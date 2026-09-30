@@ -1,0 +1,17 @@
+# CMake and Ninja output
+/build/
+/build-*/
+/cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+compile_commands.json
+build.ninja
+.ninja_deps
+.ninja_log
+
+# Apple build output and local IDE state
+DerivedData/
+*.xcuserstate
+*.xcuserdata/
+.DS_Store
