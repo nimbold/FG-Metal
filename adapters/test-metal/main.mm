@@ -1,11 +1,13 @@
 #import <AppKit/AppKit.h>
 #import <Metal/Metal.h>
 #import <MetalKit/MetalKit.h>
+#import <QuartzCore/QuartzCore.h>
 
 #include "framegen/frame_generator.hpp"
 #include "framegen/metal.hpp"
 
 #include <algorithm>
+#include <atomic>
 #include <cstdint>
 #include <cstdio>
 #include <memory>
@@ -138,7 +140,7 @@ bool encode_test_patterns(id<MTLDevice> device,
 
 } // namespace
 
-@interface OutputViewDelegate : NSObject <MTKViewDelegate> {
+@interface OutputViewDelegate : NSObject <CAMetalDisplayLinkDelegate> {
 @private
     framegen::metal::Device _adapter;
     framegen::Texture _output;
@@ -147,6 +149,10 @@ bool encode_test_patterns(id<MTLDevice> device,
     __strong id<MTLCommandQueue> _display_queue;
     __strong id<MTLRenderPipelineState> _display_pipeline;
     __strong id<MTLSamplerState> _sampler;
+    __strong CAMetalDisplayLink* _display_link;
+    std::atomic_uint64_t _presented_drawables;
+    std::atomic_uint64_t _dropped_drawables;
+    std::atomic_uint64_t _late_callbacks;
 }
 - (instancetype)initWithDevice:(id<MTLDevice>)device
                        adapter:(const framegen::metal::Device*)adapter
@@ -170,6 +176,9 @@ bool encode_test_patterns(id<MTLDevice> device,
     if (self == nil) {
         return nil;
     }
+    _presented_drawables.store(0, std::memory_order_relaxed);
+    _dropped_drawables.store(0, std::memory_order_relaxed);
+    _late_callbacks.store(0, std::memory_order_relaxed);
 
     NSError* error = nil;
     id<MTLCommandQueue> queue = [device newCommandQueue];
@@ -229,27 +238,65 @@ bool encode_test_patterns(id<MTLDevice> device,
     _display_queue = queue;
     _display_pipeline = pipeline;
     _sampler = sampler;
+    view.paused = YES;
+    view.enableSetNeedsDisplay = NO;
+    view.framebufferOnly = YES;
+    CAMetalLayer* layer = (CAMetalLayer*)view.layer;
+    layer.device = device;
+    layer.pixelFormat = view.colorPixelFormat;
+    layer.framebufferOnly = YES;
+    layer.displaySyncEnabled = YES;
+    if (@available(macOS 14.0, *)) {
+        _display_link = [[CAMetalDisplayLink alloc] initWithMetalLayer:layer];
+        _display_link.delegate = self;
+        _display_link.preferredFrameLatency = 1.0F;
+        [_display_link addToRunLoop:[NSRunLoop mainRunLoop]
+                            forMode:NSRunLoopCommonModes];
+    } else {
+        if (out_error != nullptr) {
+            *out_error = [NSError errorWithDomain:@"FrameGenMetalTest"
+                                              code:4
+                                          userInfo:@{NSLocalizedDescriptionKey :
+                                              @"CAMetalDisplayLink requires macOS 14 or later"}];
+        }
+        return nil;
+    }
     return self;
 }
 
-- (void)mtkView:(MTKView*)view drawableSizeWillChange:(CGSize)size {
-    (void)view;
-    (void)size;
+- (void)dealloc {
+    [_display_link invalidate];
 }
 
-- (void)drawInMTKView:(MTKView*)view {
+- (void)metalDisplayLink:(CAMetalDisplayLink*)link
+              needsUpdate:(CAMetalDisplayLinkUpdate*)update {
+    (void)link;
     // Retain the completion through presentation so its event and resource
     // owners outlive the display queue's queued wait and texture sampling.
     (void)_completion;
-    MTLRenderPassDescriptor* pass = view.currentRenderPassDescriptor;
-    id<CAMetalDrawable> drawable = view.currentDrawable;
+    id<CAMetalDrawable> drawable = update.drawable;
     id<MTLTexture> image = _adapter.native_texture(_output);
-    if (pass == nil || drawable == nil || image == nil || _ready.event == nil) {
+    if (drawable == nil) {
+        _dropped_drawables.fetch_add(1, std::memory_order_relaxed);
+        return;
+    }
+    if (image == nil || _ready.event == nil) {
+        _dropped_drawables.fetch_add(1, std::memory_order_relaxed);
         return;
     }
 
+    if (CACurrentMediaTime() > update.targetTimestamp) {
+        _late_callbacks.fetch_add(1, std::memory_order_relaxed);
+    }
+    MTLRenderPassDescriptor* pass = [MTLRenderPassDescriptor renderPassDescriptor];
+    pass.colorAttachments[0].texture = drawable.texture;
+    pass.colorAttachments[0].loadAction = MTLLoadActionClear;
+    pass.colorAttachments[0].storeAction = MTLStoreActionStore;
+    pass.colorAttachments[0].clearColor = MTLClearColorMake(0.015, 0.02, 0.03, 1.0);
+
     id<MTLCommandBuffer> command_buffer = [_display_queue commandBuffer];
     if (command_buffer == nil) {
+        _dropped_drawables.fetch_add(1, std::memory_order_relaxed);
         return;
     }
     // Presentation consumes the generated GPU texture directly. The shared
@@ -258,6 +305,7 @@ bool encode_test_patterns(id<MTLDevice> device,
     [command_buffer encodeWaitForEvent:_ready.event value:_ready.value];
     id<MTLRenderCommandEncoder> encoder = [command_buffer renderCommandEncoderWithDescriptor:pass];
     if (encoder == nil) {
+        _dropped_drawables.fetch_add(1, std::memory_order_relaxed);
         return;
     }
     [encoder setRenderPipelineState:_display_pipeline];
@@ -265,7 +313,33 @@ bool encode_test_patterns(id<MTLDevice> device,
     [encoder setFragmentSamplerState:_sampler atIndex:0];
     [encoder drawPrimitives:MTLPrimitiveTypeTriangleStrip vertexStart:0 vertexCount:4];
     [encoder endEncoding];
-    [command_buffer presentDrawable:drawable];
+    const NSTimeInterval target_presentation_timestamp =
+        update.targetPresentationTimestamp;
+    __weak OutputViewDelegate* weak_self = self;
+    [drawable addPresentedHandler:^(id<MTLDrawable> presented_drawable) {
+        OutputViewDelegate* strong_self = weak_self;
+        if (strong_self == nil) {
+            return;
+        }
+        const auto actual_time = presented_drawable.presentedTime;
+        if (actual_time <= 0.0) {
+            strong_self->_dropped_drawables.fetch_add(1, std::memory_order_relaxed);
+            return;
+        }
+        const auto count = strong_self->_presented_drawables.fetch_add(
+            1, std::memory_order_relaxed) + 1;
+        if (count % 120 == 0) {
+            NSLog(@"FrameGen presentation timing: target %.6f s, actual %.6f s, late callbacks %llu, dropped drawables %llu",
+                  target_presentation_timestamp, actual_time,
+                  static_cast<unsigned long long>(strong_self->_late_callbacks.load(
+                      std::memory_order_relaxed)),
+                  static_cast<unsigned long long>(strong_self->_dropped_drawables.load(
+                      std::memory_order_relaxed)));
+        }
+    }];
+    // CAMetalDisplayLink supplies both the present-call deadline and the
+    // estimated visible time. The GPU wait is queued; the CPU never waits.
+    [command_buffer presentDrawable:drawable atTime:target_presentation_timestamp];
     [command_buffer commit];
 }
 
@@ -396,7 +470,6 @@ int main(int argc, const char* argv[]) {
         MTKView* view = [[MTKView alloc] initWithFrame:content_rect device:native_device];
         view.colorPixelFormat = MTLPixelFormatBGRA8Unorm;
         view.clearColor = MTLClearColorMake(0.015, 0.02, 0.03, 1.0);
-        view.preferredFramesPerSecond = 60;
         NSError* display_error = nil;
         OutputViewDelegate* view_delegate = [[OutputViewDelegate alloc]
             initWithDevice:native_device
@@ -411,7 +484,6 @@ int main(int argc, const char* argv[]) {
                          ns_error_text(display_error, "display initialization failed").c_str());
             return 1;
         }
-        view.delegate = view_delegate;
         window.contentView = view;
         [window makeKeyAndOrderFront:nil];
         [NSApp activateIgnoringOtherApps:YES];

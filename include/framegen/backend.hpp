@@ -9,6 +9,7 @@
 #include <memory>
 #include <optional>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 namespace framegen {
@@ -61,6 +62,13 @@ public:
     // backend without trustworthy timestamps returns std::nullopt.
     [[nodiscard]] virtual std::optional<std::uint64_t>
     gpu_execution_time_ns() const noexcept {
+        return std::nullopt;
+    }
+
+    // Absolute host-clock timestamps for the first and last GPU segments.
+    // Implementations without a trustworthy shared host clock return nullopt.
+    [[nodiscard]] virtual std::optional<std::pair<std::int64_t, std::int64_t>>
+    gpu_time_range_ns() const noexcept {
         return std::nullopt;
     }
 };

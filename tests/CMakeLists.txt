@@ -18,6 +18,16 @@ endif()
 
 add_test(NAME framegen-tests COMMAND framegen-tests)
 
+add_executable(framegen-pacing-host
+    pacing_host.cpp
+)
+target_link_libraries(framegen-pacing-host PRIVATE framegen::core)
+target_compile_features(framegen-pacing-host PRIVATE cxx_std_23)
+if(CMAKE_CXX_COMPILER_ID MATCHES "AppleClang|Clang|GNU")
+    target_compile_options(framegen-pacing-host PRIVATE -Wall -Wextra -Wpedantic)
+endif()
+add_test(NAME framegen-pacing-host COMMAND framegen-pacing-host)
+
 add_executable(framegen-c-api-tests
     c_api_tests.cpp
 )
@@ -61,5 +71,8 @@ if(TARGET framegen::metal)
         OBJCXX_EXTENSIONS NO
     )
     add_test(NAME framegen-metal-c-api-tests COMMAND framegen-metal-c-api-tests)
-    set_tests_properties(framegen-metal-c-api-tests PROPERTIES SKIP_RETURN_CODE 77)
+    set_tests_properties(framegen-metal-c-api-tests PROPERTIES
+        SKIP_RETURN_CODE 77
+        ENVIRONMENT "FRAMEGEN_MODEL_WEIGHTS=${PROJECT_SOURCE_DIR}/models/local/rife-v4.26/rife-v4.26.fgweights"
+    )
 endif()

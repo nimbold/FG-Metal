@@ -49,6 +49,20 @@ Task states: **Done** means the repository contains the work and it has passed t
 - Endpoint fallback reduced HUD-region flicker p95 23.3% and weapon-sight flicker p95 16.6% versus raw RIFE, but whole-frame flicker p95 rose 3.7% and minimum thin-edge recall fell 0.7055→0.6090. HUD-plus-temporal was worse than HUD alone for HUD flicker. These results justify keeping the feature experimental and off by default, not a general quality claim.
 - GPU same-histogram cut, no-false-positive rotation, real-frame cut/reset fallback, duplicate-target stability, and stale-request isolation were probed. Final verification: CMake build succeeded; CTest passed 4/4, including Metal C API smoke on Apple M3; benchmark metric tests passed 43/43.
 
+## Presentation pacing step
+
+- [x] **Done** — Add a model-independent 2x presentation scheduler with configurable interpolation fraction, QUALITY/BALANCED latency policies, bounded work/ready state, real-source fallback, and deadline-miss cooldown/recovery.
+- [x] **Done** — Keep source production, backend generation, and display scheduling on separate paths; expose bounded event traces and queue/latency diagnostics.
+- [x] **Done** — Use `CAMetalDisplayLink` target timing and `MTLDrawable` presentation feedback in the standalone Metal host; keep QuartzCore types out of the reusable scheduler.
+- [x] **Done** — Add a standalone simulation host for 30→60, 40→80, and 60→120 under stable/jittery timing, long source frames, a slow generation backend, display timing changes, and late render-submit callbacks.
+- [x] **Done** — Verify artificially slow generation drops generated work, continues real-frame presentation, recovers after cooldown, and keeps queue depth bounded.
+
+### Presentation pacing verification record
+
+- `framegen-pacing-host` completed all 18 cadence/disturbance scenarios plus interpolation-fraction, output-retirement, and concurrent source/presentation checks.
+- The deliberately slow backend recorded deadline misses and generated-frame drops in all three cadence pairs, continued presenting real frames, attempted recovery after cooldown, and never exceeded queue depth 1.
+- The host is a deterministic scheduler simulation. It does not establish physical panel cadence, renderer integration, neural interpolation performance, or zero added latency.
+
 ## Follow-on work (not authorized by completion of bootstrap)
 
 - [ ] **Open** — Resolve the API and synchronization decisions listed in `DECISIONS.md`.
