@@ -1,7 +1,7 @@
 #ifndef FRAMEGEN_METAL_API_H
 #define FRAMEGEN_METAL_API_H
 
-/* C entry point for registering the placeholder Metal backend. The argument
+/* C entry point for registering the Metal backend. The argument
  * and resource handles in api.h remain opaque and Objective-C-free. */
 #include "framegen/api.h"
 

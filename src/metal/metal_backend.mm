@@ -1,15 +1,21 @@
 #import "metal_backend.hpp"
 
 #import <Foundation/Foundation.h>
+#import <mach-o/dyld.h>
 
 #include "framegen/metal.hpp"
+#include "rife_model.hpp"
+#include "rife_model_shader.hpp"
 
 #include <algorithm>
 #include <atomic>
 #include <cmath>
+#include <cstdlib>
+#include <filesystem>
 #include <limits>
 #include <optional>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
 
@@ -42,6 +48,66 @@ std::string error_message(NSError* error, const char* fallback) {
     }
     const char* utf8 = error.localizedDescription.UTF8String;
     return utf8 == nullptr ? fallback : utf8;
+}
+
+std::filesystem::path model_weights_path() {
+    if (const char* configured = std::getenv("FRAMEGEN_MODEL_WEIGHTS");
+        configured != nullptr && configured[0] != '\0') {
+        return std::filesystem::path(configured);
+    }
+    const std::filesystem::path relative_weights(
+        "models/local/rife-v4.26/rife-v4.26.fgweights");
+    const auto search_parents = [&](std::filesystem::path base)
+        -> std::optional<std::filesystem::path> {
+        std::error_code filesystem_error;
+        base = std::filesystem::weakly_canonical(base, filesystem_error);
+        if (filesystem_error) return std::nullopt;
+        for (std::size_t depth = 0; depth < 16; ++depth) {
+            const auto candidate = base / relative_weights;
+            if (std::filesystem::is_regular_file(candidate, filesystem_error) &&
+                !filesystem_error) {
+                return candidate;
+            }
+            filesystem_error.clear();
+            const auto parent = base.parent_path();
+            if (parent == base || parent.empty()) break;
+            base = parent;
+        }
+        return std::nullopt;
+    };
+
+    std::error_code filesystem_error;
+    if (auto from_working_directory = search_parents(
+            std::filesystem::current_path(filesystem_error));
+        from_working_directory) {
+        return *from_working_directory;
+    }
+    std::array<char, 4096> executable_path{};
+    std::uint32_t executable_path_size =
+        static_cast<std::uint32_t>(executable_path.size());
+    if (_NSGetExecutablePath(executable_path.data(), &executable_path_size) == 0) {
+        if (auto from_executable = search_parents(
+                std::filesystem::path(executable_path.data()).parent_path());
+            from_executable) {
+            return *from_executable;
+        }
+    }
+    return relative_weights;
+}
+
+std::optional<detail::RifeMode> internal_model_mode(std::string& error) {
+    const char* configured = std::getenv("FRAMEGEN_METAL_MODEL_VARIANT");
+    if (configured == nullptr || configured[0] == '\0' ||
+        std::string_view(configured) == "QUALITY") {
+        error.clear();
+        return detail::RifeMode::quality;
+    }
+    if (std::string_view(configured) == "BALANCED") {
+        error.clear();
+        return detail::RifeMode::balanced;
+    }
+    error = "FRAMEGEN_METAL_MODEL_VARIANT must be QUALITY or BALANCED";
+    return std::nullopt;
 }
 
 std::optional<MTLPixelFormat> to_metal_format(PixelFormat format) {
@@ -86,28 +152,6 @@ std::optional<PixelFormat> from_metal_format(MTLPixelFormat format) {
     }
 }
 
-bool is_blend_format(PixelFormat format) {
-    // The first implementation keeps the kernel contract deliberately narrow.
-    // Additional typed formats can be added with targeted Metal validation.
-    return format == PixelFormat::rgba8_unorm;
-}
-
-constexpr const char* kBlendShader = R"metal(
-#include <metal_stdlib>
-using namespace metal;
-
-kernel void framegen_blend(
-    texture2d<float, access::read> previous [[texture(0)]],
-    texture2d<float, access::read> current [[texture(1)]],
-    texture2d<float, access::write> output [[texture(2)]],
-    constant float& interpolation [[buffer(0)]],
-    uint2 position [[thread_position_in_grid]]) {
-    const float4 a = previous.read(position);
-    const float4 b = current.read(position);
-    output.write(mix(a, b, interpolation), position);
-}
-)metal";
-
 constexpr const char* kExplicitUiShader = R"metal(
 #include <metal_stdlib>
 using namespace metal;
@@ -139,7 +183,8 @@ kernel void framegen_explicit_ui(
     texture2d<float, access::read> current [[texture(1)]],
     texture2d<float, access::read> previous_ui [[texture(2)]],
     texture2d<float, access::read> current_ui [[texture(3)]],
-    texture2d<float, access::write> output [[texture(4)]],
+    texture2d<float, access::read> generated_scene [[texture(4)]],
+    texture2d<float, access::write> output [[texture(5)]],
     constant ExplicitUiParameters& parameters [[buffer(0)]],
     uint2 position [[thread_position_in_grid]]) {
     if (position.x >= output.get_width() || position.y >= output.get_height()) return;
@@ -149,11 +194,9 @@ kernel void framegen_explicit_ui(
         ? current_ui.read(position) : previous_ui.read(position);
     const float alpha = parameters.alpha_mode == 1
         ? 1.0f : clamp(ui_encoded.a, 0.0f, 1.0f);
-    const float3 previous_scene = parameters.scene_is_srgb != 0
-        ? srgb_to_linear(a.rgb) : a.rgb;
-    const float3 current_scene = parameters.scene_is_srgb != 0
-        ? srgb_to_linear(b.rgb) : b.rgb;
-    const float3 scene = mix(previous_scene, current_scene, parameters.interpolation);
+    const float3 encoded_scene = generated_scene.read(position).rgb;
+    const float3 scene = parameters.scene_is_srgb != 0
+        ? srgb_to_linear(encoded_scene) : encoded_scene;
     const float3 ui_decoded = parameters.ui_is_srgb != 0
         ? srgb_to_linear(ui_encoded.rgb) : ui_encoded.rgb;
     const float3 composited = parameters.alpha_mode == 3
@@ -216,8 +259,9 @@ kernel void framegen_automatic_hud(
     texture2d<float, access::read> previous [[texture(0)]],
     texture2d<float, access::read> current [[texture(1)]],
     texture2d<float, access::read> previous_mask [[texture(2)]],
-    texture2d<float, access::write> output [[texture(3)]],
-    texture2d<float, access::write> stabilized_mask [[texture(4)]],
+    texture2d<float, access::read> generated_scene [[texture(3)]],
+    texture2d<float, access::write> output [[texture(4)]],
+    texture2d<float, access::write> stabilized_mask [[texture(5)]],
     constant AutomaticHudParameters& parameters [[buffer(0)]],
     uint2 position [[thread_position_in_grid]]) {
     const uint width = output.get_width();
@@ -279,7 +323,7 @@ kernel void framegen_automatic_hud(
 
     const float4 a = previous.read(position);
     const float4 b = current.read(position);
-    const float4 generated = mix(a, b, parameters.interpolation);
+    const float4 generated = generated_scene.read(position);
     const float4 protected_source = parameters.current_ui != 0 ? b : a;
     float4 result = mix(generated, protected_source, confidence);
     if (parameters.debug_visualization == 1) {
@@ -451,7 +495,8 @@ private:
 
 class MetalCompletion final : public GpuCompletion, public MetalEventSyncPoint {
 public:
-    MetalCompletion(id<MTLCommandBuffer> command_buffer,
+    MetalCompletion(id<MTLCommandBuffer> first_command_buffer,
+                    id<MTLCommandBuffer> completion_command_buffer,
                     id<MTLSharedEvent> event, std::uint64_t value,
                     std::uint64_t device_id,
                     std::shared_ptr<TextureResource> previous,
@@ -459,10 +504,12 @@ public:
                     std::shared_ptr<TextureResource> output,
                     std::vector<std::shared_ptr<TextureResource>> auxiliary,
                     std::vector<std::shared_ptr<const GpuSyncPoint>> dependencies)
-        : command_buffer_(command_buffer), event_(event), value_(value),
+        : first_command_buffer_(first_command_buffer),
+          command_buffer_(completion_command_buffer), event_(event), value_(value),
           device_id_(device_id), previous_(std::move(previous)),
           current_(std::move(current)), output_(std::move(output)),
-          auxiliary_(std::move(auxiliary)), dependencies_(std::move(dependencies)) {}
+          auxiliary_(std::move(auxiliary)),
+          dependencies_(std::move(dependencies)) {}
 
     [[nodiscard]] std::string_view backend_id() const noexcept override {
         return kBackendId;
@@ -485,7 +532,9 @@ public:
 
     [[nodiscard]] std::optional<std::uint64_t>
     gpu_execution_time_ns() const noexcept override {
-        const NSTimeInterval started = command_buffer_.GPUStartTime;
+        // MPSGraph may commit and continue across multiple command buffers.
+        // The first and final GPU timestamps span every ordered segment.
+        const NSTimeInterval started = first_command_buffer_.GPUStartTime;
         const NSTimeInterval ended = command_buffer_.GPUEndTime;
         if (!std::isfinite(started) || !std::isfinite(ended) ||
             started <= 0.0 || ended < started) {
@@ -511,6 +560,7 @@ public:
     }
 
 private:
+    __strong id<MTLCommandBuffer> first_command_buffer_;
     __strong id<MTLCommandBuffer> command_buffer_;
     __strong id<MTLSharedEvent> event_;
     std::uint64_t value_;
@@ -525,6 +575,29 @@ private:
 } // namespace
 
 namespace detail {
+
+std::filesystem::path rife_model_weights_path() {
+    return model_weights_path();
+}
+
+bool rife_runtime_available() noexcept {
+    try {
+        std::error_code filesystem_error;
+        if (!std::filesystem::is_regular_file(rife_model_weights_path(), filesystem_error) ||
+            filesystem_error) {
+            return false;
+        }
+        const char* configured = std::getenv("FRAMEGEN_METAL_MODEL_VARIANT");
+        if (configured != nullptr && configured[0] != '\0' &&
+            std::string_view(configured) != "QUALITY" &&
+            std::string_view(configured) != "BALANCED") {
+            return false;
+        }
+        return MTLCreateSystemDefaultDevice() != nil;
+    } catch (...) {
+        return false;
+    }
+}
 
 MetalTextureResource::MetalTextureResource(id<MTLDevice> device,
                                            id<MTLTexture> texture,
@@ -560,15 +633,17 @@ const void* MetalTextureResource::resource_identity() const noexcept {
 }
 
 MetalBackend::MetalBackend(id<MTLDevice> device, id<MTLCommandQueue> queue,
-                           id<MTLComputePipelineState> blend_pipeline,
                            id<MTLComputePipelineState> explicit_ui_pipeline,
                            id<MTLComputePipelineState> automatic_hud_pipeline,
                            id<MTLSharedEvent> completion_event,
+                           std::shared_ptr<MetalRifeModel> rife_model,
+                           RifeMode rife_mode,
                            std::uint64_t device_id)
-    : device_(device), queue_(queue), blend_pipeline_(blend_pipeline),
+    : device_(device), queue_(queue),
       explicit_ui_pipeline_(explicit_ui_pipeline),
       automatic_hud_pipeline_(automatic_hud_pipeline),
-      completion_event_(completion_event), device_id_(device_id) {}
+      completion_event_(completion_event), rife_model_(std::move(rife_model)),
+      rife_mode_(rife_mode), device_id_(device_id) {}
 
 std::string_view MetalBackend::backend_id() const noexcept {
     return kBackendId;
@@ -624,9 +699,19 @@ Result<GeneratedFrame> MetalBackend::submit(const FrameSubmission& submission) {
         return std::unexpected(make_error(ErrorCode::incompatible_resource,
                                            "Metal input texture descriptions must match"));
     }
-    if (!is_blend_format(previous_descriptor.format)) {
+    const auto previous_srgb = transfer_is_srgb(
+        previous_descriptor, submission.previous.color_metadata);
+    const auto current_srgb = transfer_is_srgb(
+        current_descriptor, submission.current.color_metadata);
+    if (previous_descriptor.format != PixelFormat::rgba8_unorm ||
+        (previous_descriptor.color_space != ColorSpace::srgb &&
+         previous_descriptor.color_space != ColorSpace::linear_srgb) ||
+        previous_descriptor.alpha_mode != AlphaMode::opaque ||
+        !previous_srgb || !current_srgb || *previous_srgb != *current_srgb ||
+        !is_sdr_or_unspecified(submission.previous.color_metadata) ||
+        !is_sdr_or_unspecified(submission.current.color_metadata)) {
         return std::unexpected(make_error(ErrorCode::unsupported_format,
-                                           "placeholder Metal blending currently supports rgba8_unorm"));
+            "RIFE requires matching RGBA8 opaque sRGB or linear-sRGB SDR textures"));
     }
 
     id<MTLTexture> previous_native = previous_resource->native_texture();
@@ -913,6 +998,21 @@ Result<GeneratedFrame> MetalBackend::submit(const FrameSubmission& submission) {
         return std::unexpected(make_error(ErrorCode::allocation_failure,
                                            "Metal could not allocate the output texture"));
     }
+    id<MTLTexture> rife_scene_native = output_native;
+    if (submission.hud_options.mode != HudMode::no_hud_knowledge) {
+        MTLTextureDescriptor* scene_descriptor =
+            [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:MTLPixelFormatRGBA8Unorm
+                                                               width:previous_descriptor.width
+                                                              height:previous_descriptor.height
+                                                           mipmapped:NO];
+        scene_descriptor.storageMode = MTLStorageModePrivate;
+        scene_descriptor.usage = MTLTextureUsageShaderRead | MTLTextureUsageShaderWrite;
+        rife_scene_native = [device_ newTextureWithDescriptor:scene_descriptor];
+        if (rife_scene_native == nil) {
+            return std::unexpected(make_error(ErrorCode::allocation_failure,
+                "Metal could not allocate the RIFE scene texture for HUD composition"));
+        }
+    }
 
     TextureDescriptor result_descriptor = previous_descriptor;
     auto output_resource = std::make_shared<MetalTextureResource>(
@@ -922,6 +1022,14 @@ Result<GeneratedFrame> MetalBackend::submit(const FrameSubmission& submission) {
         return std::unexpected(output_texture.error());
     }
 
+    // MPSGraph can commit and replace the root command buffer while encoding.
+    // Serialize the complete encode/signal/commit section so its continuation
+    // buffers cannot interleave with another submission on this queue.
+    std::unique_lock submission_order_lock(submission_mutex_);
+    if (next_event_value_ == std::numeric_limits<std::uint64_t>::max()) {
+        return std::unexpected(make_error(ErrorCode::backend_failure,
+                                           "Metal completion event sequence was exhausted"));
+    }
     id<MTLCommandBuffer> command_buffer = [queue_ commandBuffer];
     if (command_buffer == nil) {
         return std::unexpected(make_error(ErrorCode::backend_failure,
@@ -944,20 +1052,52 @@ Result<GeneratedFrame> MetalBackend::submit(const FrameSubmission& submission) {
                                       value:metal_dependency->value()];
     }
 
-    id<MTLComputeCommandEncoder> encoder = [command_buffer computeCommandEncoder];
-    if (encoder == nil) {
+    id<MTLCommandBuffer> first_command_buffer = command_buffer;
+    std::shared_ptr<MetalRifeInvocation> retained_rife;
+    std::string rife_error;
+    MPSCommandBuffer* graph_command_buffer = rife_model_->encode(
+        command_buffer, previous_native, current_native, rife_scene_native,
+        submission.interpolation, rife_mode_, !*previous_srgb, !*previous_srgb,
+        retained_rife, rife_error);
+    if (graph_command_buffer == nil || !retained_rife) {
         return std::unexpected(make_error(ErrorCode::backend_failure,
-                                           "Metal could not create a compute encoder"));
+            "RIFE inference could not be encoded: " + rife_error));
     }
-    id<MTLComputePipelineState> selected_pipeline = blend_pipeline_;
+    // The returned MPS wrapper can refer to a root different from the initial
+    // command buffer after commitAndContinue. Use that live root for HUD work,
+    // the completion event, and final commit.
+    command_buffer = graph_command_buffer.rootCommandBuffer;
+    const auto commit_failed_inference = [&] {
+        const auto retained_for_completion = retained_rife;
+        [command_buffer addCompletedHandler:^(id<MTLCommandBuffer> completed_command_buffer) {
+            (void)completed_command_buffer;
+            (void)retained_for_completion;
+        }];
+        [command_buffer commit];
+        submission_order_lock.unlock();
+    };
+    if (!rife_error.empty()) {
+        commit_failed_inference();
+        return std::unexpected(make_error(ErrorCode::backend_failure,
+            "RIFE inference could not be encoded: " + rife_error));
+    }
+
+    id<MTLComputePipelineState> selected_pipeline = nil;
     if (submission.hud_options.mode == HudMode::explicit_ui_plane) {
+        id<MTLComputeCommandEncoder> encoder = [command_buffer computeCommandEncoder];
+        if (encoder == nil) {
+            commit_failed_inference();
+            return std::unexpected(make_error(ErrorCode::backend_failure,
+                "Metal could not create the explicit UI composition encoder"));
+        }
         selected_pipeline = explicit_ui_pipeline_;
         [encoder setComputePipelineState:selected_pipeline];
         [encoder setTexture:previous_native atIndex:0];
         [encoder setTexture:current_native atIndex:1];
         [encoder setTexture:previous_ui_native atIndex:2];
         [encoder setTexture:current_ui_native atIndex:3];
-        [encoder setTexture:output_native atIndex:4];
+        [encoder setTexture:rife_scene_native atIndex:4];
+        [encoder setTexture:output_native atIndex:5];
         struct ExplicitUiParameters {
             float interpolation;
             std::uint32_t current_ui;
@@ -979,14 +1119,27 @@ Result<GeneratedFrame> MetalBackend::submit(const FrameSubmission& submission) {
             static_cast<std::uint32_t>(submission.hud_options.debug_visualization),
         };
         [encoder setBytes:&parameters length:sizeof(parameters) atIndex:0];
+        const NSUInteger threads_x = selected_pipeline.threadExecutionWidth;
+        const NSUInteger threads_y = std::max<NSUInteger>(
+            1, std::min<NSUInteger>(8, selected_pipeline.maxTotalThreadsPerThreadgroup / threads_x));
+        [encoder dispatchThreads:MTLSizeMake(output_native.width, output_native.height, 1)
+            threadsPerThreadgroup:MTLSizeMake(threads_x, threads_y, 1)];
+        [encoder endEncoding];
     } else if (submission.hud_options.mode == HudMode::automatic_protection) {
+        id<MTLComputeCommandEncoder> encoder = [command_buffer computeCommandEncoder];
+        if (encoder == nil) {
+            commit_failed_inference();
+            return std::unexpected(make_error(ErrorCode::backend_failure,
+                "Metal could not create the automatic HUD composition encoder"));
+        }
         selected_pipeline = automatic_hud_pipeline_;
         [encoder setComputePipelineState:selected_pipeline];
         [encoder setTexture:previous_native atIndex:0];
         [encoder setTexture:current_native atIndex:1];
         [encoder setTexture:history_read_resource->native_texture() atIndex:2];
-        [encoder setTexture:output_native atIndex:3];
-        [encoder setTexture:history_write_resource->native_texture() atIndex:4];
+        [encoder setTexture:rife_scene_native atIndex:3];
+        [encoder setTexture:output_native atIndex:4];
+        [encoder setTexture:history_write_resource->native_texture() atIndex:5];
         struct AutomaticHudParameters {
             float interpolation;
             float engagement_alpha;
@@ -1003,36 +1156,24 @@ Result<GeneratedFrame> MetalBackend::submit(const FrameSubmission& submission) {
             static_cast<std::uint32_t>(submission.hud_options.debug_visualization),
         };
         [encoder setBytes:&parameters length:sizeof(parameters) atIndex:0];
-    } else {
-        [encoder setComputePipelineState:selected_pipeline];
-        [encoder setTexture:previous_native atIndex:0];
-        [encoder setTexture:current_native atIndex:1];
-        [encoder setTexture:output_native atIndex:2];
-        const float interpolation = submission.interpolation;
-        [encoder setBytes:&interpolation length:sizeof(interpolation) atIndex:0];
+        const NSUInteger threads_x = selected_pipeline.threadExecutionWidth;
+        const NSUInteger threads_y = std::max<NSUInteger>(
+            1, std::min<NSUInteger>(8, selected_pipeline.maxTotalThreadsPerThreadgroup / threads_x));
+        [encoder dispatchThreads:MTLSizeMake(output_native.width, output_native.height, 1)
+            threadsPerThreadgroup:MTLSizeMake(threads_x, threads_y, 1)];
+        [encoder endEncoding];
     }
-
-    const NSUInteger threads_x = selected_pipeline.threadExecutionWidth;
-    const NSUInteger threads_y = std::max<NSUInteger>(
-        1, std::min<NSUInteger>(8, selected_pipeline.maxTotalThreadsPerThreadgroup / threads_x));
-    [encoder dispatchThreads:MTLSizeMake(output_native.width, output_native.height, 1)
-        threadsPerThreadgroup:MTLSizeMake(threads_x, threads_y, 1)];
-    [encoder endEncoding];
 
     std::uint64_t event_value{};
-    {
-        // Event values must follow the command queue's commit order. Holding
-        // this lock through commit prevents concurrent callers from signaling
-        // a larger value before an earlier frame has finished.
-        std::scoped_lock lock(submission_mutex_);
-        if (next_event_value_ == std::numeric_limits<std::uint64_t>::max()) {
-            return std::unexpected(make_error(ErrorCode::backend_failure,
-                                               "Metal completion event sequence was exhausted"));
-        }
-        event_value = next_event_value_++;
-        [command_buffer encodeSignalEvent:completion_event_ value:event_value];
-        [command_buffer commit];
-    }
+    event_value = next_event_value_++;
+    [command_buffer encodeSignalEvent:completion_event_ value:event_value];
+    const auto retained_for_completion = retained_rife;
+    [command_buffer addCompletedHandler:^(id<MTLCommandBuffer> completed_command_buffer) {
+        (void)completed_command_buffer;
+        (void)retained_for_completion;
+    }];
+    [command_buffer commit];
+    submission_order_lock.unlock();
 
     last_hud_mode_ = submission.hud_options.mode;
     if (submission.hud_options.mode == HudMode::automatic_protection) {
@@ -1062,7 +1203,7 @@ Result<GeneratedFrame> MetalBackend::submit(const FrameSubmission& submission) {
     history_lock.unlock();
 
     auto completion = std::make_shared<MetalCompletion>(
-        command_buffer, completion_event_, event_value, device_id_,
+        first_command_buffer, command_buffer, completion_event_, event_value, device_id_,
         previous.resource(), current.resource(), output_texture->resource(),
         std::move(auxiliary_resources),
         submission.gpu_dependencies);
@@ -1074,7 +1215,6 @@ Result<GeneratedFrame> MetalBackend::submit(const FrameSubmission& submission) {
 struct Device::State {
     __strong id<MTLDevice> native_device;
     __strong id<MTLCommandQueue> queue;
-    __strong id<MTLComputePipelineState> blend_pipeline;
     __strong id<MTLComputePipelineState> explicit_ui_pipeline;
     __strong id<MTLComputePipelineState> automatic_hud_pipeline;
     __strong id<MTLSharedEvent> completion_event;
@@ -1088,19 +1228,46 @@ Result<Device> Device::create(id<MTLDevice> native_device) {
                                            "Metal device must not be nil"));
     }
 
+    std::string model_error;
+    auto model_mode = internal_model_mode(model_error);
+    if (!model_mode) {
+        return std::unexpected(make_error(ErrorCode::invalid_argument, model_error));
+    }
+
+    const auto model_path = detail::rife_model_weights_path();
+    std::error_code filesystem_error;
+    if (!std::filesystem::is_regular_file(model_path, filesystem_error) ||
+        filesystem_error) {
+        return std::unexpected(make_error(ErrorCode::backend_failure,
+            "RIFE weights are unavailable at " + model_path.string() +
+            ". Convert the external checkpoint with tools/rife/convert_checkpoint.py "
+            "or set FRAMEGEN_MODEL_WEIGHTS to a converted .fgweights file."));
+    }
+
     id<MTLCommandQueue> queue = [native_device newCommandQueue];
     if (queue == nil) {
         return std::unexpected(make_error(ErrorCode::allocation_failure,
                                            "Metal could not create a command queue"));
     }
 
-    std::string pipeline_error;
-    id<MTLComputePipelineState> pipeline = make_compute_pipeline(
-        native_device, kBlendShader, "framegen_blend", pipeline_error);
-    if (pipeline == nil) {
+    NSError* rife_library_error = nil;
+    id<MTLLibrary> rife_library = [native_device newLibraryWithSource:
+        [NSString stringWithUTF8String:detail::kRifeMetalShaderSource]
+        options:nil error:&rife_library_error];
+    if (rife_library == nil) {
         return std::unexpected(make_error(ErrorCode::backend_failure,
-                                           "Metal blend pipeline failed: " + pipeline_error));
+            "RIFE Metal kernels failed to compile: " +
+            error_message(rife_library_error, "Metal shader compilation failed")));
     }
+    auto model = detail::MetalRifeModel::load(
+        native_device, rife_library, model_path, model_error);
+    if (!model) {
+        return std::unexpected(make_error(ErrorCode::backend_failure,
+            "RIFE model could not be loaded: " + model_error +
+            ". Convert the external checkpoint with tools/rife/convert_checkpoint.py "
+            "or set FRAMEGEN_MODEL_WEIGHTS to a converted .fgweights file."));
+    }
+    std::string pipeline_error;
     id<MTLComputePipelineState> explicit_ui_pipeline = make_compute_pipeline(
         native_device, kExplicitUiShader, "framegen_explicit_ui", pipeline_error);
     if (explicit_ui_pipeline == nil) {
@@ -1129,14 +1296,13 @@ Result<Device> Device::create(id<MTLDevice> native_device) {
     auto state = std::make_shared<State>();
     state->native_device = native_device;
     state->queue = queue;
-    state->blend_pipeline = pipeline;
     state->explicit_ui_pipeline = explicit_ui_pipeline;
     state->automatic_hud_pipeline = automatic_hud_pipeline;
     state->completion_event = event;
     state->device_id = *device_id;
     state->backend = std::make_shared<detail::MetalBackend>(
-        native_device, queue, pipeline, explicit_ui_pipeline,
-        automatic_hud_pipeline, event, *device_id);
+        native_device, queue, explicit_ui_pipeline, automatic_hud_pipeline,
+        event, std::move(model), *model_mode, *device_id);
     return Device(std::move(state));
 }
 

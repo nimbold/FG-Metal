@@ -14,8 +14,8 @@
 
 namespace {
 
-constexpr std::uint32_t kImageWidth = 1280;
-constexpr std::uint32_t kImageHeight = 720;
+constexpr std::uint32_t kImageWidth = 320;
+constexpr std::uint32_t kImageHeight = 180;
 
 constexpr const char* kPatternShader = R"metal(
 #include <metal_stdlib>
@@ -390,7 +390,7 @@ int main(int argc, const char* argv[]) {
                                  NSWindowStyleMaskMiniaturizable | NSWindowStyleMaskResizable)
                         backing:NSBackingStoreBuffered
                           defer:NO];
-        window.title = @"FrameGen Metal blend preview";
+        window.title = @"FrameGen Metal RIFE preview";
         [window center];
 
         MTKView* view = [[MTKView alloc] initWithFrame:content_rect device:native_device];

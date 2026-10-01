@@ -46,10 +46,14 @@ if(TARGET framegen::metal)
     target_compile_options(framegen-metal-c-api-tests PRIVATE
         -fobjc-arc -Wall -Wextra -Wpedantic
     )
+    target_compile_definitions(framegen-metal-c-api-tests PRIVATE
+        FRAMEGEN_TEST_MODEL_WEIGHTS_PATH="${PROJECT_SOURCE_DIR}/models/local/rife-v4.26/rife-v4.26.fgweights"
+    )
     set_target_properties(framegen-metal-c-api-tests PROPERTIES
         OBJCXX_STANDARD 23
         OBJCXX_STANDARD_REQUIRED YES
         OBJCXX_EXTENSIONS NO
     )
     add_test(NAME framegen-metal-c-api-tests COMMAND framegen-metal-c-api-tests)
+    set_tests_properties(framegen-metal-c-api-tests PROPERTIES SKIP_RETURN_CODE 77)
 endif()

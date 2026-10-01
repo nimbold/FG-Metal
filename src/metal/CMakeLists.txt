@@ -5,6 +5,7 @@ endif()
 add_library(framegen_metal STATIC
     metal_c_api.mm
     metal_backend.mm
+    rife_model.mm
 )
 add_library(framegen::metal ALIAS framegen_metal)
 
@@ -18,9 +19,22 @@ target_link_libraries(framegen_metal
         framegen::core
         "-framework Foundation"
         "-framework Metal"
+        "-framework MetalPerformanceShaders"
+        "-framework MetalPerformanceShadersGraph"
 )
 target_include_directories(framegen_metal PRIVATE
     ${PROJECT_SOURCE_DIR}/src/core
+    ${CMAKE_CURRENT_BINARY_DIR}
+)
+
+# Compile the model's purpose-built Metal kernels from a source literal at
+# runtime. The generated header keeps the kernels inside the static library,
+# so the standalone host and consumers do not depend on a loose shader file.
+file(READ "${CMAKE_CURRENT_SOURCE_DIR}/rife_model.metal" FRAMEGEN_RIFE_METAL_SOURCE)
+configure_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/rife_model_shader.hpp.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/rife_model_shader.hpp"
+    @ONLY
 )
 target_compile_options(framegen_metal PRIVATE
     "$<$<COMPILE_LANGUAGE:OBJCXX>:-fobjc-arc>"

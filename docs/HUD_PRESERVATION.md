@@ -4,13 +4,13 @@ HUD handling is a host-visible part of the frame-generation contract. The defaul
 
 ## Modes
 
-| Mode | Host input | Placeholder behavior |
+| Mode | Host input | Metal behavior |
 | --- | --- | --- |
-| No HUD knowledge | One composited color image | Blend the complete image at the requested interpolation fraction. |
-| Explicit UI plane | Scene-only color plus a matching UI texture for each source | Blend scene color, then composite the selected endpoint UI using its alpha mode. |
-| Automatic protection | One already-composited color image | Estimate a soft screen-space confidence mask, stabilize it on the GPU, and mix protected pixels from the selected endpoint into the generated image. |
+| No HUD knowledge | One composited color image | Run RIFE on the complete color image. |
+| Explicit UI plane | Scene-only color plus a matching UI texture for each source | Run RIFE on scene color, then composite the selected endpoint UI using its alpha mode. |
+| Automatic protection | One already-composited color image | Run RIFE, estimate a soft screen-space confidence mask, stabilize it on the GPU, and mix protected pixels from the selected endpoint into the generated scene. |
 
-Explicit mode is preferred. Configure the context with `FRAMEGEN_CAP_UI_PLANE` in `preferred_capabilities` and `available_input_capabilities`, then set the HUD mode before submitting source frames. Attach a `ui_texture` to every explicit-mode source frame. The placeholder currently accepts an opaque scene plane and matching RGBA8 SDR UI planes. Scene and UI may each declare sRGB or linear-sRGB transfer, and each plane is decoded from its own metadata for linear-light composition. Straight, premultiplied, and opaque UI alpha are supported; alpha supplies the soft coverage. The explicit mode composites after scene interpolation, so the UI pixels are not themselves interpolated.
+Explicit mode is preferred when the host can provide a clean scene plane. Configure the context with `FRAMEGEN_CAP_UI_PLANE` in `preferred_capabilities` and `available_input_capabilities`, then set the HUD mode before submitting source frames. Attach a `ui_texture` to every explicit-mode source frame. The current Metal path accepts an opaque RGBA8 SDR scene and matching RGBA8 SDR UI planes. Scene and UI may each declare sRGB or linear-sRGB transfer, and each plane is decoded from its own metadata for linear-light composition. Straight, premultiplied, and opaque UI alpha are supported; alpha supplies the soft coverage. The explicit mode composites after RIFE scene interpolation, so the UI pixels are not themselves interpolated.
 
 Automatic mode is a per-pixel heuristic, not a general motion estimator. It combines source-pair screen-position stability, sharp-edge and local high-frequency structure, disagreement between a pixel's change and its four-neighbor change, and recurring change at a previously confident fixed position. The neighborhood signal is only a scene-motion proxy; it does not estimate optical flow. The mask uses a soft confidence ramp, faster engagement than release, time-aware smoothing, and a one-pixel confidence feather. History advances only for a new chronological source pair; repeated requests for the same pair are evaluated idempotently, and an older pair cannot overwrite the forward mask history. A mode change, history reset, resolution change, clock-domain change, or source color-metadata discontinuity starts fresh mask history. The host must request a reset after a cut or seek.
 
@@ -18,11 +18,13 @@ Automatic mode is a per-pixel heuristic, not a general motion estimator. It comb
 
 Protected pixels can come from the previous source, current source, or the source nearest the requested presentation timestamp. An exact nearest-time tie selects the current source. The choice affects dynamic UI: previous can show a stale state, current can show the next state early, and nearest follows the requested presentation time. It does not remove the half-frame tradeoff for moving UI when only endpoint samples are available.
 
-The optional debug views are raw HUD confidence, stabilized confidence, protected regions, interpolation confidence, and final composite. Automatic mode displays its raw or stabilized detector mask. Explicit UI-plane mode displays the supplied UI alpha for both raw and stabilized mask views. In the placeholder automatic mode, “interpolation confidence” is the inverse of HUD protection confidence; it is not an optical-flow or motion-model confidence. A debug view replaces the generated image while enabled; disable it for normal output. This keeps readback optional and lets a host display the selected internal view without adding CPU mask transfers.
+The optional debug views are raw HUD confidence, stabilized confidence, protected regions, interpolation confidence, and final composite. Automatic mode displays its raw or stabilized detector mask. Explicit UI-plane mode displays the supplied UI alpha for both raw and stabilized mask views. “Interpolation confidence” is the inverse of HUD protection confidence; it is not RIFE optical-flow or motion-model confidence. A debug view replaces the generated image while enabled; disable it for normal output. This keeps readback optional and lets a host display the selected internal view without adding CPU mask transfers.
 
 The mask itself has a separate temporal diagnostic. `measure_mask_stability.py` runs the five consecutive synthetic midpoint pairs in one backend session, compares adjacent raw-mask and stabilized-mask debug images, and measures detection precision/recall against the authored midpoint HUD ROI at a confidence threshold of 0.5. That binary ROI is an evaluation proxy for intended protected pixels, not ground-truth confidence. Lower mask transition difference can mean smoothing or slower response, so the detector metrics and coverage must be considered alongside it.
 
-## Placeholder benchmark
+## Historical placeholder benchmark
+
+The measurements below predate RIFE integration. They document the HUD heuristic against the earlier blend backend and are retained as a historical baseline. Current RIFE and RIFE-plus-HUD metrics are generated with the commands in [BENCHMARK.md](BENCHMARK.md).
 
 The committed synthetic fixture includes a static crosshair and exact crosshair-stroke mask, static `CLEAR` text and exact glyph-pixel mask, minimap, health bar, subtitle, counter, timer, scrolling text, flashing UI, transparent UI, and a moving menu, alongside scene motion, foliage, particles, thin geometry, and an occluder. UI detection does not consume authored masks; masks are evaluation-only.
 
@@ -62,4 +64,4 @@ Endpoint selection also changes whole-image tails: raw/current/previous/nearest 
 - An already-composited protected pixel includes the scene beneath translucent UI. Automatic protection can freeze or ghost that underlay; it cannot reconstruct the missing clean scene. The synthetic translucent panel now overlays moving scene content, but this still does not represent the variety of real compositors and materials.
 - Camera jitter, exposure changes, temporal antialiasing, reflections, or cuts can change the detector's confidence. The backend does not infer scene cuts; the host must request history reset or invalidate history after cuts and seeks. At confidence `0.5`, raw-to-stabilized HUD-ROI proxy precision is `0.5239 → 0.5278` and recall is `0.2853 → 0.3119`. Stabilized coverage rises from `0.1419` on the first transition to `0.2226` on the fifth while raw coverage stays near `0.14–0.16`. The `37.3%` transition-MAE reduction can reflect smoothing or slower response; these proxy scores are not detector ground truth.
 
-The current implementation is limited to the placeholder Metal backend. It does not integrate D3DMetal, include a renderer adapter, or establish performance or quality on real games.
+The current implementation runs inside the standalone Metal host. It does not integrate D3DMetal, include a renderer adapter, or establish performance or quality on real games. The metrics above apply only to the historical placeholder results.

@@ -355,9 +355,9 @@ typedef struct framegen_optional_inputs {
 /*
  * In FRAMEGEN_HUD_MODE_EXPLICIT_UI_PLANE, source color must contain opaque
  * scene color without UI and ui_texture must contain the corresponding UI
- * layer. The placeholder Metal backend interpolates scene color in linear
- * light, then composites the selected endpoint UI using its declared alpha
- * mode. UI dimensions must match color; RGBA8 SDR is currently supported.
+ * layer. The backend generates scene color, then composites the selected
+ * endpoint UI in linear light using its declared alpha mode. UI dimensions
+ * must match color; RGBA8 SDR is currently supported.
  * Scene and UI may each use sRGB or linear-sRGB transfer, but their effective
  * transfer must match across the two source endpoints. UI alpha is the soft
  * coverage mask. Premultiplied RGB is premultiplied in linear light and then

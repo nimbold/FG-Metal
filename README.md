@@ -2,7 +2,7 @@
 
 Framegen is an experimental macOS library for renderer-integrated frame generation. Its live processing contract is built around GPU textures: renderer adapters provide frames as GPU resources, a backend processes them on the GPU, and the caller receives an output texture. The project does not capture the desktop or copy image pixels through CPU memory.
 
-The first implementation is deliberately small: a Metal test host submits two textures through a placeholder API and displays a GPU-blended result. It establishes resource ownership, synchronization, and presentation boundaries before any frame-interpolation algorithm is selected.
+The first implementation is a standalone Metal host that submits two textures through the generic color-only API and displays Practical-RIFE v4.26 interpolation. It establishes resource ownership, synchronization, and presentation boundaries without tying the host API to a particular model.
 
 ## Project boundaries
 
@@ -20,13 +20,15 @@ Target the newest macOS SDK and Apple toolchain available in the development env
 
 ## Current status
 
-The bootstrap, benchmark framework, provisional Step 3 host API, and Step 4 HUD preservation paths are implemented. The host API is a versioned C ABI with backend/capability discovery, GPU-resource import, source-frame submission, asynchronous interpolation tickets, presentation feedback, history invalidation, HUD mode/source/debug controls, and statistics. HUD controls are a separate top-level v1 extension. The Metal backend is registered explicitly with `framegen_metal_register_backend()`. The ABI remains a draft; it has not been validated by an external renderer adapter or declared stable.
+The bootstrap, benchmark framework, provisional Step 3 host API, Step 4 HUD preservation paths, and Step 5 Metal RIFE v4.26 backend are implemented. The host API is a versioned C ABI with backend/capability discovery, GPU-resource import, source-frame submission, asynchronous interpolation tickets, presentation feedback, history invalidation, HUD mode/source/debug controls, and statistics. HUD controls are a separate top-level v1 extension. The Metal backend advertises `COLOR_ONLY` and is registered explicitly with `framegen_metal_register_backend()`. QUALITY output matches the pinned CPU reference within one 8-bit channel value on the 64×64 and 65×63 fixtures. The ABI remains a draft; it has not been validated by an external renderer adapter or declared stable.
 
-The only processing backend is still the placeholder Metal path. It supports three host-visible HUD modes: whole-frame blending with no HUD knowledge, preferred explicit scene/UI-plane composition (straight, premultiplied, or opaque UI alpha), and heuristic protection for already-composited frames. Automatic protection produces a soft confidence mask, stabilizes it over chronologically ordered source pairs, and lets the host choose previous, current, or nearest-presentation UI. Debug views are optional and disabled by default. This is a first-class API path, but it is not a general scene-flow estimator or motion-compensated interpolator.
+The Metal backend runs the complete Practical-RIFE v4.26 `IFNet_HDv3` color model with MPSGraph and purpose-built Metal kernels. It accepts matching opaque RGBA8 sRGB or linear-sRGB SDR textures, pads inputs to RIFE's mod-64 requirement, and writes an output texture without CPU pixel readback. The internal `QUALITY` and `BALANCED` variants use full-resolution float32 and float16 inference, respectively. HUD handling runs after scene interpolation: explicit scene/UI-plane composition uses the supplied UI plane, and automatic protection uses a soft confidence mask over already-composited frames. The model's intermediate scratch pool is capped at 2 GiB, with a 1280 MiB per-request limit checked before graph compilation; requests above the limit fail explicitly. These limits exclude MPSGraph workspaces and input/output/HUD textures. The RIFE implementation and checkpoint are MIT licensed; exact source, checkpoint, conversion provenance and reference results are recorded in [RIFE provenance](docs/provenance/rife-v4.26.md). The converted weights remain local and outside Git.
 
-The current synthetic results are mixed. At timestamp-quantized midpoint targets, automatic-current reduced HUD pixel-error p95 from 0.2858 to 0.2690, temporal-residual p95 from 0.2876 to 0.2766, and flicker p95 from 0.5752 to 0.5144 versus raw blending. All-image pixel-error p95 increased from 0.2107 to 0.2201; moving-menu p95 increased from 0.3616 to 0.6867. Exact static crosshair and text pixels remain stable, but those regions are also exact in the raw baseline. The separate five-pair mask check reduced transition MAE by 37.3%, while 0.5-threshold HUD-ROI proxy recall was only 0.3119 and stabilized mask coverage rose across the sequence. Treat this as synthetic placeholder evidence, not proof of general HUD detection quality.
+The checked-in synthetic benchmark results were captured against the earlier blend placeholder and remain historical. RIFE-specific raw and HUD-protected results are reported in the current benchmark artifacts. These synthetic scenes do not establish performance or quality on real games.
 
-No RIFE implementation, model weights, Core ML or MPSGraph backend, D3DMetal integration, Wine/game integration, renderer adapter, or in-game FPS evidence exists. The benchmark's source-throughput value is an offline input-upload proxy, not game FPS or presented-frame pacing. CTest covers the placeholder and fake-provider contracts, not renderer integration or ABI stability. See [HUD preservation](docs/HUD_PRESERVATION.md) for per-policy measurements, mask diagnostics, and documented quality regressions.
+On an Apple M3, the serial 128×72 synthetic run measured QUALITY raw RIFE GPU p50/p95/p99 at 2.59/3.04/3.92 ms and QUALITY with automatic HUD protection at 2.59/2.67/3.34 ms, with no misses across 500 measured samples in either run. Automatic protection improves aggregate HUD tails on this corpus, while the strict comparison still reports regressions in some ROIs and temporal/edge tails. The runs sampled about 42 MB of GPU allocation and 91 MB of runner RSS. The runner samples GPU allocation after completion, so transient MPSGraph workspace peaks may be missed.
+
+Backend availability reports whether a Metal device and converted weights are present; the runtime parses the weights at context creation and validates their architecture and graph shapes when it builds the first inference plan. CTest covers core and fake-provider contracts plus a Metal C API smoke test when a Metal device and converted RIFE weights are present, and reports the Metal test as skipped when either prerequisite is absent. The benchmark's source-throughput value is an offline input-upload proxy, not game FPS or presented-frame pacing. The standalone Metal host is the current GPU runtime boundary; D3DMetal integration, full-resolution performance evidence, and in-game FPS evidence remain future work. See [HUD preservation](docs/HUD_PRESERVATION.md) for the host controls and [benchmark guidance](docs/BENCHMARK.md) for measurement limits.
 
 The committed synthetic fixture covers slow panning, third-person motion, foliage, thin geometry and fences, particles, translucent scene and UI layers, moving highlights, sights and static crosshairs, subtitles, minimap, health bar, timer, scrolling text, flashing UI, moving menu, and changing HUD counters. HUD and text are mandatory pointwise ROIs; named UI guards include an exact crosshair-stroke mask. Those guards compare per-target RGB errors and per-pixel temporal residual, color flicker, and edge flicker. Fast rotation, racing, scene cuts, loading transitions, and richer subtitle cases remain planned. See [the corpus catalog](tools/benchmark/corpus/catalog.json) for the per-category status. No copyrighted game footage is included.
 
@@ -52,7 +54,7 @@ Open the native Metal preview with:
 open build/adapters/test-metal/framegen-test-metal.app
 ```
 
-The Metal test host requires a Metal-capable device. A core-only build can disable both Metal targets with `-DFRAMEGEN_BUILD_METAL=OFF -DFRAMEGEN_BUILD_TEST_METAL=OFF`. The Python analyzer uses only the standard library and can validate/compare results on other hosts. The Metal benchmark runner is an optional macOS target; configure it with `-DFRAMEGEN_BUILD_TOOLS=ON`.
+The Metal test host requires a Metal-capable device and the separately converted weights at `models/local/rife-v4.26/rife-v4.26.fgweights` (or `FRAMEGEN_MODEL_WEIGHTS`). Prepare the checkpoint with [the offline conversion steps](tools/rife/README.md). Set `FRAMEGEN_METAL_MODEL_VARIANT=QUALITY` or `BALANCED` to select an internal precision mode; the default is `QUALITY`. A core-only build can disable both Metal targets with `-DFRAMEGEN_BUILD_METAL=OFF -DFRAMEGEN_BUILD_TEST_METAL=OFF`. The Python analyzer uses only the standard library and can validate/compare results on other hosts. The Metal benchmark runner is an optional macOS target; configure it with `-DFRAMEGEN_BUILD_TOOLS=ON`.
 
 Run the committed synthetic fixture after building the runner:
 
@@ -62,24 +64,26 @@ cmake --build build --target framegen-benchmark-metal
 python3 tools/benchmark/bench.py run \
   --corpus tools/benchmark/corpus/synthetic-motion/manifest.json \
   --backend build/tools/benchmark/framegen-benchmark-metal \
-  --output test-results/benchmarks/candidate-synthetic-motion.json
+  --output test-results/benchmarks/rife-v4.26-raw-synthetic-motion.json
 ```
 
-Compare a candidate with the checked-in placeholder baseline:
+Run automatic HUD protection against the same corpus and target times with `--hud-mode automatic`; see [BENCHMARK.md](docs/BENCHMARK.md) for raw and protected commands and the metrics each run records.
+
+Compare the checked-in raw and automatic-HUD RIFE runs:
 
 ```sh
 python3 tools/benchmark/bench.py compare \
-  --baseline test-results/benchmarks/placeholder-synthetic-motion.json \
-  --candidate test-results/benchmarks/candidate-synthetic-motion.json \
-  --output test-results/benchmarks/placeholder-vs-candidate.json \
-  --summary test-results/benchmarks/placeholder-vs-candidate.md
+  --baseline test-results/benchmarks/rife-v4.26-raw-synthetic-motion.json \
+  --candidate test-results/benchmarks/rife-v4.26-automatic-synthetic-motion.json \
+  --output test-results/benchmarks/rife-v4.26-raw-vs-automatic.json \
+  --summary test-results/benchmarks/rife-v4.26-raw-vs-automatic.md
 ```
 
 See [BENCHMARK.md](docs/BENCHMARK.md) for corpus authoring, arbitrary interpolation timestamps, masked temporal/edge metrics, runtime fields, comparison rules, and limitations. Analytic ground-truth providers are Python code loaded from the corpus; run only providers you trust.
 
 ## Project boundaries and next work
 
-The benchmark is a quality-evaluation framework, not evidence that a frame-generation algorithm has been selected or validated. Next work is to validate the provisional ABI and synchronization contract with a real adapter, broaden the synthetic corpus, identify redistribution-cleared sequences, and evaluate algorithm and backend candidates before implementation. RIFE-family approaches, Core ML, and MetalFX remain research options, not selected dependencies or promised backends.
+The standalone Metal host demonstrates GPU-native inference, and the deterministic 64×64 fixture provides a reference-parity check. The provisional ABI still needs validation with an external renderer adapter, and the synthetic benchmark does not substitute for real-game quality or display-pacing evidence. Next work can address renderer integration and broader licensed evaluation footage.
 
 ## Contributing
 

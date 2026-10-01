@@ -15,3 +15,10 @@ DerivedData/
 *.xcuserstate
 *.xcuserdata/
 .DS_Store
+__pycache__/
+*.py[cod]
+
+# Model assets are fetched and converted locally; keep copyrighted checkpoints
+# and generated runtime weights out of Git history.
+/models/local/
+/models/cache/
