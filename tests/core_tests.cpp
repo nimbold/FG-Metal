@@ -316,6 +316,27 @@ void test_input_descriptors_must_match() {
     CHECK(backend->submit_count == 0);
 }
 
+void test_explicit_ui_plane_requires_two_matching_layers() {
+    auto backend = std::make_shared<FakeBackend>();
+    auto generator = make_generator(backend);
+    auto submission = valid_submission();
+    submission.hud_options.mode = HudMode::explicit_ui_plane;
+    expect_error(generator.submit(submission), ErrorCode::invalid_argument);
+    CHECK(backend->submit_count == 0);
+
+    const auto descriptor = submission.previous.texture.descriptor();
+    submission.previous.optional_inputs.ui_texture = make_texture(descriptor);
+    submission.current.optional_inputs.ui_texture = make_texture(descriptor);
+    CHECK(generator.submit(submission).has_value());
+    CHECK(backend->submit_count == 1);
+
+    auto mismatched = descriptor;
+    mismatched.width += 1;
+    submission.current.optional_inputs.ui_texture = make_texture(mismatched);
+    expect_error(generator.submit(submission), ErrorCode::incompatible_resource);
+    CHECK(backend->submit_count == 1);
+}
+
 void test_timing_and_clock_domain_validation_with_history_reset() {
     auto backend = std::make_shared<FakeBackend>();
     auto generator = make_generator(backend);
@@ -341,9 +362,15 @@ void test_timing_and_clock_domain_validation_with_history_reset() {
         decreasing_timestamp.previous.timing.timestamp_ns;
     expect_error(generator.submit(decreasing_timestamp), ErrorCode::invalid_argument);
 
+    auto reset_cannot_reverse_pair = valid_submission();
+    reset_cannot_reverse_pair.current.timing.sequence =
+        reset_cannot_reverse_pair.previous.timing.sequence;
+    reset_cannot_reverse_pair.current.timing.timestamp_ns =
+        reset_cannot_reverse_pair.previous.timing.timestamp_ns - 1;
+    reset_cannot_reverse_pair.reset_history = true;
+    expect_error(generator.submit(reset_cannot_reverse_pair), ErrorCode::invalid_argument);
+
     auto reset_stream = valid_submission();
-    reset_stream.current.timing.sequence = reset_stream.previous.timing.sequence;
-    reset_stream.current.timing.timestamp_ns = reset_stream.previous.timing.timestamp_ns - 1;
     reset_stream.reset_history = true;
     CHECK(generator.submit(reset_stream).has_value());
     CHECK(backend->last_reset_history);
@@ -464,6 +491,8 @@ int main() {
         {"backend and device mismatch validation",
          test_backend_and_device_mismatches_are_rejected},
         {"input descriptor compatibility", test_input_descriptors_must_match},
+        {"explicit UI-plane input validation",
+         test_explicit_ui_plane_requires_two_matching_layers},
         {"timing validation and history reset",
          test_timing_and_clock_domain_validation_with_history_reset},
         {"GPU dependency ownership", test_null_and_foreign_gpu_dependencies_are_rejected},

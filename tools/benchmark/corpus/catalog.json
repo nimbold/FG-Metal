@@ -17,8 +17,12 @@
     {"id": "subtitles", "status": "partial", "fixture": "synthetic-motion-v1", "notes": "Small caption-like text is present; multi-line and animated subtitle cases remain planned."},
     {"id": "minimaps", "status": "covered", "fixture": "synthetic-motion-v1", "notes": "Synthetic gridded minimap with moving marker."},
     {"id": "health_bars", "status": "covered", "fixture": "synthetic-motion-v1", "notes": "Dynamic synthetic health bar."},
-    {"id": "menus", "status": "planned", "fixture": null, "notes": "Add synthetic menu transitions and cursor motion."},
-    {"id": "rapidly_changing_hud_counters", "status": "covered", "fixture": "synthetic-motion-v1", "notes": "Counter changes with analytic frame time."},
+    {"id": "menus", "status": "covered", "fixture": "synthetic-motion-v1", "notes": "A translucent menu moves within a fixed screen-space ROI."},
+    {"id": "rapidly_changing_hud_counters", "status": "covered", "fixture": "synthetic-motion-v1", "notes": "Counter and timer values change with analytic frame time."},
+    {"id": "scrolling_text", "status": "covered", "fixture": "synthetic-motion-v1", "notes": "An alert scrolls across a fixed screen-space evaluation region."},
+    {"id": "flashing_ui", "status": "covered", "fixture": "synthetic-motion-v1", "notes": "A warning panel toggles at a fixed screen location."},
+    {"id": "transparent_ui", "status": "covered", "fixture": "synthetic-motion-v1", "notes": "A screen-space translucent panel is alpha-composited over moving scene pixels."},
+    {"id": "timers", "status": "covered", "fixture": "synthetic-motion-v1", "notes": "A timer value changes between source and generated frames."},
     {"id": "scene_cuts", "status": "planned", "fixture": null, "notes": "Add cut metadata; never compute temporal flow/residuals across a cut."},
     {"id": "loading_transitions", "status": "planned", "fixture": null, "notes": "Add synthetic progress/loading transitions and transition annotations."}
   ]

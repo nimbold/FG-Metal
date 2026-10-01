@@ -31,7 +31,9 @@ constexpr framegen_capability_flags_t kOptionalInputMask =
     FRAMEGEN_CAP_CAMERA_MATRICES | FRAMEGEN_CAP_JITTER | FRAMEGEN_CAP_EXPOSURE;
 constexpr framegen_capability_flags_t kKnownCapabilityMask =
     FRAMEGEN_CAP_COLOR_ONLY | kOptionalInputMask | FRAMEGEN_CAP_HDR |
-    FRAMEGEN_CAP_ARBITRARY_INTERPOLATION_TIME;
+    FRAMEGEN_CAP_ARBITRARY_INTERPOLATION_TIME |
+    FRAMEGEN_CAP_AUTOMATIC_HUD_PROTECTION |
+    FRAMEGEN_CAP_HUD_DEBUG_VISUALIZATION;
 constexpr framegen_capability_flags_t kKnownInputMask = kOptionalInputMask;
 
 thread_local std::array<char, 1024> g_last_error{};
@@ -322,6 +324,7 @@ struct ContextImpl : std::enable_shared_from_this<ContextImpl> {
     std::shared_ptr<NativeLease> device_lease;
     framegen_capability_result_t capabilities{};
     framegen_context_config_t config{};
+    framegen_hud_options_t hud_options{};
     std::deque<std::shared_ptr<FrameRecord>> frames;
     std::unordered_map<std::uint64_t, std::shared_ptr<TicketImpl>> tickets;
     framegen_statistics_t statistics{};
@@ -329,6 +332,7 @@ struct ContextImpl : std::enable_shared_from_this<ContextImpl> {
     std::uint64_t history_generation{1};
     std::uint64_t last_source_frame_id{};
     std::uint64_t next_ticket_id{1};
+    std::uint64_t last_backend_history_generation{};
     std::uint64_t stream_id{};
     std::uint64_t clock_domain{};
     // Emergency lifetime hold used only if the retirement worker cannot queue
@@ -913,6 +917,13 @@ framegen_status_t framegen_context_configure(
             negotiated.max_in_flight_requests = max_in_flight;
             state->capabilities = negotiated;
             state->config = *config;
+            state->hud_options = framegen_hud_options_t{
+                .struct_size = sizeof(framegen_hud_options_t),
+                .struct_version = FRAMEGEN_ABI_VERSION,
+                .mode = FRAMEGEN_HUD_MODE_NO_KNOWLEDGE,
+                .ui_temporal_source = FRAMEGEN_UI_SOURCE_NEAREST_PRESENTATION,
+                .debug_visualization = FRAMEGEN_HUD_DEBUG_DISABLED,
+            };
             state->max_in_flight = max_in_flight;
             state->history_capacity = history_capacity;
             state->configured = true;
@@ -920,6 +931,7 @@ framegen_status_t framegen_context_configure(
             state->stream_id = 0;
             state->clock_domain = 0;
             ++state->history_generation;
+            state->last_backend_history_generation = 0;
             for (auto& [id, ticket] : state->tickets) {
                 (void)id;
                 if (ticket->history_generation < state->history_generation) {
@@ -934,6 +946,93 @@ framegen_status_t framegen_context_configure(
                 state->backend.invalidate(FRAMEGEN_INVALIDATE_HISTORY_RESET);
             } catch (...) {
                 // Configuration was committed; backend hooks cannot roll it back.
+            }
+        }
+        return succeed();
+    });
+}
+
+framegen_status_t framegen_context_set_hud_options(
+    framegen_context_t* context, const framegen_hud_options_t* options) {
+    return guarded([&] {
+        if (context == nullptr || !valid_input_struct(options)) {
+            return fail(FRAMEGEN_STATUS_INVALID_ARGUMENT,
+                        "HUD configuration requires a context and valid options");
+        }
+        if (options->mode > FRAMEGEN_HUD_MODE_AUTOMATIC_PROTECTION ||
+            options->ui_temporal_source > FRAMEGEN_UI_SOURCE_NEAREST_PRESENTATION ||
+            options->debug_visualization > FRAMEGEN_HUD_DEBUG_FINAL_COMPOSITE ||
+            (options->mode == FRAMEGEN_HUD_MODE_NO_KNOWLEDGE &&
+             options->debug_visualization != FRAMEGEN_HUD_DEBUG_DISABLED &&
+             options->debug_visualization != FRAMEGEN_HUD_DEBUG_FINAL_COMPOSITE)) {
+            return fail(FRAMEGEN_STATUS_INVALID_ARGUMENT,
+                        "HUD mode, UI source, or debug visualization is invalid");
+        }
+
+        auto state = context->impl;
+        std::unique_lock backend_operation_lock(state->backend_operation_mutex);
+        std::deque<std::shared_ptr<FrameRecord>> old_frames;
+        {
+            std::scoped_lock lock(state->mutex);
+            const auto context_status = check_context(state);
+            if (context_status != FRAMEGEN_STATUS_OK) {
+                return context_status;
+            }
+            if (!state->configured) {
+                return fail(FRAMEGEN_STATUS_INVALID_STATE,
+                            "context must be configured before HUD options are set");
+            }
+            const auto supported = state->backend_info.supported_capabilities;
+            const auto negotiated = state->capabilities.negotiated_capabilities;
+            if (options->mode == FRAMEGEN_HUD_MODE_EXPLICIT_UI_PLANE &&
+                (((supported & FRAMEGEN_CAP_UI_PLANE) == 0) ||
+                 ((state->config.available_input_capabilities &
+                   FRAMEGEN_INPUT_UI_PLANE) == 0) ||
+                 ((negotiated & FRAMEGEN_CAP_UI_PLANE) == 0))) {
+                return fail(FRAMEGEN_STATUS_CAPABILITY_UNAVAILABLE,
+                            "explicit UI-plane mode requires negotiated UI-plane input support");
+            }
+            if (options->mode == FRAMEGEN_HUD_MODE_AUTOMATIC_PROTECTION &&
+                ((supported & FRAMEGEN_CAP_AUTOMATIC_HUD_PROTECTION) == 0 ||
+                 (negotiated & FRAMEGEN_CAP_AUTOMATIC_HUD_PROTECTION) == 0)) {
+                return fail(FRAMEGEN_STATUS_CAPABILITY_UNAVAILABLE,
+                            "automatic HUD protection must be supported and negotiated");
+            }
+            if (options->debug_visualization != FRAMEGEN_HUD_DEBUG_DISABLED &&
+                options->debug_visualization != FRAMEGEN_HUD_DEBUG_FINAL_COMPOSITE &&
+                ((supported & FRAMEGEN_CAP_HUD_DEBUG_VISUALIZATION) == 0 ||
+                 (negotiated & FRAMEGEN_CAP_HUD_DEBUG_VISUALIZATION) == 0)) {
+                return fail(FRAMEGEN_STATUS_CAPABILITY_UNAVAILABLE,
+                            "HUD debug visualization must be supported and negotiated");
+            }
+            if (std::memcmp(&state->hud_options, options,
+                            offsetof(framegen_hud_options_t, reserved)) == 0) {
+                return succeed();
+            }
+            if (state->history_generation == UINT64_MAX) {
+                return fail(FRAMEGEN_STATUS_INTERNAL_ERROR,
+                            "history generation sequence is exhausted");
+            }
+
+            state->hud_options = *options;
+            ++state->history_generation;
+            state->last_backend_history_generation = 0;
+            old_frames.swap(state->frames);
+            state->stream_id = 0;
+            state->clock_domain = 0;
+            for (auto& [id, ticket] : state->tickets) {
+                (void)id;
+                if (ticket->history_generation < state->history_generation) {
+                    ticket->status = FRAMEGEN_TICKET_INVALIDATED;
+                    ticket->error_status = FRAMEGEN_STATUS_STALE_FRAME;
+                }
+            }
+        }
+        if (state->backend.invalidate) {
+            try {
+                state->backend.invalidate(FRAMEGEN_INVALIDATE_HISTORY_RESET);
+            } catch (...) {
+                // HUD option changes are committed even if a backend hook fails.
             }
         }
         return succeed();
@@ -956,6 +1055,7 @@ framegen_status_t framegen_submit_source_frame(
         framegen_capability_flags_t negotiated_capabilities{};
         std::uint64_t current_generation{};
         std::uint64_t expected_device_id{};
+        framegen_hud_mode_t hud_mode{};
         {
             std::scoped_lock lock(state->mutex);
             if (check_context(state) != FRAMEGEN_STATUS_OK) {
@@ -971,6 +1071,7 @@ framegen_status_t framegen_submit_source_frame(
             negotiated_capabilities = state->capabilities.negotiated_capabilities;
             current_generation = state->history_generation;
             expected_device_id = state->device_id;
+            hud_mode = state->hud_options.mode;
         }
 
         const auto optional_mask = frame->optional_inputs.present_mask;
@@ -1001,6 +1102,11 @@ framegen_status_t framegen_submit_source_frame(
         if ((optional_mask & ~config.available_input_capabilities) != 0) {
             return fail(FRAMEGEN_STATUS_INVALID_FRAME,
                         "source frame contains an input absent from the negotiated configuration");
+        }
+        if (hud_mode == FRAMEGEN_HUD_MODE_EXPLICIT_UI_PLANE &&
+            (optional_mask & FRAMEGEN_INPUT_UI_PLANE) == 0) {
+            return fail(FRAMEGEN_STATUS_CAPABILITY_UNAVAILABLE,
+                        "explicit UI-plane mode requires a UI texture on every source frame");
         }
         if (frame->color.dynamic_range == FRAMEGEN_DYNAMIC_RANGE_HDR &&
             ((backend_info.supported_capabilities & FRAMEGEN_CAP_HDR) == 0 ||
@@ -1067,6 +1173,12 @@ framegen_status_t framegen_submit_source_frame(
                 image.resource.device_id != frame->color.resource.device_id) {
                 return fail(FRAMEGEN_STATUS_INVALID_FRAME,
                             "optional image resource metadata is invalid or from another device");
+            }
+            if (color_image &&
+                (image.width != frame->color.width ||
+                 image.height != frame->color.height)) {
+                return fail(FRAMEGEN_STATUS_INVALID_FRAME,
+                            "UI plane dimensions must match the source color image");
             }
             if (import_for_backend) {
                 if (!backend_supports_format(backend_info, image.pixel_format)) {
@@ -1192,6 +1304,11 @@ framegen_status_t framegen_submit_source_frame(
                     };
                 }
             }
+        }
+        if (target.ui_texture &&
+            target.ui_texture.resource_identity() == record->input.texture.resource_identity()) {
+            return fail(FRAMEGEN_STATUS_INVALID_FRAME,
+                        "scene color and explicit UI plane must use distinct texture storage");
         }
         if ((optional_mask & FRAMEGEN_INPUT_CAMERA_MATRICES) != 0) {
             std::array<float, 16> camera{};
@@ -1401,6 +1518,12 @@ framegen_status_t framegen_request_interpolation(
                 return fail(FRAMEGEN_STATUS_CAPABILITY_UNAVAILABLE,
                             "one or both interpolation frames lack a required optional input");
             }
+            if (state->hud_options.mode == FRAMEGEN_HUD_MODE_EXPLICIT_UI_PLANE &&
+                ((previous_inputs & FRAMEGEN_INPUT_UI_PLANE) == 0 ||
+                 (current_inputs & FRAMEGEN_INPUT_UI_PLANE) == 0)) {
+                return fail(FRAMEGEN_STATUS_CAPABILITY_UNAVAILABLE,
+                            "explicit UI-plane mode requires both source UI textures");
+            }
             retire_released_tickets_locked(*state);
             if (state->active_in_flight >= state->max_in_flight ||
                 state->tickets.size() >= state->max_in_flight) {
@@ -1438,6 +1561,48 @@ framegen_status_t framegen_request_interpolation(
             submission.desired_presentation_timestamp_ns =
                 request->desired_presentation_timestamp_ns;
             submission.presentation_deadline_ns = request->presentation_deadline_ns;
+            switch (state->hud_options.mode) {
+            case FRAMEGEN_HUD_MODE_EXPLICIT_UI_PLANE:
+                submission.hud_options.mode = HudMode::explicit_ui_plane;
+                break;
+            case FRAMEGEN_HUD_MODE_AUTOMATIC_PROTECTION:
+                submission.hud_options.mode = HudMode::automatic_protection;
+                break;
+            default:
+                submission.hud_options.mode = HudMode::no_hud_knowledge;
+                break;
+            }
+            switch (state->hud_options.ui_temporal_source) {
+            case FRAMEGEN_UI_SOURCE_PREVIOUS:
+                submission.hud_options.ui_source = UiTemporalSource::previous_frame;
+                break;
+            case FRAMEGEN_UI_SOURCE_CURRENT:
+                submission.hud_options.ui_source = UiTemporalSource::current_frame;
+                break;
+            default:
+                submission.hud_options.ui_source = UiTemporalSource::nearest_presentation;
+                break;
+            }
+            switch (state->hud_options.debug_visualization) {
+            case FRAMEGEN_HUD_DEBUG_RAW_MASK:
+                submission.hud_options.debug_visualization = HudDebugVisualization::raw_mask;
+                break;
+            case FRAMEGEN_HUD_DEBUG_STABILIZED_MASK:
+                submission.hud_options.debug_visualization = HudDebugVisualization::stabilized_mask;
+                break;
+            case FRAMEGEN_HUD_DEBUG_PROTECTED_REGIONS:
+                submission.hud_options.debug_visualization = HudDebugVisualization::protected_regions;
+                break;
+            case FRAMEGEN_HUD_DEBUG_INTERPOLATION_CONFIDENCE:
+                submission.hud_options.debug_visualization = HudDebugVisualization::interpolation_confidence;
+                break;
+            case FRAMEGEN_HUD_DEBUG_FINAL_COMPOSITE:
+                submission.hud_options.debug_visualization = HudDebugVisualization::final_composite;
+                break;
+            default:
+                submission.hud_options.debug_visualization = HudDebugVisualization::disabled;
+                break;
+            }
             if (previous->render_dependency) {
                 submission.gpu_dependencies.push_back(previous->render_dependency);
             }
@@ -1475,6 +1640,13 @@ framegen_status_t framegen_request_interpolation(
                                                  : FRAMEGEN_STATUS_STALE_FRAME,
                                 "history changed before backend submission");
                 }
+                // Derive reset state only after acquiring the same serialization
+                // lock that orders backend submissions. Concurrent requests can
+                // otherwise all observe the old generation and each discard the
+                // temporal history initialized by the preceding request.
+                submission.reset_history =
+                    state->last_backend_history_generation !=
+                    request->history_generation;
             }
 
             Result<GeneratedFrame> generated = std::unexpected(
@@ -1509,6 +1681,7 @@ framegen_status_t framegen_request_interpolation(
                 state->statistics.total_cpu_enqueue_time_ns +=
                     static_cast<std::uint64_t>(std::max<std::int64_t>(0, enqueue_ns));
                 ticket_state->generated = std::move(*generated);
+                state->last_backend_history_generation = request->history_generation;
             }
         }
         *out_ticket = public_ticket.release();

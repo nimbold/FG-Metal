@@ -83,6 +83,8 @@ typedef uint64_t framegen_capability_flags_t;
 #define FRAMEGEN_CAP_EXPOSURE (UINT64_C(1) << 8)
 #define FRAMEGEN_CAP_HDR (UINT64_C(1) << 9)
 #define FRAMEGEN_CAP_ARBITRARY_INTERPOLATION_TIME (UINT64_C(1) << 10)
+#define FRAMEGEN_CAP_AUTOMATIC_HUD_PROTECTION (UINT64_C(1) << 11)
+#define FRAMEGEN_CAP_HUD_DEBUG_VISUALIZATION (UINT64_C(1) << 12)
 
 #define FRAMEGEN_INPUT_MOTION_VECTORS FRAMEGEN_CAP_MOTION_VECTORS
 #define FRAMEGEN_INPUT_DEPTH FRAMEGEN_CAP_DEPTH
@@ -278,6 +280,46 @@ typedef struct framegen_context_config {
     uint32_t reserved[8];
 } framegen_context_config_t;
 
+/*
+ * HUD options are a separate top-level extension so ABI v1's existing
+ * by-value structures remain unchanged. Apply after context_configure and
+ * before submitting new source frames. For explicit UI-plane mode, include
+ * FRAMEGEN_CAP_UI_PLANE in preferred_capabilities and
+ * available_input_capabilities when configuring the context. Automatic mode
+ * and nontrivial debug views also require their respective capability bits in
+ * preferred_capabilities (or required_capabilities). Changing options
+ * invalidates history; set them before submitting frames for the new mode.
+ * ui_temporal_source selects previous, current, or the endpoint nearest
+ * desired_presentation_timestamp_ns; exact ties choose current. A debug view
+ * replaces the normal generated image.
+ */
+typedef uint32_t framegen_hud_mode_t;
+#define FRAMEGEN_HUD_MODE_NO_KNOWLEDGE 0u
+#define FRAMEGEN_HUD_MODE_EXPLICIT_UI_PLANE 1u
+#define FRAMEGEN_HUD_MODE_AUTOMATIC_PROTECTION 2u
+
+typedef uint32_t framegen_ui_temporal_source_t;
+#define FRAMEGEN_UI_SOURCE_PREVIOUS 0u
+#define FRAMEGEN_UI_SOURCE_CURRENT 1u
+#define FRAMEGEN_UI_SOURCE_NEAREST_PRESENTATION 2u
+
+typedef uint32_t framegen_hud_debug_visualization_t;
+#define FRAMEGEN_HUD_DEBUG_DISABLED 0u
+#define FRAMEGEN_HUD_DEBUG_RAW_MASK 1u
+#define FRAMEGEN_HUD_DEBUG_STABILIZED_MASK 2u
+#define FRAMEGEN_HUD_DEBUG_PROTECTED_REGIONS 3u
+#define FRAMEGEN_HUD_DEBUG_INTERPOLATION_CONFIDENCE 4u
+#define FRAMEGEN_HUD_DEBUG_FINAL_COMPOSITE 5u
+
+typedef struct framegen_hud_options {
+    uint32_t struct_size;
+    uint32_t struct_version;
+    framegen_hud_mode_t mode;
+    framegen_ui_temporal_source_t ui_temporal_source;
+    framegen_hud_debug_visualization_t debug_visualization;
+    uint32_t reserved[8];
+} framegen_hud_options_t;
+
 typedef struct framegen_capability_result {
     uint32_t struct_size;
     uint32_t struct_version;
@@ -309,6 +351,22 @@ typedef struct framegen_optional_inputs {
     uint32_t depth_encoding;
     uint32_t reserved[8];
 } framegen_optional_inputs_t;
+
+/*
+ * In FRAMEGEN_HUD_MODE_EXPLICIT_UI_PLANE, source color must contain opaque
+ * scene color without UI and ui_texture must contain the corresponding UI
+ * layer. The placeholder Metal backend interpolates scene color in linear
+ * light, then composites the selected endpoint UI using its declared alpha
+ * mode. UI dimensions must match color; RGBA8 SDR is currently supported.
+ * Scene and UI may each use sRGB or linear-sRGB transfer, but their effective
+ * transfer must match across the two source endpoints. UI alpha is the soft
+ * coverage mask. Premultiplied RGB is premultiplied in linear light and then
+ * encoded by the declared transfer function. In automatic-protection mode,
+ * color is already composited; the backend estimates and stabilizes a soft
+ * confidence mask from image and temporal cues.
+ * The generated image returned by polling is the final image, or the selected
+ * optional debug visualization when enabled.
+ */
 
 #define FRAMEGEN_MOTION_VECTOR_ENCODING_SIGNED_XY 1u
 #define FRAMEGEN_MOTION_VECTOR_ENCODING_UNORM_XY 2u
@@ -490,6 +548,8 @@ FRAMEGEN_API framegen_status_t framegen_context_query_capabilities(
 FRAMEGEN_API framegen_status_t framegen_context_configure(
     framegen_context_t *context, const framegen_context_config_t *config,
     framegen_capability_result_t *out_result);
+FRAMEGEN_API framegen_status_t framegen_context_set_hud_options(
+    framegen_context_t *context, const framegen_hud_options_t *options);
 FRAMEGEN_API framegen_status_t framegen_submit_source_frame(
     framegen_context_t *context, const framegen_source_frame_t *frame,
     framegen_frame_receipt_t *out_receipt);

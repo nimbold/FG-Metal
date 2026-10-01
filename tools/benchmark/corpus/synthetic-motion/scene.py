@@ -77,13 +77,14 @@ _FONT = {
     "A": ("010", "101", "111", "101", "101"), "C": ("111", "100", "100", "100", "111"),
     "E": ("111", "100", "110", "100", "111"), "H": ("101", "101", "111", "101", "101"),
     "I": ("111", "010", "010", "010", "111"), "L": ("100", "100", "100", "100", "111"),
+    "M": ("101", "111", "111", "101", "101"), "N": ("101", "111", "111", "111", "101"),
     "O": ("111", "101", "101", "101", "111"), "R": ("110", "101", "110", "101", "101"),
     "S": ("111", "100", "111", "001", "111"), "T": ("111", "010", "010", "010", "010"),
     "U": ("101", "101", "101", "101", "111"), " ": ("000",) * 5,
 }
 
 
-def _text(image, mask, x, y, text, color):
+def _text(image, mask, x, y, text, color, secondary_mask=None):
     origin = x
     for char in text.upper():
         glyph = _FONT.get(char, _FONT[" "])
@@ -94,8 +95,19 @@ def _text(image, mask, x, y, text, color):
                     _set(image, px, py, color)
                     if 0 <= px < WIDTH and 0 <= py < HEIGHT:
                         mask[py * WIDTH + px] = 255
+                        if secondary_mask is not None:
+                            secondary_mask[py * WIDTH + px] = 255
         x += 4
     return x - origin
+
+
+def _blend_rect(image, x0, y0, x1, y1, color, alpha):
+    for y in range(max(0, y0), min(HEIGHT, y1)):
+        for x in range(max(0, x0), min(WIDTH, x1)):
+            offset = (y * WIDTH + x) * 3
+            image[offset:offset + 3] = bytes(
+                int(round(image[offset + channel] * (1.0 - alpha) + color[channel] * alpha))
+                for channel in range(3))
 
 
 def render(time_frame: float):
@@ -106,7 +118,9 @@ def render(time_frame: float):
     occlusion = bytearray(WIDTH * HEIGHT)
     thin_geometry = bytearray(WIDTH * HEIGHT)
     critical_masks = {label: bytearray(WIDTH * HEIGHT) for label in (
-        "crosshair", "weapon_sight", "minimap", "health_bar", "subtitle", "hud_counter")}
+        "crosshair", "crosshair_pixels", "static_text_pixels", "weapon_sight", "minimap", "health_bar",
+        "subtitle", "hud_counter", "timer", "scrolling_text", "flashing_ui",
+        "transparent_ui", "moving_menu")}
 
     pan = int(round(time_frame * 1.2))
     # Thin skyline and distant foliage, translated by an analytic camera pan.
@@ -160,19 +174,24 @@ def render(time_frame: float):
         _set(image, px, py, (232, 218, 144))
 
     # HUD backing, crosshair, weapon sight, minimap, health bar, subtitle,
-    # and a rapidly changing counter. HUD/text masks intentionally overlap.
+    # timer, scrolling text, flashing state, transparent UI, and a moving menu.
+    # HUD/text masks intentionally overlap.
     _rect(image, 3, 3, 39, 16, (22, 29, 33))
     _rect(image, 91, 3, 124, 22, (20, 30, 36))
     _rect(image, 5, 62, 42, 69, (18, 22, 28))
+    _rect(image, 47, 2, 83, 12, (20, 27, 31))
     for y in range(3, 16):
         for x in range(3, 39): hud[y * WIDTH + x] = 255
     for y in range(3, 22):
         for x in range(91, 124): hud[y * WIDTH + x] = 255
     for y in range(62, 69):
         for x in range(5, 42): hud[y * WIDTH + x] = 255
+    for y in range(2, 12):
+        for x in range(47, 83): hud[y * WIDTH + x] = 255
 
     _text(image, text_mask, 7, 5, "HP", (244, 236, 205))
     _text(image, text_mask, 20, 5, f"{(93 - int(time_frame * 7)) % 100:02d}", (250, 225, 104))
+    _text(image, text_mask, 54, 4, f"{int(time_frame * 2) % 100:02d}", (238, 226, 183))
     # Minimap grid and player marker.
     for x in (96, 104, 112, 120): _line(image, x, 5, x, 20, (58, 91, 87))
     for y in (8, 13, 18): _line(image, 93, y, 122, y, (58, 91, 87))
@@ -181,11 +200,42 @@ def render(time_frame: float):
     _rect(image, 7, 12, 34, 14, (56, 61, 59))
     _rect(image, 7, 12, 7 + max(2, 26 - int(time_frame) % 8), 14, (77, 197, 105))
     cross_x, cross_y = WIDTH // 2, 38
-    _line(image, cross_x - 4, cross_y, cross_x + 4, cross_y, (238, 239, 222))
-    _line(image, cross_x, cross_y - 4, cross_x, cross_y + 4, (238, 239, 222))
+    _line(image, cross_x - 4, cross_y, cross_x + 4, cross_y,
+          (238, 239, 222), critical_masks["crosshair_pixels"])
+    _line(image, cross_x, cross_y - 4, cross_x, cross_y + 4,
+          (238, 239, 222), critical_masks["crosshair_pixels"])
     for y in range(cross_y - 5, cross_y + 6):
         for x in range(cross_x - 5, cross_x + 6): hud[y * WIDTH + x] = 255
-    _text(image, text_mask, 8, 64, "CLEAR", (224, 228, 211))
+    _text(image, text_mask, 8, 64, "CLEAR", (224, 228, 211),
+          critical_masks["static_text_pixels"])
+
+    # Scroll through fixed screen coordinates, toggle a warning, and retain a
+    # translucent screen-space panel so the temporal mask sees varied UI.
+    scroll_x = 34 + int(round((time_frame * 4.0) % 52))
+    _text(image, text_mask, scroll_x, 53, "ALERT", (246, 193, 92))
+    _mask_rect(hud, 34, 52, 106, 60)
+    _mask_rect(critical_masks["flashing_ui"], 47, 13, 61, 23)
+    for y in range(13, 23):
+        for x in range(47, 61): hud[y * WIDTH + x] = 255
+    if int(time_frame * 2) % 2 == 0:
+        _rect(image, 48, 14, 60, 22, (142, 43, 36))
+        for y in range(14, 22):
+            for x in range(48, 60): hud[y * WIDTH + x] = 255
+
+    # A moving scene highlight passes underneath the translucent lower UI
+    # panel. This exposes the composited-underlay ambiguity in automatic mode.
+    underlay_x = 50 + int(round((time_frame * 3.0) % 30))
+    _disk(image, underlay_x, 66, 2, (186, 137, 54))
+    _blend_rect(image, 48, 61, 82, 71, (28, 102, 108), 0.52)
+    _text(image, text_mask, 54, 63, "MENU", (223, 242, 227))
+    for y in range(61, 71):
+        for x in range(48, 82): hud[y * WIDTH + x] = 255
+
+    menu_x = 62 + int(round((time_frame * 1.5) % 10))
+    _blend_rect(image, menu_x, 13, menu_x + 20, 25, (32, 46, 72), 0.78)
+    _text(image, text_mask, menu_x + 2, 16, "MENU", (242, 235, 210))
+    for y in range(13, 25):
+        for x in range(menu_x, menu_x + 20): hud[y * WIDTH + x] = 255
 
     # Keep gameplay-critical HUD components independently scorable. These
     # tight, overlapping ROIs let the regression tool detect damage moving
@@ -196,6 +246,10 @@ def render(time_frame: float):
     _mask_rect(critical_masks["health_bar"], 7, 12, 34, 14)
     _mask_rect(critical_masks["subtitle"], 5, 62, 42, 69)
     _mask_rect(critical_masks["hud_counter"], 18, 3, 31, 11)
+    _mask_rect(critical_masks["timer"], 47, 2, 83, 12)
+    _mask_rect(critical_masks["scrolling_text"], 34, 52, 106, 60)
+    _mask_rect(critical_masks["transparent_ui"], 48, 61, 82, 71)
+    _mask_rect(critical_masks["moving_menu"], 62, 13, 92, 25)
 
     # A subtle vignette makes color and edge changes easier to inspect.
     return {
@@ -203,7 +257,15 @@ def render(time_frame: float):
         "masks": {
             "hud": bytes(hud),
             "text": bytes(text_mask),
-            "scene": bytes(255 if hud[i] == 0 else 0 for i in range(WIDTH * HEIGHT)),
+            # Keep the moving scenery beneath the translucent lower HUD panel
+            # in the scene ROI as well. This intentionally overlaps HUD so
+            # composited-underlay regressions remain visible in scene metrics.
+            "scene": bytes(
+                255 if hud[i] == 0 or (
+                    48 <= i % WIDTH < 82 and 61 <= i // WIDTH < 71
+                ) else 0
+                for i in range(WIDTH * HEIGHT)
+            ),
             "occlusion": bytes(occlusion),
             "thin_geometry": bytes(thin_geometry),
             **{label: bytes(mask) for label, mask in critical_masks.items()},

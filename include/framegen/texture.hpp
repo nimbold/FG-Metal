@@ -41,6 +41,8 @@ enum class ColorSpace : std::uint8_t {
     rec2020,
 };
 
+// For premultiplied textures, RGB represents linear-light color multiplied by
+// alpha, then encoded with the transfer function declared by ColorSpace.
 enum class AlphaMode : std::uint8_t {
     unknown,
     opaque,

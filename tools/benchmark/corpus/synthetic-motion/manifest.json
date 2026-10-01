@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "sequence_id": "synthetic-motion-v1",
-  "title": "Synthetic motion, thin geometry, occlusion, and HUD fixture",
+  "title": "Synthetic motion, thin geometry, occlusion, and HUD preservation fixture",
   "source": "Project-authored analytic scene; no third-party footage or assets.",
   "license": "Apache-2.0 (project-authored code and generated fixture)",
   "width": 128,
@@ -26,20 +26,29 @@
     "occlusion",
     "thin_geometry",
     "crosshair",
+    "crosshair_pixels",
     "weapon_sight",
     "minimap",
+    "static_text_pixels",
     "health_bar",
     "subtitle",
-    "hud_counter"
+    "hud_counter",
+    "timer",
+    "scrolling_text",
+    "flashing_ui",
+    "transparent_ui",
+    "moving_menu"
   ],
   "strict_pixel_labels": [
     "hud",
     "text",
     "thin_geometry",
     "crosshair",
+    "crosshair_pixels",
     "weapon_sight",
     "minimap",
     "health_bar",
+    "static_text_pixels",
     "subtitle",
     "hud_counter"
   ],
@@ -58,7 +67,12 @@
     "subtitles",
     "minimaps",
     "health_bars",
-    "rapidly_changing_hud_counters"
+    "rapidly_changing_hud_counters",
+    "timer",
+    "scrolling_text",
+    "flashing_ui",
+    "transparent_ui",
+    "moving_menu"
   ],
   "frames": [
     {
@@ -72,11 +86,18 @@
         "occlusion": "masks/f000-occlusion.pgm",
         "thin_geometry": "masks/f000-thin_geometry.pgm",
         "crosshair": "masks/f000-crosshair.pgm",
+        "crosshair_pixels": "masks/f000-crosshair_pixels.pgm",
+        "static_text_pixels": "masks/f000-static_text_pixels.pgm",
         "weapon_sight": "masks/f000-weapon_sight.pgm",
         "minimap": "masks/f000-minimap.pgm",
         "health_bar": "masks/f000-health_bar.pgm",
         "subtitle": "masks/f000-subtitle.pgm",
-        "hud_counter": "masks/f000-hud_counter.pgm"
+        "hud_counter": "masks/f000-hud_counter.pgm",
+        "timer": "masks/f000-timer.pgm",
+        "scrolling_text": "masks/f000-scrolling_text.pgm",
+        "flashing_ui": "masks/f000-flashing_ui.pgm",
+        "transparent_ui": "masks/f000-transparent_ui.pgm",
+        "moving_menu": "masks/f000-moving_menu.pgm"
       }
     },
     {
@@ -90,11 +111,18 @@
         "occlusion": "masks/f001-occlusion.pgm",
         "thin_geometry": "masks/f001-thin_geometry.pgm",
         "crosshair": "masks/f001-crosshair.pgm",
+        "crosshair_pixels": "masks/f001-crosshair_pixels.pgm",
+        "static_text_pixels": "masks/f001-static_text_pixels.pgm",
         "weapon_sight": "masks/f001-weapon_sight.pgm",
         "minimap": "masks/f001-minimap.pgm",
         "health_bar": "masks/f001-health_bar.pgm",
         "subtitle": "masks/f001-subtitle.pgm",
-        "hud_counter": "masks/f001-hud_counter.pgm"
+        "hud_counter": "masks/f001-hud_counter.pgm",
+        "timer": "masks/f001-timer.pgm",
+        "scrolling_text": "masks/f001-scrolling_text.pgm",
+        "flashing_ui": "masks/f001-flashing_ui.pgm",
+        "transparent_ui": "masks/f001-transparent_ui.pgm",
+        "moving_menu": "masks/f001-moving_menu.pgm"
       }
     },
     {
@@ -108,11 +136,18 @@
         "occlusion": "masks/f002-occlusion.pgm",
         "thin_geometry": "masks/f002-thin_geometry.pgm",
         "crosshair": "masks/f002-crosshair.pgm",
+        "crosshair_pixels": "masks/f002-crosshair_pixels.pgm",
+        "static_text_pixels": "masks/f002-static_text_pixels.pgm",
         "weapon_sight": "masks/f002-weapon_sight.pgm",
         "minimap": "masks/f002-minimap.pgm",
         "health_bar": "masks/f002-health_bar.pgm",
         "subtitle": "masks/f002-subtitle.pgm",
-        "hud_counter": "masks/f002-hud_counter.pgm"
+        "hud_counter": "masks/f002-hud_counter.pgm",
+        "timer": "masks/f002-timer.pgm",
+        "scrolling_text": "masks/f002-scrolling_text.pgm",
+        "flashing_ui": "masks/f002-flashing_ui.pgm",
+        "transparent_ui": "masks/f002-transparent_ui.pgm",
+        "moving_menu": "masks/f002-moving_menu.pgm"
       }
     },
     {
@@ -126,11 +161,18 @@
         "occlusion": "masks/f003-occlusion.pgm",
         "thin_geometry": "masks/f003-thin_geometry.pgm",
         "crosshair": "masks/f003-crosshair.pgm",
+        "crosshair_pixels": "masks/f003-crosshair_pixels.pgm",
+        "static_text_pixels": "masks/f003-static_text_pixels.pgm",
         "weapon_sight": "masks/f003-weapon_sight.pgm",
         "minimap": "masks/f003-minimap.pgm",
         "health_bar": "masks/f003-health_bar.pgm",
         "subtitle": "masks/f003-subtitle.pgm",
-        "hud_counter": "masks/f003-hud_counter.pgm"
+        "hud_counter": "masks/f003-hud_counter.pgm",
+        "timer": "masks/f003-timer.pgm",
+        "scrolling_text": "masks/f003-scrolling_text.pgm",
+        "flashing_ui": "masks/f003-flashing_ui.pgm",
+        "transparent_ui": "masks/f003-transparent_ui.pgm",
+        "moving_menu": "masks/f003-moving_menu.pgm"
       }
     },
     {
@@ -144,11 +186,18 @@
         "occlusion": "masks/f004-occlusion.pgm",
         "thin_geometry": "masks/f004-thin_geometry.pgm",
         "crosshair": "masks/f004-crosshair.pgm",
+        "crosshair_pixels": "masks/f004-crosshair_pixels.pgm",
+        "static_text_pixels": "masks/f004-static_text_pixels.pgm",
         "weapon_sight": "masks/f004-weapon_sight.pgm",
         "minimap": "masks/f004-minimap.pgm",
         "health_bar": "masks/f004-health_bar.pgm",
         "subtitle": "masks/f004-subtitle.pgm",
-        "hud_counter": "masks/f004-hud_counter.pgm"
+        "hud_counter": "masks/f004-hud_counter.pgm",
+        "timer": "masks/f004-timer.pgm",
+        "scrolling_text": "masks/f004-scrolling_text.pgm",
+        "flashing_ui": "masks/f004-flashing_ui.pgm",
+        "transparent_ui": "masks/f004-transparent_ui.pgm",
+        "moving_menu": "masks/f004-moving_menu.pgm"
       }
     },
     {
@@ -162,11 +211,18 @@
         "occlusion": "masks/f005-occlusion.pgm",
         "thin_geometry": "masks/f005-thin_geometry.pgm",
         "crosshair": "masks/f005-crosshair.pgm",
+        "crosshair_pixels": "masks/f005-crosshair_pixels.pgm",
+        "static_text_pixels": "masks/f005-static_text_pixels.pgm",
         "weapon_sight": "masks/f005-weapon_sight.pgm",
         "minimap": "masks/f005-minimap.pgm",
         "health_bar": "masks/f005-health_bar.pgm",
         "subtitle": "masks/f005-subtitle.pgm",
-        "hud_counter": "masks/f005-hud_counter.pgm"
+        "hud_counter": "masks/f005-hud_counter.pgm",
+        "timer": "masks/f005-timer.pgm",
+        "scrolling_text": "masks/f005-scrolling_text.pgm",
+        "flashing_ui": "masks/f005-flashing_ui.pgm",
+        "transparent_ui": "masks/f005-transparent_ui.pgm",
+        "moving_menu": "masks/f005-moving_menu.pgm"
       }
     },
     {
@@ -180,11 +236,18 @@
         "occlusion": "masks/f006-occlusion.pgm",
         "thin_geometry": "masks/f006-thin_geometry.pgm",
         "crosshair": "masks/f006-crosshair.pgm",
+        "crosshair_pixels": "masks/f006-crosshair_pixels.pgm",
+        "static_text_pixels": "masks/f006-static_text_pixels.pgm",
         "weapon_sight": "masks/f006-weapon_sight.pgm",
         "minimap": "masks/f006-minimap.pgm",
         "health_bar": "masks/f006-health_bar.pgm",
         "subtitle": "masks/f006-subtitle.pgm",
-        "hud_counter": "masks/f006-hud_counter.pgm"
+        "hud_counter": "masks/f006-hud_counter.pgm",
+        "timer": "masks/f006-timer.pgm",
+        "scrolling_text": "masks/f006-scrolling_text.pgm",
+        "flashing_ui": "masks/f006-flashing_ui.pgm",
+        "transparent_ui": "masks/f006-transparent_ui.pgm",
+        "moving_menu": "masks/f006-moving_menu.pgm"
       }
     },
     {
@@ -198,11 +261,18 @@
         "occlusion": "masks/f007-occlusion.pgm",
         "thin_geometry": "masks/f007-thin_geometry.pgm",
         "crosshair": "masks/f007-crosshair.pgm",
+        "crosshair_pixels": "masks/f007-crosshair_pixels.pgm",
+        "static_text_pixels": "masks/f007-static_text_pixels.pgm",
         "weapon_sight": "masks/f007-weapon_sight.pgm",
         "minimap": "masks/f007-minimap.pgm",
         "health_bar": "masks/f007-health_bar.pgm",
         "subtitle": "masks/f007-subtitle.pgm",
-        "hud_counter": "masks/f007-hud_counter.pgm"
+        "hud_counter": "masks/f007-hud_counter.pgm",
+        "timer": "masks/f007-timer.pgm",
+        "scrolling_text": "masks/f007-scrolling_text.pgm",
+        "flashing_ui": "masks/f007-flashing_ui.pgm",
+        "transparent_ui": "masks/f007-transparent_ui.pgm",
+        "moving_menu": "masks/f007-moving_menu.pgm"
       }
     },
     {
@@ -216,11 +286,18 @@
         "occlusion": "masks/f008-occlusion.pgm",
         "thin_geometry": "masks/f008-thin_geometry.pgm",
         "crosshair": "masks/f008-crosshair.pgm",
+        "crosshair_pixels": "masks/f008-crosshair_pixels.pgm",
+        "static_text_pixels": "masks/f008-static_text_pixels.pgm",
         "weapon_sight": "masks/f008-weapon_sight.pgm",
         "minimap": "masks/f008-minimap.pgm",
         "health_bar": "masks/f008-health_bar.pgm",
         "subtitle": "masks/f008-subtitle.pgm",
-        "hud_counter": "masks/f008-hud_counter.pgm"
+        "hud_counter": "masks/f008-hud_counter.pgm",
+        "timer": "masks/f008-timer.pgm",
+        "scrolling_text": "masks/f008-scrolling_text.pgm",
+        "flashing_ui": "masks/f008-flashing_ui.pgm",
+        "transparent_ui": "masks/f008-transparent_ui.pgm",
+        "moving_menu": "masks/f008-moving_menu.pgm"
       }
     },
     {
@@ -234,11 +311,18 @@
         "occlusion": "masks/f009-occlusion.pgm",
         "thin_geometry": "masks/f009-thin_geometry.pgm",
         "crosshair": "masks/f009-crosshair.pgm",
+        "crosshair_pixels": "masks/f009-crosshair_pixels.pgm",
+        "static_text_pixels": "masks/f009-static_text_pixels.pgm",
         "weapon_sight": "masks/f009-weapon_sight.pgm",
         "minimap": "masks/f009-minimap.pgm",
         "health_bar": "masks/f009-health_bar.pgm",
         "subtitle": "masks/f009-subtitle.pgm",
-        "hud_counter": "masks/f009-hud_counter.pgm"
+        "hud_counter": "masks/f009-hud_counter.pgm",
+        "timer": "masks/f009-timer.pgm",
+        "scrolling_text": "masks/f009-scrolling_text.pgm",
+        "flashing_ui": "masks/f009-flashing_ui.pgm",
+        "transparent_ui": "masks/f009-transparent_ui.pgm",
+        "moving_menu": "masks/f009-moving_menu.pgm"
       }
     },
     {
@@ -252,11 +336,18 @@
         "occlusion": "masks/f010-occlusion.pgm",
         "thin_geometry": "masks/f010-thin_geometry.pgm",
         "crosshair": "masks/f010-crosshair.pgm",
+        "crosshair_pixels": "masks/f010-crosshair_pixels.pgm",
+        "static_text_pixels": "masks/f010-static_text_pixels.pgm",
         "weapon_sight": "masks/f010-weapon_sight.pgm",
         "minimap": "masks/f010-minimap.pgm",
         "health_bar": "masks/f010-health_bar.pgm",
         "subtitle": "masks/f010-subtitle.pgm",
-        "hud_counter": "masks/f010-hud_counter.pgm"
+        "hud_counter": "masks/f010-hud_counter.pgm",
+        "timer": "masks/f010-timer.pgm",
+        "scrolling_text": "masks/f010-scrolling_text.pgm",
+        "flashing_ui": "masks/f010-flashing_ui.pgm",
+        "transparent_ui": "masks/f010-transparent_ui.pgm",
+        "moving_menu": "masks/f010-moving_menu.pgm"
       }
     }
   ]

@@ -1008,16 +1008,34 @@ def _target_plan(corpus: dict[str, Any], requested_t: float | None) -> list[dict
                     f"requested t={t:g} for source pair {left_index},{right_index} "
                     "does not resolve to a distinct interior nanosecond timestamp"
                 )
-            coordinate = left_index + (right_index - left_index) * t
+            # Use the timestamp-quantized position consistently for the
+            # analytic reference, benchmark metadata, and backend request.
+            # For very short intervals, integer-nanosecond rounding can move
+            # the effective fraction by much more than float precision.
+            effective_t = ((timestamp - left["timestamp_ns"]) /
+                           (right["timestamp_ns"] - left["timestamp_ns"]))
+            coordinate = left_index + (right_index - left_index) * effective_t
             plan.append({
                 "source_pair": [left_index, right_index],
-                "t": float(t), "time_ns": timestamp,
+                "t": float(effective_t), "time_ns": timestamp,
                 "target_index": target_frame["index"] if target_frame else None,
                 "coordinate": float(coordinate), "continuity_group": continuity_group,
             })
     if not plan:
         raise ValueError("no exact target-time ground truth was selected")
     return plan
+
+
+def _timestamp_matches_interpolation(source_times: list[int], timestamp: int,
+                                     interpolation_t: float) -> bool:
+    span = source_times[1] - source_times[0]
+    expected = source_times[0] + round(span * interpolation_t)
+    # A float64 fraction cannot represent every integer ratio for large spans.
+    # Allow only its arithmetic uncertainty when validating the quantized ns
+    # timestamp; the target plan itself is also checked against corpus-derived
+    # metadata exactly.
+    tolerance = max(1, math.ceil(2.0 * span * math.ulp(float(interpolation_t)) + 1.0))
+    return abs(timestamp - expected) <= tolerance
 
 
 def _read_backend_json(stdout: str) -> dict[str, Any]:
@@ -1452,6 +1470,8 @@ def _run(args: argparse.Namespace) -> int:
                     str(left["index"]), str(right["index"]),
                     str(left["timestamp_ns"]), str(right["timestamp_ns"]),
                     "1" if reset_history else "0",
+                    args.hud_mode, args.ui_source, args.hud_debug,
+                    str(target["time_ns"]),
                 ]
                 if any("\t" in str(field) or "\n" in str(field) for field in fields):
                     raise ValueError("backend server request paths cannot contain tabs or newlines")
@@ -1484,6 +1504,8 @@ def _run(args: argparse.Namespace) -> int:
                 "current_sequence": right["index"],
                 "previous_timestamp_ns": left["timestamp_ns"],
                 "current_timestamp_ns": right["timestamp_ns"],
+                "interpolation_timestamp_ns": target["time_ns"],
+                "desired_presentation_timestamp_ns": target["time_ns"],
             }
             for key, expected in expected_timing.items():
                 value = backend_run.get(key)
@@ -2197,10 +2219,11 @@ def _validate_result_impl(result: dict[str, Any], label: str) -> None:
                 or isinstance(interpolation_t, bool)
                 or not isinstance(interpolation_t, (int, float))
                 or not math.isfinite(interpolation_t) or not 0 < interpolation_t < 1
-                or target_time != source_times[0] + round(
-                    (source_times[1] - source_times[0]) * interpolation_t)
                 or isinstance(group, bool) or not isinstance(group, int) or group < 0):
             raise ValueError(f"{label} has invalid target/source timeline metadata")
+        if not _timestamp_matches_interpolation(source_times, target_time,
+                                                float(interpolation_t)):
+            raise ValueError(f"{label} target timestamp disagrees with its interpolation fraction")
         for timestamp in (*source_times, target_time):
             prior_group = expected_temporal_groups.setdefault(timestamp, group)
             if prior_group != group:
@@ -2959,6 +2982,15 @@ def main() -> int:
     run.add_argument("--deadline-ms", type=float, help="default is one high-rate frame period")
     run.add_argument("--backend-timeout-seconds", type=float, default=600.0,
                      help="fail the full backend sequence session after this wall time (default: 600)")
+    run.add_argument("--hud-mode", choices=("none", "explicit", "automatic"),
+                     default="none", help="host-visible HUD handling mode")
+    run.add_argument("--ui-source", choices=("previous", "current", "nearest"),
+                     default="nearest",
+                     help="endpoint UI source; nearest ties select the current frame")
+    run.add_argument("--hud-debug", choices=(
+        "disabled", "raw-mask", "stabilized-mask", "protected-regions",
+        "interpolation-confidence", "final-composite"), default="disabled",
+        help="optional debug output visualization")
     run.add_argument("--max-analysis-memory-mib", type=int,
                      default=DEFAULT_MAX_ANALYSIS_MEMORY_MIB,
                      help="reject corpora whose estimated analyzer working set exceeds this MiB budget")

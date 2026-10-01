@@ -2,7 +2,7 @@
 
 This benchmark evaluates generated frames against known high-rate ground truth and measures the isolated backend runner. It is designed to expose temporal shimmer, edge movement, HUD/text damage, and errors around occlusion. It does not capture a desktop, integrate with Wine, or claim game performance.
 
-The analyzer is `tools/benchmark/bench.py` and uses only Python's standard library. The Metal command-line runner is an offline adapter: it loads two PPM inputs, submits the backend request, waits for completion, reads back the final measured generated texture, and emits timing/memory JSON. Readback is confined to this benchmark path. One persistent server process and Metal context serve all jobs in a run. The default 600-second timeout applies to the complete backend session; `--backend-timeout-seconds` changes it. A timed-out session is killed as a process group. The protocol caps each input line at 64 KiB, a session at 100,000 jobs and 1,000,000 total warmup/measured samples, each job at 100,000 samples, and combined stdout/stderr at 256 MiB.
+The analyzer is `tools/benchmark/bench.py` and uses only Python's standard library. The Metal command-line runner is an offline adapter: it loads two PPM inputs, submits the backend request, waits for completion, reads back the final measured generated texture, and emits timing/memory JSON. Readback is confined to this benchmark path. One persistent server process and Metal context serve all jobs in a run. The default 600-second timeout applies to the complete backend session; `--backend-timeout-seconds` changes it. A timed-out session is killed as a process group. The protocol caps each input line at 64 KiB, a session at 100,000 jobs and 1,000,000 total warmup/measured samples, each job at 100,000 samples, and combined stdout/stderr at 256 MiB. The session accepts the original 11-column request, a 14-column extension carrying HUD mode/UI source/debug view, and a 15-column form that also carries the analyzer's exact integer target timestamp. The analyzer uses the 15-column form so the scene interpolation fraction and endpoint UI selection share the timestamp used to evaluate the reference. The runner echoes both target timestamp fields and the analyzer checks them against the planned sample.
 
 ## Build and run
 
@@ -23,7 +23,35 @@ python3 tools/benchmark/bench.py run \
   --output test-results/benchmarks/placeholder-synthetic-motion.json
 ~~~
 
-The default run uses three warmup iterations and 100 measured iterations for each target timestamp. The default deadline is one high-rate frame period, 1000 / `high_rate_fps` milliseconds. The JSON result is accompanied by a Markdown summary at the same path with a `.md` suffix. The corpus and its assets are validated before launching the backend. Paths must resolve inside the manifest's corpus directory. Manifest, provider code, Netpbm payloads, backend output, result files, and server sessions have size bounds. The analyzer estimates its working set and rejects corpora above the default 6144 MiB `--max-analysis-memory-mib` budget before loading image assets. The estimate is deliberately conservative but is not an operating-system RSS limit; large custom corpora should be run on a host with sufficient memory. Analytic providers are executable Python source and must be trusted before running the benchmark.
+The runner can measure the placeholder HUD paths and each endpoint UI policy. For example, collect a raw baseline and an automatic-protection run at the same midpoint targets:
+
+~~~sh
+python3 tools/benchmark/bench.py run \
+  --corpus tools/benchmark/corpus/synthetic-motion/manifest.json \
+  --backend build/tools/benchmark/framegen-benchmark-metal \
+  --t 0.5 --hud-mode none --ui-source nearest \
+  --output test-results/benchmarks/hud-none.json
+python3 tools/benchmark/bench.py run \
+  --corpus tools/benchmark/corpus/synthetic-motion/manifest.json \
+  --backend build/tools/benchmark/framegen-benchmark-metal \
+  --t 0.5 --hud-mode automatic --ui-source previous \
+  --output test-results/benchmarks/hud-automatic-previous.json
+~~~
+
+Repeat with `--ui-source current` and `--ui-source nearest`. Nearest presentation compares the requested presentation timestamp with each endpoint's presentation timestamp; an exact tie selects the current frame. Every policy uses the same per-target HUD/text/scene quality, temporal residual, and flicker metrics. The backend options are recorded in run metadata. `--hud-debug` can select `raw-mask`, `stabilized-mask`, `protected-regions`, `interpolation-confidence`, or `final-composite`; leave it `disabled` for quality runs because a debug view replaces the generated image.
+
+Measure temporal mask changes separately from generated-image quality:
+
+~~~sh
+python3 tools/benchmark/measure_mask_stability.py \
+  --corpus tools/benchmark/corpus/synthetic-motion/manifest.json \
+  --backend build/tools/benchmark/framegen-benchmark-metal \
+  --output test-results/benchmarks/hud-mask-stability.json
+~~~
+
+This runs raw and stabilized mask debug views over one consecutive source-pair timeline in a persistent backend session. The report also thresholds the confidence at 0.5 and compares it with the authored binary `hud` ROI, providing a detection proxy's precision, recall, and false-positive rate alongside coverage. The authored ROI labels intended pixels for protection; it is not ground-truth confidence. Transition MAE measures temporal change and can improve simply because smoothing slows response, so review it with the proxy scores and coverage.
+
+The default run uses three warmup iterations and 100 measured iterations for each target timestamp. For stateful, temporal comparisons, the persistent Metal server accepts exactly one sample per job and the analyzer replays the full chronological source-pair sequence for each warmup and measured pass. This lets mask history follow the same timeline on every pass; the runner does not repeatedly submit one source pair inside a server job. The default deadline is one high-rate frame period, 1000 / `high_rate_fps` milliseconds. The JSON result is accompanied by a Markdown summary at the same path with a `.md` suffix. The corpus and its assets are validated before launching the backend. Paths must resolve inside the manifest's corpus directory. Manifest, provider code, Netpbm payloads, backend output, result files, and server sessions have size bounds. The analyzer estimates its working set and rejects corpora above the default 6144 MiB `--max-analysis-memory-mib` budget before loading image assets. The estimate is deliberately conservative but is not an operating-system RSS limit; large custom corpora should be run on a host with sufficient memory. Analytic providers are executable Python source and must be trusted before running the benchmark.
 
 Regenerate the small, project-authored synthetic fixture with:
 
@@ -43,7 +71,7 @@ python3 tools/benchmark/bench.py run \
   --output test-results/benchmarks/placeholder-t050.json
 ~~~
 
-Without `--t`, the analyzer requests every available ground-truth frame between consecutive low-rate source frames. For ordinary image sequences, t is derived from source and target timestamps; a requested t must match a supplied target timestamp in each eligible interval. An analytic provider may render a target at any normalized coordinate, including values other than 0.5. Its corpus must follow the nominal uniform cadence implied by `high_rate_fps`, because the provider receives high-rate frame coordinates. Each generated target is paired with its own integer nanosecond timestamp and mask. Interpolated provider timestamps are quantized to the nearest nanosecond; timestamp arithmetic remains integer-valued to preserve epoch-based timestamps.
+Without `--t`, the analyzer requests every available ground-truth frame between consecutive low-rate source frames. For ordinary image sequences, t is derived from source and target timestamps; a requested t must match a supplied target timestamp in each eligible interval. An analytic provider may render a target at any normalized coordinate, including values other than 0.5. Its corpus must follow the nominal uniform cadence implied by `high_rate_fps`, because the provider receives high-rate frame coordinates. Each generated target is paired with its own integer nanosecond timestamp and mask. Interpolated provider timestamps are quantized to the nearest nanosecond; the reference coordinate and reported interpolation fraction are derived from that quantized timestamp. This keeps the scene blend, nearest-UI choice, and reference on one timeline. The placeholder accepts float32 interpolation fractions, so a target that rounds to an endpoint float is clamped to the nearest representable interior value. For very short intervals, nanosecond quantization can materially shift the effective fraction from the requested `--t`; reports record the effective fraction. Timestamp arithmetic remains integer-valued to preserve epoch-based timestamps.
 
 ## Corpus format
 
@@ -62,7 +90,7 @@ Each label in `strict_pixel_labels` retains sparse per-pixel absolute RGB channe
 
 For corpora with fixed authored masks, a frame may include `mask_pixel_counts` with the declared active-pixel count for every label. The analyzer rejects any mask whose actual count differs. This catches accidental mask erosion or truncation when regenerating fixed fixtures; mask counts and the corpus content digest remain recorded in each run. The memory preflight estimate includes storage for every declared mask and named ROI.
 
-The manifest's fixture_coverage is a descriptive inventory. A representative corpus should contain clips or synthetic scenes for slow camera pans, fast camera rotations, third-person character movement, racing, foliage, thin geometry, fences, particles, transparency, reflections/specular highlights, weapon sights, crosshairs, subtitles, minimaps, health bars, menus, rapidly changing HUD counters, scene cuts, and loading transitions. The committed fixture covers a subset using deterministic synthetic geometry, particles, a moving occluder, and a changing HUD.
+The manifest's fixture_coverage is a descriptive inventory. A representative corpus should contain clips or synthetic scenes for slow camera pans, fast camera rotations, third-person character movement, racing, foliage, thin geometry, fences, particles, transparency, reflections/specular highlights, weapon sights, crosshairs, subtitles, minimaps, health bars, menus, rapidly changing HUD counters, scene cuts, and loading transitions. The committed fixture currently covers deterministic slow panning, third-person motion, foliage and thin geometry, particles, translucent layers, highlights, weapon sights and crosshairs, subtitles, minimap, health bar, counter, timer, scrolling text, flashing and transparent UI, a moving menu, and a moving occluder. Fast rotations, racing, cuts, loading transitions, and richer subtitle behavior remain untested. See [HUD preservation results](HUD_PRESERVATION.md) for the per-policy measurements and failure cases.
 
 ### Scene cuts and loading transitions
 

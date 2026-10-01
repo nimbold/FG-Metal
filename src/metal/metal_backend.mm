@@ -108,8 +108,314 @@ kernel void framegen_blend(
 }
 )metal";
 
+constexpr const char* kExplicitUiShader = R"metal(
+#include <metal_stdlib>
+using namespace metal;
+
+struct ExplicitUiParameters {
+    float interpolation;
+    uint current_ui;
+    uint alpha_mode;
+    uint scene_is_srgb;
+    uint ui_is_srgb;
+    uint debug_visualization;
+};
+
+float3 srgb_to_linear(float3 value) {
+    const float3 low = value / 12.92f;
+    const float3 high = pow((value + 0.055f) / 1.055f, float3(2.4f));
+    return select(high, low, value <= 0.04045f);
+}
+
+float3 linear_to_srgb(float3 value) {
+    value = max(value, float3(0.0f));
+    const float3 low = value * 12.92f;
+    const float3 high = 1.055f * pow(value, float3(1.0f / 2.4f)) - 0.055f;
+    return select(high, low, value <= 0.0031308f);
+}
+
+kernel void framegen_explicit_ui(
+    texture2d<float, access::read> previous [[texture(0)]],
+    texture2d<float, access::read> current [[texture(1)]],
+    texture2d<float, access::read> previous_ui [[texture(2)]],
+    texture2d<float, access::read> current_ui [[texture(3)]],
+    texture2d<float, access::write> output [[texture(4)]],
+    constant ExplicitUiParameters& parameters [[buffer(0)]],
+    uint2 position [[thread_position_in_grid]]) {
+    if (position.x >= output.get_width() || position.y >= output.get_height()) return;
+    const float4 a = previous.read(position);
+    const float4 b = current.read(position);
+    const float4 ui_encoded = parameters.current_ui != 0
+        ? current_ui.read(position) : previous_ui.read(position);
+    const float alpha = parameters.alpha_mode == 1
+        ? 1.0f : clamp(ui_encoded.a, 0.0f, 1.0f);
+    const float3 previous_scene = parameters.scene_is_srgb != 0
+        ? srgb_to_linear(a.rgb) : a.rgb;
+    const float3 current_scene = parameters.scene_is_srgb != 0
+        ? srgb_to_linear(b.rgb) : b.rgb;
+    const float3 scene = mix(previous_scene, current_scene, parameters.interpolation);
+    const float3 ui_decoded = parameters.ui_is_srgb != 0
+        ? srgb_to_linear(ui_encoded.rgb) : ui_encoded.rgb;
+    const float3 composited = parameters.alpha_mode == 3
+        ? ui_decoded + scene * (1.0f - alpha)
+        : mix(scene, ui_decoded, alpha);
+
+    float3 display = composited;
+    switch (parameters.debug_visualization) {
+    case 1:
+        display = float3(alpha);
+        break;
+    case 2:
+        display = float3(alpha);
+        break;
+    case 3:
+        display = mix(scene, float3(1.0f, 0.08f, 0.04f), alpha * 0.65f);
+        break;
+    case 4:
+        display = float3(1.0f - alpha);
+        break;
+    default:
+        break;
+    }
+    const bool mask_visualization = parameters.debug_visualization == 1 ||
+        parameters.debug_visualization == 2 || parameters.debug_visualization == 4;
+    if (parameters.scene_is_srgb != 0 && !mask_visualization) {
+        display = linear_to_srgb(display);
+    }
+    // Explicit mode requires opaque scene color, so the composite remains
+    // opaque regardless of unused alpha bytes in the scene textures.
+    output.write(float4(clamp(display, 0.0f, 1.0f), 1.0f), position);
+}
+)metal";
+
+constexpr const char* kAutomaticHudShader = R"metal(
+#include <metal_stdlib>
+using namespace metal;
+
+struct AutomaticHudParameters {
+    float interpolation;
+    float engagement_alpha;
+    float release_alpha;
+    uint current_ui;
+    uint has_history;
+    uint debug_visualization;
+};
+
+float luminance(float3 value) {
+    return dot(value, float3(0.2126f, 0.7152f, 0.0722f));
+}
+
+float pixel_change(texture2d<float, access::read> previous,
+                   texture2d<float, access::read> current, uint2 p) {
+    return (abs(previous.read(p).r - current.read(p).r) +
+            abs(previous.read(p).g - current.read(p).g) +
+            abs(previous.read(p).b - current.read(p).b)) / 3.0f;
+}
+
+kernel void framegen_automatic_hud(
+    texture2d<float, access::read> previous [[texture(0)]],
+    texture2d<float, access::read> current [[texture(1)]],
+    texture2d<float, access::read> previous_mask [[texture(2)]],
+    texture2d<float, access::write> output [[texture(3)]],
+    texture2d<float, access::write> stabilized_mask [[texture(4)]],
+    constant AutomaticHudParameters& parameters [[buffer(0)]],
+    uint2 position [[thread_position_in_grid]]) {
+    const uint width = output.get_width();
+    const uint height = output.get_height();
+    if (position.x >= width || position.y >= height) return;
+
+    const uint2 left = uint2(position.x == 0 ? 0 : position.x - 1, position.y);
+    const uint2 right = uint2(min(position.x + 1, width - 1), position.y);
+    const uint2 up = uint2(position.x, position.y == 0 ? 0 : position.y - 1);
+    const uint2 down = uint2(position.x, min(position.y + 1, height - 1));
+    const float change = pixel_change(previous, current, position);
+    const float neighborhood_motion = 0.25f * (
+        pixel_change(previous, current, left) + pixel_change(previous, current, right) +
+        pixel_change(previous, current, up) + pixel_change(previous, current, down));
+    const float screen_stability = 1.0f - smoothstep(0.012f, 0.105f, change);
+
+    const float3 center_rgb = 0.5f * (previous.read(position).rgb + current.read(position).rgb);
+    const float3 left_rgb = 0.5f * (previous.read(left).rgb + current.read(left).rgb);
+    const float3 right_rgb = 0.5f * (previous.read(right).rgb + current.read(right).rgb);
+    const float3 up_rgb = 0.5f * (previous.read(up).rgb + current.read(up).rgb);
+    const float3 down_rgb = 0.5f * (previous.read(down).rgb + current.read(down).rgb);
+    const float center_luma = luminance(center_rgb);
+    const float horizontal_edge = abs(luminance(left_rgb) - luminance(right_rgb));
+    const float vertical_edge = abs(luminance(up_rgb) - luminance(down_rgb));
+    const float edge_strength = max(horizontal_edge, vertical_edge);
+    const float horizontal_frequency = abs(
+        center_luma - 0.5f * (luminance(left_rgb) + luminance(right_rgb)));
+    const float vertical_frequency = abs(
+        center_luma - 0.5f * (luminance(up_rgb) + luminance(down_rgb)));
+    const float text_structure = smoothstep(0.035f, 0.14f,
+        max(horizontal_frequency, vertical_frequency)) *
+        smoothstep(0.06f, 0.20f, edge_strength);
+    const float motion_disagreement = smoothstep(
+        0.018f, 0.09f, neighborhood_motion - change);
+    const float sharp_structure = smoothstep(0.045f, 0.19f, edge_strength);
+    const float prior = parameters.has_history != 0 ? previous_mask.read(position).r : 0.0f;
+    const float recurring_fixed_change =
+        smoothstep(0.025f, 0.12f, change) * smoothstep(0.24f, 0.62f, prior);
+    const float raw = clamp(max(
+        screen_stability * sharp_structure * 0.22f,
+        max(text_structure * (0.12f + 0.66f * screen_stability),
+            max(motion_disagreement * sharp_structure * 0.32f,
+                recurring_fixed_change * 0.7f))), 0.0f, 1.0f);
+
+    const float stabilized = raw >= prior
+        ? mix(prior, raw, parameters.engagement_alpha)
+        : mix(prior, raw, parameters.release_alpha);
+    const float neighbor_prior = parameters.has_history != 0 ? 0.25f * (
+        previous_mask.read(left).r + previous_mask.read(right).r +
+        previous_mask.read(up).r + previous_mask.read(down).r) : 0.0f;
+    const float soft_confidence = smoothstep(0.12f, 0.72f, stabilized);
+    const float feathered_confidence = smoothstep(0.12f, 0.72f, neighbor_prior);
+    const float confidence = clamp(
+        soft_confidence * 0.84f + feathered_confidence * 0.16f, 0.0f, 1.0f);
+    // Keep unsaturated temporal evidence here. Storing the thresholded output
+    // confidence would feed 1.0 back through release hysteresis; values above
+    // the confidence ramp's upper edge then remain pinned indefinitely.
+    stabilized_mask.write(float4(stabilized, 0.0f, 0.0f, 1.0f), position);
+
+    const float4 a = previous.read(position);
+    const float4 b = current.read(position);
+    const float4 generated = mix(a, b, parameters.interpolation);
+    const float4 protected_source = parameters.current_ui != 0 ? b : a;
+    float4 result = mix(generated, protected_source, confidence);
+    if (parameters.debug_visualization == 1) {
+        result = float4(raw, raw, raw, 1.0f);
+    } else if (parameters.debug_visualization == 2) {
+        result = float4(confidence, confidence, confidence, 1.0f);
+    } else if (parameters.debug_visualization == 3) {
+        result = float4(mix(generated.rgb, float3(0.05f, 1.0f, 0.1f), confidence * 0.7f), 1.0f);
+    } else if (parameters.debug_visualization == 4) {
+        const float certainty = 1.0f - confidence;
+        result = float4(certainty, certainty, certainty, 1.0f);
+    }
+    output.write(result, position);
+}
+)metal";
+
 std::shared_ptr<detail::MetalTextureResource> as_metal_resource(const Texture& texture) {
     return std::dynamic_pointer_cast<detail::MetalTextureResource>(texture.resource());
+}
+
+bool select_current_ui(const FrameSubmission& submission) {
+    switch (submission.hud_options.ui_source) {
+    case UiTemporalSource::previous_frame: return false;
+    case UiTemporalSource::current_frame: return true;
+    case UiTemporalSource::nearest_presentation: break;
+    }
+    const auto endpoint_time = [](const FrameTiming& timing) {
+        return timing.desired_presentation_timestamp_ns != unknown_timestamp_ns
+            ? timing.desired_presentation_timestamp_ns : timing.timestamp_ns;
+    };
+    std::int64_t target{};
+    if (submission.desired_presentation_timestamp_ns != unknown_timestamp_ns) {
+        target = submission.desired_presentation_timestamp_ns;
+    } else if (submission.interpolation_timestamp_ns != unknown_timestamp_ns) {
+        target = submission.interpolation_timestamp_ns;
+    } else {
+        // The target is defined by interpolation itself here, so comparing
+        // its fraction avoids converting large epoch timestamps to floating
+        // point and losing nanosecond distinctions.
+        return submission.interpolation >= 0.5F;
+    }
+
+    const auto distance = [](std::int64_t left, std::int64_t right) {
+        const auto left_unsigned = static_cast<std::uint64_t>(left);
+        const auto right_unsigned = static_cast<std::uint64_t>(right);
+        return left <= right ? right_unsigned - left_unsigned
+                             : left_unsigned - right_unsigned;
+    };
+    const auto previous_distance = distance(
+        target, endpoint_time(submission.previous.timing));
+    const auto current_distance = distance(
+        target, endpoint_time(submission.current.timing));
+    // An exact tie selects the newer source frame to keep UI state responsive.
+    return current_distance <= previous_distance;
+}
+
+std::optional<bool> transfer_is_srgb(
+    const TextureDescriptor& descriptor, const FrameColorMetadata& metadata) {
+    if (metadata.transfer_function == TransferFunction::srgb &&
+        descriptor.color_space == ColorSpace::srgb) {
+        return true;
+    }
+    if (metadata.transfer_function == TransferFunction::linear &&
+        descriptor.color_space == ColorSpace::linear_srgb) {
+        return false;
+    }
+    if (metadata.transfer_function != TransferFunction::unknown) {
+        return std::nullopt;
+    }
+    if (descriptor.color_space == ColorSpace::srgb) return true;
+    if (descriptor.color_space == ColorSpace::linear_srgb) return false;
+    return std::nullopt;
+}
+
+bool is_sdr_or_unspecified(const FrameColorMetadata& metadata) {
+    return metadata.dynamic_range == DynamicRange::unknown ||
+        metadata.dynamic_range == DynamicRange::sdr;
+}
+
+bool same_texture_descriptor(const TextureDescriptor& left,
+                             const TextureDescriptor& right) {
+    return left.width == right.width && left.height == right.height &&
+        left.format == right.format && left.color_space == right.color_space &&
+        left.alpha_mode == right.alpha_mode;
+}
+
+bool same_color_metadata(const FrameColorMetadata& left,
+                         const FrameColorMetadata& right) {
+    return left.transfer_function == right.transfer_function &&
+        left.dynamic_range == right.dynamic_range;
+}
+
+std::shared_ptr<detail::MetalTextureResource> make_mask_texture(
+    id<MTLDevice> device, std::uint32_t width, std::uint32_t height,
+    std::uint64_t device_id) {
+    MTLTextureDescriptor* descriptor =
+        [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:MTLPixelFormatR8Unorm
+                                                           width:width
+                                                          height:height
+                                                       mipmapped:NO];
+    descriptor.storageMode = MTLStorageModePrivate;
+    descriptor.usage = MTLTextureUsageShaderRead | MTLTextureUsageShaderWrite;
+    id<MTLTexture> texture = [device newTextureWithDescriptor:descriptor];
+    if (texture == nil) return {};
+    return std::make_shared<detail::MetalTextureResource>(
+        device, texture,
+        TextureDescriptor{width, height, PixelFormat::r8_unorm,
+                          ColorSpace::unknown, AlphaMode::opaque},
+        device_id);
+}
+
+id<MTLComputePipelineState> make_compute_pipeline(
+    id<MTLDevice> device, const char* source, const char* function_name,
+    std::string& failure) {
+    NSError* error = nil;
+    NSString* shader_source = [NSString stringWithUTF8String:source];
+    id<MTLLibrary> library = [device newLibraryWithSource:shader_source
+                                                  options:nil
+                                                    error:&error];
+    if (library == nil) {
+        failure = error_message(error, "Metal shader compilation failed");
+        return nil;
+    }
+    NSString* function_name_string = [NSString stringWithUTF8String:function_name];
+    id<MTLFunction> function = [library newFunctionWithName:function_name_string];
+    if (function == nil) {
+        failure = std::string("Metal function not found: ") + function_name;
+        return nil;
+    }
+    id<MTLComputePipelineState> pipeline =
+        [device newComputePipelineStateWithFunction:function error:&error];
+    if (pipeline == nil) {
+        failure = error_message(error, "Metal pipeline creation failed");
+        return nil;
+    }
+    return pipeline;
 }
 
 class MetalEventSyncPoint {
@@ -151,11 +457,12 @@ public:
                     std::shared_ptr<TextureResource> previous,
                     std::shared_ptr<TextureResource> current,
                     std::shared_ptr<TextureResource> output,
+                    std::vector<std::shared_ptr<TextureResource>> auxiliary,
                     std::vector<std::shared_ptr<const GpuSyncPoint>> dependencies)
         : command_buffer_(command_buffer), event_(event), value_(value),
           device_id_(device_id), previous_(std::move(previous)),
           current_(std::move(current)), output_(std::move(output)),
-          dependencies_(std::move(dependencies)) {}
+          auxiliary_(std::move(auxiliary)), dependencies_(std::move(dependencies)) {}
 
     [[nodiscard]] std::string_view backend_id() const noexcept override {
         return kBackendId;
@@ -211,6 +518,7 @@ private:
     std::shared_ptr<TextureResource> previous_;
     std::shared_ptr<TextureResource> current_;
     std::shared_ptr<TextureResource> output_;
+    std::vector<std::shared_ptr<TextureResource>> auxiliary_;
     std::vector<std::shared_ptr<const GpuSyncPoint>> dependencies_;
 };
 
@@ -253,9 +561,13 @@ const void* MetalTextureResource::resource_identity() const noexcept {
 
 MetalBackend::MetalBackend(id<MTLDevice> device, id<MTLCommandQueue> queue,
                            id<MTLComputePipelineState> blend_pipeline,
+                           id<MTLComputePipelineState> explicit_ui_pipeline,
+                           id<MTLComputePipelineState> automatic_hud_pipeline,
                            id<MTLSharedEvent> completion_event,
                            std::uint64_t device_id)
     : device_(device), queue_(queue), blend_pipeline_(blend_pipeline),
+      explicit_ui_pipeline_(explicit_ui_pipeline),
+      automatic_hud_pipeline_(automatic_hud_pipeline),
       completion_event_(completion_event), device_id_(device_id) {}
 
 std::string_view MetalBackend::backend_id() const noexcept {
@@ -270,11 +582,15 @@ id<MTLDevice> MetalBackend::native_device() const noexcept {
     return device_;
 }
 
+std::shared_ptr<BackendStreamState> MetalBackend::create_stream_state() {
+    auto stream_state = std::make_shared<MetalBackendStreamState>();
+    stream_state->device_id = device_id_;
+    return stream_state;
+}
+
 Result<GeneratedFrame> MetalBackend::submit(const FrameSubmission& submission) {
     const auto& previous = submission.previous.texture;
     const auto& current = submission.current.texture;
-    // The blend placeholder has no temporal model or history to invalidate.
-    (void)submission.reset_history;
     if (!previous || !current) {
         return std::unexpected(make_error(ErrorCode::invalid_argument,
                                            "both Metal input textures must be valid"));
@@ -319,6 +635,270 @@ Result<GeneratedFrame> MetalBackend::submit(const FrameSubmission& submission) {
         (current_native.usage & MTLTextureUsageShaderRead) == 0) {
         return std::unexpected(make_error(ErrorCode::unsupported_format,
                                            "Metal input textures must allow shader reads"));
+    }
+
+    auto stream_state = std::dynamic_pointer_cast<MetalBackendStreamState>(
+        submission.backend_stream_state);
+    if (submission.hud_options.mode == HudMode::automatic_protection &&
+        !stream_state) {
+        return std::unexpected(make_error(
+            ErrorCode::invalid_argument,
+            "automatic HUD protection requires a backend stream state; submit through FrameGenerator or provide one"));
+    }
+    if (!stream_state) {
+        stream_state = std::make_shared<MetalBackendStreamState>();
+        stream_state->device_id = device_id_;
+    } else if (stream_state->device_id != device_id_) {
+        return std::unexpected(make_error(
+            ErrorCode::incompatible_resource,
+            "Metal backend stream state belongs to another device"));
+    }
+    auto& automatic_history_mutex_ = stream_state->automatic_history_mutex;
+    auto& automatic_mask_history_ = stream_state->automatic_mask_history;
+    auto& automatic_mask_width_ = stream_state->automatic_mask_width;
+    auto& automatic_mask_height_ = stream_state->automatic_mask_height;
+    auto& automatic_mask_pair_descriptor_ = stream_state->automatic_mask_pair_descriptor;
+    auto& automatic_mask_pair_previous_color_metadata_ =
+        stream_state->automatic_mask_pair_previous_color_metadata;
+    auto& automatic_mask_pair_current_color_metadata_ =
+        stream_state->automatic_mask_pair_current_color_metadata;
+    auto& automatic_mask_history_index_ = stream_state->automatic_mask_history_index;
+    auto& automatic_mask_history_valid_ = stream_state->automatic_mask_history_valid;
+    auto& automatic_mask_pair_has_prior_history_ =
+        stream_state->automatic_mask_pair_has_prior_history;
+    auto& automatic_mask_pair_clock_domain_ = stream_state->automatic_mask_pair_clock_domain;
+    auto& automatic_mask_pair_previous_sequence_ =
+        stream_state->automatic_mask_pair_previous_sequence;
+    auto& automatic_mask_pair_current_sequence_ =
+        stream_state->automatic_mask_pair_current_sequence;
+    auto& automatic_mask_pair_previous_timestamp_ns_ =
+        stream_state->automatic_mask_pair_previous_timestamp_ns;
+    auto& automatic_mask_pair_current_timestamp_ns_ =
+        stream_state->automatic_mask_pair_current_timestamp_ns;
+    auto& automatic_mask_pair_engagement_alpha_ =
+        stream_state->automatic_mask_pair_engagement_alpha;
+    auto& automatic_mask_pair_release_alpha_ =
+        stream_state->automatic_mask_pair_release_alpha;
+    auto& last_hud_mode_ = stream_state->last_hud_mode;
+    std::unique_lock history_lock(automatic_history_mutex_);
+    const bool current_ui = select_current_ui(submission);
+    std::shared_ptr<MetalTextureResource> selected_ui_resource;
+    id<MTLTexture> previous_ui_native = nil;
+    id<MTLTexture> current_ui_native = nil;
+    std::vector<std::shared_ptr<TextureResource>> auxiliary_resources;
+
+    if (submission.hud_options.mode == HudMode::explicit_ui_plane) {
+        const auto& previous_ui = submission.previous.optional_inputs.ui_texture;
+        const auto& current_ui_texture = submission.current.optional_inputs.ui_texture;
+        if (!previous_ui || !current_ui_texture) {
+            return std::unexpected(make_error(
+                ErrorCode::invalid_argument,
+                "explicit UI-plane mode requires a UI texture on both source frames"));
+        }
+        const auto previous_ui_descriptor = previous_ui.descriptor();
+        const auto current_ui_descriptor = current_ui_texture.descriptor();
+        const auto previous_scene_srgb = transfer_is_srgb(
+            previous_descriptor, submission.previous.color_metadata);
+        const auto current_scene_srgb = transfer_is_srgb(
+            current_descriptor, submission.current.color_metadata);
+        const auto previous_ui_srgb = transfer_is_srgb(
+            previous_ui_descriptor, submission.previous.optional_inputs.ui_color_metadata);
+        const auto current_ui_srgb = transfer_is_srgb(
+            current_ui_descriptor, submission.current.optional_inputs.ui_color_metadata);
+        const auto valid_ui_descriptor = [&](const TextureDescriptor& descriptor) {
+            return descriptor.width == previous_descriptor.width &&
+                descriptor.height == previous_descriptor.height &&
+                descriptor.format == PixelFormat::rgba8_unorm &&
+                (descriptor.color_space == ColorSpace::srgb ||
+                 descriptor.color_space == ColorSpace::linear_srgb) &&
+                descriptor.alpha_mode != AlphaMode::unknown;
+        };
+        if (!valid_ui_descriptor(previous_ui_descriptor) ||
+            !valid_ui_descriptor(current_ui_descriptor) ||
+            previous_ui_descriptor.alpha_mode != current_ui_descriptor.alpha_mode ||
+            !previous_scene_srgb || !current_scene_srgb ||
+            *previous_scene_srgb != *current_scene_srgb ||
+            !previous_ui_srgb || !current_ui_srgb ||
+            !is_sdr_or_unspecified(submission.previous.color_metadata) ||
+            !is_sdr_or_unspecified(submission.current.color_metadata) ||
+            !is_sdr_or_unspecified(submission.previous.optional_inputs.ui_color_metadata) ||
+            !is_sdr_or_unspecified(submission.current.optional_inputs.ui_color_metadata) ||
+            previous_descriptor.alpha_mode != AlphaMode::opaque) {
+            return std::unexpected(make_error(
+                ErrorCode::unsupported_format,
+                "explicit UI composition requires opaque sRGB/linear-sRGB scene color and matching RGBA8 SDR UI planes with declared alpha"));
+        }
+        if (previous_ui.resource_identity() == previous.resource_identity() ||
+            previous_ui.resource_identity() == current.resource_identity() ||
+            current_ui_texture.resource_identity() == previous.resource_identity() ||
+            current_ui_texture.resource_identity() == current.resource_identity()) {
+            return std::unexpected(make_error(
+                ErrorCode::incompatible_resource,
+                "scene color and explicit UI plane must use distinct texture storage"));
+        }
+        auto previous_ui_resource = as_metal_resource(previous_ui);
+        auto current_ui_resource = as_metal_resource(current_ui_texture);
+        if (!previous_ui_resource || !current_ui_resource ||
+            !previous_ui_resource->belongs_to(device_) ||
+            !current_ui_resource->belongs_to(device_)) {
+            return std::unexpected(make_error(
+                ErrorCode::incompatible_resource,
+                "explicit UI plane is not owned by this Metal device"));
+        }
+        previous_ui_native = previous_ui_resource->native_texture();
+        current_ui_native = current_ui_resource->native_texture();
+        if ((previous_ui_native.usage & MTLTextureUsageShaderRead) == 0 ||
+            (current_ui_native.usage & MTLTextureUsageShaderRead) == 0) {
+            return std::unexpected(make_error(
+                ErrorCode::unsupported_format,
+                "Metal UI textures must allow shader reads"));
+        }
+        if (previous_ui_native == previous_native ||
+            previous_ui_native == current_native ||
+            current_ui_native == previous_native ||
+            current_ui_native == current_native) {
+            return std::unexpected(make_error(
+                ErrorCode::incompatible_resource,
+                "scene color and explicit UI plane must not alias the same Metal texture"));
+        }
+        selected_ui_resource = current_ui ? current_ui_resource : previous_ui_resource;
+        // Both endpoints are bound to the command buffer, even though only one
+        // is selected per pixel. Retain both through completion for direct C++
+        // callers whose FrameSubmission may go out of scope immediately.
+        auxiliary_resources.push_back(previous_ui_resource);
+        auxiliary_resources.push_back(current_ui_resource);
+    }
+
+    bool has_mask_history{};
+    std::uint32_t history_write_index{};
+    std::shared_ptr<MetalTextureResource> history_read_resource;
+    std::shared_ptr<MetalTextureResource> history_write_resource;
+    bool advance_mask_history{};
+    float mask_engagement_alpha{1.0F};
+    float mask_release_alpha{1.0F};
+    if (submission.hud_options.mode == HudMode::automatic_protection) {
+        const auto previous_sequence = submission.previous.timing.sequence;
+        const auto current_sequence = submission.current.timing.sequence;
+        const auto previous_timestamp = submission.previous.timing.timestamp_ns;
+        const auto current_timestamp = submission.current.timing.timestamp_ns;
+        const auto clock_domain = submission.current.timing.clock_domain;
+        const auto previous_color_metadata = submission.previous.color_metadata;
+        const auto current_color_metadata = submission.current.color_metadata;
+        if (current_sequence <= previous_sequence ||
+            previous_timestamp == unknown_timestamp_ns ||
+            current_timestamp == unknown_timestamp_ns ||
+            current_timestamp <= previous_timestamp || clock_domain == 0 ||
+            submission.previous.timing.clock_domain != clock_domain) {
+            return std::unexpected(make_error(
+                ErrorCode::invalid_argument,
+                "automatic HUD protection requires ordered source timing in one clock domain"));
+        }
+        if (!same_color_metadata(previous_color_metadata, current_color_metadata)) {
+            return std::unexpected(make_error(
+                ErrorCode::unsupported_format,
+                "automatic HUD protection requires matching source color metadata"));
+        }
+        const bool dimensions_changed = automatic_mask_width_ != previous_descriptor.width ||
+            automatic_mask_height_ != previous_descriptor.height;
+        if (dimensions_changed || !automatic_mask_history_[0] ||
+            !automatic_mask_history_[1] || !automatic_mask_history_[2]) {
+            auto first = make_mask_texture(device_, previous_descriptor.width,
+                                           previous_descriptor.height, device_id_);
+            auto second = make_mask_texture(device_, previous_descriptor.width,
+                                            previous_descriptor.height, device_id_);
+            auto scratch = make_mask_texture(device_, previous_descriptor.width,
+                                             previous_descriptor.height, device_id_);
+            if (!first || !second || !scratch) {
+                return std::unexpected(make_error(
+                    ErrorCode::allocation_failure,
+                    "Metal could not allocate automatic HUD mask history"));
+            }
+            automatic_mask_history_[0] = std::move(first);
+            automatic_mask_history_[1] = std::move(second);
+            automatic_mask_history_[2] = std::move(scratch);
+            automatic_mask_width_ = previous_descriptor.width;
+            automatic_mask_height_ = previous_descriptor.height;
+            automatic_mask_history_index_ = 0;
+            automatic_mask_history_valid_ = false;
+            automatic_mask_pair_has_prior_history_ = false;
+        }
+
+        const bool previous_history_valid = automatic_mask_history_valid_ &&
+            last_hud_mode_ == HudMode::automatic_protection && !dimensions_changed;
+        const bool same_source_pair = previous_history_valid &&
+            clock_domain == automatic_mask_pair_clock_domain_ &&
+            previous_sequence == automatic_mask_pair_previous_sequence_ &&
+            current_sequence == automatic_mask_pair_current_sequence_ &&
+            previous_timestamp == automatic_mask_pair_previous_timestamp_ns_ &&
+            current_timestamp == automatic_mask_pair_current_timestamp_ns_ &&
+            same_texture_descriptor(previous_descriptor,
+                                    automatic_mask_pair_descriptor_) &&
+            same_color_metadata(previous_color_metadata,
+                                automatic_mask_pair_previous_color_metadata_) &&
+            same_color_metadata(current_color_metadata,
+                                automatic_mask_pair_current_color_metadata_);
+        const bool follows_source_pair = previous_history_valid &&
+            clock_domain == automatic_mask_pair_clock_domain_ &&
+            previous_sequence == automatic_mask_pair_current_sequence_ &&
+            previous_timestamp == automatic_mask_pair_current_timestamp_ns_ &&
+            same_texture_descriptor(previous_descriptor,
+                                    automatic_mask_pair_descriptor_) &&
+            same_color_metadata(previous_color_metadata,
+                                automatic_mask_pair_current_color_metadata_) &&
+            current_sequence > automatic_mask_pair_current_sequence_ &&
+            current_timestamp > automatic_mask_pair_current_timestamp_ns_;
+        const bool same_history_basis = previous_history_valid &&
+            clock_domain == automatic_mask_pair_clock_domain_ &&
+            same_texture_descriptor(previous_descriptor,
+                                    automatic_mask_pair_descriptor_) &&
+            same_color_metadata(previous_color_metadata,
+                                automatic_mask_pair_current_color_metadata_);
+        const bool older_than_history = same_history_basis && !same_source_pair &&
+            (current_sequence <= automatic_mask_pair_current_sequence_ ||
+             current_timestamp <= automatic_mask_pair_current_timestamp_ns_);
+
+        if (same_source_pair && !submission.reset_history) {
+            // Interpolating the same source pair at multiple target times must
+            // reuse the same pair evidence. Recompute from the prior-pair mask
+            // and leave the current history slot unchanged so output does not
+            // depend on how many target requests the host makes.
+            has_mask_history = automatic_mask_pair_has_prior_history_;
+            history_write_index = automatic_mask_history_index_;
+            history_read_resource = automatic_mask_history_[1U - history_write_index];
+            mask_engagement_alpha = automatic_mask_pair_engagement_alpha_;
+            mask_release_alpha = automatic_mask_pair_release_alpha_;
+        } else if (follows_source_pair && !submission.reset_history) {
+            has_mask_history = true;
+            advance_mask_history = true;
+            history_write_index = 1U - automatic_mask_history_index_;
+            history_read_resource = automatic_mask_history_[automatic_mask_history_index_];
+            // For adjacent pairs [a,b] and [b,c], their center-to-center
+            // interval is exactly (c-a)/2. Compute the signed-timestamp
+            // distance with unsigned arithmetic so epoch-scale nanoseconds
+            // retain their ordering even where long double is only double.
+            const auto elapsed_span_ns =
+                static_cast<std::uint64_t>(current_timestamp) -
+                static_cast<std::uint64_t>(automatic_mask_pair_previous_timestamp_ns_);
+            const double cadence = static_cast<double>(elapsed_span_ns) * 0.5 /
+                33'333'333.0;
+            mask_engagement_alpha = static_cast<float>(
+                1.0 - std::pow(0.36, cadence));
+            mask_release_alpha = static_cast<float>(
+                1.0 - std::pow(0.79, cadence));
+        } else if (!older_than_history || submission.reset_history) {
+            // A first pair, explicit discontinuity, mode/size change, or
+            // forward gap starts fresh evidence. Out-of-order work writes only
+            // to scratch storage and cannot poison the most recent mask.
+            advance_mask_history = true;
+            history_write_index = 1U - automatic_mask_history_index_;
+            history_read_resource = automatic_mask_history_[automatic_mask_history_index_];
+        } else {
+            history_write_index = 2U;
+            history_read_resource = automatic_mask_history_[automatic_mask_history_index_];
+        }
+        history_write_resource = automatic_mask_history_[history_write_index];
+        auxiliary_resources.push_back(history_read_resource);
+        auxiliary_resources.push_back(history_write_resource);
     }
 
     MTLTextureDescriptor* output_descriptor =
@@ -369,16 +949,72 @@ Result<GeneratedFrame> MetalBackend::submit(const FrameSubmission& submission) {
         return std::unexpected(make_error(ErrorCode::backend_failure,
                                            "Metal could not create a compute encoder"));
     }
-    [encoder setComputePipelineState:blend_pipeline_];
-    [encoder setTexture:previous_native atIndex:0];
-    [encoder setTexture:current_native atIndex:1];
-    [encoder setTexture:output_native atIndex:2];
-    const float interpolation = submission.interpolation;
-    [encoder setBytes:&interpolation length:sizeof(interpolation) atIndex:0];
+    id<MTLComputePipelineState> selected_pipeline = blend_pipeline_;
+    if (submission.hud_options.mode == HudMode::explicit_ui_plane) {
+        selected_pipeline = explicit_ui_pipeline_;
+        [encoder setComputePipelineState:selected_pipeline];
+        [encoder setTexture:previous_native atIndex:0];
+        [encoder setTexture:current_native atIndex:1];
+        [encoder setTexture:previous_ui_native atIndex:2];
+        [encoder setTexture:current_ui_native atIndex:3];
+        [encoder setTexture:output_native atIndex:4];
+        struct ExplicitUiParameters {
+            float interpolation;
+            std::uint32_t current_ui;
+            std::uint32_t alpha_mode;
+            std::uint32_t scene_is_srgb;
+            std::uint32_t ui_is_srgb;
+            std::uint32_t debug_visualization;
+        } parameters{
+            submission.interpolation,
+            current_ui ? 1U : 0U,
+            static_cast<std::uint32_t>(selected_ui_resource->descriptor().alpha_mode),
+            *transfer_is_srgb(previous_descriptor,
+                              submission.previous.color_metadata) ? 1U : 0U,
+            *(current_ui
+                ? transfer_is_srgb(selected_ui_resource->descriptor(),
+                    submission.current.optional_inputs.ui_color_metadata)
+                : transfer_is_srgb(selected_ui_resource->descriptor(),
+                    submission.previous.optional_inputs.ui_color_metadata)) ? 1U : 0U,
+            static_cast<std::uint32_t>(submission.hud_options.debug_visualization),
+        };
+        [encoder setBytes:&parameters length:sizeof(parameters) atIndex:0];
+    } else if (submission.hud_options.mode == HudMode::automatic_protection) {
+        selected_pipeline = automatic_hud_pipeline_;
+        [encoder setComputePipelineState:selected_pipeline];
+        [encoder setTexture:previous_native atIndex:0];
+        [encoder setTexture:current_native atIndex:1];
+        [encoder setTexture:history_read_resource->native_texture() atIndex:2];
+        [encoder setTexture:output_native atIndex:3];
+        [encoder setTexture:history_write_resource->native_texture() atIndex:4];
+        struct AutomaticHudParameters {
+            float interpolation;
+            float engagement_alpha;
+            float release_alpha;
+            std::uint32_t current_ui;
+            std::uint32_t has_history;
+            std::uint32_t debug_visualization;
+        } parameters{
+            submission.interpolation,
+            mask_engagement_alpha,
+            mask_release_alpha,
+            current_ui ? 1U : 0U,
+            has_mask_history ? 1U : 0U,
+            static_cast<std::uint32_t>(submission.hud_options.debug_visualization),
+        };
+        [encoder setBytes:&parameters length:sizeof(parameters) atIndex:0];
+    } else {
+        [encoder setComputePipelineState:selected_pipeline];
+        [encoder setTexture:previous_native atIndex:0];
+        [encoder setTexture:current_native atIndex:1];
+        [encoder setTexture:output_native atIndex:2];
+        const float interpolation = submission.interpolation;
+        [encoder setBytes:&interpolation length:sizeof(interpolation) atIndex:0];
+    }
 
-    const NSUInteger threads_x = blend_pipeline_.threadExecutionWidth;
+    const NSUInteger threads_x = selected_pipeline.threadExecutionWidth;
     const NSUInteger threads_y = std::max<NSUInteger>(
-        1, std::min<NSUInteger>(8, blend_pipeline_.maxTotalThreadsPerThreadgroup / threads_x));
+        1, std::min<NSUInteger>(8, selected_pipeline.maxTotalThreadsPerThreadgroup / threads_x));
     [encoder dispatchThreads:MTLSizeMake(output_native.width, output_native.height, 1)
         threadsPerThreadgroup:MTLSizeMake(threads_x, threads_y, 1)];
     [encoder endEncoding];
@@ -398,9 +1034,37 @@ Result<GeneratedFrame> MetalBackend::submit(const FrameSubmission& submission) {
         [command_buffer commit];
     }
 
+    last_hud_mode_ = submission.hud_options.mode;
+    if (submission.hud_options.mode == HudMode::automatic_protection) {
+        if (advance_mask_history) {
+            automatic_mask_history_index_ = history_write_index;
+            automatic_mask_history_valid_ = true;
+            automatic_mask_pair_has_prior_history_ = has_mask_history;
+            automatic_mask_pair_clock_domain_ = submission.current.timing.clock_domain;
+            automatic_mask_pair_previous_sequence_ = submission.previous.timing.sequence;
+            automatic_mask_pair_current_sequence_ = submission.current.timing.sequence;
+            automatic_mask_pair_previous_timestamp_ns_ =
+                submission.previous.timing.timestamp_ns;
+            automatic_mask_pair_current_timestamp_ns_ =
+                submission.current.timing.timestamp_ns;
+            automatic_mask_pair_descriptor_ = previous_descriptor;
+            automatic_mask_pair_previous_color_metadata_ =
+                submission.previous.color_metadata;
+            automatic_mask_pair_current_color_metadata_ =
+                submission.current.color_metadata;
+            automatic_mask_pair_engagement_alpha_ = mask_engagement_alpha;
+            automatic_mask_pair_release_alpha_ = mask_release_alpha;
+        }
+    } else {
+        automatic_mask_history_valid_ = false;
+        automatic_mask_pair_has_prior_history_ = false;
+    }
+    history_lock.unlock();
+
     auto completion = std::make_shared<MetalCompletion>(
         command_buffer, completion_event_, event_value, device_id_,
         previous.resource(), current.resource(), output_texture->resource(),
+        std::move(auxiliary_resources),
         submission.gpu_dependencies);
     return GeneratedFrame{std::move(*output_texture), std::move(completion)};
 }
@@ -411,6 +1075,8 @@ struct Device::State {
     __strong id<MTLDevice> native_device;
     __strong id<MTLCommandQueue> queue;
     __strong id<MTLComputePipelineState> blend_pipeline;
+    __strong id<MTLComputePipelineState> explicit_ui_pipeline;
+    __strong id<MTLComputePipelineState> automatic_hud_pipeline;
     __strong id<MTLSharedEvent> completion_event;
     std::uint64_t device_id{};
     std::shared_ptr<FrameGenerationBackend> backend;
@@ -428,25 +1094,24 @@ Result<Device> Device::create(id<MTLDevice> native_device) {
                                            "Metal could not create a command queue"));
     }
 
-    NSError* error = nil;
-    NSString* shader_source = [NSString stringWithUTF8String:kBlendShader];
-    id<MTLLibrary> library = [native_device newLibraryWithSource:shader_source
-                                                         options:nil
-                                                           error:&error];
-    if (library == nil) {
-        return std::unexpected(make_error(ErrorCode::backend_failure,
-                                           error_message(error, "Metal blend shader compilation failed")));
-    }
-    id<MTLFunction> function = [library newFunctionWithName:@"framegen_blend"];
-    if (function == nil) {
-        return std::unexpected(make_error(ErrorCode::backend_failure,
-                                           "Metal blend function was not found"));
-    }
-    id<MTLComputePipelineState> pipeline =
-        [native_device newComputePipelineStateWithFunction:function error:&error];
+    std::string pipeline_error;
+    id<MTLComputePipelineState> pipeline = make_compute_pipeline(
+        native_device, kBlendShader, "framegen_blend", pipeline_error);
     if (pipeline == nil) {
         return std::unexpected(make_error(ErrorCode::backend_failure,
-                                           error_message(error, "Metal compute pipeline creation failed")));
+                                           "Metal blend pipeline failed: " + pipeline_error));
+    }
+    id<MTLComputePipelineState> explicit_ui_pipeline = make_compute_pipeline(
+        native_device, kExplicitUiShader, "framegen_explicit_ui", pipeline_error);
+    if (explicit_ui_pipeline == nil) {
+        return std::unexpected(make_error(ErrorCode::backend_failure,
+                                           "Metal explicit UI pipeline failed: " + pipeline_error));
+    }
+    id<MTLComputePipelineState> automatic_hud_pipeline = make_compute_pipeline(
+        native_device, kAutomaticHudShader, "framegen_automatic_hud", pipeline_error);
+    if (automatic_hud_pipeline == nil) {
+        return std::unexpected(make_error(ErrorCode::backend_failure,
+                                           "Metal automatic HUD pipeline failed: " + pipeline_error));
     }
 
     id<MTLSharedEvent> event = [native_device newSharedEvent];
@@ -465,10 +1130,13 @@ Result<Device> Device::create(id<MTLDevice> native_device) {
     state->native_device = native_device;
     state->queue = queue;
     state->blend_pipeline = pipeline;
+    state->explicit_ui_pipeline = explicit_ui_pipeline;
+    state->automatic_hud_pipeline = automatic_hud_pipeline;
     state->completion_event = event;
     state->device_id = *device_id;
     state->backend = std::make_shared<detail::MetalBackend>(
-        native_device, queue, pipeline, event, *device_id);
+        native_device, queue, pipeline, explicit_ui_pipeline,
+        automatic_hud_pipeline, event, *device_id);
     return Device(std::move(state));
 }
 

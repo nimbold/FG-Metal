@@ -2,6 +2,7 @@
 
 #include <array>
 #include <cmath>
+#include <new>
 #include <utility>
 
 namespace framegen {
@@ -21,6 +22,26 @@ bool compatible_frame_descriptions(const TextureDescriptor& a,
            a.color_space == b.color_space && a.alpha_mode == b.alpha_mode;
 }
 
+bool valid_hud_options(const HudOptions& options) {
+    const bool valid_mode = options.mode == HudMode::no_hud_knowledge ||
+        options.mode == HudMode::explicit_ui_plane ||
+        options.mode == HudMode::automatic_protection;
+    const bool valid_source = options.ui_source == UiTemporalSource::previous_frame ||
+        options.ui_source == UiTemporalSource::current_frame ||
+        options.ui_source == UiTemporalSource::nearest_presentation;
+    const bool valid_debug =
+        options.debug_visualization == HudDebugVisualization::disabled ||
+        options.debug_visualization == HudDebugVisualization::raw_mask ||
+        options.debug_visualization == HudDebugVisualization::stabilized_mask ||
+        options.debug_visualization == HudDebugVisualization::protected_regions ||
+        options.debug_visualization == HudDebugVisualization::interpolation_confidence ||
+        options.debug_visualization == HudDebugVisualization::final_composite;
+    return valid_mode && valid_source && valid_debug &&
+        (options.mode != HudMode::no_hud_knowledge ||
+         options.debug_visualization == HudDebugVisualization::disabled ||
+         options.debug_visualization == HudDebugVisualization::final_composite);
+}
+
 } // namespace
 
 Result<FrameGenerator> FrameGenerator::create(
@@ -38,7 +59,29 @@ Result<FrameGenerator> FrameGenerator::create(
                                      "backend device identifier must be non-zero"));
     }
 
-    return FrameGenerator(std::move(backend));
+    try {
+        auto stream_state = backend->create_stream_state();
+        return FrameGenerator(std::move(backend), std::move(stream_state));
+    } catch (const std::bad_alloc&) {
+        return std::unexpected(error(ErrorCode::allocation_failure,
+                                     "backend stream state allocation failed"));
+    }
+}
+
+FrameGenerator::FrameGenerator(const FrameGenerator& other)
+    : backend_(other.backend_),
+      stream_state_(backend_ ? backend_->create_stream_state() : nullptr) {}
+
+FrameGenerator& FrameGenerator::operator=(const FrameGenerator& other) {
+    if (this == &other) {
+        return *this;
+    }
+    auto stream_state = other.backend_
+        ? other.backend_->create_stream_state()
+        : std::shared_ptr<BackendStreamState>{};
+    backend_ = other.backend_;
+    stream_state_ = std::move(stream_state);
+    return *this;
 }
 
 Result<GeneratedFrame> FrameGenerator::submit(const FrameSubmission& submission) {
@@ -53,6 +96,10 @@ Result<GeneratedFrame> FrameGenerator::submit(const FrameSubmission& submission)
         return std::unexpected(error(ErrorCode::invalid_argument,
                                      "interpolation must be finite and in [0, 1]"));
     }
+    if (!valid_hud_options(submission.hud_options)) {
+        return std::unexpected(error(ErrorCode::invalid_argument,
+                                     "HUD mode, UI source, or debug visualization is invalid"));
+    }
     const auto& previous_timing = submission.previous.timing;
     const auto& current_timing = submission.current.timing;
     if (previous_timing.clock_domain == 0 || current_timing.clock_domain == 0 ||
@@ -60,11 +107,12 @@ Result<GeneratedFrame> FrameGenerator::submit(const FrameSubmission& submission)
         return std::unexpected(error(ErrorCode::invalid_argument,
                                      "input timestamps must share a non-zero clock domain"));
     }
-    if (!submission.reset_history &&
-        (current_timing.sequence <= previous_timing.sequence ||
-         current_timing.timestamp_ns <= previous_timing.timestamp_ns)) {
+    if (current_timing.sequence <= previous_timing.sequence ||
+        current_timing.timestamp_ns == unknown_timestamp_ns ||
+        previous_timing.timestamp_ns == unknown_timestamp_ns ||
+        current_timing.timestamp_ns <= previous_timing.timestamp_ns) {
         return std::unexpected(error(ErrorCode::invalid_argument,
-                                     "input timing must increase unless history is reset"));
+                                     "source sequence and timestamps must be known and increase"));
     }
     if (!same_backend_device(previous, current)) {
         return std::unexpected(error(ErrorCode::incompatible_resource,
@@ -101,6 +149,30 @@ Result<GeneratedFrame> FrameGenerator::submit(const FrameSubmission& submission)
         }
     }
 
+    if (submission.hud_options.mode == HudMode::explicit_ui_plane) {
+        const auto& previous_ui = submission.previous.optional_inputs.ui_texture;
+        const auto& current_ui = submission.current.optional_inputs.ui_texture;
+        if (!previous_ui || !current_ui) {
+            return std::unexpected(error(
+                ErrorCode::invalid_argument,
+                "explicit UI-plane mode requires a UI texture on both source frames"));
+        }
+        const auto scene_desc = previous.descriptor();
+        const auto previous_ui_desc = previous_ui.descriptor();
+        const auto current_ui_desc = current_ui.descriptor();
+        if (previous_ui_desc.width != scene_desc.width ||
+            previous_ui_desc.height != scene_desc.height ||
+            current_ui_desc.width != scene_desc.width ||
+            current_ui_desc.height != scene_desc.height ||
+            previous_ui_desc.format != current_ui_desc.format ||
+            previous_ui_desc.color_space != current_ui_desc.color_space ||
+            previous_ui_desc.alpha_mode != current_ui_desc.alpha_mode) {
+            return std::unexpected(error(
+                ErrorCode::incompatible_resource,
+                "explicit UI planes must match scene dimensions and each other"));
+        }
+    }
+
     for (const auto& dependency : submission.gpu_dependencies) {
         if (!dependency) {
             return std::unexpected(error(ErrorCode::invalid_argument,
@@ -113,7 +185,15 @@ Result<GeneratedFrame> FrameGenerator::submit(const FrameSubmission& submission)
         }
     }
 
-    auto generated = backend_->submit(submission);
+    FrameSubmission backend_submission;
+    try {
+        backend_submission = submission;
+    } catch (const std::bad_alloc&) {
+        return std::unexpected(error(ErrorCode::allocation_failure,
+                                     "backend submission copy allocation failed"));
+    }
+    backend_submission.backend_stream_state = stream_state_;
+    auto generated = backend_->submit(backend_submission);
     if (!generated) {
         return std::unexpected(generated.error());
     }
