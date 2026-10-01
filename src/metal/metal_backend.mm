@@ -148,6 +148,23 @@ public:
                command_buffer_.status == MTLCommandBufferStatusError;
     }
 
+    [[nodiscard]] std::optional<std::uint64_t>
+    gpu_execution_time_ns() const noexcept override {
+        const NSTimeInterval started = command_buffer_.GPUStartTime;
+        const NSTimeInterval ended = command_buffer_.GPUEndTime;
+        if (!std::isfinite(started) || !std::isfinite(ended) ||
+            started <= 0.0 || ended < started) {
+            return std::nullopt;
+        }
+        const long double elapsed_ns =
+            static_cast<long double>(ended - started) * 1'000'000'000.0L;
+        if (elapsed_ns > static_cast<long double>(
+                             std::numeric_limits<std::uint64_t>::max())) {
+            return std::nullopt;
+        }
+        return static_cast<std::uint64_t>(elapsed_ns);
+    }
+
     [[nodiscard]] Result<void> wait() override {
         [command_buffer_ waitUntilCompleted];
         if (command_buffer_.status == MTLCommandBufferStatusError) {

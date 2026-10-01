@@ -29,7 +29,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 option(FRAMEGEN_BUILD_LIBRARY "Build the renderer-independent frame-generation library" ON)
 option(FRAMEGEN_BUILD_TESTS "Build and register the test suite" ON)
-option(FRAMEGEN_BUILD_TOOLS "Build optional benchmark and analyzer tools" OFF)
+option(FRAMEGEN_BUILD_TOOLS "Build optional benchmark tools" OFF)
 
 if(APPLE)
   set(_framegen_metal_default ON)
@@ -85,5 +85,4 @@ endif()
 
 if(FRAMEGEN_BUILD_TOOLS)
   framegen_add_required_subdirectory(FRAMEGEN_BUILD_TOOLS tools/benchmark "the benchmark tool")
-  framegen_add_required_subdirectory(FRAMEGEN_BUILD_TOOLS tools/analyzer "the analyzer tool")
 endif()

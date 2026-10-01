@@ -1,0 +1,3254 @@
+{
+  "schema_version": 1,
+  "analyzer_version": "1.0",
+  "metric_contract_version": "2",
+  "run_id": "placeholder-metal-synthetic-motion-v1",
+  "created_utc": "2026-10-01T01:00:35.956788+00:00",
+  "backend": {
+    "id": "org.framegen.metal",
+    "kind": "metal_placeholder_blend",
+    "metadata": null,
+    "binary": "/Users/nima/Documents/Code/FG-Metal/build/tools/benchmark/framegen-benchmark-metal"
+  },
+  "host": {
+    "platform": "macOS-27.0.1-arm64-arm-64bit-Mach-O",
+    "system": "Darwin",
+    "machine": "arm64",
+    "python": "3.14.7"
+  },
+  "corpus": {
+    "sequence_id": "synthetic-motion-v1",
+    "title": "Synthetic motion, thin geometry, occlusion, and HUD fixture",
+    "manifest": "/Users/nima/Documents/Code/FG-Metal/tools/benchmark/corpus/synthetic-motion/manifest.json",
+    "manifest_sha256": "841c9e283fb94d9ce78c34b0f89524c448998388478e12eed7337de8637fa331",
+    "content_sha256": "27640ad1a8d8cb9074ca4426243a6dd30e4ff73846fb156ddda1da4d200eb0ee",
+    "width": 128,
+    "height": 72,
+    "high_rate_fps": 60.0,
+    "low_rate_stride_frames": 2,
+    "source_indices": [
+      0,
+      2,
+      4,
+      6,
+      8,
+      10
+    ],
+    "license": "Apache-2.0 (project-authored code and generated fixture)",
+    "source": "Project-authored analytic scene; no third-party footage or assets.",
+    "fixture_coverage": [
+      "slow_camera_pan",
+      "third_person_character_movement",
+      "foliage",
+      "thin_geometry",
+      "fences",
+      "particles",
+      "transparency",
+      "reflections_specular_highlights",
+      "weapon_sights",
+      "crosshairs",
+      "subtitles",
+      "minimaps",
+      "health_bars",
+      "rapidly_changing_hud_counters"
+    ],
+    "mask_coverage_pixels_by_frame": {
+      "0": {
+        "hud": 1475,
+        "text": 80,
+        "scene": 7741,
+        "occlusion": 308
+      },
+      "1": {
+        "hud": 1475,
+        "text": 82,
+        "scene": 7741,
+        "occlusion": 308
+      },
+      "2": {
+        "hud": 1475,
+        "text": 76,
+        "scene": 7741,
+        "occlusion": 308
+      },
+      "3": {
+        "hud": 1475,
+        "text": 75,
+        "scene": 7741,
+        "occlusion": 308
+      },
+      "4": {
+        "hud": 1475,
+        "text": 80,
+        "scene": 7741,
+        "occlusion": 308
+      },
+      "5": {
+        "hud": 1475,
+        "text": 81,
+        "scene": 7741,
+        "occlusion": 308
+      },
+      "6": {
+        "hud": 1475,
+        "text": 76,
+        "scene": 7741,
+        "occlusion": 308
+      },
+      "7": {
+        "hud": 1475,
+        "text": 75,
+        "scene": 7741,
+        "occlusion": 308
+      },
+      "8": {
+        "hud": 1475,
+        "text": 75,
+        "scene": 7741,
+        "occlusion": 308
+      },
+      "9": {
+        "hud": 1475,
+        "text": 80,
+        "scene": 7741,
+        "occlusion": 308
+      },
+      "10": {
+        "hud": 1475,
+        "text": 79,
+        "scene": 7741,
+        "occlusion": 308
+      }
+    },
+    "mask_overlap_policy": "Masks are evaluated independently and may overlap; HUD/text and scene/occlusion are not forced into a partition."
+  },
+  "configuration": {
+    "warmup_iterations": 3,
+    "measured_iterations_per_target": 100,
+    "deadline_ms": 16.666666666666668,
+    "requested_t": null,
+    "target_timeline": [
+      {
+        "source_pair": [
+          0,
+          2
+        ],
+        "target_index": 1,
+        "t": 0.5,
+        "timestamp_ns": 16666667.0
+      },
+      {
+        "source_pair": [
+          2,
+          4
+        ],
+        "target_index": 3,
+        "t": 0.5,
+        "timestamp_ns": 50000001.0
+      },
+      {
+        "source_pair": [
+          4,
+          6
+        ],
+        "target_index": 5,
+        "t": 0.5,
+        "timestamp_ns": 83333335.0
+      },
+      {
+        "source_pair": [
+          6,
+          8
+        ],
+        "target_index": 7,
+        "t": 0.5,
+        "timestamp_ns": 116666669.0
+      },
+      {
+        "source_pair": [
+          8,
+          10
+        ],
+        "target_index": 9,
+        "t": 0.5,
+        "timestamp_ns": 150000003.0
+      }
+    ],
+    "runner_mode": "offline serial submit, completion wait, and readback",
+    "metric_parameters": {
+      "metric_contract_version": "2",
+      "psnr_perfect_cap_db": 120.0,
+      "ssim_window": "7x7 box, mask-weighted local neighborhoods",
+      "perceptual_metric": "project-authored masked multiscale luminance SSIM plus CIE76 color score",
+      "multiscale_weights": [
+        0.4,
+        0.3,
+        0.2,
+        0.1
+      ],
+      "perceptual_color_scale_delta_e": 25.0,
+      "edge_threshold_luma_gradient": 48.0,
+      "edge_chamfer_cap_px": 6.0,
+      "temporal_time_unit": "actual elapsed high-rate frame periods from timestamps",
+      "source_with_generation_throughput_method": "two source-frame texture uploads plus serial submit-to-completion per cycle, divided by measured wall time from before uploads through completion; offline benchmark host only; excludes renderer work and presentation"
+    }
+  },
+  "quality_by_region": {
+    "all": {
+      "sample_count": 5,
+      "psnr_db": {
+        "count": 5,
+        "mean": 23.848679489267333,
+        "min": 21.39539100786009,
+        "p50": 24.47149934042946,
+        "p95": 24.526849986784114,
+        "p99": 24.53153536197483,
+        "max": 24.532706705772508
+      },
+      "ssim_7x7_masked_luminance": {
+        "count": 5,
+        "mean": 0.8247346153802353,
+        "min": 0.7354886508469388,
+        "p50": 0.8443205414231882,
+        "p95": 0.8528238038073871,
+        "p99": 0.8530956777339549,
+        "max": 0.8531636462155968
+      },
+      "perceptual_similarity": {
+        "count": 5,
+        "mean": 0.8874102733749332,
+        "min": 0.8397596185961458,
+        "p50": 0.8987857255178727,
+        "p95": 0.9018443658819274,
+        "p99": 0.9018974127194973,
+        "max": 0.9019106744288898
+      },
+      "cielab_delta_e76_mean": {
+        "count": 5,
+        "mean": 3.5114074015932593,
+        "min": 3.100121627890852,
+        "p50": 3.2973771524421407,
+        "p95": 4.258759990760608,
+        "p99": 4.403344127696086,
+        "max": 4.439490161929955
+      },
+      "pixel_abs_error_norm_mean_per_target": {
+        "count": 5,
+        "mean": 0.018976432007988382,
+        "min": 0.016354620551924475,
+        "p50": 0.0174782702432825,
+        "p95": 0.02458591480573711,
+        "p99": 0.02593819784858388,
+        "max": 0.02627626860929557
+      },
+      "frame_max_pixel_error_norm": {
+        "count": 5,
+        "mean": 0.657516339869281,
+        "min": 0.657516339869281,
+        "p50": 0.657516339869281,
+        "p95": 0.657516339869281,
+        "p99": 0.657516339869281,
+        "max": 0.657516339869281
+      },
+      "pixels_over_1pct_error_fraction_per_target": {
+        "count": 5,
+        "mean": 0.14383680555555556,
+        "min": 0.1320529513888889,
+        "p50": 0.1388888888888889,
+        "p95": 0.16180555555555556,
+        "p99": 0.16447916666666668,
+        "max": 0.16514756944444445
+      },
+      "pixels_over_1pct_error_count_per_target": {
+        "count": 5,
+        "mean": 1325.6,
+        "min": 1217,
+        "p50": 1280,
+        "p95": 1491.1999999999998,
+        "p99": 1515.84,
+        "max": 1522
+      },
+      "pixels_over_5pct_error_fraction_per_target": {
+        "count": 5,
+        "mean": 0.10323350694444444,
+        "min": 0.0876736111111111,
+        "p50": 0.10112847222222222,
+        "p95": 0.11922743055555556,
+        "p99": 0.12202256944444445,
+        "max": 0.12272135416666667
+      },
+      "pixels_over_5pct_error_count_per_target": {
+        "count": 5,
+        "mean": 951.4,
+        "min": 808,
+        "p50": 932,
+        "p95": 1098.8,
+        "p99": 1124.56,
+        "max": 1131
+      },
+      "edge_location": {
+        "symmetric_chamfer_norm": {
+          "count": 5,
+          "mean": 0.059834552550113405,
+          "min": 0.04588867282346276,
+          "p50": 0.05883029908124938,
+          "p95": 0.07509172937209492,
+          "p99": 0.07739122880728862,
+          "max": 0.07796610366608703
+        },
+        "precision_at_1px": {
+          "count": 5,
+          "mean": 0.9900445219169445,
+          "min": 0.9789545145960624,
+          "p50": 0.993920972644377,
+          "p95": 0.9966481314219794,
+          "p99": 0.9969329815869723,
+          "max": 0.9970041941282205
+        },
+        "recall_at_1px": {
+          "count": 5,
+          "mean": 0.9018737814455061,
+          "min": 0.8647540983606558,
+          "p50": 0.9047337278106509,
+          "p95": 0.9278996552906568,
+          "p99": 0.9299571982890866,
+          "max": 0.9304715840386941
+        },
+        "worst_target_chamfer_norm": 0.07796610366608703,
+        "minimum_target_precision_at_1px": 0.9789545145960624,
+        "minimum_target_recall_at_1px": 0.8647540983606558
+      },
+      "temporal": {
+        "frame_to_frame_residual": {
+          "per_transition_mean": {
+            "count": 10,
+            "mean": 0.018976431628459745,
+            "min": 0.01635462022483207,
+            "p50": 0.017478269893717098,
+            "p95": 0.026276268083770205,
+            "p99": 0.026276268083770205,
+            "max": 0.026276268083770205
+          },
+          "per_transition_p95": {
+            "count": 10,
+            "mean": 0.15895424518692816,
+            "min": 0.14379084679738566,
+            "p50": 0.1464052258300654,
+            "p95": 0.20130718551633991,
+            "p99": 0.20130718551633991,
+            "max": 0.20130718551633991
+          },
+          "worst_pixel_per_transition": {
+            "count": 10,
+            "mean": 0.6575163267189544,
+            "min": 0.6575163267189544,
+            "p50": 0.6575163267189544,
+            "p95": 0.6575163267189544,
+            "p99": 0.6575163267189544,
+            "max": 0.6575163267189544
+          },
+          "definition": "absolute RGB first-difference residual against ground truth, normalized by actual elapsed high-rate frame units",
+          "transitions": [
+            {
+              "timestamps_ns": [
+                0.0,
+                16666667.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.016948500704966077,
+              "p95": 0.14379084679738566,
+              "max": 0.6575163267189544
+            },
+            {
+              "timestamps_ns": [
+                16666667.0,
+                33333334.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.016948500704966077,
+              "p95": 0.14379084679738566,
+              "max": 0.6575163267189544
+            },
+            {
+              "timestamps_ns": [
+                33333334.0,
+                50000001.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.01782449923501328,
+              "p95": 0.1464052258300654,
+              "max": 0.6575163267189544
+            },
+            {
+              "timestamps_ns": [
+                50000001.0,
+                66666668.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.01782449923501328,
+              "p95": 0.1464052258300654,
+              "max": 0.6575163267189544
+            },
+            {
+              "timestamps_ns": [
+                66666668.0,
+                83333335.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.017478269893717098,
+              "p95": 0.1464052258300654,
+              "max": 0.6575163267189544
+            },
+            {
+              "timestamps_ns": [
+                83333335.0,
+                100000002.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.017478269893717098,
+              "p95": 0.1464052258300654,
+              "max": 0.6575163267189544
+            },
+            {
+              "timestamps_ns": [
+                100000002.0,
+                116666669.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.026276268083770205,
+              "p95": 0.20130718551633991,
+              "max": 0.6575163267189544
+            },
+            {
+              "timestamps_ns": [
+                116666669.0,
+                133333336.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.026276268083770205,
+              "p95": 0.20130718551633991,
+              "max": 0.6575163267189544
+            },
+            {
+              "timestamps_ns": [
+                133333336.0,
+                150000003.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.01635462022483207,
+              "p95": 0.15686274196078437,
+              "max": 0.6575163267189544
+            },
+            {
+              "timestamps_ns": [
+                150000003.0,
+                166666670.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.01635462022483207,
+              "p95": 0.15686274196078437,
+              "max": 0.6575163267189544
+            }
+          ]
+        },
+        "temporal_consistency_score": 0.9810235683715403,
+        "high_frequency_temporal_flicker": {
+          "per_window_mean": {
+            "count": 9,
+            "mean": 0.03432404685486833,
+            "min": 0.024430231185100106,
+            "p50": 0.032709239795479336,
+            "p95": 0.04579112017271246,
+            "p99": 0.051200252127734255,
+            "max": 0.052552535116489704
+          },
+          "per_window_p95": {
+            "count": 9,
+            "mean": 0.2671023858300656,
+            "min": 0.1882352865882355,
+            "p50": 0.28758168784313753,
+            "p95": 0.3670588088470591,
+            "p99": 0.3955032521537259,
+            "max": 0.40261436298039255
+          },
+          "worst_pixel_per_window": {
+            "count": 9,
+            "mean": 1.2339868787450992,
+            "min": 0.9712417912156872,
+            "p50": 1.3150326271372563,
+            "p95": 1.3150326271372563,
+            "p99": 1.3150326271372563,
+            "max": 1.3150326271372563
+          },
+          "definition": "absolute RGB second-derivative residual against ground truth, with actual timestamp spacing",
+          "windows": [
+            {
+              "timestamps_ns": [
+                0.0,
+                16666667.0,
+                33333334.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.03389700073199214,
+              "p95": 0.28758168784313753,
+              "max": 1.3150326271372563,
+              "edge_mean": 0.05237361780388306,
+              "edge_p95": 0.4033035132796241,
+              "edge_max": 1.1397301504892248
+            },
+            {
+              "timestamps_ns": [
+                16666667.0,
+                33333334.0,
+                50000001.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.030607183779343714,
+              "p95": 0.19999999200000018,
+              "max": 1.2941175952941188,
+              "edge_mean": 0.04704491504363273,
+              "edge_p95": 0.2720876866444803,
+              "edge_max": 0.7596313421637655
+            },
+            {
+              "timestamps_ns": [
+                33333334.0,
+                50000001.0,
+                66666668.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.0356489977570466,
+              "p95": 0.29281044580392185,
+              "max": 1.3150326271372563,
+              "edge_mean": 0.05736042808609251,
+              "edge_p95": 0.40330351327962416,
+              "edge_max": 1.5195458215711075
+            },
+            {
+              "timestamps_ns": [
+                50000001.0,
+                66666668.0,
+                83333335.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.024430231185100106,
+              "p95": 0.1882352865882355,
+              "max": 1.2941175952941188,
+              "edge_mean": 0.03427634089522854,
+              "edge_p95": 0.20439293300075312,
+              "edge_max": 0.7597729107855538
+            },
+            {
+              "timestamps_ns": [
+                66666668.0,
+                83333335.0,
+                100000002.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.03495653908830341,
+              "p95": 0.29281044580392185,
+              "max": 1.3150326271372563,
+              "edge_mean": 0.05496699164948907,
+              "edge_p95": 0.4033035132796242,
+              "edge_max": 1.1397301504892248
+            },
+            {
+              "timestamps_ns": [
+                83333335.0,
+                100000002.0,
+                116666669.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.032373648396412075,
+              "p95": 0.21307188690196102,
+              "max": 0.9712417912156872,
+              "edge_mean": 0.04434258157535345,
+              "edge_p95": 0.21565489333458857,
+              "edge_max": 1.0849492438146993
+            },
+            {
+              "timestamps_ns": [
+                100000002.0,
+                116666669.0,
+                133333336.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.052552535116489704,
+              "p95": 0.40261436298039255,
+              "max": 1.3150326271372563,
+              "edge_mean": 0.07004660834548396,
+              "edge_p95": 0.4089129248199532,
+              "edge_max": 1.251058513926826
+            },
+            {
+              "timestamps_ns": [
+                116666669.0,
+                133333336.0,
+                150000003.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.03174104584364791,
+              "p95": 0.21307188690196102,
+              "max": 0.9712417912156872,
+              "edge_mean": 0.042850800287966714,
+              "edge_p95": 0.21565489333458843,
+              "edge_max": 1.0053449280452957
+            },
+            {
+              "timestamps_ns": [
+                133333336.0,
+                150000003.0,
+                166666670.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.032709239795479336,
+              "p95": 0.3137254776470591,
+              "max": 1.3150326271372563,
+              "edge_mean": 0.05001923720375293,
+              "edge_p95": 0.3827354413624725,
+              "edge_max": 0.9687879830541567
+            }
+          ]
+        },
+        "edge_flicker": {
+          "per_window_mean": {
+            "count": 9,
+            "mean": 0.05036461343232033,
+            "min": 0.03427634089522854,
+            "p50": 0.05001923720375293,
+            "p95": 0.06497213624172737,
+            "p99": 0.06903171392473263,
+            "max": 0.07004660834548396
+          },
+          "per_window_p95": {
+            "count": 9,
+            "mean": 0.3232610347039676,
+            "min": 0.20439293300075312,
+            "p50": 0.3827354413624725,
+            "p95": 0.4066691602038216,
+            "p99": 0.4084641718967269,
+            "max": 0.4089129248199532
+          },
+          "worst_pixel_per_window": {
+            "count": 9,
+            "mean": 1.0698390049266504,
+            "min": 0.7596313421637655,
+            "p50": 1.0849492438146993,
+            "p95": 1.4121508985133948,
+            "p99": 1.498066836959565,
+            "max": 1.5195458215711075
+          },
+          "definition": "Sobel magnitude second-derivative residual against ground truth"
+        }
+      }
+    },
+    "hud": {
+      "sample_count": 5,
+      "psnr_db": {
+        "count": 5,
+        "mean": 24.91082300206201,
+        "min": 22.39485602544557,
+        "p50": 25.122614296217186,
+        "p95": 26.167427207762547,
+        "p99": 26.238441851520907,
+        "max": 26.256195512460497
+      },
+      "ssim_7x7_masked_luminance": {
+        "count": 5,
+        "mean": 0.9663811897616414,
+        "min": 0.9388369853618065,
+        "p50": 0.9713880344789217,
+        "p95": 0.9780532135234457,
+        "p99": 0.9787298196215007,
+        "max": 0.9788989711460145
+      },
+      "perceptual_similarity": {
+        "count": 5,
+        "mean": 0.967752610793173,
+        "min": 0.9435255340812595,
+        "p50": 0.9712539770118632,
+        "p95": 0.9779595017386714,
+        "p99": 0.9786810579689466,
+        "max": 0.9788614470265153
+      },
+      "cielab_delta_e76_mean": {
+        "count": 5,
+        "mean": 1.4719326273374709,
+        "min": 1.0646205268675808,
+        "p50": 1.4441521294789792,
+        "p95": 1.9447596763794581,
+        "p99": 2.0438680805120404,
+        "max": 2.0686451815451856
+      },
+      "pixel_abs_error_norm_mean_per_target": {
+        "count": 5,
+        "mean": 0.009173368782541266,
+        "min": 0.007376980170599313,
+        "p50": 0.008409438351611832,
+        "p95": 0.012472803810789851,
+        "p99": 0.013186041874376869,
+        "max": 0.013364351390273624
+      },
+      "frame_max_pixel_error_norm": {
+        "count": 5,
+        "mean": 0.6470588235294118,
+        "min": 0.6470588235294118,
+        "p50": 0.6470588235294118,
+        "p95": 0.6470588235294118,
+        "p99": 0.6470588235294118,
+        "max": 0.6470588235294118
+      },
+      "pixels_over_1pct_error_fraction_per_target": {
+        "count": 5,
+        "mean": 0.03823728813559322,
+        "min": 0.03389830508474576,
+        "p50": 0.03661016949152542,
+        "p95": 0.04474576271186441,
+        "p99": 0.04583050847457627,
+        "max": 0.04610169491525424
+      },
+      "pixels_over_1pct_error_count_per_target": {
+        "count": 5,
+        "mean": 56.4,
+        "min": 50,
+        "p50": 54,
+        "p95": 66.0,
+        "p99": 67.60000000000001,
+        "max": 68
+      },
+      "pixels_over_5pct_error_fraction_per_target": {
+        "count": 5,
+        "mean": 0.037016949152542375,
+        "min": 0.031864406779661014,
+        "p50": 0.03525423728813559,
+        "p95": 0.044474576271186436,
+        "p99": 0.045776271186440676,
+        "max": 0.04610169491525424
+      },
+      "pixels_over_5pct_error_count_per_target": {
+        "count": 5,
+        "mean": 54.6,
+        "min": 47,
+        "p50": 52,
+        "p95": 65.6,
+        "p99": 67.52000000000001,
+        "max": 68
+      },
+      "edge_location": {
+        "symmetric_chamfer_norm": {
+          "count": 5,
+          "mean": 0.007893455376064066,
+          "min": 0.003909150458428182,
+          "p50": 0.005087404651583901,
+          "p95": 0.017079809336444738,
+          "p99": 0.019412013422183037,
+          "max": 0.01999506444361761
+        },
+        "precision_at_1px": {
+          "count": 5,
+          "mean": 0.9920215525372571,
+          "min": 0.9618055555555556,
+          "p50": 1.0,
+          "p95": 1.0,
+          "p99": 1.0,
+          "max": 1.0
+        },
+        "recall_at_1px": {
+          "count": 5,
+          "mean": 0.9993013095107337,
+          "min": 0.9982517482517482,
+          "p50": 1.0,
+          "p95": 1.0,
+          "p99": 1.0,
+          "max": 1.0
+        },
+        "worst_target_chamfer_norm": 0.01999506444361761,
+        "minimum_target_precision_at_1px": 0.9618055555555556,
+        "minimum_target_recall_at_1px": 0.9982517482517482
+      },
+      "temporal": {
+        "frame_to_frame_residual": {
+          "per_transition_mean": {
+            "count": 10,
+            "mean": 0.009173368599073892,
+            "min": 0.007376980023059712,
+            "p50": 0.008409438183423067,
+            "p95": 0.0133643511229866,
+            "p99": 0.0133643511229866,
+            "max": 0.0133643511229866
+          },
+          "per_transition_p95": {
+            "count": 10,
+            "mean": 0.0,
+            "min": 0.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "p99": 0.0,
+            "max": 0.0
+          },
+          "worst_pixel_per_transition": {
+            "count": 10,
+            "mean": 0.6470588105882354,
+            "min": 0.6470588105882354,
+            "p50": 0.6470588105882354,
+            "p95": 0.6470588105882354,
+            "p99": 0.6470588105882354,
+            "max": 0.6470588105882354
+          },
+          "definition": "absolute RGB first-difference residual against ground truth, normalized by actual elapsed high-rate frame units",
+          "transitions": [
+            {
+              "timestamps_ns": [
+                0.0,
+                16666667.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.007376980023059712,
+              "p95": 0.0,
+              "max": 0.6470588105882354
+            },
+            {
+              "timestamps_ns": [
+                16666667.0,
+                33333334.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.007376980023059712,
+              "p95": 0.0,
+              "max": 0.6470588105882354
+            },
+            {
+              "timestamps_ns": [
+                33333334.0,
+                50000001.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.008906613314722502,
+              "p95": 0.0,
+              "max": 0.6470588105882354
+            },
+            {
+              "timestamps_ns": [
+                50000001.0,
+                66666668.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.008906613314722502,
+              "p95": 0.0,
+              "max": 0.6470588105882354
+            },
+            {
+              "timestamps_ns": [
+                66666668.0,
+                83333335.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.007809460351177581,
+              "p95": 0.0,
+              "max": 0.6470588105882354
+            },
+            {
+              "timestamps_ns": [
+                83333335.0,
+                100000002.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.007809460351177581,
+              "p95": 0.0,
+              "max": 0.6470588105882354
+            },
+            {
+              "timestamps_ns": [
+                100000002.0,
+                116666669.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.0133643511229866,
+              "p95": 0.0,
+              "max": 0.6470588105882354
+            },
+            {
+              "timestamps_ns": [
+                116666669.0,
+                133333336.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.0133643511229866,
+              "p95": 0.0,
+              "max": 0.6470588105882354
+            },
+            {
+              "timestamps_ns": [
+                133333336.0,
+                150000003.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.008409438183423067,
+              "p95": 0.0,
+              "max": 0.6470588105882354
+            },
+            {
+              "timestamps_ns": [
+                150000003.0,
+                166666670.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.008409438183423067,
+              "p95": 0.0,
+              "max": 0.6470588105882354
+            }
+          ]
+        },
+        "temporal_consistency_score": 0.9908266314009261,
+        "high_frequency_temporal_flicker": {
+          "per_window_mean": {
+            "count": 9,
+            "mean": 0.016615338503068587,
+            "min": 0.011444776322977744,
+            "p50": 0.016047855788793634,
+            "p95": 0.02348474482332205,
+            "p99": 0.02607991033378374,
+            "max": 0.026728701711399162
+          },
+          "per_window_p95": {
+            "count": 9,
+            "mean": 0.022236745661002023,
+            "min": 0.0,
+            "p50": 0.0,
+            "p95": 0.10779084536156773,
+            "p99": 0.1408784257374104,
+            "max": 0.14915032083137109
+          },
+          "worst_pixel_per_window": {
+            "count": 9,
+            "mean": 1.222367416610023,
+            "min": 0.9712417912156872,
+            "p50": 1.2941175952941188,
+            "p95": 1.2941175952941188,
+            "p99": 1.2941175952941188,
+            "max": 1.2941175952941188
+          },
+          "definition": "absolute RGB second-derivative residual against ground truth, with actual timestamp spacing",
+          "windows": [
+            {
+              "timestamps_ns": [
+                0.0,
+                16666667.0,
+                33333334.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.014753959751040227,
+              "p95": 0.0,
+              "max": 1.2941175952941188,
+              "edge_mean": 0.024099271585289014,
+              "edge_p95": 0.1662611020206834,
+              "edge_max": 1.1397301504892248
+            },
+            {
+              "timestamps_ns": [
+                16666667.0,
+                33333334.0,
+                50000001.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.01169292076857429,
+              "p95": 0.04575163215686279,
+              "max": 1.2941175952941188,
+              "edge_mean": 0.01841797644491528,
+              "edge_p95": 0.1321490008240751,
+              "edge_max": 0.7596313421637655
+            },
+            {
+              "timestamps_ns": [
+                33333334.0,
+                50000001.0,
+                66666668.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.017813226273180476,
+              "p95": 0.0,
+              "max": 1.2941175952941188,
+              "edge_mean": 0.027084139329019475,
+              "edge_p95": 0.21895802823990396,
+              "edge_max": 1.5195458215711075
+            },
+            {
+              "timestamps_ns": [
+                50000001.0,
+                66666668.0,
+                83333335.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.011444776322977744,
+              "p95": 0.002614378980392167,
+              "max": 1.2941175952941188,
+              "edge_mean": 0.014541780352967633,
+              "edge_p95": 0.10445341087397635,
+              "edge_max": 0.7597729107855538
+            },
+            {
+              "timestamps_ns": [
+                66666668.0,
+                83333335.0,
+                100000002.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.015618920389976752,
+              "p95": 0.0,
+              "max": 1.2941175952941188,
+              "edge_mean": 0.022697645496761062,
+              "edge_p95": 0.201651756639812,
+              "edge_max": 1.1397301504892248
+            },
+            {
+              "timestamps_ns": [
+                83333335.0,
+                100000002.0,
+                116666669.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.016047855788793634,
+              "p95": 0.002614378980392167,
+              "max": 0.9712417912156872,
+              "edge_mean": 0.025497168101493006,
+              "edge_p95": 0.19672843732318243,
+              "edge_max": 1.0849492438146993
+            },
+            {
+              "timestamps_ns": [
+                100000002.0,
+                116666669.0,
+                133333336.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.026728701711399162,
+              "p95": 0.0,
+              "max": 1.2941175952941188,
+              "edge_mean": 0.04677618494753691,
+              "edge_p95": 0.4069496307808378,
+              "edge_max": 1.251058513926826
+            },
+            {
+              "timestamps_ns": [
+                116666669.0,
+                133333336.0,
+                150000003.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.0186188094912064,
+              "p95": 0.14915032083137109,
+              "max": 0.9712417912156872,
+              "edge_mean": 0.02821574822884181,
+              "edge_p95": 0.20207246250533667,
+              "edge_max": 1.0053449280452957
+            },
+            {
+              "timestamps_ns": [
+                133333336.0,
+                150000003.0,
+                166666670.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.01681887603046861,
+              "p95": 0.0,
+              "max": 1.2941175952941188,
+              "edge_mean": 0.02388571402596004,
+              "edge_p95": 0.1711694049179296,
+              "edge_max": 0.9687879830541567
+            }
+          ]
+        },
+        "edge_flicker": {
+          "per_window_mean": {
+            "count": 9,
+            "mean": 0.02569062539030936,
+            "min": 0.014541780352967633,
+            "p50": 0.024099271585289014,
+            "p95": 0.03935201026005886,
+            "p99": 0.0452913500100413,
+            "max": 0.04677618494753691
+          },
+          "per_window_p95": {
+            "count": 9,
+            "mean": 0.20004369268063749,
+            "min": 0.10445341087397635,
+            "p50": 0.19672843732318243,
+            "p95": 0.3317529897644642,
+            "p99": 0.3919103025775631,
+            "max": 0.4069496307808378
+          },
+          "worst_pixel_per_window": {
+            "count": 9,
+            "mean": 1.0698390049266504,
+            "min": 0.7596313421637655,
+            "p50": 1.0849492438146993,
+            "p95": 1.4121508985133948,
+            "p99": 1.498066836959565,
+            "max": 1.5195458215711075
+          },
+          "definition": "Sobel magnitude second-derivative residual against ground truth"
+        }
+      }
+    },
+    "text": {
+      "sample_count": 5,
+      "psnr_db": {
+        "count": 5,
+        "mean": 16.958926310046863,
+        "min": 15.09070733796072,
+        "p50": 16.697636382491112,
+        "p95": 18.956749550688947,
+        "p99": 19.33346919264058,
+        "max": 19.42764910312849
+      },
+      "ssim_7x7_masked_luminance": {
+        "count": 5,
+        "mean": 0.740293264018161,
+        "min": 0.6997135292944553,
+        "p50": 0.7566108475918294,
+        "p95": 0.7637638017995316,
+        "p99": 0.7637701773360006,
+        "max": 0.7637717712201177
+      },
+      "perceptual_similarity": {
+        "count": 5,
+        "mean": 0.8294867587107806,
+        "min": 0.8091163813236872,
+        "p50": 0.8180777400247597,
+        "p95": 0.8588792993120324,
+        "p99": 0.8613892244582406,
+        "max": 0.8620167057447927
+      },
+      "cielab_delta_e76_mean": {
+        "count": 5,
+        "mean": 5.914720588357289,
+        "min": 3.2251503225715745,
+        "p50": 6.0471568548217025,
+        "p95": 8.042187467454719,
+        "p99": 8.35733911684763,
+        "max": 8.436127029195857
+      },
+      "pixel_abs_error_norm_mean_per_target": {
+        "count": 5,
+        "mean": 0.03944078580945577,
+        "min": 0.02154248366013072,
+        "p50": 0.040392156862745096,
+        "p95": 0.053482841808810244,
+        "p99": 0.05551051171688187,
+        "max": 0.056017429193899786
+      },
+      "frame_max_pixel_error_norm": {
+        "count": 5,
+        "mean": 0.6470588235294118,
+        "min": 0.6470588235294118,
+        "p50": 0.6470588235294118,
+        "p95": 0.6470588235294118,
+        "p99": 0.6470588235294118,
+        "max": 0.6470588235294118
+      },
+      "pixels_over_1pct_error_fraction_per_target": {
+        "count": 5,
+        "mean": 0.0965685034628124,
+        "min": 0.05333333333333334,
+        "p50": 0.1,
+        "p95": 0.12861788617886177,
+        "p99": 0.13239024390243903,
+        "max": 0.13333333333333333
+      },
+      "pixels_over_1pct_error_count_per_target": {
+        "count": 5,
+        "mean": 7.6,
+        "min": 4,
+        "p50": 8,
+        "p95": 9.8,
+        "p99": 9.96,
+        "max": 10
+      },
+      "pixels_over_5pct_error_fraction_per_target": {
+        "count": 5,
+        "mean": 0.0965685034628124,
+        "min": 0.05333333333333334,
+        "p50": 0.1,
+        "p95": 0.12861788617886177,
+        "p99": 0.13239024390243903,
+        "max": 0.13333333333333333
+      },
+      "pixels_over_5pct_error_count_per_target": {
+        "count": 5,
+        "mean": 7.6,
+        "min": 4,
+        "p50": 8,
+        "p95": 9.8,
+        "p99": 9.96,
+        "max": 10
+      },
+      "edge_location": {
+        "symmetric_chamfer_norm": {
+          "count": 5,
+          "mean": 0.0008989898989898989,
+          "min": 0.0,
+          "p50": 0.0010822510822510823,
+          "p95": 0.0020158730158730156,
+          "p99": 0.002180952380952381,
+          "max": 0.0022222222222222222
+        },
+        "precision_at_1px": {
+          "count": 5,
+          "mean": 1.0,
+          "min": 1.0,
+          "p50": 1.0,
+          "p95": 1.0,
+          "p99": 1.0,
+          "max": 1.0
+        },
+        "recall_at_1px": {
+          "count": 5,
+          "mean": 1.0,
+          "min": 1.0,
+          "p50": 1.0,
+          "p95": 1.0,
+          "p99": 1.0,
+          "max": 1.0
+        },
+        "worst_target_chamfer_norm": 0.0022222222222222222,
+        "minimum_target_precision_at_1px": 1.0,
+        "minimum_target_recall_at_1px": 1.0
+      },
+      "temporal": {
+        "frame_to_frame_residual": {
+          "per_transition_mean": {
+            "count": 10,
+            "mean": 0.05937213539312267,
+            "min": 0.03778966056327986,
+            "p50": 0.05125139384186196,
+            "p95": 0.10277204473739493,
+            "p99": 0.10471851467422916,
+            "max": 0.10520513215843771
+          },
+          "per_transition_p95": {
+            "count": 10,
+            "mean": 0.38784312949803934,
+            "min": 0.3228758105359478,
+            "p50": 0.3228758105359478,
+            "p95": 0.6470588105882354,
+            "p99": 0.6470588105882354,
+            "max": 0.6470588105882354
+          },
+          "worst_pixel_per_transition": {
+            "count": 10,
+            "mean": 0.6470588105882354,
+            "min": 0.6470588105882354,
+            "p50": 0.6470588105882354,
+            "p95": 0.6470588105882354,
+            "p99": 0.6470588105882354,
+            "max": 0.6470588105882354
+          },
+          "definition": "absolute RGB first-difference residual against ground truth, normalized by actual elapsed high-rate frame units",
+          "transitions": [
+            {
+              "timestamps_ns": [
+                0.0,
+                16666667.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.050618157897787244,
+              "p95": 0.3228758105359478,
+              "max": 0.6470588105882354
+            },
+            {
+              "timestamps_ns": [
+                16666667.0,
+                33333334.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.05387488220915034,
+              "p95": 0.3228758105359478,
+              "max": 0.6470588105882354
+            },
+            {
+              "timestamps_ns": [
+                33333334.0,
+                50000001.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.03778966056327986,
+              "p95": 0.3228758105359478,
+              "max": 0.6470588105882354
+            },
+            {
+              "timestamps_ns": [
+                50000001.0,
+                66666668.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.06165577218736386,
+              "p95": 0.3241830000522876,
+              "max": 0.6470588105882354
+            },
+            {
+              "timestamps_ns": [
+                66666668.0,
+                83333335.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.039422922852542654,
+              "p95": 0.3228758105359478,
+              "max": 0.6470588105882354
+            },
+            {
+              "timestamps_ns": [
+                83333335.0,
+                100000002.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.04285376715615404,
+              "p95": 0.3228758105359478,
+              "max": 0.6470588105882354
+            },
+            {
+              "timestamps_ns": [
+                100000002.0,
+                116666669.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.10520513215843771,
+              "p95": 0.6470588105882354,
+              "max": 0.6470588105882354
+            },
+            {
+              "timestamps_ns": [
+                116666669.0,
+                133333336.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.09979827122278709,
+              "p95": 0.6470588105882354,
+              "max": 0.6470588105882354
+            },
+            {
+              "timestamps_ns": [
+                133333336.0,
+                150000003.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.05125139384186196,
+              "p95": 0.3228758105359478,
+              "max": 0.6470588105882354
+            },
+            {
+              "timestamps_ns": [
+                150000003.0,
+                166666670.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.05125139384186196,
+              "p95": 0.3228758105359478,
+              "max": 0.6470588105882354
+            }
+          ]
+        },
+        "temporal_consistency_score": 0.9406278646068773,
+        "high_frequency_temporal_flicker": {
+          "per_window_mean": {
+            "count": 9,
+            "mean": 0.11827590000836974,
+            "min": 0.03862433707936511,
+            "p50": 0.10907945071202468,
+            "p95": 0.18476467224297993,
+            "p99": 0.20528114253553215,
+            "max": 0.2104102601086702
+          },
+          "per_window_p95": {
+            "count": 9,
+            "mean": 0.7100798554021793,
+            "min": 0.3228758040784317,
+            "p50": 0.6481045492392165,
+            "p95": 1.151529365703531,
+            "p99": 1.2655999493760013,
+            "max": 1.2941175952941188
+          },
+          "worst_pixel_per_window": {
+            "count": 9,
+            "mean": 1.222367416610023,
+            "min": 0.9712417912156872,
+            "p50": 1.2941175952941188,
+            "p95": 1.2941175952941188,
+            "p99": 1.2941175952941188,
+            "max": 1.2941175952941188
+          },
+          "definition": "absolute RGB second-derivative residual against ground truth, with actual timestamp spacing",
+          "windows": [
+            {
+              "timestamps_ns": [
+                0.0,
+                16666667.0,
+                33333334.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.10774976226330542,
+              "p95": 0.6457516081568634,
+              "max": 1.2941175952941188,
+              "edge_mean": 0.05247471891983535,
+              "edge_p95": 0.31476688361421123,
+              "edge_max": 0.38009880832545917
+            },
+            {
+              "timestamps_ns": [
+                16666667.0,
+                33333334.0,
+                50000001.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.03862433707936511,
+              "p95": 0.3228758040784317,
+              "max": 1.2941175952941188,
+              "edge_mean": 0.026502508558476284,
+              "edge_p95": 0.15805475009419945,
+              "edge_max": 0.3147668836142112
+            },
+            {
+              "timestamps_ns": [
+                33333334.0,
+                50000001.0,
+                66666668.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.12331154190849684,
+              "p95": 0.6483659871372556,
+              "max": 1.2941175952941188,
+              "edge_mean": 0.0502239226544256,
+              "edge_p95": 0.30786741780525795,
+              "edge_max": 0.37981567108188274
+            },
+            {
+              "timestamps_ns": [
+                50000001.0,
+                66666668.0,
+                83333335.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.09245253287208226,
+              "p95": 0.3241829935686278,
+              "max": 1.2941175952941188,
+              "edge_mean": 0.047788408819267145,
+              "edge_p95": 0.22085268036396805,
+              "edge_max": 0.30507931264596133
+            },
+            {
+              "timestamps_ns": [
+                66666668.0,
+                83333335.0,
+                100000002.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.09240584753314669,
+              "p95": 0.6479738302901967,
+              "max": 1.2941175952941188,
+              "edge_mean": 0.06751274199763528,
+              "edge_p95": 0.4417053607279361,
+              "edge_max": 0.7599144794073418
+            },
+            {
+              "timestamps_ns": [
+                83333335.0,
+                100000002.0,
+                116666669.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.1462962904444446,
+              "p95": 0.9216993095372541,
+              "max": 0.9712417912156872,
+              "edge_mean": 0.08558097307947407,
+              "edge_p95": 0.5016858791316926,
+              "edge_max": 0.7355014265939154
+            },
+            {
+              "timestamps_ns": [
+                100000002.0,
+                116666669.0,
+                133333336.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.2104102601086702,
+              "p95": 1.2941175952941188,
+              "max": 1.2941175952941188,
+              "edge_mean": 0.13949587165531382,
+              "edge_p95": 0.6643686844749366,
+              "edge_max": 1.2319232362068704
+            },
+            {
+              "timestamps_ns": [
+                116666669.0,
+                133333336.0,
+                150000003.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.14415307715379178,
+              "p95": 0.9376470213176498,
+              "max": 0.9712417912156872,
+              "edge_mean": 0.09417270482138528,
+              "edge_p95": 0.5418653558104842,
+              "edge_max": 0.8159850493409598
+            },
+            {
+              "timestamps_ns": [
+                133333336.0,
+                150000003.0,
+                166666670.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.10907945071202468,
+              "p95": 0.6481045492392165,
+              "max": 1.2941175952941188,
+              "edge_mean": 0.07969584455924666,
+              "edge_p95": 0.5788052496757081,
+              "edge_max": 0.9687879830541567
+            }
+          ]
+        },
+        "edge_flicker": {
+          "per_window_mean": {
+            "count": 9,
+            "mean": 0.07149418834056216,
+            "min": 0.026502508558476284,
+            "p50": 0.06751274199763528,
+            "p95": 0.1213666049217424,
+            "p99": 0.13587001830859954,
+            "max": 0.13949587165531382
+          },
+          "per_window_p95": {
+            "count": 9,
+            "mean": 0.41444136241093266,
+            "min": 0.15805475009419945,
+            "p50": 0.4417053607279361,
+            "p95": 0.6301433105552452,
+            "p99": 0.6575236096909982,
+            "max": 0.6643686844749366
+          },
+          "worst_pixel_per_window": {
+            "count": 9,
+            "mean": 0.6546525389189732,
+            "min": 0.30507931264596133,
+            "p50": 0.7355014265939154,
+            "p95": 1.1266691349457847,
+            "p99": 1.2108724159546531,
+            "max": 1.2319232362068704
+          },
+          "definition": "Sobel magnitude second-derivative residual against ground truth"
+        }
+      }
+    },
+    "scene": {
+      "sample_count": 5,
+      "psnr_db": {
+        "count": 5,
+        "mean": 23.67671377916781,
+        "min": 21.22852146754743,
+        "p50": 24.2060772670356,
+        "p95": 24.4222342179026,
+        "p99": 24.448029119937715,
+        "max": 24.454477845446494
+      },
+      "ssim_7x7_masked_luminance": {
+        "count": 5,
+        "mean": 0.7934400320456576,
+        "min": 0.6926702324272195,
+        "p50": 0.8145977007230363,
+        "p95": 0.8258982255858636,
+        "p99": 0.8262821530440503,
+        "max": 0.8263781349085969
+      },
+      "perceptual_similarity": {
+        "count": 5,
+        "mean": 0.8693339427480964,
+        "min": 0.8172892052751107,
+        "p50": 0.88092729485725,
+        "p95": 0.885765428606995,
+        "p99": 0.8858823635489809,
+        "max": 0.8859115972844773
+      },
+      "cielab_delta_e76_mean": {
+        "count": 5,
+        "mean": 3.900016792114805,
+        "min": 3.415656443826456,
+        "p50": 3.722815212476048,
+        "p95": 4.699678536647728,
+        "p99": 4.852927795128777,
+        "max": 4.891240109749039
+      },
+      "pixel_abs_error_norm_mean_per_target": {
+        "count": 5,
+        "mean": 0.020844345489132225,
+        "min": 0.017868526215980944,
+        "p50": 0.019320602546663932,
+        "p95": 0.026893993699619968,
+        "p99": 0.02836804283785598,
+        "max": 0.02873655512241498
+      },
+      "frame_max_pixel_error_norm": {
+        "count": 5,
+        "mean": 0.657516339869281,
+        "min": 0.657516339869281,
+        "p50": 0.657516339869281,
+        "p95": 0.657516339869281,
+        "p99": 0.657516339869281,
+        "max": 0.657516339869281
+      },
+      "pixels_over_1pct_error_fraction_per_target": {
+        "count": 5,
+        "mean": 0.16395814494251387,
+        "min": 0.15049735176333806,
+        "p50": 0.158894199715799,
+        "p95": 0.18411058002842012,
+        "p99": 0.18708693967187703,
+        "max": 0.18783102958274125
+      },
+      "pixels_over_1pct_error_count_per_target": {
+        "count": 5,
+        "mean": 1269.2,
+        "min": 1165,
+        "p50": 1230,
+        "p95": 1425.2,
+        "p99": 1448.24,
+        "max": 1454
+      },
+      "pixels_over_5pct_error_fraction_per_target": {
+        "count": 5,
+        "mean": 0.11585066528872238,
+        "min": 0.09766180080093011,
+        "p50": 0.1131636739439349,
+        "p95": 0.1336261464927012,
+        "p99": 0.13658183697196744,
+        "max": 0.137320759591784
+      },
+      "pixels_over_5pct_error_count_per_target": {
+        "count": 5,
+        "mean": 896.8,
+        "min": 756,
+        "p50": 876,
+        "p95": 1034.4,
+        "p99": 1057.28,
+        "max": 1063
+      },
+      "edge_location": {
+        "symmetric_chamfer_norm": {
+          "count": 5,
+          "mean": 0.08698231629214075,
+          "min": 0.06767976544862027,
+          "p50": 0.08759033127445244,
+          "p95": 0.1046454429981862,
+          "p99": 0.10679078866124228,
+          "max": 0.1073271250770063
+        },
+        "precision_at_1px": {
+          "count": 5,
+          "mean": 0.9882551442692199,
+          "min": 0.9771897810218978,
+          "p50": 0.9899665551839465,
+          "p95": 0.9944183620239957,
+          "p99": 0.9951799687010954,
+          "max": 0.9953703703703703
+        },
+        "recall_at_1px": {
+          "count": 5,
+          "mean": 0.8524699556622066,
+          "min": 0.7989556135770235,
+          "p50": 0.8568872987477638,
+          "p95": 0.8897352459805525,
+          "p99": 0.8928406662173871,
+          "max": 0.8936170212765957
+        },
+        "worst_target_chamfer_norm": 0.1073271250770063,
+        "minimum_target_precision_at_1px": 0.9771897810218978,
+        "minimum_target_recall_at_1px": 0.7989556135770235
+      },
+      "temporal": {
+        "frame_to_frame_residual": {
+          "per_transition_mean": {
+            "count": 10,
+            "mean": 0.02084434507224532,
+            "min": 0.017868525858610425,
+            "p50": 0.019320602160251887,
+            "p95": 0.02873655454768389,
+            "p99": 0.02873655454768389,
+            "max": 0.02873655454768389
+          },
+          "per_transition_p95": {
+            "count": 10,
+            "mean": 0.1772548984156863,
+            "min": 0.16993463712418305,
+            "p50": 0.17124182664052293,
+            "p95": 0.20392156454901966,
+            "p99": 0.20392156454901966,
+            "max": 0.20392156454901966
+          },
+          "worst_pixel_per_transition": {
+            "count": 10,
+            "mean": 0.6575163267189544,
+            "min": 0.6575163267189544,
+            "p50": 0.6575163267189544,
+            "p95": 0.6575163267189544,
+            "p99": 0.6575163267189544,
+            "max": 0.6575163267189544
+          },
+          "definition": "absolute RGB first-difference residual against ground truth, normalized by actual elapsed high-rate frame units",
+          "transitions": [
+            {
+              "timestamps_ns": [
+                0.0,
+                16666667.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.01877229517671545,
+              "p95": 0.17124182664052293,
+              "max": 0.6575163267189544
+            },
+            {
+              "timestamps_ns": [
+                16666667.0,
+                33333334.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.01877229517671545,
+              "p95": 0.17124182664052293,
+              "max": 0.6575163267189544
+            },
+            {
+              "timestamps_ns": [
+                33333334.0,
+                50000001.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.019523747617964955,
+              "p95": 0.16993463712418305,
+              "max": 0.6575163267189544
+            },
+            {
+              "timestamps_ns": [
+                50000001.0,
+                66666668.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.019523747617964955,
+              "p95": 0.16993463712418305,
+              "max": 0.6575163267189544
+            },
+            {
+              "timestamps_ns": [
+                66666668.0,
+                83333335.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.019320602160251887,
+              "p95": 0.16993463712418305,
+              "max": 0.6575163267189544
+            },
+            {
+              "timestamps_ns": [
+                83333335.0,
+                100000002.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.019320602160251887,
+              "p95": 0.16993463712418305,
+              "max": 0.6575163267189544
+            },
+            {
+              "timestamps_ns": [
+                100000002.0,
+                116666669.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.02873655454768389,
+              "p95": 0.20392156454901966,
+              "max": 0.6575163267189544
+            },
+            {
+              "timestamps_ns": [
+                116666669.0,
+                133333336.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.02873655454768389,
+              "p95": 0.20392156454901966,
+              "max": 0.6575163267189544
+            },
+            {
+              "timestamps_ns": [
+                133333336.0,
+                150000003.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.017868525858610425,
+              "p95": 0.17124182664052293,
+              "max": 0.6575163267189544
+            },
+            {
+              "timestamps_ns": [
+                150000003.0,
+                166666670.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.017868525858610425,
+              "p95": 0.17124182664052293,
+              "max": 0.6575163267189544
+            }
+          ]
+        },
+        "temporal_consistency_score": 0.9791556549277547,
+        "high_frequency_temporal_flicker": {
+          "per_window_mean": {
+            "count": 9,
+            "mean": 0.03769833245348668,
+            "min": 0.02690452984439871,
+            "p50": 0.03573705100247983,
+            "p95": 0.05010286254953536,
+            "p99": 0.05599905886663156,
+            "max": 0.05747310794590561
+          },
+          "per_window_p95": {
+            "count": 9,
+            "mean": 0.2899055802701528,
+            "min": 0.19999999200000018,
+            "p50": 0.3398692674509807,
+            "p95": 0.3816993311372553,
+            "p99": 0.4026143629803926,
+            "max": 0.4078431209411769
+          },
+          "worst_pixel_per_window": {
+            "count": 9,
+            "mean": 1.1035584162788683,
+            "min": 0.752941146352942,
+            "p50": 1.3150326271372563,
+            "p95": 1.3150326271372563,
+            "p99": 1.3150326271372563,
+            "max": 1.3150326271372563
+          },
+          "definition": "absolute RGB second-derivative residual against ground truth, with actual timestamp spacing",
+          "windows": [
+            {
+              "timestamps_ns": [
+                0.0,
+                16666667.0,
+                33333334.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.037544589602539105,
+              "p95": 0.3424836464313729,
+              "max": 1.3150326271372563,
+              "edge_mean": 0.05776112079734983,
+              "edge_p95": 0.40878586600150624,
+              "edge_max": 0.8290786681538447
+            },
+            {
+              "timestamps_ns": [
+                16666667.0,
+                33333334.0,
+                50000001.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.034211180412967904,
+              "p95": 0.2104575079215688,
+              "max": 0.752941146352942,
+              "edge_mean": 0.05249960234929197,
+              "edge_p95": 0.30845354139859327,
+              "edge_max": 0.6332854648646595
+            },
+            {
+              "timestamps_ns": [
+                33333334.0,
+                50000001.0,
+                66666668.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.039047494454980014,
+              "p95": 0.3398692674509807,
+              "max": 1.3150326271372563,
+              "edge_mean": 0.06312938893309972,
+              "edge_p95": 0.40878586600150624,
+              "edge_max": 0.8661358595889713
+            },
+            {
+              "timestamps_ns": [
+                50000001.0,
+                66666668.0,
+                83333335.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.02690452984439871,
+              "p95": 0.19999999200000018,
+              "max": 0.8679738214901971,
+              "edge_mean": 0.03803664018470468,
+              "edge_p95": 0.20439293300075312,
+              "edge_max": 0.5877906175241407
+            },
+            {
+              "timestamps_ns": [
+                66666668.0,
+                83333335.0,
+                100000002.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.0386412035476797,
+              "p95": 0.3398692674509807,
+              "max": 1.3150326271372563,
+              "edge_mean": 0.061115717340649627,
+              "edge_p95": 0.40878586600150624,
+              "edge_max": 0.812780527284647
+            },
+            {
+              "timestamps_ns": [
+                83333335.0,
+                100000002.0,
+                116666669.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.03548442789469875,
+              "p95": 0.21307188690196102,
+              "max": 0.8679738214901971,
+              "edge_mean": 0.047933459352635994,
+              "edge_p95": 0.21784287039534908,
+              "edge_max": 0.7870121253822598
+            },
+            {
+              "timestamps_ns": [
+                100000002.0,
+                116666669.0,
+                133333336.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.05747310794590561,
+              "p95": 0.4078431209411769,
+              "max": 1.3150326271372563,
+              "edge_mean": 0.07448064458265898,
+              "edge_p95": 0.4089129248199532,
+              "edge_max": 1.1189964848049143
+            },
+            {
+              "timestamps_ns": [
+                116666669.0,
+                133333336.0,
+                150000003.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.03424140737573049,
+              "p95": 0.21307188690196102,
+              "max": 0.8679738214901971,
+              "edge_mean": 0.04563941956030998,
+              "edge_p95": 0.2156548933345885,
+              "edge_max": 0.6328913514551727
+            },
+            {
+              "timestamps_ns": [
+                133333336.0,
+                150000003.0,
+                166666670.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.03573705100247983,
+              "p95": 0.3424836464313729,
+              "max": 1.3150326271372563,
+              "edge_mean": 0.054998819517051545,
+              "edge_p95": 0.4033035132796241,
+              "edge_max": 0.8212551419464684
+            }
+          ]
+        },
+        "edge_flicker": {
+          "per_window_mean": {
+            "count": 9,
+            "mean": 0.05506609029086137,
+            "min": 0.03803664018470468,
+            "p50": 0.054998819517051545,
+            "p95": 0.06994014232283527,
+            "p99": 0.07357254413069424,
+            "max": 0.07448064458265898
+          },
+          "per_window_p95": {
+            "count": 9,
+            "mean": 0.3316575860259311,
+            "min": 0.20439293300075312,
+            "p50": 0.4033035132796241,
+            "p95": 0.40886210129257444,
+            "p99": 0.40890276011447746,
+            "max": 0.4089129248199532
+          },
+          "worst_pixel_per_window": {
+            "count": 9,
+            "mean": 0.7876918045561199,
+            "min": 0.5877906175241407,
+            "p50": 0.812780527284647,
+            "p95": 1.017852234718537,
+            "p99": 1.098767634787639,
+            "max": 1.1189964848049143
+          },
+          "definition": "Sobel magnitude second-derivative residual against ground truth"
+        }
+      }
+    },
+    "occlusion": {
+      "sample_count": 5,
+      "psnr_db": {
+        "count": 5,
+        "mean": 20.983612268027933,
+        "min": 20.457236798219164,
+        "p50": 20.99429841906277,
+        "p95": 21.554718620712865,
+        "p99": 21.582165938765336,
+        "max": 21.589027768278456
+      },
+      "ssim_7x7_masked_luminance": {
+        "count": 5,
+        "mean": 0.22031038425637606,
+        "min": 0.16405510021219313,
+        "p50": 0.21454894440345887,
+        "p95": 0.2696550184985582,
+        "p99": 0.2700872987815332,
+        "max": 0.27019536885227696
+      },
+      "perceptual_similarity": {
+        "count": 5,
+        "mean": 0.3691605664282894,
+        "min": 0.34043672070119635,
+        "p50": 0.3474422106792417,
+        "p95": 0.41358901899516737,
+        "p99": 0.41746095890210655,
+        "max": 0.41842894387884133
+      },
+      "cielab_delta_e76_mean": {
+        "count": 5,
+        "mean": 14.230168561994592,
+        "min": 12.30305885080002,
+        "p50": 14.411987963483643,
+        "p95": 15.397010002635227,
+        "p99": 15.548403918297419,
+        "max": 15.586252397212967
+      },
+      "pixel_abs_error_norm_mean_per_target": {
+        "count": 5,
+        "mean": 0.07306510482981073,
+        "min": 0.06695526695526696,
+        "p50": 0.07245140480434598,
+        "p95": 0.0808454290807232,
+        "p99": 0.08237059672353791,
+        "max": 0.08275188863424159
+      },
+      "frame_max_pixel_error_norm": {
+        "count": 5,
+        "mean": 0.42169934640522877,
+        "min": 0.2130718954248366,
+        "p50": 0.4117647058823529,
+        "p95": 0.5764705882352941,
+        "p99": 0.5764705882352941,
+        "max": 0.5764705882352941
+      },
+      "pixels_over_1pct_error_fraction_per_target": {
+        "count": 5,
+        "mean": 0.9227272727272726,
+        "min": 0.9090909090909091,
+        "p50": 0.9123376623376623,
+        "p95": 0.9571428571428571,
+        "p99": 0.9654545454545455,
+        "max": 0.9675324675324676
+      },
+      "pixels_over_1pct_error_count_per_target": {
+        "count": 5,
+        "mean": 284.2,
+        "min": 280,
+        "p50": 281,
+        "p95": 294.8,
+        "p99": 297.36,
+        "max": 298
+      },
+      "pixels_over_5pct_error_fraction_per_target": {
+        "count": 5,
+        "mean": 0.7974025974025973,
+        "min": 0.5454545454545454,
+        "p50": 0.8474025974025974,
+        "p95": 0.9071428571428573,
+        "p99": 0.9138961038961039,
+        "max": 0.9155844155844156
+      },
+      "pixels_over_5pct_error_count_per_target": {
+        "count": 5,
+        "mean": 245.6,
+        "min": 168,
+        "p50": 261,
+        "p95": 279.4,
+        "p99": 281.47999999999996,
+        "max": 282
+      },
+      "edge_location": {
+        "symmetric_chamfer_norm": {
+          "count": 5,
+          "mean": 0.5395707706945667,
+          "min": 0.36490701535183606,
+          "p50": 0.41033988391614473,
+          "p95": 0.9064542406554799,
+          "p99": 0.981290848131096,
+          "max": 1.0
+        },
+        "precision_at_1px": {
+          "count": 5,
+          "mean": 0.9181818181818182,
+          "min": 0.5909090909090909,
+          "p50": 1.0,
+          "p95": 1.0,
+          "p99": 1.0,
+          "max": 1.0
+        },
+        "recall_at_1px": {
+          "count": 5,
+          "mean": 0.09014697403998276,
+          "min": 0.0,
+          "p50": 0.05737704918032787,
+          "p95": 0.23568677792041076,
+          "p99": 0.2617715019255456,
+          "max": 0.2682926829268293
+        },
+        "worst_target_chamfer_norm": 1.0,
+        "minimum_target_precision_at_1px": 0.5909090909090909,
+        "minimum_target_recall_at_1px": 0.0
+      },
+      "temporal": {
+        "frame_to_frame_residual": {
+          "per_transition_mean": {
+            "count": 10,
+            "mean": 0.06322993173424192,
+            "min": 0.054398424949113,
+            "p50": 0.0598692028945091,
+            "p95": 0.084223226068175,
+            "p99": 0.09678431178980394,
+            "max": 0.09992458322021118
+          },
+          "per_transition_p95": {
+            "count": 10,
+            "mean": 0.1188235270352942,
+            "min": 0.08235293952941178,
+            "p50": 0.08235293952941179,
+            "p95": 0.21042483239281093,
+            "p99": 0.21254247940928117,
+            "max": 0.21307189116339875
+          },
+          "worst_pixel_per_transition": {
+            "count": 10,
+            "mean": 0.45111110208888905,
+            "min": 0.21307189116339875,
+            "p50": 0.4594771149934642,
+            "p95": 0.5764705767058825,
+            "p99": 0.5764705767058825,
+            "max": 0.5764705767058825
+          },
+          "definition": "absolute RGB first-difference residual against ground truth, normalized by actual elapsed high-rate frame units",
+          "transitions": [
+            {
+              "timestamps_ns": [
+                0.0,
+                16666667.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.06134094540824537,
+              "p95": 0.08235293952941178,
+              "max": 0.330718947633987
+            },
+            {
+              "timestamps_ns": [
+                16666667.0,
+                33333334.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.05495864902754437,
+              "p95": 0.08235293952941179,
+              "max": 0.330718947633987
+            },
+            {
+              "timestamps_ns": [
+                33333334.0,
+                50000001.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.058163264142857156,
+              "p95": 0.08235293952941179,
+              "max": 0.5764705767058825
+            },
+            {
+              "timestamps_ns": [
+                50000001.0,
+                66666668.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.0619550371865259,
+              "p95": 0.08235293952941178,
+              "max": 0.5764705767058825
+            },
+            {
+              "timestamps_ns": [
+                66666668.0,
+                83333335.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.06130503360834592,
+              "p95": 0.08235293952941178,
+              "max": 0.4117646976470589
+            },
+            {
+              "timestamps_ns": [
+                83333335.0,
+                100000002.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.05843337218067229,
+              "p95": 0.08235293952941179,
+              "max": 0.4954248266928106
+            },
+            {
+              "timestamps_ns": [
+                100000002.0,
+                116666669.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.06503267843790851,
+              "p95": 0.08235293952941179,
+              "max": 0.21307189116339875
+            },
+            {
+              "timestamps_ns": [
+                116666669.0,
+                133333336.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.09992458322021118,
+              "p95": 0.21307189116339875,
+              "max": 0.42352940329411776
+            },
+            {
+              "timestamps_ns": [
+                133333336.0,
+                150000003.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.056787329180995494,
+              "p95": 0.20718953833987022,
+              "max": 0.5764705767058825
+            },
+            {
+              "timestamps_ns": [
+                150000003.0,
+                166666670.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.054398424949113,
+              "p95": 0.19150326414379049,
+              "max": 0.5764705767058825
+            }
+          ]
+        },
+        "temporal_consistency_score": 0.936770068265758,
+        "high_frequency_temporal_flicker": {
+          "per_window_mean": {
+            "count": 9,
+            "mean": 0.09372532116671956,
+            "min": 0.05768385554951398,
+            "p50": 0.09541316144957993,
+            "p95": 0.13834383200126063,
+            "p99": 0.15758939612406178,
+            "max": 0.16240078715476208
+          },
+          "per_window_p95": {
+            "count": 9,
+            "mean": 0.24124908257952093,
+            "min": 0.1620914967843139,
+            "p50": 0.16470587576470605,
+            "p95": 0.4214378916392161,
+            "p99": 0.4252025973709808,
+            "max": 0.42614377380392204
+          },
+          "worst_pixel_per_window": {
+            "count": 9,
+            "mean": 0.7992737516165584,
+            "min": 0.4130718789019612,
+            "p50": 0.6614378820392163,
+            "p95": 1.1529411303529422,
+            "p99": 1.1529411303529422,
+            "max": 1.1529411303529422
+          },
+          "definition": "absolute RGB second-derivative residual against ground truth, with actual timestamp spacing",
+          "windows": [
+            {
+              "timestamps_ns": [
+                0.0,
+                16666667.0,
+                33333334.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.09967903429481803,
+              "p95": 0.16470587576470605,
+              "max": 0.6614378820392163,
+              "edge_mean": 0.1362686433390183,
+              "edge_p95": 0.40878586600150624,
+              "edge_max": 0.7052289913986832
+            },
+            {
+              "timestamps_ns": [
+                16666667.0,
+                33333334.0,
+                50000001.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.05768385554951398,
+              "p95": 0.1620914967843139,
+              "max": 0.657516313568628,
+              "edge_mean": 0.12924433888029158,
+              "edge_p95": 0.38750146507691074,
+              "edge_max": 0.41693031815062603
+            },
+            {
+              "timestamps_ns": [
+                33333334.0,
+                50000001.0,
+                66666668.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.10178571021428583,
+              "p95": 0.16470587576470605,
+              "max": 1.1529411303529422,
+              "edge_mean": 0.15254601226023076,
+              "edge_p95": 0.40878586600150624,
+              "edge_max": 0.8338606363012521
+            },
+            {
+              "timestamps_ns": [
+                50000001.0,
+                66666668.0,
+                83333335.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.06596327156003742,
+              "p95": 0.16470587576470605,
+              "max": 0.6601306925490202,
+              "edge_mean": 0.1433551718731502,
+              "edge_p95": 0.40878586600150624,
+              "edge_max": 0.41693031815062603
+            },
+            {
+              "timestamps_ns": [
+                66666668.0,
+                83333335.0,
+                100000002.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.10225839927100851,
+              "p95": 0.16470587576470605,
+              "max": 0.9908496335686284,
+              "edge_mean": 0.15706710898900508,
+              "edge_p95": 0.40878586600150624,
+              "edge_max": 0.5673261465671787
+            },
+            {
+              "timestamps_ns": [
+                83333335.0,
+                100000002.0,
+                116666669.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.06534025113494817,
+              "p95": 0.1620914967843139,
+              "max": 0.4130718789019612,
+              "edge_mean": 0.13688686931922042,
+              "edge_p95": 0.2916010449896791,
+              "edge_max": 0.40878586600150624
+            },
+            {
+              "timestamps_ns": [
+                100000002.0,
+                116666669.0,
+                133333336.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.16240078715476208,
+              "p95": 0.42614377380392204,
+              "max": 0.8470587896470596,
+              "edge_mean": 0.17762446897353268,
+              "edge_p95": 0.40878586600150624,
+              "edge_max": 0.8687952593658363
+            },
+            {
+              "timestamps_ns": [
+                116666669.0,
+                133333336.0,
+                150000003.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.09300341987152203,
+              "p95": 0.4143790683921572,
+              "max": 0.657516313568628,
+              "edge_mean": 0.15671090571153615,
+              "edge_p95": 0.40878586600150624,
+              "edge_max": 0.5677858596415065
+            },
+            {
+              "timestamps_ns": [
+                133333336.0,
+                150000003.0,
+                166666670.0
+              ],
+              "continuity_group": 0,
+              "mean": 0.09541316144957993,
+              "p95": 0.34771240439215717,
+              "max": 1.1529411303529422,
+              "edge_mean": 0.15593672170452444,
+              "edge_p95": 0.40878586600150624,
+              "edge_max": 0.7267858532815068
+            }
+          ]
+        },
+        "edge_flicker": {
+          "per_window_mean": {
+            "count": 9,
+            "mean": 0.14951558233894552,
+            "min": 0.12924433888029158,
+            "p50": 0.15254601226023076,
+            "p95": 0.16940152497972163,
+            "p99": 0.17597988017477048,
+            "max": 0.17762446897353268
+          },
+          "per_window_p95": {
+            "count": 9,
+            "mean": 0.3934003968974593,
+            "min": 0.2916010449896791,
+            "p50": 0.40878586600150624,
+            "p95": 0.40878586600150624,
+            "p99": 0.40878586600150624,
+            "max": 0.40878586600150624
+          },
+          "worst_pixel_per_window": {
+            "count": 9,
+            "mean": 0.6124921387620802,
+            "min": 0.40878586600150624,
+            "p50": 0.5677858596415065,
+            "p95": 0.8548214101400027,
+            "p99": 0.8660004895206697,
+            "max": 0.8687952593658363
+          },
+          "definition": "Sobel magnitude second-derivative residual against ground truth"
+        }
+      }
+    }
+  },
+  "quality_frames": [
+    {
+      "source_pair": [
+        0,
+        2
+      ],
+      "target_index": 1,
+      "t": 0.5,
+      "timestamp_ns": 16666667.0,
+      "regions": {
+        "all": {
+          "psnr_db": 24.50342311083052,
+          "psnr_perfect_match": false,
+          "ssim_7x7_masked_luminance": 0.8531636462155968,
+          "perceptual_similarity": 0.9015791316940778,
+          "perceptual_similarity_definition": "project-authored score: weighted geometric mean of masked 7x7 luminance SSIM over average-pooled scales 1,2,4,8 (weights 0.4,0.3,0.2,0.1), raised to 0.75, times exp(-mean CIE76 DeltaE/25) raised to 0.25; higher is better; not LPIPS or canonical MS-SSIM",
+          "cielab_delta_e76_mean": 3.184208759620126,
+          "pixel_abs_error_norm_mean": 0.016948501043936096,
+          "pixel_abs_error_norm_p95": 0.1437908496732026,
+          "frame_max_pixel_error_norm": 0.657516339869281,
+          "pixels_over_1pct_error_fraction": 0.13465711805555555,
+          "pixels_over_1pct_error_count": 1241,
+          "pixels_over_5pct_error_fraction": 0.0993923611111111,
+          "pixels_over_5pct_error_count": 916,
+          "active_pixel_count": 9216,
+          "edge_location": {
+            "symmetric_chamfer_px": 0.31736072990184805,
+            "symmetric_chamfer_norm": 0.05289345498364134,
+            "precision_at_1px": 0.9970041941282205,
+            "recall_at_1px": 0.9176119402985075,
+            "reference_edge_pixels": 1675.0,
+            "candidate_edge_pixels": 1669.0
+          }
+        },
+        "hud": {
+          "psnr_db": 25.81235398897075,
+          "psnr_perfect_match": false,
+          "ssim_7x7_masked_luminance": 0.9746701830331702,
+          "perceptual_similarity": 0.9743517205872955,
+          "perceptual_similarity_definition": "project-authored score: weighted geometric mean of masked 7x7 luminance SSIM over average-pooled scales 1,2,4,8 (weights 0.4,0.3,0.2,0.1), raised to 0.75, times exp(-mean CIE76 DeltaE/25) raised to 0.25; higher is better; not LPIPS or canonical MS-SSIM",
+          "cielab_delta_e76_mean": 1.3330276430790595,
+          "pixel_abs_error_norm_mean": 0.007376980170599313,
+          "pixel_abs_error_norm_p95": 0.0,
+          "frame_max_pixel_error_norm": 0.6470588235294118,
+          "pixels_over_1pct_error_fraction": 0.03661016949152542,
+          "pixels_over_1pct_error_count": 54,
+          "pixels_over_5pct_error_fraction": 0.031864406779661014,
+          "pixels_over_5pct_error_count": 47,
+          "active_pixel_count": 1475,
+          "edge_location": {
+            "symmetric_chamfer_px": 0.032512733446519525,
+            "symmetric_chamfer_norm": 0.005418788907753254,
+            "precision_at_1px": 0.99830220713073,
+            "recall_at_1px": 1.0,
+            "reference_edge_pixels": 570.0,
+            "candidate_edge_pixels": 589.0
+          }
+        },
+        "text": {
+          "psnr_db": 16.505487385723214,
+          "psnr_perfect_match": false,
+          "ssim_7x7_masked_luminance": 0.6997135292944553,
+          "perceptual_similarity": 0.8091163813236872,
+          "perceptual_similarity_definition": "project-authored score: weighted geometric mean of masked 7x7 luminance SSIM over average-pooled scales 1,2,4,8 (weights 0.4,0.3,0.2,0.1), raised to 0.75, times exp(-mean CIE76 DeltaE/25) raised to 0.25; higher is better; not LPIPS or canonical MS-SSIM",
+          "cielab_delta_e76_mean": 6.466429220490165,
+          "pixel_abs_error_norm_mean": 0.0433444922684521,
+          "pixel_abs_error_norm_p95": 0.32287581699346407,
+          "frame_max_pixel_error_norm": 0.6470588235294118,
+          "pixels_over_1pct_error_fraction": 0.10975609756097561,
+          "pixels_over_1pct_error_count": 9,
+          "pixels_over_5pct_error_fraction": 0.10975609756097561,
+          "pixels_over_5pct_error_count": 9,
+          "active_pixel_count": 82,
+          "edge_location": {
+            "symmetric_chamfer_px": 0.006493506493506494,
+            "symmetric_chamfer_norm": 0.0010822510822510823,
+            "precision_at_1px": 1.0,
+            "recall_at_1px": 1.0,
+            "reference_edge_pixels": 76.0,
+            "candidate_edge_pixels": 77.0
+          }
+        },
+        "scene": {
+          "psnr_db": 24.293259707727017,
+          "psnr_perfect_match": false,
+          "ssim_7x7_masked_luminance": 0.8263781349085969,
+          "perceptual_similarity": 0.885180753897066,
+          "perceptual_similarity_definition": "project-authored score: weighted geometric mean of masked 7x7 luminance SSIM over average-pooled scales 1,2,4,8 (weights 0.4,0.3,0.2,0.1), raised to 0.75, times exp(-mean CIE76 DeltaE/25) raised to 0.25; higher is better; not LPIPS or canonical MS-SSIM",
+          "cielab_delta_e76_mean": 3.5369399502799985,
+          "pixel_abs_error_norm_mean": 0.018772295552161356,
+          "pixel_abs_error_norm_p95": 0.17124183006535948,
+          "frame_max_pixel_error_norm": 0.657516339869281,
+          "pixels_over_1pct_error_fraction": 0.15333936183955563,
+          "pixels_over_1pct_error_count": 1187,
+          "pixels_over_5pct_error_fraction": 0.11225939801059295,
+          "pixels_over_5pct_error_count": 869,
+          "active_pixel_count": 7741,
+          "edge_location": {
+            "symmetric_chamfer_px": 0.47037386986631335,
+            "symmetric_chamfer_norm": 0.07839564497771889,
+            "precision_at_1px": 0.9953703703703703,
+            "recall_at_1px": 0.8742081447963801,
+            "reference_edge_pixels": 1105.0,
+            "candidate_edge_pixels": 1080.0
+          }
+        },
+        "occlusion": {
+          "psnr_db": 21.589027768278456,
+          "psnr_perfect_match": false,
+          "ssim_7x7_masked_luminance": 0.26749361708368324,
+          "perceptual_similarity": 0.34043672070119635,
+          "perceptual_similarity_definition": "project-authored score: weighted geometric mean of masked 7x7 luminance SSIM over average-pooled scales 1,2,4,8 (weights 0.4,0.3,0.2,0.1), raised to 0.75, times exp(-mean CIE76 DeltaE/25) raised to 0.25; higher is better; not LPIPS or canonical MS-SSIM",
+          "cielab_delta_e76_mean": 14.209503174152067,
+          "pixel_abs_error_norm_mean": 0.06994737288854937,
+          "pixel_abs_error_norm_p95": 0.08235294117647059,
+          "frame_max_pixel_error_norm": 0.330718954248366,
+          "pixels_over_1pct_error_fraction": 0.9155844155844156,
+          "pixels_over_1pct_error_count": 282,
+          "pixels_over_5pct_error_fraction": 0.8051948051948052,
+          "pixels_over_5pct_error_count": 248,
+          "active_pixel_count": 308,
+          "edge_location": {
+            "symmetric_chamfer_px": 2.3420145055647206,
+            "symmetric_chamfer_norm": 0.39033575092745343,
+            "precision_at_1px": 1.0,
+            "recall_at_1px": 0.10526315789473684,
+            "reference_edge_pixels": 95.0,
+            "candidate_edge_pixels": 5.0
+          }
+        }
+      }
+    },
+    {
+      "source_pair": [
+        2,
+        4
+      ],
+      "target_index": 3,
+      "t": 0.5,
+      "timestamp_ns": 50000001.0,
+      "regions": {
+        "all": {
+          "psnr_db": 24.340377281444077,
+          "psnr_perfect_match": false,
+          "ssim_7x7_masked_luminance": 0.8392358042409038,
+          "perceptual_similarity": 0.8950162166376804,
+          "perceptual_similarity_definition": "project-authored score: weighted geometric mean of masked 7x7 luminance SSIM over average-pooled scales 1,2,4,8 (weights 0.4,0.3,0.2,0.1), raised to 0.75, times exp(-mean CIE76 DeltaE/25) raised to 0.25; higher is better; not LPIPS or canonical MS-SSIM",
+          "cielab_delta_e76_mean": 3.535839306083223,
+          "pixel_abs_error_norm_mean": 0.01782449959150327,
+          "pixel_abs_error_norm_p95": 0.14640522875816994,
+          "frame_max_pixel_error_norm": 0.657516339869281,
+          "pixels_over_1pct_error_fraction": 0.1484375,
+          "pixels_over_1pct_error_count": 1368,
+          "pixels_over_5pct_error_fraction": 0.10112847222222222,
+          "pixels_over_5pct_error_count": 932,
+          "active_pixel_count": 9216,
+          "edge_location": {
+            "symmetric_chamfer_px": 0.3529817944874963,
+            "symmetric_chamfer_norm": 0.05883029908124938,
+            "precision_at_1px": 0.993920972644377,
+            "recall_at_1px": 0.9047337278106509,
+            "reference_edge_pixels": 1690.0,
+            "candidate_edge_pixels": 1645.0
+          }
+        },
+        "hud": {
+          "psnr_db": 25.122614296217186,
+          "psnr_perfect_match": false,
+          "ssim_7x7_masked_luminance": 0.9713880344789217,
+          "perceptual_similarity": 0.9707703752589313,
+          "perceptual_similarity_definition": "project-authored score: weighted geometric mean of masked 7x7 luminance SSIM over average-pooled scales 1,2,4,8 (weights 0.4,0.3,0.2,0.1), raised to 0.75, times exp(-mean CIE76 DeltaE/25) raised to 0.25; higher is better; not LPIPS or canonical MS-SSIM",
+          "cielab_delta_e76_mean": 1.449217655716549,
+          "pixel_abs_error_norm_mean": 0.008906613492854768,
+          "pixel_abs_error_norm_p95": 0.0,
+          "frame_max_pixel_error_norm": 0.6470588235294118,
+          "pixels_over_1pct_error_fraction": 0.03932203389830508,
+          "pixels_over_1pct_error_count": 58,
+          "pixels_over_5pct_error_fraction": 0.03796610169491525,
+          "pixels_over_5pct_error_count": 56,
+          "active_pixel_count": 1475,
+          "edge_location": {
+            "symmetric_chamfer_px": 0.03034121051362431,
+            "symmetric_chamfer_norm": 0.005056868418937385,
+            "precision_at_1px": 1.0,
+            "recall_at_1px": 0.9982517482517482,
+            "reference_edge_pixels": 572.0,
+            "candidate_edge_pixels": 580.0
+          }
+        },
+        "text": {
+          "psnr_db": 19.42764910312849,
+          "psnr_perfect_match": false,
+          "ssim_7x7_masked_luminance": 0.7637319241171877,
+          "perceptual_similarity": 0.8620167057447927,
+          "perceptual_similarity_definition": "project-authored score: weighted geometric mean of masked 7x7 luminance SSIM over average-pooled scales 1,2,4,8 (weights 0.4,0.3,0.2,0.1), raised to 0.75, times exp(-mean CIE76 DeltaE/25) raised to 0.25; higher is better; not LPIPS or canonical MS-SSIM",
+          "cielab_delta_e76_mean": 3.2251503225715745,
+          "pixel_abs_error_norm_mean": 0.02154248366013072,
+          "pixel_abs_error_norm_p95": 0.0968627450980383,
+          "frame_max_pixel_error_norm": 0.6470588235294118,
+          "pixels_over_1pct_error_fraction": 0.05333333333333334,
+          "pixels_over_1pct_error_count": 4,
+          "pixels_over_5pct_error_fraction": 0.05333333333333334,
+          "pixels_over_5pct_error_count": 4,
+          "active_pixel_count": 75,
+          "edge_location": {
+            "symmetric_chamfer_px": 0.0,
+            "symmetric_chamfer_norm": 0.0,
+            "precision_at_1px": 1.0,
+            "recall_at_1px": 1.0,
+            "reference_edge_pixels": 68.0,
+            "candidate_edge_pixels": 68.0
+          }
+        },
+        "scene": {
+          "psnr_db": 24.2060772670356,
+          "psnr_perfect_match": false,
+          "ssim_7x7_masked_luminance": 0.809575503874505,
+          "perceptual_similarity": 0.8773608624265777,
+          "perceptual_similarity_definition": "project-authored score: weighted geometric mean of masked 7x7 luminance SSIM over average-pooled scales 1,2,4,8 (weights 0.4,0.3,0.2,0.1), raised to 0.75, times exp(-mean CIE76 DeltaE/25) raised to 0.25; higher is better; not LPIPS or canonical MS-SSIM",
+          "cielab_delta_e76_mean": 3.9334322442424843,
+          "pixel_abs_error_norm_mean": 0.01952374800843991,
+          "pixel_abs_error_norm_p95": 0.16993464052287582,
+          "frame_max_pixel_error_norm": 0.657516339869281,
+          "pixels_over_1pct_error_fraction": 0.16922878181113551,
+          "pixels_over_1pct_error_count": 1310,
+          "pixels_over_5pct_error_fraction": 0.1131636739439349,
+          "pixels_over_5pct_error_count": 876,
+          "active_pixel_count": 7741,
+          "edge_location": {
+            "symmetric_chamfer_px": 0.5255419876467147,
+            "symmetric_chamfer_norm": 0.08759033127445244,
+            "precision_at_1px": 0.9906103286384976,
+            "recall_at_1px": 0.8568872987477638,
+            "reference_edge_pixels": 1118.0,
+            "candidate_edge_pixels": 1065.0
+          }
+        },
+        "occlusion": {
+          "psnr_db": 20.99429841906277,
+          "psnr_perfect_match": false,
+          "ssim_7x7_masked_luminance": 0.21454894440345887,
+          "perceptual_similarity": 0.41842894387884133,
+          "perceptual_similarity_definition": "project-authored score: weighted geometric mean of masked 7x7 luminance SSIM over average-pooled scales 1,2,4,8 (weights 0.4,0.3,0.2,0.1), raised to 0.75, times exp(-mean CIE76 DeltaE/25) raised to 0.25; higher is better; not LPIPS or canonical MS-SSIM",
+          "cielab_delta_e76_mean": 14.411987963483643,
+          "pixel_abs_error_norm_mean": 0.0732195908666497,
+          "pixel_abs_error_norm_p95": 0.08235294117647059,
+          "frame_max_pixel_error_norm": 0.5764705882352941,
+          "pixels_over_1pct_error_fraction": 0.9123376623376623,
+          "pixels_over_1pct_error_count": 281,
+          "pixels_over_5pct_error_fraction": 0.8474025974025974,
+          "pixels_over_5pct_error_count": 261,
+          "active_pixel_count": 308,
+          "edge_location": {
+            "symmetric_chamfer_px": 3.1936272196643967,
+            "symmetric_chamfer_norm": 0.5322712032773994,
+            "precision_at_1px": 1.0,
+            "recall_at_1px": 0.019801980198019802,
+            "reference_edge_pixels": 101.0,
+            "candidate_edge_pixels": 2.0
+          }
+        }
+      }
+    },
+    {
+      "source_pair": [
+        4,
+        6
+      ],
+      "target_index": 5,
+      "t": 0.5,
+      "timestamp_ns": 83333335.0,
+      "regions": {
+        "all": {
+          "psnr_db": 24.47149934042946,
+          "psnr_perfect_match": false,
+          "ssim_7x7_masked_luminance": 0.8443205414231882,
+          "perceptual_similarity": 0.8987857255178727,
+          "perceptual_similarity_definition": "project-authored score: weighted geometric mean of masked 7x7 luminance SSIM over average-pooled scales 1,2,4,8 (weights 0.4,0.3,0.2,0.1), raised to 0.75, times exp(-mean CIE76 DeltaE/25) raised to 0.25; higher is better; not LPIPS or canonical MS-SSIM",
+          "cielab_delta_e76_mean": 3.2973771524421407,
+          "pixel_abs_error_norm_mean": 0.0174782702432825,
+          "pixel_abs_error_norm_p95": 0.14640522875816994,
+          "frame_max_pixel_error_norm": 0.657516339869281,
+          "pixels_over_1pct_error_fraction": 0.1388888888888889,
+          "pixels_over_1pct_error_count": 1280,
+          "pixels_over_5pct_error_fraction": 0.1052517361111111,
+          "pixels_over_5pct_error_count": 970,
+          "active_pixel_count": 9216,
+          "edge_location": {
+            "symmetric_chamfer_px": 0.381565393176759,
+            "symmetric_chamfer_norm": 0.0635942321961265,
+            "precision_at_1px": 0.9952238805970149,
+            "recall_at_1px": 0.8917975567190227,
+            "reference_edge_pixels": 1719.0,
+            "candidate_edge_pixels": 1675.0
+          }
+        },
+        "hud": {
+          "psnr_db": 26.256195512460497,
+          "psnr_perfect_match": false,
+          "ssim_7x7_masked_luminance": 0.9788989711460145,
+          "perceptual_similarity": 0.9788614470265153,
+          "perceptual_similarity_definition": "project-authored score: weighted geometric mean of masked 7x7 luminance SSIM over average-pooled scales 1,2,4,8 (weights 0.4,0.3,0.2,0.1), raised to 0.75, times exp(-mean CIE76 DeltaE/25) raised to 0.25; higher is better; not LPIPS or canonical MS-SSIM",
+          "cielab_delta_e76_mean": 1.0646205268675808,
+          "pixel_abs_error_norm_mean": 0.007809460507366788,
+          "pixel_abs_error_norm_p95": 0.0,
+          "frame_max_pixel_error_norm": 0.6470588235294118,
+          "pixels_over_1pct_error_fraction": 0.03389830508474576,
+          "pixels_over_1pct_error_count": 50,
+          "pixels_over_5pct_error_fraction": 0.03389830508474576,
+          "pixels_over_5pct_error_count": 50,
+          "active_pixel_count": 1475,
+          "edge_location": {
+            "symmetric_chamfer_px": 0.023454902750569093,
+            "symmetric_chamfer_norm": 0.003909150458428182,
+            "precision_at_1px": 1.0,
+            "recall_at_1px": 1.0,
+            "reference_edge_pixels": 566.0,
+            "candidate_edge_pixels": 579.0
+          }
+        },
+        "text": {
+          "psnr_db": 17.07315134093077,
+          "psnr_perfect_match": false,
+          "ssim_7x7_masked_luminance": 0.7566108475918294,
+          "perceptual_similarity": 0.8463296735809914,
+          "perceptual_similarity_definition": "project-authored score: weighted geometric mean of masked 7x7 luminance SSIM over average-pooled scales 1,2,4,8 (weights 0.4,0.3,0.2,0.1), raised to 0.75, times exp(-mean CIE76 DeltaE/25) raised to 0.25; higher is better; not LPIPS or canonical MS-SSIM",
+          "cielab_delta_e76_mean": 5.398739514707144,
+          "pixel_abs_error_norm_mean": 0.035907367062051165,
+          "pixel_abs_error_norm_p95": 0.32287581699346407,
+          "frame_max_pixel_error_norm": 0.6470588235294118,
+          "pixels_over_1pct_error_fraction": 0.08641975308641975,
+          "pixels_over_1pct_error_count": 7,
+          "pixels_over_5pct_error_fraction": 0.08641975308641975,
+          "pixels_over_5pct_error_count": 7,
+          "active_pixel_count": 81,
+          "edge_location": {
+            "symmetric_chamfer_px": 0.0,
+            "symmetric_chamfer_norm": 0.0,
+            "precision_at_1px": 1.0,
+            "recall_at_1px": 1.0,
+            "reference_edge_pixels": 74.0,
+            "candidate_edge_pixels": 74.0
+          }
+        },
+        "scene": {
+          "psnr_db": 24.201232608082503,
+          "psnr_perfect_match": false,
+          "ssim_7x7_masked_luminance": 0.8145977007230363,
+          "perceptual_similarity": 0.88092729485725,
+          "perceptual_similarity_definition": "project-authored score: weighted geometric mean of masked 7x7 luminance SSIM over average-pooled scales 1,2,4,8 (weights 0.4,0.3,0.2,0.1), raised to 0.75, times exp(-mean CIE76 DeltaE/25) raised to 0.25; higher is better; not LPIPS or canonical MS-SSIM",
+          "cielab_delta_e76_mean": 3.722815212476048,
+          "pixel_abs_error_norm_mean": 0.019320602546663932,
+          "pixel_abs_error_norm_p95": 0.16993464052287582,
+          "frame_max_pixel_error_norm": 0.657516339869281,
+          "pixels_over_1pct_error_fraction": 0.158894199715799,
+          "pixels_over_1pct_error_count": 1230,
+          "pixels_over_5pct_error_fraction": 0.11884769409636997,
+          "pixels_over_5pct_error_count": 920,
+          "active_pixel_count": 7741,
+          "edge_location": {
+            "symmetric_chamfer_px": 0.5635122880974349,
+            "symmetric_chamfer_norm": 0.09391871468290582,
+            "precision_at_1px": 0.9881386861313869,
+            "recall_at_1px": 0.8386816999132697,
+            "reference_edge_pixels": 1153.0,
+            "candidate_edge_pixels": 1096.0
+          }
+        },
+        "occlusion": {
+          "psnr_db": 21.4174820304505,
+          "psnr_perfect_match": false,
+          "ssim_7x7_masked_luminance": 0.18525889073026816,
+          "perceptual_similarity": 0.3474422106792417,
+          "perceptual_similarity_definition": "project-authored score: weighted geometric mean of masked 7x7 luminance SSIM over average-pooled scales 1,2,4,8 (weights 0.4,0.3,0.2,0.1), raised to 0.75, times exp(-mean CIE76 DeltaE/25) raised to 0.25; higher is better; not LPIPS or canonical MS-SSIM",
+          "cielab_delta_e76_mean": 14.640040424324265,
+          "pixel_abs_error_norm_mean": 0.07245140480434598,
+          "pixel_abs_error_norm_p95": 0.08235294117647059,
+          "frame_max_pixel_error_norm": 0.4117647058823529,
+          "pixels_over_1pct_error_fraction": 0.9090909090909091,
+          "pixels_over_1pct_error_count": 280,
+          "pixels_over_5pct_error_fraction": 0.8733766233766234,
+          "pixels_over_5pct_error_count": 269,
+          "active_pixel_count": 308,
+          "edge_location": {
+            "symmetric_chamfer_px": 6.0,
+            "symmetric_chamfer_norm": 1.0,
+            "precision_at_1px": 1.0,
+            "recall_at_1px": 0.0,
+            "reference_edge_pixels": 107.0,
+            "candidate_edge_pixels": 0.0
+          }
+        }
+      }
+    },
+    {
+      "source_pair": [
+        6,
+        8
+      ],
+      "target_index": 7,
+      "t": 0.5,
+      "timestamp_ns": 116666669.0,
+      "regions": {
+        "all": {
+          "psnr_db": 21.39539100786009,
+          "psnr_perfect_match": false,
+          "ssim_7x7_masked_luminance": 0.7354886508469388,
+          "perceptual_similarity": 0.8397596185961458,
+          "perceptual_similarity_definition": "project-authored score: weighted geometric mean of masked 7x7 luminance SSIM over average-pooled scales 1,2,4,8 (weights 0.4,0.3,0.2,0.1), raised to 0.75, times exp(-mean CIE76 DeltaE/25) raised to 0.25; higher is better; not LPIPS or canonical MS-SSIM",
+          "cielab_delta_e76_mean": 4.439490161929955,
+          "pixel_abs_error_norm_mean": 0.02627626860929557,
+          "pixel_abs_error_norm_p95": 0.20130718954248367,
+          "frame_max_pixel_error_norm": 0.657516339869281,
+          "pixels_over_1pct_error_fraction": 0.16514756944444445,
+          "pixels_over_1pct_error_count": 1522,
+          "pixels_over_5pct_error_fraction": 0.12272135416666667,
+          "pixels_over_5pct_error_count": 1131,
+          "active_pixel_count": 9216,
+          "edge_location": {
+            "symmetric_chamfer_px": 0.46779662199652217,
+            "symmetric_chamfer_norm": 0.07796610366608703,
+            "precision_at_1px": 0.9789545145960624,
+            "recall_at_1px": 0.8647540983606558,
+            "reference_edge_pixels": 1708.0,
+            "candidate_edge_pixels": 1473.0
+          }
+        },
+        "hud": {
+          "psnr_db": 22.39485602544557,
+          "psnr_perfect_match": false,
+          "ssim_7x7_masked_luminance": 0.9388369853618065,
+          "perceptual_similarity": 0.9435255340812595,
+          "perceptual_similarity_definition": "project-authored score: weighted geometric mean of masked 7x7 luminance SSIM over average-pooled scales 1,2,4,8 (weights 0.4,0.3,0.2,0.1), raised to 0.75, times exp(-mean CIE76 DeltaE/25) raised to 0.25; higher is better; not LPIPS or canonical MS-SSIM",
+          "cielab_delta_e76_mean": 2.0686451815451856,
+          "pixel_abs_error_norm_mean": 0.013364351390273624,
+          "pixel_abs_error_norm_p95": 0.0,
+          "frame_max_pixel_error_norm": 0.6470588235294118,
+          "pixels_over_1pct_error_fraction": 0.04610169491525424,
+          "pixels_over_1pct_error_count": 68,
+          "pixels_over_5pct_error_fraction": 0.04610169491525424,
+          "pixels_over_5pct_error_count": 68,
+          "active_pixel_count": 1475,
+          "edge_location": {
+            "symmetric_chamfer_px": 0.11997038666170567,
+            "symmetric_chamfer_norm": 0.01999506444361761,
+            "precision_at_1px": 0.9618055555555556,
+            "recall_at_1px": 1.0,
+            "reference_edge_pixels": 559.0,
+            "candidate_edge_pixels": 576.0
+          }
+        },
+        "text": {
+          "psnr_db": 15.09070733796072,
+          "psnr_perfect_match": false,
+          "ssim_7x7_masked_luminance": 0.7637717712201177,
+          "perceptual_similarity": 0.8118932928796714,
+          "perceptual_similarity_definition": "project-authored score: weighted geometric mean of masked 7x7 luminance SSIM over average-pooled scales 1,2,4,8 (weights 0.4,0.3,0.2,0.1), raised to 0.75, times exp(-mean CIE76 DeltaE/25) raised to 0.25; higher is better; not LPIPS or canonical MS-SSIM",
+          "cielab_delta_e76_mean": 8.436127029195857,
+          "pixel_abs_error_norm_mean": 0.056017429193899786,
+          "pixel_abs_error_norm_p95": 0.32287581699346407,
+          "frame_max_pixel_error_norm": 0.6470588235294118,
+          "pixels_over_1pct_error_fraction": 0.13333333333333333,
+          "pixels_over_1pct_error_count": 10,
+          "pixels_over_5pct_error_fraction": 0.13333333333333333,
+          "pixels_over_5pct_error_count": 10,
+          "active_pixel_count": 75,
+          "edge_location": {
+            "symmetric_chamfer_px": 0.007142857142857143,
+            "symmetric_chamfer_norm": 0.0011904761904761904,
+            "precision_at_1px": 1.0,
+            "recall_at_1px": 1.0,
+            "reference_edge_pixels": 70.0,
+            "candidate_edge_pixels": 69.0
+          }
+        },
+        "scene": {
+          "psnr_db": 21.22852146754743,
+          "psnr_perfect_match": false,
+          "ssim_7x7_masked_luminance": 0.6926702324272195,
+          "perceptual_similarity": 0.8172892052751107,
+          "perceptual_similarity_definition": "project-authored score: weighted geometric mean of masked 7x7 luminance SSIM over average-pooled scales 1,2,4,8 (weights 0.4,0.3,0.2,0.1), raised to 0.75, times exp(-mean CIE76 DeltaE/25) raised to 0.25; higher is better; not LPIPS or canonical MS-SSIM",
+          "cielab_delta_e76_mean": 4.891240109749039,
+          "pixel_abs_error_norm_mean": 0.02873655512241498,
+          "pixel_abs_error_norm_p95": 0.20392156862745098,
+          "frame_max_pixel_error_norm": 0.657516339869281,
+          "pixels_over_1pct_error_fraction": 0.18783102958274125,
+          "pixels_over_1pct_error_count": 1454,
+          "pixels_over_5pct_error_fraction": 0.137320759591784,
+          "pixels_over_5pct_error_count": 1063,
+          "active_pixel_count": 7741,
+          "edge_location": {
+            "symmetric_chamfer_px": 0.6439627504620378,
+            "symmetric_chamfer_norm": 0.1073271250770063,
+            "precision_at_1px": 0.9899665551839465,
+            "recall_at_1px": 0.7989556135770235,
+            "reference_edge_pixels": 1149.0,
+            "candidate_edge_pixels": 897.0
+          }
+        },
+        "occlusion": {
+          "psnr_db": 20.457236798219164,
+          "psnr_perfect_match": false,
+          "ssim_7x7_masked_luminance": 0.16405510021219313,
+          "perceptual_similarity": 0.3452656374216963,
+          "perceptual_similarity_definition": "project-authored score: weighted geometric mean of masked 7x7 luminance SSIM over average-pooled scales 1,2,4,8 (weights 0.4,0.3,0.2,0.1), raised to 0.75, times exp(-mean CIE76 DeltaE/25) raised to 0.25; higher is better; not LPIPS or canonical MS-SSIM",
+          "cielab_delta_e76_mean": 15.586252397212967,
+          "pixel_abs_error_norm_mean": 0.08275188863424159,
+          "pixel_abs_error_norm_p95": 0.1738562091503268,
+          "frame_max_pixel_error_norm": 0.2130718954248366,
+          "pixels_over_1pct_error_fraction": 0.9675324675324676,
+          "pixels_over_1pct_error_count": 298,
+          "pixels_over_5pct_error_fraction": 0.9155844155844156,
+          "pixels_over_5pct_error_count": 282,
+          "active_pixel_count": 308,
+          "edge_location": {
+            "symmetric_chamfer_px": 2.4620393034968684,
+            "symmetric_chamfer_norm": 0.41033988391614473,
+            "precision_at_1px": 1.0,
+            "recall_at_1px": 0.05737704918032787,
+            "reference_edge_pixels": 122.0,
+            "candidate_edge_pixels": 4.0
+          }
+        }
+      }
+    },
+    {
+      "source_pair": [
+        8,
+        10
+      ],
+      "target_index": 9,
+      "t": 0.5,
+      "timestamp_ns": 150000003.0,
+      "regions": {
+        "all": {
+          "psnr_db": 24.532706705772508,
+          "psnr_perfect_match": false,
+          "ssim_7x7_masked_luminance": 0.8514644341745486,
+          "perceptual_similarity": 0.9019106744288898,
+          "perceptual_similarity_definition": "project-authored score: weighted geometric mean of masked 7x7 luminance SSIM over average-pooled scales 1,2,4,8 (weights 0.4,0.3,0.2,0.1), raised to 0.75, times exp(-mean CIE76 DeltaE/25) raised to 0.25; higher is better; not LPIPS or canonical MS-SSIM",
+          "cielab_delta_e76_mean": 3.100121627890852,
+          "pixel_abs_error_norm_mean": 0.016354620551924475,
+          "pixel_abs_error_norm_p95": 0.1568627450980392,
+          "frame_max_pixel_error_norm": 0.657516339869281,
+          "pixels_over_1pct_error_fraction": 0.1320529513888889,
+          "pixels_over_1pct_error_count": 1217,
+          "pixels_over_5pct_error_fraction": 0.0876736111111111,
+          "pixels_over_5pct_error_count": 808,
+          "active_pixel_count": 9216,
+          "edge_location": {
+            "symmetric_chamfer_px": 0.27533203694077657,
+            "symmetric_chamfer_norm": 0.04588867282346276,
+            "precision_at_1px": 0.9851190476190477,
+            "recall_at_1px": 0.9304715840386941,
+            "reference_edge_pixels": 1654.0,
+            "candidate_edge_pixels": 1680.0
+          }
+        },
+        "hud": {
+          "psnr_db": 24.968095187216054,
+          "psnr_perfect_match": false,
+          "ssim_7x7_masked_luminance": 0.9681117747882942,
+          "perceptual_similarity": 0.9712539770118632,
+          "perceptual_similarity_definition": "project-authored score: weighted geometric mean of masked 7x7 luminance SSIM over average-pooled scales 1,2,4,8 (weights 0.4,0.3,0.2,0.1), raised to 0.75, times exp(-mean CIE76 DeltaE/25) raised to 0.25; higher is better; not LPIPS or canonical MS-SSIM",
+          "cielab_delta_e76_mean": 1.4441521294789792,
+          "pixel_abs_error_norm_mean": 0.008409438351611832,
+          "pixel_abs_error_norm_p95": 0.0,
+          "frame_max_pixel_error_norm": 0.6470588235294118,
+          "pixels_over_1pct_error_fraction": 0.03525423728813559,
+          "pixels_over_1pct_error_count": 52,
+          "pixels_over_5pct_error_fraction": 0.03525423728813559,
+          "pixels_over_5pct_error_count": 52,
+          "active_pixel_count": 1475,
+          "edge_location": {
+            "symmetric_chamfer_px": 0.030524427909503406,
+            "symmetric_chamfer_norm": 0.005087404651583901,
+            "precision_at_1px": 1.0,
+            "recall_at_1px": 0.9982547993019197,
+            "reference_edge_pixels": 573.0,
+            "candidate_edge_pixels": 584.0
+          }
+        },
+        "text": {
+          "psnr_db": 16.697636382491112,
+          "psnr_perfect_match": false,
+          "ssim_7x7_masked_luminance": 0.7176382478672148,
+          "perceptual_similarity": 0.8180777400247597,
+          "perceptual_similarity_definition": "project-authored score: weighted geometric mean of masked 7x7 luminance SSIM over average-pooled scales 1,2,4,8 (weights 0.4,0.3,0.2,0.1), raised to 0.75, times exp(-mean CIE76 DeltaE/25) raised to 0.25; higher is better; not LPIPS or canonical MS-SSIM",
+          "cielab_delta_e76_mean": 6.0471568548217025,
+          "pixel_abs_error_norm_mean": 0.040392156862745096,
+          "pixel_abs_error_norm_p95": 0.32287581699346407,
+          "frame_max_pixel_error_norm": 0.6470588235294118,
+          "pixels_over_1pct_error_fraction": 0.1,
+          "pixels_over_1pct_error_count": 8,
+          "pixels_over_5pct_error_fraction": 0.1,
+          "pixels_over_5pct_error_count": 8,
+          "active_pixel_count": 80,
+          "edge_location": {
+            "symmetric_chamfer_px": 0.013333333333333334,
+            "symmetric_chamfer_norm": 0.0022222222222222222,
+            "precision_at_1px": 1.0,
+            "recall_at_1px": 1.0,
+            "reference_edge_pixels": 73.0,
+            "candidate_edge_pixels": 75.0
+          }
+        },
+        "scene": {
+          "psnr_db": 24.454477845446494,
+          "psnr_perfect_match": false,
+          "ssim_7x7_masked_luminance": 0.8239785882949303,
+          "perceptual_similarity": 0.8859115972844773,
+          "perceptual_similarity_definition": "project-authored score: weighted geometric mean of masked 7x7 luminance SSIM over average-pooled scales 1,2,4,8 (weights 0.4,0.3,0.2,0.1), raised to 0.75, times exp(-mean CIE76 DeltaE/25) raised to 0.25; higher is better; not LPIPS or canonical MS-SSIM",
+          "cielab_delta_e76_mean": 3.415656443826456,
+          "pixel_abs_error_norm_mean": 0.017868526215980944,
+          "pixel_abs_error_norm_p95": 0.17124183006535948,
+          "frame_max_pixel_error_norm": 0.657516339869281,
+          "pixels_over_1pct_error_fraction": 0.15049735176333806,
+          "pixels_over_1pct_error_count": 1165,
+          "pixels_over_5pct_error_fraction": 0.09766180080093011,
+          "pixels_over_5pct_error_count": 756,
+          "active_pixel_count": 7741,
+          "edge_location": {
+            "symmetric_chamfer_px": 0.4060785926917216,
+            "symmetric_chamfer_norm": 0.06767976544862027,
+            "precision_at_1px": 0.9771897810218978,
+            "recall_at_1px": 0.8936170212765957,
+            "reference_edge_pixels": 1081.0,
+            "candidate_edge_pixels": 1096.0
+          }
+        },
+        "occlusion": {
+          "psnr_db": 20.460016324128777,
+          "psnr_perfect_match": false,
+          "ssim_7x7_masked_luminance": 0.27019536885227696,
+          "perceptual_similarity": 0.39422931946047146,
+          "perceptual_similarity_definition": "project-authored score: weighted geometric mean of masked 7x7 luminance SSIM over average-pooled scales 1,2,4,8 (weights 0.4,0.3,0.2,0.1), raised to 0.75, times exp(-mean CIE76 DeltaE/25) raised to 0.25; higher is better; not LPIPS or canonical MS-SSIM",
+          "cielab_delta_e76_mean": 12.30305885080002,
+          "pixel_abs_error_norm_mean": 0.06695526695526696,
+          "pixel_abs_error_norm_p95": 0.2130718954248366,
+          "frame_max_pixel_error_norm": 0.5764705882352941,
+          "pixels_over_1pct_error_fraction": 0.9090909090909091,
+          "pixels_over_1pct_error_count": 280,
+          "pixels_over_5pct_error_fraction": 0.5454545454545454,
+          "pixels_over_5pct_error_count": 168,
+          "active_pixel_count": 308,
+          "edge_location": {
+            "symmetric_chamfer_px": 2.1894420921110163,
+            "symmetric_chamfer_norm": 0.36490701535183606,
+            "precision_at_1px": 0.5909090909090909,
+            "recall_at_1px": 0.2682926829268293,
+            "reference_edge_pixels": 82.0,
+            "candidate_edge_pixels": 22.0
+          }
+        }
+      }
+    }
+  ],
+  "performance": {
+    "measurement_samples": 500,
+    "expected_measurement_samples": 500,
+    "interpolation_gpu_time_ms": {
+      "count": 500,
+      "mean": 0.010147376,
+      "min": 0.0045,
+      "p50": 0.010874,
+      "p95": 0.013047250000000002,
+      "p99": 0.021624010000000003,
+      "max": 0.055875,
+      "missing_samples": 0,
+      "availability": "available"
+    },
+    "cpu_submit_overhead_ms": {
+      "count": 500,
+      "mean": 0.012331006,
+      "min": 0.009875,
+      "p50": 0.0115205,
+      "p95": 0.01608605,
+      "p99": 0.023171159999999996,
+      "max": 0.0325
+    },
+    "completion_latency_ms": {
+      "count": 500,
+      "mean": 0.313466672,
+      "min": 0.167375,
+      "p50": 0.3515,
+      "p95": 0.41720805000000005,
+      "p99": 0.4308981599999999,
+      "max": 0.544458
+    },
+    "gpu_allocated_bytes_current_max": 704512,
+    "gpu_allocated_bytes_peak_max": 770048,
+    "runner_peak_resident_bytes_max": 13959168,
+    "gpu_memory_sample_count": 5,
+    "gpu_memory_missing_target_runs": 0,
+    "runner_resident_memory_sample_count": 5,
+    "runner_resident_memory_missing_target_runs": 0,
+    "deadline_ms": 16.666666666666668,
+    "generated_frame_deadline_miss_count": 0,
+    "generated_frame_deadline_miss_rate": 0.0,
+    "dropped_generated_frames_estimated": 0,
+    "dropped_generated_frames_method": "count of measured serial generation completions above deadline; not observed presentation drops",
+    "source_only_input_throughput_fps": {
+      "count": 5,
+      "mean": 884628.0,
+      "min": 872090.0,
+      "p50": 888561.0,
+      "p95": 891399.4,
+      "p99": 891505.48,
+      "max": 891532.0
+    },
+    "source_with_generation_input_throughput_fps": {
+      "count": 5,
+      "mean": 6335.432,
+      "min": 5823.67,
+      "p50": 6301.52,
+      "p95": 6761.83,
+      "p99": 6793.614,
+      "max": 6801.56
+    },
+    "source_frame_fps_impact_percent": 99.28383094362827,
+    "source_frame_fps_impact_availability": "measured",
+    "source_frame_fps_impact_method": "100 * (source_only_input_fps - source_with_generation_input_fps) / source_only_input_fps; two source-frame texture uploads plus serial submit-to-completion per cycle, divided by measured wall time from before uploads through completion; offline benchmark host only; excludes renderer work and presentation",
+    "source_frame_fps_impact_scope": "offline input-throughput proxy only; excludes renderer work, game FPS, and presentation"
+  },
+  "compatibility": {
+    "host": {
+      "platform": "macOS-27.0.1-arm64-arm-64bit-Mach-O",
+      "system": "Darwin",
+      "machine": "arm64"
+    },
+    "corpus": {
+      "content_sha256": "27640ad1a8d8cb9074ca4426243a6dd30e4ff73846fb156ddda1da4d200eb0ee",
+      "sequence_id": "synthetic-motion-v1",
+      "width": 128,
+      "height": 72,
+      "high_rate_fps": 60.0,
+      "low_rate_stride_frames": 2,
+      "source_indices": [
+        0,
+        2,
+        4,
+        6,
+        8,
+        10
+      ]
+    },
+    "configuration": {
+      "warmup_iterations": 3,
+      "measured_iterations_per_target": 100,
+      "deadline_ms": 16.666666666666668,
+      "target_timeline": [
+        {
+          "source_pair": [
+            0,
+            2
+          ],
+          "target_index": 1,
+          "t": 0.5,
+          "timestamp_ns": 16666667.0
+        },
+        {
+          "source_pair": [
+            2,
+            4
+          ],
+          "target_index": 3,
+          "t": 0.5,
+          "timestamp_ns": 50000001.0
+        },
+        {
+          "source_pair": [
+            4,
+            6
+          ],
+          "target_index": 5,
+          "t": 0.5,
+          "timestamp_ns": 83333335.0
+        },
+        {
+          "source_pair": [
+            6,
+            8
+          ],
+          "target_index": 7,
+          "t": 0.5,
+          "timestamp_ns": 116666669.0
+        },
+        {
+          "source_pair": [
+            8,
+            10
+          ],
+          "target_index": 9,
+          "t": 0.5,
+          "timestamp_ns": 150000003.0
+        }
+      ],
+      "metric_parameters": {
+        "metric_contract_version": "2",
+        "psnr_perfect_cap_db": 120.0,
+        "ssim_window": "7x7 box, mask-weighted local neighborhoods",
+        "perceptual_metric": "project-authored masked multiscale luminance SSIM plus CIE76 color score",
+        "multiscale_weights": [
+          0.4,
+          0.3,
+          0.2,
+          0.1
+        ],
+        "perceptual_color_scale_delta_e": 25.0,
+        "edge_threshold_luma_gradient": 48.0,
+        "edge_chamfer_cap_px": 6.0,
+        "temporal_time_unit": "actual elapsed high-rate frame periods from timestamps",
+        "source_with_generation_throughput_method": "two source-frame texture uploads plus serial submit-to-completion per cycle, divided by measured wall time from before uploads through completion; offline benchmark host only; excludes renderer work and presentation"
+      }
+    }
+  }
+}
