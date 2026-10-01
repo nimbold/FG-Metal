@@ -452,6 +452,32 @@ class BenchmarkMetricTests(unittest.TestCase):
         self.assertIsInstance(plan[0]["time_ns"], int)
         self.assertEqual(plan[0]["time_ns"], epoch_offset + 16_666_667)
 
+    def test_target_plan_uses_timestamp_quantized_fraction(self) -> None:
+        frames = [
+            {"index": index, "timestamp_ns": timestamp, "segment_id": "segment",
+             "boundary_before": None, "interpolable": True}
+            for index, timestamp in enumerate((0, 1, 2))
+        ]
+        corpus = {
+            "frames": frames,
+            "by_index": {frame["index"]: frame for frame in frames},
+            "source_indices": [0, 2],
+            "provider": object(),
+        }
+        plan = bench._target_plan(corpus, 0.26)
+        self.assertEqual(plan[0]["time_ns"], 1)
+        self.assertEqual(plan[0]["t"], 0.5)
+        self.assertEqual(plan[0]["coordinate"], 1.0)
+
+    def test_fraction_timestamp_validation_allows_float64_ratio_error(self) -> None:
+        source_times = [0, 5_249_979_066_121_302_519]
+        timestamp = 582_057_716_445_789_125
+        fraction = timestamp / source_times[1]
+        self.assertTrue(bench._timestamp_matches_interpolation(
+            source_times, timestamp, fraction))
+        self.assertFalse(bench._timestamp_matches_interpolation(
+            source_times, timestamp + 1_000_000, fraction))
+
     def test_analysis_memory_estimate_accounts_for_named_masks(self) -> None:
         base = bench._estimated_analysis_bytes(128, 72, 11, len(bench.MASK_LABELS))
         named = bench._estimated_analysis_bytes(128, 72, 11, bench.MAX_CORPUS_MASK_LABELS)

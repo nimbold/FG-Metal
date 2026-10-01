@@ -12,6 +12,7 @@
 #include <memory>
 #include <mutex>
 #include <string_view>
+#include <array>
 
 namespace framegen::metal::detail {
 
@@ -36,16 +37,43 @@ private:
     const void* resource_identity_{};
 };
 
+class MetalBackendStreamState final : public BackendStreamState {
+public:
+    std::uint64_t device_id{};
+    std::mutex automatic_history_mutex;
+    std::array<std::shared_ptr<MetalTextureResource>, 3> automatic_mask_history;
+    std::uint32_t automatic_mask_width{};
+    std::uint32_t automatic_mask_height{};
+    TextureDescriptor automatic_mask_pair_descriptor{};
+    FrameColorMetadata automatic_mask_pair_previous_color_metadata{};
+    FrameColorMetadata automatic_mask_pair_current_color_metadata{};
+    std::uint32_t automatic_mask_history_index{};
+    bool automatic_mask_history_valid{};
+    bool automatic_mask_pair_has_prior_history{};
+    std::uint64_t automatic_mask_pair_clock_domain{};
+    std::uint64_t automatic_mask_pair_previous_sequence{};
+    std::uint64_t automatic_mask_pair_current_sequence{};
+    std::int64_t automatic_mask_pair_previous_timestamp_ns{unknown_timestamp_ns};
+    std::int64_t automatic_mask_pair_current_timestamp_ns{unknown_timestamp_ns};
+    float automatic_mask_pair_engagement_alpha{1.0F};
+    float automatic_mask_pair_release_alpha{1.0F};
+    HudMode last_hud_mode{HudMode::no_hud_knowledge};
+};
+
 class MetalBackend final : public FrameGenerationBackend {
 public:
     MetalBackend(id<MTLDevice> device, id<MTLCommandQueue> queue,
                  id<MTLComputePipelineState> blend_pipeline,
+                 id<MTLComputePipelineState> explicit_ui_pipeline,
+                 id<MTLComputePipelineState> automatic_hud_pipeline,
                  id<MTLSharedEvent> completion_event,
                  std::uint64_t device_id);
 
     [[nodiscard]] std::string_view backend_id() const noexcept override;
     [[nodiscard]] std::uint64_t device_id() const noexcept override;
     [[nodiscard]] id<MTLDevice> native_device() const noexcept;
+    [[nodiscard]] std::shared_ptr<BackendStreamState>
+    create_stream_state() override;
 
     [[nodiscard]] Result<GeneratedFrame> submit(
         const FrameSubmission& submission) override;
@@ -54,6 +82,8 @@ private:
     __strong id<MTLDevice> device_;
     __strong id<MTLCommandQueue> queue_;
     __strong id<MTLComputePipelineState> blend_pipeline_;
+    __strong id<MTLComputePipelineState> explicit_ui_pipeline_;
+    __strong id<MTLComputePipelineState> automatic_hud_pipeline_;
     __strong id<MTLSharedEvent> completion_event_;
     std::uint64_t device_id_;
     std::uint64_t next_event_value_{1};

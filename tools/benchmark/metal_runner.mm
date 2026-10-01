@@ -12,6 +12,7 @@
 #include <cstdint>
 #include <cstdlib>
 #include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <iterator>
 #include <limits>
@@ -47,10 +48,40 @@ struct Options {
     std::uint64_t current_sequence{2};
     std::int64_t previous_timestamp_ns{};
     std::int64_t current_timestamp_ns{33'333'333};
+    std::optional<std::int64_t> requested_target_timestamp_ns;
     bool reset_history{};
+    std::string hud_mode{"none"};
+    std::string ui_source{"nearest"};
+    std::string hud_debug{"disabled"};
 };
 
-void fail(std::string message) {
+[[noreturn]] void fail(std::string message);
+
+framegen::HudMode hud_mode(const std::string& value) {
+    if (value == "none") return framegen::HudMode::no_hud_knowledge;
+    if (value == "explicit") return framegen::HudMode::explicit_ui_plane;
+    if (value == "automatic") return framegen::HudMode::automatic_protection;
+    fail("--hud-mode must be none, explicit, or automatic");
+}
+
+framegen::UiTemporalSource ui_source(const std::string& value) {
+    if (value == "previous") return framegen::UiTemporalSource::previous_frame;
+    if (value == "current") return framegen::UiTemporalSource::current_frame;
+    if (value == "nearest") return framegen::UiTemporalSource::nearest_presentation;
+    fail("--ui-source must be previous, current, or nearest");
+}
+
+framegen::HudDebugVisualization hud_debug(const std::string& value) {
+    if (value == "disabled") return framegen::HudDebugVisualization::disabled;
+    if (value == "raw-mask") return framegen::HudDebugVisualization::raw_mask;
+    if (value == "stabilized-mask") return framegen::HudDebugVisualization::stabilized_mask;
+    if (value == "protected-regions") return framegen::HudDebugVisualization::protected_regions;
+    if (value == "interpolation-confidence") return framegen::HudDebugVisualization::interpolation_confidence;
+    if (value == "final-composite") return framegen::HudDebugVisualization::final_composite;
+    fail("--hud-debug has an unknown visualization mode");
+}
+
+[[noreturn]] void fail(std::string message) {
     throw std::runtime_error(std::move(message));
 }
 
@@ -112,6 +143,35 @@ std::int64_t parse_i64(std::string_view value, std::string_view label) {
         fail("invalid " + std::string(label));
     }
     return result;
+}
+
+std::uint64_t timestamp_distance(std::int64_t lower, std::int64_t upper) {
+    return static_cast<std::uint64_t>(upper) - static_cast<std::uint64_t>(lower);
+}
+
+std::int64_t timestamp_plus_offset(std::int64_t lower, std::uint64_t offset) {
+    if (lower >= 0) {
+        return lower + static_cast<std::int64_t>(offset);
+    }
+    const auto magnitude = std::uint64_t{0} - static_cast<std::uint64_t>(lower);
+    if (offset < magnitude) {
+        const auto remaining = magnitude - offset;
+        if (remaining == (std::uint64_t{1} << 63)) {
+            return std::numeric_limits<std::int64_t>::min();
+        }
+        return -static_cast<std::int64_t>(remaining);
+    }
+    return static_cast<std::int64_t>(offset - magnitude);
+}
+
+std::int64_t interpolate_timestamp(std::int64_t previous, std::int64_t current,
+                                   float interpolation) {
+    const auto span = timestamp_distance(previous, current);
+    const auto rounded_offset = std::round(
+        static_cast<long double>(span) * static_cast<long double>(interpolation));
+    const auto bounded_offset = rounded_offset >= static_cast<long double>(span)
+        ? span : static_cast<std::uint64_t>(rounded_offset);
+    return timestamp_plus_offset(previous, bounded_offset);
 }
 
 Image read_ppm(const std::string& path) {
@@ -185,13 +245,20 @@ Options parse_options(int argc, char** argv) {
             const auto reset = value();
             if (reset != "0" && reset != "1") fail("--reset-history must be 0 or 1");
             options.reset_history = reset == "1";
+        } else if (arg == "--hud-mode") {
+            options.hud_mode = value();
+        } else if (arg == "--ui-source") {
+            options.ui_source = value();
+        } else if (arg == "--hud-debug") {
+            options.hud_debug = value();
         } else if (arg == "--help" || arg == "-h") {
             std::cout << "Usage: framegen-benchmark-metal --previous F.ppm --current F.ppm "
                          "--output G.ppm [--t 0.5] [--warmup 3] [--iterations 100] "
                          "[--previous-sequence N --current-sequence N] "
                          "[--previous-timestamp-ns N --current-timestamp-ns N] "
-                         "[--reset-history 0|1]\n"
-                         "       framegen-benchmark-metal --server  # read 11-column TSV jobs from stdin\n";
+                         "[--reset-history 0|1] [--hud-mode none|explicit|automatic] "
+                         "[--ui-source previous|current|nearest] [--hud-debug MODE]\n"
+                         "       framegen-benchmark-metal --server  # read 11-, 14-, or 15-column TSV jobs from stdin\n";
             std::exit(0);
         } else {
             fail("unknown option: " + std::string(arg));
@@ -206,10 +273,14 @@ Options parse_options(int argc, char** argv) {
         fail("--t must be finite and strictly between 0 and 1");
     }
     validate_sample_counts(options);
-    if (!options.reset_history &&
-        (options.current_sequence <= options.previous_sequence ||
-         options.current_timestamp_ns <= options.previous_timestamp_ns)) {
-        fail("source sequence numbers and timestamps must increase unless history is reset");
+    (void)hud_mode(options.hud_mode);
+    (void)ui_source(options.ui_source);
+    (void)hud_debug(options.hud_debug);
+    if (options.current_sequence <= options.previous_sequence ||
+        options.previous_timestamp_ns == framegen::unknown_timestamp_ns ||
+        options.current_timestamp_ns == framegen::unknown_timestamp_ns ||
+        options.current_timestamp_ns <= options.previous_timestamp_ns) {
+        fail("source sequences and timestamps must be known and increase within the pair");
     }
     return options;
 }
@@ -356,16 +427,18 @@ Options parse_server_job(std::string_view line) {
         if (tab == std::string_view::npos) break;
         start = tab + 1;
     }
-    if (columns.size() != 11) {
-        fail("server input requires exactly 11 tab-separated columns");
+    if (columns.size() != 11 && columns.size() != 14 && columns.size() != 15) {
+        fail("server input requires exactly 11, 14, or 15 tab-separated columns");
     }
     Options options;
     options.previous_path = columns[0];
     options.current_path = columns[1];
     options.output_path = columns[2];
     std::size_t t_consumed{};
-    options.interpolation = std::stof(std::string(columns[3]), &t_consumed);
+    const double parsed_interpolation =
+        std::stod(std::string(columns[3]), &t_consumed);
     if (t_consumed != columns[3].size()) fail("invalid server interpolation t");
+    options.interpolation = static_cast<float>(parsed_interpolation);
     options.warmup = parse_u32(columns[4], "server warmup count", true);
     options.iterations = parse_u32(columns[5], "server iteration count");
     options.previous_sequence = parse_u64(columns[6], "previous sequence number");
@@ -376,20 +449,65 @@ Options parse_server_job(std::string_view line) {
         fail("server reset_history must be 0 or 1");
     }
     options.reset_history = columns[10] == "1";
+    if (columns.size() >= 14) {
+        options.hud_mode = columns[11];
+        options.ui_source = columns[12];
+        options.hud_debug = columns[13];
+    }
+    if (columns.size() == 15) {
+        options.requested_target_timestamp_ns =
+            parse_i64(columns[14], "requested target timestamp");
+    }
 
     if (options.previous_path.empty() || options.current_path.empty() ||
         options.output_path.empty()) {
         fail("server input paths must not be empty");
     }
-    if (!std::isfinite(options.interpolation) || options.interpolation <= 0.0F ||
-        options.interpolation >= 1.0F) {
+    if (!std::isfinite(parsed_interpolation) || parsed_interpolation <= 0.0 ||
+        parsed_interpolation >= 1.0) {
         fail("server interpolation t must be finite and strictly between 0 and 1");
     }
     validate_sample_counts(options);
-    if (!options.reset_history &&
-        (options.current_sequence <= options.previous_sequence ||
-         options.current_timestamp_ns <= options.previous_timestamp_ns)) {
-        fail("server source sequences and timestamps must increase unless history is reset");
+    (void)hud_mode(options.hud_mode);
+    (void)ui_source(options.ui_source);
+    (void)hud_debug(options.hud_debug);
+    if (options.current_sequence <= options.previous_sequence ||
+        options.previous_timestamp_ns == framegen::unknown_timestamp_ns ||
+        options.current_timestamp_ns == framegen::unknown_timestamp_ns ||
+        options.current_timestamp_ns <= options.previous_timestamp_ns) {
+        fail("server source sequences and timestamps must be known and increase within the pair");
+    }
+    if (options.requested_target_timestamp_ns &&
+        (*options.requested_target_timestamp_ns <= options.previous_timestamp_ns ||
+         *options.requested_target_timestamp_ns >= options.current_timestamp_ns)) {
+        fail("requested target timestamp must be strictly inside the source pair");
+    }
+    if (options.requested_target_timestamp_ns) {
+        const auto span = timestamp_distance(options.previous_timestamp_ns,
+                                             options.current_timestamp_ns);
+        const auto offset = timestamp_distance(options.previous_timestamp_ns,
+            *options.requested_target_timestamp_ns);
+        const long double timestamp_fraction =
+            static_cast<long double>(offset) / static_cast<long double>(span);
+        const long double quantization_tolerance =
+            0.5L / static_cast<long double>(span) +
+            8.0L * std::numeric_limits<double>::epsilon();
+        if (std::fabs(timestamp_fraction - parsed_interpolation) >
+            quantization_tolerance) {
+            fail("requested target timestamp does not match interpolation t after quantization");
+        }
+        // The exact integer timestamp is authoritative for this server request.
+        // Deriving t from it keeps scene interpolation and nearest-UI selection
+        // on the same timeline after the accepted nanosecond quantization.
+        options.interpolation = static_cast<float>(timestamp_fraction);
+        if (options.interpolation <= 0.0F) {
+            options.interpolation = std::nextafter(0.0F, 1.0F);
+        } else if (options.interpolation >= 1.0F) {
+            options.interpolation = std::nextafter(1.0F, 0.0F);
+        }
+    } else if (!std::isfinite(options.interpolation) ||
+               options.interpolation <= 0.0F || options.interpolation >= 1.0F) {
+        fail("server interpolation t must remain strictly inside (0, 1) as float");
     }
     return options;
 }
@@ -461,21 +579,37 @@ void run_job(const Options& options, BenchmarkContext& context) {
         static_cast<double>(options.iterations) * 2.0 /
         std::chrono::duration<double>(source_end - source_start).count();
 
+    const auto target_timestamp_ns = options.requested_target_timestamp_ns
+        ? *options.requested_target_timestamp_ns
+        : interpolate_timestamp(options.previous_timestamp_ns,
+                                options.current_timestamp_ns,
+                                options.interpolation);
     framegen::FrameSubmission submission{
         .previous = framegen::FrameInput{
             .texture = *wrapped_previous,
             .timing = framegen::FrameTiming{.sequence = options.previous_sequence,
                                              .timestamp_ns = options.previous_timestamp_ns,
-                                             .clock_domain = 1},
+                                             .clock_domain = 1,
+                                             .desired_presentation_timestamp_ns =
+                                                 options.previous_timestamp_ns},
         },
         .current = framegen::FrameInput{
             .texture = *wrapped_current,
             .timing = framegen::FrameTiming{.sequence = options.current_sequence,
                                              .timestamp_ns = options.current_timestamp_ns,
-                                             .clock_domain = 1},
+                                             .clock_domain = 1,
+                                             .desired_presentation_timestamp_ns =
+                                                 options.current_timestamp_ns},
         },
         .interpolation = options.interpolation,
         .reset_history = options.reset_history,
+        .interpolation_timestamp_ns = target_timestamp_ns,
+        .desired_presentation_timestamp_ns = target_timestamp_ns,
+        .hud_options = framegen::HudOptions{
+            .mode = hud_mode(options.hud_mode),
+            .ui_source = ui_source(options.ui_source),
+            .debug_visualization = hud_debug(options.hud_debug),
+        },
     };
 
     std::vector<std::uint64_t> gpu_ns;
@@ -483,7 +617,7 @@ void run_job(const Options& options, BenchmarkContext& context) {
     std::vector<std::uint64_t> latency_ns;
     std::uint64_t gpu_allocated_bytes_sampled_max{};
     std::uint64_t measured_generation_cycle_total_ns{};
-    framegen::GeneratedFrame last_generated;
+    framegen::GeneratedFrame quality_generated;
     for (std::uint32_t i = 0; i < options.warmup + options.iterations; ++i) {
         const auto cycle_start = Clock::now();
         upload_input(previous_texture, previous, previous_rgba);
@@ -507,11 +641,16 @@ void run_job(const Options& options, BenchmarkContext& context) {
                 std::chrono::duration_cast<std::chrono::nanoseconds>(completed - cycle_start).count());
             gpu_ns.push_back(generated->completion->gpu_execution_time_ns().value_or(0));
         }
-        last_generated = std::move(*generated);
+        // Repeated direct-run samples are for timing, not additional temporal
+        // observations. Keep the first one-pass result for quality readback so
+        // mask output cannot depend on the requested iteration count.
+        if (i == 0 && options.output_path != "-") {
+            quality_generated = std::move(*generated);
+        }
     }
 
     if (options.output_path != "-") {
-        const auto native_output = device.native_texture(last_generated.texture);
+        const auto native_output = device.native_texture(quality_generated.texture);
         if (native_output == nil) fail("generated Metal output could not be read back");
         const auto rgba = readback_texture(native_device, native_output,
                                            previous.width, previous.height);
@@ -522,7 +661,8 @@ void run_job(const Options& options, BenchmarkContext& context) {
         : static_cast<double>(latency_ns.size()) * 2.0 * 1'000'000'000.0 /
               static_cast<double>(measured_generation_cycle_total_ns);
 
-    std::cout << "{\"backend_id\":\"" << generator.backend_id()
+    std::cout << std::setprecision(std::numeric_limits<float>::max_digits10)
+              << "{\"backend_id\":\"" << generator.backend_id()
               << "\",\"backend_kind\":\"metal_placeholder_blend\",\"device_id\":\""
               << json_escape(device_id) << "\",\"device_name\":\""
               << json_escape(device_name) << "\",\"width\":"
@@ -532,9 +672,18 @@ void run_job(const Options& options, BenchmarkContext& context) {
               << ",\"current_sequence\":" << options.current_sequence
               << ",\"previous_timestamp_ns\":" << options.previous_timestamp_ns
               << ",\"current_timestamp_ns\":" << options.current_timestamp_ns
+              << ",\"interpolation_timestamp_ns\":" << target_timestamp_ns
+              << ",\"desired_presentation_timestamp_ns\":" << target_timestamp_ns
               << ",\"reset_history\":" << (options.reset_history ? "true" : "false")
               << ",\"warmup_samples\":" << options.warmup
               << ",\"measured_samples\":" << options.iterations
+              << ",\"backend_metadata\":{\"hud_mode\":\""
+              << json_escape(options.hud_mode) << "\",\"ui_temporal_source\":\""
+              << json_escape(options.ui_source) << "\",\"debug_visualization\":\""
+              << json_escape(options.hud_debug) << "\",\"automatic_mask\":\""
+              << (options.hud_mode == "automatic"
+                      ? "soft confidence; temporal hysteresis; one-pixel feather"
+                      : "not used") << "\"}"
               << ",\"gpu_execution_time_ns\":";
     print_array(gpu_ns);
     std::cout << ",\"cpu_submit_overhead_ns\":";
@@ -589,6 +738,9 @@ int run_server() {
             fail("benchmark server job count exceeds 100000");
         }
         const auto options = parse_server_job(line);
+        if (options.warmup != 0 || options.iterations != 1) {
+            fail("server jobs must contain one chronological sample; replay the sequence for warmup and measurement passes");
+        }
         const auto job_samples = static_cast<std::size_t>(options.warmup) + options.iterations;
         if (job_samples > kMaximumServerTotalSamples - sample_count) {
             fail("benchmark server total sample count exceeds 1000000");

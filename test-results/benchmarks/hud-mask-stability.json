@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "corpus": "synthetic-motion-v1",
+  "corpus_manifest_sha256": "52047f311802a4fe25bb3efecbbe52246b70b5e469f98086397aaf42e645465e",
+  "source_indices": [
+    0,
+    2,
+    4,
+    6,
+    8,
+    10
+  ],
+  "interpolation_t": 0.5,
+  "backend": {
+    "hud_mode": "automatic",
+    "ui_temporal_source": "nearest",
+    "debug_visualization": "raw-mask",
+    "automatic_mask": "soft confidence; temporal hysteresis; one-pixel feather"
+  },
+  "metric": "mean normalized RGB absolute difference between consecutive mask debug images",
+  "raw_mask": {
+    "mean_transition_mae": 0.06309700095315904,
+    "per_transition_mae": [
+      0.05728783700980392,
+      0.0666998570261438,
+      0.061054942810457515,
+      0.06734536696623093
+    ],
+    "per_frame_coverage": [
+      0.14039309300108932,
+      0.15743889569716776,
+      0.16424632352941176,
+      0.1577631399782135,
+      0.1631072133714597
+    ],
+    "mean_coverage": 0.15658973311546842,
+    "detection_vs_midpoint_hud_roi_at_confidence_0_5": {
+      "true_positive": 4466,
+      "false_positive": 4058,
+      "false_negative": 11189,
+      "true_negative": 26367,
+      "precision": 0.5239324260910371,
+      "recall": 0.2852762695624401,
+      "false_positive_rate": 0.1333771569433032
+    }
+  },
+  "stabilized_mask": {
+    "mean_transition_mae": 0.039563227634803924,
+    "per_transition_mae": [
+      0.04668224060457516,
+      0.03873144744008714,
+      0.034308619281045755,
+      0.038530603213507625
+    ],
+    "per_frame_coverage": [
+      0.14185687295751634,
+      0.18260569852941178,
+      0.20531130855119825,
+      0.21430164079520697,
+      0.2225498706427015
+    ],
+    "mean_coverage": 0.19332507829520698,
+    "detection_vs_midpoint_hud_roi_at_confidence_0_5": {
+      "true_positive": 4883,
+      "false_positive": 4369,
+      "false_negative": 10772,
+      "true_negative": 26056,
+      "precision": 0.5277777777777778,
+      "recall": 0.31191312679655064,
+      "false_positive_rate": 0.14359901396877567
+    }
+  },
+  "transition_mae_reduction_fraction": 0.3729776845626268,
+  "note": "Detection precision and recall compare the 0.5 confidence threshold with the authored binary HUD ROI at each exact midpoint. The ROI is only a proxy for protected pixels, not ground-truth confidence. Lower transition difference can also mean slower response."
+}

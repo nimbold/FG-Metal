@@ -86,7 +86,7 @@ struct FrameTiming {
     std::int64_t duration_ns{};
     // Diagnostic only; use unknown_timestamp_ns when unavailable.
     std::int64_t render_completion_timestamp_ns{};
-    std::int64_t desired_presentation_timestamp_ns{};
+    std::int64_t desired_presentation_timestamp_ns{unknown_timestamp_ns};
 };
 
 enum class TransferFunction : std::uint8_t { unknown, linear, srgb, pq, hlg };
@@ -114,6 +114,45 @@ struct FrameAuxiliaryInputs {
     std::uint32_t depth_encoding{};
 };
 
+// HUD handling is an explicit host/backend contract. In explicit_ui_plane
+// mode, FrameInput::texture is scene-only and ui_texture is composited after
+// scene interpolation. automatic_protection is for already-composited source
+// frames and uses a conservative, temporally stabilized confidence mask.
+enum class HudMode : std::uint8_t {
+    no_hud_knowledge,
+    explicit_ui_plane,
+    automatic_protection,
+};
+
+enum class UiTemporalSource : std::uint8_t {
+    previous_frame,
+    current_frame,
+    nearest_presentation,
+};
+
+enum class HudDebugVisualization : std::uint8_t {
+    disabled,
+    raw_mask,
+    stabilized_mask,
+    protected_regions,
+    interpolation_confidence,
+    final_composite,
+};
+
+struct HudOptions {
+    HudMode mode{HudMode::no_hud_knowledge};
+    UiTemporalSource ui_source{UiTemporalSource::nearest_presentation};
+    HudDebugVisualization debug_visualization{HudDebugVisualization::disabled};
+};
+
+// Backends may keep temporal resources here to isolate separate generators
+// that share one device/backend instance. A FrameGenerator creates one state
+// for its lifetime and forwards it with every submission.
+class BackendStreamState {
+public:
+    virtual ~BackendStreamState() = default;
+};
+
 struct FrameInput {
     Texture texture;
     FrameTiming timing;
@@ -130,6 +169,8 @@ struct FrameSubmission {
     float interpolation{0.5F};
     // Set when the backend must discard temporal history before processing
     // this pair, for example after a scene cut, stream seek, or device reset.
+    // Source sequence and timestamp must still increase within this pair;
+    // reset_history permits discontinuity from the preceding submitted pair.
     bool reset_history{};
     // GPU-native dependencies for outstanding writes to either input texture.
     // If absent, the caller asserts both textures are ready for GPU reads.
@@ -138,10 +179,14 @@ struct FrameSubmission {
     std::vector<std::shared_ptr<const GpuSyncPoint>> gpu_dependencies;
     // Sample time bracketed by the two source timestamps; determines the
     // interpolation fraction.
-    std::int64_t interpolation_timestamp_ns{};
+    std::int64_t interpolation_timestamp_ns{unknown_timestamp_ns};
     // Renderer scheduling target and deadline, independent of sample time.
-    std::int64_t desired_presentation_timestamp_ns{};
+    std::int64_t desired_presentation_timestamp_ns{unknown_timestamp_ns};
     std::int64_t presentation_deadline_ns{};
+    HudOptions hud_options;
+    // Assigned by FrameGenerator; direct backend callers may provide their own
+    // backend-created state when they need temporal continuity.
+    std::shared_ptr<BackendStreamState> backend_stream_state;
 };
 
 // Backend SPI implemented by Metal or another renderer adapter. submit()
@@ -153,7 +198,9 @@ struct FrameSubmission {
 // serialize producer and backend work, or include GPU dependencies for every
 // outstanding input write.
 // Omitting a dependency asserts that the corresponding texture is already
-// ready for GPU reads. If reset_history is set, prior temporal state must be discarded.
+// ready for GPU reads. If reset_history is set, prior temporal state must be
+// discarded. Auxiliary textures sampled by queued work must be retained until
+// GPU completion, just like the two primary color textures.
 // The output may still be in flight; consumers compose the completion point
 // into their GPU queue or explicitly wait when CPU blocking is acceptable.
 class FrameGenerationBackend {
@@ -169,6 +216,12 @@ public:
     // (1); interpolated outputs usually use a value strictly between them.
     [[nodiscard]] virtual Result<GeneratedFrame> submit(
         const FrameSubmission& submission) = 0;
+
+    // Optional per-generator temporal state. Stateless backends can retain the
+    // default implementation; stateful backends should return a fresh object
+    // so generators sharing this backend cannot exchange history.
+    [[nodiscard]] virtual std::shared_ptr<BackendStreamState>
+    create_stream_state() { return {}; }
 };
 
 } // namespace framegen

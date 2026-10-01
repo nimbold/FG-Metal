@@ -31,6 +31,7 @@ constexpr char kColorBackend[] = "org.framegen.test.color-only";
 constexpr char kMotionBackend[] = "org.framegen.test.motion";
 constexpr char kLateBackend[] = "org.framegen.test.late";
 constexpr char kHdrBackend[] = "org.framegen.test.hdr";
+constexpr char kHudBackend[] = "org.framegen.test.hud";
 
 class TestFailure final : public std::runtime_error {
 public:
@@ -141,6 +142,7 @@ struct BackendControl {
     bool submit_entered{};
     bool unblock_submit{};
     std::vector<std::uint32_t> lifecycle_events;
+    std::vector<bool> reset_history_values;
 };
 
 class TestBackend final : public FrameGenerationBackend {
@@ -162,6 +164,7 @@ public:
                 control_->lifecycle_events.push_back(1);
                 control_->block_submit = false;
             }
+            control_->reset_history_values.push_back(submission.reset_history);
         }
         ++control_->submit_count;
         control_->last_dependency_count =
@@ -389,6 +392,7 @@ struct RegisteredBackends {
     std::shared_ptr<BackendControl> motion = std::make_shared<BackendControl>();
     std::shared_ptr<BackendControl> late = std::make_shared<BackendControl>();
     std::shared_ptr<BackendControl> hdr = std::make_shared<BackendControl>();
+    std::shared_ptr<BackendControl> hud = std::make_shared<BackendControl>();
 
     RegisteredBackends() {
         detail::register_backend_provider(std::make_shared<TestProvider>(
@@ -408,6 +412,12 @@ struct RegisteredBackends {
             kHdrBackend, FRAMEGEN_CAP_COLOR_ONLY |
                 FRAMEGEN_CAP_ARBITRARY_INTERPOLATION_TIME | FRAMEGEN_CAP_HDR,
             FRAMEGEN_CAP_COLOR_ONLY | FRAMEGEN_CAP_HDR, 0, hdr));
+        detail::register_backend_provider(std::make_shared<TestProvider>(
+            kHudBackend, FRAMEGEN_CAP_COLOR_ONLY |
+                FRAMEGEN_CAP_UI_PLANE | FRAMEGEN_CAP_AUTOMATIC_HUD_PROTECTION |
+                FRAMEGEN_CAP_HUD_DEBUG_VISUALIZATION |
+                FRAMEGEN_CAP_ARBITRARY_INTERPOLATION_TIME,
+            FRAMEGEN_CAP_COLOR_ONLY, 0, hud));
     }
 } g_backends;
 
@@ -1473,6 +1483,132 @@ void test_history_invalidation_serializes_after_backend_submit() {
     framegen_context_destroy(context);
 }
 
+void test_overlapping_first_requests_reset_backend_history_once() {
+    auto* context = create_context(kColorBackend);
+    configure(context, FRAMEGEN_CAP_COLOR_ONLY |
+        FRAMEGEN_CAP_ARBITRARY_INTERPOLATION_TIME);
+    const auto first = submit(context, source(71, 671));
+    const auto second = submit(context, source(72, 672, 1, 2'000'000));
+    const auto third = submit(context, source(73, 673, 1, 3'000'000));
+    const auto first_request = request_for(first, second, 9, 1'500'000, 1'900'000);
+    const auto second_request = request_for(second, third, 9, 2'500'000, 2'900'000);
+    {
+        std::scoped_lock lock(g_backends.color->lifecycle_mutex);
+        g_backends.color->reset_history_values.clear();
+        g_backends.color->block_submit = true;
+        g_backends.color->submit_entered = false;
+        g_backends.color->unblock_submit = false;
+    }
+
+    framegen_ticket_t* first_ticket{};
+    framegen_ticket_t* second_ticket{};
+    framegen_status_t first_status = FRAMEGEN_STATUS_INTERNAL_ERROR;
+    framegen_status_t second_status = FRAMEGEN_STATUS_INTERNAL_ERROR;
+    std::thread first_thread([&] {
+        first_status = framegen_request_interpolation(
+            context, &first_request, &first_ticket);
+    });
+    bool first_entered{};
+    {
+        std::unique_lock lock(g_backends.color->lifecycle_mutex);
+        first_entered = g_backends.color->lifecycle_condition.wait_for(
+            lock, std::chrono::seconds(2), [&] {
+                return g_backends.color->submit_entered;
+            });
+    }
+    if (!first_entered) {
+        {
+            std::scoped_lock lock(g_backends.color->lifecycle_mutex);
+            g_backends.color->unblock_submit = true;
+            g_backends.color->lifecycle_condition.notify_all();
+        }
+        first_thread.join();
+        framegen_ticket_release(first_ticket);
+        framegen_context_destroy(context);
+        throw TestFailure("first concurrent request did not enter the backend");
+    }
+
+    std::thread second_thread([&] {
+        second_status = framegen_request_interpolation(
+            context, &second_request, &second_ticket);
+    });
+    const auto observed_two_requests_by =
+        std::chrono::steady_clock::now() + std::chrono::seconds(2);
+    bool second_request_queued{};
+    while (std::chrono::steady_clock::now() < observed_two_requests_by) {
+        framegen_statistics_t stats{};
+        init(stats);
+        const auto stats_status =
+            framegen_context_collect_statistics(context, &stats);
+        if (stats_status != FRAMEGEN_STATUS_OK) {
+            break;
+        }
+        if (stats.interpolation_requests >= 2) {
+            second_request_queued = true;
+            break;
+        }
+        std::this_thread::yield();
+    }
+    {
+        std::scoped_lock lock(g_backends.color->lifecycle_mutex);
+        g_backends.color->unblock_submit = true;
+        g_backends.color->lifecycle_condition.notify_all();
+    }
+    first_thread.join();
+    second_thread.join();
+    bool reset_sequence_correct{};
+    {
+        std::scoped_lock lock(g_backends.color->lifecycle_mutex);
+        reset_sequence_correct = g_backends.color->reset_history_values.size() == 2 &&
+            g_backends.color->reset_history_values[0] &&
+            !g_backends.color->reset_history_values[1];
+    }
+    framegen_ticket_release(first_ticket);
+    framegen_ticket_release(second_ticket);
+    framegen_context_destroy(context);
+    CHECK(second_request_queued);
+    CHECK(first_status == FRAMEGEN_STATUS_OK);
+    CHECK(second_status == FRAMEGEN_STATUS_OK);
+    CHECK(reset_sequence_correct);
+}
+
+void test_hud_modes_require_negotiated_capabilities() {
+    auto* context = create_context(kHudBackend);
+    configure(context, FRAMEGEN_CAP_COLOR_ONLY |
+        FRAMEGEN_CAP_ARBITRARY_INTERPOLATION_TIME);
+
+    framegen_hud_options_t options{};
+    init(options);
+    options.mode = FRAMEGEN_HUD_MODE_AUTOMATIC_PROTECTION;
+    CHECK(framegen_context_set_hud_options(context, &options) ==
+          FRAMEGEN_STATUS_CAPABILITY_UNAVAILABLE);
+    const auto auto_caps = configure(context, FRAMEGEN_CAP_COLOR_ONLY |
+        FRAMEGEN_CAP_ARBITRARY_INTERPOLATION_TIME |
+        FRAMEGEN_CAP_AUTOMATIC_HUD_PROTECTION);
+    CHECK(auto_caps.negotiated_capabilities &
+          FRAMEGEN_CAP_AUTOMATIC_HUD_PROTECTION);
+    options.debug_visualization = FRAMEGEN_HUD_DEBUG_RAW_MASK;
+    CHECK(framegen_context_set_hud_options(context, &options) ==
+          FRAMEGEN_STATUS_CAPABILITY_UNAVAILABLE);
+
+    const auto caps = configure(context, FRAMEGEN_CAP_COLOR_ONLY |
+        FRAMEGEN_CAP_ARBITRARY_INTERPOLATION_TIME | FRAMEGEN_CAP_UI_PLANE |
+        FRAMEGEN_CAP_AUTOMATIC_HUD_PROTECTION |
+        FRAMEGEN_CAP_HUD_DEBUG_VISUALIZATION,
+        0, FRAMEGEN_INPUT_UI_PLANE);
+    CHECK(caps.negotiated_capabilities & FRAMEGEN_CAP_UI_PLANE);
+    CHECK(caps.negotiated_capabilities & FRAMEGEN_CAP_AUTOMATIC_HUD_PROTECTION);
+    CHECK(caps.negotiated_capabilities & FRAMEGEN_CAP_HUD_DEBUG_VISUALIZATION);
+
+    options.mode = FRAMEGEN_HUD_MODE_AUTOMATIC_PROTECTION;
+    options.debug_visualization = FRAMEGEN_HUD_DEBUG_RAW_MASK;
+    CHECK(framegen_context_set_hud_options(context, &options) == FRAMEGEN_STATUS_OK);
+    options.mode = FRAMEGEN_HUD_MODE_EXPLICIT_UI_PLANE;
+    options.debug_visualization = FRAMEGEN_HUD_DEBUG_DISABLED;
+    CHECK(framegen_context_set_hud_options(context, &options) == FRAMEGEN_STATUS_OK);
+    framegen_context_destroy(context);
+}
+
 void test_input_leases_survive_history_eviction_and_ticket_release() {
     g_backends.late->complete_immediately->store(false, std::memory_order_release);
     auto* context = create_context(kLateBackend);
@@ -1562,6 +1698,10 @@ int main() {
          test_exported_output_handles_are_validated},
         {"history invalidation follows submitted backend work",
          test_history_invalidation_serializes_after_backend_submit},
+        {"overlapping requests reset backend history only once",
+         test_overlapping_first_requests_reset_backend_history_once},
+        {"HUD modes require negotiated capabilities",
+         test_hud_modes_require_negotiated_capabilities},
         {"input leases survive history eviction and ticket release",
          test_input_leases_survive_history_eviction_and_ticket_release},
     };

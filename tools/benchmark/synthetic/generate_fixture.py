@@ -48,7 +48,7 @@ def main() -> None:
     manifest = {
         "schema_version": 1,
         "sequence_id": "synthetic-motion-v1",
-        "title": "Synthetic motion, thin geometry, occlusion, and HUD fixture",
+        "title": "Synthetic motion, thin geometry, occlusion, and HUD preservation fixture",
         "source": "Project-authored analytic scene; no third-party footage or assets.",
         "license": "Apache-2.0 (project-authored code and generated fixture)",
         "width": WIDTH,
@@ -60,17 +60,19 @@ def main() -> None:
         "analytic_provider_function": "render",
         "frame_time_coordinate": "high-rate frame units; endpoints are two units apart",
         "mask_labels": ["hud", "text", "scene", "occlusion", "thin_geometry",
-                        "crosshair", "weapon_sight", "minimap", "health_bar", "subtitle",
-                        "hud_counter"],
+                        "crosshair", "crosshair_pixels", "weapon_sight", "minimap",
+                        "static_text_pixels", "health_bar", "subtitle", "hud_counter", "timer",
+                        "scrolling_text", "flashing_ui", "transparent_ui", "moving_menu"],
         "strict_pixel_labels": ["hud", "text", "thin_geometry", "crosshair",
-                                "weapon_sight", "minimap", "health_bar", "subtitle",
-                                "hud_counter"],
+                                "crosshair_pixels", "weapon_sight", "minimap", "health_bar",
+                                "static_text_pixels", "subtitle", "hud_counter"],
         "category_catalog": "../catalog.json",
         "fixture_coverage": [
             "slow_camera_pan", "third_person_character_movement", "foliage",
             "thin_geometry", "fences", "particles", "transparency",
             "reflections_specular_highlights", "weapon_sights", "crosshairs",
-            "subtitles", "minimaps", "health_bars", "rapidly_changing_hud_counters"
+            "subtitles", "minimaps", "health_bars", "rapidly_changing_hud_counters",
+            "timer", "scrolling_text", "flashing_ui", "transparent_ui", "moving_menu"
         ],
         "frames": frames,
     }
