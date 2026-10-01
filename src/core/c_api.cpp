@@ -198,6 +198,10 @@ std::uint64_t timestamp_distance(std::int64_t lower, std::int64_t upper) {
     return static_cast<std::uint64_t>(upper) - static_cast<std::uint64_t>(lower);
 }
 
+bool is_known_timestamp(std::int64_t timestamp) noexcept {
+    return timestamp != FRAMEGEN_TIMESTAMP_UNKNOWN;
+}
+
 bool valid_image_metadata(const framegen_image_t& image,
                           const framegen_backend_info_t& backend_info,
                           bool color_image) {
@@ -368,6 +372,36 @@ void refresh_ticket_locked(ContextImpl& state, TicketImpl& ticket) {
         const auto signaled = ticket.consumer_completion->is_signaled();
         ticket.consumer_finished = signaled.value_or(false);
     }
+}
+
+framegen_status_t validate_generated_presentation_locked(
+    ContextImpl& state, TicketImpl& ticket,
+    std::int64_t presentation_timestamp_ns) {
+    refresh_ticket_locked(state, ticket);
+    if (ticket.status == FRAMEGEN_TICKET_PENDING ||
+        ticket.status == FRAMEGEN_TICKET_READY) {
+        if (presentation_timestamp_ns >= ticket.deadline_ns) {
+            ticket.status = FRAMEGEN_TICKET_DEADLINE_MISSED;
+            ++state.statistics.deadline_misses;
+            return fail(FRAMEGEN_STATUS_INVALID_STATE,
+                        "generated output cannot be presented at or after its deadline");
+        }
+        return FRAMEGEN_STATUS_OK;
+    }
+    if (ticket.status == FRAMEGEN_TICKET_DEADLINE_MISSED) {
+        return fail(FRAMEGEN_STATUS_INVALID_STATE,
+                    "a deadline-missed generated output cannot be presented");
+    }
+    if (ticket.status == FRAMEGEN_TICKET_INVALIDATED) {
+        return fail(FRAMEGEN_STATUS_STALE_FRAME,
+                    "an output from invalidated history cannot be presented");
+    }
+    if (ticket.status == FRAMEGEN_TICKET_FAILED) {
+        return fail(FRAMEGEN_STATUS_INVALID_STATE,
+                    "a failed generated frame cannot be presented");
+    }
+    return fail(FRAMEGEN_STATUS_INVALID_STATE,
+                "ticket is no longer eligible for generated presentation");
 }
 
 void retire_released_tickets_locked(ContextImpl& state) {
@@ -943,6 +977,8 @@ framegen_status_t framegen_submit_source_frame(
         if ((optional_mask & ~kKnownInputMask) != 0 || frame->stream_id == 0 ||
             frame->source_frame_id == 0 || frame->clock_domain == 0 ||
             frame->source_duration_ns <= 0 ||
+            !is_known_timestamp(frame->source_timestamp_ns) ||
+            !is_known_timestamp(frame->desired_presentation_timestamp_ns) ||
             !valid_image_metadata(frame->color, backend_info, true) ||
             frame->color.resource.device_id != expected_device_id ||
             !valid_input_struct(&frame->render_completion) ||
@@ -1334,6 +1370,9 @@ framegen_status_t framegen_request_interpolation(
                     previous->source.source_timestamp_ns ||
                 request->interpolation_timestamp_ns >=
                     current->source.source_timestamp_ns ||
+                !is_known_timestamp(request->interpolation_timestamp_ns) ||
+                !is_known_timestamp(request->desired_presentation_timestamp_ns) ||
+                !is_known_timestamp(request->presentation_deadline_ns) ||
                 request->presentation_deadline_ns <
                     request->desired_presentation_timestamp_ns) {
                 return fail(FRAMEGEN_STATUS_INVALID_ARGUMENT,
@@ -1481,9 +1520,10 @@ framegen_status_t framegen_ticket_poll(framegen_ticket_t* ticket,
                                        std::int64_t now_ns,
                                        framegen_ticket_result_t* out_result) {
     return guarded([&] {
-        if (ticket == nullptr || !ticket->impl || !valid_output_struct(out_result)) {
+        if (ticket == nullptr || !ticket->impl || !valid_output_struct(out_result) ||
+            !is_known_timestamp(now_ns)) {
             return fail(FRAMEGEN_STATUS_INVALID_ARGUMENT,
-                        "ticket poll requires a ticket and valid output structure");
+                        "ticket poll requires a ticket, valid output, and known time");
         }
         auto state = ticket->impl->context.lock();
         if (!state) {
@@ -1610,9 +1650,10 @@ framegen_status_t framegen_notify_presentation(
     framegen_context_t* context, const framegen_presentation_event_t* event) {
     return guarded([&] {
         if (context == nullptr || !valid_input_struct(event) ||
+            !is_known_timestamp(event->presentation_timestamp_ns) ||
             !valid_input_struct(&event->consumer_completion)) {
             return fail(FRAMEGEN_STATUS_INVALID_ARGUMENT,
-                        "presentation notification requires valid structures");
+                        "presentation notification requires valid structures and a known timestamp");
         }
         auto state = context->impl;
         std::unique_lock backend_operation_lock(state->backend_operation_mutex);
@@ -1668,12 +1709,13 @@ framegen_status_t framegen_notify_presentation(
                                 "presentation event uses a different ticket clock domain");
                 }
                 if (generated_disposition) {
-                    refresh_ticket_locked(*state, *ticket_state);
-                }
-                if (generated_disposition &&
-                    ticket_state->status == FRAMEGEN_TICKET_FAILED) {
-                    return fail(FRAMEGEN_STATUS_INVALID_STATE,
-                                "a failed generated frame cannot be presented");
+                    const auto presentation_status =
+                        validate_generated_presentation_locked(
+                            *state, *ticket_state,
+                            event->presentation_timestamp_ns);
+                    if (presentation_status != FRAMEGEN_STATUS_OK) {
+                        return presentation_status;
+                    }
                 }
             } else if (generated_disposition ||
                        event->disposition == FRAMEGEN_BYPASSED_GENERATED_FRAME) {
@@ -1755,6 +1797,15 @@ framegen_status_t framegen_notify_presentation(
                     return fail(FRAMEGEN_STATUS_STALE_FRAME,
                                 "ticket clock domain changed before notification commit");
                 }
+                if (generated_disposition) {
+                    const auto presentation_status =
+                        validate_generated_presentation_locked(
+                            *state, *ticket_state,
+                            event->presentation_timestamp_ns);
+                    if (presentation_status != FRAMEGEN_STATUS_OK) {
+                        return presentation_status;
+                    }
+                }
                 ticket_state->presentation_notified = true;
                 ticket_state->consumer_lease = consumer_lease;
                 ticket_state->consumer_completion = consumer_sync;
@@ -1762,32 +1813,21 @@ framegen_status_t framegen_notify_presentation(
                     consumer_sync->is_signaled().value_or(false);
                 if (event->disposition == FRAMEGEN_PRESENTED_GENERATED_FRAME) {
                     ++state->statistics.generated_frames_presented;
-                } else if (event->disposition == FRAMEGEN_BYPASSED_GENERATED_FRAME) {
-                    if (ticket_state->status == FRAMEGEN_TICKET_PENDING) {
-                        ticket_state->status =
-                            event->presentation_timestamp_ns >= ticket_state->deadline_ns
-                                ? FRAMEGEN_TICKET_DEADLINE_MISSED
-                                : FRAMEGEN_TICKET_BYPASSED;
-                        if (ticket_state->status == FRAMEGEN_TICKET_DEADLINE_MISSED) {
+                } else if (event->disposition == FRAMEGEN_BYPASSED_GENERATED_FRAME ||
+                           event->disposition == FRAMEGEN_DROPPED_FRAME) {
+                    if (ticket_state->status == FRAMEGEN_TICKET_PENDING ||
+                        ticket_state->status == FRAMEGEN_TICKET_READY) {
+                        if (event->presentation_timestamp_ns >=
+                            ticket_state->deadline_ns) {
+                            ticket_state->status = FRAMEGEN_TICKET_DEADLINE_MISSED;
                             ++state->statistics.deadline_misses;
+                        } else {
+                            ticket_state->status = FRAMEGEN_TICKET_BYPASSED;
                         }
-                    } else if (ticket_state->status == FRAMEGEN_TICKET_READY) {
-                        ticket_state->status = FRAMEGEN_TICKET_BYPASSED;
                     }
-                    ++state->statistics.bypassed_frames;
-                } else if (event->disposition == FRAMEGEN_DROPPED_FRAME) {
-                    if (ticket_state->status == FRAMEGEN_TICKET_PENDING) {
-                        ticket_state->status =
-                            event->presentation_timestamp_ns >= ticket_state->deadline_ns
-                                ? FRAMEGEN_TICKET_DEADLINE_MISSED
-                                : FRAMEGEN_TICKET_BYPASSED;
-                        if (ticket_state->status == FRAMEGEN_TICKET_DEADLINE_MISSED) {
-                            ++state->statistics.deadline_misses;
-                        }
-                    } else if (ticket_state->status == FRAMEGEN_TICKET_READY) {
-                        ticket_state->status = FRAMEGEN_TICKET_BYPASSED;
+                    if (event->disposition == FRAMEGEN_BYPASSED_GENERATED_FRAME) {
+                        ++state->statistics.bypassed_frames;
                     }
-                    ++state->statistics.bypassed_frames;
                 }
             } else if (event->clock_domain != state->clock_domain) {
                 return fail(FRAMEGEN_STATUS_STALE_FRAME,

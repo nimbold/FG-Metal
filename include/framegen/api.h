@@ -12,7 +12,10 @@
  * All timestamps in one clock_domain use the same monotonic clock and epoch.
  * A clock_domain changes when that clock is reset or re-based. The caller
  * supplies now_ns to ticket_poll in that same clock domain. Timestamps are
- * signed nanoseconds; zero and negative values are valid.
+ * signed nanoseconds; zero and negative values are valid. The
+ * FRAMEGEN_TIMESTAMP_UNKNOWN sentinel is allowed only for diagnostic
+ * render_completion_timestamp_ns; required source, scheduling, interpolation,
+ * polling, and presentation timestamps must not use it.
  */
 
 #include <stdint.h>
@@ -455,6 +458,7 @@ typedef struct framegen_statistics {
     uint64_t source_frames_submitted;
     uint64_t interpolation_requests;
     uint64_t generated_frames_ready;
+    /* Counts BYPASSED_GENERATED_FRAME dispositions; drops are not bypasses. */
     uint64_t bypassed_frames;
     uint64_t deadline_misses;
     uint64_t failed_requests;
@@ -496,16 +500,23 @@ FRAMEGEN_API framegen_status_t framegen_ticket_poll(
     framegen_ticket_t *ticket, int64_t now_ns, framegen_ticket_result_t *out_result);
 FRAMEGEN_API void framegen_ticket_release(framegen_ticket_t *ticket);
 /*
- * Report exactly one presentation disposition for each returned ticket. A
- * generated output may be reported while its producer completion is pending;
- * the consumer completion must order after the producer wait and all sampling.
+ * Report one accepted terminal disposition for each returned ticket. A
+ * generated output may be reported while its producer completion is pending,
+ * but only while its ticket is PENDING or READY and the presentation timestamp
+ * is before the deadline. The consumer completion must order after the
+ * producer wait and all sampling. A failed, invalidated, or deadline-missed
+ * ticket cannot be presented as generated.
  * A ticket-associated drop may use FRAMEGEN_DROPPED_FRAME with its ticket ID,
  * including after history invalidation. Pass a non-NONE consumer_completion
  * whenever consumer GPU work may still reference the output; NONE_READY asserts
  * that use has already finished. It is valid to release the client ticket
  * before notifying by ticket ID; Framegen retains internal resources until the
- * notification and both GPU completion points are finished. Duplicate
- * notifications are rejected.
+ * notification and both GPU completion points are finished. A rejected
+ * generated-presentation notification does not commit its disposition or
+ * consumer completion; report a bypass or drop with the same ticket ID to
+ * retire it. Deadline misses are counted once, when polling or a late
+ * presentation timestamp first establishes that the deadline was missed.
+ * Duplicate accepted notifications are rejected.
  */
 FRAMEGEN_API framegen_status_t framegen_notify_presentation(
     framegen_context_t *context, const framegen_presentation_event_t *event);
