@@ -72,6 +72,16 @@ std::uint32_t c_pixel_format(PixelFormat format) {
     return FRAMEGEN_PIXEL_FORMAT_UNKNOWN;
 }
 
+std::uint32_t c_alpha_mode(AlphaMode mode) {
+    switch (mode) {
+    case AlphaMode::opaque: return FRAMEGEN_ALPHA_OPAQUE;
+    case AlphaMode::straight: return FRAMEGEN_ALPHA_STRAIGHT;
+    case AlphaMode::premultiplied: return FRAMEGEN_ALPHA_PREMULTIPLIED;
+    case AlphaMode::unknown: return FRAMEGEN_ALPHA_UNKNOWN;
+    }
+    return FRAMEGEN_ALPHA_UNKNOWN;
+}
+
 class MetalBackendProvider final : public ::framegen::detail::BackendProvider {
 public:
     [[nodiscard]] framegen_backend_info_t info() const override {
@@ -80,7 +90,7 @@ public:
         result.struct_version = FRAMEGEN_ABI_VERSION;
         std::strncpy(result.backend_id, kBackendId, sizeof(result.backend_id) - 1);
         result.backend_type = FRAMEGEN_GPU_BACKEND_METAL;
-        result.available = 1;
+        result.available = detail::rife_runtime_available() ? 1U : 0U;
         result.supported_capabilities = FRAMEGEN_CAP_COLOR_ONLY |
             FRAMEGEN_CAP_UI_PLANE | FRAMEGEN_CAP_AUTOMATIC_HUD_PROTECTION |
             FRAMEGEN_CAP_HUD_DEBUG_VISUALIZATION |
@@ -159,9 +169,10 @@ public:
             output.height = descriptor.height;
             output.pixel_format = c_pixel_format(descriptor.format);
             output.color_space = FRAMEGEN_COLOR_SPACE_SRGB;
-            output.transfer_function = FRAMEGEN_TRANSFER_LINEAR;
+            output.transfer_function = descriptor.color_space == ColorSpace::linear_srgb
+                ? FRAMEGEN_TRANSFER_LINEAR : FRAMEGEN_TRANSFER_SRGB;
             output.dynamic_range = FRAMEGEN_DYNAMIC_RANGE_SDR;
-            output.alpha_mode = FRAMEGEN_ALPHA_PREMULTIPLIED;
+            output.alpha_mode = c_alpha_mode(descriptor.alpha_mode);
             return output;
         };
         instance.export_sync = [adapter](const GpuSyncPoint& sync)
@@ -181,10 +192,10 @@ public:
             return output;
         };
         instance.invalidate = [](framegen_invalidation_reason_t) {
-            // The blend placeholder has no temporal history to discard.
+            // The core marks the next submission reset_history after invalidation.
         };
         instance.notify_presentation = [](const framegen_presentation_event_t&) {
-            // No output pool is reused by the placeholder backend.
+            // Each generated frame owns a distinct output texture.
         };
         return instance;
     }

@@ -2,7 +2,7 @@
 
 This benchmark evaluates generated frames against known high-rate ground truth and measures the isolated backend runner. It is designed to expose temporal shimmer, edge movement, HUD/text damage, and errors around occlusion. It does not capture a desktop, integrate with Wine, or claim game performance.
 
-The analyzer is `tools/benchmark/bench.py` and uses only Python's standard library. The Metal command-line runner is an offline adapter: it loads two PPM inputs, submits the backend request, waits for completion, reads back the final measured generated texture, and emits timing/memory JSON. Readback is confined to this benchmark path. One persistent server process and Metal context serve all jobs in a run. The default 600-second timeout applies to the complete backend session; `--backend-timeout-seconds` changes it. A timed-out session is killed as a process group. The protocol caps each input line at 64 KiB, a session at 100,000 jobs and 1,000,000 total warmup/measured samples, each job at 100,000 samples, and combined stdout/stderr at 256 MiB. The session accepts the original 11-column request, a 14-column extension carrying HUD mode/UI source/debug view, and a 15-column form that also carries the analyzer's exact integer target timestamp. The analyzer uses the 15-column form so the scene interpolation fraction and endpoint UI selection share the timestamp used to evaluate the reference. The runner echoes both target timestamp fields and the analyzer checks them against the planned sample.
+The analyzer is `tools/benchmark/bench.py` and uses only Python's standard library. The Metal command-line runner is an offline adapter: it loads two PPM inputs, submits the RIFE request, waits for completion, reads back the generated texture, and emits timing/memory JSON. Readback is confined to this benchmark path. One persistent server process and Metal context serve all jobs in a run. The default 600-second timeout applies to the complete backend session; `--backend-timeout-seconds` changes it. A timed-out session is killed as a process group. The protocol caps each input line at 64 KiB, a session at 100,000 jobs and 1,000,000 total warmup/measured samples, each job at 100,000 samples, and combined stdout/stderr at 256 MiB. The session accepts the original 11-column request, a 14-column extension carrying HUD mode/UI source/debug view, and a 15-column form that also carries the analyzer's exact integer target timestamp. The analyzer uses the 15-column form so the scene interpolation fraction and endpoint UI selection share the timestamp used to evaluate the reference. The runner echoes both target timestamp fields and the analyzer checks them against the planned sample.
 
 ## Build and run
 
@@ -17,28 +17,25 @@ On a Metal capable macOS host:
 ~~~sh
 cmake -S . -B build -G Ninja -DFRAMEGEN_BUILD_TOOLS=ON
 cmake --build build --target framegen-benchmark-metal
+export FRAMEGEN_MODEL_WEIGHTS="$PWD/models/local/rife-v4.26/rife-v4.26.fgweights"
 python3 tools/benchmark/bench.py run \
   --corpus tools/benchmark/corpus/synthetic-motion/manifest.json \
   --backend build/tools/benchmark/framegen-benchmark-metal \
-  --output test-results/benchmarks/placeholder-synthetic-motion.json
+  --hud-mode none \
+  --output test-results/benchmarks/rife-v4.26-raw-synthetic-motion.json
 ~~~
 
-The runner can measure the placeholder HUD paths and each endpoint UI policy. For example, collect a raw baseline and an automatic-protection run at the same midpoint targets:
+For a matched automatic-HUD run, use the same corpus, interpolation targets, model variant, warmup, and measured iteration count:
 
 ~~~sh
 python3 tools/benchmark/bench.py run \
   --corpus tools/benchmark/corpus/synthetic-motion/manifest.json \
   --backend build/tools/benchmark/framegen-benchmark-metal \
-  --t 0.5 --hud-mode none --ui-source nearest \
-  --output test-results/benchmarks/hud-none.json
-python3 tools/benchmark/bench.py run \
-  --corpus tools/benchmark/corpus/synthetic-motion/manifest.json \
-  --backend build/tools/benchmark/framegen-benchmark-metal \
-  --t 0.5 --hud-mode automatic --ui-source previous \
-  --output test-results/benchmarks/hud-automatic-previous.json
+  --hud-mode automatic --ui-source current \
+  --output test-results/benchmarks/rife-v4.26-automatic-synthetic-motion.json
 ~~~
 
-Repeat with `--ui-source current` and `--ui-source nearest`. Nearest presentation compares the requested presentation timestamp with each endpoint's presentation timestamp; an exact tie selects the current frame. Every policy uses the same per-target HUD/text/scene quality, temporal residual, and flicker metrics. The backend options are recorded in run metadata. `--hud-debug` can select `raw-mask`, `stabilized-mask`, `protected-regions`, `interpolation-confidence`, or `final-composite`; leave it `disabled` for quality runs because a debug view replaces the generated image.
+Automatic protection applies its estimated HUD mask after RIFE generates the scene image. `--ui-source` selects previous, current, or nearest-presentation source UI. Nearest presentation compares the requested presentation timestamp with each endpoint's presentation timestamp; an exact tie selects the current frame. The analyzer reports full-image and per-ROI spatial quality, temporal residual/flicker, HUD/text metrics, and GPU, CPU-submit, completion-latency, and memory statistics. The selected variant and HUD options are carried in run metadata. QUALITY uses full-resolution float32 inference; BALANCED uses full-resolution float16. `--hud-debug` can select `raw-mask`, `stabilized-mask`, `protected-regions`, `interpolation-confidence`, or `final-composite`; leave it `disabled` for quality runs because a debug view replaces the generated image. For BALANCED results, set `FRAMEGEN_METAL_MODEL_VARIANT=BALANCED` for both runs.
 
 Measure temporal mask changes separately from generated-image quality:
 
@@ -68,10 +65,10 @@ python3 tools/benchmark/bench.py run \
   --corpus tools/benchmark/corpus/synthetic-motion/manifest.json \
   --backend build/tools/benchmark/framegen-benchmark-metal \
   --t 0.5 \
-  --output test-results/benchmarks/placeholder-t050.json
+  --output test-results/benchmarks/rife-v4.26-raw-t050.json
 ~~~
 
-Without `--t`, the analyzer requests every available ground-truth frame between consecutive low-rate source frames. For ordinary image sequences, t is derived from source and target timestamps; a requested t must match a supplied target timestamp in each eligible interval. An analytic provider may render a target at any normalized coordinate, including values other than 0.5. Its corpus must follow the nominal uniform cadence implied by `high_rate_fps`, because the provider receives high-rate frame coordinates. Each generated target is paired with its own integer nanosecond timestamp and mask. Interpolated provider timestamps are quantized to the nearest nanosecond; the reference coordinate and reported interpolation fraction are derived from that quantized timestamp. This keeps the scene blend, nearest-UI choice, and reference on one timeline. The placeholder accepts float32 interpolation fractions, so a target that rounds to an endpoint float is clamped to the nearest representable interior value. For very short intervals, nanosecond quantization can materially shift the effective fraction from the requested `--t`; reports record the effective fraction. Timestamp arithmetic remains integer-valued to preserve epoch-based timestamps.
+Without `--t`, the analyzer requests every available ground-truth frame between consecutive low-rate source frames. For ordinary image sequences, t is derived from source and target timestamps; a requested t must match a supplied target timestamp in each eligible interval. An analytic provider may render a target at any normalized coordinate, including values other than 0.5. Its corpus must follow the nominal uniform cadence implied by `high_rate_fps`, because the provider receives high-rate frame coordinates. Each generated target is paired with its own integer nanosecond timestamp and mask. Interpolated provider timestamps are quantized to the nearest nanosecond; the reference coordinate and reported interpolation fraction are derived from that quantized timestamp. This keeps scene interpolation, nearest-UI choice, and the reference on one timeline. Very short intervals can materially shift the effective fraction from requested `--t`; reports record the effective fraction. Timestamp arithmetic remains integer-valued to preserve epoch-based timestamps.
 
 ## Corpus format
 
@@ -125,7 +122,7 @@ Temporal residual and flicker distributions are kept per transition/window. Targ
 
 ## Runtime fields and limits
 
-The result stores p50, p95, and p99 for GPU execution time, CPU submit overhead, and completion latency. Every measured sample must have positive GPU, CPU-submit, and completion timing; a missing or zero timing invalidates the run instead of being reported as zero. It reports current GPU allocation and the highest post-completion allocation sample (not a guaranteed allocation peak), plus the runner's peak resident memory. Memory values include sample coverage per target run. Comparisons require complete timing sample coverage. If a backend reports source-only and source-with-generation throughput, it must provide both consistently for every measured job and state the measurement method; both may be omitted, in which case impact remains unavailable.
+The result stores p50, p95, and p99 for GPU execution time, CPU submit overhead, and completion latency. Every measured sample must have positive GPU, CPU-submit, and completion timing; a missing or zero timing invalidates the run instead of being reported as zero. GPU execution time spans the first and final Metal command-buffer timestamps. MPSGraph may use `commitAndContinue`, so this span can include gaps between GPU work and should not be interpreted as the sum of active GPU kernel time. It reports current GPU allocation and the highest post-completion allocation sample (not a guaranteed allocation peak), plus the runner's peak resident memory. Memory values include sample coverage per target run. Comparisons require complete timing sample coverage. If a backend reports source-only and source-with-generation throughput, it must provide both consistently for every measured job and state the measurement method; both may be omitted, in which case impact remains unavailable.
 
 Deadline misses count measured completion samples above the deadline. `dropped_generated_frames_estimated` repeats that count as a serial-runner estimate; it is not an observed presentation drop. `source_only_input_throughput_fps` measures wall time for uploading the same two source textures per cycle. `source_with_generation_input_throughput_fps` reuploads those textures and includes backend submit-to-completion in wall time. Their percentage difference is labeled an offline input-throughput proxy. It excludes renderer work, game FPS, and presentation. The comparator treats an increase of more than one percentage point in source-frame FPS impact and any new deadline miss as runtime regressions.
 
@@ -137,10 +134,10 @@ Create a candidate with the same corpus and measurement configuration, then comp
 
 ~~~sh
 python3 tools/benchmark/bench.py compare \
-  --baseline test-results/benchmarks/placeholder-synthetic-motion.json \
-  --candidate test-results/benchmarks/candidate-synthetic-motion.json \
-  --output test-results/benchmarks/placeholder-vs-candidate.json \
-  --summary test-results/benchmarks/placeholder-vs-candidate.md
+  --baseline test-results/benchmarks/rife-v4.26-raw-synthetic-motion.json \
+  --candidate test-results/benchmarks/rife-v4.26-automatic-synthetic-motion.json \
+  --output test-results/benchmarks/rife-v4.26-raw-vs-automatic.json \
+  --summary test-results/benchmarks/rife-v4.26-raw-vs-automatic.md
 ~~~
 
 The comparison rejects differences in corpus content, target timestamps, host and reported Metal device, warmup/iteration/deadline/timeout/memory-budget configuration, or metric parameters. It validates result structure, timing coverage, target and temporal records, and required per-region/per-target quality data before comparing. Backend identity may differ, allowing comparisons such as raw RIFE versus stabilized RIFE, HUD-protected variants, Core ML, MPSGraph, future models, and renderer adapters.
@@ -151,6 +148,6 @@ Regression rules are explicit in `QUALITY_RULES` and `RUNTIME_RULES` in `bench.p
 
 ## Baseline
 
-The initial result should be captured from a clean checkout after building the Metal runner. Use a stable, descriptive run ID and store the JSON and Markdown under test-results/benchmarks/. The placeholder blend is only a plumbing baseline; it is not an interpolation quality claim and does not establish RIFE or game performance.
+Store each run's JSON and Markdown under `test-results/benchmarks/` with the model, variant, and HUD mode in its name. The checked-in placeholder blend reports are historical plumbing measurements. RIFE benchmark results on this synthetic corpus are local-host evidence; they do not establish game performance or quality on real footage.
 
 The baseline should preserve its corpus content digest, manifest digest, backend identity, host details, configuration, and per-target records. Do not distribute third-party footage with the result unless its license permits redistribution.

@@ -1,0 +1,9 @@
+#pragma once
+
+namespace framegen::metal::detail {
+
+inline constexpr char kRifeMetalShaderSource[] = R"FGRIFE(
+@FRAMEGEN_RIFE_METAL_SOURCE@
+)FGRIFE";
+
+} // namespace framegen::metal::detail

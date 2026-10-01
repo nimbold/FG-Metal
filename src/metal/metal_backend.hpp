@@ -9,12 +9,18 @@
 #include "framegen/backend.hpp"
 
 #include <cstdint>
+#include <filesystem>
 #include <memory>
 #include <mutex>
 #include <string_view>
 #include <array>
 
 namespace framegen::metal::detail {
+
+class MetalRifeModel;
+enum class RifeMode : unsigned char;
+[[nodiscard]] std::filesystem::path rife_model_weights_path();
+[[nodiscard]] bool rife_runtime_available() noexcept;
 
 class MetalTextureResource final : public TextureResource {
 public:
@@ -63,10 +69,11 @@ public:
 class MetalBackend final : public FrameGenerationBackend {
 public:
     MetalBackend(id<MTLDevice> device, id<MTLCommandQueue> queue,
-                 id<MTLComputePipelineState> blend_pipeline,
                  id<MTLComputePipelineState> explicit_ui_pipeline,
                  id<MTLComputePipelineState> automatic_hud_pipeline,
                  id<MTLSharedEvent> completion_event,
+                 std::shared_ptr<MetalRifeModel> rife_model,
+                 RifeMode rife_mode,
                  std::uint64_t device_id);
 
     [[nodiscard]] std::string_view backend_id() const noexcept override;
@@ -81,10 +88,11 @@ public:
 private:
     __strong id<MTLDevice> device_;
     __strong id<MTLCommandQueue> queue_;
-    __strong id<MTLComputePipelineState> blend_pipeline_;
     __strong id<MTLComputePipelineState> explicit_ui_pipeline_;
     __strong id<MTLComputePipelineState> automatic_hud_pipeline_;
     __strong id<MTLSharedEvent> completion_event_;
+    std::shared_ptr<MetalRifeModel> rife_model_;
+    RifeMode rife_mode_;
     std::uint64_t device_id_;
     std::uint64_t next_event_value_{1};
     std::mutex submission_mutex_;

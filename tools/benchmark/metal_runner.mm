@@ -625,7 +625,7 @@ void run_job(const Options& options, BenchmarkContext& context) {
         const auto submission_start = Clock::now();
         auto generated = generator.submit(submission);
         const auto submitted = Clock::now();
-        if (!generated) fail("Metal placeholder interpolation failed: " + generated.error().message);
+        if (!generated) fail("Metal RIFE interpolation failed: " + generated.error().message);
         auto waited = generated->completion->wait();
         const auto completed = Clock::now();
         if (!waited) fail("Metal completion wait failed: " + waited.error().message);
@@ -660,10 +660,15 @@ void run_job(const Options& options, BenchmarkContext& context) {
         ? 0.0
         : static_cast<double>(latency_ns.size()) * 2.0 * 1'000'000'000.0 /
               static_cast<double>(measured_generation_cycle_total_ns);
+    const char* configured_model_variant =
+        std::getenv("FRAMEGEN_METAL_MODEL_VARIANT");
+    const std::string_view model_variant = configured_model_variant != nullptr &&
+        configured_model_variant[0] != '\0'
+        ? std::string_view(configured_model_variant) : std::string_view("QUALITY");
 
     std::cout << std::setprecision(std::numeric_limits<float>::max_digits10)
               << "{\"backend_id\":\"" << generator.backend_id()
-              << "\",\"backend_kind\":\"metal_placeholder_blend\",\"device_id\":\""
+              << "\",\"backend_kind\":\"practical_rife_v4_26_metal\",\"device_id\":\""
               << json_escape(device_id) << "\",\"device_name\":\""
               << json_escape(device_name) << "\",\"width\":"
               << previous.width << ",\"height\":" << previous.height
@@ -680,7 +685,9 @@ void run_job(const Options& options, BenchmarkContext& context) {
               << ",\"backend_metadata\":{\"hud_mode\":\""
               << json_escape(options.hud_mode) << "\",\"ui_temporal_source\":\""
               << json_escape(options.ui_source) << "\",\"debug_visualization\":\""
-              << json_escape(options.hud_debug) << "\",\"automatic_mask\":\""
+              << json_escape(options.hud_debug) << "\",\"model_variant\":\""
+              << json_escape(model_variant)
+              << "\",\"model\":\"Practical-RIFE v4.26 IFNet_HDv3\",\"automatic_mask\":\""
               << (options.hud_mode == "automatic"
                       ? "soft confidence; temporal hysteresis; one-pixel feather"
                       : "not used") << "\"}"

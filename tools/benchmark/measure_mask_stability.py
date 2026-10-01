@@ -259,7 +259,7 @@ def main() -> int:
                 "",
                 f"- Corpus: `{manifest['sequence_id']}` ({manifest['width']}×{manifest['height']})",
                 f"- Source indices: `{source_indices}` at `t=0.5`",
-                f"- Backend mode: `{result['backend'].get('hud_mode', 'unknown')}`; synthetic placeholder only",
+                f"- Backend mode: `{result['backend'].get('hud_mode', 'unknown')}`; synthetic corpus only",
                 f"- Raw mask transition MAE: {raw_mean:.6f}",
                 f"- Stabilized mask transition MAE: {stabilized_mean:.6f}",
                 f"- Transition-MAE reduction: {reduction * 100.0:.1f}%",

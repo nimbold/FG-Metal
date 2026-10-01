@@ -9,7 +9,9 @@
 #include <chrono>
 #include <algorithm>
 #include <array>
+#include <cstdlib>
 #include <cstdint>
+#include <filesystem>
 #include <iostream>
 #include <thread>
 #include <utility>
@@ -51,6 +53,10 @@ bool run_contract_smoke() {
                "query Metal backend")) {
         return false;
     }
+    if (backend_info.available == 0) {
+        std::cerr << "Metal RIFE backend is unavailable despite installed model weights\n";
+        return false;
+    }
     if ((backend_info.supported_capabilities &
          (FRAMEGEN_CAP_COLOR_ONLY | FRAMEGEN_CAP_UI_PLANE |
           FRAMEGEN_CAP_AUTOMATIC_HUD_PROTECTION |
@@ -60,7 +66,7 @@ bool run_contract_smoke() {
          FRAMEGEN_CAP_AUTOMATIC_HUD_PROTECTION |
          FRAMEGEN_CAP_HUD_DEBUG_VISUALIZATION |
          FRAMEGEN_CAP_ARBITRARY_INTERPOLATION_TIME)) {
-        std::cerr << "Metal placeholder did not advertise HUD preservation capabilities\n";
+        std::cerr << "Metal RIFE backend did not advertise HUD preservation capabilities\n";
         return false;
     }
 
@@ -371,16 +377,18 @@ bool run_contract_smoke() {
                           bytesPerRow:64 * 4
                            fromRegion:MTLRegionMake2D(0, 0, 64, 32)
                           mipmapLevel:0];
-                    const auto red = bytes[0];
                     const auto green = bytes[1];
-                    const auto blue = bytes[2];
-                    success = red >= 134 && red <= 140 && green >= 185 && green <= 191 &&
-                              blue >= 134 && blue <= 140 && bytes[3] == 255;
+                    // The RIFE scene result is motion-compensated and is not
+                    // the former endpoint blend. This channel stays black in
+                    // the red/blue source pair, so a half-alpha green UI pixel
+                    // selected from the nearer previous presentation endpoint
+                    // must produce the linear-light sRGB value near 188.
+                    success = green >= 185 && green <= 191 && bytes[3] == 255;
                     if (!success) {
-                        std::cerr << "explicit UI-plane composite did not linearly interpolate sRGB scene and select nearest-presentation UI: "
-                                  << static_cast<int>(red) << ','
+                        std::cerr << "explicit UI-plane composite did not select the nearest UI and composite in linear light: "
+                                  << static_cast<int>(bytes[0]) << ','
                                   << static_cast<int>(green) << ','
-                                  << static_cast<int>(blue) << ','
+                                  << static_cast<int>(bytes[2]) << ','
                                   << static_cast<int>(bytes[3]) << '\n';
                     }
                 }
@@ -683,6 +691,23 @@ bool run_automatic_mask_release_smoke(id<MTLDevice> native_device) {
 
 int main() {
     id<MTLDevice> device = MTLCreateSystemDefaultDevice();
-    return device != nil && run_contract_smoke() &&
-        run_automatic_mask_release_smoke(device) ? 0 : 1;
+    if (device == nil) {
+        std::cerr << "SKIP: Metal integration tests require a Metal device\n";
+        return 77;
+    }
+
+    const char* configured_weights = std::getenv("FRAMEGEN_MODEL_WEIGHTS");
+    const std::filesystem::path weights_path = configured_weights != nullptr &&
+        configured_weights[0] != '\0'
+        ? std::filesystem::path(configured_weights)
+        : std::filesystem::path(FRAMEGEN_TEST_MODEL_WEIGHTS_PATH);
+    std::error_code filesystem_error;
+    if (!std::filesystem::is_regular_file(weights_path, filesystem_error) ||
+        filesystem_error) {
+        std::cerr << "SKIP: Metal RIFE integration tests require converted weights at "
+                  << weights_path << " (or FRAMEGEN_MODEL_WEIGHTS)\n";
+        return 77;
+    }
+
+    return run_contract_smoke() && run_automatic_mask_release_smoke(device) ? 0 : 1;
 }
