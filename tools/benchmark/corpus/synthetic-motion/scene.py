@@ -35,13 +35,21 @@ def _rect(image, x0, y0, x1, y1, color):
             _set(image, x, y, color)
 
 
-def _line(image, x0, y0, x1, y1, color):
+def _mask_rect(mask, x0, y0, x1, y1):
+    for y in range(max(0, y0), min(HEIGHT, y1)):
+        for x in range(max(0, x0), min(WIDTH, x1)):
+            mask[y * WIDTH + x] = 255
+
+
+def _line(image, x0, y0, x1, y1, color, mask=None):
     dx, dy = abs(x1 - x0), abs(y1 - y0)
     sx = 1 if x0 < x1 else -1
     sy = 1 if y0 < y1 else -1
     error = dx - dy
     while True:
         _set(image, x0, y0, color)
+        if mask is not None and 0 <= x0 < WIDTH and 0 <= y0 < HEIGHT:
+            mask[y0 * WIDTH + x0] = 255
         if x0 == x1 and y0 == y1:
             break
         twice = 2 * error
@@ -96,6 +104,9 @@ def render(time_frame: float):
     hud = bytearray(WIDTH * HEIGHT)
     text_mask = bytearray(WIDTH * HEIGHT)
     occlusion = bytearray(WIDTH * HEIGHT)
+    thin_geometry = bytearray(WIDTH * HEIGHT)
+    critical_masks = {label: bytearray(WIDTH * HEIGHT) for label in (
+        "crosshair", "weapon_sight", "minimap", "health_bar", "subtitle", "hud_counter")}
 
     pan = int(round(time_frame * 1.2))
     # Thin skyline and distant foliage, translated by an analytic camera pan.
@@ -110,14 +121,14 @@ def render(time_frame: float):
     # Fence / thin geometry behind the moving character.
     for x in range(-10, WIDTH + 12, 9):
         sx = x - pan // 2
-        _line(image, sx, 31, sx, 51, (139, 151, 125))
+        _line(image, sx, 31, sx, 51, (139, 151, 125), thin_geometry)
     for y in (34, 43, 50):
-        _line(image, 0, y, WIDTH - 1, y + 1, (112, 130, 112))
+        _line(image, 0, y, WIDTH - 1, y + 1, (112, 130, 112), thin_geometry)
 
     # Specular rail with a moving highlight.
-    _line(image, 0, 54, WIDTH - 1, 54, (78, 87, 91))
+    _line(image, 0, 54, WIDTH - 1, 54, (78, 87, 91), thin_geometry)
     highlight_x = int((time_frame * 5.0) % WIDTH)
-    _line(image, highlight_x - 5, 53, highlight_x + 5, 53, (230, 220, 164))
+    _line(image, highlight_x - 5, 53, highlight_x + 5, 53, (230, 220, 164), thin_geometry)
 
     # Third-person silhouette moving through the scene.
     character_x = 41 + int(round(math.sin(time_frame * 0.12) * 10 + time_frame * 0.35))
@@ -176,6 +187,16 @@ def render(time_frame: float):
         for x in range(cross_x - 5, cross_x + 6): hud[y * WIDTH + x] = 255
     _text(image, text_mask, 8, 64, "CLEAR", (224, 228, 211))
 
+    # Keep gameplay-critical HUD components independently scorable. These
+    # tight, overlapping ROIs let the regression tool detect damage moving
+    # from a broad HUD region onto a crosshair or text element.
+    _mask_rect(critical_masks["crosshair"], 59, 33, 70, 44)
+    _mask_rect(critical_masks["weapon_sight"], 56, 30, 73, 47)
+    _mask_rect(critical_masks["minimap"], 91, 3, 124, 22)
+    _mask_rect(critical_masks["health_bar"], 7, 12, 34, 14)
+    _mask_rect(critical_masks["subtitle"], 5, 62, 42, 69)
+    _mask_rect(critical_masks["hud_counter"], 18, 3, 31, 11)
+
     # A subtle vignette makes color and edge changes easier to inspect.
     return {
         "rgb": bytes(image),
@@ -184,5 +205,7 @@ def render(time_frame: float):
             "text": bytes(text_mask),
             "scene": bytes(255 if hud[i] == 0 else 0 for i in range(WIDTH * HEIGHT)),
             "occlusion": bytes(occlusion),
+            "thin_geometry": bytes(thin_geometry),
+            **{label: bytes(mask) for label, mask in critical_masks.items()},
         },
     }

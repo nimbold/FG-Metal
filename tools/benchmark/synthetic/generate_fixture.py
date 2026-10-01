@@ -4,13 +4,17 @@
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
 
+ROOT = Path(__file__).resolve().parents[1] / "corpus" / "synthetic-motion"
+sys.dont_write_bytecode = True
+sys.path.insert(0, str(ROOT))
 from scene import HEIGHT, WIDTH, render
 
-ROOT = Path(__file__).resolve().parents[1] / "corpus" / "synthetic-motion"
 FRAMES = ROOT / "frames"
 MASKS = ROOT / "masks"
+HIGH_RATE_FPS = 60.0
 
 
 def write_ppm(path: Path, rgb: bytes) -> None:
@@ -36,7 +40,7 @@ def main() -> None:
             masks[label] = f"masks/{filename}"
         frames.append({
             "index": index,
-            "timestamp_ns": index * 16_666_667,
+            "timestamp_ns": round(index * 1_000_000_000 / HIGH_RATE_FPS),
             "path": f"frames/{name}",
             "masks": masks,
         })
@@ -49,13 +53,18 @@ def main() -> None:
         "license": "Apache-2.0 (project-authored code and generated fixture)",
         "width": WIDTH,
         "height": HEIGHT,
-        "high_rate_fps": 60.0,
+        "high_rate_fps": HIGH_RATE_FPS,
         "low_rate_stride_frames": 2,
         "source_indices": [0, 2, 4, 6, 8, 10],
-        "analytic_provider": "../../synthetic/scene.py",
+        "analytic_provider": "scene.py",
         "analytic_provider_function": "render",
         "frame_time_coordinate": "high-rate frame units; endpoints are two units apart",
-        "mask_labels": ["hud", "text", "scene", "occlusion"],
+        "mask_labels": ["hud", "text", "scene", "occlusion", "thin_geometry",
+                        "crosshair", "weapon_sight", "minimap", "health_bar", "subtitle",
+                        "hud_counter"],
+        "strict_pixel_labels": ["hud", "text", "thin_geometry", "crosshair",
+                                "weapon_sight", "minimap", "health_bar", "subtitle",
+                                "hud_counter"],
         "category_catalog": "../catalog.json",
         "fixture_coverage": [
             "slow_camera_pan", "third_person_character_movement", "foliage",

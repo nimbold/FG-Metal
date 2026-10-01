@@ -18,6 +18,14 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for module boundaries and [DECISIONS.md](
 
 Target the newest macOS SDK and Apple toolchain available in the development environment, C++23, CMake, Ninja, and modern Metal APIs, including Metal 4 where applicable. Objective-C++ is limited to Apple framework interop. The initial host is a Metal-only test application; D3DMetal, DXMT, and DXVK adapters are later work and are not part of this bootstrap.
 
+## Current status
+
+The GPU-texture API, core tests, Metal placeholder blend, and standalone Metal test host from the bootstrap are implemented. Step 2 adds a reproducible offline quality and runtime benchmark, a versioned corpus format, a project-authored synthetic sequence, JSON and Markdown reports, and a regression comparator. A placeholder-backend baseline is stored under `test-results/benchmarks/`.
+
+The only implemented processing backend is still a linear Metal texture blend used to validate the API path. It is not a motion-compensated interpolator and its baseline is not a quality claim. No RIFE implementation, model weights, Core ML or MPSGraph backend, Wine/game integration, renderer adapter, or in-game FPS evidence exists. The benchmark's source-throughput value is an offline input-upload proxy, not game FPS or presented-frame pacing.
+
+The committed synthetic fixture covers slow panning, third-person motion, foliage, thin geometry and fences, particles, transparency, moving highlights, sights and crosshairs, a caption-like subtitle, minimap, health bar, and changing HUD counters. HUD and text are mandatory pointwise ROIs; thin geometry, crosshair, weapon sight, minimap, health bar, subtitle, and counter add named pointwise guards. Those guards compare both per-target RGB errors and per-pixel temporal residual, color flicker, and edge flicker. Fast rotation, racing, menus, scene cuts, loading transitions, and richer subtitle cases remain planned. See [the corpus catalog](tools/benchmark/corpus/catalog.json) for the per-category status. No copyrighted game footage is included.
+
 ## Build and run
 
 Prerequisites are macOS with an Apple SDK/Clang toolchain, CMake 3.25 or newer, and Ninja. On macOS, the Metal backend and test app are enabled by default.
@@ -28,17 +36,46 @@ cmake --build build
 ctest --test-dir build --output-on-failure
 ```
 
+On macOS, run the analyzer's standard-library metric and regression checks with:
+
+```sh
+PYTHONDONTWRITEBYTECODE=1 python3 tests/test_benchmark_metrics.py
+```
+
 Open the native Metal preview with:
 
 ```sh
 open build/adapters/test-metal/framegen-test-metal.app
 ```
 
-The Metal test host requires a Metal-capable device. A core-only build can disable both Metal targets with `-DFRAMEGEN_BUILD_METAL=OFF -DFRAMEGEN_BUILD_TEST_METAL=OFF`. Benchmark and analyzer targets are reserved but not implemented; `FRAMEGEN_BUILD_TOOLS=ON` is unavailable until those targets land.
+The Metal test host requires a Metal-capable device. A core-only build can disable both Metal targets with `-DFRAMEGEN_BUILD_METAL=OFF -DFRAMEGEN_BUILD_TEST_METAL=OFF`. The Python analyzer uses only the standard library and can validate/compare results on other hosts. The Metal benchmark runner is an optional macOS target; configure it with `-DFRAMEGEN_BUILD_TOOLS=ON`.
 
-## Current scope
+Run the committed synthetic fixture after building the runner:
 
-The bootstrap establishes project structure, a GPU-texture public API, tests, and a placeholder Metal blend path. Neural network implementation, model selection, renderer integration, and performance claims remain out of scope until the corresponding roadmap work is explicitly started. RIFE, Core ML, and MetalFX are research/evaluation options only, not selected dependencies or promised backends.
+```sh
+cmake -S . -B build -G Ninja -DFRAMEGEN_BUILD_TOOLS=ON
+cmake --build build --target framegen-benchmark-metal
+python3 tools/benchmark/bench.py run \
+  --corpus tools/benchmark/corpus/synthetic-motion/manifest.json \
+  --backend build/tools/benchmark/framegen-benchmark-metal \
+  --output test-results/benchmarks/candidate-synthetic-motion.json
+```
+
+Compare a candidate with the checked-in placeholder baseline:
+
+```sh
+python3 tools/benchmark/bench.py compare \
+  --baseline test-results/benchmarks/placeholder-synthetic-motion.json \
+  --candidate test-results/benchmarks/candidate-synthetic-motion.json \
+  --output test-results/benchmarks/placeholder-vs-candidate.json \
+  --summary test-results/benchmarks/placeholder-vs-candidate.md
+```
+
+See [BENCHMARK.md](docs/BENCHMARK.md) for corpus authoring, arbitrary interpolation timestamps, masked temporal/edge metrics, runtime fields, comparison rules, and limitations. Analytic ground-truth providers are Python code loaded from the corpus; run only providers you trust.
+
+## Project boundaries and next work
+
+The benchmark is a quality-evaluation framework, not evidence that a frame-generation algorithm has been selected or validated. Next work is to broaden the synthetic corpus, identify and document redistribution-safe sequences, finish the API/synchronization decisions, and evaluate algorithm and backend candidates before implementation. RIFE-family approaches, Core ML, and MetalFX remain research options, not selected dependencies or promised backends.
 
 ## Contributing
 
