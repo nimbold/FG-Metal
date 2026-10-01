@@ -5,6 +5,7 @@
 #include "framegen/metal.hpp"
 
 #include <algorithm>
+#include <charconv>
 #include <cctype>
 #include <chrono>
 #include <cmath>
@@ -24,6 +25,10 @@
 namespace {
 
 using Clock = std::chrono::steady_clock;
+constexpr std::size_t kMaximumServerLineBytes = 64 * 1024;
+constexpr std::size_t kMaximumServerJobs = 100'000;
+constexpr std::size_t kMaximumServerTotalSamples = 1'000'000;
+constexpr std::uint32_t kMaximumSamplesPerJob = 100'000;
 
 struct Image {
     std::uint32_t width{};
@@ -38,10 +43,22 @@ struct Options {
     float interpolation{0.5F};
     std::uint32_t warmup{3};
     std::uint32_t iterations{100};
+    std::uint64_t previous_sequence{};
+    std::uint64_t current_sequence{2};
+    std::int64_t previous_timestamp_ns{};
+    std::int64_t current_timestamp_ns{33'333'333};
+    bool reset_history{};
 };
 
 void fail(std::string message) {
     throw std::runtime_error(std::move(message));
+}
+
+void validate_sample_counts(const Options& options) {
+    if (options.iterations == 0 || options.warmup > kMaximumSamplesPerJob ||
+        options.iterations > kMaximumSamplesPerJob - options.warmup) {
+        fail("warmup plus measured iterations must be between 1 and 100000");
+    }
 }
 
 std::string next_ppm_token(const std::vector<std::uint8_t>& bytes, std::size_t& cursor) {
@@ -68,14 +85,33 @@ std::string next_ppm_token(const std::vector<std::uint8_t>& bytes, std::size_t& 
                        bytes.begin() + static_cast<std::ptrdiff_t>(cursor));
 }
 
-std::uint32_t parse_u32(std::string_view value, std::string_view label) {
+std::uint32_t parse_u32(std::string_view value, std::string_view label,
+                        bool allow_zero = false) {
     std::size_t consumed{};
     const auto result = std::stoul(std::string(value), &consumed);
-    if (consumed != value.size() || result == 0 ||
+    if (consumed != value.size() || (!allow_zero && result == 0) ||
         result > std::numeric_limits<std::uint32_t>::max()) {
         fail("invalid PPM " + std::string(label));
     }
     return static_cast<std::uint32_t>(result);
+}
+
+std::uint64_t parse_u64(std::string_view value, std::string_view label) {
+    std::uint64_t result{};
+    const auto [end, error] = std::from_chars(value.data(), value.data() + value.size(), result);
+    if (error != std::errc{} || end != value.data() + value.size()) {
+        fail("invalid " + std::string(label));
+    }
+    return result;
+}
+
+std::int64_t parse_i64(std::string_view value, std::string_view label) {
+    std::int64_t result{};
+    const auto [end, error] = std::from_chars(value.data(), value.data() + value.size(), result);
+    if (error != std::errc{} || end != value.data() + value.size()) {
+        fail("invalid " + std::string(label));
+    }
+    return result;
 }
 
 Image read_ppm(const std::string& path) {
@@ -102,9 +138,13 @@ Image read_ppm(const std::string& path) {
     } else {
         ++cursor;
     }
-    const std::uint64_t byte_count = static_cast<std::uint64_t>(image.width) * image.height * 3;
-    if (byte_count > std::numeric_limits<std::size_t>::max() ||
-        bytes.size() - cursor != static_cast<std::size_t>(byte_count)) {
+    const std::uint64_t pixel_count = static_cast<std::uint64_t>(image.width) * image.height;
+    if (pixel_count > std::numeric_limits<std::size_t>::max() / 4 ||
+        pixel_count > std::numeric_limits<std::uint64_t>::max() / 3) {
+        fail("PPM dimensions exceed addressable benchmark texture storage: " + path);
+    }
+    const std::uint64_t byte_count = pixel_count * 3;
+    if (bytes.size() - cursor != static_cast<std::size_t>(byte_count)) {
         fail("PPM pixel payload size does not match its dimensions: " + path);
     }
     image.rgb.assign(bytes.begin() + static_cast<std::ptrdiff_t>(cursor), bytes.end());
@@ -130,12 +170,28 @@ Options parse_options(int argc, char** argv) {
             options.interpolation = std::stof(std::string(text), &consumed);
             if (consumed != text.size()) fail("--t must be a number");
         } else if (arg == "--warmup") {
-            options.warmup = parse_u32(value(), "warmup count");
+            options.warmup = parse_u32(value(), "warmup count", true);
         } else if (arg == "--iterations") {
             options.iterations = parse_u32(value(), "iteration count");
+        } else if (arg == "--previous-sequence") {
+            options.previous_sequence = parse_u64(value(), "previous sequence number");
+        } else if (arg == "--current-sequence") {
+            options.current_sequence = parse_u64(value(), "current sequence number");
+        } else if (arg == "--previous-timestamp-ns") {
+            options.previous_timestamp_ns = parse_i64(value(), "previous timestamp");
+        } else if (arg == "--current-timestamp-ns") {
+            options.current_timestamp_ns = parse_i64(value(), "current timestamp");
+        } else if (arg == "--reset-history") {
+            const auto reset = value();
+            if (reset != "0" && reset != "1") fail("--reset-history must be 0 or 1");
+            options.reset_history = reset == "1";
         } else if (arg == "--help" || arg == "-h") {
             std::cout << "Usage: framegen-benchmark-metal --previous F.ppm --current F.ppm "
-                         "--output G.ppm [--t 0.5] [--warmup 3] [--iterations 100]\n";
+                         "--output G.ppm [--t 0.5] [--warmup 3] [--iterations 100] "
+                         "[--previous-sequence N --current-sequence N] "
+                         "[--previous-timestamp-ns N --current-timestamp-ns N] "
+                         "[--reset-history 0|1]\n"
+                         "       framegen-benchmark-metal --server  # read 11-column TSV jobs from stdin\n";
             std::exit(0);
         } else {
             fail("unknown option: " + std::string(arg));
@@ -149,8 +205,11 @@ Options parse_options(int argc, char** argv) {
         options.interpolation >= 1.0F) {
         fail("--t must be finite and strictly between 0 and 1");
     }
-    if (options.warmup == 0 || options.iterations == 0) {
-        fail("warmup and iteration counts must be non-zero");
+    validate_sample_counts(options);
+    if (!options.reset_history &&
+        (options.current_sequence <= options.previous_sequence ||
+         options.current_timestamp_ns <= options.previous_timestamp_ns)) {
+        fail("source sequence numbers and timestamps must increase unless history is reset");
     }
     return options;
 }
@@ -286,17 +345,103 @@ std::string json_escape(std::string_view value) {
     return escaped;
 }
 
-int run(const Options& options) {
+Options parse_server_job(std::string_view line) {
+    std::vector<std::string_view> columns;
+    std::size_t start{};
+    while (true) {
+        const auto tab = line.find('\t', start);
+        columns.push_back(line.substr(start, tab == std::string_view::npos
+                                                ? line.size() - start
+                                                : tab - start));
+        if (tab == std::string_view::npos) break;
+        start = tab + 1;
+    }
+    if (columns.size() != 11) {
+        fail("server input requires exactly 11 tab-separated columns");
+    }
+    Options options;
+    options.previous_path = columns[0];
+    options.current_path = columns[1];
+    options.output_path = columns[2];
+    std::size_t t_consumed{};
+    options.interpolation = std::stof(std::string(columns[3]), &t_consumed);
+    if (t_consumed != columns[3].size()) fail("invalid server interpolation t");
+    options.warmup = parse_u32(columns[4], "server warmup count", true);
+    options.iterations = parse_u32(columns[5], "server iteration count");
+    options.previous_sequence = parse_u64(columns[6], "previous sequence number");
+    options.current_sequence = parse_u64(columns[7], "current sequence number");
+    options.previous_timestamp_ns = parse_i64(columns[8], "previous timestamp");
+    options.current_timestamp_ns = parse_i64(columns[9], "current timestamp");
+    if (columns[10] != "0" && columns[10] != "1") {
+        fail("server reset_history must be 0 or 1");
+    }
+    options.reset_history = columns[10] == "1";
+
+    if (options.previous_path.empty() || options.current_path.empty() ||
+        options.output_path.empty()) {
+        fail("server input paths must not be empty");
+    }
+    if (!std::isfinite(options.interpolation) || options.interpolation <= 0.0F ||
+        options.interpolation >= 1.0F) {
+        fail("server interpolation t must be finite and strictly between 0 and 1");
+    }
+    validate_sample_counts(options);
+    if (!options.reset_history &&
+        (options.current_sequence <= options.previous_sequence ||
+         options.current_timestamp_ns <= options.previous_timestamp_ns)) {
+        fail("server source sequences and timestamps must increase unless history is reset");
+    }
+    return options;
+}
+
+class BenchmarkContext final {
+public:
+    [[nodiscard]] static BenchmarkContext create() {
+        id<MTLDevice> native_device = MTLCreateSystemDefaultDevice();
+        auto device_result = framegen::metal::Device::create(native_device);
+        if (!device_result) {
+            fail("Metal backend initialization failed: " + device_result.error().message);
+        }
+        auto device = std::move(*device_result);
+        auto generator_result = framegen::FrameGenerator::create(device.backend());
+        if (!generator_result) {
+            fail("FrameGenerator creation failed: " + generator_result.error().message);
+        }
+        return BenchmarkContext(native_device, std::move(device),
+                                std::move(*generator_result));
+    }
+
+    [[nodiscard]] id<MTLDevice> native_device() const noexcept { return native_device_; }
+    [[nodiscard]] framegen::metal::Device& device() noexcept { return device_; }
+    [[nodiscard]] framegen::FrameGenerator& generator() noexcept { return generator_; }
+
+private:
+    BenchmarkContext(id<MTLDevice> native_device, framegen::metal::Device device,
+                     framegen::FrameGenerator generator)
+        : native_device_(native_device), device_(std::move(device)),
+          generator_(std::move(generator)) {}
+
+    __strong id<MTLDevice> native_device_;
+    framegen::metal::Device device_;
+    framegen::FrameGenerator generator_;
+};
+
+void run_job(const Options& options, BenchmarkContext& context) {
     const auto previous = read_ppm(options.previous_path);
     const auto current = read_ppm(options.current_path);
     if (previous.width != current.width || previous.height != current.height) {
         fail("input frame dimensions must match");
     }
 
-    id<MTLDevice> native_device = MTLCreateSystemDefaultDevice();
-    auto device_result = framegen::metal::Device::create(native_device);
-    if (!device_result) fail("Metal backend initialization failed: " + device_result.error().message);
-    auto device = std::move(*device_result);
+    id<MTLDevice> native_device = context.native_device();
+    NSString* native_device_name = native_device.name;
+    const char* native_device_name_utf8 = native_device_name.UTF8String;
+    const std::string device_name = native_device_name_utf8 != nullptr
+        ? native_device_name_utf8 : "unknown Metal device";
+    const std::string device_id = "metal-registry-" +
+        std::to_string(static_cast<std::uint64_t>(native_device.registryID));
+    auto& device = context.device();
+    auto& generator = context.generator();
     std::vector<std::uint8_t> previous_rgba;
     std::vector<std::uint8_t> current_rgba;
     const auto previous_texture = make_input_texture(native_device, previous, previous_rgba);
@@ -306,10 +451,6 @@ int run(const Options& options) {
     auto wrapped_current = device.wrap_texture(current_texture, framegen::ColorSpace::srgb,
                                                framegen::AlphaMode::opaque);
     if (!wrapped_previous || !wrapped_current) fail("could not wrap benchmark input textures");
-    auto generator_result = framegen::FrameGenerator::create(device.backend());
-    if (!generator_result) fail("FrameGenerator creation failed: " + generator_result.error().message);
-    auto generator = std::move(*generator_result);
-
     const auto source_start = Clock::now();
     for (std::uint32_t i = 0; i < options.iterations; ++i) {
         upload_input(previous_texture, previous, previous_rgba);
@@ -323,21 +464,24 @@ int run(const Options& options) {
     framegen::FrameSubmission submission{
         .previous = framegen::FrameInput{
             .texture = *wrapped_previous,
-            .timing = framegen::FrameTiming{.sequence = 0, .timestamp_ns = 0,
+            .timing = framegen::FrameTiming{.sequence = options.previous_sequence,
+                                             .timestamp_ns = options.previous_timestamp_ns,
                                              .clock_domain = 1},
         },
         .current = framegen::FrameInput{
             .texture = *wrapped_current,
-            .timing = framegen::FrameTiming{.sequence = 2, .timestamp_ns = 33'333'333,
+            .timing = framegen::FrameTiming{.sequence = options.current_sequence,
+                                             .timestamp_ns = options.current_timestamp_ns,
                                              .clock_domain = 1},
         },
         .interpolation = options.interpolation,
+        .reset_history = options.reset_history,
     };
 
     std::vector<std::uint64_t> gpu_ns;
     std::vector<std::uint64_t> submit_ns;
     std::vector<std::uint64_t> latency_ns;
-    std::uint64_t gpu_allocated_bytes_peak{};
+    std::uint64_t gpu_allocated_bytes_sampled_max{};
     std::uint64_t measured_generation_cycle_total_ns{};
     framegen::GeneratedFrame last_generated;
     for (std::uint32_t i = 0; i < options.warmup + options.iterations; ++i) {
@@ -351,8 +495,9 @@ int run(const Options& options) {
         auto waited = generated->completion->wait();
         const auto completed = Clock::now();
         if (!waited) fail("Metal completion wait failed: " + waited.error().message);
-        gpu_allocated_bytes_peak = std::max<std::uint64_t>(
-            gpu_allocated_bytes_peak, static_cast<std::uint64_t>(native_device.currentAllocatedSize));
+        gpu_allocated_bytes_sampled_max = std::max<std::uint64_t>(
+            gpu_allocated_bytes_sampled_max,
+            static_cast<std::uint64_t>(native_device.currentAllocatedSize));
         if (i >= options.warmup) {
             submit_ns.push_back(static_cast<std::uint64_t>(
                 std::chrono::duration_cast<std::chrono::nanoseconds>(submitted - submission_start).count()));
@@ -365,20 +510,29 @@ int run(const Options& options) {
         last_generated = std::move(*generated);
     }
 
-    const auto native_output = device.native_texture(last_generated.texture);
-    if (native_output == nil) fail("generated Metal output could not be read back");
-    const auto rgba = readback_texture(native_device, native_output,
-                                       previous.width, previous.height);
-    write_ppm(options.output_path, previous.width, previous.height, rgba);
+    if (options.output_path != "-") {
+        const auto native_output = device.native_texture(last_generated.texture);
+        if (native_output == nil) fail("generated Metal output could not be read back");
+        const auto rgba = readback_texture(native_device, native_output,
+                                           previous.width, previous.height);
+        write_ppm(options.output_path, previous.width, previous.height, rgba);
+    }
     const double source_with_generation_fps = measured_generation_cycle_total_ns == 0
         ? 0.0
         : static_cast<double>(latency_ns.size()) * 2.0 * 1'000'000'000.0 /
               static_cast<double>(measured_generation_cycle_total_ns);
 
     std::cout << "{\"backend_id\":\"" << generator.backend_id()
-              << "\",\"backend_kind\":\"metal_placeholder_blend\",\"width\":"
+              << "\",\"backend_kind\":\"metal_placeholder_blend\",\"device_id\":\""
+              << json_escape(device_id) << "\",\"device_name\":\""
+              << json_escape(device_name) << "\",\"width\":"
               << previous.width << ",\"height\":" << previous.height
               << ",\"interpolation_t\":" << options.interpolation
+              << ",\"previous_sequence\":" << options.previous_sequence
+              << ",\"current_sequence\":" << options.current_sequence
+              << ",\"previous_timestamp_ns\":" << options.previous_timestamp_ns
+              << ",\"current_timestamp_ns\":" << options.current_timestamp_ns
+              << ",\"reset_history\":" << (options.reset_history ? "true" : "false")
               << ",\"warmup_samples\":" << options.warmup
               << ",\"measured_samples\":" << options.iterations
               << ",\"gpu_execution_time_ns\":";
@@ -388,13 +542,63 @@ int run(const Options& options) {
     std::cout << ",\"completion_latency_ns\":";
     print_array(latency_ns);
     std::cout << ",\"peak_resident_bytes\":" << peak_resident_bytes()
-              << ",\"gpu_allocated_bytes_peak\":" << gpu_allocated_bytes_peak
+              << ",\"gpu_allocated_bytes_sampled_max\":" << gpu_allocated_bytes_sampled_max
               << ",\"gpu_allocated_bytes_current\":"
               << static_cast<std::uint64_t>(native_device.currentAllocatedSize)
               << ",\"source_only_input_fps\":" << source_only_fps
               << ",\"source_with_generation_input_fps\":" << source_with_generation_fps
               << ",\"source_with_generation_throughput_method\":\"two source-frame texture uploads plus serial submit-to-completion per cycle, divided by measured wall time from before uploads through completion; offline benchmark host only; excludes renderer work and presentation\""
-              << ",\"output_path\":\"" << json_escape(options.output_path) << "\"}\n";
+              << ",\"output_path\":";
+    if (options.output_path == "-") {
+        std::cout << "null";
+    } else {
+        std::cout << "\"" << json_escape(options.output_path) << "\"";
+    }
+    std::cout << "}\n" << std::flush;
+}
+
+int run(const Options& options) {
+    auto context = BenchmarkContext::create();
+    run_job(options, context);
+    return 0;
+}
+
+bool read_server_line(std::string& line) {
+    line.clear();
+    char value{};
+    while (std::cin.get(value)) {
+        if (value == '\n') return true;
+        if (line.size() == kMaximumServerLineBytes) {
+            fail("benchmark server input line exceeds 64 KiB");
+        }
+        line.push_back(value);
+    }
+    if (std::cin.bad()) fail("failed while reading benchmark server jobs");
+    return !line.empty();
+}
+
+int run_server() {
+    auto context = BenchmarkContext::create();
+    std::string line;
+    std::size_t job_count{};
+    std::size_t sample_count{};
+    while (read_server_line(line)) {
+        if (!line.empty() && line.back() == '\r') line.pop_back();
+        if (line.empty()) continue;
+        if (job_count == kMaximumServerJobs) {
+            fail("benchmark server job count exceeds 100000");
+        }
+        const auto options = parse_server_job(line);
+        const auto job_samples = static_cast<std::size_t>(options.warmup) + options.iterations;
+        if (job_samples > kMaximumServerTotalSamples - sample_count) {
+            fail("benchmark server total sample count exceeds 1000000");
+        }
+        ++job_count;
+        sample_count += job_samples;
+        @autoreleasepool {
+            run_job(options, context);
+        }
+    }
     return 0;
 }
 
@@ -403,6 +607,10 @@ int run(const Options& options) {
 int main(int argc, char** argv) {
     @autoreleasepool {
         try {
+            if (argc >= 2 && std::string_view(argv[1]) == "--server") {
+                if (argc != 2) fail("--server does not accept additional command-line arguments");
+                return run_server();
+            }
             return run(parse_options(argc, argv));
         } catch (const std::exception& exception) {
             std::cerr << "framegen-benchmark-metal: " << exception.what() << '\n';

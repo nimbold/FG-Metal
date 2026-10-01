@@ -16,14 +16,32 @@
     8,
     10
   ],
-  "analytic_provider": "../../synthetic/scene.py",
+  "analytic_provider": "scene.py",
   "analytic_provider_function": "render",
   "frame_time_coordinate": "high-rate frame units; endpoints are two units apart",
   "mask_labels": [
     "hud",
     "text",
     "scene",
-    "occlusion"
+    "occlusion",
+    "thin_geometry",
+    "crosshair",
+    "weapon_sight",
+    "minimap",
+    "health_bar",
+    "subtitle",
+    "hud_counter"
+  ],
+  "strict_pixel_labels": [
+    "hud",
+    "text",
+    "thin_geometry",
+    "crosshair",
+    "weapon_sight",
+    "minimap",
+    "health_bar",
+    "subtitle",
+    "hud_counter"
   ],
   "category_catalog": "../catalog.json",
   "fixture_coverage": [
@@ -51,7 +69,14 @@
         "hud": "masks/f000-hud.pgm",
         "text": "masks/f000-text.pgm",
         "scene": "masks/f000-scene.pgm",
-        "occlusion": "masks/f000-occlusion.pgm"
+        "occlusion": "masks/f000-occlusion.pgm",
+        "thin_geometry": "masks/f000-thin_geometry.pgm",
+        "crosshair": "masks/f000-crosshair.pgm",
+        "weapon_sight": "masks/f000-weapon_sight.pgm",
+        "minimap": "masks/f000-minimap.pgm",
+        "health_bar": "masks/f000-health_bar.pgm",
+        "subtitle": "masks/f000-subtitle.pgm",
+        "hud_counter": "masks/f000-hud_counter.pgm"
       }
     },
     {
@@ -62,106 +87,176 @@
         "hud": "masks/f001-hud.pgm",
         "text": "masks/f001-text.pgm",
         "scene": "masks/f001-scene.pgm",
-        "occlusion": "masks/f001-occlusion.pgm"
+        "occlusion": "masks/f001-occlusion.pgm",
+        "thin_geometry": "masks/f001-thin_geometry.pgm",
+        "crosshair": "masks/f001-crosshair.pgm",
+        "weapon_sight": "masks/f001-weapon_sight.pgm",
+        "minimap": "masks/f001-minimap.pgm",
+        "health_bar": "masks/f001-health_bar.pgm",
+        "subtitle": "masks/f001-subtitle.pgm",
+        "hud_counter": "masks/f001-hud_counter.pgm"
       }
     },
     {
       "index": 2,
-      "timestamp_ns": 33333334,
+      "timestamp_ns": 33333333,
       "path": "frames/f002.ppm",
       "masks": {
         "hud": "masks/f002-hud.pgm",
         "text": "masks/f002-text.pgm",
         "scene": "masks/f002-scene.pgm",
-        "occlusion": "masks/f002-occlusion.pgm"
+        "occlusion": "masks/f002-occlusion.pgm",
+        "thin_geometry": "masks/f002-thin_geometry.pgm",
+        "crosshair": "masks/f002-crosshair.pgm",
+        "weapon_sight": "masks/f002-weapon_sight.pgm",
+        "minimap": "masks/f002-minimap.pgm",
+        "health_bar": "masks/f002-health_bar.pgm",
+        "subtitle": "masks/f002-subtitle.pgm",
+        "hud_counter": "masks/f002-hud_counter.pgm"
       }
     },
     {
       "index": 3,
-      "timestamp_ns": 50000001,
+      "timestamp_ns": 50000000,
       "path": "frames/f003.ppm",
       "masks": {
         "hud": "masks/f003-hud.pgm",
         "text": "masks/f003-text.pgm",
         "scene": "masks/f003-scene.pgm",
-        "occlusion": "masks/f003-occlusion.pgm"
+        "occlusion": "masks/f003-occlusion.pgm",
+        "thin_geometry": "masks/f003-thin_geometry.pgm",
+        "crosshair": "masks/f003-crosshair.pgm",
+        "weapon_sight": "masks/f003-weapon_sight.pgm",
+        "minimap": "masks/f003-minimap.pgm",
+        "health_bar": "masks/f003-health_bar.pgm",
+        "subtitle": "masks/f003-subtitle.pgm",
+        "hud_counter": "masks/f003-hud_counter.pgm"
       }
     },
     {
       "index": 4,
-      "timestamp_ns": 66666668,
+      "timestamp_ns": 66666667,
       "path": "frames/f004.ppm",
       "masks": {
         "hud": "masks/f004-hud.pgm",
         "text": "masks/f004-text.pgm",
         "scene": "masks/f004-scene.pgm",
-        "occlusion": "masks/f004-occlusion.pgm"
+        "occlusion": "masks/f004-occlusion.pgm",
+        "thin_geometry": "masks/f004-thin_geometry.pgm",
+        "crosshair": "masks/f004-crosshair.pgm",
+        "weapon_sight": "masks/f004-weapon_sight.pgm",
+        "minimap": "masks/f004-minimap.pgm",
+        "health_bar": "masks/f004-health_bar.pgm",
+        "subtitle": "masks/f004-subtitle.pgm",
+        "hud_counter": "masks/f004-hud_counter.pgm"
       }
     },
     {
       "index": 5,
-      "timestamp_ns": 83333335,
+      "timestamp_ns": 83333333,
       "path": "frames/f005.ppm",
       "masks": {
         "hud": "masks/f005-hud.pgm",
         "text": "masks/f005-text.pgm",
         "scene": "masks/f005-scene.pgm",
-        "occlusion": "masks/f005-occlusion.pgm"
+        "occlusion": "masks/f005-occlusion.pgm",
+        "thin_geometry": "masks/f005-thin_geometry.pgm",
+        "crosshair": "masks/f005-crosshair.pgm",
+        "weapon_sight": "masks/f005-weapon_sight.pgm",
+        "minimap": "masks/f005-minimap.pgm",
+        "health_bar": "masks/f005-health_bar.pgm",
+        "subtitle": "masks/f005-subtitle.pgm",
+        "hud_counter": "masks/f005-hud_counter.pgm"
       }
     },
     {
       "index": 6,
-      "timestamp_ns": 100000002,
+      "timestamp_ns": 100000000,
       "path": "frames/f006.ppm",
       "masks": {
         "hud": "masks/f006-hud.pgm",
         "text": "masks/f006-text.pgm",
         "scene": "masks/f006-scene.pgm",
-        "occlusion": "masks/f006-occlusion.pgm"
+        "occlusion": "masks/f006-occlusion.pgm",
+        "thin_geometry": "masks/f006-thin_geometry.pgm",
+        "crosshair": "masks/f006-crosshair.pgm",
+        "weapon_sight": "masks/f006-weapon_sight.pgm",
+        "minimap": "masks/f006-minimap.pgm",
+        "health_bar": "masks/f006-health_bar.pgm",
+        "subtitle": "masks/f006-subtitle.pgm",
+        "hud_counter": "masks/f006-hud_counter.pgm"
       }
     },
     {
       "index": 7,
-      "timestamp_ns": 116666669,
+      "timestamp_ns": 116666667,
       "path": "frames/f007.ppm",
       "masks": {
         "hud": "masks/f007-hud.pgm",
         "text": "masks/f007-text.pgm",
         "scene": "masks/f007-scene.pgm",
-        "occlusion": "masks/f007-occlusion.pgm"
+        "occlusion": "masks/f007-occlusion.pgm",
+        "thin_geometry": "masks/f007-thin_geometry.pgm",
+        "crosshair": "masks/f007-crosshair.pgm",
+        "weapon_sight": "masks/f007-weapon_sight.pgm",
+        "minimap": "masks/f007-minimap.pgm",
+        "health_bar": "masks/f007-health_bar.pgm",
+        "subtitle": "masks/f007-subtitle.pgm",
+        "hud_counter": "masks/f007-hud_counter.pgm"
       }
     },
     {
       "index": 8,
-      "timestamp_ns": 133333336,
+      "timestamp_ns": 133333333,
       "path": "frames/f008.ppm",
       "masks": {
         "hud": "masks/f008-hud.pgm",
         "text": "masks/f008-text.pgm",
         "scene": "masks/f008-scene.pgm",
-        "occlusion": "masks/f008-occlusion.pgm"
+        "occlusion": "masks/f008-occlusion.pgm",
+        "thin_geometry": "masks/f008-thin_geometry.pgm",
+        "crosshair": "masks/f008-crosshair.pgm",
+        "weapon_sight": "masks/f008-weapon_sight.pgm",
+        "minimap": "masks/f008-minimap.pgm",
+        "health_bar": "masks/f008-health_bar.pgm",
+        "subtitle": "masks/f008-subtitle.pgm",
+        "hud_counter": "masks/f008-hud_counter.pgm"
       }
     },
     {
       "index": 9,
-      "timestamp_ns": 150000003,
+      "timestamp_ns": 150000000,
       "path": "frames/f009.ppm",
       "masks": {
         "hud": "masks/f009-hud.pgm",
         "text": "masks/f009-text.pgm",
         "scene": "masks/f009-scene.pgm",
-        "occlusion": "masks/f009-occlusion.pgm"
+        "occlusion": "masks/f009-occlusion.pgm",
+        "thin_geometry": "masks/f009-thin_geometry.pgm",
+        "crosshair": "masks/f009-crosshair.pgm",
+        "weapon_sight": "masks/f009-weapon_sight.pgm",
+        "minimap": "masks/f009-minimap.pgm",
+        "health_bar": "masks/f009-health_bar.pgm",
+        "subtitle": "masks/f009-subtitle.pgm",
+        "hud_counter": "masks/f009-hud_counter.pgm"
       }
     },
     {
       "index": 10,
-      "timestamp_ns": 166666670,
+      "timestamp_ns": 166666667,
       "path": "frames/f010.ppm",
       "masks": {
         "hud": "masks/f010-hud.pgm",
         "text": "masks/f010-text.pgm",
         "scene": "masks/f010-scene.pgm",
-        "occlusion": "masks/f010-occlusion.pgm"
+        "occlusion": "masks/f010-occlusion.pgm",
+        "thin_geometry": "masks/f010-thin_geometry.pgm",
+        "crosshair": "masks/f010-crosshair.pgm",
+        "weapon_sight": "masks/f010-weapon_sight.pgm",
+        "minimap": "masks/f010-minimap.pgm",
+        "health_bar": "masks/f010-health_bar.pgm",
+        "subtitle": "masks/f010-subtitle.pgm",
+        "hud_counter": "masks/f010-hud_counter.pgm"
       }
     }
   ]
