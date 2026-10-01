@@ -33,7 +33,8 @@ constexpr framegen_capability_flags_t kKnownCapabilityMask =
     FRAMEGEN_CAP_COLOR_ONLY | kOptionalInputMask | FRAMEGEN_CAP_HDR |
     FRAMEGEN_CAP_ARBITRARY_INTERPOLATION_TIME |
     FRAMEGEN_CAP_AUTOMATIC_HUD_PROTECTION |
-    FRAMEGEN_CAP_HUD_DEBUG_VISUALIZATION;
+    FRAMEGEN_CAP_HUD_DEBUG_VISUALIZATION |
+    FRAMEGEN_CAP_TEMPORAL_QUALITY_CONTROLLER;
 constexpr framegen_capability_flags_t kKnownInputMask = kOptionalInputMask;
 
 thread_local std::array<char, 1024> g_last_error{};
@@ -325,6 +326,7 @@ struct ContextImpl : std::enable_shared_from_this<ContextImpl> {
     framegen_capability_result_t capabilities{};
     framegen_context_config_t config{};
     framegen_hud_options_t hud_options{};
+    framegen_temporal_quality_options_t temporal_quality_options{};
     std::deque<std::shared_ptr<FrameRecord>> frames;
     std::unordered_map<std::uint64_t, std::shared_ptr<TicketImpl>> tickets;
     framegen_statistics_t statistics{};
@@ -924,6 +926,12 @@ framegen_status_t framegen_context_configure(
                 .ui_temporal_source = FRAMEGEN_UI_SOURCE_NEAREST_PRESENTATION,
                 .debug_visualization = FRAMEGEN_HUD_DEBUG_DISABLED,
             };
+            state->temporal_quality_options = framegen_temporal_quality_options_t{
+                .struct_size = sizeof(framegen_temporal_quality_options_t),
+                .struct_version = FRAMEGEN_ABI_VERSION,
+                .policy = FRAMEGEN_TEMPORAL_QUALITY_DISABLED,
+                .debug_visualization = FRAMEGEN_TEMPORAL_QUALITY_DEBUG_DISABLED,
+            };
             state->max_in_flight = max_in_flight;
             state->history_capacity = history_capacity;
             state->configured = true;
@@ -1033,6 +1041,78 @@ framegen_status_t framegen_context_set_hud_options(
                 state->backend.invalidate(FRAMEGEN_INVALIDATE_HISTORY_RESET);
             } catch (...) {
                 // HUD option changes are committed even if a backend hook fails.
+            }
+        }
+        return succeed();
+    });
+}
+
+framegen_status_t framegen_context_set_temporal_quality_options(
+    framegen_context_t* context,
+    const framegen_temporal_quality_options_t* options) {
+    return guarded([&] {
+        if (context == nullptr || !valid_input_struct(options)) {
+            return fail(FRAMEGEN_STATUS_INVALID_ARGUMENT,
+                        "temporal quality configuration requires a context and valid options");
+        }
+        if (options->policy > FRAMEGEN_TEMPORAL_QUALITY_NEAREST_ENDPOINT_FALLBACK ||
+            options->debug_visualization > FRAMEGEN_TEMPORAL_QUALITY_DEBUG_CLASSES) {
+            return fail(FRAMEGEN_STATUS_INVALID_ARGUMENT,
+                        "temporal quality policy or debug visualization is invalid");
+        }
+
+        auto state = context->impl;
+        std::unique_lock backend_operation_lock(state->backend_operation_mutex);
+        std::deque<std::shared_ptr<FrameRecord>> old_frames;
+        {
+            std::scoped_lock lock(state->mutex);
+            const auto context_status = check_context(state);
+            if (context_status != FRAMEGEN_STATUS_OK) {
+                return context_status;
+            }
+            if (!state->configured) {
+                return fail(FRAMEGEN_STATUS_INVALID_STATE,
+                            "context must be configured before temporal quality options are set");
+            }
+            const bool controller_requested =
+                options->policy != FRAMEGEN_TEMPORAL_QUALITY_DISABLED ||
+                options->debug_visualization != FRAMEGEN_TEMPORAL_QUALITY_DEBUG_DISABLED;
+            const auto supported = state->backend_info.supported_capabilities;
+            const auto negotiated = state->capabilities.negotiated_capabilities;
+            if (controller_requested &&
+                ((supported & FRAMEGEN_CAP_TEMPORAL_QUALITY_CONTROLLER) == 0 ||
+                 (negotiated & FRAMEGEN_CAP_TEMPORAL_QUALITY_CONTROLLER) == 0)) {
+                return fail(FRAMEGEN_STATUS_CAPABILITY_UNAVAILABLE,
+                            "temporal quality control must be supported and negotiated");
+            }
+            if (std::memcmp(&state->temporal_quality_options, options,
+                            offsetof(framegen_temporal_quality_options_t, reserved)) == 0) {
+                return succeed();
+            }
+            if (state->history_generation == UINT64_MAX) {
+                return fail(FRAMEGEN_STATUS_INTERNAL_ERROR,
+                            "history generation sequence is exhausted");
+            }
+
+            state->temporal_quality_options = *options;
+            ++state->history_generation;
+            state->last_backend_history_generation = 0;
+            old_frames.swap(state->frames);
+            state->stream_id = 0;
+            state->clock_domain = 0;
+            for (auto& [id, ticket] : state->tickets) {
+                (void)id;
+                if (ticket->history_generation < state->history_generation) {
+                    ticket->status = FRAMEGEN_TICKET_INVALIDATED;
+                    ticket->error_status = FRAMEGEN_STATUS_STALE_FRAME;
+                }
+            }
+        }
+        if (state->backend.invalidate) {
+            try {
+                state->backend.invalidate(FRAMEGEN_INVALIDATE_HISTORY_RESET);
+            } catch (...) {
+                // Option changes are committed even if a backend hook fails.
             }
         }
         return succeed();
@@ -1601,6 +1681,57 @@ framegen_status_t framegen_request_interpolation(
                 break;
             default:
                 submission.hud_options.debug_visualization = HudDebugVisualization::disabled;
+                break;
+            }
+            switch (state->temporal_quality_options.policy) {
+            case FRAMEGEN_TEMPORAL_QUALITY_CONTINUOUS_ENDPOINT_BLEND:
+                submission.temporal_quality.policy =
+                    TemporalQualityPolicy::continuous_endpoint_blend;
+                break;
+            case FRAMEGEN_TEMPORAL_QUALITY_CONTINUOUS_SOURCE_BLEND:
+                submission.temporal_quality.policy =
+                    TemporalQualityPolicy::continuous_source_blend;
+                break;
+            case FRAMEGEN_TEMPORAL_QUALITY_NEAREST_ENDPOINT_FALLBACK:
+                submission.temporal_quality.policy =
+                    TemporalQualityPolicy::nearest_endpoint_fallback;
+                break;
+            default:
+                submission.temporal_quality.policy = TemporalQualityPolicy::disabled;
+                break;
+            }
+            switch (state->temporal_quality_options.debug_visualization) {
+            case FRAMEGEN_TEMPORAL_QUALITY_DEBUG_CONFIDENCE:
+                submission.temporal_quality.debug_visualization =
+                    TemporalQualityDebugVisualization::confidence;
+                break;
+            case FRAMEGEN_TEMPORAL_QUALITY_DEBUG_DISOCCLUSION:
+                submission.temporal_quality.debug_visualization =
+                    TemporalQualityDebugVisualization::disocclusion;
+                break;
+            case FRAMEGEN_TEMPORAL_QUALITY_DEBUG_UNSTABLE_THIN:
+                submission.temporal_quality.debug_visualization =
+                    TemporalQualityDebugVisualization::unstable_thin_features;
+                break;
+            case FRAMEGEN_TEMPORAL_QUALITY_DEBUG_HIGH_FREQUENCY:
+                submission.temporal_quality.debug_visualization =
+                    TemporalQualityDebugVisualization::high_frequency_texture;
+                break;
+            case FRAMEGEN_TEMPORAL_QUALITY_DEBUG_SPECULAR_PARTICLES:
+                submission.temporal_quality.debug_visualization =
+                    TemporalQualityDebugVisualization::specular_or_particles;
+                break;
+            case FRAMEGEN_TEMPORAL_QUALITY_DEBUG_SCENE_CUT:
+                submission.temporal_quality.debug_visualization =
+                    TemporalQualityDebugVisualization::scene_cut;
+                break;
+            case FRAMEGEN_TEMPORAL_QUALITY_DEBUG_CLASSES:
+                submission.temporal_quality.debug_visualization =
+                    TemporalQualityDebugVisualization::confidence_classes;
+                break;
+            default:
+                submission.temporal_quality.debug_visualization =
+                    TemporalQualityDebugVisualization::disabled;
                 break;
             }
             if (previous->render_dependency) {

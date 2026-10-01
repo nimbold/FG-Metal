@@ -145,6 +145,32 @@ struct HudOptions {
     HudDebugVisualization debug_visualization{HudDebugVisualization::disabled};
 };
 
+// A model-independent output policy. The backend applies it after generating
+// a frame; it does not alter or depend on the interpolation model itself.
+enum class TemporalQualityPolicy : std::uint8_t {
+    disabled,
+    continuous_endpoint_blend,
+    continuous_source_blend,
+    nearest_endpoint_fallback,
+};
+
+enum class TemporalQualityDebugVisualization : std::uint8_t {
+    disabled,
+    confidence,
+    disocclusion,
+    unstable_thin_features,
+    high_frequency_texture,
+    specular_or_particles,
+    scene_cut,
+    confidence_classes,
+};
+
+struct TemporalQualityOptions {
+    TemporalQualityPolicy policy{TemporalQualityPolicy::disabled};
+    TemporalQualityDebugVisualization debug_visualization{
+        TemporalQualityDebugVisualization::disabled};
+};
+
 // Backends may keep temporal resources here to isolate separate generators
 // that share one device/backend instance. A FrameGenerator creates one state
 // for its lifetime and forwards it with every submission.
@@ -177,13 +203,14 @@ struct FrameSubmission {
     // Adapters encode queue waits for supplied points; the core never waits on
     // them or reads image data back to CPU.
     std::vector<std::shared_ptr<const GpuSyncPoint>> gpu_dependencies;
-    // Sample time bracketed by the two source timestamps; determines the
-    // interpolation fraction.
+    // Optional sample time strictly bracketed by the two source timestamps.
+    // When supplied, it must agree with interpolation within float precision.
     std::int64_t interpolation_timestamp_ns{unknown_timestamp_ns};
     // Renderer scheduling target and deadline, independent of sample time.
     std::int64_t desired_presentation_timestamp_ns{unknown_timestamp_ns};
     std::int64_t presentation_deadline_ns{};
     HudOptions hud_options;
+    TemporalQualityOptions temporal_quality;
     // Assigned by FrameGenerator; direct backend callers may provide their own
     // backend-created state when they need temporal continuity.
     std::shared_ptr<BackendStreamState> backend_stream_state;

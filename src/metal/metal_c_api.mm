@@ -94,6 +94,7 @@ public:
         result.supported_capabilities = FRAMEGEN_CAP_COLOR_ONLY |
             FRAMEGEN_CAP_UI_PLANE | FRAMEGEN_CAP_AUTOMATIC_HUD_PROTECTION |
             FRAMEGEN_CAP_HUD_DEBUG_VISUALIZATION |
+            FRAMEGEN_CAP_TEMPORAL_QUALITY_CONTROLLER |
             FRAMEGEN_CAP_ARBITRARY_INTERPOLATION_TIME;
         result.required_capabilities = FRAMEGEN_CAP_COLOR_ONLY;
         result.required_input_capabilities = 0;

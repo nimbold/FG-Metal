@@ -132,6 +132,8 @@ def _comparison_fixture() -> dict:
     ]
     config = {
         "warmup_iterations": 1, "measured_iterations_per_target": 100,
+        "hud_mode": "none", "ui_source": "nearest", "hud_debug": "disabled",
+        "temporal_policy": "none", "temporal_debug": "disabled",
         "deadline_ms": 16.666, "backend_timeout_seconds": 600.0,
         "max_analysis_memory_mib": bench.DEFAULT_MAX_ANALYSIS_MEMORY_MIB,
         "estimated_analysis_memory_bytes": 1000, "estimated_result_bytes": 1000,

@@ -48,7 +48,7 @@ def main() -> None:
     manifest = {
         "schema_version": 1,
         "sequence_id": "synthetic-motion-v1",
-        "title": "Synthetic motion, thin geometry, occlusion, and HUD preservation fixture",
+        "title": "Synthetic motion, fast camera rotation, thin geometry, occlusion, and HUD fixture",
         "source": "Project-authored analytic scene; no third-party footage or assets.",
         "license": "Apache-2.0 (project-authored code and generated fixture)",
         "width": WIDTH,
@@ -68,7 +68,8 @@ def main() -> None:
                                 "static_text_pixels", "subtitle", "hud_counter"],
         "category_catalog": "../catalog.json",
         "fixture_coverage": [
-            "slow_camera_pan", "third_person_character_movement", "foliage",
+            "slow_camera_pan", "fast_camera_rotation",
+            "third_person_character_movement", "foliage",
             "thin_geometry", "fences", "particles", "transparency",
             "reflections_specular_highlights", "weapon_sights", "crosshairs",
             "subtitles", "minimaps", "health_bars", "rapidly_changing_hud_counters",

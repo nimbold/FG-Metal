@@ -53,6 +53,8 @@ struct Options {
     std::string hud_mode{"none"};
     std::string ui_source{"nearest"};
     std::string hud_debug{"disabled"};
+    std::string temporal_policy{"none"};
+    std::string temporal_debug{"disabled"};
 };
 
 [[noreturn]] void fail(std::string message);
@@ -79,6 +81,48 @@ framegen::HudDebugVisualization hud_debug(const std::string& value) {
     if (value == "interpolation-confidence") return framegen::HudDebugVisualization::interpolation_confidence;
     if (value == "final-composite") return framegen::HudDebugVisualization::final_composite;
     fail("--hud-debug has an unknown visualization mode");
+}
+
+framegen::TemporalQualityPolicy temporal_policy(const std::string& value) {
+    if (value == "none") return framegen::TemporalQualityPolicy::disabled;
+    if (value == "endpoint-blend") {
+        return framegen::TemporalQualityPolicy::continuous_endpoint_blend;
+    }
+    if (value == "source-blend") {
+        return framegen::TemporalQualityPolicy::continuous_source_blend;
+    }
+    if (value == "nearest") {
+        return framegen::TemporalQualityPolicy::nearest_endpoint_fallback;
+    }
+    fail("--temporal-policy must be none, endpoint-blend, source-blend, or nearest");
+}
+
+framegen::TemporalQualityDebugVisualization temporal_debug(const std::string& value) {
+    if (value == "disabled") {
+        return framegen::TemporalQualityDebugVisualization::disabled;
+    }
+    if (value == "confidence") {
+        return framegen::TemporalQualityDebugVisualization::confidence;
+    }
+    if (value == "disocclusion") {
+        return framegen::TemporalQualityDebugVisualization::disocclusion;
+    }
+    if (value == "thin") {
+        return framegen::TemporalQualityDebugVisualization::unstable_thin_features;
+    }
+    if (value == "high-frequency") {
+        return framegen::TemporalQualityDebugVisualization::high_frequency_texture;
+    }
+    if (value == "specular-particles") {
+        return framegen::TemporalQualityDebugVisualization::specular_or_particles;
+    }
+    if (value == "scene-cut") {
+        return framegen::TemporalQualityDebugVisualization::scene_cut;
+    }
+    if (value == "classes") {
+        return framegen::TemporalQualityDebugVisualization::confidence_classes;
+    }
+    fail("--temporal-debug has an unknown visualization mode");
 }
 
 [[noreturn]] void fail(std::string message) {
@@ -251,14 +295,20 @@ Options parse_options(int argc, char** argv) {
             options.ui_source = value();
         } else if (arg == "--hud-debug") {
             options.hud_debug = value();
+        } else if (arg == "--temporal-policy") {
+            options.temporal_policy = value();
+        } else if (arg == "--temporal-debug") {
+            options.temporal_debug = value();
         } else if (arg == "--help" || arg == "-h") {
             std::cout << "Usage: framegen-benchmark-metal --previous F.ppm --current F.ppm "
                          "--output G.ppm [--t 0.5] [--warmup 3] [--iterations 100] "
                          "[--previous-sequence N --current-sequence N] "
                          "[--previous-timestamp-ns N --current-timestamp-ns N] "
                          "[--reset-history 0|1] [--hud-mode none|explicit|automatic] "
-                         "[--ui-source previous|current|nearest] [--hud-debug MODE]\n"
-                         "       framegen-benchmark-metal --server  # read 11-, 14-, or 15-column TSV jobs from stdin\n";
+                         "[--ui-source previous|current|nearest] [--hud-debug MODE] "
+                         "[--temporal-policy none|endpoint-blend|source-blend|nearest] "
+                         "[--temporal-debug MODE]\n"
+                         "       framegen-benchmark-metal --server  # read 11-, 14-, 15-, 16-, or 17-column TSV jobs from stdin\n";
             std::exit(0);
         } else {
             fail("unknown option: " + std::string(arg));
@@ -276,6 +326,8 @@ Options parse_options(int argc, char** argv) {
     (void)hud_mode(options.hud_mode);
     (void)ui_source(options.ui_source);
     (void)hud_debug(options.hud_debug);
+    (void)temporal_policy(options.temporal_policy);
+    (void)temporal_debug(options.temporal_debug);
     if (options.current_sequence <= options.previous_sequence ||
         options.previous_timestamp_ns == framegen::unknown_timestamp_ns ||
         options.current_timestamp_ns == framegen::unknown_timestamp_ns ||
@@ -427,8 +479,9 @@ Options parse_server_job(std::string_view line) {
         if (tab == std::string_view::npos) break;
         start = tab + 1;
     }
-    if (columns.size() != 11 && columns.size() != 14 && columns.size() != 15) {
-        fail("server input requires exactly 11, 14, or 15 tab-separated columns");
+    if (columns.size() != 11 && columns.size() != 14 && columns.size() != 15 &&
+        columns.size() != 16 && columns.size() != 17) {
+        fail("server input requires exactly 11, 14, 15, 16, or 17 tab-separated columns");
     }
     Options options;
     options.previous_path = columns[0];
@@ -458,6 +511,12 @@ Options parse_server_job(std::string_view line) {
         options.requested_target_timestamp_ns =
             parse_i64(columns[14], "requested target timestamp");
     }
+    if (columns.size() >= 16) {
+        options.requested_target_timestamp_ns =
+            parse_i64(columns[14], "requested target timestamp");
+        options.temporal_policy = columns[15];
+    }
+    if (columns.size() == 17) options.temporal_debug = columns[16];
 
     if (options.previous_path.empty() || options.current_path.empty() ||
         options.output_path.empty()) {
@@ -471,6 +530,8 @@ Options parse_server_job(std::string_view line) {
     (void)hud_mode(options.hud_mode);
     (void)ui_source(options.ui_source);
     (void)hud_debug(options.hud_debug);
+    (void)temporal_policy(options.temporal_policy);
+    (void)temporal_debug(options.temporal_debug);
     if (options.current_sequence <= options.previous_sequence ||
         options.previous_timestamp_ns == framegen::unknown_timestamp_ns ||
         options.current_timestamp_ns == framegen::unknown_timestamp_ns ||
@@ -610,6 +671,10 @@ void run_job(const Options& options, BenchmarkContext& context) {
             .ui_source = ui_source(options.ui_source),
             .debug_visualization = hud_debug(options.hud_debug),
         },
+        .temporal_quality = framegen::TemporalQualityOptions{
+            .policy = temporal_policy(options.temporal_policy),
+            .debug_visualization = temporal_debug(options.temporal_debug),
+        },
     };
 
     std::vector<std::uint64_t> gpu_ns;
@@ -686,8 +751,10 @@ void run_job(const Options& options, BenchmarkContext& context) {
               << json_escape(options.hud_mode) << "\",\"ui_temporal_source\":\""
               << json_escape(options.ui_source) << "\",\"debug_visualization\":\""
               << json_escape(options.hud_debug) << "\",\"model_variant\":\""
-              << json_escape(model_variant)
-              << "\",\"model\":\"Practical-RIFE v4.26 IFNet_HDv3\",\"automatic_mask\":\""
+              << json_escape(model_variant) << "\",\"temporal_policy\":\""
+              << json_escape(options.temporal_policy) << "\",\"temporal_debug\":\""
+              << json_escape(options.temporal_debug) << "\",\"quality_model\":\""
+              << "TemporalQualityController\",\"model\":\"Practical-RIFE v4.26 IFNet_HDv3\",\"automatic_mask\":\""
               << (options.hud_mode == "automatic"
                       ? "soft confidence; temporal hysteresis; one-pixel feather"
                       : "not used") << "\"}"

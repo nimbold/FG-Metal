@@ -85,6 +85,7 @@ typedef uint64_t framegen_capability_flags_t;
 #define FRAMEGEN_CAP_ARBITRARY_INTERPOLATION_TIME (UINT64_C(1) << 10)
 #define FRAMEGEN_CAP_AUTOMATIC_HUD_PROTECTION (UINT64_C(1) << 11)
 #define FRAMEGEN_CAP_HUD_DEBUG_VISUALIZATION (UINT64_C(1) << 12)
+#define FRAMEGEN_CAP_TEMPORAL_QUALITY_CONTROLLER (UINT64_C(1) << 13)
 
 #define FRAMEGEN_INPUT_MOTION_VECTORS FRAMEGEN_CAP_MOTION_VECTORS
 #define FRAMEGEN_INPUT_DEPTH FRAMEGEN_CAP_DEPTH
@@ -320,6 +321,40 @@ typedef struct framegen_hud_options {
     uint32_t reserved[8];
 } framegen_hud_options_t;
 
+/*
+ * Temporal-quality policy options are a separate top-level ABI extension.
+ * The controller runs after interpolation and can select the nearest real
+ * endpoint or a source blend where its GPU confidence estimate is low. The
+ * scene-cut detector combines GPU image statistics with host timing resets;
+ * it never reads source pixels back to the CPU. Changing options invalidates
+ * temporal history. Debug views replace the returned image.
+ * C host applications must request FRAMEGEN_CAP_TEMPORAL_QUALITY_CONTROLLER
+ * in preferred_capabilities or required_capabilities before enabling a policy.
+ */
+typedef uint32_t framegen_temporal_quality_policy_t;
+#define FRAMEGEN_TEMPORAL_QUALITY_DISABLED 0u
+#define FRAMEGEN_TEMPORAL_QUALITY_CONTINUOUS_ENDPOINT_BLEND 1u
+#define FRAMEGEN_TEMPORAL_QUALITY_CONTINUOUS_SOURCE_BLEND 2u
+#define FRAMEGEN_TEMPORAL_QUALITY_NEAREST_ENDPOINT_FALLBACK 3u
+
+typedef uint32_t framegen_temporal_quality_debug_visualization_t;
+#define FRAMEGEN_TEMPORAL_QUALITY_DEBUG_DISABLED 0u
+#define FRAMEGEN_TEMPORAL_QUALITY_DEBUG_CONFIDENCE 1u
+#define FRAMEGEN_TEMPORAL_QUALITY_DEBUG_DISOCCLUSION 2u
+#define FRAMEGEN_TEMPORAL_QUALITY_DEBUG_UNSTABLE_THIN 3u
+#define FRAMEGEN_TEMPORAL_QUALITY_DEBUG_HIGH_FREQUENCY 4u
+#define FRAMEGEN_TEMPORAL_QUALITY_DEBUG_SPECULAR_PARTICLES 5u
+#define FRAMEGEN_TEMPORAL_QUALITY_DEBUG_SCENE_CUT 6u
+#define FRAMEGEN_TEMPORAL_QUALITY_DEBUG_CLASSES 7u
+
+typedef struct framegen_temporal_quality_options {
+    uint32_t struct_size;
+    uint32_t struct_version;
+    framegen_temporal_quality_policy_t policy;
+    framegen_temporal_quality_debug_visualization_t debug_visualization;
+    uint32_t reserved[8];
+} framegen_temporal_quality_options_t;
+
 typedef struct framegen_capability_result {
     uint32_t struct_size;
     uint32_t struct_version;
@@ -550,6 +585,9 @@ FRAMEGEN_API framegen_status_t framegen_context_configure(
     framegen_capability_result_t *out_result);
 FRAMEGEN_API framegen_status_t framegen_context_set_hud_options(
     framegen_context_t *context, const framegen_hud_options_t *options);
+FRAMEGEN_API framegen_status_t framegen_context_set_temporal_quality_options(
+    framegen_context_t *context,
+    const framegen_temporal_quality_options_t *options);
 FRAMEGEN_API framegen_status_t framegen_submit_source_frame(
     framegen_context_t *context, const framegen_source_frame_t *frame,
     framegen_frame_receipt_t *out_receipt);

@@ -7,6 +7,9 @@ add_executable(framegen-tests
 )
 
 target_link_libraries(framegen-tests PRIVATE framegen::core)
+target_include_directories(framegen-tests PRIVATE
+    ${PROJECT_SOURCE_DIR}/src/quality
+)
 target_compile_features(framegen-tests PRIVATE cxx_std_23)
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "AppleClang|Clang|GNU")
@@ -42,6 +45,9 @@ if(TARGET framegen::metal)
         metal_c_api_tests.mm
     )
     target_link_libraries(framegen-metal-c-api-tests PRIVATE framegen::metal)
+    target_include_directories(framegen-metal-c-api-tests PRIVATE
+        ${PROJECT_SOURCE_DIR}/src/metal
+    )
     target_compile_features(framegen-metal-c-api-tests PRIVATE cxx_std_23)
     target_compile_options(framegen-metal-c-api-tests PRIVATE
         -fobjc-arc -Wall -Wextra -Wpedantic
