@@ -3,6 +3,7 @@ add_library(framegen STATIC
     core/c_api.cpp
     core/frame_generator.cpp
     core/texture.cpp
+    pacing/presentation_scheduler.cpp
     quality/temporal_quality_controller.cpp
 )
 add_library(framegen::core ALIAS framegen)

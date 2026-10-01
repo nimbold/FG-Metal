@@ -81,6 +81,13 @@ This log records decisions that constrain implementation. Pending items are not 
 **Rationale:** Renderer adapters need a stable language boundary across toolchains while the host contract still needs validation through a real placeholder backend.<br>
 **Consequence:** Fixed-width versioned structures are used at the boundary. Embedded-by-value structures are frozen for ABI v1; future evolution must use top-level extensions or a new major ABI. D3D12 and Vulkan transport values remain reserved until resource-layout and queue-ownership import contracts exist.
 
+### D-012 — Bounded model-independent presentation pacing
+
+**Status:** Accepted for Step 7<br>
+**Decision:** Keep presentation policy in a renderer/model-independent scheduler. Source production submits timing metadata and receives at most one generation request; the caller runs backend work on a separate worker. The initial schedule is 2x with one configurable interior interpolation sample per source pair, defaulting to 0.5. QUALITY permits more source-to-presentation headroom; BALANCED uses a shorter delay and a more conservative readiness cutoff. The scheduler retains at most one active or ready generated output, falls back to real source frames at a missed slot, and temporarily disables generation after repeated misses before allowing recovery probes. It does not predict or extrapolate frames.
+**Rationale:** Deadline misses must not block source production or turn GPU work into an unbounded presentation queue. A model-independent policy allows the same tests and timing contract to serve different backends.
+**Consequence:** Added latency is measured and reported, never described as zero. The scheduler's generation-readiness deadline is separate from the host's render-submit deadline and from the C ABI's later presentation expiry. QuartzCore/Metal timing values stay in the standalone host adapter; all times are translated into one monotonic clock domain before entering Framegen. QUALITY/BALANCED pacing policy does not select the backend's f32/f16 precision variant.
+
 ## Open decisions
 
 ### O-002 — Public API ABI and language boundary

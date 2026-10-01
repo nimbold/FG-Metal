@@ -1079,6 +1079,21 @@ public:
 
     [[nodiscard]] std::optional<std::uint64_t>
     gpu_execution_time_ns() const noexcept override {
+        const auto range = gpu_time_range_ns();
+        if (!range || range->second < range->first) {
+            return std::nullopt;
+        }
+        const __int128 elapsed = static_cast<__int128>(range->second) -
+                                 static_cast<__int128>(range->first);
+        if (elapsed > static_cast<__int128>(
+                          std::numeric_limits<std::uint64_t>::max())) {
+            return std::nullopt;
+        }
+        return static_cast<std::uint64_t>(elapsed);
+    }
+
+    [[nodiscard]] std::optional<std::pair<std::int64_t, std::int64_t>>
+    gpu_time_range_ns() const noexcept override {
         // MPSGraph may commit and continue across multiple command buffers.
         // The first and final GPU timestamps span every ordered segment.
         const NSTimeInterval started = first_command_buffer_.GPUStartTime;
@@ -1087,13 +1102,21 @@ public:
             started <= 0.0 || ended < started) {
             return std::nullopt;
         }
-        const long double elapsed_ns =
-            static_cast<long double>(ended - started) * 1'000'000'000.0L;
-        if (elapsed_ns > static_cast<long double>(
-                             std::numeric_limits<std::uint64_t>::max())) {
+        const long double started_ns =
+            static_cast<long double>(started) * 1'000'000'000.0L;
+        const long double ended_ns =
+            static_cast<long double>(ended) * 1'000'000'000.0L;
+        const auto minimum = static_cast<long double>(
+            std::numeric_limits<std::int64_t>::min() + 1);
+        const auto maximum = static_cast<long double>(
+            std::numeric_limits<std::int64_t>::max());
+        if (started_ns < minimum || ended_ns > maximum) {
             return std::nullopt;
         }
-        return static_cast<std::uint64_t>(elapsed_ns);
+        return std::pair{
+            static_cast<std::int64_t>(started_ns),
+            static_cast<std::int64_t>(ended_ns),
+        };
     }
 
     [[nodiscard]] Result<void> wait() override {
