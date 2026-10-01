@@ -35,6 +35,7 @@ public:
     [[nodiscard]] bool valid() const noexcept {
         return static_cast<bool>(state_);
     }
+    [[nodiscard]] std::uint64_t device_id() const noexcept;
 
     [[nodiscard]] Result<Texture> create_texture(
         const TextureDescriptor& descriptor) const;
@@ -48,7 +49,8 @@ public:
     [[nodiscard]] Result<Texture> wrap_texture(
         id<MTLTexture> native_texture,
         ColorSpace color_space = ColorSpace::unknown,
-        AlphaMode alpha_mode = AlphaMode::unknown) const;
+        AlphaMode alpha_mode = AlphaMode::unknown,
+        const void* resource_identity = nullptr) const;
 
     // Wraps a producer event/value pair as an input dependency. The framegen
     // backend will encode a GPU wait before reading submitted textures.

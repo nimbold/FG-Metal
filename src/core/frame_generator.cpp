@@ -1,5 +1,6 @@
 #include "framegen/frame_generator.hpp"
 
+#include <array>
 #include <cmath>
 #include <utility>
 
@@ -77,6 +78,27 @@ Result<GeneratedFrame> FrameGenerator::submit(const FrameSubmission& submission)
     if (!compatible_frame_descriptions(previous.descriptor(), current.descriptor())) {
         return std::unexpected(error(ErrorCode::incompatible_resource,
                                      "input texture descriptions must match"));
+    }
+
+    const std::array<const Texture*, 10> optional_textures{
+        &submission.previous.optional_inputs.motion_vectors,
+        &submission.previous.optional_inputs.depth,
+        &submission.previous.optional_inputs.ui_texture,
+        &submission.previous.optional_inputs.ui_mask,
+        &submission.previous.optional_inputs.reactive_mask,
+        &submission.current.optional_inputs.motion_vectors,
+        &submission.current.optional_inputs.depth,
+        &submission.current.optional_inputs.ui_texture,
+        &submission.current.optional_inputs.ui_mask,
+        &submission.current.optional_inputs.reactive_mask,
+    };
+    for (const auto* texture : optional_textures) {
+        if (*texture && (texture->backend_id() != backend_->backend_id() ||
+                         texture->device_id() != backend_->device_id())) {
+            return std::unexpected(error(
+                ErrorCode::incompatible_resource,
+                "optional input texture belongs to another backend device"));
+        }
     }
 
     for (const auto& dependency : submission.gpu_dependencies) {

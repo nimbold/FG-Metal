@@ -9,7 +9,6 @@
 #include "framegen/backend.hpp"
 
 #include <cstdint>
-#include <atomic>
 #include <memory>
 #include <mutex>
 #include <string_view>
@@ -19,7 +18,8 @@ namespace framegen::metal::detail {
 class MetalTextureResource final : public TextureResource {
 public:
     MetalTextureResource(id<MTLDevice> device, id<MTLTexture> texture,
-                         TextureDescriptor descriptor, std::uint64_t device_id);
+                         TextureDescriptor descriptor, std::uint64_t device_id,
+                         const void* resource_identity = nullptr);
 
     [[nodiscard]] TextureDescriptor descriptor() const noexcept override;
     [[nodiscard]] std::string_view backend_id() const noexcept override;
@@ -33,6 +33,7 @@ private:
     __strong id<MTLTexture> texture_;
     TextureDescriptor descriptor_;
     std::uint64_t device_id_;
+    const void* resource_identity_{};
 };
 
 class MetalBackend final : public FrameGenerationBackend {
@@ -55,7 +56,7 @@ private:
     __strong id<MTLComputePipelineState> blend_pipeline_;
     __strong id<MTLSharedEvent> completion_event_;
     std::uint64_t device_id_;
-    std::atomic<std::uint64_t> next_event_value_{1};
+    std::uint64_t next_event_value_{1};
     std::mutex submission_mutex_;
 };
 

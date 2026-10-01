@@ -22,6 +22,13 @@ enum class PixelFormat : std::uint8_t {
     rg11b10_float,
     rgba16_float,
     rgba32_float,
+    r16_float,
+    rg16_float,
+    rg32_float,
+    r32_float,
+    d16_unorm,
+    d32_float,
+    d24_unorm_s8_uint,
 };
 
 enum class ColorSpace : std::uint8_t {
@@ -31,6 +38,7 @@ enum class ColorSpace : std::uint8_t {
     display_p3,
     rec2020_pq,
     rec2020_hlg,
+    rec2020,
 };
 
 enum class AlphaMode : std::uint8_t {

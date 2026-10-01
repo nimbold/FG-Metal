@@ -74,12 +74,20 @@ This log records decisions that constrain implementation. Pending items are not 
 **Rationale:** A narrow validated format keeps the initial GPU blend simple while preserving the metadata contract needed for later quality work.<br>
 **Consequence:** Other formats may be represented by the public descriptor and wrapped, but the placeholder backend rejects formats it does not process. Unknown color/alpha metadata is allowed at wrapping time and may be rejected by future algorithms.
 
+### D-011 — Provisional renderer-independent C host ABI
+
+**Status:** Accepted for Step 3; ABI remains provisional<br>
+**Decision:** Expose the host lifecycle through a versioned C ABI with opaque context/ticket and GPU-resource handles. Keep C++ backend implementations and platform GPU types behind that boundary. Negotiate backend capabilities and supported formats before submission, separate interpolation sample time from desired presentation time/deadline, and report producer/consumer completion through nonblocking synchronization points. The current ABI is a draft, not a permanent freeze.<br>
+**Rationale:** Renderer adapters need a stable language boundary across toolchains while the host contract still needs validation through a real placeholder backend.<br>
+**Consequence:** Fixed-width versioned structures are used at the boundary. Embedded-by-value structures are frozen for ABI v1; future evolution must use top-level extensions or a new major ABI. D3D12 and Vulkan transport values remain reserved until resource-layout and queue-ownership import contracts exist.
+
 ## Open decisions
 
 ### O-002 — Public API ABI and language boundary
 
-**Question:** Is a C++23 public façade sufficient for initial consumers, or is a C ABI needed for plugin/toolchain stability?<br>
-**Need:** Decide based on real adapter/consumer requirements. Do not add a stable ABI promise prematurely.
+**Status:** Resolved for the provisional Step 3 contract; long-term ABI stability remains open<br>
+**Decision:** Use the provisional C host ABI in D-011 and keep the implementation SPI in C++.<br>
+**Need:** Validate the draft through adapter consumers before declaring any ABI frozen.
 
 ### O-004 — Backend candidates
 

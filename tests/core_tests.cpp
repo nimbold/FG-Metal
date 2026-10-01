@@ -264,6 +264,11 @@ void test_backend_and_device_mismatches_are_rejected() {
                                                    std::string(kBackendId), kDeviceId + 1);
     expect_error(generator.submit(foreign_device), ErrorCode::incompatible_resource);
 
+    auto foreign_optional = valid_submission();
+    foreign_optional.current.optional_inputs.depth = make_texture(
+        standard_descriptor(), std::string(kBackendId), kDeviceId + 1);
+    expect_error(generator.submit(foreign_optional), ErrorCode::incompatible_resource);
+
     auto matching_foreign_pair = valid_submission();
     matching_foreign_pair.previous.texture = make_texture(
         standard_descriptor(), "org.example.framegen.other", kDeviceId);

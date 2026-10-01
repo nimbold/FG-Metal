@@ -3,6 +3,7 @@ if(NOT APPLE)
 endif()
 
 add_library(framegen_metal STATIC
+    metal_c_api.mm
     metal_backend.mm
 )
 add_library(framegen::metal ALIAS framegen_metal)
@@ -17,6 +18,9 @@ target_link_libraries(framegen_metal
         framegen::core
         "-framework Foundation"
         "-framework Metal"
+)
+target_include_directories(framegen_metal PRIVATE
+    ${PROJECT_SOURCE_DIR}/src/core
 )
 target_compile_options(framegen_metal PRIVATE
     "$<$<COMPILE_LANGUAGE:OBJCXX>:-fobjc-arc>"
