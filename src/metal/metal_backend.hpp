@@ -7,7 +7,9 @@
 #import <Metal/Metal.h>
 
 #include "framegen/backend.hpp"
+#include "../quality/temporal_quality_controller.hpp"
 
+#include <atomic>
 #include <cstdint>
 #include <filesystem>
 #include <memory>
@@ -46,6 +48,7 @@ private:
 class MetalBackendStreamState final : public BackendStreamState {
 public:
     std::uint64_t device_id{};
+    std::shared_ptr<const std::uint8_t> backend_identity;
     std::mutex automatic_history_mutex;
     std::array<std::shared_ptr<MetalTextureResource>, 3> automatic_mask_history;
     std::uint32_t automatic_mask_width{};
@@ -64,6 +67,20 @@ public:
     float automatic_mask_pair_engagement_alpha{1.0F};
     float automatic_mask_pair_release_alpha{1.0F};
     HudMode last_hud_mode{HudMode::no_hud_knowledge};
+
+    quality::TemporalQualityController temporal_controller;
+    std::array<std::shared_ptr<MetalTextureResource>, 2> temporal_history;
+    TextureDescriptor temporal_history_descriptor{};
+    FrameColorMetadata temporal_history_color_metadata{};
+    std::uint32_t temporal_history_width{};
+    std::uint32_t temporal_history_height{};
+    std::uint32_t temporal_history_index{};
+    __strong id<MTLBuffer> temporal_history_valid_buffer;
+    __strong id<MTLBuffer> temporal_cut_tile_buffer;
+    __strong id<MTLBuffer> temporal_cut_summary_buffer;
+    std::uint32_t temporal_cut_group_count_x{};
+    std::uint32_t temporal_cut_group_count_y{};
+    std::atomic<bool> temporal_async_reset_requested{};
 };
 
 class MetalBackend final : public FrameGenerationBackend {
@@ -71,6 +88,10 @@ public:
     MetalBackend(id<MTLDevice> device, id<MTLCommandQueue> queue,
                  id<MTLComputePipelineState> explicit_ui_pipeline,
                  id<MTLComputePipelineState> automatic_hud_pipeline,
+                 id<MTLComputePipelineState> temporal_cut_tiles_pipeline,
+                 id<MTLComputePipelineState> temporal_cut_reduce_pipeline,
+                 id<MTLComputePipelineState> temporal_quality_pipeline,
+                 id<MTLComputePipelineState> temporal_history_commit_pipeline,
                  id<MTLSharedEvent> completion_event,
                  std::shared_ptr<MetalRifeModel> rife_model,
                  RifeMode rife_mode,
@@ -90,10 +111,15 @@ private:
     __strong id<MTLCommandQueue> queue_;
     __strong id<MTLComputePipelineState> explicit_ui_pipeline_;
     __strong id<MTLComputePipelineState> automatic_hud_pipeline_;
+    __strong id<MTLComputePipelineState> temporal_cut_tiles_pipeline_;
+    __strong id<MTLComputePipelineState> temporal_cut_reduce_pipeline_;
+    __strong id<MTLComputePipelineState> temporal_quality_pipeline_;
+    __strong id<MTLComputePipelineState> temporal_history_commit_pipeline_;
     __strong id<MTLSharedEvent> completion_event_;
     std::shared_ptr<MetalRifeModel> rife_model_;
     RifeMode rife_mode_;
     std::uint64_t device_id_;
+    std::shared_ptr<const std::uint8_t> backend_identity_;
     std::uint64_t next_event_value_{1};
     std::mutex submission_mutex_;
 };

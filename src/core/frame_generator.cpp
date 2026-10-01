@@ -2,6 +2,7 @@
 
 #include <array>
 #include <cmath>
+#include <cstdint>
 #include <new>
 #include <utility>
 
@@ -10,6 +11,12 @@ namespace {
 
 Error error(ErrorCode code, const char* message) {
     return Error{code, message};
+}
+
+std::uint64_t timestamp_distance(std::int64_t lower,
+                                 std::int64_t upper) noexcept {
+    return static_cast<std::uint64_t>(upper) -
+        static_cast<std::uint64_t>(lower);
 }
 
 bool same_backend_device(const Texture& a, const Texture& b) {
@@ -40,6 +47,24 @@ bool valid_hud_options(const HudOptions& options) {
         (options.mode != HudMode::no_hud_knowledge ||
          options.debug_visualization == HudDebugVisualization::disabled ||
          options.debug_visualization == HudDebugVisualization::final_composite);
+}
+
+bool valid_temporal_quality_options(const TemporalQualityOptions& options) {
+    const bool valid_policy =
+        options.policy == TemporalQualityPolicy::disabled ||
+        options.policy == TemporalQualityPolicy::continuous_endpoint_blend ||
+        options.policy == TemporalQualityPolicy::continuous_source_blend ||
+        options.policy == TemporalQualityPolicy::nearest_endpoint_fallback;
+    const bool valid_debug =
+        options.debug_visualization == TemporalQualityDebugVisualization::disabled ||
+        options.debug_visualization == TemporalQualityDebugVisualization::confidence ||
+        options.debug_visualization == TemporalQualityDebugVisualization::disocclusion ||
+        options.debug_visualization == TemporalQualityDebugVisualization::unstable_thin_features ||
+        options.debug_visualization == TemporalQualityDebugVisualization::high_frequency_texture ||
+        options.debug_visualization == TemporalQualityDebugVisualization::specular_or_particles ||
+        options.debug_visualization == TemporalQualityDebugVisualization::scene_cut ||
+        options.debug_visualization == TemporalQualityDebugVisualization::confidence_classes;
+    return valid_policy && valid_debug;
 }
 
 } // namespace
@@ -100,6 +125,11 @@ Result<GeneratedFrame> FrameGenerator::submit(const FrameSubmission& submission)
         return std::unexpected(error(ErrorCode::invalid_argument,
                                      "HUD mode, UI source, or debug visualization is invalid"));
     }
+    if (!valid_temporal_quality_options(submission.temporal_quality)) {
+        return std::unexpected(error(
+            ErrorCode::invalid_argument,
+            "temporal quality policy or debug visualization is invalid"));
+    }
     const auto& previous_timing = submission.previous.timing;
     const auto& current_timing = submission.current.timing;
     if (previous_timing.clock_domain == 0 || current_timing.clock_domain == 0 ||
@@ -113,6 +143,26 @@ Result<GeneratedFrame> FrameGenerator::submit(const FrameSubmission& submission)
         current_timing.timestamp_ns <= previous_timing.timestamp_ns) {
         return std::unexpected(error(ErrorCode::invalid_argument,
                                      "source sequence and timestamps must be known and increase"));
+    }
+    if (submission.interpolation_timestamp_ns != unknown_timestamp_ns) {
+        if (submission.interpolation_timestamp_ns <= previous_timing.timestamp_ns ||
+            submission.interpolation_timestamp_ns >= current_timing.timestamp_ns) {
+            return std::unexpected(error(
+                ErrorCode::invalid_argument,
+                "interpolation timestamp must be strictly between the source timestamps"));
+        }
+        const auto interval = timestamp_distance(
+            previous_timing.timestamp_ns, current_timing.timestamp_ns);
+        const auto offset = timestamp_distance(
+            previous_timing.timestamp_ns, submission.interpolation_timestamp_ns);
+        const long double timestamp_fraction = static_cast<long double>(offset) /
+            static_cast<long double>(interval);
+        if (std::abs(timestamp_fraction -
+                     static_cast<long double>(submission.interpolation)) > 1.0e-6L) {
+            return std::unexpected(error(
+                ErrorCode::invalid_argument,
+                "interpolation fraction must match the supplied interpolation timestamp"));
+        }
     }
     if (!same_backend_device(previous, current)) {
         return std::unexpected(error(ErrorCode::incompatible_resource,

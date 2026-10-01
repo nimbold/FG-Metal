@@ -996,6 +996,26 @@ std::unique_ptr<ScratchLease> acquire_scratch(MetalRifeModel::Impl& model,
 
 } // namespace
 
+Result<void> MetalRifeModel::validate_dimensions(
+    std::uint32_t width, std::uint32_t height, RifeMode mode) {
+    if (width == 0 || height == 0 || width > kMaxDimension || height > kMaxDimension) {
+        return std::unexpected(Error{ErrorCode::unsupported_format,
+            "RIFE requires matching, non-empty texture dimensions within the supported limit"});
+    }
+    const Precision precision = mode == RifeMode::balanced ? Precision::f16 : Precision::f32;
+    const auto model_width = align_up(width, kPadMultiple);
+    const auto model_height = align_up(height, kPadMultiple);
+    const auto scratch_size_bytes = scratch_set_size_bytes(
+        model_width, model_height, precision);
+    if (scratch_size_bytes > kMaxScratchSetBytes) {
+        return std::unexpected(Error{ErrorCode::allocation_failure,
+            "RIFE padded resolution requires " +
+                std::to_string(scratch_size_bytes / (1024ULL * 1024ULL)) +
+                " MiB of scratch buffers, above the 1280 MiB per-request limit"});
+    }
+    return {};
+}
+
 MPSCommandBuffer* MetalRifeModel::encode(
     id<MTLCommandBuffer> command_buffer, id<MTLTexture> previous,
     id<MTLTexture> current, id<MTLTexture> output, float interpolation,
@@ -1017,19 +1037,20 @@ MPSCommandBuffer* MetalRifeModel::encode(
             throw std::runtime_error("RIFE interpolation fraction must be finite and in [0, 1]");
         }
 
+        auto dimensions_valid = validate_dimensions(
+            static_cast<std::uint32_t>(previous.width),
+            static_cast<std::uint32_t>(previous.height), mode);
+        if (!dimensions_valid) {
+            throw std::runtime_error(dimensions_valid.error().message);
+        }
+
         const Precision precision = mode == RifeMode::balanced ? Precision::f16 : Precision::f32;
         const std::uint32_t valid_model_width = static_cast<std::uint32_t>(previous.width);
         const std::uint32_t valid_model_height = static_cast<std::uint32_t>(previous.height);
         const std::uint32_t model_width = align_up(valid_model_width, kPadMultiple);
         const std::uint32_t model_height = align_up(valid_model_height, kPadMultiple);
-        const std::size_t scratch_size_bytes =
-            scratch_set_size_bytes(model_width, model_height, precision);
-        if (scratch_size_bytes > kMaxScratchSetBytes) {
-            throw std::runtime_error(
-                "RIFE padded resolution requires " +
-                std::to_string(scratch_size_bytes / (1024ULL * 1024ULL)) +
-                " MiB of scratch buffers, above the 1280 MiB per-request limit");
-        }
+        const std::size_t scratch_size_bytes = scratch_set_size_bytes(
+            model_width, model_height, precision);
         const PlanKey key{model_width, model_height, mode, precision};
         std::shared_ptr<InferencePlan> plan;
         {

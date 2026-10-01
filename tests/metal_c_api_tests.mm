@@ -5,6 +5,7 @@
 #include "framegen/frame_generator.hpp"
 #include "framegen/metal.hpp"
 #include "framegen/metal_api.h"
+#include "rife_model.hpp"
 
 #include <chrono>
 #include <algorithm>
@@ -61,12 +62,14 @@ bool run_contract_smoke() {
          (FRAMEGEN_CAP_COLOR_ONLY | FRAMEGEN_CAP_UI_PLANE |
           FRAMEGEN_CAP_AUTOMATIC_HUD_PROTECTION |
           FRAMEGEN_CAP_HUD_DEBUG_VISUALIZATION |
+          FRAMEGEN_CAP_TEMPORAL_QUALITY_CONTROLLER |
           FRAMEGEN_CAP_ARBITRARY_INTERPOLATION_TIME)) !=
         (FRAMEGEN_CAP_COLOR_ONLY | FRAMEGEN_CAP_UI_PLANE |
          FRAMEGEN_CAP_AUTOMATIC_HUD_PROTECTION |
          FRAMEGEN_CAP_HUD_DEBUG_VISUALIZATION |
+         FRAMEGEN_CAP_TEMPORAL_QUALITY_CONTROLLER |
          FRAMEGEN_CAP_ARBITRARY_INTERPOLATION_TIME)) {
-        std::cerr << "Metal RIFE backend did not advertise HUD preservation capabilities\n";
+        std::cerr << "Metal RIFE backend did not advertise its implemented capabilities\n";
         return false;
     }
 
@@ -88,6 +91,7 @@ bool run_contract_smoke() {
                                     FRAMEGEN_CAP_UI_PLANE |
                                     FRAMEGEN_CAP_AUTOMATIC_HUD_PROTECTION |
                                     FRAMEGEN_CAP_HUD_DEBUG_VISUALIZATION |
+                                    FRAMEGEN_CAP_TEMPORAL_QUALITY_CONTROLLER |
                                     FRAMEGEN_CAP_ARBITRARY_INTERPOLATION_TIME;
     config.available_input_capabilities = FRAMEGEN_INPUT_UI_PLANE;
     config.history_capacity = 4;
@@ -112,6 +116,15 @@ bool run_contract_smoke() {
     hud_options.ui_temporal_source = FRAMEGEN_UI_SOURCE_NEAREST_PRESENTATION;
     if (!check(framegen_context_set_hud_options(context, &hud_options),
                "select explicit UI plane")) {
+        framegen_context_destroy(context);
+        return false;
+    }
+
+    framegen_temporal_quality_options_t temporal_options{};
+    init(temporal_options);
+    temporal_options.policy = FRAMEGEN_TEMPORAL_QUALITY_CONTINUOUS_ENDPOINT_BLEND;
+    if (!check(framegen_context_set_temporal_quality_options(context, &temporal_options),
+               "enable temporal quality control")) {
         framegen_context_destroy(context);
         return false;
     }
@@ -461,6 +474,42 @@ bool run_automatic_mask_release_smoke(id<MTLDevice> native_device) {
     }
     alternate_textures = textures;
 
+    auto sibling_device_result = framegen::metal::Device::create(native_device);
+    if (!sibling_device_result) {
+        std::cerr << "could not create a sibling Metal backend for state isolation checks\n";
+        return false;
+    }
+    auto sibling_device = std::move(*sibling_device_result);
+    if (sibling_device.device_id() == device.device_id()) {
+        std::cerr << "sibling Metal backends reused a device identity\n";
+        return false;
+    }
+    auto sibling_previous = sibling_device.wrap_texture(
+        textures[0], framegen::ColorSpace::linear_srgb, framegen::AlphaMode::opaque);
+    auto sibling_current = sibling_device.wrap_texture(
+        textures[1], framegen::ColorSpace::linear_srgb, framegen::AlphaMode::opaque);
+    if (!sibling_previous || !sibling_current) {
+        std::cerr << "could not wrap Metal inputs for the sibling-backend check\n";
+        return false;
+    }
+    framegen::FrameSubmission foreign_stream_submission{};
+    foreign_stream_submission.previous.texture = std::move(*sibling_previous);
+    foreign_stream_submission.previous.timing = {
+        .sequence = 1, .timestamp_ns = 1'000'000, .clock_domain = 1};
+    foreign_stream_submission.current.texture = std::move(*sibling_current);
+    foreign_stream_submission.current.timing = {
+        .sequence = 2, .timestamp_ns = 2'000'000, .clock_domain = 1};
+    foreign_stream_submission.interpolation = 0.5F;
+    foreign_stream_submission.backend_stream_state =
+        device.backend()->create_stream_state();
+    auto foreign_stream_result = sibling_device.backend()->submit(
+        foreign_stream_submission);
+    if (foreign_stream_result || foreign_stream_result.error().code !=
+            framegen::ErrorCode::incompatible_resource) {
+        std::cerr << "a second backend instance accepted another instance's stream state\n";
+        return false;
+    }
+
     MTLTextureDescriptor* staging_descriptor =
         [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:MTLPixelFormatRGBA8Unorm
                                                            width:width height:height mipmapped:NO];
@@ -690,6 +739,18 @@ bool run_automatic_mask_release_smoke(id<MTLDevice> native_device) {
 } // namespace
 
 int main() {
+    const auto representative_dimensions =
+        framegen::metal::detail::MetalRifeModel::validate_dimensions(
+            1280, 720, framegen::metal::detail::RifeMode::quality);
+    const auto oversized_dimensions =
+        framegen::metal::detail::MetalRifeModel::validate_dimensions(
+            32768, 32768, framegen::metal::detail::RifeMode::quality);
+    if (!representative_dimensions || oversized_dimensions ||
+        oversized_dimensions.error().code != framegen::ErrorCode::allocation_failure) {
+        std::cerr << "RIFE dimension preflight accepted an oversized scratch allocation\n";
+        return 1;
+    }
+
     id<MTLDevice> device = MTLCreateSystemDefaultDevice();
     if (device == nil) {
         std::cerr << "SKIP: Metal integration tests require a Metal device\n";

@@ -242,6 +242,8 @@ struct AutomaticHudParameters {
     uint current_ui;
     uint has_history;
     uint debug_visualization;
+    uint reset_history;
+    uint has_cut_summary;
 };
 
 float luminance(float3 value) {
@@ -263,6 +265,7 @@ kernel void framegen_automatic_hud(
     texture2d<float, access::write> output [[texture(4)]],
     texture2d<float, access::write> stabilized_mask [[texture(5)]],
     constant AutomaticHudParameters& parameters [[buffer(0)]],
+    device const uint* cut_summary_words [[buffer(1)]],
     uint2 position [[thread_position_in_grid]]) {
     const uint width = output.get_width();
     const uint height = output.get_height();
@@ -297,7 +300,11 @@ kernel void framegen_automatic_hud(
     const float motion_disagreement = smoothstep(
         0.018f, 0.09f, neighborhood_motion - change);
     const float sharp_structure = smoothstep(0.045f, 0.19f, edge_strength);
-    const float prior = parameters.has_history != 0 ? previous_mask.read(position).r : 0.0f;
+    const bool detected_cut = parameters.has_cut_summary != 0 &&
+        cut_summary_words[4] != 0;
+    const bool reset = parameters.reset_history != 0 || detected_cut;
+    const bool has_effective_history = parameters.has_history != 0 && !reset;
+    const float prior = has_effective_history ? previous_mask.read(position).r : 0.0f;
     const float recurring_fixed_change =
         smoothstep(0.025f, 0.12f, change) * smoothstep(0.24f, 0.62f, prior);
     const float raw = clamp(max(
@@ -306,10 +313,10 @@ kernel void framegen_automatic_hud(
             max(motion_disagreement * sharp_structure * 0.32f,
                 recurring_fixed_change * 0.7f))), 0.0f, 1.0f);
 
-    const float stabilized = raw >= prior
+    const float stabilized = reset ? raw : (raw >= prior
         ? mix(prior, raw, parameters.engagement_alpha)
-        : mix(prior, raw, parameters.release_alpha);
-    const float neighbor_prior = parameters.has_history != 0 ? 0.25f * (
+        : mix(prior, raw, parameters.release_alpha));
+    const float neighbor_prior = has_effective_history ? 0.25f * (
         previous_mask.read(left).r + previous_mask.read(right).r +
         previous_mask.read(up).r + previous_mask.read(down).r) : 0.0f;
     const float soft_confidence = smoothstep(0.12f, 0.72f, stabilized);
@@ -337,6 +344,414 @@ kernel void framegen_automatic_hud(
         result = float4(certainty, certainty, certainty, 1.0f);
     }
     output.write(result, position);
+}
+)metal";
+
+constexpr const char* kTemporalQualityShader = R"metal(
+#include <metal_stdlib>
+using namespace metal;
+
+struct TemporalCutTileStats {
+    uint histogram_a[16];
+    uint histogram_b[16];
+    float difference_sum;
+    float generated_residual_sum;
+    uint changed_count;
+    uint sample_count;
+};
+
+struct TemporalCutSummary {
+    float histogram_difference;
+    float downsampled_difference;
+    float generated_residual;
+    float changed_fraction;
+    uint scene_cut;
+};
+
+struct TemporalCutTileParameters {
+    uint groups_x;
+    uint width;
+    uint height;
+    float interpolation;
+};
+
+struct TemporalCutReduceParameters {
+    uint tile_count;
+    uint force_reset;
+};
+
+struct TemporalQualityParameters {
+    float interpolation;
+    float history_time_scale;
+    uint policy;
+    uint debug_visualization;
+    uint force_reset;
+    uint force_real_fallback;
+    uint advance_history;
+    uint reuse_cached_output;
+    uint current_source;
+    uint scene_is_srgb;
+    uint has_hud_mask;
+};
+
+float temporal_luminance(float3 value) {
+    return dot(value, float3(0.2126f, 0.7152f, 0.0722f));
+}
+
+float temporal_rgb_distance(float3 left, float3 right) {
+    return (abs(left.r - right.r) + abs(left.g - right.g) + abs(left.b - right.b)) / 3.0f;
+}
+
+float3 temporal_decode_srgb(float3 value) {
+    const float3 low = value / 12.92f;
+    const float3 high = pow((value + 0.055f) / 1.055f, float3(2.4f));
+    return select(high, low, value <= 0.04045f);
+}
+
+float3 temporal_encode_srgb(float3 value) {
+    value = max(value, float3(0.0f));
+    const float3 low = value * 12.92f;
+    const float3 high = 1.055f * pow(value, float3(1.0f / 2.4f)) - 0.055f;
+    return select(high, low, value <= 0.0031308f);
+}
+
+kernel void framegen_temporal_cut_tiles(
+    texture2d<float, access::read> previous [[texture(0)]],
+    texture2d<float, access::read> current [[texture(1)]],
+    texture2d<float, access::read> generated [[texture(2)]],
+    device TemporalCutTileStats* tile_stats [[buffer(0)]],
+    constant TemporalCutTileParameters& parameters [[buffer(1)]],
+    uint2 group [[threadgroup_position_in_grid]],
+    uint2 local [[thread_position_in_threadgroup]]) {
+    threadgroup atomic_uint histogram_a[16];
+    threadgroup atomic_uint histogram_b[16];
+    threadgroup float differences[256];
+    threadgroup float residuals[256];
+    threadgroup uint changed[256];
+    threadgroup uint samples[256];
+    const uint lane = local.y * 16 + local.x;
+    if (lane < 16) {
+        atomic_store_explicit(&histogram_a[lane], 0u, memory_order_relaxed);
+        atomic_store_explicit(&histogram_b[lane], 0u, memory_order_relaxed);
+    }
+    threadgroup_barrier(mem_flags::mem_threadgroup);
+
+    const uint base_x = group.x * 64 + local.x * 4;
+    const uint base_y = group.y * 64 + local.y * 4;
+    const bool valid = base_x < parameters.width && base_y < parameters.height;
+    if (valid) {
+        const uint2 p = uint2(min(base_x + 2, parameters.width - 1),
+                              min(base_y + 2, parameters.height - 1));
+        const float3 a = previous.read(p).rgb;
+        const float3 b = current.read(p).rgb;
+        const float3 g = generated.read(p).rgb;
+        const uint bin_a = min(uint(temporal_luminance(a) * 16.0f), 15u);
+        const uint bin_b = min(uint(temporal_luminance(b) * 16.0f), 15u);
+        atomic_fetch_add_explicit(&histogram_a[bin_a], 1u, memory_order_relaxed);
+        atomic_fetch_add_explicit(&histogram_b[bin_b], 1u, memory_order_relaxed);
+        differences[lane] = temporal_rgb_distance(a, b);
+        residuals[lane] = temporal_rgb_distance(g, mix(a, b, parameters.interpolation));
+        changed[lane] = differences[lane] > 0.22f ? 1u : 0u;
+        samples[lane] = 1u;
+    } else {
+        differences[lane] = 0.0f;
+        residuals[lane] = 0.0f;
+        changed[lane] = 0u;
+        samples[lane] = 0u;
+    }
+    threadgroup_barrier(mem_flags::mem_threadgroup);
+
+    for (uint stride = 128; stride > 0; stride >>= 1) {
+        if (lane < stride) {
+            differences[lane] += differences[lane + stride];
+            residuals[lane] += residuals[lane + stride];
+            changed[lane] += changed[lane + stride];
+            samples[lane] += samples[lane + stride];
+        }
+        threadgroup_barrier(mem_flags::mem_threadgroup);
+    }
+
+    const uint tile_index = group.y * parameters.groups_x + group.x;
+    device TemporalCutTileStats& tile = tile_stats[tile_index];
+    if (lane < 16) {
+        tile.histogram_a[lane] = atomic_load_explicit(&histogram_a[lane], memory_order_relaxed);
+        tile.histogram_b[lane] = atomic_load_explicit(&histogram_b[lane], memory_order_relaxed);
+    }
+    if (lane == 0) {
+        tile.difference_sum = differences[0];
+        tile.generated_residual_sum = residuals[0];
+        tile.changed_count = changed[0];
+        tile.sample_count = samples[0];
+    }
+}
+
+kernel void framegen_temporal_cut_reduce(
+    device const TemporalCutTileStats* tile_stats [[buffer(0)]],
+    device TemporalCutSummary* summary [[buffer(1)]],
+    constant TemporalCutReduceParameters& parameters [[buffer(2)]],
+    uint lane [[thread_index_in_threadgroup]]) {
+    threadgroup atomic_uint histogram_a[16];
+    threadgroup atomic_uint histogram_b[16];
+    threadgroup float differences[256];
+    threadgroup float residuals[256];
+    threadgroup float changed[256];
+    threadgroup float samples[256];
+    threadgroup float histogram_distance[16];
+    if (lane < 16) {
+        atomic_store_explicit(&histogram_a[lane], 0u, memory_order_relaxed);
+        atomic_store_explicit(&histogram_b[lane], 0u, memory_order_relaxed);
+    }
+    threadgroup_barrier(mem_flags::mem_threadgroup);
+
+    float lane_difference = 0.0f;
+    float lane_residual = 0.0f;
+    float lane_changed = 0.0f;
+    float lane_samples = 0.0f;
+    for (uint tile_index = lane; tile_index < parameters.tile_count; tile_index += 256) {
+        const device TemporalCutTileStats& tile = tile_stats[tile_index];
+        lane_difference += tile.difference_sum;
+        lane_residual += tile.generated_residual_sum;
+        lane_changed += float(tile.changed_count);
+        lane_samples += float(tile.sample_count);
+        for (uint bin = 0; bin < 16; ++bin) {
+            atomic_fetch_add_explicit(&histogram_a[bin], tile.histogram_a[bin], memory_order_relaxed);
+            atomic_fetch_add_explicit(&histogram_b[bin], tile.histogram_b[bin], memory_order_relaxed);
+        }
+    }
+    differences[lane] = lane_difference;
+    residuals[lane] = lane_residual;
+    changed[lane] = lane_changed;
+    samples[lane] = lane_samples;
+    threadgroup_barrier(mem_flags::mem_threadgroup);
+
+    for (uint stride = 128; stride > 0; stride >>= 1) {
+        if (lane < stride) {
+            differences[lane] += differences[lane + stride];
+            residuals[lane] += residuals[lane + stride];
+            changed[lane] += changed[lane + stride];
+            samples[lane] += samples[lane + stride];
+        }
+        threadgroup_barrier(mem_flags::mem_threadgroup);
+    }
+
+    if (lane < 16) {
+        const float a = float(atomic_load_explicit(&histogram_a[lane], memory_order_relaxed));
+        const float b = float(atomic_load_explicit(&histogram_b[lane], memory_order_relaxed));
+        histogram_distance[lane] = abs(a - b);
+    }
+    threadgroup_barrier(mem_flags::mem_threadgroup);
+    for (uint stride = 8; stride > 0; stride >>= 1) {
+        if (lane < stride) histogram_distance[lane] += histogram_distance[lane + stride];
+        threadgroup_barrier(mem_flags::mem_threadgroup);
+    }
+
+    if (lane == 0) {
+        const float count = max(samples[0], 1.0f);
+        const float histogram_difference = histogram_distance[0] / (2.0f * count);
+        const float mean_difference = differences[0] / count;
+        const float generated_residual = residuals[0] / count;
+        const float changed_fraction = changed[0] / count;
+        const bool cut =
+            (histogram_difference > 0.42f && mean_difference > 0.18f && changed_fraction > 0.55f) ||
+            (histogram_difference < 0.05f && mean_difference > 0.30f && changed_fraction > 0.80f) ||
+            (mean_difference > 0.50f && changed_fraction > 0.80f) ||
+            (histogram_difference > 0.30f && mean_difference > 0.20f &&
+             changed_fraction > 0.60f && generated_residual > 0.42f);
+        summary->histogram_difference = histogram_difference;
+        summary->downsampled_difference = mean_difference;
+        summary->generated_residual = generated_residual;
+        summary->changed_fraction = changed_fraction;
+        summary->scene_cut = cut ? 1u : 0u;
+        (void)parameters.force_reset;
+    }
+}
+
+float2 temporal_neighbors(texture2d<float, access::read> image, uint2 p) {
+    const uint width = image.get_width();
+    const uint height = image.get_height();
+    const uint2 left = uint2(p.x == 0 ? 0 : p.x - 1, p.y);
+    const uint2 right = uint2(min(p.x + 1, width - 1), p.y);
+    const uint2 up = uint2(p.x, p.y == 0 ? 0 : p.y - 1);
+    const uint2 down = uint2(p.x, min(p.y + 1, height - 1));
+    const float l = temporal_luminance(image.read(left).rgb);
+    const float r = temporal_luminance(image.read(right).rgb);
+    const float u = temporal_luminance(image.read(up).rgb);
+    const float d = temporal_luminance(image.read(down).rgb);
+    return float2(max(abs(l - r), abs(u - d)),
+                  abs(temporal_luminance(image.read(p).rgb) - 0.25f * (l + r + u + d)));
+}
+
+kernel void framegen_temporal_quality(
+    texture2d<float, access::read> previous [[texture(0)]],
+    texture2d<float, access::read> current [[texture(1)]],
+    texture2d<float, access::read> generated [[texture(2)]],
+    texture2d<float, access::read> previous_generated [[texture(3)]],
+    texture2d<float, access::write> output [[texture(4)]],
+    texture2d<float, access::write> history_output [[texture(5)]],
+    texture2d<float, access::read> hud_mask [[texture(6)]],
+    device const TemporalCutSummary* cut_summary [[buffer(0)]],
+    device uint* history_valid_state [[buffer(1)]],
+    constant TemporalQualityParameters& parameters [[buffer(2)]],
+    uint2 p [[thread_position_in_grid]]) {
+    const uint width = output.get_width();
+    const uint height = output.get_height();
+    if (p.x >= width || p.y >= height) return;
+
+    const uint2 left = uint2(p.x == 0 ? 0 : p.x - 1, p.y);
+    const uint2 right = uint2(min(p.x + 1, width - 1), p.y);
+    const uint2 up = uint2(p.x, p.y == 0 ? 0 : p.y - 1);
+    const uint2 down = uint2(p.x, min(p.y + 1, height - 1));
+    const float4 a = previous.read(p);
+    const float4 b = current.read(p);
+    const float4 g = generated.read(p);
+    const float4 nearest_source = parameters.current_source != 0 ? b : a;
+    const bool scene_cut = cut_summary[0].scene_cut != 0;
+    // A reset can follow resource allocation that failed before its first GPU
+    // initialization pass. Do not read private storage until a prior pass has
+    // committed valid history.
+    const uint history_state = parameters.force_reset != 0
+        ? 0u : history_valid_state[0];
+    const bool has_history = parameters.force_reset == 0 && !scene_cut &&
+        history_state == 1;
+    const bool hold_real_frame = history_state == 2 ||
+        parameters.force_real_fallback != 0;
+
+    const float source_change = abs(temporal_luminance(a.rgb) - temporal_luminance(b.rgb));
+    const float source_neighborhood_motion = max(source_change, max(
+        abs(temporal_luminance(previous.read(left).rgb) - temporal_luminance(current.read(left).rgb)),
+        max(abs(temporal_luminance(previous.read(right).rgb) - temporal_luminance(current.read(right).rgb)),
+            max(abs(temporal_luminance(previous.read(up).rgb) - temporal_luminance(current.read(up).rgb)),
+                abs(temporal_luminance(previous.read(down).rgb) - temporal_luminance(current.read(down).rgb))))));
+
+    float best_source_support = 1.0f;
+    best_source_support = min(best_source_support, temporal_rgb_distance(g.rgb, previous.read(p).rgb));
+    best_source_support = min(best_source_support, temporal_rgb_distance(g.rgb, current.read(p).rgb));
+    best_source_support = min(best_source_support, temporal_rgb_distance(g.rgb, previous.read(left).rgb));
+    best_source_support = min(best_source_support, temporal_rgb_distance(g.rgb, previous.read(right).rgb));
+    best_source_support = min(best_source_support, temporal_rgb_distance(g.rgb, previous.read(up).rgb));
+    best_source_support = min(best_source_support, temporal_rgb_distance(g.rgb, previous.read(down).rgb));
+    best_source_support = min(best_source_support, temporal_rgb_distance(g.rgb, current.read(left).rgb));
+    best_source_support = min(best_source_support, temporal_rgb_distance(g.rgb, current.read(right).rgb));
+    best_source_support = min(best_source_support, temporal_rgb_distance(g.rgb, current.read(up).rgb));
+    best_source_support = min(best_source_support, temporal_rgb_distance(g.rgb, current.read(down).rgb));
+    const float source_support = 1.0f - smoothstep(0.04f, 0.22f, best_source_support);
+    const float disocclusion = smoothstep(0.075f, 0.24f, source_neighborhood_motion) *
+        (1.0f - source_support);
+
+    const float2 edge_source = temporal_neighbors(previous, p);
+    const float2 edge_current = temporal_neighbors(current, p);
+    const float2 edge_generated = temporal_neighbors(generated, p);
+    const float high_frequency = smoothstep(0.025f, 0.11f,
+        max(edge_generated.y, max(edge_source.y, edge_current.y)));
+    const float thin_feature = smoothstep(0.035f, 0.14f,
+        max(edge_generated.y, max(edge_source.y, edge_current.y))) *
+        smoothstep(0.06f, 0.22f,
+            max(edge_generated.x, max(edge_source.x, edge_current.x)));
+    const float source_neighbor_luma = 0.25f * (
+        temporal_luminance(previous.read(left).rgb) + temporal_luminance(previous.read(right).rgb) +
+        temporal_luminance(previous.read(up).rgb) + temporal_luminance(previous.read(down).rgb));
+    const float particle_outlier = smoothstep(0.08f, 0.24f,
+        max(temporal_luminance(a.rgb), temporal_luminance(b.rgb)) - source_neighbor_luma) *
+        smoothstep(0.04f, 0.18f, source_neighborhood_motion) * high_frequency;
+
+    float temporal_excess = 0.0f;
+    if (has_history) {
+        const float generated_change = temporal_rgb_distance(g.rgb, previous_generated.read(p).rgb);
+        const float expected_source_change = temporal_rgb_distance(a.rgb, b.rgb) *
+            parameters.history_time_scale;
+        temporal_excess = smoothstep(0.025f, 0.15f,
+            max(0.0f, generated_change - expected_source_change - 0.012f));
+        // History is not motion-warped. Do not interpret same-pixel change as
+        // instability when source motion makes that correspondence unreliable.
+        const float history_motion_reliability = 1.0f - smoothstep(
+            0.025f, 0.12f, source_neighborhood_motion);
+        temporal_excess *= history_motion_reliability;
+    }
+    // Motion alone does not mean a thin feature is unstable: a valid moving
+    // fence should still interpolate. Penalize it when the output's temporal
+    // change exceeds the source-pair motion evidence.
+    const float thin_instability = thin_feature * temporal_excess;
+    const float high_frequency_instability = high_frequency * max(temporal_excess, particle_outlier * 0.35f);
+    float confidence = 1.0f - clamp(max(disocclusion * 0.92f,
+        max(temporal_excess * 0.86f,
+            max(thin_instability * 0.95f, high_frequency_instability * 0.78f))), 0.0f, 1.0f);
+    const float temporal_agreement =
+        1.0f - smoothstep(0.025f, 0.15f, temporal_excess);
+    const float stable_structure_confidence = max(
+        thin_feature * temporal_agreement,
+        high_frequency * temporal_agreement * (1.0f - particle_outlier * 0.75f));
+    confidence = max(confidence, stable_structure_confidence * 0.92f);
+    if (parameters.has_hud_mask != 0 && hud_mask.read(p).r > 0.5f) confidence = 1.0f;
+
+    float4 source_blend = mix(a, b, parameters.interpolation);
+    if (parameters.scene_is_srgb != 0) {
+        source_blend.rgb = temporal_encode_srgb(mix(
+            temporal_decode_srgb(a.rgb), temporal_decode_srgb(b.rgb), parameters.interpolation));
+    }
+    float4 result = g;
+    if (scene_cut || hold_real_frame) {
+        result = nearest_source;
+    } else if (!has_history) {
+        // A cold start has no temporal evidence yet, so emit the model output
+        // unchanged while seeding history. Cuts and continuity failures take
+        // the real-frame path above.
+        result = g;
+    } else if (parameters.reuse_cached_output != 0) {
+        result = previous_generated.read(p);
+    } else if (parameters.policy == 1) {
+        result = mix(nearest_source, g, smoothstep(0.20f, 0.76f, confidence));
+    } else if (parameters.policy == 2) {
+        result = mix(source_blend, g, smoothstep(0.20f, 0.76f, confidence));
+    } else if (parameters.policy == 3 && confidence < 0.34f) {
+        result = nearest_source;
+    }
+    result.a = 1.0f;
+    history_output.write(result, p);
+
+    float4 debug_result = result;
+    switch (parameters.debug_visualization) {
+    case 1:
+        debug_result = float4(confidence, confidence, confidence, 1.0f);
+        break;
+    case 2:
+        debug_result = float4(disocclusion, 0.08f, 1.0f - disocclusion, 1.0f);
+        break;
+    case 3:
+        debug_result = float4(thin_feature, 0.12f, thin_instability, 1.0f);
+        break;
+    case 4:
+        debug_result = float4(high_frequency, high_frequency, high_frequency, 1.0f);
+        break;
+    case 5:
+        debug_result = float4(particle_outlier, particle_outlier * 0.38f, 0.02f, 1.0f);
+        break;
+    case 6:
+        debug_result = scene_cut ? float4(1.0f, 0.02f, 0.02f, 1.0f)
+                                 : float4(0.02f, 0.85f, 0.04f, 1.0f);
+        break;
+    case 7: {
+        float3 category = confidence > 0.76f ? float3(0.08f, 0.68f, 0.12f)
+            : (confidence > 0.42f ? float3(0.92f, 0.68f, 0.05f) : float3(0.92f, 0.16f, 0.04f));
+        if (disocclusion > 0.45f) category = float3(0.05f, 0.68f, 0.92f);
+        if (thin_instability > 0.35f) category = float3(0.82f, 0.12f, 0.86f);
+        if (particle_outlier > 0.52f) category = float3(1.0f, 0.32f, 0.03f);
+        debug_result = float4(category, 1.0f);
+        break;
+    }
+    default:
+        break;
+    }
+    output.write(debug_result, p);
+}
+
+kernel void framegen_temporal_history_commit(
+    device const TemporalCutSummary* cut_summary [[buffer(0)]],
+    device uint* history_valid_state [[buffer(1)]],
+    constant TemporalQualityParameters& parameters [[buffer(2)]],
+    uint lane [[thread_position_in_grid]]) {
+    if (lane == 0 && parameters.advance_history != 0) {
+        history_valid_state[0] = cut_summary[0].scene_cut != 0 ? 2u : 1u;
+    }
 }
 )metal";
 
@@ -433,6 +848,138 @@ std::shared_ptr<detail::MetalTextureResource> make_mask_texture(
         TextureDescriptor{width, height, PixelFormat::r8_unorm,
                           ColorSpace::unknown, AlphaMode::opaque},
         device_id);
+}
+
+std::shared_ptr<detail::MetalTextureResource> make_temporal_history_texture(
+    id<MTLDevice> device, const TextureDescriptor& source,
+    std::uint64_t device_id) {
+    MTLTextureDescriptor* descriptor =
+        [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:MTLPixelFormatRGBA8Unorm
+                                                           width:source.width
+                                                          height:source.height
+                                                       mipmapped:NO];
+    descriptor.storageMode = MTLStorageModePrivate;
+    descriptor.usage = MTLTextureUsageShaderRead | MTLTextureUsageShaderWrite;
+    id<MTLTexture> texture = [device newTextureWithDescriptor:descriptor];
+    if (texture == nil) return {};
+    return std::make_shared<detail::MetalTextureResource>(
+        device, texture,
+        TextureDescriptor{source.width, source.height, PixelFormat::rgba8_unorm,
+                          source.color_space, AlphaMode::opaque},
+        device_id);
+}
+
+struct TemporalCutTileStats {
+    std::uint32_t histogram_a[16];
+    std::uint32_t histogram_b[16];
+    float difference_sum;
+    float generated_residual_sum;
+    std::uint32_t changed_count;
+    std::uint32_t sample_count;
+};
+
+struct TemporalCutSummary {
+    float histogram_difference;
+    float downsampled_difference;
+    float generated_residual;
+    float changed_fraction;
+    std::uint32_t scene_cut;
+};
+
+static_assert(sizeof(TemporalCutTileStats) == 144);
+static_assert(sizeof(TemporalCutSummary) == 20);
+
+struct TemporalCutTileParameters {
+    std::uint32_t groups_x;
+    std::uint32_t width;
+    std::uint32_t height;
+    float interpolation;
+};
+
+struct TemporalCutReduceParameters {
+    std::uint32_t tile_count;
+    std::uint32_t force_reset;
+};
+
+struct TemporalQualityParameters {
+    float interpolation;
+    float history_time_scale;
+    std::uint32_t policy;
+    std::uint32_t debug_visualization;
+    std::uint32_t force_reset;
+    std::uint32_t force_real_fallback;
+    std::uint32_t advance_history;
+    std::uint32_t reuse_cached_output;
+    std::uint32_t current_source;
+    std::uint32_t scene_is_srgb;
+    std::uint32_t has_hud_mask;
+};
+
+bool temporal_quality_active(const TemporalQualityOptions& options) {
+    return options.policy != TemporalQualityPolicy::disabled ||
+        options.debug_visualization != TemporalQualityDebugVisualization::disabled;
+}
+
+bool interpolation_matches_timestamp(const FrameSubmission& submission) {
+    if (submission.interpolation_timestamp_ns == unknown_timestamp_ns) return true;
+    const auto previous = submission.previous.timing.timestamp_ns;
+    const auto current = submission.current.timing.timestamp_ns;
+    const auto target = submission.interpolation_timestamp_ns;
+    if (previous == unknown_timestamp_ns || current == unknown_timestamp_ns ||
+        target <= previous || target >= current) {
+        return false;
+    }
+    const auto interval = static_cast<std::uint64_t>(current) -
+        static_cast<std::uint64_t>(previous);
+    const auto offset = static_cast<std::uint64_t>(target) -
+        static_cast<std::uint64_t>(previous);
+    const long double timestamp_fraction = static_cast<long double>(offset) /
+        static_cast<long double>(interval);
+    return std::abs(timestamp_fraction -
+        static_cast<long double>(submission.interpolation)) <= 1.0e-6L;
+}
+
+std::uint32_t temporal_policy_value(TemporalQualityPolicy policy) {
+    switch (policy) {
+    case TemporalQualityPolicy::continuous_endpoint_blend: return 1;
+    case TemporalQualityPolicy::continuous_source_blend: return 2;
+    case TemporalQualityPolicy::nearest_endpoint_fallback: return 3;
+    default: return 0;
+    }
+}
+
+std::uint32_t temporal_debug_value(TemporalQualityDebugVisualization visualization) {
+    switch (visualization) {
+    case TemporalQualityDebugVisualization::confidence: return 1;
+    case TemporalQualityDebugVisualization::disocclusion: return 2;
+    case TemporalQualityDebugVisualization::unstable_thin_features: return 3;
+    case TemporalQualityDebugVisualization::high_frequency_texture: return 4;
+    case TemporalQualityDebugVisualization::specular_or_particles: return 5;
+    case TemporalQualityDebugVisualization::scene_cut: return 6;
+    case TemporalQualityDebugVisualization::confidence_classes: return 7;
+    default: return 0;
+    }
+}
+
+bool select_temporal_current_source(const FrameSubmission& submission) {
+    if (submission.interpolation_timestamp_ns == unknown_timestamp_ns) {
+        return submission.interpolation >= 0.5F;
+    }
+    const auto previous_timestamp = submission.previous.timing.timestamp_ns;
+    const auto current_timestamp = submission.current.timing.timestamp_ns;
+    const auto target = submission.interpolation_timestamp_ns;
+    const auto absolute_distance = [](std::int64_t left, std::int64_t right) {
+        const auto a = static_cast<std::uint64_t>(left);
+        const auto b = static_cast<std::uint64_t>(right);
+        return left <= right ? b - a : a - b;
+    };
+    const auto current_distance = absolute_distance(target, current_timestamp);
+    const auto previous_distance = absolute_distance(target, previous_timestamp);
+    // Integer nanosecond conversion can put a mathematical midpoint one tick
+    // closer to A on alternating 60 Hz pairs. Keep midpoint fallback phase
+    // canonical so it cannot crawl between the two source samples.
+    return current_distance <= previous_distance ||
+        current_distance - previous_distance <= 1;
 }
 
 id<MTLComputePipelineState> make_compute_pipeline(
@@ -635,6 +1182,10 @@ const void* MetalTextureResource::resource_identity() const noexcept {
 MetalBackend::MetalBackend(id<MTLDevice> device, id<MTLCommandQueue> queue,
                            id<MTLComputePipelineState> explicit_ui_pipeline,
                            id<MTLComputePipelineState> automatic_hud_pipeline,
+                           id<MTLComputePipelineState> temporal_cut_tiles_pipeline,
+                           id<MTLComputePipelineState> temporal_cut_reduce_pipeline,
+                           id<MTLComputePipelineState> temporal_quality_pipeline,
+                           id<MTLComputePipelineState> temporal_history_commit_pipeline,
                            id<MTLSharedEvent> completion_event,
                            std::shared_ptr<MetalRifeModel> rife_model,
                            RifeMode rife_mode,
@@ -642,8 +1193,13 @@ MetalBackend::MetalBackend(id<MTLDevice> device, id<MTLCommandQueue> queue,
     : device_(device), queue_(queue),
       explicit_ui_pipeline_(explicit_ui_pipeline),
       automatic_hud_pipeline_(automatic_hud_pipeline),
+      temporal_cut_tiles_pipeline_(temporal_cut_tiles_pipeline),
+      temporal_cut_reduce_pipeline_(temporal_cut_reduce_pipeline),
+      temporal_quality_pipeline_(temporal_quality_pipeline),
+      temporal_history_commit_pipeline_(temporal_history_commit_pipeline),
       completion_event_(completion_event), rife_model_(std::move(rife_model)),
-      rife_mode_(rife_mode), device_id_(device_id) {}
+      rife_mode_(rife_mode), device_id_(device_id),
+      backend_identity_(std::make_shared<const std::uint8_t>(0)) {}
 
 std::string_view MetalBackend::backend_id() const noexcept {
     return kBackendId;
@@ -660,6 +1216,7 @@ id<MTLDevice> MetalBackend::native_device() const noexcept {
 std::shared_ptr<BackendStreamState> MetalBackend::create_stream_state() {
     auto stream_state = std::make_shared<MetalBackendStreamState>();
     stream_state->device_id = device_id_;
+    stream_state->backend_identity = backend_identity_;
     return stream_state;
 }
 
@@ -689,6 +1246,51 @@ Result<GeneratedFrame> MetalBackend::submit(const FrameSubmission& submission) {
                                            "Metal texture resources are not owned by this device"));
     }
 
+    auto stream_state = std::dynamic_pointer_cast<MetalBackendStreamState>(
+        submission.backend_stream_state);
+    const bool temporal_requested = temporal_quality_active(submission.temporal_quality);
+    if ((submission.hud_options.mode == HudMode::automatic_protection || temporal_requested) &&
+        !stream_state) {
+        return std::unexpected(make_error(
+            ErrorCode::invalid_argument,
+            "temporal Metal quality features require a backend stream state; submit through FrameGenerator or provide one"));
+    }
+    if (!stream_state) {
+        stream_state = std::make_shared<MetalBackendStreamState>();
+        stream_state->device_id = device_id_;
+        stream_state->backend_identity = backend_identity_;
+    } else if (stream_state->device_id != device_id_ ||
+               stream_state->backend_identity != backend_identity_) {
+        return std::unexpected(make_error(
+            ErrorCode::incompatible_resource,
+            "Metal backend stream state belongs to another backend instance or device"));
+    }
+    const auto invalidate_temporal_on_rejection = [&] {
+        if (temporal_requested) {
+            stream_state->temporal_async_reset_requested.store(
+                true, std::memory_order_release);
+        }
+    };
+    if (temporal_requested) {
+        const auto& previous_timing = submission.previous.timing;
+        const auto& current_timing = submission.current.timing;
+        if (previous_timing.sequence >= current_timing.sequence ||
+            previous_timing.timestamp_ns == unknown_timestamp_ns ||
+            current_timing.timestamp_ns == unknown_timestamp_ns ||
+            previous_timing.timestamp_ns >= current_timing.timestamp_ns ||
+            previous_timing.clock_domain == 0 ||
+            previous_timing.clock_domain != current_timing.clock_domain) {
+            invalidate_temporal_on_rejection();
+            return std::unexpected(make_error(ErrorCode::invalid_argument,
+                "temporal quality requires ordered source timing in one known clock domain"));
+        }
+    }
+    if (!interpolation_matches_timestamp(submission)) {
+        invalidate_temporal_on_rejection();
+        return std::unexpected(make_error(ErrorCode::invalid_argument,
+            "interpolation timestamp must be strictly bracketed and match the interpolation fraction"));
+    }
+
     const auto previous_descriptor = previous.descriptor();
     const auto current_descriptor = current.descriptor();
     if (previous_descriptor.width != current_descriptor.width ||
@@ -696,6 +1298,7 @@ Result<GeneratedFrame> MetalBackend::submit(const FrameSubmission& submission) {
         previous_descriptor.format != current_descriptor.format ||
         previous_descriptor.color_space != current_descriptor.color_space ||
         previous_descriptor.alpha_mode != current_descriptor.alpha_mode) {
+        invalidate_temporal_on_rejection();
         return std::unexpected(make_error(ErrorCode::incompatible_resource,
                                            "Metal input texture descriptions must match"));
     }
@@ -710,34 +1313,27 @@ Result<GeneratedFrame> MetalBackend::submit(const FrameSubmission& submission) {
         !previous_srgb || !current_srgb || *previous_srgb != *current_srgb ||
         !is_sdr_or_unspecified(submission.previous.color_metadata) ||
         !is_sdr_or_unspecified(submission.current.color_metadata)) {
+        invalidate_temporal_on_rejection();
         return std::unexpected(make_error(ErrorCode::unsupported_format,
             "RIFE requires matching RGBA8 opaque sRGB or linear-sRGB SDR textures"));
+    }
+
+    auto dimensions_valid = MetalRifeModel::validate_dimensions(
+        previous_descriptor.width, previous_descriptor.height, rife_mode_);
+    if (!dimensions_valid) {
+        invalidate_temporal_on_rejection();
+        return std::unexpected(dimensions_valid.error());
     }
 
     id<MTLTexture> previous_native = previous_resource->native_texture();
     id<MTLTexture> current_native = current_resource->native_texture();
     if ((previous_native.usage & MTLTextureUsageShaderRead) == 0 ||
         (current_native.usage & MTLTextureUsageShaderRead) == 0) {
+        invalidate_temporal_on_rejection();
         return std::unexpected(make_error(ErrorCode::unsupported_format,
                                            "Metal input textures must allow shader reads"));
     }
 
-    auto stream_state = std::dynamic_pointer_cast<MetalBackendStreamState>(
-        submission.backend_stream_state);
-    if (submission.hud_options.mode == HudMode::automatic_protection &&
-        !stream_state) {
-        return std::unexpected(make_error(
-            ErrorCode::invalid_argument,
-            "automatic HUD protection requires a backend stream state; submit through FrameGenerator or provide one"));
-    }
-    if (!stream_state) {
-        stream_state = std::make_shared<MetalBackendStreamState>();
-        stream_state->device_id = device_id_;
-    } else if (stream_state->device_id != device_id_) {
-        return std::unexpected(make_error(
-            ErrorCode::incompatible_resource,
-            "Metal backend stream state belongs to another device"));
-    }
     auto& automatic_history_mutex_ = stream_state->automatic_history_mutex;
     auto& automatic_mask_history_ = stream_state->automatic_mask_history;
     auto& automatic_mask_width_ = stream_state->automatic_mask_width;
@@ -766,10 +1362,89 @@ Result<GeneratedFrame> MetalBackend::submit(const FrameSubmission& submission) {
         stream_state->automatic_mask_pair_release_alpha;
     auto& last_hud_mode_ = stream_state->last_hud_mode;
     std::unique_lock history_lock(automatic_history_mutex_);
+    const bool asynchronous_temporal_reset =
+        stream_state->temporal_async_reset_requested.exchange(
+            false, std::memory_order_acq_rel);
+    auto temporal_plan = stream_state->temporal_controller.begin(
+        submission, previous_descriptor, asynchronous_temporal_reset);
+    if (temporal_plan.stale_submission && asynchronous_temporal_reset) {
+        // An out-of-order request is rendered without reusable temporal state,
+        // but it must not consume a reset needed by the newest timeline.
+        stream_state->temporal_async_reset_requested.store(
+            true, std::memory_order_release);
+    }
+    bool temporal_force_reset = temporal_plan.force_reset;
+    bool temporal_resources_rebuilt = false;
+    std::uint32_t temporal_write_index = 1U - stream_state->temporal_history_index;
+    if (temporal_plan.enabled) {
+        const bool descriptor_changed = stream_state->temporal_history[0] &&
+            (!same_texture_descriptor(previous_descriptor,
+                                      stream_state->temporal_history_descriptor) ||
+             !same_color_metadata(submission.current.color_metadata,
+                                  stream_state->temporal_history_color_metadata));
+        const bool dimensions_changed = stream_state->temporal_history_width !=
+                previous_descriptor.width ||
+            stream_state->temporal_history_height != previous_descriptor.height;
+        const std::uint32_t group_count_x = (previous_descriptor.width + 63U) / 64U;
+        const std::uint32_t group_count_y = (previous_descriptor.height + 63U) / 64U;
+        const std::uint64_t tile_count = static_cast<std::uint64_t>(group_count_x) * group_count_y;
+        if (tile_count == 0 ||
+            tile_count > std::numeric_limits<std::uint32_t>::max() || tile_count >
+                std::numeric_limits<NSUInteger>::max() / sizeof(TemporalCutTileStats)) {
+            return std::unexpected(make_error(ErrorCode::allocation_failure,
+                "temporal scene-cut statistics exceed Metal buffer limits"));
+        }
+        const bool buffers_changed =
+            !stream_state->temporal_cut_tile_buffer ||
+            !stream_state->temporal_cut_summary_buffer ||
+            !stream_state->temporal_history_valid_buffer ||
+            stream_state->temporal_cut_group_count_x != group_count_x ||
+            stream_state->temporal_cut_group_count_y != group_count_y;
+        temporal_resources_rebuilt = !stream_state->temporal_history[0] ||
+            !stream_state->temporal_history[1] || descriptor_changed ||
+            dimensions_changed || buffers_changed;
+        if (temporal_resources_rebuilt) {
+            auto first = make_temporal_history_texture(
+                device_, previous_descriptor, device_id_);
+            auto second = make_temporal_history_texture(
+                device_, previous_descriptor, device_id_);
+            id<MTLBuffer> tile_buffer = [device_ newBufferWithLength:
+                static_cast<NSUInteger>(tile_count * sizeof(TemporalCutTileStats))
+                options:MTLResourceStorageModePrivate];
+            id<MTLBuffer> summary_buffer = [device_ newBufferWithLength:
+                sizeof(TemporalCutSummary) options:MTLResourceStorageModePrivate];
+            id<MTLBuffer> history_valid_buffer = [device_ newBufferWithLength:
+                sizeof(std::uint32_t) options:MTLResourceStorageModePrivate];
+            if (!first || !second || tile_buffer == nil || summary_buffer == nil ||
+                history_valid_buffer == nil) {
+                return std::unexpected(make_error(ErrorCode::allocation_failure,
+                    "Metal could not allocate temporal quality history or scene-cut buffers"));
+            }
+            stream_state->temporal_history[0] = std::move(first);
+            stream_state->temporal_history[1] = std::move(second);
+            stream_state->temporal_history_descriptor = previous_descriptor;
+            stream_state->temporal_history_color_metadata = submission.current.color_metadata;
+            stream_state->temporal_history_width = previous_descriptor.width;
+            stream_state->temporal_history_height = previous_descriptor.height;
+            stream_state->temporal_history_index = 0;
+            stream_state->temporal_cut_tile_buffer = tile_buffer;
+            stream_state->temporal_cut_summary_buffer = summary_buffer;
+            stream_state->temporal_history_valid_buffer = history_valid_buffer;
+            stream_state->temporal_cut_group_count_x = group_count_x;
+            stream_state->temporal_cut_group_count_y = group_count_y;
+            temporal_write_index = 1;
+        }
+        temporal_force_reset = temporal_force_reset || temporal_resources_rebuilt;
+    }
+    const bool temporal_gpu_reset = temporal_plan.enabled &&
+        (temporal_force_reset ||
+         (!temporal_plan.use_history && !temporal_plan.reuse_cached_output));
     const bool current_ui = select_current_ui(submission);
     std::shared_ptr<MetalTextureResource> selected_ui_resource;
     id<MTLTexture> previous_ui_native = nil;
     id<MTLTexture> current_ui_native = nil;
+    std::shared_ptr<MetalTextureResource> temporal_hud_mask_resource;
+    id<MTLTexture> temporal_hud_mask_native = nil;
     std::vector<std::shared_ptr<TextureResource>> auxiliary_resources;
 
     if (submission.hud_options.mode == HudMode::explicit_ui_plane) {
@@ -854,6 +1529,37 @@ Result<GeneratedFrame> MetalBackend::submit(const FrameSubmission& submission) {
         auxiliary_resources.push_back(current_ui_resource);
     }
 
+    const auto& previous_hud_mask = submission.previous.optional_inputs.ui_mask;
+    const auto& current_hud_mask = submission.current.optional_inputs.ui_mask;
+    if (temporal_plan.enabled && (previous_hud_mask || current_hud_mask)) {
+        const Texture* selected_mask = current_ui
+            ? (current_hud_mask ? &current_hud_mask : &previous_hud_mask)
+            : (previous_hud_mask ? &previous_hud_mask : &current_hud_mask);
+        if (!selected_mask || !*selected_mask) {
+            return std::unexpected(make_error(ErrorCode::invalid_argument,
+                "temporal HUD-mask selection did not produce a valid texture"));
+        }
+        const auto mask_descriptor = selected_mask->descriptor();
+        if (mask_descriptor.width != previous_descriptor.width ||
+            mask_descriptor.height != previous_descriptor.height ||
+            mask_descriptor.format != PixelFormat::r8_unorm) {
+            return std::unexpected(make_error(ErrorCode::unsupported_format,
+                "temporal HUD masks must be matching single-channel R8 textures"));
+        }
+        temporal_hud_mask_resource = as_metal_resource(*selected_mask);
+        if (!temporal_hud_mask_resource ||
+            !temporal_hud_mask_resource->belongs_to(device_)) {
+            return std::unexpected(make_error(ErrorCode::incompatible_resource,
+                "temporal HUD mask is not owned by this Metal device"));
+        }
+        temporal_hud_mask_native = temporal_hud_mask_resource->native_texture();
+        if ((temporal_hud_mask_native.usage & MTLTextureUsageShaderRead) == 0) {
+            return std::unexpected(make_error(ErrorCode::unsupported_format,
+                "Metal temporal HUD masks must allow shader reads"));
+        }
+        auxiliary_resources.push_back(temporal_hud_mask_resource);
+    }
+
     bool has_mask_history{};
     std::uint32_t history_write_index{};
     std::shared_ptr<MetalTextureResource> history_read_resource;
@@ -861,6 +1567,7 @@ Result<GeneratedFrame> MetalBackend::submit(const FrameSubmission& submission) {
     bool advance_mask_history{};
     float mask_engagement_alpha{1.0F};
     float mask_release_alpha{1.0F};
+    const bool automatic_hud_reset_history = submission.reset_history || temporal_gpu_reset;
     if (submission.hud_options.mode == HudMode::automatic_protection) {
         const auto previous_sequence = submission.previous.timing.sequence;
         const auto current_sequence = submission.current.timing.sequence;
@@ -942,7 +1649,7 @@ Result<GeneratedFrame> MetalBackend::submit(const FrameSubmission& submission) {
             (current_sequence <= automatic_mask_pair_current_sequence_ ||
              current_timestamp <= automatic_mask_pair_current_timestamp_ns_);
 
-        if (same_source_pair && !submission.reset_history) {
+        if (same_source_pair && !automatic_hud_reset_history) {
             // Interpolating the same source pair at multiple target times must
             // reuse the same pair evidence. Recompute from the prior-pair mask
             // and leave the current history slot unchanged so output does not
@@ -952,7 +1659,7 @@ Result<GeneratedFrame> MetalBackend::submit(const FrameSubmission& submission) {
             history_read_resource = automatic_mask_history_[1U - history_write_index];
             mask_engagement_alpha = automatic_mask_pair_engagement_alpha_;
             mask_release_alpha = automatic_mask_pair_release_alpha_;
-        } else if (follows_source_pair && !submission.reset_history) {
+        } else if (follows_source_pair && !automatic_hud_reset_history) {
             has_mask_history = true;
             advance_mask_history = true;
             history_write_index = 1U - automatic_mask_history_index_;
@@ -970,7 +1677,7 @@ Result<GeneratedFrame> MetalBackend::submit(const FrameSubmission& submission) {
                 1.0 - std::pow(0.36, cadence));
             mask_release_alpha = static_cast<float>(
                 1.0 - std::pow(0.79, cadence));
-        } else if (!older_than_history || submission.reset_history) {
+        } else if (!older_than_history || automatic_hud_reset_history) {
             // A first pair, explicit discontinuity, mode/size change, or
             // forward gap starts fresh evidence. Out-of-order work writes only
             // to scratch storage and cannot poison the most recent mask.
@@ -998,8 +1705,14 @@ Result<GeneratedFrame> MetalBackend::submit(const FrameSubmission& submission) {
         return std::unexpected(make_error(ErrorCode::allocation_failure,
                                            "Metal could not allocate the output texture"));
     }
+    const bool temporal_debug_requested =
+        submission.temporal_quality.debug_visualization !=
+            TemporalQualityDebugVisualization::disabled;
+    const bool compose_hud =
+        submission.hud_options.mode != HudMode::no_hud_knowledge &&
+        !temporal_debug_requested;
     id<MTLTexture> rife_scene_native = output_native;
-    if (submission.hud_options.mode != HudMode::no_hud_knowledge) {
+    if (compose_hud || temporal_plan.enabled) {
         MTLTextureDescriptor* scene_descriptor =
             [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:MTLPixelFormatRGBA8Unorm
                                                                width:previous_descriptor.width
@@ -1010,8 +1723,25 @@ Result<GeneratedFrame> MetalBackend::submit(const FrameSubmission& submission) {
         rife_scene_native = [device_ newTextureWithDescriptor:scene_descriptor];
         if (rife_scene_native == nil) {
             return std::unexpected(make_error(ErrorCode::allocation_failure,
-                "Metal could not allocate the RIFE scene texture for HUD composition"));
+                "Metal could not allocate an intermediate RIFE scene texture"));
         }
+    }
+    id<MTLTexture> temporal_scene_native = rife_scene_native;
+    if (temporal_plan.enabled && compose_hud) {
+        MTLTextureDescriptor* scene_descriptor =
+            [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:MTLPixelFormatRGBA8Unorm
+                                                               width:previous_descriptor.width
+                                                              height:previous_descriptor.height
+                                                           mipmapped:NO];
+        scene_descriptor.storageMode = MTLStorageModePrivate;
+        scene_descriptor.usage = MTLTextureUsageShaderRead | MTLTextureUsageShaderWrite;
+        temporal_scene_native = [device_ newTextureWithDescriptor:scene_descriptor];
+        if (temporal_scene_native == nil) {
+            return std::unexpected(make_error(ErrorCode::allocation_failure,
+                "Metal could not allocate the stabilized scene texture for HUD composition"));
+        }
+    } else if (temporal_plan.enabled) {
+        temporal_scene_native = output_native;
     }
 
     TextureDescriptor result_descriptor = previous_descriptor;
@@ -1020,6 +1750,23 @@ Result<GeneratedFrame> MetalBackend::submit(const FrameSubmission& submission) {
     auto output_texture = Texture::from_resource(output_resource);
     if (!output_texture) {
         return std::unexpected(output_texture.error());
+    }
+    if (rife_scene_native != output_native) {
+        auxiliary_resources.push_back(std::make_shared<MetalTextureResource>(
+            device_, rife_scene_native,
+            TextureDescriptor{previous_descriptor.width, previous_descriptor.height,
+                              PixelFormat::rgba8_unorm, previous_descriptor.color_space,
+                              AlphaMode::opaque},
+            device_id_));
+    }
+    if (temporal_scene_native != output_native &&
+        temporal_scene_native != rife_scene_native) {
+        auxiliary_resources.push_back(std::make_shared<MetalTextureResource>(
+            device_, temporal_scene_native,
+            TextureDescriptor{previous_descriptor.width, previous_descriptor.height,
+                              PixelFormat::rgba8_unorm, previous_descriptor.color_space,
+                              AlphaMode::opaque},
+            device_id_));
     }
 
     // MPSGraph can commit and replace the root command buffer while encoding.
@@ -1082,8 +1829,118 @@ Result<GeneratedFrame> MetalBackend::submit(const FrameSubmission& submission) {
             "RIFE inference could not be encoded: " + rife_error));
     }
 
+    if (temporal_plan.enabled) {
+        if (temporal_resources_rebuilt) {
+            id<MTLBlitCommandEncoder> blit = [command_buffer blitCommandEncoder];
+            if (blit == nil) {
+                commit_failed_inference();
+                return std::unexpected(make_error(ErrorCode::backend_failure,
+                    "Metal could not initialize temporal history state"));
+            }
+            [blit fillBuffer:stream_state->temporal_history_valid_buffer
+                       range:NSMakeRange(0, sizeof(std::uint32_t)) value:0];
+            [blit endEncoding];
+        }
+
+        const std::uint32_t group_count_x = stream_state->temporal_cut_group_count_x;
+        const std::uint32_t group_count_y = stream_state->temporal_cut_group_count_y;
+        const std::uint32_t tile_count = group_count_x * group_count_y;
+        TemporalCutTileParameters tile_parameters{
+            group_count_x, previous_descriptor.width, previous_descriptor.height,
+            submission.interpolation};
+        id<MTLComputeCommandEncoder> tile_encoder = [command_buffer computeCommandEncoder];
+        if (tile_encoder == nil) {
+            commit_failed_inference();
+            return std::unexpected(make_error(ErrorCode::backend_failure,
+                "Metal could not create the temporal scene-cut sampling encoder"));
+        }
+        [tile_encoder setComputePipelineState:temporal_cut_tiles_pipeline_];
+        [tile_encoder setTexture:previous_native atIndex:0];
+        [tile_encoder setTexture:current_native atIndex:1];
+        [tile_encoder setTexture:rife_scene_native atIndex:2];
+        [tile_encoder setBuffer:stream_state->temporal_cut_tile_buffer offset:0 atIndex:0];
+        [tile_encoder setBytes:&tile_parameters length:sizeof(tile_parameters) atIndex:1];
+        [tile_encoder dispatchThreadgroups:MTLSizeMake(group_count_x, group_count_y, 1)
+            threadsPerThreadgroup:MTLSizeMake(16, 16, 1)];
+        [tile_encoder endEncoding];
+
+        TemporalCutReduceParameters reduce_parameters{
+            tile_count, temporal_gpu_reset ? 1U : 0U};
+        id<MTLComputeCommandEncoder> reduce_encoder = [command_buffer computeCommandEncoder];
+        if (reduce_encoder == nil) {
+            commit_failed_inference();
+            return std::unexpected(make_error(ErrorCode::backend_failure,
+                "Metal could not create the temporal scene-cut reduction encoder"));
+        }
+        [reduce_encoder setComputePipelineState:temporal_cut_reduce_pipeline_];
+        [reduce_encoder setBuffer:stream_state->temporal_cut_tile_buffer offset:0 atIndex:0];
+        [reduce_encoder setBuffer:stream_state->temporal_cut_summary_buffer offset:0 atIndex:1];
+        [reduce_encoder setBytes:&reduce_parameters length:sizeof(reduce_parameters) atIndex:2];
+        [reduce_encoder dispatchThreadgroups:MTLSizeMake(1, 1, 1)
+            threadsPerThreadgroup:MTLSizeMake(256, 1, 1)];
+        [reduce_encoder endEncoding];
+
+        TemporalQualityParameters quality_parameters{
+            submission.interpolation,
+            temporal_plan.history_time_scale,
+            temporal_policy_value(submission.temporal_quality.policy),
+            temporal_debug_value(submission.temporal_quality.debug_visualization),
+            temporal_gpu_reset ? 1U : 0U,
+            temporal_plan.force_real_fallback ? 1U : 0U,
+            temporal_plan.advance_history ? 1U : 0U,
+            temporal_plan.reuse_cached_output ? 1U : 0U,
+            select_temporal_current_source(submission) ? 1U : 0U,
+            *previous_srgb ? 1U : 0U,
+            temporal_hud_mask_native != nil ? 1U : 0U};
+        id<MTLComputeCommandEncoder> quality_encoder = [command_buffer computeCommandEncoder];
+        if (quality_encoder == nil) {
+            commit_failed_inference();
+            return std::unexpected(make_error(ErrorCode::backend_failure,
+                "Metal could not create the temporal confidence and fallback encoder"));
+        }
+        quality_encoder.label = @"FrameGen temporal quality controller";
+        [quality_encoder setComputePipelineState:temporal_quality_pipeline_];
+        [quality_encoder setTexture:previous_native atIndex:0];
+        [quality_encoder setTexture:current_native atIndex:1];
+        [quality_encoder setTexture:rife_scene_native atIndex:2];
+        [quality_encoder setTexture:stream_state->temporal_history[
+            stream_state->temporal_history_index]->native_texture() atIndex:3];
+        [quality_encoder setTexture:temporal_scene_native atIndex:4];
+        [quality_encoder setTexture:stream_state->temporal_history[
+            temporal_write_index]->native_texture() atIndex:5];
+        [quality_encoder setTexture:temporal_hud_mask_native atIndex:6];
+        [quality_encoder setBuffer:stream_state->temporal_cut_summary_buffer offset:0 atIndex:0];
+        [quality_encoder setBuffer:stream_state->temporal_history_valid_buffer offset:0 atIndex:1];
+        [quality_encoder setBytes:&quality_parameters length:sizeof(quality_parameters) atIndex:2];
+        const NSUInteger quality_threads_x = temporal_quality_pipeline_.threadExecutionWidth;
+        const NSUInteger quality_threads_y = std::max<NSUInteger>(1,
+            std::min<NSUInteger>(8,
+                temporal_quality_pipeline_.maxTotalThreadsPerThreadgroup / quality_threads_x));
+        [quality_encoder dispatchThreads:MTLSizeMake(output_native.width, output_native.height, 1)
+            threadsPerThreadgroup:MTLSizeMake(quality_threads_x, quality_threads_y, 1)];
+        [quality_encoder endEncoding];
+
+        id<MTLComputeCommandEncoder> history_encoder = [command_buffer computeCommandEncoder];
+        if (history_encoder == nil) {
+            commit_failed_inference();
+            return std::unexpected(make_error(ErrorCode::backend_failure,
+                "Metal could not create the temporal history commit encoder"));
+        }
+        [history_encoder setComputePipelineState:temporal_history_commit_pipeline_];
+        [history_encoder setBuffer:stream_state->temporal_cut_summary_buffer offset:0 atIndex:0];
+        [history_encoder setBuffer:stream_state->temporal_history_valid_buffer offset:0 atIndex:1];
+        [history_encoder setBytes:&quality_parameters length:sizeof(quality_parameters) atIndex:2];
+        [history_encoder dispatchThreads:MTLSizeMake(1, 1, 1)
+            threadsPerThreadgroup:MTLSizeMake(1, 1, 1)];
+        [history_encoder endEncoding];
+
+        auxiliary_resources.push_back(stream_state->temporal_history[
+            stream_state->temporal_history_index]);
+        auxiliary_resources.push_back(stream_state->temporal_history[temporal_write_index]);
+    }
+
     id<MTLComputePipelineState> selected_pipeline = nil;
-    if (submission.hud_options.mode == HudMode::explicit_ui_plane) {
+    if (compose_hud && submission.hud_options.mode == HudMode::explicit_ui_plane) {
         id<MTLComputeCommandEncoder> encoder = [command_buffer computeCommandEncoder];
         if (encoder == nil) {
             commit_failed_inference();
@@ -1096,7 +1953,7 @@ Result<GeneratedFrame> MetalBackend::submit(const FrameSubmission& submission) {
         [encoder setTexture:current_native atIndex:1];
         [encoder setTexture:previous_ui_native atIndex:2];
         [encoder setTexture:current_ui_native atIndex:3];
-        [encoder setTexture:rife_scene_native atIndex:4];
+        [encoder setTexture:temporal_scene_native atIndex:4];
         [encoder setTexture:output_native atIndex:5];
         struct ExplicitUiParameters {
             float interpolation;
@@ -1125,7 +1982,8 @@ Result<GeneratedFrame> MetalBackend::submit(const FrameSubmission& submission) {
         [encoder dispatchThreads:MTLSizeMake(output_native.width, output_native.height, 1)
             threadsPerThreadgroup:MTLSizeMake(threads_x, threads_y, 1)];
         [encoder endEncoding];
-    } else if (submission.hud_options.mode == HudMode::automatic_protection) {
+    } else if (compose_hud &&
+               submission.hud_options.mode == HudMode::automatic_protection) {
         id<MTLComputeCommandEncoder> encoder = [command_buffer computeCommandEncoder];
         if (encoder == nil) {
             commit_failed_inference();
@@ -1137,7 +1995,7 @@ Result<GeneratedFrame> MetalBackend::submit(const FrameSubmission& submission) {
         [encoder setTexture:previous_native atIndex:0];
         [encoder setTexture:current_native atIndex:1];
         [encoder setTexture:history_read_resource->native_texture() atIndex:2];
-        [encoder setTexture:rife_scene_native atIndex:3];
+        [encoder setTexture:temporal_scene_native atIndex:3];
         [encoder setTexture:output_native atIndex:4];
         [encoder setTexture:history_write_resource->native_texture() atIndex:5];
         struct AutomaticHudParameters {
@@ -1147,6 +2005,8 @@ Result<GeneratedFrame> MetalBackend::submit(const FrameSubmission& submission) {
             std::uint32_t current_ui;
             std::uint32_t has_history;
             std::uint32_t debug_visualization;
+            std::uint32_t reset_history;
+            std::uint32_t has_cut_summary;
         } parameters{
             submission.interpolation,
             mask_engagement_alpha,
@@ -1154,7 +2014,11 @@ Result<GeneratedFrame> MetalBackend::submit(const FrameSubmission& submission) {
             current_ui ? 1U : 0U,
             has_mask_history ? 1U : 0U,
             static_cast<std::uint32_t>(submission.hud_options.debug_visualization),
+            automatic_hud_reset_history ? 1U : 0U,
+            temporal_plan.enabled ? 1U : 0U,
         };
+        [encoder setBuffer:(temporal_plan.enabled
+            ? stream_state->temporal_cut_summary_buffer : nil) offset:0 atIndex:1];
         [encoder setBytes:&parameters length:sizeof(parameters) atIndex:0];
         const NSUInteger threads_x = selected_pipeline.threadExecutionWidth;
         const NSUInteger threads_y = std::max<NSUInteger>(
@@ -1168,15 +2032,27 @@ Result<GeneratedFrame> MetalBackend::submit(const FrameSubmission& submission) {
     event_value = next_event_value_++;
     [command_buffer encodeSignalEvent:completion_event_ value:event_value];
     const auto retained_for_completion = retained_rife;
+    const std::weak_ptr<MetalBackendStreamState> weak_stream_state = stream_state;
     [command_buffer addCompletedHandler:^(id<MTLCommandBuffer> completed_command_buffer) {
-        (void)completed_command_buffer;
+        if (completed_command_buffer.status == MTLCommandBufferStatusError) {
+            if (const auto failed_stream_state = weak_stream_state.lock()) {
+                failed_stream_state->temporal_async_reset_requested.store(
+                    true, std::memory_order_release);
+            }
+        }
         (void)retained_for_completion;
     }];
     [command_buffer commit];
     submission_order_lock.unlock();
 
-    last_hud_mode_ = submission.hud_options.mode;
-    if (submission.hud_options.mode == HudMode::automatic_protection) {
+    stream_state->temporal_controller.commit(submission, previous_descriptor, temporal_plan);
+    if (temporal_plan.enabled && temporal_plan.advance_history) {
+        stream_state->temporal_history_index = temporal_write_index;
+    }
+    last_hud_mode_ = compose_hud
+        ? submission.hud_options.mode : HudMode::no_hud_knowledge;
+    if (compose_hud &&
+        submission.hud_options.mode == HudMode::automatic_protection) {
         if (advance_mask_history) {
             automatic_mask_history_index_ = history_write_index;
             automatic_mask_history_valid_ = true;
@@ -1217,6 +2093,10 @@ struct Device::State {
     __strong id<MTLCommandQueue> queue;
     __strong id<MTLComputePipelineState> explicit_ui_pipeline;
     __strong id<MTLComputePipelineState> automatic_hud_pipeline;
+    __strong id<MTLComputePipelineState> temporal_cut_tiles_pipeline;
+    __strong id<MTLComputePipelineState> temporal_cut_reduce_pipeline;
+    __strong id<MTLComputePipelineState> temporal_quality_pipeline;
+    __strong id<MTLComputePipelineState> temporal_history_commit_pipeline;
     __strong id<MTLSharedEvent> completion_event;
     std::uint64_t device_id{};
     std::shared_ptr<FrameGenerationBackend> backend;
@@ -1280,6 +2160,30 @@ Result<Device> Device::create(id<MTLDevice> native_device) {
         return std::unexpected(make_error(ErrorCode::backend_failure,
                                            "Metal automatic HUD pipeline failed: " + pipeline_error));
     }
+    id<MTLComputePipelineState> temporal_cut_tiles_pipeline = make_compute_pipeline(
+        native_device, kTemporalQualityShader, "framegen_temporal_cut_tiles", pipeline_error);
+    if (temporal_cut_tiles_pipeline == nil) {
+        return std::unexpected(make_error(ErrorCode::backend_failure,
+            "Metal temporal cut statistics pipeline failed: " + pipeline_error));
+    }
+    id<MTLComputePipelineState> temporal_cut_reduce_pipeline = make_compute_pipeline(
+        native_device, kTemporalQualityShader, "framegen_temporal_cut_reduce", pipeline_error);
+    if (temporal_cut_reduce_pipeline == nil) {
+        return std::unexpected(make_error(ErrorCode::backend_failure,
+            "Metal temporal cut reduction pipeline failed: " + pipeline_error));
+    }
+    id<MTLComputePipelineState> temporal_quality_pipeline = make_compute_pipeline(
+        native_device, kTemporalQualityShader, "framegen_temporal_quality", pipeline_error);
+    if (temporal_quality_pipeline == nil) {
+        return std::unexpected(make_error(ErrorCode::backend_failure,
+            "Metal temporal quality pipeline failed: " + pipeline_error));
+    }
+    id<MTLComputePipelineState> temporal_history_commit_pipeline = make_compute_pipeline(
+        native_device, kTemporalQualityShader, "framegen_temporal_history_commit", pipeline_error);
+    if (temporal_history_commit_pipeline == nil) {
+        return std::unexpected(make_error(ErrorCode::backend_failure,
+            "Metal temporal history commit pipeline failed: " + pipeline_error));
+    }
 
     id<MTLSharedEvent> event = [native_device newSharedEvent];
     if (event == nil) {
@@ -1298,10 +2202,16 @@ Result<Device> Device::create(id<MTLDevice> native_device) {
     state->queue = queue;
     state->explicit_ui_pipeline = explicit_ui_pipeline;
     state->automatic_hud_pipeline = automatic_hud_pipeline;
+    state->temporal_cut_tiles_pipeline = temporal_cut_tiles_pipeline;
+    state->temporal_cut_reduce_pipeline = temporal_cut_reduce_pipeline;
+    state->temporal_quality_pipeline = temporal_quality_pipeline;
+    state->temporal_history_commit_pipeline = temporal_history_commit_pipeline;
     state->completion_event = event;
     state->device_id = *device_id;
     state->backend = std::make_shared<detail::MetalBackend>(
         native_device, queue, explicit_ui_pipeline, automatic_hud_pipeline,
+        temporal_cut_tiles_pipeline, temporal_cut_reduce_pipeline,
+        temporal_quality_pipeline, temporal_history_commit_pipeline,
         event, std::move(model), *model_mode, *device_id);
     return Device(std::move(state));
 }

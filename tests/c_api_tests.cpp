@@ -133,6 +133,8 @@ struct BackendControl {
     std::uint32_t last_dynamic_range{};
     bool last_motion_input_valid{};
     std::uint32_t last_motion_pixel_format{};
+    std::uint32_t last_temporal_policy{};
+    std::uint32_t last_temporal_debug{};
     std::atomic<std::uint32_t> last_invalidation_reason{};
     bool corrupt_exported_image{};
     bool corrupt_exported_sync{};
@@ -179,6 +181,10 @@ public:
             submission.current.color_metadata.dynamic_range);
         control_->last_motion_input_valid =
             submission.current.optional_inputs.motion_vectors.valid();
+        control_->last_temporal_policy =
+            static_cast<std::uint32_t>(submission.temporal_quality.policy);
+        control_->last_temporal_debug =
+            static_cast<std::uint32_t>(submission.temporal_quality.debug_visualization);
         if (control_->last_motion_input_valid) {
             control_->last_motion_pixel_format = static_cast<std::uint32_t>(
                 submission.current.optional_inputs.motion_vectors.descriptor().format);
@@ -416,6 +422,7 @@ struct RegisteredBackends {
             kHudBackend, FRAMEGEN_CAP_COLOR_ONLY |
                 FRAMEGEN_CAP_UI_PLANE | FRAMEGEN_CAP_AUTOMATIC_HUD_PROTECTION |
                 FRAMEGEN_CAP_HUD_DEBUG_VISUALIZATION |
+                FRAMEGEN_CAP_TEMPORAL_QUALITY_CONTROLLER |
                 FRAMEGEN_CAP_ARBITRARY_INTERPOLATION_TIME,
             FRAMEGEN_CAP_COLOR_ONLY, 0, hud));
     }
@@ -1609,6 +1616,68 @@ void test_hud_modes_require_negotiated_capabilities() {
     framegen_context_destroy(context);
 }
 
+void test_temporal_quality_options_require_negotiation_and_forward() {
+    auto* context = create_context(kHudBackend);
+    configure(context, FRAMEGEN_CAP_COLOR_ONLY |
+        FRAMEGEN_CAP_ARBITRARY_INTERPOLATION_TIME);
+
+    framegen_temporal_quality_options_t options{};
+    init(options);
+    options.policy = FRAMEGEN_TEMPORAL_QUALITY_CONTINUOUS_ENDPOINT_BLEND;
+    CHECK(framegen_context_set_temporal_quality_options(context, &options) ==
+          FRAMEGEN_STATUS_CAPABILITY_UNAVAILABLE);
+    options.policy = FRAMEGEN_TEMPORAL_QUALITY_DISABLED;
+    options.debug_visualization = FRAMEGEN_TEMPORAL_QUALITY_DEBUG_CONFIDENCE;
+    CHECK(framegen_context_set_temporal_quality_options(context, &options) ==
+          FRAMEGEN_STATUS_CAPABILITY_UNAVAILABLE);
+    options.policy = static_cast<framegen_temporal_quality_policy_t>(255);
+    CHECK(framegen_context_set_temporal_quality_options(context, &options) ==
+          FRAMEGEN_STATUS_INVALID_ARGUMENT);
+
+    const auto capabilities = configure(context, FRAMEGEN_CAP_COLOR_ONLY |
+        FRAMEGEN_CAP_ARBITRARY_INTERPOLATION_TIME |
+        FRAMEGEN_CAP_TEMPORAL_QUALITY_CONTROLLER);
+    CHECK(capabilities.negotiated_capabilities &
+          FRAMEGEN_CAP_TEMPORAL_QUALITY_CONTROLLER);
+    options.policy = FRAMEGEN_TEMPORAL_QUALITY_CONTINUOUS_ENDPOINT_BLEND;
+    options.debug_visualization = FRAMEGEN_TEMPORAL_QUALITY_DEBUG_CLASSES;
+    CHECK(framegen_context_set_temporal_quality_options(context, &options) ==
+          FRAMEGEN_STATUS_OK);
+
+    framegen_context_info_t before{};
+    init(before);
+    CHECK(framegen_context_get_info(context, &before) == FRAMEGEN_STATUS_OK);
+    CHECK(framegen_context_set_temporal_quality_options(context, &options) ==
+          FRAMEGEN_STATUS_OK);
+    framegen_context_info_t unchanged{};
+    init(unchanged);
+    CHECK(framegen_context_get_info(context, &unchanged) == FRAMEGEN_STATUS_OK);
+    CHECK(unchanged.history_generation == before.history_generation);
+
+    const auto previous = submit(context, source(1, 801));
+    const auto current = submit(context, source(2, 802, 1, 2'000'000));
+    auto request = request_for(previous, current);
+    framegen_ticket_t* ticket{};
+    CHECK(framegen_request_interpolation(context, &request, &ticket) ==
+          FRAMEGEN_STATUS_OK);
+    CHECK(g_backends.hud->last_temporal_policy ==
+          FRAMEGEN_TEMPORAL_QUALITY_CONTINUOUS_ENDPOINT_BLEND);
+    CHECK(g_backends.hud->last_temporal_debug ==
+          FRAMEGEN_TEMPORAL_QUALITY_DEBUG_CLASSES);
+    CHECK(!g_backends.hud->reset_history_values.empty());
+    CHECK(g_backends.hud->reset_history_values.back());
+    framegen_ticket_release(ticket);
+
+    options.policy = FRAMEGEN_TEMPORAL_QUALITY_CONTINUOUS_SOURCE_BLEND;
+    CHECK(framegen_context_set_temporal_quality_options(context, &options) ==
+          FRAMEGEN_STATUS_OK);
+    framegen_context_info_t changed{};
+    init(changed);
+    CHECK(framegen_context_get_info(context, &changed) == FRAMEGEN_STATUS_OK);
+    CHECK(changed.history_generation == unchanged.history_generation + 1);
+    framegen_context_destroy(context);
+}
+
 void test_input_leases_survive_history_eviction_and_ticket_release() {
     g_backends.late->complete_immediately->store(false, std::memory_order_release);
     auto* context = create_context(kLateBackend);
@@ -1702,6 +1771,8 @@ int main() {
          test_overlapping_first_requests_reset_backend_history_once},
         {"HUD modes require negotiated capabilities",
          test_hud_modes_require_negotiated_capabilities},
+        {"temporal quality options require negotiation and forward correctly",
+         test_temporal_quality_options_require_negotiation_and_forward},
         {"input leases survive history eviction and ticket release",
          test_input_leases_survive_history_eviction_and_ticket_release},
     };

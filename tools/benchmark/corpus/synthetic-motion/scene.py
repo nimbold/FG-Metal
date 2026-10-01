@@ -110,6 +110,34 @@ def _blend_rect(image, x0, y0, x1, y1, color, alpha):
                 for channel in range(3))
 
 
+def _rotate_world(image, masks, angle):
+    """Apply an analytic camera-roll proxy to world pixels, keeping the HUD fixed."""
+    source = bytes(image)
+    rotated = _blank()
+    source_masks = [bytes(mask) for mask in masks]
+    rotated_masks = [bytearray(WIDTH * HEIGHT) for _ in source_masks]
+    center_x, center_y = (WIDTH - 1) * 0.5, (HEIGHT - 1) * 0.5
+    cosine, sine = math.cos(angle), math.sin(angle)
+    for y in range(HEIGHT):
+        dy = y - center_y
+        for x in range(WIDTH):
+            dx = x - center_x
+            source_x = int(round(center_x + cosine * dx + sine * dy))
+            source_y = int(round(center_y - sine * dx + cosine * dy))
+            if not (0 <= source_x < WIDTH and 0 <= source_y < HEIGHT):
+                continue
+            target_offset = (y * WIDTH + x) * 3
+            source_offset = (source_y * WIDTH + source_x) * 3
+            rotated[target_offset:target_offset + 3] = source[source_offset:source_offset + 3]
+            source_pixel = source_y * WIDTH + source_x
+            target_pixel = y * WIDTH + x
+            for source_mask, target_mask in zip(source_masks, rotated_masks):
+                target_mask[target_pixel] = source_mask[source_pixel]
+    image[:] = rotated
+    for mask, rotated_mask in zip(masks, rotated_masks):
+        mask[:] = rotated_mask
+
+
 def render(time_frame: float):
     """Render exact ground truth at a continuous high-rate frame coordinate."""
     image = _blank()
@@ -172,6 +200,11 @@ def render(time_frame: float):
         px = int((particle * 19 + time_frame * (2 + particle % 3) * 2) % WIDTH)
         py = 24 + ((particle * 13 + int(time_frame * 3)) % 37)
         _set(image, px, py, (232, 218, 144))
+
+    # The world rolls quickly while all screen-space HUD layers remain fixed.
+    # This gives the benchmark true high-angular-velocity edges rather than
+    # labeling a plain translation as camera rotation.
+    _rotate_world(image, (occlusion, thin_geometry), time_frame * 0.08)
 
     # HUD backing, crosshair, weapon sight, minimap, health bar, subtitle,
     # timer, scrolling text, flashing state, transparent UI, and a moving menu.

@@ -23,7 +23,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-ANALYZER_VERSION = "1.4"
+ANALYZER_VERSION = "1.5"
 METRIC_CONTRACT_VERSION = "7"
 REGIONS = ("all", "hud", "text", "scene", "occlusion")
 MASK_LABELS = REGIONS[1:]
@@ -1472,6 +1472,7 @@ def _run(args: argparse.Namespace) -> int:
                     "1" if reset_history else "0",
                     args.hud_mode, args.ui_source, args.hud_debug,
                     str(target["time_ns"]),
+                    args.temporal_policy, args.temporal_debug,
                 ]
                 if any("\t" in str(field) or "\n" in str(field) for field in fields):
                     raise ValueError("backend server request paths cannot contain tabs or newlines")
@@ -1599,6 +1600,17 @@ def _run(args: argparse.Namespace) -> int:
             if (gw, gh) != (width, height):
                 raise ValueError("backend output image dimensions changed")
             reference, masks = context["reference"], context["masks"]
+            if args.keep_generated_images_dir:
+                retained = Path(args.keep_generated_images_dir).resolve()
+                retained.mkdir(parents=True, exist_ok=True)
+                (retained / f"generated-{ordinal:02d}.ppm").write_bytes(
+                    context["output_path"].read_bytes())
+                _write_ppm(retained / f"reference-{ordinal:02d}.ppm",
+                           width, height, reference)
+                _write_ppm(retained / f"source-a-{ordinal:02d}.ppm",
+                           width, height, context["left"]["rgb"])
+                _write_ppm(retained / f"source-b-{ordinal:02d}.ppm",
+                           width, height, context["right"]["rgb"])
             target_index = target["target_index"]
             time_ns = target["time_ns"]
             item = {
@@ -1745,6 +1757,9 @@ def _run(args: argparse.Namespace) -> int:
         },
         "configuration": {
             "warmup_iterations": args.warmup, "measured_iterations_per_target": args.iterations,
+            "hud_mode": args.hud_mode, "ui_source": args.ui_source,
+            "hud_debug": args.hud_debug, "temporal_policy": args.temporal_policy,
+            "temporal_debug": args.temporal_debug,
             "deadline_ms": deadline_ms, "backend_timeout_seconds": args.backend_timeout_seconds,
             "max_analysis_memory_mib": args.max_analysis_memory_mib,
             "estimated_analysis_memory_bytes": corpus["estimated_analysis_bytes"],
@@ -2081,8 +2096,29 @@ def _validate_result_impl(result: dict[str, Any], label: str) -> None:
     }
     if compatibility != expected_compatibility:
         raise ValueError(f"{label} compatibility metadata does not match its reported run identity")
-    device = host.get("gpu_device")
     backend = result.get("backend")
+    backend_metadata = (backend.get("metadata", {})
+                        if isinstance(backend, dict) and
+                        isinstance(backend.get("metadata", {}), dict) else {})
+    hud_mode = configuration.get("hud_mode", backend_metadata.get("hud_mode", "none"))
+    ui_source = configuration.get(
+        "ui_source", backend_metadata.get("ui_temporal_source", "nearest"))
+    hud_debug = configuration.get(
+        "hud_debug", backend_metadata.get("debug_visualization", "disabled"))
+    temporal_policy = configuration.get("temporal_policy", "none")
+    temporal_debug = configuration.get("temporal_debug", "disabled")
+    if (hud_mode not in ("none", "explicit", "automatic")
+            or ui_source not in ("previous", "current", "nearest")
+            or hud_debug not in (
+                "disabled", "raw-mask", "stabilized-mask", "protected-regions",
+                "interpolation-confidence", "final-composite")
+            or temporal_policy not in (
+                "none", "endpoint-blend", "source-blend", "nearest")
+            or temporal_debug not in (
+                "disabled", "confidence", "disocclusion", "thin", "high-frequency",
+                "specular-particles", "scene-cut", "classes")):
+        raise ValueError(f"{label} has an invalid HUD or temporal quality configuration")
+    device = host.get("gpu_device")
     if (not isinstance(device, dict) or set(device) != {"id", "name"}
             or not isinstance(device.get("id"), str) or not device["id"].strip()
             or not isinstance(device.get("name"), str) or not device["name"].strip()
@@ -2991,6 +3027,15 @@ def main() -> int:
         "disabled", "raw-mask", "stabilized-mask", "protected-regions",
         "interpolation-confidence", "final-composite"), default="disabled",
         help="optional debug output visualization")
+    run.add_argument("--temporal-policy", choices=(
+        "none", "endpoint-blend", "source-blend", "nearest"), default="none",
+        help="confidence-dependent temporal fallback policy")
+    run.add_argument("--temporal-debug", choices=(
+        "disabled", "confidence", "disocclusion", "thin", "high-frequency",
+        "specular-particles", "scene-cut", "classes"), default="disabled",
+        help="optional temporal confidence/cut debug output")
+    run.add_argument("--keep-generated-images-dir",
+                     help="copy final generated, reference, and source PPMs here for visual inspection")
     run.add_argument("--max-analysis-memory-mib", type=int,
                      default=DEFAULT_MAX_ANALYSIS_MEMORY_MIB,
                      help="reject corpora whose estimated analyzer working set exceeds this MiB budget")

@@ -3,7 +3,7 @@
   "redistribution_policy": "Only synthetic assets or footage with documented redistribution permission may be committed. Never commit copyrighted game capture without an explicit redistributable license.",
   "categories": [
     {"id": "slow_camera_pan", "status": "covered", "fixture": "synthetic-motion-v1", "notes": "Continuous horizontal camera translation."},
-    {"id": "fast_camera_rotation", "status": "planned", "fixture": null, "notes": "Add a synthetic rotational scene and exact analytic target renderer."},
+    {"id": "fast_camera_rotation", "status": "covered", "fixture": "synthetic-motion-v1", "notes": "World layers rotate analytically at high angular velocity while screen-space HUD remains fixed."},
     {"id": "third_person_character_movement", "status": "covered", "fixture": "synthetic-motion-v1", "notes": "Moving synthetic character silhouette."},
     {"id": "racing", "status": "planned", "fixture": null, "notes": "Add a synthetic road, high-speed parallax, and lane-edge geometry."},
     {"id": "foliage", "status": "covered", "fixture": "synthetic-motion-v1", "notes": "Repeated synthetic foliage shapes move under camera pan."},

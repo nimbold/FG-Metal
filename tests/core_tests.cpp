@@ -1,4 +1,5 @@
 #include "framegen/framegen.hpp"
+#include "temporal_quality_controller.hpp"
 
 #include <cmath>
 #include <cstddef>
@@ -250,6 +251,25 @@ void test_interpolation_requires_finite_value_in_closed_unit_interval() {
     CHECK(backend->submit_count == 2);
 }
 
+void test_interpolation_timestamp_must_match_fraction() {
+    auto backend = std::make_shared<FakeBackend>();
+    auto generator = make_generator(backend);
+
+    auto valid = valid_submission();
+    valid.interpolation_timestamp_ns = 1'250'000;
+    valid.interpolation = 0.25F;
+    CHECK(generator.submit(valid).has_value());
+
+    auto unbracketed = valid_submission();
+    unbracketed.interpolation_timestamp_ns = 1'000'000;
+    expect_error(generator.submit(unbracketed), ErrorCode::invalid_argument);
+
+    auto mismatched = valid_submission();
+    mismatched.interpolation_timestamp_ns = 1'250'000;
+    expect_error(generator.submit(mismatched), ErrorCode::invalid_argument);
+    CHECK(backend->submit_count == 1);
+}
+
 void test_backend_and_device_mismatches_are_rejected() {
     auto backend = std::make_shared<FakeBackend>();
     auto generator = make_generator(backend);
@@ -477,6 +497,103 @@ void test_backend_output_validation() {
     });
 }
 
+void test_temporal_quality_controller_history_ordering_and_recovery() {
+    quality::TemporalQualityController controller;
+    const auto descriptor = standard_descriptor();
+    auto first = valid_submission();
+    first.temporal_quality.policy =
+        TemporalQualityPolicy::continuous_endpoint_blend;
+
+    const auto cold = controller.begin(first, descriptor, false);
+    CHECK(cold.enabled);
+    CHECK(cold.force_reset);
+    CHECK(!cold.force_real_fallback);
+    CHECK(cold.advance_history);
+    CHECK(!cold.use_history);
+    controller.commit(first, descriptor, cold);
+
+    auto next = first;
+    next.previous.timing = first.current.timing;
+    next.current.timing.sequence = first.current.timing.sequence + 1;
+    next.current.timing.timestamp_ns = 3'000'000;
+    next.interpolation_timestamp_ns = 2'250'000;
+    next.interpolation = 0.25F;
+    const auto chronological = controller.begin(next, descriptor, false);
+    CHECK(!chronological.force_reset);
+    CHECK(!chronological.force_real_fallback);
+    CHECK(chronological.use_history);
+    CHECK(chronological.advance_history);
+    CHECK(std::abs(chronological.history_time_scale - 0.75F) < 0.0001F);
+    controller.commit(next, descriptor, chronological);
+
+    const auto duplicate = controller.begin(next, descriptor, false);
+    CHECK(duplicate.reuse_cached_output);
+    CHECK(!duplicate.advance_history);
+
+    const auto stale = controller.begin(first, descriptor, false);
+    CHECK(stale.stale_submission);
+    CHECK(stale.force_reset);
+    CHECK(stale.force_real_fallback);
+    CHECK(!stale.advance_history);
+    controller.commit(first, descriptor, stale);
+
+    first.reset_history = true;
+    const auto explicit_reset = controller.begin(first, descriptor, false);
+    CHECK(!explicit_reset.stale_submission);
+    CHECK(explicit_reset.force_reset);
+    CHECK(explicit_reset.force_real_fallback);
+    CHECK(explicit_reset.advance_history);
+    controller.commit(first, descriptor, explicit_reset);
+
+    const auto after_reset = controller.begin(next, descriptor, false);
+    CHECK(!after_reset.force_reset);
+    CHECK(after_reset.use_history);
+
+    auto severe_jump = next;
+    severe_jump.reset_history = false;
+    severe_jump.current.timing.timestamp_ns = 10'000'000;
+    severe_jump.interpolation_timestamp_ns = 6'000'000;
+    severe_jump.interpolation = 0.5F;
+    const auto discontinuity = controller.begin(severe_jump, descriptor, false);
+    CHECK(discontinuity.force_reset);
+    CHECK(discontinuity.force_real_fallback);
+    CHECK(discontinuity.advance_history);
+}
+
+void test_temporal_quality_controller_handles_full_signed_timestamps() {
+    quality::TemporalQualityController controller;
+    auto submission = valid_submission();
+    submission.previous.timing.timestamp_ns =
+        std::numeric_limits<std::int64_t>::min() + 1;
+    submission.current.timing.timestamp_ns =
+        std::numeric_limits<std::int64_t>::max();
+    submission.interpolation = 0.5F;
+    submission.interpolation_timestamp_ns = unknown_timestamp_ns;
+    submission.temporal_quality.policy =
+        TemporalQualityPolicy::continuous_source_blend;
+
+    const auto plan = controller.begin(
+        submission, standard_descriptor(), false);
+    CHECK(plan.target_timestamp_ns == 0);
+    CHECK(plan.advance_history);
+}
+
+void test_invalid_temporal_quality_options_are_rejected() {
+    auto backend = std::make_shared<FakeBackend>();
+    auto generator = make_generator(backend);
+
+    auto invalid_policy = valid_submission();
+    invalid_policy.temporal_quality.policy =
+        static_cast<TemporalQualityPolicy>(255);
+    expect_error(generator.submit(invalid_policy), ErrorCode::invalid_argument);
+
+    auto invalid_debug = valid_submission();
+    invalid_debug.temporal_quality.debug_visualization =
+        static_cast<TemporalQualityDebugVisualization>(255);
+    expect_error(generator.submit(invalid_debug), ErrorCode::invalid_argument);
+    CHECK(backend->submit_count == 0);
+}
+
 using Test = std::pair<const char*, void (*)()>;
 
 } // namespace
@@ -488,6 +605,8 @@ int main() {
         {"null backend and null input validation", test_null_backend_and_null_inputs_are_rejected},
         {"interpolation range and finiteness",
          test_interpolation_requires_finite_value_in_closed_unit_interval},
+        {"interpolation timestamp and fraction agreement",
+         test_interpolation_timestamp_must_match_fraction},
         {"backend and device mismatch validation",
          test_backend_and_device_mismatches_are_rejected},
         {"input descriptor compatibility", test_input_descriptors_must_match},
@@ -497,6 +616,12 @@ int main() {
          test_timing_and_clock_domain_validation_with_history_reset},
         {"GPU dependency ownership", test_null_and_foreign_gpu_dependencies_are_rejected},
         {"backend output validation", test_backend_output_validation},
+        {"temporal controller ordering and recovery",
+         test_temporal_quality_controller_history_ordering_and_recovery},
+        {"temporal controller full signed timestamp range",
+         test_temporal_quality_controller_handles_full_signed_timestamps},
+        {"temporal option enum validation",
+         test_invalid_temporal_quality_options_are_rejected},
     };
 
     int failures = 0;

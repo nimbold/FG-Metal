@@ -7,6 +7,9 @@
 #import <Metal/Metal.h>
 #import <MetalPerformanceShadersGraph/MetalPerformanceShadersGraph.h>
 
+#include "framegen/result.hpp"
+
+#include <cstdint>
 #include <filesystem>
 #include <memory>
 #include <string>
@@ -40,6 +43,12 @@ public:
     [[nodiscard]] static std::shared_ptr<MetalRifeModel> load(
         id<MTLDevice> device, id<MTLLibrary> kernel_library,
         const std::filesystem::path& weights_path, std::string& error);
+
+    // Check padded inference size and scratch limits without compiling a graph
+    // or allocating GPU resources. The backend uses this before allocating
+    // per-stream temporal textures and buffers.
+    [[nodiscard]] static Result<void> validate_dimensions(
+        std::uint32_t width, std::uint32_t height, RifeMode mode);
 
     ~MetalRifeModel();
     MetalRifeModel(const MetalRifeModel&) = delete;
