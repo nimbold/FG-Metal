@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "redistribution_policy": "Only synthetic assets or footage with documented redistribution permission may be committed. Never commit copyrighted game capture without an explicit redistributable license.",
+  "categories": [
+    {"id": "slow_camera_pan", "status": "covered", "fixture": "synthetic-motion-v1", "notes": "Continuous horizontal camera translation."},
+    {"id": "fast_camera_rotation", "status": "planned", "fixture": null, "notes": "Add a synthetic rotational scene and exact analytic target renderer."},
+    {"id": "third_person_character_movement", "status": "covered", "fixture": "synthetic-motion-v1", "notes": "Moving synthetic character silhouette."},
+    {"id": "racing", "status": "planned", "fixture": null, "notes": "Add a synthetic road, high-speed parallax, and lane-edge geometry."},
+    {"id": "foliage", "status": "covered", "fixture": "synthetic-motion-v1", "notes": "Repeated synthetic foliage shapes move under camera pan."},
+    {"id": "thin_geometry", "status": "covered", "fixture": "synthetic-motion-v1", "notes": "One-pixel rails and branches."},
+    {"id": "fences", "status": "covered", "fixture": "synthetic-motion-v1", "notes": "Thin bars and rails cross the scene."},
+    {"id": "particles", "status": "covered", "fixture": "synthetic-motion-v1", "notes": "Deterministic moving bright particles."},
+    {"id": "transparency", "status": "covered", "fixture": "synthetic-motion-v1", "notes": "Synthetic alpha-like translucent panel composited into ground truth."},
+    {"id": "reflections_specular_highlights", "status": "covered", "fixture": "synthetic-motion-v1", "notes": "Moving high-contrast rail highlight."},
+    {"id": "weapon_sights", "status": "covered", "fixture": "synthetic-motion-v1", "notes": "Synthetic sight/rail and crosshair overlay."},
+    {"id": "crosshairs", "status": "covered", "fixture": "synthetic-motion-v1", "notes": "Static crosshair has its own HUD mask."},
+    {"id": "subtitles", "status": "partial", "fixture": "synthetic-motion-v1", "notes": "Small caption-like text is present; multi-line and animated subtitle cases remain planned."},
+    {"id": "minimaps", "status": "covered", "fixture": "synthetic-motion-v1", "notes": "Synthetic gridded minimap with moving marker."},
+    {"id": "health_bars", "status": "covered", "fixture": "synthetic-motion-v1", "notes": "Dynamic synthetic health bar."},
+    {"id": "menus", "status": "planned", "fixture": null, "notes": "Add synthetic menu transitions and cursor motion."},
+    {"id": "rapidly_changing_hud_counters", "status": "covered", "fixture": "synthetic-motion-v1", "notes": "Counter changes with analytic frame time."},
+    {"id": "scene_cuts", "status": "planned", "fixture": null, "notes": "Add cut metadata; never compute temporal flow/residuals across a cut."},
+    {"id": "loading_transitions", "status": "planned", "fixture": null, "notes": "Add synthetic progress/loading transitions and transition annotations."}
+  ]
+}

@@ -5,6 +5,7 @@
 
 #include <cstdint>
 #include <memory>
+#include <optional>
 #include <string_view>
 #include <vector>
 
@@ -31,6 +32,14 @@ public:
 
     [[nodiscard]] virtual bool is_complete() const noexcept = 0;
     [[nodiscard]] virtual Result<void> wait() = 0;
+
+    // GPU execution time for diagnostics when the backend exposes hardware
+    // timestamps. This excludes CPU submission and host-side readback. A
+    // backend without trustworthy timestamps returns std::nullopt.
+    [[nodiscard]] virtual std::optional<std::uint64_t>
+    gpu_execution_time_ns() const noexcept {
+        return std::nullopt;
+    }
 };
 
 struct GeneratedFrame {
