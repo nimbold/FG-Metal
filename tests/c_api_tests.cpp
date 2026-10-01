@@ -682,7 +682,7 @@ void test_full_signed_timestamp_range_is_overflow_safe() {
     configure(context, FRAMEGEN_CAP_COLOR_ONLY |
         FRAMEGEN_CAP_ARBITRARY_INTERPOLATION_TIME);
     auto first_frame = source(1, 250, 1,
-        std::numeric_limits<std::int64_t>::min());
+        std::numeric_limits<std::int64_t>::min() + 1);
     auto second_frame = source(2, 251, 1,
         std::numeric_limits<std::int64_t>::max());
     first_frame.render_completion_timestamp_ns = FRAMEGEN_TIMESTAMP_UNKNOWN;
@@ -698,6 +698,73 @@ void test_full_signed_timestamp_range_is_overflow_safe() {
     CHECK(framegen_ticket_poll(ticket, 10, &result) == FRAMEGEN_STATUS_OK);
     CHECK(result.status == FRAMEGEN_TICKET_READY);
     CHECK(std::abs(g_backends.color->last_interpolation - 0.5F) < 1e-6F);
+    framegen_ticket_release(ticket);
+    framegen_context_destroy(context);
+}
+
+void test_unknown_timestamp_sentinel_is_reserved_for_diagnostics() {
+    auto* context = create_context(kColorBackend);
+    configure(context, FRAMEGEN_CAP_COLOR_ONLY |
+        FRAMEGEN_CAP_ARBITRARY_INTERPOLATION_TIME);
+
+    framegen_frame_receipt_t receipt{};
+    init(receipt);
+    auto unknown_source_time = source(1, 260);
+    unknown_source_time.source_timestamp_ns = FRAMEGEN_TIMESTAMP_UNKNOWN;
+    CHECK(framegen_submit_source_frame(context, &unknown_source_time, &receipt) ==
+          FRAMEGEN_STATUS_INVALID_FRAME);
+
+    auto unknown_source_presentation = source(1, 261);
+    unknown_source_presentation.desired_presentation_timestamp_ns =
+        FRAMEGEN_TIMESTAMP_UNKNOWN;
+    CHECK(framegen_submit_source_frame(context, &unknown_source_presentation,
+                                       &receipt) == FRAMEGEN_STATUS_INVALID_FRAME);
+
+    auto first_frame = source(1, 262, 1, -3'000'000);
+    auto second_frame = source(2, 263, 1, -1'000'000);
+    first_frame.render_completion_timestamp_ns = FRAMEGEN_TIMESTAMP_UNKNOWN;
+    second_frame.render_completion_timestamp_ns = FRAMEGEN_TIMESTAMP_UNKNOWN;
+    const auto first = submit(context, first_frame);
+    const auto second = submit(context, second_frame);
+
+    auto request = request_for(first, second, 9, -2'000'000, -1'400'000);
+    request.desired_presentation_timestamp_ns = -1'500'000;
+    auto invalid_request = request;
+    framegen_ticket_t* ticket{};
+    invalid_request.interpolation_timestamp_ns = FRAMEGEN_TIMESTAMP_UNKNOWN;
+    CHECK(framegen_request_interpolation(context, &invalid_request, &ticket) ==
+          FRAMEGEN_STATUS_INVALID_ARGUMENT);
+    invalid_request = request;
+    invalid_request.desired_presentation_timestamp_ns = FRAMEGEN_TIMESTAMP_UNKNOWN;
+    CHECK(framegen_request_interpolation(context, &invalid_request, &ticket) ==
+          FRAMEGEN_STATUS_INVALID_ARGUMENT);
+    invalid_request = request;
+    invalid_request.presentation_deadline_ns = FRAMEGEN_TIMESTAMP_UNKNOWN;
+    CHECK(framegen_request_interpolation(context, &invalid_request, &ticket) ==
+          FRAMEGEN_STATUS_INVALID_ARGUMENT);
+
+    CHECK(framegen_request_interpolation(context, &request, &ticket) ==
+          FRAMEGEN_STATUS_OK);
+    framegen_ticket_result_t result{};
+    init(result);
+    CHECK(framegen_ticket_poll(ticket, FRAMEGEN_TIMESTAMP_UNKNOWN, &result) ==
+          FRAMEGEN_STATUS_INVALID_ARGUMENT);
+    CHECK(framegen_ticket_poll(ticket, -1'600'000, &result) == FRAMEGEN_STATUS_OK);
+    CHECK(result.status == FRAMEGEN_TICKET_READY);
+
+    framegen_presentation_event_t presentation{};
+    init(presentation);
+    init(presentation.consumer_completion);
+    presentation.disposition = FRAMEGEN_PRESENTED_GENERATED_FRAME;
+    presentation.source_frame_id = second.source_frame_id;
+    presentation.ticket_id = result.ticket_id;
+    presentation.clock_domain = 9;
+    presentation.presentation_timestamp_ns = FRAMEGEN_TIMESTAMP_UNKNOWN;
+    CHECK(framegen_notify_presentation(context, &presentation) ==
+          FRAMEGEN_STATUS_INVALID_ARGUMENT);
+    presentation.presentation_timestamp_ns = -1'500'000;
+    CHECK(framegen_notify_presentation(context, &presentation) == FRAMEGEN_STATUS_OK);
+
     framegen_ticket_release(ticket);
     framegen_context_destroy(context);
 }
@@ -973,20 +1040,130 @@ void test_ready_output_misses_deadline_if_not_committed() {
     g_backends.late->complete_immediately->store(true, std::memory_order_release);
     CHECK(framegen_ticket_poll(ticket, 1'800'000, &result) == FRAMEGEN_STATUS_OK);
     CHECK(result.status == FRAMEGEN_TICKET_READY);
+    const auto cached_ready = result;
     CHECK(framegen_ticket_poll(ticket, 1'900'000, &result) == FRAMEGEN_STATUS_OK);
     CHECK(result.status == FRAMEGEN_TICKET_DEADLINE_MISSED);
     CHECK(result.generated_frame.image.resource.native_handle == nullptr);
 
-    framegen_presentation_event_t dropped{};
-    init(dropped);
-    init(dropped.consumer_completion);
-    dropped.disposition = FRAMEGEN_DROPPED_FRAME;
-    dropped.source_frame_id = second.source_frame_id;
-    dropped.ticket_id = result.ticket_id;
-    dropped.clock_domain = 9;
-    dropped.presentation_timestamp_ns = 1'900'000;
-    CHECK(framegen_notify_presentation(context, &dropped) == FRAMEGEN_STATUS_OK);
     framegen_ticket_release(ticket);
+
+    LeaseCounts consumer_counts;
+    std::atomic<bool> consumer_done{false};
+    framegen_presentation_event_t cached_presentation{};
+    init(cached_presentation);
+    init(cached_presentation.consumer_completion);
+    cached_presentation.disposition = FRAMEGEN_PRESENTED_GENERATED_FRAME;
+    cached_presentation.source_frame_id =
+        cached_ready.generated_frame.current_source_frame_id;
+    cached_presentation.ticket_id = cached_ready.generated_frame.ticket_id;
+    cached_presentation.clock_domain = 9;
+    cached_presentation.presentation_timestamp_ns = 1'800'000;
+    cached_presentation.consumer_completion.backend_type = FRAMEGEN_GPU_BACKEND_TEST;
+    cached_presentation.consumer_completion.sync_type = FRAMEGEN_SYNC_TEST;
+    cached_presentation.consumer_completion.device_id = kDeviceId;
+    cached_presentation.consumer_completion.value = 1;
+    cached_presentation.consumer_completion.native_handle = &consumer_done;
+    cached_presentation.consumer_completion.user_data = &consumer_counts;
+    cached_presentation.consumer_completion.retain = retain_test_handle;
+    cached_presentation.consumer_completion.release = release_test_handle;
+    CHECK(framegen_notify_presentation(context, &cached_presentation) ==
+          FRAMEGEN_STATUS_INVALID_STATE);
+    CHECK(consumer_counts.retains.load() == 0);
+    CHECK(consumer_counts.releases.load() == 0);
+
+    cached_presentation.disposition = FRAMEGEN_DROPPED_FRAME;
+    cached_presentation.presentation_timestamp_ns = 1'900'000;
+    CHECK(framegen_notify_presentation(context, &cached_presentation) ==
+          FRAMEGEN_STATUS_OK);
+    CHECK(consumer_counts.retains.load() == 1);
+    CHECK(consumer_counts.releases.load() == 0);
+
+    framegen_statistics_t stats{};
+    init(stats);
+    CHECK(framegen_context_collect_statistics(context, &stats) == FRAMEGEN_STATUS_OK);
+    CHECK(stats.generated_frames_presented == 0);
+    CHECK(stats.bypassed_frames == 0);
+    CHECK(stats.deadline_misses == 1);
+    consumer_done.store(true, std::memory_order_release);
+    CHECK(framegen_context_collect_statistics(context, &stats) == FRAMEGEN_STATUS_OK);
+    CHECK(consumer_counts.releases.load() == 1);
+    framegen_context_destroy(context);
+}
+
+void test_late_presentation_timestamp_misses_deadline() {
+    auto* context = create_context(kColorBackend);
+    configure(context, FRAMEGEN_CAP_COLOR_ONLY |
+        FRAMEGEN_CAP_ARBITRARY_INTERPOLATION_TIME);
+    const auto first = submit(context, source(43, 543));
+    const auto second = submit(context, source(44, 544, 1, 2'000'000));
+    auto request = request_for(first, second, 9, 1'500'000, 1'900'000);
+    framegen_ticket_t* ticket{};
+    CHECK(framegen_request_interpolation(context, &request, &ticket) ==
+          FRAMEGEN_STATUS_OK);
+
+    framegen_ticket_result_t cached{};
+    init(cached);
+    CHECK(framegen_ticket_poll(ticket, 1'800'000, &cached) == FRAMEGEN_STATUS_OK);
+    CHECK(cached.status == FRAMEGEN_TICKET_READY);
+
+    framegen_presentation_event_t late_presentation{};
+    init(late_presentation);
+    init(late_presentation.consumer_completion);
+    late_presentation.disposition = FRAMEGEN_PRESENTED_GENERATED_FRAME;
+    late_presentation.source_frame_id =
+        cached.generated_frame.current_source_frame_id;
+    late_presentation.ticket_id = cached.generated_frame.ticket_id;
+    late_presentation.clock_domain = 9;
+    late_presentation.presentation_timestamp_ns = 1'900'000;
+    CHECK(framegen_notify_presentation(context, &late_presentation) ==
+          FRAMEGEN_STATUS_INVALID_STATE);
+
+    framegen_ticket_result_t expired{};
+    init(expired);
+    CHECK(framegen_ticket_poll(ticket, 1'800'000, &expired) == FRAMEGEN_STATUS_OK);
+    CHECK(expired.status == FRAMEGEN_TICKET_DEADLINE_MISSED);
+    CHECK(expired.ticket_id == cached.ticket_id);
+
+    late_presentation.disposition = FRAMEGEN_DROPPED_FRAME;
+    CHECK(framegen_notify_presentation(context, &late_presentation) ==
+          FRAMEGEN_STATUS_OK);
+    framegen_ticket_release(ticket);
+
+    framegen_statistics_t stats{};
+    init(stats);
+    CHECK(framegen_context_collect_statistics(context, &stats) == FRAMEGEN_STATUS_OK);
+    CHECK(stats.generated_frames_presented == 0);
+    CHECK(stats.bypassed_frames == 0);
+    CHECK(stats.deadline_misses == 1);
+
+    const auto next_first = submit(context, source(45, 545, 1, 3'000'000));
+    const auto next_second = submit(context, source(46, 546, 1, 4'000'000));
+    auto next_request = request_for(next_first, next_second, 9, 3'500'000, 3'900'000);
+    framegen_ticket_t* bypassed_ticket{};
+    CHECK(framegen_request_interpolation(context, &next_request, &bypassed_ticket) ==
+          FRAMEGEN_STATUS_OK);
+    framegen_ticket_result_t next_result{};
+    init(next_result);
+    CHECK(framegen_ticket_poll(bypassed_ticket, 3'800'000, &next_result) ==
+          FRAMEGEN_STATUS_OK);
+    CHECK(next_result.status == FRAMEGEN_TICKET_READY);
+    framegen_presentation_event_t late_bypass{};
+    init(late_bypass);
+    init(late_bypass.consumer_completion);
+    late_bypass.disposition = FRAMEGEN_BYPASSED_GENERATED_FRAME;
+    late_bypass.source_frame_id = next_second.source_frame_id;
+    late_bypass.ticket_id = next_result.ticket_id;
+    late_bypass.clock_domain = 9;
+    late_bypass.presentation_timestamp_ns = 3'900'000;
+    CHECK(framegen_notify_presentation(context, &late_bypass) == FRAMEGEN_STATUS_OK);
+    CHECK(framegen_ticket_poll(bypassed_ticket, 3'800'000, &next_result) ==
+          FRAMEGEN_STATUS_OK);
+    CHECK(next_result.status == FRAMEGEN_TICKET_DEADLINE_MISSED);
+    framegen_ticket_release(bypassed_ticket);
+    CHECK(framegen_context_collect_statistics(context, &stats) == FRAMEGEN_STATUS_OK);
+    CHECK(stats.generated_frames_presented == 0);
+    CHECK(stats.bypassed_frames == 1);
+    CHECK(stats.deadline_misses == 2);
     framegen_context_destroy(context);
 }
 
@@ -1070,25 +1247,46 @@ void test_dropped_invalidated_ticket_retains_queued_consumer() {
     CHECK(result.status == FRAMEGEN_TICKET_PENDING);
 
     CHECK(framegen_context_reset_history(context) == FRAMEGEN_STATUS_OK);
+
+    LeaseCounts consumer_counts;
+    std::atomic<bool> consumer_done{false};
+    framegen_presentation_event_t generated{};
+    init(generated);
+    init(generated.consumer_completion);
+    generated.disposition = FRAMEGEN_PRESENTED_GENERATED_FRAME;
+    generated.source_frame_id = result.generated_frame.current_source_frame_id;
+    generated.ticket_id = result.generated_frame.ticket_id;
+    generated.clock_domain = 9;
+    generated.presentation_timestamp_ns = 1'700'000;
+    generated.consumer_completion.backend_type = FRAMEGEN_GPU_BACKEND_TEST;
+    generated.consumer_completion.sync_type = FRAMEGEN_SYNC_TEST;
+    generated.consumer_completion.device_id = kDeviceId;
+    generated.consumer_completion.value = 1;
+    generated.consumer_completion.native_handle = &consumer_done;
+    generated.consumer_completion.user_data = &consumer_counts;
+    generated.consumer_completion.retain = retain_test_handle;
+    generated.consumer_completion.release = release_test_handle;
+    CHECK(framegen_notify_presentation(context, &generated) ==
+          FRAMEGEN_STATUS_STALE_FRAME);
+    CHECK(consumer_counts.retains.load() == 0);
+    CHECK(consumer_counts.releases.load() == 0);
+
     framegen_ticket_release(ticket);
     CHECK(previous_counts.releases.load() == 0);
     CHECK(current_counts.releases.load() == 0);
 
-    std::atomic<bool> consumer_done{false};
-    framegen_presentation_event_t dropped{};
-    init(dropped);
-    init(dropped.consumer_completion);
-    dropped.disposition = FRAMEGEN_DROPPED_FRAME;
-    dropped.source_frame_id = current.source_frame_id;
-    dropped.ticket_id = result.ticket_id;
-    dropped.clock_domain = 9;
-    dropped.presentation_timestamp_ns = 1'700'000;
-    dropped.consumer_completion.backend_type = FRAMEGEN_GPU_BACKEND_TEST;
-    dropped.consumer_completion.sync_type = FRAMEGEN_SYNC_TEST;
-    dropped.consumer_completion.device_id = kDeviceId;
-    dropped.consumer_completion.value = 1;
-    dropped.consumer_completion.native_handle = &consumer_done;
-    CHECK(framegen_notify_presentation(context, &dropped) == FRAMEGEN_STATUS_OK);
+    generated.disposition = FRAMEGEN_DROPPED_FRAME;
+    CHECK(framegen_notify_presentation(context, &generated) == FRAMEGEN_STATUS_OK);
+    CHECK(consumer_counts.retains.load() == 1);
+    CHECK(consumer_counts.releases.load() == 0);
+
+    framegen_statistics_t before_retirement{};
+    init(before_retirement);
+    CHECK(framegen_context_collect_statistics(context, &before_retirement) ==
+          FRAMEGEN_STATUS_OK);
+    CHECK(before_retirement.generated_frames_presented == 0);
+    CHECK(before_retirement.bypassed_frames == 0);
+    CHECK(before_retirement.deadline_misses == 0);
 
     g_backends.late->complete_immediately->store(true, std::memory_order_release);
     framegen_statistics_t stats{};
@@ -1099,12 +1297,8 @@ void test_dropped_invalidated_ticket_retains_queued_consumer() {
     CHECK(current_counts.releases.load() == 0);
 
     consumer_done.store(true, std::memory_order_release);
-    const auto retirement_deadline = std::chrono::steady_clock::now() +
-                                     std::chrono::seconds(2);
-    while (previous_counts.releases.load() == 0 &&
-           std::chrono::steady_clock::now() < retirement_deadline) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(5));
-    }
+    CHECK(framegen_context_collect_statistics(context, &stats) == FRAMEGEN_STATUS_OK);
+    CHECK(consumer_counts.releases.load() == 1);
     CHECK(previous_counts.releases.load() == 1);
     CHECK(current_counts.releases.load() == 1);
     framegen_context_destroy(context);
@@ -1346,6 +1540,8 @@ int main() {
          test_invalid_dimensions_and_mismatched_history},
         {"full signed timestamp range is overflow safe",
          test_full_signed_timestamp_range_is_overflow_safe},
+        {"unknown timestamp sentinel is diagnostic only",
+         test_unknown_timestamp_sentinel_is_reserved_for_diagnostics},
         {"resize, format, color-space, and reset invalidation",
          test_resize_format_change_and_reset_invalidate_history},
         {"unavailable backend and capability negotiation",
@@ -1354,6 +1550,8 @@ int main() {
          test_late_output_can_be_bypassed_without_waiting},
         {"ready output expires at its deadline",
          test_ready_output_misses_deadline_if_not_committed},
+        {"late presentation timestamps cannot commit generated output",
+         test_late_presentation_timestamp_misses_deadline},
         {"retained tickets apply backpressure",
          test_retained_ticket_capacity_applies_backpressure},
         {"dropped invalidated ticket retains queued consumer",
