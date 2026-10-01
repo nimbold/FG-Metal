@@ -20,6 +20,18 @@ constexpr std::string_view kBackendId = "org.framegen.metal";
 
 std::atomic<std::uint64_t> g_next_device_id{1};
 
+std::optional<std::uint64_t> allocate_device_id() noexcept {
+    auto next = g_next_device_id.load(std::memory_order_relaxed);
+    while (next != std::numeric_limits<std::uint64_t>::max()) {
+        if (g_next_device_id.compare_exchange_weak(
+                next, next + 1, std::memory_order_relaxed,
+                std::memory_order_relaxed)) {
+            return next;
+        }
+    }
+    return std::nullopt;
+}
+
 Error make_error(ErrorCode code, std::string message) {
     return Error{code, std::move(message)};
 }
@@ -45,6 +57,13 @@ std::optional<MTLPixelFormat> to_metal_format(PixelFormat format) {
     case PixelFormat::rg11b10_float: return MTLPixelFormatRG11B10Float;
     case PixelFormat::rgba16_float: return MTLPixelFormatRGBA16Float;
     case PixelFormat::rgba32_float: return MTLPixelFormatRGBA32Float;
+    case PixelFormat::r16_float:
+    case PixelFormat::rg16_float:
+    case PixelFormat::rg32_float:
+    case PixelFormat::r32_float:
+    case PixelFormat::d16_unorm:
+    case PixelFormat::d32_float:
+    case PixelFormat::d24_unorm_s8_uint:
     case PixelFormat::unknown: return std::nullopt;
     }
     return std::nullopt;
@@ -112,6 +131,9 @@ public:
     [[nodiscard]] std::uint64_t device_id() const noexcept override {
         return device_id_;
     }
+    [[nodiscard]] std::optional<bool> is_signaled() const noexcept override {
+        return event_.signaledValue >= value_;
+    }
     [[nodiscard]] id<MTLSharedEvent> event() const noexcept override { return event_; }
     [[nodiscard]] std::uint64_t value() const noexcept override { return value_; }
 
@@ -144,8 +166,14 @@ public:
     [[nodiscard]] id<MTLSharedEvent> event() const noexcept override { return event_; }
     [[nodiscard]] std::uint64_t value() const noexcept override { return value_; }
     [[nodiscard]] bool is_complete() const noexcept override {
-        return event_.signaledValue >= value_ ||
-               command_buffer_.status == MTLCommandBufferStatusError;
+        return poll_status() != GpuCompletionStatus::pending;
+    }
+    [[nodiscard]] GpuCompletionStatus poll_status() const noexcept override {
+        if (command_buffer_.status == MTLCommandBufferStatusError) {
+            return GpuCompletionStatus::failed;
+        }
+        return command_buffer_.status == MTLCommandBufferStatusCompleted
+            ? GpuCompletionStatus::complete : GpuCompletionStatus::pending;
     }
 
     [[nodiscard]] std::optional<std::uint64_t>
@@ -193,9 +221,10 @@ namespace detail {
 MetalTextureResource::MetalTextureResource(id<MTLDevice> device,
                                            id<MTLTexture> texture,
                                            TextureDescriptor descriptor,
-                                           std::uint64_t device_id)
+                                           std::uint64_t device_id,
+                                           const void* resource_identity)
     : device_(device), texture_(texture), descriptor_(descriptor),
-      device_id_(device_id) {}
+      device_id_(device_id), resource_identity_(resource_identity) {}
 
 TextureDescriptor MetalTextureResource::descriptor() const noexcept {
     return descriptor_;
@@ -218,7 +247,8 @@ bool MetalTextureResource::belongs_to(id<MTLDevice> device) const noexcept {
 }
 
 const void* MetalTextureResource::resource_identity() const noexcept {
-    return (__bridge const void*)texture_;
+    return resource_identity_ != nullptr
+        ? resource_identity_ : (__bridge const void*)texture_;
 }
 
 MetalBackend::MetalBackend(id<MTLDevice> device, id<MTLCommandQueue> queue,
@@ -359,11 +389,11 @@ Result<GeneratedFrame> MetalBackend::submit(const FrameSubmission& submission) {
         // this lock through commit prevents concurrent callers from signaling
         // a larger value before an earlier frame has finished.
         std::scoped_lock lock(submission_mutex_);
-        event_value = next_event_value_.fetch_add(1, std::memory_order_relaxed);
-        if (event_value == 0) {
+        if (next_event_value_ == std::numeric_limits<std::uint64_t>::max()) {
             return std::unexpected(make_error(ErrorCode::backend_failure,
                                                "Metal completion event sequence was exhausted"));
         }
+        event_value = next_event_value_++;
         [command_buffer encodeSignalEvent:completion_event_ value:event_value];
         [command_buffer commit];
     }
@@ -425,8 +455,8 @@ Result<Device> Device::create(id<MTLDevice> native_device) {
                                            "Metal could not create a shared completion event"));
     }
 
-    const std::uint64_t device_id = g_next_device_id.fetch_add(1, std::memory_order_relaxed);
-    if (device_id == 0) {
+    const auto device_id = allocate_device_id();
+    if (!device_id) {
         return std::unexpected(make_error(ErrorCode::backend_failure,
                                            "Metal device identifier sequence was exhausted"));
     }
@@ -436,10 +466,14 @@ Result<Device> Device::create(id<MTLDevice> native_device) {
     state->queue = queue;
     state->blend_pipeline = pipeline;
     state->completion_event = event;
-    state->device_id = device_id;
+    state->device_id = *device_id;
     state->backend = std::make_shared<detail::MetalBackend>(
-        native_device, queue, pipeline, event, device_id);
+        native_device, queue, pipeline, event, *device_id);
     return Device(std::move(state));
+}
+
+std::uint64_t Device::device_id() const noexcept {
+    return state_ ? state_->device_id : 0;
 }
 
 Result<Texture> Device::create_texture(const TextureDescriptor& descriptor) const {
@@ -477,7 +511,8 @@ Result<Texture> Device::create_texture(const TextureDescriptor& descriptor) cons
 
 Result<Texture> Device::wrap_texture(id<MTLTexture> native_texture,
                                     ColorSpace color_space,
-                                    AlphaMode alpha_mode) const {
+                                    AlphaMode alpha_mode,
+                                    const void* resource_identity) const {
     if (!state_) {
         return std::unexpected(make_error(ErrorCode::invalid_argument,
                                            "Metal device adapter is not initialized"));
@@ -505,7 +540,8 @@ Result<Texture> Device::wrap_texture(id<MTLTexture> native_texture,
         alpha_mode,
     };
     auto resource = std::make_shared<detail::MetalTextureResource>(
-        state_->native_device, native_texture, descriptor, state_->device_id);
+        state_->native_device, native_texture, descriptor, state_->device_id,
+        resource_identity);
     return Texture::from_resource(std::move(resource));
 }
 

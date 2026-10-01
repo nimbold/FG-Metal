@@ -20,9 +20,11 @@ Target the newest macOS SDK and Apple toolchain available in the development env
 
 ## Current status
 
-The GPU-texture API, core tests, Metal placeholder blend, and standalone Metal test host from the bootstrap are implemented. Step 2 adds a reproducible offline quality and runtime benchmark, a versioned corpus format, a project-authored synthetic sequence, JSON and Markdown reports, and a regression comparator. A placeholder-backend baseline is stored under `test-results/benchmarks/`.
+The bootstrap, benchmark framework, and provisional Step 3 host API are implemented. The host API is a versioned C ABI with backend/capability discovery, GPU-resource import, source-frame submission, asynchronous interpolation tickets, presentation feedback, history invalidation, and statistics. The Metal backend is registered explicitly with `framegen_metal_register_backend()`. The ABI remains a draft; it has not been validated by an external renderer adapter or declared stable.
 
-The only implemented processing backend is still a linear Metal texture blend used to validate the API path. It is not a motion-compensated interpolator and its baseline is not a quality claim. No RIFE implementation, model weights, Core ML or MPSGraph backend, Wine/game integration, renderer adapter, or in-game FPS evidence exists. The benchmark's source-throughput value is an offline input-upload proxy, not game FPS or presented-frame pacing.
+The only processing backend is still a Metal GPU blend. It supports color-only `RGBA8_UNORM` input and arbitrary sample timestamps; it does not implement motion-compensated interpolation or consume the optional motion, depth, or UI inputs. Its output and checked-in baseline are not quality claims. No RIFE implementation, model weights, Core ML or MPSGraph backend, Wine/game integration, renderer adapter, or in-game FPS evidence exists. The benchmark's source-throughput value is an offline input-upload proxy, not game FPS or presented-frame pacing.
+
+The C and C++ API tests, C header smoke test, and Metal C API smoke test run through CTest. These validate the placeholder and fake-provider contracts; they do not establish renderer integration or ABI stability.
 
 The committed synthetic fixture covers slow panning, third-person motion, foliage, thin geometry and fences, particles, transparency, moving highlights, sights and crosshairs, a caption-like subtitle, minimap, health bar, and changing HUD counters. HUD and text are mandatory pointwise ROIs; thin geometry, crosshair, weapon sight, minimap, health bar, subtitle, and counter add named pointwise guards. Those guards compare both per-target RGB errors and per-pixel temporal residual, color flicker, and edge flicker. Fast rotation, racing, menus, scene cuts, loading transitions, and richer subtitle cases remain planned. See [the corpus catalog](tools/benchmark/corpus/catalog.json) for the per-category status. No copyrighted game footage is included.
 
@@ -75,7 +77,7 @@ See [BENCHMARK.md](docs/BENCHMARK.md) for corpus authoring, arbitrary interpolat
 
 ## Project boundaries and next work
 
-The benchmark is a quality-evaluation framework, not evidence that a frame-generation algorithm has been selected or validated. Next work is to broaden the synthetic corpus, identify and document redistribution-safe sequences, finish the API/synchronization decisions, and evaluate algorithm and backend candidates before implementation. RIFE-family approaches, Core ML, and MetalFX remain research options, not selected dependencies or promised backends.
+The benchmark is a quality-evaluation framework, not evidence that a frame-generation algorithm has been selected or validated. Next work is to validate the provisional ABI and synchronization contract with a real adapter, broaden the synthetic corpus, identify redistribution-cleared sequences, and evaluate algorithm and backend candidates before implementation. RIFE-family approaches, Core ML, and MetalFX remain research options, not selected dependencies or promised backends.
 
 ## Contributing
 

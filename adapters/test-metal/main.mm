@@ -350,9 +350,16 @@ int main(int argc, const char* argv[]) {
         }
         framegen::FrameGenerator generator = std::move(*generator_result);
         framegen::FrameSubmission submission{
-            .previous = {previous, {.sequence = 1, .timestamp_ns = 0, .clock_domain = 1}},
-            .current = {current, {.sequence = 2, .timestamp_ns = 16'666'667,
-                                  .clock_domain = 1}},
+            .previous = {.texture = previous,
+                         .timing = {.sequence = 1, .timestamp_ns = 0,
+                                    .clock_domain = 1},
+                         .optional_inputs = {},
+                         .color_metadata = {}},
+            .current = {.texture = current,
+                        .timing = {.sequence = 2, .timestamp_ns = 16'666'667,
+                                   .clock_domain = 1},
+                        .optional_inputs = {},
+                        .color_metadata = {}},
             .interpolation = 0.5F,
             .reset_history = true,
             .gpu_dependencies = {*dependency_result},
