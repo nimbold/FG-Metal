@@ -1,0 +1,5 @@
+date_utc=2026-10-02T12:49:28Z
+app_sha256=f24e62ba02aabde268b0380ccf5060a38804f1e72708eb99e9f47e654f9cd9ec
+proxy_sha256=1a5f780465924aa8f8511248e60ba574bfd5da98edd4b35c1e578d7ff4ebac3f
+engine=/Users/nima/Library/Application Support/Highball/engines/x64-sikarugir10.0_6-r14
+prefix=/Users/nima/Library/Caches/FG-Metal-Step8D-20261002/transparent-prefix

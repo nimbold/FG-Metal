@@ -1,0 +1,7 @@
+date_utc=2026-10-02T10:55:19Z
+app_sha256=127c875d95d9d515157803f13286ff4eb9023e6ef352351f810c65134dfeb98a
+proxy_sha256=f434a1daa0f46412f63f410e6dd9519f3effa09133644021d51988a721f737db
+engine=/Users/nima/Library/Application Support/Highball/engines/x64-sikarugir10.0_6-r14
+prefix=/Users/nima/Library/Caches/FG-Metal-Step8D-20261002/transparent-prefix
+frames=15
+fps=uncapped

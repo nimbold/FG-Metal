@@ -1,0 +1,19 @@
+---- new run sourceFps=30 seconds=10 lifecycle=1 ----
+runtime_modules dxgi_chars=28 dxgi=C:\windows\system32\dxgi.dll d3d12_chars=29 d3d12=C:\windows\system32\d3d12.dll
+call CreateDXGIFactory2 interface=IDXGIFactory2 hr=0x00000000 factory=00007ff60674b8d0
+call D3D12CreateDevice interface=ID3D12Device hr=0x00000000 device=00007ff6078f9a10
+call ID3D12Device::CreateCommandQueue type=DIRECT hr=0x00000000 queue=00007ff606840810
+call IDXGIFactory2::CreateSwapChainForHwnd pDevice=ID3D12CommandQueue buffers=3 format=28 hr=0x00000000 swapchain=00007ff5d74115c0
+swapchain_interfaces IDXGISwapChain1=yes IDXGISwapChain3_hr=0x00000000 IDXGISwapChain4_hr=0x00000000 currentIndex=0
+resize_buffers requested=1024x576 hr=0x00000000
+lifecycle focus phase=before mainActive=1 mainFocused=1 activeWindow=0000000000010052 focusWindow=0000000000010052 foregroundWindow=0000000000010052
+lifecycle focus phase=loss requested=1 foregroundResult=1 helperFocused=1 mainFocused=0 activeWindow=000000000001006a focusWindow=000000000001006a foregroundWindow=000000000001006a
+lifecycle focus phase=recovery foregroundResult=1 mainFocused=1 focusRecovered=1 activeWindow=0000000000010052 focusWindow=0000000000010052 foregroundWindow=0000000000010052
+lifecycle focus exercise hr=0x00000000
+fullscreen requested=1 hr=0x00000000 actual=1 queryHr=0x00000000
+resize_buffers requested=1024x576 hr=0x00000000
+fullscreen requested=0 hr=0x00000000 actual=0 queryHr=0x00000000
+resize_buffers requested=1024x576 hr=0x00000000
+resize_buffers requested=960x540 hr=0x00000000
+summary sourceFrames=300 syntheticFrames=299 presentCalls=599 lastCountHr=0x00000000 lastCount=599 frameStatsHr=0x00000000 monitorPresentCount=599 presentRefreshCount=599 syncRefreshCount=599 qpcEnd=2961443841476
+run_result hr=0x00000000 focusAtExit=1

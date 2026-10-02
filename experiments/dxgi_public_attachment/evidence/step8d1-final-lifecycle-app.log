@@ -1,0 +1,136 @@
+start dxgi_module=00006fffff070000 dxgi_path_chars=86 dxgi_path=Z:\Users\nima\Library\Caches\FG-Metal-Step8D-20261002\lifecycle-step8d1-final\dxgi.dll
+window_event kind=WM_SETFOCUS count=1
+call=CreateDXGIFactory2 hr=0x00000000 factory=000000000080df60
+interface name=IDXGIFactory hr=0x00000000 ptr=000000000080df60
+interface name=IDXGIFactory1 hr=0x00000000 ptr=000000000080df60
+interface name=IDXGIFactory2 hr=0x00000000 ptr=000000000080df60
+interface name=IDXGIFactory3 hr=0x00000000 ptr=000000000080df60
+interface name=IDXGIFactory4 hr=0x00000000 ptr=000000000080df60
+interface name=IDXGIFactory5 hr=0x00000000 ptr=000000000080df60
+interface name=IDXGIFactory6 hr=0x00000000 ptr=000000000080df60
+interface name=IDXGIFactory7 hr=0x00000000 ptr=000000000080df60
+interface name=IDXGIFactoryMedia hr=0x80004002 ptr=0000000000000000
+call=D3D12CreateDevice hr=0x00000000 device=00007f9c5710a210
+call=CreateCommandQueue hr=0x00000000 queue=00007f9c579c5a10
+call=CreateSwapChainForHwnd hr=0x00000000 swapchain=00000000008126c0
+call=GetContainingOutput hr=0x00000000 output=0000000000812780
+call=QueryInterface_IDXGISwapChain3 hr=0x00000000 swapchain3=00000000008126c0
+interface name=IDXGISwapChain hr=0x00000000 ptr=00000000008126c0
+interface name=IDXGISwapChain1 hr=0x00000000 ptr=00000000008126c0
+interface name=IDXGISwapChain2 hr=0x00000000 ptr=00000000008126c0
+interface name=IDXGISwapChain3 hr=0x00000000 ptr=00000000008126c0
+interface name=IDXGISwapChain4 hr=0x00000000 ptr=00000000008126c0
+timing qpc_frequency=10000000 target_fps=30
+present frame=0 index=0 qpc=3106632716997 duration_ticks=20217 hr=0x00000000
+present frame=1 index=2 qpc=3106633046970 duration_ticks=10350 hr=0x00000000
+present frame=2 index=1 qpc=3106633383480 duration_ticks=5858 hr=0x00000000
+present frame=3 index=0 qpc=3106633716142 duration_ticks=8363 hr=0x00000000
+present frame=4 index=2 qpc=3106634053122 duration_ticks=7563 hr=0x00000000
+present frame=5 index=1 qpc=3106634389134 duration_ticks=6044 hr=0x00000000
+present frame=6 index=0 qpc=3106634712317 duration_ticks=6408 hr=0x00000000
+present frame=7 index=2 qpc=3106635045958 duration_ticks=8137 hr=0x00000000
+present frame=8 index=1 qpc=3106635381265 duration_ticks=10206 hr=0x00000000
+present frame=9 index=0 qpc=3106635720191 duration_ticks=9840 hr=0x00000000
+present frame=10 index=2 qpc=3106636047947 duration_ticks=12114 hr=0x00000000
+present frame=11 index=1 qpc=3106636378436 duration_ticks=15376 hr=0x00000000
+present frame=12 index=0 qpc=3106636711514 duration_ticks=14758 hr=0x00000000
+present frame=13 index=2 qpc=3106637046755 duration_ticks=26951 hr=0x00000000
+present frame=14 index=1 qpc=3106637381440 duration_ticks=54952 hr=0x00000000
+present frame=15 index=0 qpc=3106637734945 duration_ticks=44312 hr=0x00000000
+present frame=16 index=2 qpc=3106638053892 duration_ticks=11415 hr=0x00000000
+present frame=17 index=1 qpc=3106638389232 duration_ticks=54161 hr=0x00000000
+present frame=18 index=0 qpc=3106638725435 duration_ticks=61542 hr=0x00000000
+present frame=19 index=2 qpc=3106639077414 duration_ticks=37181 hr=0x00000000
+present frame=20 index=1 qpc=3106639385667 duration_ticks=11804 hr=0x00000000
+present frame=21 index=0 qpc=3106639717503 duration_ticks=53132 hr=0x00000000
+present frame=22 index=2 qpc=3106640047664 duration_ticks=43132 hr=0x00000000
+present frame=23 index=1 qpc=3106640392337 duration_ticks=34031 hr=0x00000000
+present frame=24 index=0 qpc=3106640722267 duration_ticks=38568 hr=0x00000000
+present frame=25 index=2 qpc=3106641047992 duration_ticks=43647 hr=0x00000000
+present frame=26 index=1 qpc=3106641388958 duration_ticks=29257 hr=0x00000000
+present frame=27 index=0 qpc=3106641714443 duration_ticks=51048 hr=0x00000000
+present frame=28 index=2 qpc=3106642050965 duration_ticks=37977 hr=0x00000000
+present frame=29 index=1 qpc=3106642386031 duration_ticks=32175 hr=0x00000000
+lifecycle event=window_resize frame=30 flush_hr=0x00000000
+lifecycle event=ResizeBuffers frame=30 hr=0x00000000 size=800x450
+lifecycle event=rebind_after_resize frame=30 hr=0x00000000
+present frame=30 index=0 qpc=3106642926852 duration_ticks=7588 hr=0x00000000
+present frame=31 index=2 qpc=3106643048759 duration_ticks=13419 hr=0x00000000
+present frame=32 index=1 qpc=3106643378674 duration_ticks=11369 hr=0x00000000
+present frame=33 index=0 qpc=3106643718978 duration_ticks=8730 hr=0x00000000
+present frame=34 index=2 qpc=3106644045836 duration_ticks=13327 hr=0x00000000
+present frame=35 index=1 qpc=3106644387327 duration_ticks=14485 hr=0x00000000
+present frame=36 index=0 qpc=3106644720862 duration_ticks=22980 hr=0x00000000
+present frame=37 index=2 qpc=3106645055957 duration_ticks=24934 hr=0x00000000
+present frame=38 index=1 qpc=3106645387350 duration_ticks=11971 hr=0x00000000
+present frame=39 index=0 qpc=3106645717498 duration_ticks=18431 hr=0x00000000
+present frame=40 index=2 qpc=3106646054386 duration_ticks=14670 hr=0x00000000
+present frame=41 index=1 qpc=3106646387677 duration_ticks=17232 hr=0x00000000
+present frame=42 index=0 qpc=3106646714223 duration_ticks=8403 hr=0x00000000
+present frame=43 index=2 qpc=3106647055495 duration_ticks=53353 hr=0x00000000
+present frame=44 index=1 qpc=3106647383756 duration_ticks=14105 hr=0x00000000
+lifecycle event=fullscreen_enter_prepare frame=45 flush_hr=0x00000000
+lifecycle event=fullscreen_enter_transition frame=45 set_hr=0x00000000 query_hr=0x00000000 fullscreen=1 resize_hr=0x00000000
+lifecycle event=fullscreen_enter_rebind frame=45 hr=0x00000000 size=800x450
+lifecycle event=fullscreen_leave_prepare frame=45 flush_hr=0x00000000
+lifecycle event=fullscreen_leave_transition frame=45 set_hr=0x00000000 query_hr=0x00000000 fullscreen=0 resize_hr=0x00000000
+lifecycle event=fullscreen_leave_rebind frame=45 hr=0x00000000 size=800x450
+present frame=45 index=0 qpc=3106648414585 duration_ticks=7267 hr=0x00000000
+present frame=46 index=2 qpc=3106648422142 duration_ticks=6452 hr=0x00000000
+present frame=47 index=1 qpc=3106648428815 duration_ticks=54570 hr=0x00000000
+present frame=48 index=0 qpc=3106648721750 duration_ticks=99685 hr=0x00000000
+present frame=49 index=2 qpc=3106649047203 duration_ticks=107127 hr=0x00000000
+present frame=50 index=1 qpc=3106649380874 duration_ticks=106078 hr=0x00000000
+present frame=51 index=0 qpc=3106649715071 duration_ticks=105275 hr=0x00000000
+present frame=52 index=2 qpc=3106650046796 duration_ticks=114691 hr=0x00000000
+present frame=53 index=1 qpc=3106650378078 duration_ticks=117355 hr=0x00000000
+present frame=54 index=0 qpc=3106650715403 duration_ticks=134196 hr=0x00000000
+present frame=55 index=2 qpc=3106651057470 duration_ticks=129514 hr=0x00000000
+present frame=56 index=1 qpc=3106651380711 duration_ticks=140554 hr=0x00000000
+present frame=57 index=0 qpc=3106651722393 duration_ticks=147107 hr=0x00000000
+present frame=58 index=2 qpc=3106652052806 duration_ticks=140862 hr=0x00000000
+present frame=59 index=1 qpc=3106652389063 duration_ticks=127994 hr=0x00000000
+lifecycle event=ResizeBuffers1_prepare frame=60 flush_hr=0x00000000
+lifecycle event=ResizeBuffers1 frame=60 hr=0x00000000
+lifecycle event=rebind_after_resize1 frame=60 hr=0x00000000
+present frame=60 index=0 qpc=3106653083667 duration_ticks=25048 hr=0x00000000
+present frame=61 index=2 qpc=3106653110617 duration_ticks=83929 hr=0x00000000
+present frame=62 index=1 qpc=3106653379519 duration_ticks=156671 hr=0x00000000
+present frame=63 index=0 qpc=3106653712669 duration_ticks=156626 hr=0x00000000
+present frame=64 index=2 qpc=3106654047227 duration_ticks=156009 hr=0x00000000
+present frame=65 index=1 qpc=3106654399905 duration_ticks=136779 hr=0x00000000
+present frame=66 index=0 qpc=3106654717607 duration_ticks=141468 hr=0x00000000
+present frame=67 index=2 qpc=3106655057839 duration_ticks=146868 hr=0x00000000
+present frame=68 index=1 qpc=3106655388267 duration_ticks=132360 hr=0x00000000
+present frame=69 index=0 qpc=3106655719600 duration_ticks=132934 hr=0x00000000
+present frame=70 index=2 qpc=3106656047966 duration_ticks=129450 hr=0x00000000
+present frame=71 index=1 qpc=3106656385856 duration_ticks=132496 hr=0x00000000
+present frame=72 index=0 qpc=3106656718884 duration_ticks=108804 hr=0x00000000
+present frame=73 index=2 qpc=3106657055667 duration_ticks=119159 hr=0x00000000
+present frame=74 index=1 qpc=3106657382100 duration_ticks=129987 hr=0x00000000
+window_event kind=WM_KILLFOCUS count=1
+window_event kind=WM_SETFOCUS count=2
+lifecycle event=focus_recovery frame=75 helper_foreground=1 helper_focused=1 main_foreground=1 main_focused=1 main_focus_lost=1 main_focus_gained=2
+present frame=75 index=0 qpc=3106663713501 duration_ticks=31936 hr=0x00000000
+present frame=76 index=2 qpc=3106663746573 duration_ticks=10613 hr=0x00000000
+present frame=77 index=1 qpc=3106663757665 duration_ticks=73330 hr=0x00000000
+present frame=78 index=0 qpc=3106663831840 duration_ticks=360385 hr=0x00000000
+present frame=79 index=2 qpc=3106664193102 duration_ticks=335724 hr=0x00000000
+lifecycle event=recreate_prepare frame=80 flush_hr=0x00000000
+lifecycle event=swapchain_recreate frame=80 create_hr=0x00000000 chain=00000000008126c0
+lifecycle event=rebind_after_recreate frame=80 hr=0x00000000
+present frame=80 index=0 qpc=3106665134995 duration_ticks=47658 hr=0x00000000
+present frame=81 index=2 qpc=3106665183354 duration_ticks=8570 hr=0x00000000
+present frame=82 index=1 qpc=3106665192515 duration_ticks=322649 hr=0x00000000
+present frame=83 index=0 qpc=3106665516563 duration_ticks=346000 hr=0x00000000
+present frame=84 index=2 qpc=3106665864412 duration_ticks=329181 hr=0x00000000
+present frame=85 index=1 qpc=3106666195805 duration_ticks=344780 hr=0x00000000
+present frame=86 index=0 qpc=3106666603477 duration_ticks=231419 hr=0x00000000
+present frame=87 index=2 qpc=3106666835430 duration_ticks=373457 hr=0x00000000
+present frame=88 index=1 qpc=3106667210566 duration_ticks=306306 hr=0x00000000
+present frame=89 index=0 qpc=3106667518109 duration_ticks=318782 hr=0x00000000
+complete frames=90 elapsed_ticks=35126645
+frame_statistics hr=0x00000000 present_count=180 present_refresh=180 sync_refresh=180
+last_present_count hr=0x00000000 count=20
+memory_sample hr=0x00000000 current_working_set=103522304 current_private=44832960512 max_sampled_working_set=103522304 max_sampled_private=44832960512 sample_interval_frames=30
+window_event kind=WM_KILLFOCUS count=2

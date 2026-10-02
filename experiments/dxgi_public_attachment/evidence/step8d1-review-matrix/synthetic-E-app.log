@@ -1,0 +1,73 @@
+start dxgi_module=00006fffff070000 dxgi_path_chars=89 dxgi_path=Z:\var\folders\4l\yp39dwhd7rg2y9xscgvhkyqw0000gn\T\fg-step8d1-synthetic-E.xOYd6r\dxgi.dll
+call=CreateDXGIFactory hr=0x00000000 factory=00000000007d0290
+call=CreateDXGIFactory1 hr=0x00000000 factory=00000000007d0290
+call=CreateDXGIFactory2 hr=0x00000000 factory=00000000007d0290
+adapter_interface version=4 hr=0x00000000 adapter=0000000000812a60
+adapter_interface_matrix adapter0=1 adapter1=1 adapter2=1 adapter3=1 adapter4=1
+com_identity factory_qi_iunknown=1 adapter_getparent_factory=1 result=PASS
+adapter_enum_output_zero hr=0x00000000 output=0000000000812aa0
+output_interface version=6 hr=0x00000000 output=0000000000812aa0
+com_identity output_getparent_adapter hr=0x00000000 same_adapter=1
+interface name=IDXGIFactory hr=0x00000000 ptr=00000000007d0290
+interface name=IDXGIFactory1 hr=0x00000000 ptr=00000000007d0290
+interface name=IDXGIFactory2 hr=0x00000000 ptr=00000000007d0290
+interface name=IDXGIFactory3 hr=0x00000000 ptr=00000000007d0290
+interface name=IDXGIFactory4 hr=0x00000000 ptr=00000000007d0290
+interface name=IDXGIFactory5 hr=0x00000000 ptr=00000000007d0290
+interface name=IDXGIFactory6 hr=0x00000000 ptr=00000000007d0290
+interface name=IDXGIFactory7 hr=0x00000000 ptr=00000000007d0290
+interface name=IDXGIFactoryMedia hr=0x80004002 ptr=0000000000000000
+call=D3D12CreateDevice hr=0x00000000 device=00007fe63702a210
+call=CreateCommandQueue hr=0x00000000 queue=00007fe6379d3210
+call=CreateSwapChainForHwnd hr=0x00000000 swapchain=0000000000812ae0
+call=QueryInterface_IDXGISwapChain3 hr=0x00000000 swapchain3=0000000000812ae0
+com_identity swapchain_getparent_factory hr=0x00000000 same_factory=1
+interface name=IDXGISwapChainMedia hr=0x80004002 ptr=0000000000000000
+interface name=IDXGISwapChain hr=0x00000000 ptr=0000000000812ae0
+interface name=IDXGISwapChain1 hr=0x00000000 ptr=0000000000812ae0
+interface name=IDXGISwapChain2 hr=0x00000000 ptr=0000000000812ae0
+interface name=IDXGISwapChain3 hr=0x00000000 ptr=0000000000812ae0
+interface name=IDXGISwapChain4 hr=0x00000000 ptr=0000000000812ae0
+test_case=E frames=15 target_fps=0 source_index_policy=local_increment_once_per_source_present allocator_policy=three_frame_context_ring
+timing qpc_frequency=10000000 target_fps=0
+index_mismatch frame=0 expected_next=1 observed_next=2 stage=after_present
+present frame=0 source_index=0 allocator_index=0 expected_next=1 observed_next=2 qpc=3164105350296 duration_ticks=17773 hr=0x00000000
+index_mismatch frame=1 expected=1 observed=2 stage=before_render
+index_mismatch frame=1 expected_next=2 observed_next=1 stage=after_present
+present frame=1 source_index=1 allocator_index=1 expected_next=2 observed_next=1 qpc=3164105372440 duration_ticks=67508 hr=0x00000000
+index_mismatch frame=2 expected=2 observed=1 stage=before_render
+present frame=2 source_index=2 allocator_index=2 expected_next=0 observed_next=0 qpc=3164105440549 duration_ticks=5086 hr=0x00000000
+index_mismatch frame=3 expected_next=1 observed_next=2 stage=after_present
+present frame=3 source_index=0 allocator_index=0 expected_next=1 observed_next=2 qpc=3164105446010 duration_ticks=5796 hr=0x00000000
+index_mismatch frame=4 expected=1 observed=2 stage=before_render
+index_mismatch frame=4 expected_next=2 observed_next=1 stage=after_present
+present frame=4 source_index=1 allocator_index=1 expected_next=2 observed_next=1 qpc=3164105452175 duration_ticks=5107 hr=0x00000000
+index_mismatch frame=5 expected=2 observed=1 stage=before_render
+present frame=5 source_index=2 allocator_index=2 expected_next=0 observed_next=0 qpc=3164105457679 duration_ticks=4101 hr=0x00000000
+index_mismatch frame=6 expected_next=1 observed_next=2 stage=after_present
+present frame=6 source_index=0 allocator_index=0 expected_next=1 observed_next=2 qpc=3164105462015 duration_ticks=13914 hr=0x00000000
+index_mismatch frame=7 expected=1 observed=2 stage=before_render
+index_mismatch frame=7 expected_next=2 observed_next=1 stage=after_present
+present frame=7 source_index=1 allocator_index=1 expected_next=2 observed_next=1 qpc=3164105476300 duration_ticks=3328 hr=0x00000000
+index_mismatch frame=8 expected=2 observed=1 stage=before_render
+present frame=8 source_index=2 allocator_index=2 expected_next=0 observed_next=0 qpc=3164105480056 duration_ticks=5328 hr=0x00000000
+index_mismatch frame=9 expected_next=1 observed_next=2 stage=after_present
+present frame=9 source_index=0 allocator_index=0 expected_next=1 observed_next=2 qpc=3164105485592 duration_ticks=16086 hr=0x00000000
+index_mismatch frame=10 expected=1 observed=2 stage=before_render
+index_mismatch frame=10 expected_next=2 observed_next=1 stage=after_present
+present frame=10 source_index=1 allocator_index=1 expected_next=2 observed_next=1 qpc=3164105501972 duration_ticks=303444 hr=0x00000000
+index_mismatch frame=11 expected=2 observed=1 stage=before_render
+present frame=11 source_index=2 allocator_index=2 expected_next=0 observed_next=0 qpc=3164105806009 duration_ticks=331194 hr=0x00000000
+index_mismatch frame=12 expected_next=1 observed_next=2 stage=after_present
+present frame=12 source_index=0 allocator_index=0 expected_next=1 observed_next=2 qpc=3164106137621 duration_ticks=333273 hr=0x00000000
+index_mismatch frame=13 expected=1 observed=2 stage=before_render
+index_mismatch frame=13 expected_next=2 observed_next=1 stage=after_present
+present frame=13 source_index=1 allocator_index=1 expected_next=2 observed_next=1 qpc=3164106471421 duration_ticks=331029 hr=0x00000000
+index_mismatch frame=14 expected=2 observed=1 stage=before_render
+present frame=14 source_index=2 allocator_index=2 expected_next=0 observed_next=0 qpc=3164106802920 duration_ticks=335365 hr=0x00000000
+complete frames=15 elapsed_ticks=1838853
+frame_statistics hr=0x00000000 present_count=30 present_refresh=30 sync_refresh=30
+last_present_count hr=0x00000000 count=30
+memory_sample hr=0x00000000 current_working_set=89763840 current_private=44406677504 max_sampled_working_set=89763840 max_sampled_private=44406677504 sample_interval_frames=30
+bookkeeping_result case=E invariant_mismatches=20 result=FAIL
+failure operation=run_app hr=0x80004005

@@ -1,0 +1,89 @@
+qpc=3095778487470 tid=436 provider_load ok module=00006ffffc510000 self=00006fffff070000
+qpc=3095778584132 tid=436 query_interface object=factory iid=7b7166ec-21c7-44ae-b21a-c9ae321ae369 hr=0x00000000 disposition=wrapped_or_unavailable
+qpc=3095778587394 tid=436 factory_wrap result=wrapped iid=00000001400128f0 proxy=000000000080e790
+qpc=3095778588708 tid=436 export_forward name=CreateDXGIFactory hr=0x00000000 factory=000000000080e790 wrapped=1
+qpc=3095778590433 tid=436 factory_destroy this=000000000080e790
+qpc=3095778591760 tid=436 query_interface object=factory iid=770aae78-f26f-4dba-a829-253c83d1b387 hr=0x00000000 disposition=wrapped_or_unavailable
+qpc=3095778592879 tid=436 factory_wrap result=wrapped iid=0000000140012900 proxy=000000000080e790
+qpc=3095778594090 tid=436 export_forward name=CreateDXGIFactory1 hr=0x00000000 factory=000000000080e790 wrapped=1
+qpc=3095778595282 tid=436 factory_destroy this=000000000080e790
+qpc=3095778597031 tid=436 query_interface object=factory iid=50c83a1c-e072-4c48-87b0-3630fa36a6d0 hr=0x00000000 disposition=wrapped_or_unavailable
+qpc=3095778598457 tid=436 factory_wrap result=wrapped iid=0000000140012910 proxy=000000000080e790
+qpc=3095778599717 tid=436 export_forward name=CreateDXGIFactory2 flags=0x00000000 hr=0x00000000 factory=000000000080e790 wrapped=1
+qpc=3095778602209 tid=436 query_interface object=adapter iid=29038f61-3839-4626-91fd-086879011a05 hr=0x00000000 disposition=wrapped_or_unavailable
+qpc=3095778603251 tid=436 adapter_wrap result=wrapped iid_data1=29038f61 proxy=0000000000812970
+qpc=3095778604262 tid=436 factory_enum_adapters1 index=0 hr=0x00000000 wrapped=1
+qpc=3095778605267 tid=436 query_interface object=adapter iid=3c8d99d1-4fbf-4181-a82c-af66bf7bd24e hr=0x00000000 disposition=wrapped_or_unavailable
+qpc=3095778606334 tid=436 query_interface object=adapter iid=645967a4-1392-4310-a798-8053ce3e93fd hr=0x00000000 disposition=wrapped_or_unavailable
+qpc=3095778607354 tid=436 query_interface object=adapter iid=0aa1ae0a-fa0e-4b84-8644-e05ff8e5acb5 hr=0x00000000 disposition=wrapped_or_unavailable
+qpc=3095778608417 tid=436 query_interface object=adapter iid=29038f61-3839-4626-91fd-086879011a05 hr=0x00000000 disposition=wrapped_or_unavailable
+qpc=3095778609392 tid=436 query_interface object=adapter iid=2411e7e1-12ac-4ccf-bd14-9798e8534dc0 hr=0x00000000 disposition=wrapped_or_unavailable
+qpc=3095778610464 tid=436 query_interface object=factory iid=00000000-0000-0000-c000-000000000046 hr=0x00000000 disposition=wrapped_or_unavailable
+qpc=3095778611415 tid=436 query_interface object=factory iid=770aae78-f26f-4dba-a829-253c83d1b387 hr=0x00000000 disposition=wrapped_or_unavailable
+qpc=3095778612348 tid=436 query_interface object=factory iid=00000000-0000-0000-c000-000000000046 hr=0x00000000 disposition=wrapped_or_unavailable
+qpc=3095778616877 tid=436 query_interface object=output iid=ae02eedb-c735-4690-8d52-5a8dc20213aa hr=0x00000000 disposition=wrapped_or_unavailable
+qpc=3095778617846 tid=436 output_wrap result=wrapped iid_data1=ae02eedb proxy=00000000008129b0
+qpc=3095778618784 tid=436 adapter_enum_outputs this=0000000000812970 index=0 hr=0x00000000 wrapped=1
+qpc=3095778619816 tid=436 query_interface object=output iid=068346e8-aaec-4b84-add7-137f513f77a1 hr=0x00000000 disposition=wrapped_or_unavailable
+qpc=3095778620855 tid=436 query_interface object=adapter iid=00000000-0000-0000-c000-000000000046 hr=0x00000000 disposition=wrapped_or_unavailable
+qpc=3095778622389 tid=436 query_interface object=adapter iid=2411e7e1-12ac-4ccf-bd14-9798e8534dc0 hr=0x00000000 disposition=wrapped_or_unavailable
+qpc=3095778623486 tid=436 adapter_wrap result=wrapped iid_data1=2411e7e1 proxy=0000000000812970
+qpc=3095778624631 tid=436 query_interface object=adapter iid=00000000-0000-0000-c000-000000000046 hr=0x00000000 disposition=wrapped_or_unavailable
+qpc=3095778625850 tid=436 query_interface object=factory iid=7b7166ec-21c7-44ae-b21a-c9ae321ae369 hr=0x00000000 disposition=wrapped_or_unavailable
+qpc=3095778626908 tid=436 query_interface object=factory iid=770aae78-f26f-4dba-a829-253c83d1b387 hr=0x00000000 disposition=wrapped_or_unavailable
+qpc=3095778628242 tid=436 query_interface object=factory iid=50c83a1c-e072-4c48-87b0-3630fa36a6d0 hr=0x00000000 disposition=wrapped_or_unavailable
+qpc=3095778629323 tid=436 query_interface object=factory iid=25483823-cd46-4c7d-86ca-47aa95b837bd hr=0x00000000 disposition=wrapped_or_unavailable
+qpc=3095778630378 tid=436 query_interface object=factory iid=1bc6ea02-ef36-464f-bf0c-21ca39e5168a hr=0x00000000 disposition=wrapped_or_unavailable
+qpc=3095778631756 tid=436 query_interface object=factory iid=7632e1f5-ee65-4dca-87fd-84cd75f8838d hr=0x00000000 disposition=wrapped_or_unavailable
+qpc=3095778632941 tid=436 query_interface object=factory iid=c1b6694f-ff09-44a9-b03c-77900a0a1d17 hr=0x00000000 disposition=wrapped_or_unavailable
+qpc=3095778634168 tid=436 query_interface object=factory iid=a4966eed-76db-44da-84c1-ee9a7afb20a8 hr=0x00000000 disposition=wrapped_or_unavailable
+qpc=3095778635636 tid=436 query_interface object=factory iid=41e7d1f2-a591-4f7b-a2e5-fa9c843e1c12 hr=0x80004002 disposition=wrapped_or_unavailable
+qpc=3095780298909 tid=436 swapchain_create id=1 this=0000000000813130 inner=00007fb26cc26cc0 device_arg=00007fb25d03ec10 queue=00007fb25d03ec10 queue_type=0 node_mask=0x00000001 node_count=1 device=00007fb26c0bc410 device_hr=0x00000000 d3d12=1
+qpc=3095780301982 tid=436 query_interface object=swapchain iid=790a45f7-0d42-4876-983a-0a55cfe6f4aa hr=0x00000000 disposition=wrapped_or_unavailable
+qpc=3095780303667 tid=436 swapchain_wrap result=wrapped proxy=0000000000813130
+qpc=3095780304928 tid=436 factory_create_swapchain kind=CreateSwapChainForHwnd device=00007fb25d03ec10 window=00000000000f0064 hr=0x00000000 wrapped=1 width=960 height=540 format=28 buffer_count=3 effect=4
+qpc=3095780306597 tid=436 query_interface object=swapchain iid=94d99bdb-f1f8-4ab0-b236-7da0170edab1 hr=0x00000000 disposition=wrapped_or_unavailable
+qpc=3095780308207 tid=436 factory_destroy this=000000000080e7e0
+qpc=3095780309774 tid=436 query_interface object=factory iid=50c83a1c-e072-4c48-87b0-3630fa36a6d0 hr=0x00000000 disposition=wrapped_or_unavailable
+qpc=3095780310977 tid=436 factory_wrap result=wrapped iid=00000001400105a0 proxy=000000000080e790
+qpc=3095780312212 tid=436 query_interface object=factory iid=00000000-0000-0000-c000-000000000046 hr=0x00000000 disposition=wrapped_or_unavailable
+qpc=3095780313390 tid=436 query_interface object=factory iid=00000000-0000-0000-c000-000000000046 hr=0x00000000 disposition=wrapped_or_unavailable
+qpc=3095780314766 tid=436 query_interface object=swapchain iid=dd95b90b-f05f-4f6a-bd65-25bfb264bd84 hr=0x80004002 disposition=wrapped_or_unavailable
+qpc=3095780316016 tid=436 query_interface object=swapchain iid=310d36a0-d2e7-4c0a-aa04-6a9d23b8886a hr=0x00000000 disposition=wrapped_or_unavailable
+qpc=3095780317232 tid=436 query_interface object=swapchain iid=790a45f7-0d42-4876-983a-0a55cfe6f4aa hr=0x00000000 disposition=wrapped_or_unavailable
+qpc=3095780318402 tid=436 query_interface object=swapchain iid=a8be2ac4-199f-4946-b331-79599fb98de7 hr=0x00000000 disposition=wrapped_or_unavailable
+qpc=3095780319570 tid=436 query_interface object=swapchain iid=94d99bdb-f1f8-4ab0-b236-7da0170edab1 hr=0x00000000 disposition=wrapped_or_unavailable
+qpc=3095780320709 tid=436 query_interface object=swapchain iid=3d585d5a-bd4a-489e-b1f4-3dbcb6452ffb hr=0x00000000 disposition=wrapped_or_unavailable
+qpc=3095780340945 tid=436 gpu_copy id=1 call=Present index=0 source=00007fb23c2479d0 destination=00007fb23c3895e0 width=960 height=540 format=28 source_state=PRESENT->COPY_SOURCE->PRESENT fence=1 result=queued
+qpc=3095780343628 tid=436 present id=1 kind=Present sequence=1 index=0 width=960 height=540 format=28 sync=1 flags=0x00000000 queue=00007fb25d03ec10 device=00007fb26c0bc410 qpc=3095780341272 duration_ticks=1151 hr=0x00000000
+qpc=3095780351165 tid=436 gpu_copy id=1 call=Present index=1 source=00007fb23c248420 destination=00007fb26cb9dc60 width=960 height=540 format=28 source_state=PRESENT->COPY_SOURCE->PRESENT fence=2 result=queued
+qpc=3095780352466 tid=436 present id=1 kind=Present sequence=2 index=1 width=960 height=540 format=28 sync=1 flags=0x00000000 queue=00007fb25d03ec10 device=00007fb26c0bc410 qpc=3095780351542 duration_ticks=24 hr=0x00000000
+qpc=3095780354821 tid=436 gpu_copy id=1 call=Present index=2 source=00007fb23c24a300 destination=00007fb26cb9efa0 width=960 height=540 format=28 source_state=PRESENT->COPY_SOURCE->PRESENT fence=3 result=queued
+qpc=3095780356238 tid=436 present id=1 kind=Present sequence=3 index=2 width=960 height=540 format=28 sync=1 flags=0x00000000 queue=00007fb25d03ec10 device=00007fb26c0bc410 qpc=3095780355256 duration_ticks=16 hr=0x00000000
+qpc=3095780415962 tid=436 gpu_copy id=1 call=Present index=0 source=00007fb23c2479d0 destination=00007fb23c3895e0 width=960 height=540 format=28 source_state=PRESENT->COPY_SOURCE->PRESENT fence=4 result=queued
+qpc=3095780418327 tid=436 present id=1 kind=Present sequence=4 index=0 width=960 height=540 format=28 sync=1 flags=0x00000000 queue=00007fb25d03ec10 device=00007fb26c0bc410 qpc=3095780417129 duration_ticks=39 hr=0x00000000
+qpc=3095780420139 tid=436 gpu_copy id=1 call=Present index=1 source=00007fb23c248420 destination=00007fb26cb9dc60 width=960 height=540 format=28 source_state=PRESENT->COPY_SOURCE->PRESENT fence=5 result=queued
+qpc=3095780421536 tid=436 present id=1 kind=Present sequence=5 index=1 width=960 height=540 format=28 sync=1 flags=0x00000000 queue=00007fb25d03ec10 device=00007fb26c0bc410 qpc=3095780420587 duration_ticks=30 hr=0x00000000
+qpc=3095780424332 tid=436 gpu_copy id=1 call=Present index=2 source=00007fb23c24a300 destination=00007fb26cb9efa0 width=960 height=540 format=28 source_state=PRESENT->COPY_SOURCE->PRESENT fence=6 result=queued
+qpc=3095780425651 tid=436 present id=1 kind=Present sequence=6 index=2 width=960 height=540 format=28 sync=1 flags=0x00000000 queue=00007fb25d03ec10 device=00007fb26c0bc410 qpc=3095780424679 duration_ticks=26 hr=0x00000000
+qpc=3095780427400 tid=436 gpu_copy id=1 call=Present index=0 source=00007fb23c2479d0 destination=00007fb23c3895e0 width=960 height=540 format=28 source_state=PRESENT->COPY_SOURCE->PRESENT fence=7 result=queued
+qpc=3095780428832 tid=436 present id=1 kind=Present sequence=7 index=0 width=960 height=540 format=28 sync=1 flags=0x00000000 queue=00007fb25d03ec10 device=00007fb26c0bc410 qpc=3095780427766 duration_ticks=29 hr=0x00000000
+qpc=3095780430555 tid=436 gpu_copy id=1 call=Present index=1 source=00007fb23c248420 destination=00007fb26cb9dc60 width=960 height=540 format=28 source_state=PRESENT->COPY_SOURCE->PRESENT fence=8 result=queued
+qpc=3095780431696 tid=436 present id=1 kind=Present sequence=8 index=1 width=960 height=540 format=28 sync=1 flags=0x00000000 queue=00007fb25d03ec10 device=00007fb26c0bc410 qpc=3095780430840 duration_ticks=26 hr=0x00000000
+qpc=3095780433300 tid=436 gpu_copy id=1 call=Present index=2 source=00007fb23c24a300 destination=00007fb26cb9efa0 width=960 height=540 format=28 source_state=PRESENT->COPY_SOURCE->PRESENT fence=9 result=queued
+qpc=3095780434495 tid=436 present id=1 kind=Present sequence=9 index=2 width=960 height=540 format=28 sync=1 flags=0x00000000 queue=00007fb25d03ec10 device=00007fb26c0bc410 qpc=3095780433595 duration_ticks=34 hr=0x00000000
+qpc=3095780435904 tid=436 gpu_copy id=1 call=Present index=0 source=00007fb23c2479d0 destination=00007fb23c3895e0 width=960 height=540 format=28 source_state=PRESENT->COPY_SOURCE->PRESENT fence=10 result=queued
+qpc=3095780438385 tid=436 present id=1 kind=Present sequence=10 index=0 width=960 height=540 format=28 sync=1 flags=0x00000000 queue=00007fb25d03ec10 device=00007fb26c0bc410 qpc=3095780436187 duration_ticks=21 hr=0x00000000
+qpc=3095780439913 tid=436 gpu_copy id=1 call=Present index=1 source=00007fb23c248420 destination=00007fb26cb9dc60 width=960 height=540 format=28 source_state=PRESENT->COPY_SOURCE->PRESENT fence=11 result=queued
+qpc=3095780440973 tid=436 present id=1 kind=Present sequence=11 index=1 width=960 height=540 format=28 sync=1 flags=0x00000000 queue=00007fb25d03ec10 device=00007fb26c0bc410 qpc=3095780440181 duration_ticks=17 hr=0x00000000
+qpc=3095780443343 tid=436 gpu_copy id=1 call=Present index=2 source=00007fb23c24a300 destination=00007fb26cb9efa0 width=960 height=540 format=28 source_state=PRESENT->COPY_SOURCE->PRESENT fence=12 result=queued
+qpc=3095780444448 tid=436 present id=1 kind=Present sequence=12 index=2 width=960 height=540 format=28 sync=1 flags=0x00000000 queue=00007fb25d03ec10 device=00007fb26c0bc410 qpc=3095780443617 duration_ticks=12 hr=0x00000000
+qpc=3095780445805 tid=436 gpu_copy id=1 call=Present index=0 source=00007fb23c2479d0 destination=00007fb23c3895e0 width=960 height=540 format=28 source_state=PRESENT->COPY_SOURCE->PRESENT fence=13 result=queued
+qpc=3095780446828 tid=436 present id=1 kind=Present sequence=13 index=0 width=960 height=540 format=28 sync=1 flags=0x00000000 queue=00007fb25d03ec10 device=00007fb26c0bc410 qpc=3095780446053 duration_ticks=8 hr=0x00000000
+qpc=3095780448119 tid=436 gpu_copy id=1 call=Present index=1 source=00007fb23c248420 destination=00007fb26cb9dc60 width=960 height=540 format=28 source_state=PRESENT->COPY_SOURCE->PRESENT fence=14 result=queued
+qpc=3095780473265 tid=436 present id=1 kind=Present sequence=14 index=1 width=960 height=540 format=28 sync=1 flags=0x00000000 queue=00007fb25d03ec10 device=00007fb26c0bc410 qpc=3095780448384 duration_ticks=23983 hr=0x00000000
+qpc=3095780474713 tid=436 gpu_copy id=1 call=Present index=2 source=00007fb23c24a300 destination=00007fb26cb9efa0 width=960 height=540 format=28 source_state=PRESENT->COPY_SOURCE->PRESENT fence=15 result=queued
+qpc=3095780607936 tid=436 present id=1 kind=Present sequence=15 index=2 width=960 height=540 format=28 sync=1 flags=0x00000000 queue=00007fb25d03ec10 device=00007fb26c0bc410 qpc=3095780474972 duration_ticks=131952 hr=0x00000000
+qpc=3095781109553 tid=436 gpu_drain id=1 reason=destroy fence=16 result=complete
+qpc=3095781112197 tid=436 swapchain_destroy id=1 this=0000000000813130
+qpc=3095781131376 tid=436 factory_destroy this=000000000080e790

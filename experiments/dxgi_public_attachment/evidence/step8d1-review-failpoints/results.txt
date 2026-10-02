@@ -1,0 +1,14 @@
+fence_create path=copy app_exit=0 bookkeeping=PASS source_presents=15 failpoint_log=1
+event_create path=copy app_exit=0 bookkeeping=PASS source_presents=15 failpoint_log=1
+allocator_create path=copy app_exit=0 bookkeeping=PASS source_presents=15 failpoint_log=1
+commandlist_create path=copy app_exit=0 bookkeeping=PASS source_presents=15 failpoint_log=1
+getbuffer path=copy app_exit=0 bookkeeping=PASS source_presents=15 failpoint_log=1
+resource_create path=copy app_exit=0 bookkeeping=PASS source_presents=15 failpoint_log=1
+allocator_reset path=copy app_exit=0 bookkeeping=PASS source_presents=15 failpoint_log=1
+commandlist_reset path=copy app_exit=0 bookkeeping=PASS source_presents=15 failpoint_log=1
+commandlist_close path=copy app_exit=0 bookkeeping=PASS source_presents=15 failpoint_log=1
+queue_signal path=copy app_exit=0 bookkeeping=PASS source_presents=15 failpoint_log=1
+fence_event path=copy app_exit=0 bookkeeping=PASS source_presents=15 failpoint_log=1
+fence_timeout path=copy app_exit=0 bookkeeping=PASS source_presents=15 failpoint_log=1
+descriptor_heap path=synthetic app_exit=0 bookkeeping=PASS source_presents=15 failpoint_log=1
+synthetic_present path=synthetic app_exit=0 bookkeeping=PASS source_presents=15 failpoint_log=1

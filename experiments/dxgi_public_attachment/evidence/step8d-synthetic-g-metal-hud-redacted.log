@@ -1,0 +1,6 @@
+Filtering the log data using "composedMessage CONTAINS "metal-HUD""
+Timestamp               Ty Process[PID:TID]
+2026-10-02 12:46:34.007 Df wine[90552:24d3af] (libMTLHud.dylib) metal-HUD: 61,53.84,190.21<private>
+2026-10-02 12:46:34.008 Df wine[90552:24d3af] [com.apple.metal.hud:Logging] metal-HUD: 61,53.84,190.21<private>
+2026-10-02 12:46:35.024 Df wine[90552:24d3af] (libMTLHud.dylib) metal-HUD: 122,53.84,190.21<private>
+2026-10-02 12:46:35.024 Df wine[90552:24d3af] [com.apple.metal.hud:Logging] metal-HUD: 122,53.84,190.21<private>

@@ -1,0 +1,10 @@
+qpc=3055112521689 tid=36 provider_load ok module=00006ffffd310000 self=00006fffff080000
+qpc=3055112632547 tid=36 factory_wrap result=wrapped iid=000000014000beb0 proxy=000000000080d770
+qpc=3055112634373 tid=36 export_forward name=CreateDXGIFactory hr=0x00000000 factory=000000000080d770 wrapped=1
+qpc=3055112637212 tid=36 factory_destroy this=000000000080d770
+qpc=3055112638738 tid=36 factory_wrap result=wrapped iid=000000014000bec0 proxy=000000000080d770
+qpc=3055112639889 tid=36 export_forward name=CreateDXGIFactory1 hr=0x00000000 factory=000000000080d770 wrapped=1
+qpc=3055112641369 tid=36 factory_destroy this=000000000080d770
+qpc=3055112642697 tid=36 factory_wrap result=wrapped iid=000000014000bed0 proxy=000000000080d770
+qpc=3055112643672 tid=36 export_forward name=CreateDXGIFactory2 flags=0x00000000 hr=0x00000000 factory=000000000080d770 wrapped=1
+qpc=3055144595917 tid=36 factory_destroy this=000000000080d770

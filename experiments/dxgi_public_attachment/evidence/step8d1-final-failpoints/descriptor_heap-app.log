@@ -1,0 +1,52 @@
+start dxgi_module=00006fffff070000 dxgi_path_chars=98 dxgi_path=Z:\var\folders\4l\yp39dwhd7rg2y9xscgvhkyqw0000gn\T\fg-step8d1-fail-descriptor_heap.VETfxd\dxgi.dll
+call=CreateDXGIFactory hr=0x00000000 factory=00000000007d03e0
+call=CreateDXGIFactory1 hr=0x00000000 factory=00000000007d03e0
+call=CreateDXGIFactory2 hr=0x00000000 factory=00000000007d03e0
+adapter_interface version=4 hr=0x00000000 adapter=0000000000812510
+adapter_interface_matrix adapter0=1 adapter1=1 adapter2=1 adapter3=1 adapter4=1
+com_identity factory_qi_iunknown=1 adapter_getparent_factory=1 result=PASS
+adapter_enum_output_zero hr=0x00000000 output=0000000000812cc0
+output_interface version=6 hr=0x00000000 output=0000000000812cc0
+com_identity output_getparent_adapter hr=0x00000000 same_adapter=1
+interface name=IDXGIFactory hr=0x00000000 ptr=00000000007d03e0
+interface name=IDXGIFactory1 hr=0x00000000 ptr=00000000007d03e0
+interface name=IDXGIFactory2 hr=0x00000000 ptr=00000000007d03e0
+interface name=IDXGIFactory3 hr=0x00000000 ptr=00000000007d03e0
+interface name=IDXGIFactory4 hr=0x00000000 ptr=00000000007d03e0
+interface name=IDXGIFactory5 hr=0x00000000 ptr=00000000007d03e0
+interface name=IDXGIFactory6 hr=0x00000000 ptr=00000000007d03e0
+interface name=IDXGIFactory7 hr=0x00000000 ptr=00000000007d03e0
+interface name=IDXGIFactoryMedia hr=0x80004002 ptr=0000000000000000
+call=D3D12CreateDevice hr=0x00000000 device=00007fa87b81c810
+call=CreateCommandQueue hr=0x00000000 queue=00007fa87b185610
+call=CreateSwapChainForHwnd hr=0x00000000 swapchain=0000000000812d00
+call=QueryInterface_IDXGISwapChain3 hr=0x00000000 swapchain3=0000000000812d00
+com_identity swapchain_getparent_factory hr=0x00000000 same_factory=1
+interface name=IDXGISwapChainMedia hr=0x80004002 ptr=0000000000000000
+interface name=IDXGISwapChain hr=0x00000000 ptr=0000000000812d00
+interface name=IDXGISwapChain1 hr=0x00000000 ptr=0000000000812d00
+interface name=IDXGISwapChain2 hr=0x00000000 ptr=0000000000812d00
+interface name=IDXGISwapChain3 hr=0x00000000 ptr=0000000000812d00
+interface name=IDXGISwapChain4 hr=0x00000000 ptr=0000000000812d00
+test_case=A frames=15 target_fps=0 source_index_policy=GetCurrentBackBufferIndex_each_frame allocator_policy=per_backbuffer
+timing qpc_frequency=10000000 target_fps=0
+present frame=0 source_index=0 allocator_index=0 expected_next=1 observed_next=1 qpc=3106383072682 duration_ticks=16945 hr=0x00000000
+present frame=1 source_index=1 allocator_index=1 expected_next=2 observed_next=2 qpc=3106383094772 duration_ticks=1544 hr=0x00000000
+present frame=2 source_index=2 allocator_index=2 expected_next=0 observed_next=0 qpc=3106383096565 duration_ticks=1274 hr=0x00000000
+present frame=3 source_index=0 allocator_index=0 expected_next=1 observed_next=1 qpc=3106383172944 duration_ticks=5958 hr=0x00000000
+present frame=4 source_index=1 allocator_index=1 expected_next=2 observed_next=2 qpc=3106383179352 duration_ticks=60149 hr=0x00000000
+present frame=5 source_index=2 allocator_index=2 expected_next=0 observed_next=0 qpc=3106383239950 duration_ticks=1496 hr=0x00000000
+present frame=6 source_index=0 allocator_index=0 expected_next=1 observed_next=1 qpc=3106383241659 duration_ticks=1860 hr=0x00000000
+present frame=7 source_index=1 allocator_index=1 expected_next=2 observed_next=2 qpc=3106383243791 duration_ticks=1490 hr=0x00000000
+present frame=8 source_index=2 allocator_index=2 expected_next=0 observed_next=0 qpc=3106383246634 duration_ticks=1687 hr=0x00000000
+present frame=9 source_index=0 allocator_index=0 expected_next=1 observed_next=1 qpc=3106383248546 duration_ticks=1866 hr=0x00000000
+present frame=10 source_index=1 allocator_index=1 expected_next=2 observed_next=2 qpc=3106383250611 duration_ticks=1944 hr=0x00000000
+present frame=11 source_index=2 allocator_index=2 expected_next=0 observed_next=0 qpc=3106383252750 duration_ticks=2189 hr=0x00000000
+present frame=12 source_index=0 allocator_index=0 expected_next=1 observed_next=1 qpc=3106383255169 duration_ticks=1478 hr=0x00000000
+present frame=13 source_index=1 allocator_index=1 expected_next=2 observed_next=2 qpc=3106383256813 duration_ticks=1750 hr=0x00000000
+present frame=14 source_index=2 allocator_index=2 expected_next=0 observed_next=0 qpc=3106383258835 duration_ticks=2265 hr=0x00000000
+complete frames=15 elapsed_ticks=195645
+frame_statistics hr=0x00000000 present_count=15 present_refresh=15 sync_refresh=15
+last_present_count hr=0x00000000 count=15
+memory_sample hr=0x00000000 current_working_set=84725760 current_private=44401561600 max_sampled_working_set=84725760 max_sampled_private=44401561600 sample_interval_frames=30
+bookkeeping_result case=A invariant_mismatches=0 result=PASS

@@ -1,0 +1,36 @@
+Step 8D final source/build identity
+Date: 2026-10-02
+Platform: macOS on Apple M3; display mode recorded as 2940x1912 at 60.0 Hz
+Highball: 0.10.1
+Engine: x64-sikarugir10.0_6-r14
+Wine: wine-10.0 (Sikarugir)
+Compiler: x86_64-w64-mingw32-g++ (GCC) 16.2.0
+
+Proxy build:
+x86_64-w64-mingw32-g++ -std=c++17 -O2 -Wall -Wextra -Wno-cast-function-type -shared -static -static-libgcc -static-libstdc++ experiments/dxgi_public_attachment/dxgi_proxy.cpp experiments/dxgi_public_attachment/dxgi_proxy.def -o /tmp/step8d_dxgi_proxy.dll -ldxgi -ld3d12 -ldxguid
+
+Controlled application build:
+x86_64-w64-mingw32-g++ -std=c++17 -O2 -Wall -Wextra -mwindows experiments/dxgi_public_attachment/unmodified_d3d12_app.cpp -o /tmp/step8d_unmodified_d3d12.exe -ld3d12 -ldxgi -ldxguid -lpsapi
+
+Lifecycle application build:
+x86_64-w64-mingw32-g++ -std=c++17 -O2 -Wall -Wextra -mwindows experiments/dxgi_public_attachment/lifecycle_app.cpp -o /tmp/step8d_lifecycle_app.exe -ld3d12 -ldxgi -ldxguid -lpsapi
+
+Two-swapchain application build:
+x86_64-w64-mingw32-g++ -std=c++17 -O2 -Wall -Wextra -mwindows experiments/dxgi_public_attachment/two_swapchains_app.cpp -o /tmp/step8d_two_swapchains.exe -ld3d12 -ldxgi -ldxguid -lpsapi
+
+Adapter-parent bypass variant:
+x86_64-w64-mingw32-g++ -std=c++17 -O2 -Wall -Wextra -mwindows -DFG_STEP8D_PARENT_FACTORY_PATH experiments/dxgi_public_attachment/unmodified_d3d12_app.cpp -o /tmp/step8d_adapter_parent_app.exe -ld3d12 -ldxgi -ldxguid -lpsapi
+
+SHA-256 source and tested binaries:
+e7aa58c0381105cb3c5faf9ae04bffad1651907aed1c482fdfe4667941621694  experiments/dxgi_public_attachment/dxgi_proxy.cpp
+6fdfb2cf37842e4a446e2bdc056b1358918f129503c92277f9639fab69940fd5  experiments/dxgi_public_attachment/dxgi_proxy.def
+1680c89d556a1fd8c864365505229b25a39d4fdef220fbc9b71666cf49c11455  experiments/dxgi_public_attachment/unmodified_d3d12_app.cpp
+be2d03a19238b4975accb76c4bc5601381d93aed7f02d629778820cd92635a46  experiments/dxgi_public_attachment/lifecycle_app.cpp
+8674ec76b0996947463a26605991d54817da2cd45af9a9e1b5f26a130268c41f  experiments/dxgi_public_attachment/two_swapchains_app.cpp
+b131c2fe745755e8e401843d9e73df8171a2b128859417ab5056aaf02b711009  /tmp/step8d_dxgi_proxy.dll
+a48fcd4210ec562a153702b09968b5fe4ad07c7b8793cdd3b21639c2829f55f0  /tmp/step8d_unmodified_d3d12.exe
+06678196cca108d59bb668a682c16e9559427e9895c2f13ecf50d590c0c4e8ee  /tmp/step8d_lifecycle_app.exe
+f8380d35f4277c6c412bbcbca3449c333e8881c814de96fb2b15d66bab177fef  /tmp/step8d_two_swapchains.exe
+55fe2e21b51c2a60814c522cf5676566f9a926335e709eab40e7ce5f06ffc163  /tmp/step8d_adapter_parent_app.exe
+
+The runtime evidence logs identify the app-local native dxgi.dll and the separate system32 Wine builtin provider. D3DMetal 4.0b2 in-process was independently established in Step 8C using the same Highball engine installation/configuration; this Step 8D trace does not independently establish the D3DMetal framework binary identity.
