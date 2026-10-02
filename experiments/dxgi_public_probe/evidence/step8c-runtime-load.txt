@@ -1,0 +1,29 @@
+Step 8C runtime identity evidence
+
+Test date: 2026-10-02
+Highball app: 0.10.1 (/Applications/Highball.app)
+Highball public source inspected: https://github.com/gauthierpiarrette/highball/tree/e9e7472f3fe870aa83071d183f263acf09c2b9e0
+Engine id: x64-sikarugir10.0_6-r14
+Engine path: $HOME/Library/Application Support/Highball/engines/x64-sikarugir10.0_6-r14
+Engine Wine runner: <Highball engine>/engine/bin/wine; reports wine-10.0 (Sikarugir)
+D3DMetal manifest version: D3DMetal-4.0b2 (Game Porting Toolkit 4.0 beta 2, redist/lib)
+D3DMetal component SHA-256 (engine manifest): 96cbbe89b71cb07cc33bd761ae4b79452b9cdf3198593dfb779036caf85f07a9
+D3DMetal Info.plist CFBundleShortVersionString / CFBundleVersion: 4.0b2 / 4.0b2
+Optional Highball timestamp shim in configured renderer path: d3dmetal-tsshim 20260915
+Disposable prefix: $HOME/Library/Caches/FG-Metal-Step8C/validated-prefix-2 (WINEARCH=win64; initialized with wineboot --init)
+Host: macOS 27.0.1 (26A434), arm64, Apple M3
+Display: built-in Liquid Retina, 2560x1664; current refresh 60.0 Hz; CoreGraphics available modes [60.0] Hz (5 modes)
+QPC frequency: 10000000 Hz
+
+Observed loaded paths (Wine +loaddll and DYLD_PRINT_LIBRARIES):
+trace:loaddll:build_module Loaded L"C:\\windows\\system32\\dxgi.dll" at 00006FFFFD5E0000: builtin
+dyld loaded /Users/nima/Library/Application Support/Highball/engines/x64-sikarugir10.0_6-r14/renderers/d3dmetal/external/libd3dshared.dylib
+dyld loaded /Users/nima/Library/Application Support/Highball/engines/x64-sikarugir10.0_6-r14/renderers/d3dmetal/external/D3DMetal.framework/Versions/A/D3DMetal
+trace:loaddll:build_module Loaded L"C:\\windows\\system32\\d3d12.dll" at 00006FFFFD5A0000: builtin
+trace:loaddll:build_module Loaded L"Z:\\Users\\nima\\Library\\Application Support\\Highball\\engines\\x64-sikarugir10.0_6-r14\\renderers\\d3dmetal-tsshim\\wine\\x86_64-windows\\apd12.dll" at 00006FFFFD550000: builtin
+
+The Windows-facing dxgi.dll and d3d12.dll names resolved as Wine builtins in the configured Highball renderer environment. The trace separately records the Highball engine's libd3dshared.dylib and D3DMetal.framework/Versions/A/D3DMetal paths in this same process. D3DMetal framework version came from its public Info.plist; no D3DMetal private symbols, object layouts, or binary internals were inspected.
+
+Raw diagnostic logs were kept for this run at /tmp/fg-step8c-30to60/dxgi_probe.log and /tmp/fg-step8c-30to60/loader-30to60.log; SHA-256:
+dxgi_probe.log: 5fdc22a6f5bdf482bdb187baf407a2375b7a808eb0160598afba266f8fd24abb
+loader-30to60.log: 41752fcff3481f395ac9599ed79a288d76a1ccfba694fadaf81b559dae1825e7

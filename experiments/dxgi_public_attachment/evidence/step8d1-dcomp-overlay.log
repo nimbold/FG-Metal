@@ -1,0 +1,7 @@
+step=CreateDXGIFactory2 hr=0x00000000 factory=00007fa8da9601d0
+step=D3D12CreateDevice hr=0x00000000 device=00007fa8db8e7e10
+step=CreateCommandQueue hr=0x00000000 queue=00007fa8db9e7a10
+step=CreateSwapChainForHwnd hr=0x00000000 chain=00007fa8bd3ecf10
+step=LoadDComp module=00006ffffd530000 create_device3=00006ffffd531600 create_device2=00006ffffd5314f0
+step=DCompositionCreateDevice3 hr=0x80004001 device=0000000000000000
+step=DCompositionCreateDevice2_fallback hr=0x80004001 device=0000000000000000

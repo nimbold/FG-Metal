@@ -1,0 +1,117 @@
+start dxgi_module=00006fffff080000 dxgi_path_chars=49 dxgi_path=Z:\private\tmp\step8d-perf-current-proxy\dxgi.dll
+call=CreateDXGIFactory hr=0x00000000 factory=000000000080d960
+call=CreateDXGIFactory1 hr=0x00000000 factory=000000000080d960
+call=CreateDXGIFactory2 hr=0x00000000 factory=000000000080d960
+interface name=IDXGIFactory hr=0x00000000 ptr=000000000080d960
+interface name=IDXGIFactory1 hr=0x00000000 ptr=000000000080d960
+interface name=IDXGIFactory2 hr=0x00000000 ptr=000000000080d960
+interface name=IDXGIFactory3 hr=0x00000000 ptr=000000000080d960
+interface name=IDXGIFactory4 hr=0x00000000 ptr=000000000080d960
+interface name=IDXGIFactory5 hr=0x00000000 ptr=000000000080d960
+interface name=IDXGIFactory6 hr=0x00000000 ptr=000000000080d960
+interface name=IDXGIFactory7 hr=0x00000000 ptr=000000000080d960
+interface name=IDXGIFactoryMedia hr=0x80004002 ptr=0000000000000000
+call=D3D12CreateDevice hr=0x00000000 device=00007fb4078adc10
+call=CreateCommandQueue hr=0x00000000 queue=00007fb4170ade10
+call=CreateSwapChainForHwnd hr=0x00000000 swapchain=0000000000811e60
+call=QueryInterface_IDXGISwapChain3 hr=0x00000000 swapchain3=0000000000811e60
+interface name=IDXGISwapChain hr=0x00000000 ptr=0000000000811e60
+interface name=IDXGISwapChain1 hr=0x00000000 ptr=0000000000811e60
+interface name=IDXGISwapChain2 hr=0x00000000 ptr=0000000000811e60
+interface name=IDXGISwapChain3 hr=0x00000000 ptr=0000000000811e60
+interface name=IDXGISwapChain4 hr=0x00000000 ptr=0000000000811e60
+timing qpc_frequency=10000000 target_fps=30
+present frame=0 index=0 qpc=3052828818398 duration_ticks=539 hr=0x00000000
+present frame=1 index=1 qpc=3052829081272 duration_ticks=52 hr=0x00000000
+present frame=2 index=2 qpc=3052829416555 duration_ticks=75 hr=0x00000000
+present frame=3 index=0 qpc=3052829755869 duration_ticks=75 hr=0x00000000
+present frame=4 index=1 qpc=3052830078675 duration_ticks=74 hr=0x00000000
+present frame=5 index=2 qpc=3052830416397 duration_ticks=78 hr=0x00000000
+present frame=6 index=0 qpc=3052830753341 duration_ticks=64 hr=0x00000000
+present frame=7 index=1 qpc=3052831079337 duration_ticks=30 hr=0x00000000
+present frame=8 index=2 qpc=3052831420223 duration_ticks=27 hr=0x00000000
+present frame=9 index=0 qpc=3052831748176 duration_ticks=74 hr=0x00000000
+present frame=10 index=1 qpc=3052832076587 duration_ticks=62 hr=0x00000000
+present frame=11 index=2 qpc=3052832417125 duration_ticks=34 hr=0x00000000
+present frame=12 index=0 qpc=3052832745650 duration_ticks=30 hr=0x00000000
+present frame=13 index=1 qpc=3052833087469 duration_ticks=86 hr=0x00000000
+present frame=14 index=2 qpc=3052833416359 duration_ticks=164 hr=0x00000000
+present frame=15 index=0 qpc=3052833743984 duration_ticks=159 hr=0x00000000
+present frame=16 index=1 qpc=3052834088240 duration_ticks=41 hr=0x00000000
+present frame=17 index=2 qpc=3052834417122 duration_ticks=148 hr=0x00000000
+present frame=18 index=0 qpc=3052834753848 duration_ticks=192 hr=0x00000000
+present frame=19 index=1 qpc=3052835080952 duration_ticks=169 hr=0x00000000
+present frame=20 index=2 qpc=3052835412127 duration_ticks=163 hr=0x00000000
+present frame=21 index=0 qpc=3052835745919 duration_ticks=136 hr=0x00000000
+present frame=22 index=1 qpc=3052836079210 duration_ticks=160 hr=0x00000000
+present frame=23 index=2 qpc=3052836411290 duration_ticks=143 hr=0x00000000
+present frame=24 index=0 qpc=3052836755020 duration_ticks=50 hr=0x00000000
+present frame=25 index=1 qpc=3052837083655 duration_ticks=35 hr=0x00000000
+present frame=26 index=2 qpc=3052837422131 duration_ticks=162 hr=0x00000000
+present frame=27 index=0 qpc=3052837751985 duration_ticks=186 hr=0x00000000
+present frame=28 index=1 qpc=3052838087482 duration_ticks=63 hr=0x00000000
+present frame=29 index=2 qpc=3052838412827 duration_ticks=14 hr=0x00000000
+present frame=30 index=0 qpc=3052838750446 duration_ticks=34 hr=0x00000000
+present frame=31 index=1 qpc=3052839085250 duration_ticks=31 hr=0x00000000
+present frame=32 index=2 qpc=3052839422527 duration_ticks=138 hr=0x00000000
+present frame=33 index=0 qpc=3052839887760 duration_ticks=82 hr=0x00000000
+present frame=34 index=1 qpc=3052840077786 duration_ticks=53 hr=0x00000000
+present frame=35 index=2 qpc=3052840415909 duration_ticks=166 hr=0x00000000
+present frame=36 index=0 qpc=3052840755528 duration_ticks=165 hr=0x00000000
+present frame=37 index=1 qpc=3052841077827 duration_ticks=192 hr=0x00000000
+present frame=38 index=2 qpc=3052841420992 duration_ticks=170 hr=0x00000000
+present frame=39 index=0 qpc=3052841752274 duration_ticks=41 hr=0x00000000
+present frame=40 index=1 qpc=3052842078595 duration_ticks=32 hr=0x00000000
+present frame=41 index=2 qpc=3052842419875 duration_ticks=188 hr=0x00000000
+present frame=42 index=0 qpc=3052842748256 duration_ticks=196 hr=0x00000000
+present frame=43 index=1 qpc=3052843082913 duration_ticks=179 hr=0x00000000
+present frame=44 index=2 qpc=3052843413134 duration_ticks=167 hr=0x00000000
+present frame=45 index=0 qpc=3052843747636 duration_ticks=177 hr=0x00000000
+present frame=46 index=1 qpc=3052844088548 duration_ticks=158 hr=0x00000000
+present frame=47 index=2 qpc=3052844416758 duration_ticks=185 hr=0x00000000
+present frame=48 index=0 qpc=3052844754868 duration_ticks=149 hr=0x00000000
+present frame=49 index=1 qpc=3052845083345 duration_ticks=164 hr=0x00000000
+present frame=50 index=2 qpc=3052845413670 duration_ticks=167 hr=0x00000000
+present frame=51 index=0 qpc=3052845749367 duration_ticks=145 hr=0x00000000
+present frame=52 index=1 qpc=3052846085810 duration_ticks=153 hr=0x00000000
+present frame=53 index=2 qpc=3052846418454 duration_ticks=188 hr=0x00000000
+present frame=54 index=0 qpc=3052846752286 duration_ticks=162 hr=0x00000000
+present frame=55 index=1 qpc=3052847083599 duration_ticks=187 hr=0x00000000
+present frame=56 index=2 qpc=3052847410937 duration_ticks=165 hr=0x00000000
+present frame=57 index=0 qpc=3052847746627 duration_ticks=140 hr=0x00000000
+present frame=58 index=1 qpc=3052848077548 duration_ticks=144 hr=0x00000000
+present frame=59 index=2 qpc=3052848410718 duration_ticks=167 hr=0x00000000
+present frame=60 index=0 qpc=3052848755301 duration_ticks=166 hr=0x00000000
+present frame=61 index=1 qpc=3052849078915 duration_ticks=157 hr=0x00000000
+present frame=62 index=2 qpc=3052849417787 duration_ticks=143 hr=0x00000000
+present frame=63 index=0 qpc=3052849745069 duration_ticks=158 hr=0x00000000
+present frame=64 index=1 qpc=3052850079349 duration_ticks=172 hr=0x00000000
+present frame=65 index=2 qpc=3052850419825 duration_ticks=60 hr=0x00000000
+present frame=66 index=0 qpc=3052850747917 duration_ticks=154 hr=0x00000000
+present frame=67 index=1 qpc=3052851079346 duration_ticks=189 hr=0x00000000
+present frame=68 index=2 qpc=3052851413736 duration_ticks=171 hr=0x00000000
+present frame=69 index=0 qpc=3052851746479 duration_ticks=154 hr=0x00000000
+present frame=70 index=1 qpc=3052852086826 duration_ticks=145 hr=0x00000000
+present frame=71 index=2 qpc=3052852417559 duration_ticks=148 hr=0x00000000
+present frame=72 index=0 qpc=3052852747915 duration_ticks=149 hr=0x00000000
+present frame=73 index=1 qpc=3052853083200 duration_ticks=166 hr=0x00000000
+present frame=74 index=2 qpc=3052853419719 duration_ticks=127 hr=0x00000000
+present frame=75 index=0 qpc=3052853752605 duration_ticks=151 hr=0x00000000
+present frame=76 index=1 qpc=3052854086433 duration_ticks=146 hr=0x00000000
+present frame=77 index=2 qpc=3052854420493 duration_ticks=160 hr=0x00000000
+present frame=78 index=0 qpc=3052854755297 duration_ticks=174 hr=0x00000000
+present frame=79 index=1 qpc=3052855089664 duration_ticks=139 hr=0x00000000
+present frame=80 index=2 qpc=3052855421878 duration_ticks=152 hr=0x00000000
+present frame=81 index=0 qpc=3052855752697 duration_ticks=173 hr=0x00000000
+present frame=82 index=1 qpc=3052856088360 duration_ticks=160 hr=0x00000000
+present frame=83 index=2 qpc=3052856422519 duration_ticks=158 hr=0x00000000
+present frame=84 index=0 qpc=3052856744305 duration_ticks=60 hr=0x00000000
+present frame=85 index=1 qpc=3052857085254 duration_ticks=164 hr=0x00000000
+present frame=86 index=2 qpc=3052857417165 duration_ticks=171 hr=0x00000000
+present frame=87 index=0 qpc=3052857751788 duration_ticks=135 hr=0x00000000
+present frame=88 index=1 qpc=3052858084775 duration_ticks=126 hr=0x00000000
+present frame=89 index=2 qpc=3052858414607 duration_ticks=136 hr=0x00000000
+complete frames=90 elapsed_ticks=30003352
+frame_statistics hr=0x00000000 present_count=90 present_refresh=90 sync_refresh=90
+last_present_count hr=0x00000000 count=90
+memory_sample hr=0x00000000 current_working_set=95248384 current_private=44413308928 max_sampled_working_set=95248384 max_sampled_private=44413308928 sample_interval_frames=30

@@ -1,42 +1,36 @@
 # Framegen
 
-Framegen is an experimental macOS library for renderer-integrated frame generation. Its live processing contract is built around GPU textures: renderer adapters provide frames as GPU resources, a backend processes them on the GPU, and the caller receives an output texture. The project does not capture the desktop or copy image pixels through CPU memory.
+Framegen is an experimental renderer-independent frame-generation library. Its processing contract uses GPU textures: a renderer adapter supplies source frames, a backend generates an output texture, and the renderer decides when to present it. Frame pixels are not read back to the CPU, and the project does not capture the desktop.
 
-The first implementation is a standalone Metal host that submits two textures through the generic color-only API and displays Practical-RIFE v4.26 interpolation. It establishes resource ownership, synchronization, and presentation boundaries without tying the host API to a particular model.
+> **Status: experimental; not a drop-in game mod or overlay.** The C ABI is a draft, and there is no supported adapter for an unmodified game.
 
-## Project boundaries
+## What works today
 
-- The reusable core must not depend on Highball, Wine, D3DMetal, DXMT, or DXVK.
-- Renderer integrations are adapters outside the core. An adapter may import or wrap renderer textures using documented/public mechanisms and pass GPU resources to the library.
-- The live path operates directly on GPU textures. CPU work may describe resources, schedule work, and collect metadata; it must not read back or copy frame pixels.
-- This project is independently designed. Do not use, copy, depend on, inspect, reconstruct, or imitate private interfaces, binaries, models, or reverse-engineered behavior from lsfg-vk, lsfg-metal, Lossless Scaling, or old Highball LSFG integration. Lossless Scaling is only a high-level product and UX reference.
-- Original project code is intended to use Apache-2.0. Third-party source, models, weights, datasets, and runtime dependencies require separate provenance and redistribution review.
+| Area | Current status |
+| --- | --- |
+| Core library and C ABI | Implemented; ABI is not stable and has not been validated by an external renderer. |
+| Metal backend | Practical-RIFE v4.26 GPU inference and a standalone macOS preview host. Model weights are prepared separately and are not checked in. |
+| Quality and pacing | Optional HUD/temporal controls and a model-independent pacing scheduler; results are synthetic and do not establish in-game quality or display pacing. |
+| GPTK / D3DMetal | Cooperative D3D12 tests passed on Highball GPTK 4. Transparent DXGI attachment reached **PARTIAL PASS** on a controlled app; same-chain generated presents break common application buffer progression. It is not a product adapter. |
+| Other renderer adapters | Not implemented. DXMT is the next renderer-integration investigation. |
 
-See [ARCHITECTURE.md](ARCHITECTURE.md) for module boundaries and [DECISIONS.md](DECISIONS.md) for current decisions and open questions.
+See [the current decisions](DECISIONS.md), [work status](TASKS.md), and the [Step 8D.1 feasibility report](docs/feasibility/dxgi-d3d12-gptk4-step8d1.md) for evidence and limits.
 
-## Development direction
+## Features
 
-Target the newest macOS SDK and Apple toolchain available in the development environment, C++23, CMake, Ninja, and modern Metal APIs, including Metal 4 where applicable. Objective-C++ is limited to Apple framework interop. The initial host is a Metal-only test application; D3DMetal, DXMT, and DXVK adapters are later work and are not part of this bootstrap.
+- GPU texture import, asynchronous interpolation tickets, presentation feedback, history invalidation, and statistics through a provisional C ABI.
+- A Metal backend using Practical-RIFE v4.26 with `QUALITY` (float32) and `BALANCED` (float16) inference modes.
+- Optional explicit UI-plane composition and automatic HUD protection.
+- An opt-in temporal quality controller and a model-independent presentation scheduler.
+- A synthetic motion corpus, benchmark tools, and strict visual-quality comparisons.
 
-## Current status
+The benchmark fixtures do not contain copyrighted game footage. Synthetic results are not substitutes for licensed game captures or real-game validation.
 
-The bootstrap, benchmark framework, provisional host API, HUD preservation paths, Metal RIFE v4.26 backend, Step 6 temporal quality controller, and Step 7 model-independent pacing policy are implemented. The versioned C ABI supports backend/capability discovery, GPU-resource import, source-frame submission, asynchronous interpolation tickets, presentation feedback, history invalidation, HUD and temporal-quality controls, and statistics. The Metal backend advertises `COLOR_ONLY`, `UI_PLANE`, `AUTOMATIC_HUD_PROTECTION`, `HUD_DEBUG_VISUALIZATION`, `ARBITRARY_INTERPOLATION_TIME`, and `TEMPORAL_QUALITY_CONTROLLER`, and is registered explicitly with `framegen_metal_register_backend()`. QUALITY output matches the pinned CPU reference within one 8-bit channel value on the 64×64 and 65×63 fixtures. The ABI remains a draft; it has not been validated by an external renderer adapter or declared stable.
+## Build and test
 
-`framegen::pacing::PresentationScheduler` separates source-frame production, generation requests, and display opportunities. It supports the initial 2x cadence with a configurable interpolation fraction, nonblocking real-frame fallback, per-output readiness deadlines, a bounded one-output queue, deadline-miss cooldown/recovery, and bounded timing diagnostics. Traces retain source, submission, optional GPU stage, readiness, target, and actual-presentation times; generated and real drawable drops are counted once per decision. QUALITY schedules with more presentation headroom; BALANCED uses a shorter source-to-presentation delay and a more conservative readiness cutoff. These policies do not select the Metal model's f32/f16 precision variant. The Metal preview uses the current SDK's `CAMetalDisplayLink` target and actual drawable presentation timestamps. `framegen-pacing-host` simulates 18 30→60, 40→80, and 60→120 timing combinations, including source jitter, long frames, slow generation, display-mode changes, and late render-submit callbacks. This host validates scheduler behavior; it is not a physical display or in-game pacing measurement and does not claim zero added latency.
+### macOS with Metal
 
-The Metal backend runs the complete Practical-RIFE v4.26 `IFNet_HDv3` color model with MPSGraph and purpose-built Metal kernels. It accepts matching opaque RGBA8 sRGB or linear-sRGB SDR textures, pads inputs to RIFE's mod-64 requirement, and writes an output texture without CPU pixel readback. The internal `QUALITY` and `BALANCED` variants use full-resolution float32 and float16 inference, respectively. HUD handling runs after scene interpolation: explicit scene/UI-plane composition uses the supplied UI plane, and automatic protection uses a soft confidence mask over already-composited frames. The model's intermediate scratch pool is capped at 2 GiB, with a 1280 MiB per-request limit checked before temporal or inference allocations; requests above the limit fail explicitly. These limits exclude MPSGraph workspaces and input/output/HUD textures. The RIFE implementation and checkpoint are MIT licensed; exact source, checkpoint, conversion provenance and reference results are recorded in [RIFE provenance](docs/provenance/rife-v4.26.md). The converted weights remain local and outside Git.
-
-The model-independent `TemporalQualityController` adds GPU confidence estimates, endpoint/source fallback, scene-cut detection, and per-stream temporal history. It remains disabled by default. On the Apple M3 synthetic matrix, endpoint fallback lowered HUD flicker p95 by 23.3% and weapon-sight flicker p95 by 16.6%, while whole-frame flicker p95 rose 3.7% and minimum thin-edge recall fell from 0.7055 to 0.6090. All six strict policy comparisons report `REGRESSION`, including temporal stabilization combined with automatic HUD protection. Keep it opt-in and evaluate the target renderer and content; see [temporal quality results, visual inspection, and limitations](docs/TEMPORAL_QUALITY.md).
-
-The checked-in early synthetic benchmark results were captured against the earlier blend placeholder and remain historical. Current RIFE raw, HUD, temporal, and combined results use the rotation fixture and are documented with their strict comparisons in [the temporal quality report](docs/TEMPORAL_QUALITY.md). Synthetic scenes do not establish performance or quality on real games.
-
-Backend availability reports whether a Metal device and converted weights are present; the runtime parses the weights at context creation and validates their architecture and graph shapes when it builds the first inference plan. CTest covers core, fake-provider, timestamp-contract, oversized-resolution-preflight, and Metal C API smoke checks when a Metal device and converted RIFE weights are present; the Metal test is skipped when either prerequisite is absent. The benchmark's source-throughput value is an offline input-upload proxy, not game FPS or presented-frame pacing. The standalone Metal host is the current GPU runtime boundary; D3DMetal integration, full-resolution performance evidence, and in-game FPS evidence remain future work. See [HUD preservation](docs/HUD_PRESERVATION.md) for the host controls and [benchmark guidance](docs/BENCHMARK.md) for measurement limits.
-
-The committed synthetic fixture covers slow panning, fast camera rotation, third-person motion, foliage, thin geometry and fences, particles, translucent scene and UI layers, moving highlights, sights and static crosshairs, subtitles, minimap, health bar, timer, scrolling text, flashing UI, moving menu, and changing HUD counters. HUD and text are mandatory pointwise ROIs; named UI guards include an exact crosshair-stroke mask. Those guards compare per-target RGB errors and per-pixel temporal residual, color flicker, and edge flicker. Racing, scene-cut and loading-transition sequences, and richer subtitle cases remain planned for corpus coverage. A separate same-histogram cut probe is recorded in the temporal quality report. See [the corpus catalog](tools/benchmark/corpus/catalog.json) for the per-category status. No copyrighted game footage is included.
-
-## Build and run
-
-Prerequisites are macOS with an Apple SDK/Clang toolchain, CMake 3.25 or newer, and Ninja. On macOS, the Metal backend and test app are enabled by default.
+Requirements: macOS, Apple SDK and Clang toolchain, CMake 3.25 or newer, and Ninja.
 
 ```sh
 cmake -S . -B build -G Ninja
@@ -44,27 +38,37 @@ cmake --build build
 ctest --test-dir build --output-on-failure
 ```
 
-On macOS, run the analyzer's standard-library metric and regression checks with:
+Run the Python benchmark-metric checks with the standard library:
 
 ```sh
 PYTHONDONTWRITEBYTECODE=1 python3 tests/test_benchmark_metrics.py
 ```
 
-Open the native Metal preview with:
+### Core-only build
+
+The renderer-independent core and tests can also be built without the Metal targets:
+
+```sh
+cmake -S . -B build-core -G Ninja \
+  -DFRAMEGEN_BUILD_METAL=OFF \
+  -DFRAMEGEN_BUILD_TEST_METAL=OFF
+cmake --build build-core
+ctest --test-dir build-core --output-on-failure
+```
+
+### Metal preview and model weights
+
+The preview requires a Metal-capable Mac and converted weights at `models/local/rife-v4.26/rife-v4.26.fgweights`, or a path provided with `FRAMEGEN_MODEL_WEIGHTS`. Prepare the weights using the [offline conversion guide](tools/rife/README.md). The weights are local and are not included in Git.
 
 ```sh
 open build/adapters/test-metal/framegen-test-metal.app
 ```
 
-The Metal test host requires a Metal-capable device and the separately converted weights at `models/local/rife-v4.26/rife-v4.26.fgweights` (or `FRAMEGEN_MODEL_WEIGHTS`). Prepare the checkpoint with [the offline conversion steps](tools/rife/README.md). Set `FRAMEGEN_METAL_MODEL_VARIANT=QUALITY` or `BALANCED` to select an internal precision mode; the default is `QUALITY`. A core-only build can disable both Metal targets with `-DFRAMEGEN_BUILD_METAL=OFF -DFRAMEGEN_BUILD_TEST_METAL=OFF`. The Python analyzer uses only the standard library and can validate/compare results on other hosts. The Metal benchmark runner is an optional macOS target; configure it with `-DFRAMEGEN_BUILD_TOOLS=ON`.
+Set `FRAMEGEN_METAL_MODEL_VARIANT=QUALITY` or `BALANCED` to select an inference precision mode. The default is `QUALITY`.
 
-Run the standalone timing host directly for its per-scenario counters and latency percentiles:
+## Benchmarks
 
-```sh
-build/tests/framegen-pacing-host
-```
-
-Run the committed synthetic fixture after building the runner:
+Enable the optional Metal benchmark runner with `-DFRAMEGEN_BUILD_TOOLS=ON`, then run the synthetic motion corpus:
 
 ```sh
 cmake -S . -B build -G Ninja -DFRAMEGEN_BUILD_TOOLS=ON
@@ -75,24 +79,34 @@ python3 tools/benchmark/bench.py run \
   --output test-results/benchmarks/rife-v4.26-raw-synthetic-motion.json
 ```
 
-Run automatic HUD protection against the same corpus and target times with `--hud-mode automatic`; see [BENCHMARK.md](docs/BENCHMARK.md) for raw and protected commands and the metrics each run records.
-
-Compare the checked-in raw and automatic-HUD RIFE runs:
+For HUD-protected runs, metric definitions, comparisons, and known limitations, see [benchmark guidance](docs/BENCHMARK.md) and [temporal quality results](docs/TEMPORAL_QUALITY.md). The scheduler host is a simulation, not an in-game or physical-display test:
 
 ```sh
-python3 tools/benchmark/bench.py compare \
-  --baseline test-results/benchmarks/rife-v4.26-raw-synthetic-motion.json \
-  --candidate test-results/benchmarks/rife-v4.26-automatic-synthetic-motion.json \
-  --output test-results/benchmarks/rife-v4.26-raw-vs-automatic.json \
-  --summary test-results/benchmarks/rife-v4.26-raw-vs-automatic.md
+build/tests/framegen-pacing-host
 ```
 
-See [BENCHMARK.md](docs/BENCHMARK.md) for corpus authoring, arbitrary interpolation timestamps, masked temporal/edge metrics, runtime fields, comparison rules, and limitations. Analytic ground-truth providers are Python code loaded from the corpus; run only providers you trust.
+## Documentation
 
-## Project boundaries and next work
+| Document | Description |
+| --- | --- |
+| [Architecture](ARCHITECTURE.md) | Library modules, resource ownership, and adapter boundary. |
+| [Roadmap](ROADMAP.md) | Planned project direction. |
+| [Decisions](DECISIONS.md) | Accepted constraints and open questions. |
+| [Tasks](TASKS.md) | Completed, blocked, and follow-up work. |
+| [HUD preservation](docs/HUD_PRESERVATION.md) | UI-plane and automatic HUD controls. |
+| [Temporal quality](docs/TEMPORAL_QUALITY.md) | Synthetic evaluation and regressions. |
+| [Renderer feasibility](docs/feasibility/) | GPTK, D3DMetal, and DXGI experiment reports. |
+| [Model provenance](docs/provenance/rife-v4.26.md) | Model source, conversion, license, and reference evidence. |
+| [Contributing](CONTRIBUTING.md) and [provenance policy](PROVENANCE.md) | Contribution and third-party material requirements. |
 
-The standalone Metal host demonstrates GPU-native inference, and the deterministic 64×64 fixture provides a reference-parity check. The provisional ABI still needs validation with an external renderer adapter, and the synthetic benchmark does not substitute for real-game quality or display-pacing evidence. Next work can address renderer integration and broader licensed evaluation footage.
+## Project boundaries
 
-## Contributing
+- The core must not depend on Highball, Wine, D3DMetal, DXMT, or DXVK.
+- Renderer integrations belong in separate adapters and must use documented/public interfaces.
+- The live frame path must remain GPU-native; CPU code may schedule work and handle metadata, but must not read back frame pixels.
+- Do not inspect, copy, depend on, reconstruct, or imitate private Lossless Scaling or LSFG interfaces, binaries, models, or behavior.
+- Original project code is intended to use Apache-2.0. Third-party code, models, weights, datasets, and runtime dependencies have separate provenance and redistribution requirements; see [LICENSE](LICENSE) and [PROVENANCE.md](PROVENANCE.md).
 
-Read [CONTRIBUTING.md](CONTRIBUTING.md) and [PROVENANCE.md](PROVENANCE.md) before proposing dependencies, model assets, or implementation material. In particular, proprietary LSFG implementation material must not be incorporated.
+## Contributing and support
+
+Read [CONTRIBUTING.md](CONTRIBUTING.md) and [PROVENANCE.md](PROVENANCE.md) before proposing code, dependencies, model assets, or evaluation data. For current priorities and integration limits, start with [TASKS.md](TASKS.md) and [DECISIONS.md](DECISIONS.md).

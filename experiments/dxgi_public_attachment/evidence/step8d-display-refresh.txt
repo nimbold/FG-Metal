@@ -1,0 +1,1 @@
+display_id=1 width=2940 height=1912 refresh_hz=60.0
