@@ -1,0 +1,68 @@
+The Meson build system
+Version: 1.12.1
+Source dir: /private/tmp/dxmt-fb451568-evidence.opkf8x/repo
+Build dir: /private/tmp/dxmt-fb451568-evidence.opkf8x/build-native-arm64
+Build type: native build
+Project name: dxmt
+Project version: v0.1
+C compiler for the host machine: cc (clang 21.0.0 "Apple clang version 21.0.0 (clang-2100.3.34.2)")
+C linker for the host machine: cc ld64 27037.1
+C++ compiler for the host machine: c++ (clang 21.0.0 "Apple clang version 21.0.0 (clang-2100.3.34.2)")
+C++ linker for the host machine: c++ ld64 27037.1
+Host machine cpu family: aarch64
+Host machine cpu: aarch64
+Program touch found: YES (/usr/bin/touch)
+Program xcrun found: YES (/usr/bin/xcrun)
+Program xxd found: YES (/usr/bin/xxd)
+Compiler for C++ supports arguments -Wimplicit-fallthrough: YES 
+Compiler for C++ supports arguments -Wno-missing-field-initializers: YES 
+Compiler for C++ supports arguments -Wno-unused-parameter: YES 
+Compiler for C++ supports arguments -Wno-cast-function-type: YES 
+Compiler for C++ supports arguments -Wno-unused-private-field: YES 
+Compiler for C++ supports arguments -Wno-microsoft-exception-spec: YES 
+Compiler for C++ supports arguments -Wno-extern-c-compat: YES 
+Compiler for C++ supports arguments -Wno-unused-const-variable: YES 
+Compiler for C++ supports arguments -Wno-missing-braces: YES 
+Compiler for C++ supports arguments -fblocks: YES 
+Compiler for C++ supports arguments -fmacro-prefix-map=../repo/=: YES 
+Compiler for C++ supports arguments -DNOMINMAX: YES 
+Compiler for C++ supports arguments -D_WIN32_WINNT=0xa00: YES 
+Compiler for C++ supports arguments -Wimplicit-fallthrough: YES (cached)
+Compiler for C++ supports arguments -Wno-unused-parameter: YES (cached)
+Compiler for C++ supports arguments -Wno-unused-private-field: YES (cached)
+Compiler for C++ supports arguments -Wno-unused-const-variable: YES (cached)
+Compiler for C++ supports arguments -Wno-missing-braces: YES (cached)
+Compiler for C++ supports arguments -fblocks: YES (cached)
+Compiler for C supports arguments -Wimplicit-fallthrough: YES 
+Compiler for C supports arguments -Wno-missing-field-initializers: YES 
+Compiler for C supports arguments -Wno-unused-parameter: YES 
+Compiler for C supports arguments -Wno-cast-function-type: YES 
+Compiler for C supports arguments -Wno-unused-private-field: YES 
+Compiler for C supports arguments -Wno-microsoft-exception-spec: YES 
+Compiler for C supports arguments -Wno-extern-c-compat: YES 
+Compiler for C supports arguments -Wno-unused-const-variable: YES 
+Compiler for C supports arguments -Wno-missing-braces: YES 
+Compiler for C supports arguments -fblocks: YES 
+Compiler for C supports arguments -fmacro-prefix-map=../repo/=: YES 
+Compiler for C supports arguments -DNOMINMAX: YES 
+Compiler for C supports arguments -D_WIN32_WINNT=0xa00: YES 
+Compiler for C supports arguments -Wimplicit-fallthrough: YES (cached)
+Compiler for C supports arguments -Wno-unused-parameter: YES (cached)
+Compiler for C supports arguments -Wno-unused-private-field: YES (cached)
+Compiler for C supports arguments -Wno-unused-const-variable: YES (cached)
+Compiler for C supports arguments -Wno-missing-braces: YES (cached)
+Compiler for C supports arguments -fblocks: YES (cached)
+Compiler for C++ supports link arguments -static: NO 
+Compiler for C++ supports link arguments -Wl,--file-alignment=4096: NO 
+Compiler for C supports link arguments -static: NO 
+Compiler for C supports link arguments -Wl,--file-alignment=4096: NO 
+Compiler for C++ supports arguments -Wno-unnecessary-virtual-specifier: YES 
+Build targets in project: 11
+
+dxmt v0.1
+
+  User defined options
+    buildtype       : release
+    native_llvm_path: /opt/homebrew/opt/llvm@15
+
+Found ninja-1.13.2 at /opt/homebrew/bin/ninja

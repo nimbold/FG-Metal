@@ -1,0 +1,7 @@
+event,app_present_seq,elapsed_us,present_hr,requested_buffer_index,buffer0_query_hr,color_id
+present,1,73820,0x00000000,0,0x00000000,0
+present,2,74578,0x00000000,0,0x00000000,0
+present,3,74793,0x00000000,0,0x00000000,0
+present,4,101070,0x00000000,0,0x00000000,0
+present,5,134486,0x00000000,0,0x00000000,0
+present,6,167910,0x00000000,0,0x00000000,0

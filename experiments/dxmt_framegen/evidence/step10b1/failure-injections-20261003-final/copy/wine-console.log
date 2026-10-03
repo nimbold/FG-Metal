@@ -1,0 +1,27 @@
+0128:trace:loaddll:build_module Loaded L"Z:\\Users\\<user>\\Documents\\Code\\FG-Metal\\experiments\\dxmt_framegen\\evidence\\step10b1\\failure-injections-20261003-final\\copy\\d3d11_clear_window.exe" at 0000000140000000: native
+0128:trace:loaddll:build_module Loaded L"C:\\windows\\system32\\kernelbase.dll" at 00006FFFFFC10000: builtin
+0128:trace:loaddll:build_module Loaded L"C:\\windows\\system32\\kernel32.dll" at 00006FFFFFEC0000: builtin
+0128:trace:loaddll:build_module Loaded L"C:\\windows\\system32\\msvcrt.dll" at 00006FFFFFAF0000: builtin
+0128:trace:loaddll:build_module Loaded L"C:\\windows\\system32\\ucrtbase.dll" at 00006FFFFF9D0000: builtin
+0128:trace:loaddll:build_module Loaded L"C:\\windows\\system32\\sechost.dll" at 00006FFFFFAC0000: builtin
+0128:trace:loaddll:build_module Loaded L"C:\\windows\\system32\\advapi32.dll" at 00006FFFFFBB0000: builtin
+0128:trace:loaddll:build_module Loaded L"C:\\windows\\system32\\win32u.dll" at 00006FFFFF4D0000: builtin
+0128:trace:loaddll:build_module Loaded L"C:\\windows\\system32\\user32.dll" at 00006FFFFF5C0000: builtin
+0128:trace:loaddll:build_module Loaded L"C:\\windows\\system32\\GDI32.dll" at 00006FFFFF520000: builtin
+0128:trace:loaddll:build_module Loaded L"C:\\windows\\system32\\winemetal.dll" at 00006FFFFD6B0000: builtin
+0128:trace:loaddll:build_module Loaded L"C:\\windows\\system32\\DXGI.DLL" at 00006FFFFD6F0000: builtin
+0128:trace:loaddll:build_module Loaded L"C:\\windows\\system32\\d3d11.dll" at 00006FFFFE2C0000: builtin
+Wine cannot find the FreeType font library.  To enable Wine to
+use TrueType fonts please install a version of FreeType greater than
+or equal to 2.0.5.
+http://www.freetype.org
+0128:trace:loaddll:build_module Loaded L"C:\\windows\\system32\\imm32.dll" at 00006FFFFF4A0000: builtin
+0128:trace:loaddll:build_module Loaded L"c:\\windows\\system32\\winemac.drv" at 00006FFFFD690000: builtin
+0128:trace:loaddll:build_module Loaded L"C:\\windows\\system32\\uxtheme.dll" at 00006FFFFD640000: builtin
+0128:trace:loaddll:build_module Loaded L"C:\\windows\\system32\\rpcrt4.dll" at 00006FFFFF8F0000: builtin
+0128:trace:loaddll:build_module Loaded L"C:\\windows\\system32\\combase.dll" at 00006FFFFCB40000: builtin
+0128:trace:loaddll:build_module Loaded L"C:\\windows\\system32\\coml2.dll" at 00006FFFFCB10000: builtin
+0128:trace:loaddll:build_module Loaded L"C:\\windows\\system32\\ole32.dll" at 00006FFFFCBA0000: builtin
+0128:err:vulkan:vulkan_init_once Failed to load libMoltenVK.dylib
+info:  Maximum supported feature level: D3D_FEATURE_LEVEL_11_1
+info:  Using feature level D3D_FEATURE_LEVEL_11_0

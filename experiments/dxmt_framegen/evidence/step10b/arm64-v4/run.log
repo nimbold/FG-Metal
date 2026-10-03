@@ -1,0 +1,19 @@
+process_arch=arm64
+metal_device=Apple M3
+submission=FrameGenerator::submit interpolation=0.5 source_updates_hz=30 display_link_hz=60 duration_seconds=60.0 cpu_readback=none
+sandbox_extension_issue_file_to_process failed for /tmp/fg-step10b-synthetic-arm64-v4/framegen-dxmt-synthetic-metal.app: 1 (Operation not permitted)
+progress callbacks=1 sources=1 submits=0 ready=0 presented_pending=0 drops=0
+progress callbacks=300 sources=152 submits=150 ready=150 presented_pending=3 drops=1
+progress callbacks=600 sources=302 submits=300 ready=300 presented_pending=4 drops=1
+progress callbacks=900 sources=452 submits=450 ready=450 presented_pending=3 drops=1
+progress callbacks=1200 sources=602 submits=600 ready=600 presented_pending=4 drops=1
+progress callbacks=1500 sources=752 submits=750 ready=750 presented_pending=4 drops=1
+progress callbacks=1800 sources=904 submits=902 ready=901 presented_pending=4 drops=2
+progress callbacks=2100 sources=1054 submits=1052 ready=1052 presented_pending=4 drops=2
+progress callbacks=2400 sources=1204 submits=1202 ready=1202 presented_pending=4 drops=2
+progress callbacks=2700 sources=1354 submits=1352 ready=1352 presented_pending=4 drops=2
+progress callbacks=3000 sources=1504 submits=1435 ready=1435 presented_pending=5 drops=2
+progress callbacks=3300 sources=1654 submits=1577 ready=1577 presented_pending=4 drops=3
+evidence_csv=experiments/dxmt_framegen/evidence/step10b/arm64-v4/synthetic-display.csv
+evidence_summary=experiments/dxmt_framegen/evidence/step10b/arm64-v4/synthetic-summary.txt
+final callbacks=3573 sources=1760 submissions=1683 ready=1683 A=863 G=1678 B=1031 actual=3569 drops=3 pending=0

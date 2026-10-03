@@ -1,0 +1,14 @@
+app_presents=1801 duration_s=59.966 rate_hz=30.033
+app_present_errors=0 buffer0_query_errors=0
+native_events=1170 display_events=169
+native_event_counts=circuit_open:1,epoch_reset:2,framegen_failure:8,generated_dropped:89,generated_ready:89,generated_requested:89,history_copy_complete:90,presentation_dropped:9,presentation_gpu_completed:178,presentation_submitted:178,selected_source:92,selected_source_repeat:86,source_accepted:90,source_displayed:169
+exact_pair_brackets=0 immediate_A_G_B_triples=0
+incorrect_pair_selections=0 source_regressions=0 repeated_source_selections=81
+presentation_drops=9 generated_drops=89
+display_interval_ms: n=168 p50=16.666 p95=46.529 p99=47.571 max=49.999
+history_copy_completion_ms: n=90 p50=0.949 p95=4.577 p99=34.467 max=34.467
+generation_submit_to_ready_ms: n=89 p50=7.594 p95=9.190 p99=16.412 max=16.412
+gpu_submit_to_complete_ms: n=178 p50=0.614 p95=1.253 p99=2.531 max=7.389
+deadline_slack_ms: n=534 p50=16.362 p95=16.566 p99=16.585 max=16.594
+display_callback_us: n=890 p50=6.958 p95=22.084 p99=31.333 max=76.041
+tick_queue_depth: n=1170 p50=0.000 p95=0.000 p99=0.000 max=0.000

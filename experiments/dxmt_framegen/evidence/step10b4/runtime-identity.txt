@@ -1,0 +1,40 @@
+Step 10B.4 runtime identity
+
+Pinned DXMT base revision: fb4515681daefb789a4d0f403c4bdbca88f3b3de
+Disposable downstream checkout: /private/tmp/fg-metal-step10b3-downstream
+Nearest-midpoint candidate F source file SHA-256: 8a7af6ab7e9dd65acfc0f38336efab02be0c6592f7faf7ed7342c31a1bad9cf3
+Build command: meson compile -C /private/tmp/dxmt-step10b3-cross-d3d12 -j 8
+Build result: success; linker warned about duplicate -lc++ and direct linking of re-exported libunwind.
+
+Pre-lookahead engine (A, B, C, initial D, and API-method probes):
+  d3d10core.dll  2a0904d16453806b13c3be3eaf4f4d9e93aaef6d715e57f684b236cceab8501f
+  d3d11.dll      7e78d9f58783f6ea8c01cfa9e64667ecd77cb166a029671a9b3631f9b9764deb
+  dxgi.dll       60f5d6117bbc6877f66650e8c8b69b1a8e9d657a0570911ee86060e40a012069
+  winemetal.dll  2247b1273362c6a2e91e109e100cdaa0fd6204488502fc55bc70a2c57b374492
+  winemetal.so   a257dc2aacb0e1de244471b1c0dadaecdcd3c07d782cd3c5a46ecb113e71d0db
+
+Nearest-midpoint engine (E smoke, final F synthetic, G lifecycle, H fault runs):
+  d3d10core.dll  e9b8559a7ecc738265ec675253ce8735393a14e452a60027b815975fcadd0267
+  d3d11.dll      55f391a38080f18dc0dcaccf24f9617a1ebc7513ebf9f1ec08f5e6a040fec497
+  dxgi.dll       2aaf5456a6a832ae4234d9439e0f3338aa688fa61314131f8f8e72965ac6af6d
+  winemetal.dll  2247b1273362c6a2e91e109e100cdaa0fd6204488502fc55bc70a2c57b374492
+  winemetal.so   8efc1296f1998e0690c8d7cc3c8c7f73a968ecf177e4e62f3d2ba2fd3137301c
+
+Advance-B candidate I source and build:
+  Candidate source file SHA-256: d7a7d2a8c63fbcd53f51e404b2b3b9aa6a944d7e3ef4c3260238a61e9f0a0030
+  Build command: meson compile -C /private/tmp/dxmt-step10b3-cross-d3d12 -j 8
+  Final rebuild result: success; build output hash matched the run engine's winemetal.so.
+  Run engine: /private/tmp/dxmt-step10b4-run-v10/engine
+  d3d10core.dll  e9b8559a7ecc738265ec675253ce8735393a14e452a60027b815975fcadd0267
+  d3d11.dll      55f391a38080f18dc0dcaccf24f9617a1ebc7513ebf9f1ec08f5e6a040fec497
+  dxgi.dll       2aaf5456a6a832ae4234d9439e0f3338aa688fa61314131f8f8e72965ac6af6d
+  winemetal.dll  2247b1273362c6a2e91e109e100cdaa0fd6204488502fc55bc70a2c57b374492
+  winemetal.so   c16ea2b5725bdeb8dca71e8f219dc19d2428dd16e1d1f7dc2557f165943216f7
+  Added engine dependency libinotify.0.dylib  0565014c42c3506fb5635aeb12f09bad3a4eef8f7ff3e6c9cf9d9e9e6b339df8
+  Controlled D3D11 app SHA-256: 9a88448479f0ae34eea9f093ec311308f0b10925cdd5d69d920e9f61b36e682a
+  First launch failed before app/native logs; the successful rerun and all lifecycle/fault runs used this same engine and app hash.
+
+Controlled D3D11 harness SHA-256: 9a88448479f0ae34eea9f093ec311308f0b10925cdd5d69d920e9f61b36e682a
+
+All runtimes and Wine prefixes above are disposable copies under /private/tmp.
+The installed Highball application and its engines were not used as destinations.

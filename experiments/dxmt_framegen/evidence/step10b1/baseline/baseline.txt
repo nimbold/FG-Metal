@@ -1,0 +1,13 @@
+STEP 10B.1 pre-edit controlled DXMT baseline
+
+Result: PASS (controlled D3D11 application exited 0)
+DXMT revision: fb4515681daefb789a4d0f403c4bdbca88f3b3de
+Pristine source checkout: /tmp/dxmt-fb451568-evidence.opkf8x/repo (detached exact revision)
+Downstream worktree: /tmp/dxmt-fb451568-evidence.opkf8x/downstream (clean before implementation)
+Wine runtime: /tmp/step10a4-highball-V5DiZw/engine (wine-10.0 Sikarugir)
+Wine prefix: /var/folders/4l/yp39dwhd7rg2y9xscgvhkyqw0000gn/T/dxmt-step10b1-baseline-prefix
+Application: build/step10a-d3d11-clear-window/d3d11_clear_window.exe
+Command: ./tools/dxmt/run_d3d11_baseline.sh /tmp/step10a4-highball-V5DiZw/engine /var/folders/4l/yp39dwhd7rg2y9xscgvhkyqw0000gn/T/dxmt-step10b1-baseline-prefix build/step10a-d3d11-clear-window/d3d11_clear_window.exe
+The engine copy already contained the Step 10A DXMT runtime and matching LLVM 15 libc++/libc++abi dylibs; this run did not restage or modify it.
+The first attempt with a prefix under /tmp failed before prefix creation because Wine canonicalized it to /private/tmp and refused that parent. The successful retry used the user-owned macOS TMPDIR. That failure and success are separate runs; the successful log is preserved beside this record.
+The log records the application and DXMT runtime path; exit success demonstrates source Present/resize execution, not physical scanout or frame-generation behavior.

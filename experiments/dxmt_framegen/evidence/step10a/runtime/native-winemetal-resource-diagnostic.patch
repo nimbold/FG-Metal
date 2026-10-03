@@ -1,0 +1,69 @@
+diff --git a/src/winemetal/unix/winemetal_unix.c b/src/winemetal/unix/winemetal_unix.c
+index 3327b29..05f9a12 100644
+--- a/src/winemetal/unix/winemetal_unix.c
++++ b/src/winemetal/unix/winemetal_unix.c
+@@ -1,5 +1,7 @@
+ #include <stdatomic.h>
+ #include <dlfcn.h>
++#include <stdio.h>
++#include <stdlib.h>
+ #import <Cocoa/Cocoa.h>
+ #import <ColorSync/ColorSync.h>
+ #import <CoreFoundation/CFRunLoop.h>
+@@ -1243,10 +1245,55 @@ _MTLTexture_pixelFormat(void *obj) {
+   return STATUS_SUCCESS;
+ }
+ 
++/* Local downstream diagnostic only. This code runs after the WineMetal Unix
++ * thunk has resolved its handle to a native Objective-C Metal texture. */
++static void
++log_native_texture_metadata(id<MTLTexture> texture) {
++  const char *enabled = getenv("DXMT_WMT_RESOURCE_DIAGNOSTIC");
++  if (!enabled || !enabled[0] || enabled[0] == '0')
++    return;
++
++  uint64_t device_id = texture.device.registryID;
++  uint64_t width = texture.width;
++  uint64_t height = texture.height;
++  uint64_t pixel_format = texture.pixelFormat;
++  uint64_t sample_count = texture.sampleCount;
++  static atomic_flag lock = ATOMIC_FLAG_INIT;
++  static uint64_t last_device_id = UINT64_MAX;
++  static uint64_t last_width = UINT64_MAX;
++  static uint64_t last_height = UINT64_MAX;
++  static uint64_t last_pixel_format = UINT64_MAX;
++  static uint64_t last_sample_count = UINT64_MAX;
++
++  while (atomic_flag_test_and_set_explicit(&lock, memory_order_acquire)) {}
++  bool changed = device_id != last_device_id || width != last_width || height != last_height ||
++                 pixel_format != last_pixel_format || sample_count != last_sample_count;
++  if (changed) {
++    last_device_id = device_id;
++    last_width = width;
++    last_height = height;
++    last_pixel_format = pixel_format;
++    last_sample_count = sample_count;
++  }
++  atomic_flag_clear_explicit(&lock, memory_order_release);
++  if (!changed)
++    return;
++
++  const char *device_name = [texture.device.name UTF8String];
++  fprintf(stderr,
++          "DXMT_WMT_NATIVE_TEXTURE device_name=\"%s\" device_registry_id=%llu "
++          "width=%llu height=%llu pixel_format=%llu sample_count=%llu\n",
++          device_name ? device_name : "(null)", (unsigned long long)device_id,
++          (unsigned long long)width, (unsigned long long)height,
++          (unsigned long long)pixel_format, (unsigned long long)sample_count);
++}
++
+ static NTSTATUS
+ _MTLTexture_width(void *obj) {
+   struct unixcall_generic_obj_uint64_ret *params = obj;
+-  params->ret = [(id<MTLTexture>)params->handle width];
++  id<MTLTexture> texture = (id<MTLTexture>)params->handle;
++  log_native_texture_metadata(texture);
++  params->ret = [texture width];
+   return STATUS_SUCCESS;
+ }
+ 

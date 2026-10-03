@@ -1,0 +1,13 @@
+event,presenter_id,epoch,presentation_seq,tick_id,kind,source_id,pair_a_id,pair_b_id,source_ns,copy_ready_ns,generated_ready_ns,generated_requested_ns,callback_ns,deadline_ns,target_ns,actual_presented_ns,present_submit_ns,gpu_complete_ns,callback_duration_ns,queue_depth,raw_callback_ca_bits,raw_deadline_ca_bits,raw_target_ca_bits,detail
+epoch_reset,1,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"2"
+source_accepted,1,2,0,0,0,1,0,0,242499854165416,242499875573625,0,0,0,0,242499937498749,0,0,0,0,0,0,0,0,"owned history copy completed successfully"
+history_copy_complete,1,2,0,0,0,1,0,0,242499854165416,242499875573625,0,0,0,0,242499937498749,0,0,0,0,0,0,0,0,"Metal command buffer completed"
+source_accepted,1,2,0,0,0,2,0,0,242499883630875,242499884646833,0,0,0,0,242499962192933,0,0,0,0,0,0,0,0,"owned history copy completed successfully"
+history_copy_complete,1,2,0,0,0,2,0,0,242499883630875,242499884646833,0,0,0,0,242499962192933,0,0,0,0,0,0,0,0,"Metal command buffer completed"
+generated_requested,1,2,0,0,2,2,1,2,242499883630875,242499884646833,0,242499884676083,0,0,242499949845841,0,0,0,0,0,0,0,0,"exact adjacent source pair submitted"
+generated_ready,1,2,0,3,2,2,1,2,0,0,242499891500916,0,242499891479541,242499908099457,242499949845841,0,0,0,3542,0,0,0,0,"Metal status completed"
+selected_source,1,2,0,3,1,1,0,0,242499854165416,242499875573625,0,0,242499891479541,242499908099457,242499941431458,0,0,0,3542,0,0,0,0,"startup source after explicit lookahead"
+presentation_submitted,1,2,1,3,1,1,0,0,242499854165416,0,0,0,242499891479541,242499908099457,242499941431458,0,242499891745458,0,3542,0,4687572245663462242,4687572246234412276,4687572247379691076,"external CAMetalDisplayLink drawable via DXMT Presenter"
+presentation_gpu_completed,1,2,1,3,1,1,0,0,242499854165416,0,0,0,242499891479541,242499908099457,242499941431458,0,242499891745458,242499892286291,3542,0,4687572245663462242,4687572246234412276,4687572247379691076,"Metal command buffer completed"
+presentation_dropped,1,2,1,3,1,1,0,0,242499854165416,0,0,0,242499891479541,242499908099457,242499941431458,0,242499891745458,0,3542,0,4687572245663462242,4687572246234412276,4687572247379691076,"Metal drawable presentedTime=0; associated frame was dropped or not presented"
+epoch_reset,1,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"3"

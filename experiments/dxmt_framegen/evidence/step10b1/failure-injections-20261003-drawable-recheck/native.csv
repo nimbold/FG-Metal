@@ -1,0 +1,13 @@
+event,presenter_id,epoch,presentation_seq,tick_id,kind,source_id,pair_a_id,pair_b_id,source_ns,copy_ready_ns,generated_ready_ns,generated_requested_ns,callback_ns,deadline_ns,target_ns,actual_presented_ns,present_submit_ns,gpu_complete_ns,callback_duration_ns,queue_depth,raw_callback_ca_bits,raw_deadline_ca_bits,raw_target_ca_bits,detail
+epoch_reset,1,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"2"
+drawable_unavailable,1,2,0,1,0,0,0,0,0,0,0,0,242744089092708,242744104870631,242744121537298,0,0,0,16250,0,0,0,0,"CAMetalDisplayLink supplied no drawable"
+framegen_failure,1,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"display link returned no drawable"
+drawable_unavailable,1,2,0,2,0,0,0,0,0,0,0,0,242744105292125,242744121537298,242744138203965,0,0,0,4625,0,0,0,0,"CAMetalDisplayLink supplied no drawable"
+framegen_failure,1,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"display link returned no drawable"
+source_accepted,1,2,0,0,0,1,0,0,242744103182625,242744116385625,0,0,0,0,242744184321531,0,0,0,0,0,0,0,0,"owned history copy completed successfully"
+history_copy_complete,1,2,0,0,0,1,0,0,242744103182625,242744116385625,0,0,0,0,242744184321531,0,0,0,0,0,0,0,0,"Metal command buffer completed"
+drawable_unavailable,1,2,0,3,0,0,0,0,0,0,0,0,242744122250833,242744138726665,242744172058665,0,0,0,21625,0,0,0,0,"CAMetalDisplayLink supplied no drawable"
+circuit_open,1,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"display link returned no drawable"
+source_accepted,1,2,0,0,0,2,0,0,242744121322791,242744123688958,0,0,0,0,242744200599980,0,0,0,0,0,0,0,0,"owned history copy completed successfully"
+history_copy_complete,1,2,0,0,0,2,0,0,242744121322791,242744123688958,0,0,0,0,242744200599980,0,0,0,0,0,0,0,0,"Metal command buffer completed"
+epoch_reset,1,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"3"

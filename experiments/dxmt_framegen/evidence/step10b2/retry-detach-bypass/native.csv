@@ -1,0 +1,23 @@
+event,presenter_id,epoch,presentation_seq,tick_id,kind,source_id,pair_a_id,pair_b_id,source_ns,copy_ready_ns,generated_ready_ns,generated_requested_ns,callback_ns,deadline_ns,target_ns,actual_presented_ns,present_submit_ns,gpu_complete_ns,callback_duration_ns,queue_depth,raw_callback_ca_bits,raw_deadline_ca_bits,raw_target_ca_bits,detail,worker_wake_ns,mutex_wait_start_ns,mutex_acquired_ns,presenter_encode_start_ns,presenter_encode_end_ns,gpu_submit_ns,present_call_ns,lifecycle_state,circuit_state
+epoch_reset,1,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"2",0,0,0,0,0,0,0,0,0
+session_active,1,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"display resumed in fresh epoch",0,0,0,0,0,0,0,0,0
+source_candidate_reserved,1,2,0,0,1,1,0,0,249435674395666,0,0,0,0,0,249435757728999,0,0,0,0,1,0,0,0,"required snapshot encoded; ownership waits for afterCommit queueing",0,0,0,0,0,0,0,0,0
+display_tick_expired,1,2,0,1,0,0,0,0,249435721846416,0,0,0,249435692745208,249435697683540,249435731015540,0,0,0,54458,2,0,0,0,"expired tick; source remains retryable",0,0,0,0,0,0,0,0,0
+presentation_stages,1,2,0,1,0,0,0,0,0,0,0,0,249435692745208,249435697683540,249435731015540,0,0,0,54458,0,4687810557980343035,4687810558149873984,4687810559295152783,"worker,mutex,encode,submit,present stages",249435692823833,249435692825875,249435692831625,0,0,0,0,2,0
+source_candidate_reserved,1,2,0,0,1,2,0,0,249435721967208,0,0,0,0,0,249435803407107,0,0,0,0,2,0,0,0,"required snapshot encoded; ownership waits for afterCommit queueing",0,0,0,0,0,0,0,0,0
+display_tick_expired,1,2,0,2,0,0,0,0,249435724720916,0,0,0,249435704185750,249435714349540,249435747681540,0,0,0,6666,1,0,0,0,"expired tick; source remains retryable",0,0,0,0,0,0,0,0,0
+presentation_stages,1,2,0,2,0,0,0,0,0,0,0,0,249435704185750,249435714349540,249435747681540,0,0,0,6666,0,4687810558373439917,4687810558722513384,4687810559867792183,"worker,mutex,encode,submit,present stages",249435724714750,249435724715458,249435724715666,0,0,0,0,2,0
+presentation_stages,1,2,0,3,0,0,0,0,0,0,0,0,249435714823291,249435731015540,249435764347541,0,0,0,5625,0,4687810558738937339,4687810559295152783,4687810560440431583,"worker,mutex,encode,submit,present stages",249435724748541,249435724748666,249435724748708,0,0,0,0,2,0
+source_state_transition,1,2,0,0,1,1,0,0,249435674395666,0,0,0,0,0,249435757728999,0,0,0,0,0,0,0,0,"accepted->snapshot_copy_pending:required snapshot queued on DXMT Metal queue",0,0,0,0,0,0,0,0,0
+source_accepted,1,2,0,0,1,1,0,0,249435674395666,0,0,0,0,0,249435757728999,0,0,0,0,0,0,0,0,"ownership transferred after required snapshot was committed on the DXMT queue",0,0,0,0,0,0,0,0,0
+source_state_transition,1,2,0,0,1,2,0,0,249435721967208,0,0,0,0,0,249435803407107,0,0,0,0,0,0,0,0,"accepted->snapshot_copy_pending:required snapshot queued on DXMT Metal queue",0,0,0,0,0,0,0,0,0
+source_accepted,1,2,0,0,1,2,0,0,249435721967208,0,0,0,0,0,249435803407107,0,0,0,0,0,0,0,0,"ownership transferred after required snapshot was committed on the DXMT queue",0,0,0,0,0,0,0,0,0
+presentation_stages,1,2,0,4,0,0,0,0,0,0,0,0,249435731303791,249435747681540,249435781013540,0,0,0,12917,0,4687810559305210154,4687810559867792183,4687810561013070982,"worker,mutex,encode,submit,present stages",249435731336250,249435731336625,249435731336958,0,0,0,0,2,0
+source_state_transition,1,2,0,0,1,1,0,0,249435674395666,249435734745208,0,0,0,0,249435757728999,0,0,0,0,0,0,0,0,"snapshot_copy_pending->owned:presentable snapshot completed",0,0,0,0,0,0,0,0,0
+source_snapshot_complete,1,2,0,0,1,1,0,0,249435674395666,249435734745208,0,0,0,0,249435757728999,0,0,0,0,0,0,0,0,"immutable presenter snapshot is ready",0,0,0,0,0,0,0,0,0
+history_copy_failed,1,2,0,0,0,1,0,0,249435674395666,249435734778250,0,0,0,0,249435757728999,0,0,0,0,0,0,0,0,"injected asynchronous history copy failure; source snapshot retained",0,0,0,0,0,0,0,0,0
+circuit_open,1,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"asynchronous history copy failed",0,0,0,0,0,0,0,0,0
+source_state_transition,1,2,0,0,1,2,0,0,249435721967208,249435735219125,0,0,0,0,249435803407107,0,0,0,0,0,0,0,0,"snapshot_copy_pending->owned:presentable snapshot completed",0,0,0,0,0,0,0,0,0
+source_snapshot_complete,1,2,0,0,1,2,0,0,249435721967208,249435735219125,0,0,0,0,249435803407107,0,0,0,0,0,0,0,0,"immutable presenter snapshot is ready",0,0,0,0,0,0,0,0,0
+history_copy_failed,1,2,0,0,0,2,0,0,249435721967208,249435735524208,0,0,0,0,249435803407107,0,0,0,0,0,0,0,0,"injected asynchronous history copy failure; source snapshot retained",0,0,0,0,0,0,0,0,0
+circuit_open,1,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"asynchronous history 

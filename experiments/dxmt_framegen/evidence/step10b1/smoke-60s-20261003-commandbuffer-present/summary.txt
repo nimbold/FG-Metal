@@ -1,0 +1,14 @@
+app_presents=1801 duration_s=59.960 rate_hz=30.036
+app_present_errors=0 buffer0_query_errors=0
+native_events=30 display_events=0
+native_event_counts=circuit_open:1,epoch_reset:2,framegen_failure:2,generated_ready:2,generated_requested:3,history_copy_complete:4,presentation_dropped:3,presentation_gpu_completed:3,presentation_submitted:3,selected_source:3,source_accepted:4
+exact_pair_brackets=0 immediate_A_G_B_triples=0
+incorrect_pair_selections=0 source_regressions=0 repeated_source_selections=0
+presentation_drops=3 generated_drops=0
+display_interval_ms: n=0
+history_copy_completion_ms: n=4 p50=1.601 p95=34.076 p99=34.076 max=34.076
+generation_submit_to_ready_ms: n=2 p50=6.697 p95=14.800 p99=14.800 max=14.800
+gpu_submit_to_complete_ms: n=3 p50=0.625 p95=0.912 p99=0.912 max=0.912
+deadline_slack_ms: n=9 p50=14.573 p95=15.967 p99=15.967 max=15.967
+display_callback_us: n=14 p50=7.625 p95=9.959 p99=9.959 max=9.959
+tick_queue_depth: n=30 p50=0.000 p95=0.000 p99=0.000 max=0.000

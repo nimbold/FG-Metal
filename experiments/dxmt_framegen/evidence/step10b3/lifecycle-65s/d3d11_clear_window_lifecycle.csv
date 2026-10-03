@@ -1,0 +1,7 @@
+event,frame,elapsed_us,result,hr
+resize_begin,90,3000247,800x450,0x00000000
+resize_complete,90,3077043,succeeded,0x00000000
+framegen_disabled,451,15000854,bypass,0x00000000
+framegen_enabled,601,20000514,resume,0x00000000
+focus_loss,751,25001274,minimized,0x00000000
+focus_recovery,781,26265851,restore_requested,0x00000000

@@ -1,0 +1,50 @@
+app_presents=301 duration_s=9.981 rate_hz=30.158
+app_present_errors=0 app_present_nonzero_success_statuses=0 app_present_occluded_statuses=0 buffer0_query_errors=0
+app_window_state: visible=301 hidden=0 iconic=0 not_iconic=301 foreground=301 background=0 unavailable_visible=0 unavailable_iconic=0 unavailable_foreground=0
+native_events=7818 positive_display_events=517 display_rate_hz=52.135
+native_event_counts=circuit_open:3,display_callback_summary:6,display_callbacks_enabled:6,display_callbacks_stopped:6,display_link_attached:6,display_tick_expired:1,epoch_reset:6,escrow_setup_failed:8,framegen_failure:6,generated_dropped:271,generated_requested:13,generation_submissions_drained:6,layer_owner_claimed:6,layer_owner_draining:6,layer_owner_released:6,ordinary_source_present_submitted:1,presentation_callbacks_registered:555,presentation_feedback_drained:6,presentation_feedback_result:555,presentation_stages:570,presented_time_zero:76,real_presentation_submitted:555,selected_source:270,selected_source_drain:22,selected_source_repeat:263,session_active:6,source_candidate_reserved:293,source_displayed:281,source_escrow_complete:293,source_gpu_progress_unblocked:555,source_only_bypass:8,source_ownership_transfer:292,source_repeat_presented:236,source_state_transition:1739,source_submission_unconfirmed:11,source_terminal:293,synthetic_gpu_work_drained:6,worker_drawables_retired:6,worker_tick_retired:570
+accepted_source_ids=292 acceptance_mode=ownership_acceptance_event
+source_acceptance_coverage=ownership_acceptance_records
+source_terminal_mode=explicit missing_terminal_ids=0 missing_terminal_records=0 duplicate_terminal_ids=0 duplicate_terminal_records=0 duplicate_accept_ids=0 orphan_terminal_ids=1 lost_source_ids=0
+lost_source_id_list=none
+source_terminal_records=293 safe_terminal_ids=292 unsafe_terminal_ids=0 source_safety_violation_ids=0
+submitted_unconfirmed_accepted_ids=11
+unsafe_terminal_id_list=none
+source_safety_violation_id_list=none
+source_state_transition_records=1739 transitions=display_confirmed->retired:terminal source is older than committed frontier:276,display_pending->display_submitted:worker committed presenter work after scheduling drawable presentation:292,display_submitted->display_confirmed:submitted source has positive presentedTime feedback:281,display_submitted->retired:terminal source is older than committed frontier:11,escrow_preparing->escrow_submitted:DXMT source command buffer committed on ordinary Presenter path:1,escrow_preparing->escrow_submitted:DXMT source command buffer committed with mandatory escrow copy:292,escrow_ready->display_pending:provisional selection; source frontier remains unchanged:292,escrow_ready->display_submitted:ordinary Presenter submitted priming source:1,escrow_submitted->escrow_ready:same-buffer SourceEscrow copy completed:293
+source_terminal_details=display_submitted_unconfirmed:presentedTime did not confirm an already-submitted source:11,ordinary_fallback:ordinary DXMT Presenter retained this source:1,renderer_presented:display submission received positive feedback and GPU completion:281
+source_zero_feedback_ids=38 accepted_source_zero_feedback=38 lost_ids_with_zero_feedback=0
+displayed_generated_frames=0 immediate_A_G_B_triples=0 unbracketed_G=0 immediate_missing_A=0 immediate_missing_B=0 immediate_missing_both=0
+nearest_source_pair_brackets=0 nearest_missing_A=0 nearest_missing_B=0 nearest_unmatched_endpoints_with_zero_feedback=0 nearest_missing_both=0 immediate_missing_endpoints_with_zero_feedback=0
+malformed_requested_pairs=0 malformed_displayed_pairs=0 source_regressions=0 repeated_source_events=228
+generated_drops=271 generated_failures=0 generated_failure_drop_details=8 generated_presentation_failures=0
+generated_zero_presentedTime=0 source_zero_presentedTime=76
+zero_presentedTime=76 by_kind=source:76
+zero_presentedTime_gpu_status=completed:76 circuit_state=0:2,1:74 lifecycle_epoch=1:24,5:2,6:50 zero_feedback_presentation_records=38 zero_feedback_with_stage_records=38
+display_interval_ms: n=516 p50=16.666 p95=45.674 p99=66.666 max=563.097
+history_copy_completion_ms: n=0 (unavailable)
+generation_submit_to_ready_ms: n=0 (unavailable)
+callback_to_worker_wake_ms: n=570 p50=0.049 p95=0.169 p99=0.406 max=2.159
+callback_to_selection_ms: n=570 p50=0.102 p95=0.234 p99=0.521 max=2.728
+device_mutex_wait_ms: n=570 p50=0.001 p95=0.002 p99=0.002 max=0.003
+device_mutex_hold_ms: n=570 p50=0.850 p95=1.565 p99=3.176 max=506.851
+presenter_encode_ms: n=555 p50=0.232 p95=0.411 p99=0.723 max=0.886
+callback_to_gpu_submit_ms: n=555 p50=0.632 p95=1.174 p99=2.339 max=8.270
+gpu_submit_to_completion_ms: n=552 p50=1.114 p95=1.366 p99=1.947 max=505.422
+callback_to_present_call_ms: n=555 p50=0.782 p95=1.509 p99=3.215 max=8.825
+gpu_submit_to_present_call_ms: n=555 p50=0.132 p95=0.488 p99=0.673 max=3.255
+present_call_to_feedback_ms: n=555 p50=45.606 p95=73.304 p99=76.286 max=538.197
+callback_to_feedback_ms: n=555 p50=46.485 p95=74.051 p99=77.135 max=539.279
+positive_presentedTime_gap_ms: n=516 p50=16.666 p95=45.674 p99=66.666 max=563.097
+presentedTime_minus_target_ms: n=517 p50=-10.818 p95=16.727 p99=16.784 max=16.797
+legacy_precommit_record_to_gpu_completion_ms: n=0 (unavailable)
+callback_to_legacy_precommit_record_ms: n=0 (unavailable)
+display_callback_duration_us: n=570 p50=12.458 p95=30.291 p99=48.958 max=198.209
+tick_queue_depth: n=570 p50=1.000 p95=1.000 p99=1.000 max=2.000
+callback_tick_ledger: callback_count=570 callback_hz=57.110 terminal_count=570 callback_terminal_delta=0 terminal_rows=570 unique_ticks=570 duplicate_tick_terminals=0 outstanding_drawable_high_water=3 classes=no_output_available:15,source_submitted:555
+display_drawable_feedback: submitted_source=555 submitted_generated=0 gpu_completed=555 gpu_failed=0 positive_presentedTime=517 zero_presentedTime=38 positive_feedback_hz=51.800 source_submission_hz=55.607 generated_submission_hz=0.000
+generated_frame_feedback: requested=13 ready=0 selected=0 submitted=0 positive=0 zero=0 dropped_before_submit_unique_pairs=8
+gpu_result_status=completed:555
+long_positive_feedback_gaps_over_25ms=78 correlated_target_window_outcomes=positive_feedback_spacing_or_target_phase:54,zero_feedback_in_target_window:24
+selection_counts_by_kind=0:15,source:555 late_G_feedback_after_source_B_schedule=0 late_G_feedback_after_B_display_target=0 before_B_display_target=0 B_target_unavailable=0 late_G_after_B_positive_feedback=0 B_positive_feedback_unavailable=0
+positive_generated_timestamp_order=none

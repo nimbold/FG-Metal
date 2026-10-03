@@ -1,0 +1,3579 @@
+diff --git a/meson.build b/meson.build
+index e10c901..0ca951a 100644
+--- a/meson.build
++++ b/meson.build
+@@ -9,6 +9,11 @@ fs = import('fs')
+ 
+ dxmt_crossbuild = meson.is_cross_build()
+ 
++if get_option('enable_dxmt_framegen_experiment')
++  add_languages('objcpp', native: true, required: true)
++  add_project_arguments('-fobjc-arc', language: 'objcpp', native: true)
++endif
++
+ cpp = meson.get_compiler('cpp')
+ cc = meson.get_compiler('c')
+ clang = meson.get_compiler('c', native: true)
+diff --git a/meson.options b/meson.options
+index 715b176..f5adc25 100644
+--- a/meson.options
++++ b/meson.options
+@@ -8,4 +8,7 @@ option('wine_builtin_dll', type : 'boolean', value : true)
+ option('enable_tests', type : 'boolean', value : false)
+ option('enable_nvapi', type : 'boolean', value : false)
+ option('enable_nvngx', type : 'boolean', value : false)
+-option('enable_d3d12', type : 'boolean', value : false)
+\ No newline at end of file
++option('enable_d3d12', type : 'boolean', value : false)
++option('enable_dxmt_framegen_experiment', type : 'boolean', value : false)
++option('framegen_root', type : 'string', value : '')
++option('framegen_static_library', type : 'string', value : '')
+diff --git a/src/d3d11/d3d11_swapchain.cpp b/src/d3d11/d3d11_swapchain.cpp
+index d182587..0646f8d 100644
+--- a/src/d3d11/d3d11_swapchain.cpp
++++ b/src/d3d11/d3d11_swapchain.cpp
+@@ -24,8 +24,12 @@
+ #include "dxmt_info.hpp"
+ #include "dxmt_presenter.hpp"
+ #include <atomic>
++#include <chrono>
+ #include <cfloat>
++#include <cstdlib>
+ #include <format>
++#include <mutex>
++#include <thread>
+ 
+ /**
+ Ref: https://learn.microsoft.com/en-us/windows/win32/api/dxgi1_3/nf-dxgi1_3-idxgiswapchain2-setmaximumframelatency
+@@ -203,10 +207,16 @@ public:
+     ResizeBuffers(0, desc_.Width, desc_.Height, DXGI_FORMAT_UNKNOWN, desc_.Flags);
+     if (!fullscreen_desc_.Windowed)
+       EnterFullscreenMode(nullptr);
++
++    startFramegenExperiment();
+   };
+ 
+   ~MTLD3D11SwapChain() {
+-    device_context_->WaitUntilGPUIdle();
++    // Runtime failures and mode changes leave the session restartable in
++    // BYPASS. The terminal native stop and worker join belong to destruction.
++    // Stop accepting display ticks before waiting for in-flight GPU work so a
++    // final worker submission cannot race the idle fence.
++    stopFramegenExperiment();
+     WMT::ReleaseMetalView(native_view_);
+     native_view_ = {};
+     CloseHandle(present_semaphore_);
+@@ -266,20 +276,36 @@ public:
+   STDMETHODCALLTYPE
+   SetFullscreenState(BOOL Fullscreen, IDXGIOutput *pTarget) final {
+     Com<IDXGIOutput1> target;
++    HMONITOR requested_monitor = nullptr;
++    bool has_requested_monitor = false;
+ 
+     if (pTarget) {
+       DXGI_OUTPUT_DESC desc;
+ 
+       pTarget->QueryInterface(IID_PPV_ARGS(&target));
+-      target->GetDesc(&desc);
+-
+-      if (!fullscreen_desc_.Windowed && Fullscreen && monitor_ != desc.Monitor) {
+-        HRESULT hr = LeaveFullscreenMode();
+-        if (FAILED(hr))
+-          return hr;
++      if (target && SUCCEEDED(target->GetDesc(&desc))) {
++        requested_monitor = desc.Monitor;
++        has_requested_monitor = true;
+       }
+     }
+ 
++    std::lock_guard<d3d11_device_mutex> framegen_lock(device_->mutex);
++    std::lock_guard<std::mutex> presentation_lock(framegen_presentation_mutex_);
++    const bool mode_transition =
++        (fullscreen_desc_.Windowed && Fullscreen) ||
++        (!fullscreen_desc_.Windowed && !Fullscreen) ||
++        (!fullscreen_desc_.Windowed && Fullscreen && has_requested_monitor &&
++         monitor_ != requested_monitor);
++    if (mode_transition)
++      suspendFramegenForTransition();
++
++    if (!fullscreen_desc_.Windowed && Fullscreen && has_requested_monitor &&
++        monitor_ != requested_monitor) {
++      HRESULT hr = LeaveFullscreenMode();
++      if (FAILED(hr))
++        return hr;
++    }
++
+     if (fullscreen_desc_.Windowed && Fullscreen)
+       return EnterFullscreenMode(target.ptr());
+     else if (!fullscreen_desc_.Windowed && !Fullscreen)
+@@ -480,6 +506,12 @@ public:
+   STDMETHODCALLTYPE
+   ResizeBuffers(UINT BufferCount, UINT Width, UINT Height, DXGI_FORMAT Format,
+                 UINT flags) final {
++    std::lock_guard<d3d11_device_mutex> framegen_lock(device_->mutex);
++    std::lock_guard<std::mutex> presentation_lock(framegen_presentation_mutex_);
++    // d3d11_device_mutex is intentionally a no-op unless an application opts
++    // into ID3D11Multithread protection. This always-on lock also serializes
++    // the display worker with layer/backbuffer mutation in either mode.
++    suspendFramegenForTransition();
+     /* BufferCount ignored */
+     if (Width == 0 || Height == 0) {
+       wsi::getWindowSize(hWnd, &desc_.Width, &desc_.Height);
+@@ -548,6 +580,10 @@ public:
+     if (!wsi::isWindow(hWnd))
+       return DXGI_ERROR_INVALID_CALL;
+ 
++    std::lock_guard<d3d11_device_mutex> framegen_lock(device_->mutex);
++    std::lock_guard<std::mutex> presentation_lock(framegen_presentation_mutex_);
++    suspendFramegenForTransition();
++
+     std::unique_lock<dxmt::mutex> lock(mutex_);
+ 
+     // Promote display mode
+@@ -757,8 +793,15 @@ public:
+       SetFullscreenState(FALSE, nullptr);
+ 
+     std::unique_lock<d3d11_device_mutex> lock(device_->mutex);
++    std::unique_lock<std::mutex> presentation_lock(framegen_presentation_mutex_);
+ 
+     device_context_->PrepareFlush();
++    const bool framegen_source_eligible = hr != DXGI_STATUS_OCCLUDED &&
++        framegenSourceSupported(
++            backbuffer_->texture()->current()->texture(), SyncInterval,
++            PresentFlags, pPresentParameters);
++    updateFramegenEnablement(hr == DXGI_STATUS_OCCLUDED,
++                             framegen_source_eligible);
+     if (hr == DXGI_STATUS_OCCLUDED) {
+       // flush commands without presenting
+       device_context_->Commit();
+@@ -774,6 +817,34 @@ public:
+     auto &cmd_queue = device_->GetDXMTDevice().queue();
+     auto chunk = cmd_queue.CurrentChunk();
+     chunk->signal_frame_latency_fence_ = cmd_queue.CurrentFrameSeq();
++    WMT::Reference<WMT::DXMTFramegenReservation> source_reservation;
++    bool framegen_source_accepted = false;
++    const bool framegen_is_active = framegen_session_ &&
++        framegen_lifecycle_.load(std::memory_order_acquire) ==
++            FramegenLifecycle::Active;
++    const bool framegen_can_capture =
++        framegen_is_active && framegen_session_.canCapture();
++    framegen_circuit_open_.store(framegen_is_active && !framegen_can_capture,
++                                 std::memory_order_release);
++    if (framegen_source_eligible && framegen_requested_ &&
++        framegen_is_active) {
++      const uint64_t source_id = framegen_source_sequence_ + 1;
++      const int64_t source_timestamp_ns =
++          WMT::DXMTFramegenSession::machNow();
++      auto queue_ref = cmd_queue.metalCommandQueue();
++      source_reservation = framegen_session_.reserveSource(
++          queue_ref, backbuffer_->texture()->current()->texture(),
++          framegen_session_.epoch(), source_id, source_timestamp_ns);
++      if (source_reservation) {
++        framegen_source_sequence_ = source_id;
++        framegen_source_accepted = true;
++      } else {
++        // A failed reservation uses the ordinary Presenter for this source.
++        // Pause the display path without destroying it; the bridge preserves
++        // any earlier accepted sources for replay on the next clean epoch.
++        enterFramegenBypass();
++      }
++    }
+     if (target_) {
+       auto output = static_cast<MTLDXGIOutput *>(target_.ptr());
+       presenter->changeGammaRamp(output->GetGammaRamp());
+@@ -800,9 +871,48 @@ public:
+       chunk->emitcc([
+         this, vsync_duration, state = presenter->synchronizeLayerProperties(),
+         sync_state = SyncFrame(++presentation_count_),
+-        backbuffer = backbuffer_->texture()
++        backbuffer = backbuffer_->texture(), framegen_source_accepted,
++        source_reservation = std::move(source_reservation),
++        framegen_session = framegen_session_
+       ](ArgumentEncodingContext &ctx) mutable {
+-        ctx.present(backbuffer, presenter, vsync_duration, state.metadata);
++        bool copy_commit_scheduled = false;
++        if (framegen_source_accepted) {
++          try {
++            auto session = framegen_session;
++            auto reservation = source_reservation;
++            copy_commit_scheduled = ctx.afterCommit(
++                [session = std::move(session),
++                 reservation = std::move(reservation)] {
++                  session.commitSource(reservation);
++                });
++          } catch (...) {
++            copy_commit_scheduled = false;
++          }
++          if (!copy_commit_scheduled) {
++            framegen_session.cancelSource(source_reservation);
++            // This callback runs on the command-queue thread. A paused
++            // CAMetalDisplayLink still reserves CAMetalLayer's drawable path,
++            // so detach it before the ordinary Presenter calls nextDrawable.
++            framegen_session.setEnabled(false);
++            framegen_lifecycle_.store(FramegenLifecycle::Bypass,
++                                      std::memory_order_release);
++            framegen_bypass_requested_.store(false,
++                                             std::memory_order_release);
++            ctx.present(backbuffer, presenter, vsync_duration,
++                        state.metadata);
++          }
++        } else {
++          // A failed or unsupported reservation can reach the ordinary
++          // Presenter even when the lifecycle enum already says BYPASS.
++          // Always detach the CAMetalDisplayLink before nextDrawable; the
++          // enum alone does not prove that the native layer released it.
++          if (framegen_session_) {
++            framegen_session_.setEnabled(false);
++            framegen_lifecycle_.store(FramegenLifecycle::Bypass,
++                                      std::memory_order_release);
++          }
++          ctx.present(backbuffer, presenter, vsync_duration, state.metadata);
++        }
+         ReleaseSemaphore(present_semaphore_, 1, nullptr);
+         this->UpdateStatistics(ctx.queue().statistics, ctx.currentFrameId());
+       });
+@@ -810,6 +920,7 @@ public:
+     device_context_->Commit();
+ 
+     lock.unlock(); // since PresentBoundary() will and should only stall current thread
++    presentation_lock.unlock();
+ 
+     cmd_queue.PresentBoundary();
+ 
+@@ -1029,6 +1140,9 @@ public:
+ 
+   HRESULT STDMETHODCALLTYPE
+   SetColorSpace1(DXGI_COLOR_SPACE_TYPE ColorSpace) override {
++    std::lock_guard<d3d11_device_mutex> framegen_lock(device_->mutex);
++    std::lock_guard<std::mutex> presentation_lock(framegen_presentation_mutex_);
++    suspendFramegenForTransition();
+     auto target_color_space = ConvertColorSpace(ColorSpace, LayerSupportEDR());
+     if (presenter->changeLayerColorSpace(target_color_space))
+       device_context_->WaitUntilGPUIdle();
+@@ -1054,6 +1168,372 @@ public:
+   }
+ 
+ private:
++  enum class FramegenLifecycle : uint64_t {
++    Stopped = 0,
++    Starting = 1,
++    Active = 2,
++    Bypass = 3,
++    Stopping = 4,
++    Failed = 5,
++  };
++
++  void startFramegenExperiment() {
++    framegen_requested_ = env::getEnvVar("DXMT_FRAMEGEN_ENABLE") == "1";
++    if (!framegen_requested_)
++      return;
++
++    if (!createFramegenSession())
++      return;
++
++    const bool source_supported = framegenSourceSupported(
++        backbuffer_->texture()->current()->texture(), 1, 0, nullptr);
++    updateFramegenEnablement(false, source_supported);
++  }
++
++  bool ensureFramegenWorker() {
++    if (framegen_worker_.joinable()) {
++      if (!framegen_worker_exited_.load(std::memory_order_acquire))
++        return true;
++      // A failed worker can be restarted on a later supported Present. Join
++      // its completed thread exactly once before replacing the thread object.
++      framegen_worker_.join();
++    }
++
++    framegen_worker_exited_.store(false, std::memory_order_release);
++    try {
++      framegen_worker_ = std::thread([this] { framegenPresentationLoop(); });
++      return true;
++    } catch (...) {
++      framegen_worker_exited_.store(true, std::memory_order_release);
++      WARN("DXMT framegen display worker could not be started");
++      return false;
++    }
++  }
++
++  bool createFramegenSession() {
++    if (framegen_session_)
++      return ensureFramegenWorker();
++
++    framegen_lifecycle_.store(FramegenLifecycle::Starting,
++                              std::memory_order_release);
++    uint32_t available = 0;
++    auto session = WMT::DXMTFramegenSession::create(
++        layer_weak_, device_->GetMTLDevice(), available);
++    if (!session || !available) {
++      WARN("DXMT framegen experiment requested, but the native display-tick session is unavailable");
++      framegen_lifecycle_.store(FramegenLifecycle::Failed,
++                                std::memory_order_release);
++      return false;
++    }
++    framegen_session_ = std::move(session);
++    framegen_command_queue_ =
++        device_->GetDXMTDevice().queue().metalCommandQueue();
++    if (!framegen_command_queue_) {
++      WARN("DXMT framegen experiment has no Metal command queue");
++      framegen_session_.setEnabled(false);
++      framegen_lifecycle_.store(FramegenLifecycle::Failed,
++                                std::memory_order_release);
++      return false;
++    }
++
++    // Creation starts the native link. Immediately put it in restartable
++    // bypass before exposing the worker or accepting a source.
++    framegen_session_.setEnabled(false);
++    framegen_lifecycle_.store(FramegenLifecycle::Bypass,
++                              std::memory_order_release);
++    if (!ensureFramegenWorker()) {
++      framegen_session_.setEnabled(false);
++      framegen_lifecycle_.store(FramegenLifecycle::Failed,
++                                std::memory_order_release);
++      return false;
++    }
++    return true;
++  }
++
++  void stopFramegenExperiment() {
++    if (framegen_stop_started_.exchange(true, std::memory_order_acq_rel))
++      return;
++    framegen_lifecycle_.store(FramegenLifecycle::Stopping,
++                              std::memory_order_release);
++    framegen_stopping_.store(true, std::memory_order_release);
++    // This is the only non-RAII call site for terminal session stop. Runtime
++    // transitions use setEnabled(false) and preserve pending source playback.
++    if (framegen_session_)
++      framegen_session_.stop();
++    if (framegen_worker_.joinable())
++      framegen_worker_.join();
++    // Completion handlers retain the native session and its source snapshots.
++    // Drain submitted Metal work before releasing the final WMT session ref.
++    device_context_->WaitUntilGPUIdle();
++    framegen_command_queue_ = nullptr;
++    framegen_session_ = nullptr;
++    framegen_lifecycle_.store(FramegenLifecycle::Stopped,
++                              std::memory_order_release);
++  }
++
++  void enterFramegenBypass() {
++    const auto current = framegen_lifecycle_.load(std::memory_order_acquire);
++    if (current == FramegenLifecycle::Stopping ||
++        current == FramegenLifecycle::Stopped)
++      return;
++    if (framegen_session_)
++      framegen_session_.setEnabled(false);
++    framegen_lifecycle_.store(FramegenLifecycle::Bypass,
++                              std::memory_order_release);
++    framegen_bypass_requested_.store(false, std::memory_order_release);
++  }
++
++  void updateFramegenEnablement(bool occluded, bool source_supported) {
++    framegen_requested_ = env::getEnvVar("DXMT_FRAMEGEN_ENABLE") == "1";
++    const bool should_run = framegen_requested_ && !occluded && source_supported;
++
++    // afterCommit callbacks execute off the device mutex. They only publish
++    // this request; serialize the actual native transition here.
++    const bool deferred_bypass =
++        framegen_bypass_requested_.exchange(false, std::memory_order_acq_rel);
++    if (deferred_bypass && framegen_session_) {
++      framegen_session_.setEnabled(false);
++      framegen_lifecycle_.store(FramegenLifecycle::Bypass,
++                                std::memory_order_release);
++    }
++
++    if (!should_run) {
++      if (framegen_session_)
++        enterFramegenBypass();
++      else
++        framegen_lifecycle_.store(FramegenLifecycle::Stopped,
++                                  std::memory_order_release);
++      return;
++    }
++
++    if (!framegen_session_ && !createFramegenSession())
++      return;
++    if (!framegen_command_queue_) {
++      framegen_lifecycle_.store(FramegenLifecycle::Failed,
++                                std::memory_order_release);
++      return;
++    }
++    if (!ensureFramegenWorker()) {
++      if (framegen_session_)
++        framegen_session_.setEnabled(false);
++      framegen_lifecycle_.store(FramegenLifecycle::Failed,
++                                std::memory_order_release);
++      return;
++    }
++
++    const auto current = framegen_lifecycle_.load(std::memory_order_acquire);
++    if (current != FramegenLifecycle::Active) {
++      framegen_lifecycle_.store(FramegenLifecycle::Starting,
++                                std::memory_order_release);
++      // false->true is the bridge's clean-epoch transition. The bridge keeps
++      // accepted real sources replayable, retires generated work, and creates
++      // a fresh CAMetalDisplayLink after bypass detached the old one.
++      if (!framegen_session_.setEnabled(true)) {
++        framegen_lifecycle_.store(FramegenLifecycle::Bypass,
++                                  std::memory_order_release);
++        return;
++      }
++      framegen_lifecycle_.store(FramegenLifecycle::Active,
++                                std::memory_order_release);
++    }
++    framegen_circuit_open_.store(!framegen_session_.canCapture(),
++                                 std::memory_order_release);
++  }
++
++  void suspendFramegenForTransition() {
++    if (!framegen_session_)
++      return;
++    // Caller holds the device mutex, so the presentation worker cannot be
++    // encoding against layer state. The bridge pauses and drains callbacks,
++    // invalidates queued old-size drawables, and carries real sources forward.
++    enterFramegenBypass();
++    device_context_->WaitUntilGPUIdle();
++  }
++
++  bool framegenSourceSupported(WMT::Texture source, UINT sync_interval,
++                               UINT present_flags,
++                               const DXGI_PRESENT_PARAMETERS *parameters) {
++    if constexpr (EnableMetalFX)
++      return false;
++    if (sync_interval != 1 || present_flags != 0 || parameters != nullptr ||
++        !fullscreen_desc_.Windowed || desc_.SampleDesc.Count != 1 ||
++        colorspace_ != DXGI_COLOR_SPACE_RGB_FULL_G22_NONE_P709)
++      return false;
++    const auto format = source.pixelFormat();
++    return format == WMTPixelFormatBGRA8Unorm ||
++           format == WMTPixelFormatRGBA8Unorm;
++  }
++
++  void reportFramegenStages(
++      WMTDXMTFramegenTick &tick,
++      const WMTDXMTFramegenSelection &selection) {
++    if (!framegen_session_)
++      return;
++    const auto lifecycle =
++        framegen_lifecycle_.load(std::memory_order_acquire);
++    const bool circuit_open = lifecycle == FramegenLifecycle::Active &&
++        !framegen_session_.canCapture();
++    framegen_circuit_open_.store(circuit_open, std::memory_order_release);
++    tick.lifecycle_state = static_cast<uint64_t>(lifecycle);
++    tick.circuit_state = circuit_open ? 1 : 0;
++    framegen_session_.reportPresentationStages(tick, selection);
++  }
++
++  void framegenPresentationLoop() {
++    try {
++      env::setThreadName("dxmt-framegen-present");
++      while (!framegen_stopping_.load(std::memory_order_acquire)) {
++        WMTDXMTFramegenTick tick{};
++        if (!framegen_session_ || !framegen_session_.waitTick(100, tick))
++          continue;
++        tick.worker_wake_ns = WMT::DXMTFramegenSession::machNow();
++        WMTDXMTFramegenSelection selection{};
++
++        try {
++          auto autorelease_pool = WMT::MakeAutoreleasePool();
++          WMT::Reference<WMT::MetalDrawable> drawable(tick.drawable);
++          if (framegen_stopping_.load(std::memory_order_acquire))
++            break;
++
++          // The worker dequeues before acquiring renderer state. Present,
++          // ResizeBuffers, and mode transitions share this mutex, so a tick
++          // cannot encode across a layer/backbuffer mutation.
++          tick.mutex_wait_start_ns = WMT::DXMTFramegenSession::machNow();
++          std::unique_lock<d3d11_device_mutex> lock(device_->mutex);
++          tick.mutex_acquired_ns = WMT::DXMTFramegenSession::machNow();
++          std::unique_lock<std::mutex> presentation_lock(
++              framegen_presentation_mutex_);
++          auto lifecycle = framegen_lifecycle_.load(std::memory_order_acquire);
++          tick.lifecycle_state = static_cast<uint64_t>(lifecycle);
++          tick.circuit_state = framegen_circuit_open_.load(
++              std::memory_order_acquire) ? 1 : 0;
++
++          if (framegen_stopping_.load(std::memory_order_acquire))
++            break;
++          if (lifecycle != FramegenLifecycle::Active ||
++              tick.epoch != framegen_session_.epoch()) {
++            WMTDXMTFramegenSelection skipped{};
++            reportFramegenStages(tick, skipped);
++            continue;
++          }
++
++          // Drawable and command-buffer failures are checked before selection:
++          // no real source can be advanced by work that cannot be submitted.
++          if (!drawable || tick.drawable == 0) {
++            if (tick.drawable == 0) {
++              WMTDXMTFramegenSelection unavailable{};
++              framegen_session_.selectOutput(tick, unavailable);
++              reportFramegenStages(tick, unavailable);
++            }
++            enterFramegenBypass();
++            continue;
++          }
++          auto raw_command_buffer = framegen_command_queue_.commandBuffer();
++          if (!raw_command_buffer) {
++            WMTDXMTFramegenSelection unavailable{};
++            reportFramegenStages(tick, unavailable);
++            enterFramegenBypass();
++            continue;
++          }
++          WMT::Reference<WMT::CommandBuffer> command_buffer(raw_command_buffer);
++
++          framegen_session_.selectOutput(tick, selection);
++          WMT::Reference<WMT::Texture> output_texture(selection.texture);
++          if (selection.kind == WMTDXMTFramegenOutputNone) {
++            reportFramegenStages(tick, selection);
++            continue;
++          }
++          if (!output_texture || selection.epoch != tick.epoch) {
++            // The source remains pending in the native ownership queue. A new
++            // epoch drops stale G and carries the source forward for replay.
++            reportFramegenStages(tick, selection);
++            enterFramegenBypass();
++            continue;
++          }
++
++          auto state = presenter->synchronizeLayerProperties();
++          tick.presenter_encode_start_ns = WMT::DXMTFramegenSession::machNow();
++          presenter->encodeCommands(
++              command_buffer, drawable, output_texture, state.metadata,
++              [](WMT::RenderCommandEncoder) {},
++              [](WMT::RenderCommandEncoder) {});
++          tick.presenter_encode_end_ns = WMT::DXMTFramegenSession::machNow();
++
++          if (WMT::DXMTFramegenSession::machNow() >=
++              tick.render_deadline_ns) {
++            if (selection.kind == WMTDXMTFramegenOutputGenerated) {
++              // Generated output is expendable. Tell the bridge to retire G;
++              // a source selection is left pending for the next safe tick.
++              auto dropped = selection;
++              dropped.kind = WMTDXMTFramegenOutputNone;
++              framegen_session_.reportPresentation(command_buffer, tick,
++                                                    dropped);
++              reportFramegenStages(tick, dropped);
++            } else {
++              // Record the late source selection for diagnostics without
++              // registering a presentation or advancing source ownership.
++              reportFramegenStages(tick, selection);
++            }
++            continue;
++          }
++
++          tick.circuit_state = framegen_session_.canCapture() ? 0 : 1;
++          framegen_circuit_open_.store(tick.circuit_state != 0,
++                                       std::memory_order_release);
++          // Register actual presented/GPU-completion feedback before submit.
++          // The source remains replayable until these handlers report outcome.
++          framegen_session_.reportPresentation(command_buffer, tick, selection);
++          command_buffer.commit();
++          tick.gpu_submit_ns = WMT::DXMTFramegenSession::machNow();
++          drawable.present();
++          tick.present_call_ns = WMT::DXMTFramegenSession::machNow();
++          tick.lifecycle_state = static_cast<uint64_t>(
++              framegen_lifecycle_.load(std::memory_order_acquire));
++          framegen_session_.reportPresentationStages(tick, selection);
++
++          if (env::getEnvVar("DXMT_FRAMEGEN_FAIL") == "worker-shutdown" &&
++              !framegen_shutdown_injected_.exchange(true,
++                                                    std::memory_order_acq_rel)) {
++            // Retain accepted sources and exercise worker restart while the
++            // submitted GPU presentation may still be live.
++            enterFramegenBypass();
++            break;
++          }
++        } catch (...) {
++          // Per-tick failures leave the worker alive. Pause native tick
++          // delivery and let the ordinary Presenter carry subsequent source
++          // Presents; accepted sources are replayed on clean re-entry.
++          std::lock_guard<d3d11_device_mutex> lock(device_->mutex);
++          std::lock_guard<std::mutex> presentation_lock(
++              framegen_presentation_mutex_);
++          if (tick.presenter_encode_start_ns != 0 &&
++              tick.presenter_encode_end_ns == 0)
++            tick.presenter_encode_end_ns =
++                WMT::DXMTFramegenSession::machNow();
++          reportFramegenStages(tick, selection);
++          if (!framegen_stopping_.load(std::memory_order_acquire))
++            enterFramegenBypass();
++          WARN("DXMT framegen display tick failed; entering restartable bypass");
++        }
++      }
++    } catch (...) {
++      WARN("DXMT framegen display worker failed; marking session failed");
++      try {
++        std::lock_guard<d3d11_device_mutex> lock(device_->mutex);
++        std::lock_guard<std::mutex> presentation_lock(
++            framegen_presentation_mutex_);
++        if (!framegen_stopping_.load(std::memory_order_acquire)) {
++          if (framegen_session_)
++            framegen_session_.setEnabled(false);
++          framegen_lifecycle_.store(FramegenLifecycle::Failed,
++                                    std::memory_order_release);
++        }
++      } catch (...) {
++      }
++    }
++    framegen_worker_exited_.store(true, std::memory_order_release);
++  }
++
+   bool LayerSupportEDR() {
+     WMTEDRValue edr_value;
+     MetalLayer_getEDRValue(layer_weak_, &edr_value);
+@@ -1084,6 +1564,23 @@ private:
+   Rc<Presenter> presenter;
+   ModeSetGuard modeset_guard_;
+   dxmt::mutex mutex_;
++  WMT::Reference<WMT::DXMTFramegenSession> framegen_session_;
++  WMT::Reference<WMT::CommandQueue> framegen_command_queue_;
++  std::thread framegen_worker_;
++  // d3d11_device_mutex only serializes when ID3D11Multithread protection is
++  // enabled. Keep display work and swapchain layer mutations serialized in
++  // every application configuration.
++  std::mutex framegen_presentation_mutex_;
++  std::atomic<FramegenLifecycle> framegen_lifecycle_{
++      FramegenLifecycle::Stopped};
++  std::atomic<bool> framegen_worker_exited_{true};
++  std::atomic<bool> framegen_stop_started_{false};
++  std::atomic<bool> framegen_bypass_requested_{false};
++  std::atomic<bool> framegen_circuit_open_{false};
++  std::atomic<bool> framegen_stopping_{false};
++  std::atomic<bool> framegen_shutdown_injected_{false};
++  uint64_t framegen_source_sequence_ = 0;
++  bool framegen_requested_ = false;
+ 
+   bool handle_alt_tab_;
+ 
+@@ -1136,4 +1633,4 @@ CreateSwapChain(
+   return S_OK;
+ };
+ 
+-} // namespace dxmt
+\ No newline at end of file
++} // namespace dxmt
+diff --git a/src/dxmt/dxmt_command_queue.cpp b/src/dxmt/dxmt_command_queue.cpp
+index 89ffc37..6442286 100644
+--- a/src/dxmt/dxmt_command_queue.cpp
++++ b/src/dxmt/dxmt_command_queue.cpp
+@@ -160,6 +160,15 @@ CommandQueue::CommitChunkInternal(CommandChunk &chunk, uint64_t seq) {
+   chunk.encode(chunk.attached_cmdbuf, this->argument_encoding_ctx);
+   cmdbuf.commit();
+ 
++  for (auto &task : chunk.post_commit_tasks) {
++    try {
++      task();
++    } catch (...) {
++      WARN("post-commit task threw after application command buffer commit");
++    }
++  }
++  chunk.post_commit_tasks.clear();
++
+   ready_for_commit.fetch_add(1, std::memory_order_release);
+   ready_for_commit.notify_one();
+ }
+diff --git a/src/dxmt/dxmt_command_queue.hpp b/src/dxmt/dxmt_command_queue.hpp
+index e109af7..53ef499 100644
+--- a/src/dxmt/dxmt_command_queue.hpp
++++ b/src/dxmt/dxmt_command_queue.hpp
+@@ -37,7 +37,9 @@
+ #include <cstddef>
+ #include <cstdint>
+ #include <cstdlib>
++#include <functional>
+ #include <span>
++#include <vector>
+ 
+ namespace dxmt {
+ 
+@@ -109,7 +111,8 @@ public:
+   encode(WMT::CommandBuffer cmdbuf, ArgumentEncodingContext &enc) {
+     enc.$$setEncodingContext(
+       chunk_id,
+-      frame_
++      frame_,
++      &post_commit_tasks
+     );
+     auto& statistics = enc.currentFrameStatistics();
+     auto t0 = clock::now();
+@@ -128,6 +131,8 @@ public:
+   uint64_t signal_frame_latency_fence_;
+   QueryReadbacks readback;
+   uint64_t resource_initializer_event_id;
++  // Follow-up submissions that must be ordered after this application buffer.
++  std::vector<std::function<void()>> post_commit_tasks;
+ 
+ private:
+   CommandQueue *queue;
+@@ -148,6 +153,7 @@ public:
+     list_enc.reset();
+     ref_tracker.clear();
+     attached_cmdbuf = nullptr;
++    post_commit_tasks.clear();
+   }
+ };
+ 
+@@ -232,6 +238,9 @@ public:
+     return current_event_seq_id;
+   };
+ 
++  WMT::Reference<WMT::CommandQueue> metalCommandQueue() {
++    return commandQueue;
++  }
+ 
+   uint64_t
+   SignaledEventSeqId() {
+@@ -315,4 +324,4 @@ public:
+   void Retain(uint64_t seq, Allocation *allocation);
+ };
+ 
+-} // namespace dxmt
+\ No newline at end of file
++} // namespace dxmt
+diff --git a/src/dxmt/dxmt_context.cpp b/src/dxmt/dxmt_context.cpp
+index 0ba84cd..32cff82 100644
+--- a/src/dxmt/dxmt_context.cpp
++++ b/src/dxmt/dxmt_context.cpp
+@@ -850,12 +850,15 @@ ArgumentEncodingContext::resolveRenderPassBarrier() {
+ }
+ 
+ void
+-ArgumentEncodingContext::$$setEncodingContext(uint64_t seq_id, uint64_t frame_id) {
++ArgumentEncodingContext::$$setEncodingContext(
++    uint64_t seq_id, uint64_t frame_id,
++    std::vector<std::function<void()>> *post_commit_tasks) {
+   current_buffer_chunk_ = 0;
+   cpu_buffer_ = cpu_buffer_chunks_[current_buffer_chunk_].ptr;
+   cpu_buffer_offset_ = 0;
+   seq_id_ = seq_id;
+   frame_id_ = frame_id;
++  post_commit_tasks_ = post_commit_tasks;
+ }
+ 
+ constexpr unsigned kEncoderOptimizerThreshold = 64;
+@@ -1811,4 +1814,4 @@ SimpleCommandContext<ArgumentEncodingContext>::draw(
+   draw.instance_count = instance_count;
+ }
+ 
+-} // namespace dxmt
+\ No newline at end of file
++} // namespace dxmt
+diff --git a/src/dxmt/dxmt_context.hpp b/src/dxmt/dxmt_context.hpp
+index eabe872..03218df 100644
+--- a/src/dxmt/dxmt_context.hpp
++++ b/src/dxmt/dxmt_context.hpp
+@@ -35,6 +35,7 @@
+ #include "rc/util_rc_ptr.hpp"
+ #include "airconv_public.h"
+ #include <cassert>
++#include <functional>
+ 
+ #define DXMT_IMPLEMENT_ME __builtin_unreachable();
+ #define DXMT_UNREACHABLE __builtin_unreachable();
+@@ -777,8 +778,20 @@ public:
+ 
+   CommandQueue& queue() { return queue_;}
+ 
++  // The callback must be bounded and must not wait for GPU completion.
++  bool afterCommit(std::function<void()> callback) noexcept {
++    assert(post_commit_tasks_);
++    try {
++      post_commit_tasks_->push_back(std::move(callback));
++      return true;
++    } catch (...) {
++      return false;
++    }
++  }
++
+   void
+-  $$setEncodingContext(uint64_t seq_id, uint64_t frame_id);
++  $$setEncodingContext(uint64_t seq_id, uint64_t frame_id,
++                       std::vector<std::function<void()>> *post_commit_tasks);
+ 
+   void bumpVisibilityResultOffset();
+   void beginVisibilityResultQuery(Rc<VisibilityResultQuery> &&query);
+@@ -926,6 +939,8 @@ private:
+ 
+   uint64_t intrapass_barrier_control_bits_ = 0;
+ 
++  std::vector<std::function<void()>> *post_commit_tasks_ = nullptr;
++
+   CommandQueue& queue_;
+ };
+ 
+@@ -1016,4 +1031,4 @@ ArgumentEncodingContext::track<PipelineStage::Pixel>(GenericAccessTracker &track
+   return;
+ }
+ 
+-} // namespace dxmt
+\ No newline at end of file
++} // namespace dxmt
+diff --git a/src/dxmt/dxmt_presenter.cpp b/src/dxmt/dxmt_presenter.cpp
+index e5aec04..17cb7e9 100644
+--- a/src/dxmt/dxmt_presenter.cpp
++++ b/src/dxmt/dxmt_presenter.cpp
+@@ -158,6 +158,18 @@ Presenter::encodeCommands(
+ ) {
+   auto drawable = layer_.nextDrawable();
+ 
++  return encodeCommands(cmdbuf, drawable, backbuffer, metadata,
++                        std::move(wait_fences), std::move(update_fences));
++}
++
++WMT::MetalDrawable
++Presenter::encodeCommands(
++    WMT::CommandBuffer cmdbuf, WMT::MetalDrawable drawable,
++    WMT::Texture backbuffer, DXMTPresentMetadata metadata,
++    std::function<void(WMT::RenderCommandEncoder)> &&wait_fences,
++    std::function<void(WMT::RenderCommandEncoder)> &&update_fences
++) {
++
+   WMTRenderPassInfo info;
+   WMT::InitializeRenderPassInfo(info);
+   info.colors[0].load_action = WMTLoadActionDontCare;
+@@ -231,4 +243,4 @@ Presenter::buildRenderPipelineState(bool is_pq, bool with_hdr_metadata, bool is_
+   }
+ }
+ 
+-} // namespace dxmt
+\ No newline at end of file
++} // namespace dxmt
+diff --git a/src/dxmt/dxmt_presenter.hpp b/src/dxmt/dxmt_presenter.hpp
+index 77eb35c..8c31d78 100644
+--- a/src/dxmt/dxmt_presenter.hpp
++++ b/src/dxmt/dxmt_presenter.hpp
+@@ -71,6 +71,13 @@ public:
+       std::function<void(WMT::RenderCommandEncoder)> &&update_fences
+   );
+ 
++  WMT::MetalDrawable encodeCommands(
++      WMT::CommandBuffer cmdbuf, WMT::MetalDrawable drawable,
++      WMT::Texture backbuffer, DXMTPresentMetadata metadata,
++      std::function<void(WMT::RenderCommandEncoder)> &&wait_fences,
++      std::function<void(WMT::RenderCommandEncoder)> &&update_fences
++  );
++
+ private:
+   void buildRenderPipelineState(bool is_pq, bool with_hdr_metadata, bool is_ms, bool gamma_enable);
+ 
+@@ -96,4 +103,4 @@ private:
+   uint64_t frame_requested_ = 0;
+   CpuFence frame_presented_ = 0;
+ };
+-} // namespace dxmt
+\ No newline at end of file
++} // namespace dxmt
+diff --git a/src/winemetal/Metal.hpp b/src/winemetal/Metal.hpp
+index 8224a0c..abdcc6e 100644
+--- a/src/winemetal/Metal.hpp
++++ b/src/winemetal/Metal.hpp
+@@ -564,6 +564,7 @@ public:
+   texture() {
+     return Texture{MetalDrawable_texture(handle)};
+   };
++  void present() { MetalDrawable_present(handle); }
+ };
+ 
+ class MetalLayer : public Object {
+@@ -999,6 +1000,72 @@ public:
+   }
+ };
+ 
++class DXMTFramegenReservation : public Object {};
++
++class DXMTFramegenSession : public Object {
++public:
++  static Reference<DXMTFramegenSession> create(MetalLayer layer, Device device,
++                                                uint32_t &available) {
++    available = 0;
++    return Reference<DXMTFramegenSession>(
++        DXMTFramegenSession_create(layer.handle, device.handle, &available));
++  }
++
++  static int64_t machNow() { return DXMTFramegenMachNow(); }
++
++  uint64_t epoch() { return DXMTFramegenSession_epoch(handle); }
++
++  bool setEnabled(bool enabled) {
++    return DXMTFramegenSession_setEnabled(handle, enabled);
++  }
++
++  bool canCapture() { return DXMTFramegenSession_canCapture(handle); }
++
++  Reference<DXMTFramegenReservation> reserveSource(
++      CommandQueue queue, Texture source, uint64_t source_epoch,
++      uint64_t source_id, int64_t source_timestamp_ns) {
++    return Reference<DXMTFramegenReservation>(DXMTFramegenReserveSource(
++        handle, queue.handle, source.handle, source_epoch, source_id,
++        source_timestamp_ns));
++  }
++
++  void commitSource(const DXMTFramegenReservation &reservation) const {
++    DXMTFramegenCommitSource(handle, reservation.handle);
++  }
++
++  void cancelSource(const DXMTFramegenReservation &reservation) {
++    DXMTFramegenCancelSource(handle, reservation.handle);
++  }
++
++  bool waitTick(uint64_t timeout_ms, WMTDXMTFramegenTick &tick) {
++    tick = {};
++    return DXMTFramegenWaitTick(handle, timeout_ms, &tick);
++  }
++
++  void selectOutput(const WMTDXMTFramegenTick &tick,
++                    WMTDXMTFramegenSelection &selection) {
++    selection = {};
++    DXMTFramegenSelectOutput(handle, &tick, &selection);
++  }
++
++  void reportPresentation(CommandBuffer command_buffer,
++                          const WMTDXMTFramegenTick &tick,
++                          const WMTDXMTFramegenSelection &selection) {
++    DXMTFramegenReportPresentation(handle, command_buffer.handle, &tick,
++                                   &selection);
++  }
++
++  // A null command buffer denotes a stage-timing update for the already
++  // registered presentation callbacks. It does not register handlers again.
++  void reportPresentationStages(const WMTDXMTFramegenTick &tick,
++                                const WMTDXMTFramegenSelection &selection) {
++    DXMTFramegenReportPresentation(handle, 0, &tick, &selection);
++  }
++
++  void reset() { DXMTFramegenSession_reset(handle); }
++  void stop() { DXMTFramegenSession_stop(handle); }
++};
++
+ inline Reference<Array<Device>>
+ CopyAllDevices() {
+   return Reference<Array<Device>>(WMTCopyAllDevices());
+@@ -1228,4 +1295,4 @@ InitializeTileRenderPipelineInfo(WMTTileRenderPipelineInfo &info) {
+   info.fail_on_binary_archive_miss = false;
+ }
+ 
+-} // namespace WMT
+\ No newline at end of file
++} // namespace WMT
+diff --git a/src/winemetal/unix/dxmt_framegen_bridge.mm b/src/winemetal/unix/dxmt_framegen_bridge.mm
+new file mode 100644
+index 0000000..9443e06
+--- /dev/null
++++ b/src/winemetal/unix/dxmt_framegen_bridge.mm
+@@ -0,0 +1,2174 @@
++/*
++ * Local/downstream DXMT display-tick experiment. This file is not an upstream
++ * DXMT contribution. WMT handles are unwrapped only inside WineMetal's Unix
++ * bridge; the Windows-side DXMT code uses the typed WMT declarations.
++ */
++#import <Foundation/Foundation.h>
++#import <Metal/Metal.h>
++#import <QuartzCore/CAMetalDisplayLink.h>
++#import <QuartzCore/QuartzCore.h>
++#import <mach/mach_time.h>
++
++#include "../winemetal_thunks.h"
++#include "synthetic_metal_backend.hpp"
++
++#include "framegen/frame_generator.hpp"
++
++#include <algorithm>
++#include <atomic>
++#include <bit>
++#include <cassert>
++#include <chrono>
++#include <compare>
++#include <condition_variable>
++#include <cstdio>
++#include <cstdlib>
++#include <cstring>
++#include <deque>
++#include <exception>
++#include <fstream>
++#include <map>
++#include <memory>
++#include <mutex>
++#include <optional>
++#include <set>
++#include <string>
++#include <thread>
++#include <utility>
++#include <vector>
++#include <unistd.h>
++
++typedef int NTSTATUS;
++static constexpr NTSTATUS STATUS_SUCCESS = 0;
++
++namespace {
++
++constexpr int64_t kDefaultDisplayPhaseNs = 50'000'000;
++constexpr int64_t kInitialSourcePeriodNs = 33'333'333;
++constexpr uint64_t kClockDomainMach = 1;
++constexpr size_t kTickQueueLimit = 3;
++constexpr size_t kHistoryLimit = 6;
++
++int64_t mach_now_ns() {
++  static mach_timebase_info_data_t timebase = [] {
++    mach_timebase_info_data_t value{};
++    mach_timebase_info(&value);
++    return value;
++  }();
++  return static_cast<int64_t>(
++      (static_cast<__uint128_t>(mach_absolute_time()) * timebase.numer) /
++      timebase.denom);
++}
++
++double ca_now() { return CACurrentMediaTime(); }
++
++uint64_t double_bits(double value) {
++  return std::bit_cast<uint64_t>(value);
++}
++
++bool fail_at(const char *stage) {
++  const char *requested = std::getenv("DXMT_FRAMEGEN_FAIL");
++  return requested != nullptr && std::strcmp(requested, stage) == 0;
++}
++
++std::string log_path() {
++  if (const char *path = std::getenv("DXMT_FRAMEGEN_LOG")) {
++    if (*path != '\0')
++      return path;
++  }
++  return "/tmp/dxmt-framegen-" + std::to_string(getpid()) + ".csv";
++}
++
++struct ClockBridge {
++  double ca_origin{ca_now()};
++  int64_t mach_origin{mach_now_ns()};
++
++  int64_t to_mach(double ca_time) const {
++    const long double delta =
++        (static_cast<long double>(ca_time) - ca_origin) * 1'000'000'000.0L;
++    return mach_origin + static_cast<int64_t>(delta);
++  }
++};
++
++struct TickRecord {
++  __strong id<CAMetalDrawable> drawable;
++  WMTDXMTFramegenTick data{};
++};
++
++enum class SourceState : uint8_t {
++  Accepted,
++  SnapshotCopyPending,
++  Owned,
++  PresentPending,
++  ReplayPending,
++  Presented,
++  Retired,
++  Failed,
++};
++
++enum class SourceOutcome : uint8_t {
++  None,
++  RendererPresented,
++  OrdinaryFallback,
++  UnsafeLostSnapshot,
++  DestroyedBeforePresentation,
++};
++
++const char *source_outcome_name(SourceOutcome outcome) {
++  switch (outcome) {
++  case SourceOutcome::None: return "none";
++  case SourceOutcome::RendererPresented: return "renderer_presented";
++  case SourceOutcome::OrdinaryFallback: return "ordinary_fallback";
++  case SourceOutcome::UnsafeLostSnapshot: return "unsafe_lost_snapshot";
++  case SourceOutcome::DestroyedBeforePresentation:
++    return "destroyed_before_presentation";
++  }
++  return "invalid";
++}
++
++const char *source_state_name(SourceState state) {
++  switch (state) {
++  case SourceState::Accepted: return "accepted";
++  case SourceState::SnapshotCopyPending: return "snapshot_copy_pending";
++  case SourceState::Owned: return "owned";
++  case SourceState::PresentPending: return "present_pending";
++  case SourceState::ReplayPending: return "replay_pending";
++  case SourceState::Presented: return "presented";
++  case SourceState::Retired: return "retired";
++  case SourceState::Failed: return "failed";
++  }
++  return "invalid";
++}
++
++struct HistoryRecord {
++  uint64_t epoch{};
++  uint64_t source_id{};
++  int64_t source_timestamp_ns{};
++  int64_t scheduled_source_ns{};
++  int64_t copy_ready_ns{};
++  int64_t snapshot_ready_ns{};
++  __strong id<MTLTexture> source;
++  __strong id<MTLTexture> presentable;
++  __strong id<MTLTexture> history;
++  __strong id<MTLCommandBuffer> snapshot_copy_buffer;
++  __strong id<MTLCommandBuffer> history_copy_buffer;
++  framegen::Texture framegen_texture;
++  SourceState source_state{SourceState::Accepted};
++  bool committed{};
++  bool snapshot_complete{};
++  bool snapshot_failed{};
++  bool history_copy_complete{};
++  bool history_copy_failed{};
++  SourceOutcome outcome{SourceOutcome::None};
++  bool generation_submitted{};
++  bool generation_allowed{true};
++};
++
++struct PairKey {
++  uint64_t a{};
++  uint64_t b{};
++  auto operator<=>(const PairKey &) const = default;
++};
++
++struct GeneratedRecord {
++  uint64_t epoch{};
++  PairKey pair{};
++  int64_t requested_ns{};
++  int64_t scheduled_ns{};
++  int64_t ready_ns{};
++  framegen::GeneratedFrame frame;
++  bool ready_logged{};
++  bool selected{};
++  bool retired{};
++  bool presentation_complete{};
++  bool presented{};
++  bool injected_completion_failure{};
++};
++
++struct PresentationAttempt {
++  uint64_t epoch{};
++  uint64_t tick_id{};
++  uint64_t presentation_seq{};
++  uint32_t kind{};
++  PairKey pair{};
++  std::shared_ptr<HistoryRecord> source;
++  std::shared_ptr<GeneratedRecord> generated;
++  std::shared_ptr<std::atomic<bool>> resolved;
++  int64_t target_ns{};
++  bool source_was_already_presented{};
++  bool drawable_feedback_received{};
++  bool gpu_feedback_received{};
++  bool drawable_was_presented{};
++  bool gpu_failed{};
++  int64_t actual_presented_ns{};
++  int64_t drawable_feedback_ns{};
++  int64_t gpu_complete_ns{};
++};
++
++struct NativeState {
++  __strong id<MTLDevice> device;
++  __strong CAMetalLayer *layer;
++  std::shared_ptr<framegen::dxmt_synthetic::SyntheticMetalBackend> backend;
++  std::optional<framegen::FrameGenerator> generator;
++  ClockBridge clock;
++  const uint64_t presenter_id;
++  std::atomic<uint64_t> epoch{1};
++  std::atomic<uint64_t> next_tick_id{1};
++  std::atomic<int64_t> display_phase_ns{kDefaultDisplayPhaseNs};
++  std::atomic<int64_t> source_period_ns{kInitialSourcePeriodNs};
++  std::atomic<bool> enabled{false};
++  std::atomic<bool> stopping{false};
++  std::atomic<bool> circuit_open{false};
++  std::atomic<bool> epoch_prepared_for_resume{false};
++  std::atomic<bool> generation_thread_failed{false};
++  std::atomic<uint32_t> consecutive_failures{0};
++  std::mutex generator_mutex;
++  std::mutex mutex;
++  std::condition_variable generation_cv;
++  std::mutex tick_mutex;
++  std::condition_variable tick_cv;
++  std::deque<TickRecord> ticks;
++  std::deque<std::shared_ptr<HistoryRecord>> history;
++  std::map<PairKey, std::shared_ptr<GeneratedRecord>> generated;
++  std::set<PairKey> dropped_pairs;
++  std::shared_ptr<PresentationAttempt> active_attempt;
++  uint64_t last_source_committed{};
++  uint64_t last_generated_presented_a{};
++  uint64_t last_generated_presented_b{};
++  std::atomic<bool> callbacks_paused{false};
++  std::atomic<bool> startup_reset_pending{true};
++  std::atomic<uint64_t> dropped_tick_count{0};
++  std::atomic<uint64_t> display_callback_count{0};
++  std::atomic<uint64_t> display_present_count{0};
++  std::atomic<uint64_t> next_presentation_seq{1};
++  uint64_t last_reported_dropped_ticks{};
++  std::thread generation_thread;
++  std::mutex log_mutex;
++  std::ofstream log;
++
++  NativeState(id<MTLDevice> in_device, CAMetalLayer *in_layer,
++              uint64_t in_presenter_id)
++      : device(in_device), layer(in_layer), presenter_id(in_presenter_id),
++        log(log_path(), std::ios::out | std::ios::trunc) {
++    if (log) {
++      log << "event,presenter_id,epoch,presentation_seq,tick_id,kind,source_id,"
++             "pair_a_id,pair_b_id,source_ns,copy_ready_ns,generated_ready_ns,"
++             "generated_requested_ns,"
++             "callback_ns,deadline_ns,target_ns,actual_presented_ns,"
++             "present_submit_ns,gpu_complete_ns,callback_duration_ns,queue_depth,raw_callback_ca_bits,"
++             "raw_deadline_ca_bits,raw_target_ca_bits,detail,worker_wake_ns,"
++             "mutex_wait_start_ns,mutex_acquired_ns,presenter_encode_start_ns,"
++             "presenter_encode_end_ns,gpu_submit_ns,present_call_ns,"
++             "lifecycle_state,circuit_state\n";
++      log.flush();
++    }
++  }
++
++  void write(const char *event, uint64_t source_id = 0, uint64_t tick_id = 0,
++             uint32_t kind = WMTDXMTFramegenOutputNone,
++             uint64_t pair_a = 0, uint64_t pair_b = 0,
++             int64_t source_ns = 0, int64_t copy_ns = 0,
++             int64_t generated_ns = 0, int64_t callback_ns = 0,
++             int64_t deadline_ns = 0, int64_t target_ns = 0,
++             int64_t actual_ns = 0, uint64_t callback_duration_ns = 0,
++             size_t queue_depth = 0, const char *detail = "",
++             uint64_t presentation_seq = 0,
++             uint64_t raw_callback_ca_bits = 0,
++             uint64_t raw_deadline_ca_bits = 0,
++             uint64_t raw_target_ca_bits = 0,
++             int64_t present_submit_ns = 0,
++             int64_t gpu_complete_ns = 0,
++             int64_t generated_requested_ns = 0,
++             uint64_t event_epoch = 0) {
++    std::scoped_lock lock(log_mutex);
++    if (!log)
++      return;
++    log << event << ',' << presenter_id << ','
++        << (event_epoch == 0 ? epoch.load() : event_epoch) << ','
++        << presentation_seq << ',' << tick_id << ',' << kind << ',' << source_id
++        << ',' << pair_a << ',' << pair_b << ',' << source_ns << ','
++        << copy_ns << ',' << generated_ns << ',' << generated_requested_ns
++        << ',' << callback_ns << ','
++        << deadline_ns << ',' << target_ns << ',' << actual_ns << ','
++        << present_submit_ns << ',' << gpu_complete_ns << ','
++        << callback_duration_ns << ',' << queue_depth << ','
++        << raw_callback_ca_bits << ',' << raw_deadline_ca_bits << ','
++        << raw_target_ca_bits << ',' << '"'
++        << detail << '"' << ",0,0,0,0,0,0,0,0,0\n";
++  }
++
++  void write_presentation_stages(const WMTDXMTFramegenTick &tick,
++                                 const WMTDXMTFramegenSelection &selection) {
++    std::scoped_lock lock(log_mutex);
++    if (!log)
++      return;
++    log << "presentation_stages," << presenter_id << ',' << tick.epoch << ','
++        << 0 << ',' << tick.tick_id << ',' << selection.kind << ','
++        << selection.source_id << ',' << selection.pair_a_id << ','
++        << selection.pair_b_id << ',' << selection.source_timestamp_ns << ','
++        << 0 << ',' << selection.generated_ready_ns << ',' << 0 << ','
++        << tick.callback_ns << ',' << tick.render_deadline_ns << ','
++        << tick.target_presentation_ns << ',' << 0 << ',' << 0 << ',' << 0
++        << ',' << tick.callback_duration_ns << ',' << 0 << ','
++        << tick.raw_callback_time_bits << ','
++        << tick.raw_render_deadline_bits << ','
++        << tick.raw_target_presentation_bits << ','
++        << "\"worker,mutex,encode,submit,present stages\"," << tick.worker_wake_ns
++        << ',' << tick.mutex_wait_start_ns << ',' << tick.mutex_acquired_ns
++        << ',' << tick.presenter_encode_start_ns << ','
++        << tick.presenter_encode_end_ns << ',' << tick.gpu_submit_ns << ','
++        << tick.present_call_ns << ',' << tick.lifecycle_state << ','
++        << tick.circuit_state << '\n';
++  }
++
++  void open_circuit(const char *reason, bool immediate = false) {
++    const uint32_t failures =
++        consecutive_failures.fetch_add(1, std::memory_order_relaxed) + 1;
++    if (immediate || failures >= 3) {
++      circuit_open.store(true, std::memory_order_release);
++      write("circuit_open", 0, 0, WMTDXMTFramegenOutputNone, 0, 0,
++            0, 0, 0, 0, 0, 0, 0, 0, 0, reason);
++    } else {
++      write("framegen_failure", 0, 0, WMTDXMTFramegenOutputNone, 0, 0,
++            0, 0, 0, 0, 0, 0, 0, 0, 0, reason);
++    }
++  }
++
++  void on_display_update(CAMetalDisplayLinkUpdate *update);
++  void generation_loop();
++  bool wait_tick(uint64_t timeout_ms, WMTDXMTFramegenTick &out);
++  void select(const WMTDXMTFramegenTick &tick,
++              WMTDXMTFramegenSelection &selection);
++  size_t queued_tick_count();
++  bool prune_history_locked();
++  void transition_source_locked(const std::shared_ptr<HistoryRecord> &record,
++                                SourceState next, const char *reason);
++  void finish_source_locked(const std::shared_ptr<HistoryRecord> &record,
++                            SourceOutcome outcome, const char *reason);
++  std::shared_ptr<HistoryRecord> find_source_locked(uint64_t source_id);
++  void resolve_attempt(const std::shared_ptr<PresentationAttempt> &attempt,
++                       bool presented, bool gpu_failed, int64_t actual_ns,
++                       const char *reason);
++  void reset();
++  void request_stop();
++  void join_generation_thread();
++  void stop();
++};
++
++struct ReservationState {
++  std::shared_ptr<HistoryRecord> record;
++};
++
++} // namespace
++
++@interface DXMTFramegenNativeSession : NSObject <CAMetalDisplayLinkDelegate> {
++@public
++  void *_native_state;
++@private
++  __strong CAMetalDisplayLink *_display_link;
++  std::atomic<bool> _accepting_callbacks;
++  std::atomic<uint32_t> _callbacks_in_flight;
++  std::mutex _callback_mutex;
++  std::condition_variable _callback_cv;
++}
++- (instancetype)initWithLayer:(CAMetalLayer *)layer device:(id<MTLDevice>)device;
++- (void)start;
++- (void)pauseDelivery;
++- (BOOL)resumeDelivery;
++- (void)stop;
++@end
++
++@interface DXMTFramegenReservationToken : NSObject {
++@public
++  std::shared_ptr<ReservationState> _reservation;
++}
++- (instancetype)initWithReservation:
++    (std::shared_ptr<ReservationState>)reservation;
++@end
++
++@implementation DXMTFramegenNativeSession
++- (instancetype)initWithLayer:(CAMetalLayer *)layer device:(id<MTLDevice>)device {
++  self = [super init];
++  if (self == nil || layer == nil || device == nil)
++    return nil;
++  _accepting_callbacks.store(false, std::memory_order_relaxed);
++  _callbacks_in_flight.store(0, std::memory_order_relaxed);
++  static std::atomic<uint64_t> next_presenter_id{1};
++  const uint64_t presenter_id =
++      next_presenter_id.fetch_add(1, std::memory_order_relaxed);
++  auto state = std::make_unique<NativeState>(device, layer, presenter_id);
++  auto backend = framegen::dxmt_synthetic::SyntheticMetalBackend::create(device);
++  if (!backend)
++    return nil;
++  auto generator = framegen::FrameGenerator::create(*backend);
++  if (!generator)
++    return nil;
++  state->backend = std::move(*backend);
++  state->generator.emplace(std::move(*generator));
++  _native_state = state.release();
++  if (@available(macOS 14.0, *)) {
++    _display_link = [[CAMetalDisplayLink alloc] initWithMetalLayer:layer];
++    if (_display_link == nil) {
++      delete static_cast<NativeState *>(_native_state);
++      _native_state = nullptr;
++      return nil;
++    }
++    _display_link.delegate = self;
++    _display_link.paused = YES;
++    _display_link.preferredFrameLatency = 1.0F;
++    _display_link.preferredFrameRateRange =
++        CAFrameRateRangeMake(60.0F, 60.0F, 60.0F);
++  } else {
++    delete static_cast<NativeState *>(_native_state);
++    _native_state = nullptr;
++    return nil;
++  }
++  return self;
++}
++
++- (void)start {
++  if (_display_link != nil)
++    [_display_link addToRunLoop:[NSRunLoop mainRunLoop]
++                       forMode:NSRunLoopCommonModes];
++}
++
++- (void)pauseDelivery {
++  std::unique_lock lock(_callback_mutex);
++  _accepting_callbacks.store(false, std::memory_order_release);
++  _display_link.paused = YES;
++  _callback_cv.wait(lock, [self] {
++    return self->_callbacks_in_flight.load(std::memory_order_acquire) == 0;
++  });
++  // A paused CAMetalDisplayLink still owns CAMetalLayer's drawable path, so
++  // -nextDrawable remains illegal for the ordinary DXMT Presenter. Detach the
++  // link completely during bypass, then build a fresh link on this same layer
++  // when the renderer resumes.
++  if (_display_link != nil) {
++    _display_link.delegate = nil;
++    [_display_link invalidate];
++    _display_link = nil;
++  }
++}
++
++- (BOOL)resumeDelivery {
++  std::unique_lock lock(_callback_mutex);
++  if (_display_link == nil) {
++    auto *state = static_cast<NativeState *>(_native_state);
++    if (state == nullptr || state->layer == nil)
++      return NO;
++    if (@available(macOS 14.0, *)) {
++      _display_link = [[CAMetalDisplayLink alloc]
++          initWithMetalLayer:state->layer];
++      if (_display_link == nil)
++        return NO;
++      _display_link.delegate = self;
++      _display_link.paused = YES;
++      _display_link.preferredFrameLatency = 1.0F;
++      _display_link.preferredFrameRateRange =
++          CAFrameRateRangeMake(60.0F, 60.0F, 60.0F);
++      [_display_link addToRunLoop:[NSRunLoop mainRunLoop]
++                         forMode:NSRunLoopCommonModes];
++    } else {
++      return NO;
++    }
++  }
++  _accepting_callbacks.store(true, std::memory_order_release);
++  _display_link.paused = NO;
++  return YES;
++}
++
++- (void)metalDisplayLink:(CAMetalDisplayLink *)link
++              needsUpdate:(CAMetalDisplayLinkUpdate *)update {
++  (void)link;
++  {
++    // Admission and pause share the mutex so pause cannot observe zero in
++    // flight after a callback's first enabled check but before its increment.
++    std::scoped_lock lock(_callback_mutex);
++    if (!_accepting_callbacks.load(std::memory_order_acquire))
++      return;
++    _callbacks_in_flight.fetch_add(1, std::memory_order_acq_rel);
++  }
++  auto finish_callback = [self] {
++    if (self->_callbacks_in_flight.fetch_sub(1, std::memory_order_acq_rel) == 1) {
++      std::scoped_lock lock(self->_callback_mutex);
++      self->_callback_cv.notify_all();
++    }
++  };
++  if (!_accepting_callbacks.load(std::memory_order_acquire)) {
++    finish_callback();
++    return;
++  }
++  auto *state = static_cast<NativeState *>(_native_state);
++  try {
++    if (state != nullptr)
++      state->on_display_update(update);
++  } catch (...) {
++    // Exceptions must not cross the Objective-C delegate boundary.
++  }
++  finish_callback();
++}
++
++- (void)stop {
++  [self pauseDelivery];
++  auto *state = static_cast<NativeState *>(_native_state);
++  if (state != nullptr)
++    state->request_stop();
++}
++
++- (void)dealloc {
++  [self stop];
++  auto *state = static_cast<NativeState *>(_native_state);
++  if (state != nullptr) {
++    state->join_generation_thread();
++    delete state;
++  }
++  _native_state = nullptr;
++}
++@end
++
++@implementation DXMTFramegenReservationToken
++- (instancetype)initWithReservation:
++    (std::shared_ptr<ReservationState>)reservation {
++  self = [super init];
++  if (self != nil)
++    _reservation = std::move(reservation);
++  return self;
++}
++@end
++
++namespace {
++
++void NativeState::transition_source_locked(
++    const std::shared_ptr<HistoryRecord> &record, SourceState next,
++    const char *reason) {
++  assert(record != nullptr);
++  const SourceState previous = record->source_state;
++  if (previous == next)
++    return;
++  const bool allowed =
++      (previous == SourceState::Accepted &&
++       (next == SourceState::SnapshotCopyPending || next == SourceState::Retired)) ||
++      (previous == SourceState::SnapshotCopyPending &&
++       (next == SourceState::Owned || next == SourceState::ReplayPending ||
++        next == SourceState::Failed)) ||
++      (previous == SourceState::Owned &&
++       (next == SourceState::PresentPending || next == SourceState::ReplayPending ||
++        next == SourceState::Failed)) ||
++      (previous == SourceState::ReplayPending &&
++       (next == SourceState::Owned || next == SourceState::PresentPending ||
++        next == SourceState::Failed)) ||
++      (previous == SourceState::PresentPending &&
++       (next == SourceState::Owned || next == SourceState::ReplayPending ||
++        next == SourceState::Presented || next == SourceState::Failed)) ||
++      (previous == SourceState::Presented && next == SourceState::Retired);
++  assert(allowed && "invalid accepted-source ownership transition");
++  if (!allowed)
++    return;
++  record->source_state = next;
++  const std::string detail = std::string(source_state_name(previous)) + "->" +
++      source_state_name(next) + ":" + reason;
++  write("source_state_transition", record->source_id, 0,
++        WMTDXMTFramegenOutputSource, 0, 0, record->source_timestamp_ns,
++        record->snapshot_ready_ns, 0, 0, 0, record->scheduled_source_ns,
++        0, 0, 0, detail.c_str(), 0, 0, 0, 0, 0, 0, 0, record->epoch);
++}
++
++void NativeState::finish_source_locked(
++    const std::shared_ptr<HistoryRecord> &record, SourceOutcome outcome,
++    const char *reason) {
++  assert(record != nullptr);
++  assert(outcome != SourceOutcome::None);
++  const bool first_terminal = record->outcome == SourceOutcome::None;
++  assert(first_terminal && "accepted source must have exactly one terminal outcome");
++  if (!first_terminal)
++    return;
++  record->outcome = outcome;
++  const std::string detail = std::string(source_outcome_name(outcome)) + ":" + reason;
++  const bool safe_outcome = outcome == SourceOutcome::RendererPresented ||
++                            outcome == SourceOutcome::OrdinaryFallback;
++  write("source_terminal", record->source_id, 0,
++        WMTDXMTFramegenOutputSource, 0, 0, record->source_timestamp_ns,
++        record->snapshot_ready_ns, 0, 0, 0, record->scheduled_source_ns,
++        0, 0, 0, detail.c_str(), 0, 0, 0, 0, 0, 0, 0, record->epoch);
++  if (!safe_outcome)
++    write("source_safety_violation", record->source_id, 0,
++          WMTDXMTFramegenOutputSource, 0, 0, record->source_timestamp_ns,
++          record->snapshot_ready_ns, 0, 0, 0, record->scheduled_source_ns,
++          0, 0, 0, detail.c_str(), 0, 0, 0, 0, 0, 0, 0, record->epoch);
++}
++
++std::shared_ptr<HistoryRecord>
++NativeState::find_source_locked(uint64_t source_id) {
++  for (const auto &record : history) {
++    if (record->source_id == source_id)
++      return record;
++  }
++  return {};
++}
++
++void NativeState::resolve_attempt(
++    const std::shared_ptr<PresentationAttempt> &attempt, bool presented,
++    bool gpu_failed, int64_t actual_ns, const char *reason) {
++  if (!attempt)
++    return;
++  std::scoped_lock lock(mutex);
++  if (attempt->resolved->load(std::memory_order_acquire))
++    return;
++  if (presented) {
++    attempt->drawable_feedback_received = true;
++    attempt->drawable_was_presented = actual_ns > 0;
++    attempt->actual_presented_ns = actual_ns;
++    attempt->drawable_feedback_ns = mach_now_ns();
++  }
++  if (gpu_failed || !presented) {
++    attempt->gpu_feedback_received = true;
++    attempt->gpu_failed = gpu_failed;
++    attempt->gpu_complete_ns = mach_now_ns();
++  }
++  // A positive drawable callback and successful consumer command completion
++  // are both required before a real source advances the committed frontier.
++  // A zero presentedTime remains retryable until GPU use is also finished.
++  if (!attempt->drawable_feedback_received || !attempt->gpu_feedback_received)
++    return;
++  if (attempt->resolved->exchange(true, std::memory_order_acq_rel))
++    return;
++
++  const bool visible = attempt->drawable_was_presented && !attempt->gpu_failed;
++  if (visible)
++    display_present_count.fetch_add(1, std::memory_order_relaxed);
++  if (attempt->source) {
++    auto &source = attempt->source;
++    if (visible) {
++      if (attempt->source_was_already_presented) {
++        write("source_repeat_presented", source->source_id, attempt->tick_id,
++              attempt->kind, 0, 0, source->source_timestamp_ns,
++              source->snapshot_ready_ns, 0, 0, 0, attempt->target_ns,
++              attempt->actual_presented_ns, 0, 0,
++              "repeat feedback does not move the source frontier",
++              attempt->presentation_seq, 0, 0, 0, 0,
++              0, 0, attempt->epoch);
++      } else {
++        uint64_t expected_source = 0;
++        for (const auto &candidate : history) {
++          if (candidate->source_id > last_source_committed &&
++              candidate->outcome == SourceOutcome::None) {
++            expected_source = candidate->source_id;
++            break;
++          }
++        }
++        if (source->source_id == expected_source) {
++          if (source->source_state == SourceState::PresentPending)
++            transition_source_locked(source, SourceState::Presented,
++                                     "submitted source has positive presentation feedback");
++          last_source_committed = source->source_id;
++          finish_source_locked(source, SourceOutcome::RendererPresented,
++                               "positive presentedTime and successful GPU completion");
++          for (auto &[pair, generated] : this->generated) {
++            if (pair.b <= last_source_committed) {
++              generated->retired = true;
++              generated->selected = false;
++              dropped_pairs.insert(pair);
++            }
++          }
++          write("source_displayed", source->source_id, attempt->tick_id,
++                attempt->kind, 0, 0, source->source_timestamp_ns,
++                source->snapshot_ready_ns, 0, 0, 0, attempt->target_ns,
++                attempt->actual_presented_ns, 0, 0,
++                "source commit after successful GPU and drawable feedback",
++                attempt->presentation_seq, 0, 0, 0, 0,
++                attempt->gpu_complete_ns, 0, attempt->epoch);
++        } else {
++          if (source->source_state == SourceState::PresentPending)
++            transition_source_locked(source, SourceState::ReplayPending,
++                                     "out-of-order positive presentation rejected");
++          write("source_order_violation", source->source_id, attempt->tick_id,
++                attempt->kind, 0, 0, source->source_timestamp_ns,
++                source->snapshot_ready_ns, 0, 0, 0, attempt->target_ns,
++                attempt->actual_presented_ns, 0, 0,
++                "presentation did not match the next uncommitted source",
++                attempt->presentation_seq, 0, 0, 0, 0,
++                0, 0, attempt->epoch);
++        }
++      }
++    } else {
++      if (!attempt->source_was_already_presented &&
++          source->source_state == SourceState::PresentPending)
++        transition_source_locked(source, SourceState::ReplayPending,
++                                 "drawable absent or GPU presentation failed");
++      write("presentation_failed", source->source_id, attempt->tick_id,
++            attempt->kind, 0, 0, source->source_timestamp_ns,
++            source->snapshot_ready_ns, 0, 0, 0, attempt->target_ns,
++            attempt->actual_presented_ns, 0, 0, reason,
++            attempt->presentation_seq, 0, 0, 0, 0,
++            attempt->gpu_complete_ns, 0, attempt->epoch);
++      if (attempt->drawable_feedback_received &&
++          !attempt->drawable_was_presented) {
++        write("presented_time_zero", source->source_id, attempt->tick_id,
++              attempt->kind, 0, 0, source->source_timestamp_ns,
++              source->snapshot_ready_ns, 0, attempt->drawable_feedback_ns,
++              0, attempt->target_ns, 0,
++              0, 0, reason, attempt->presentation_seq, 0, 0, 0,
++              0, attempt->gpu_complete_ns, 0, attempt->epoch);
++      }
++    }
++  } else if (attempt->generated) {
++    auto &generated = attempt->generated;
++    generated->selected = false;
++    if (visible && attempt->pair.a == last_source_committed) {
++      uint64_t next_source = 0;
++      for (const auto &candidate : history) {
++        if (candidate->source_id > last_source_committed &&
++            candidate->outcome == SourceOutcome::None) {
++          next_source = candidate->source_id;
++          break;
++        }
++      }
++      if (next_source == attempt->pair.b) {
++        generated->presented = true;
++        last_generated_presented_a = attempt->pair.a;
++        last_generated_presented_b = attempt->pair.b;
++        write("generated_displayed", attempt->pair.b, attempt->tick_id,
++              attempt->kind, attempt->pair.a, attempt->pair.b, 0, 0,
++              generated->ready_ns, 0, 0, attempt->target_ns,
++              attempt->actual_presented_ns, 0, 0,
++              "G committed only for exact previous and next source endpoints",
++              attempt->presentation_seq, 0, 0, 0, 0,
++              attempt->gpu_complete_ns, 0, attempt->epoch);
++      } else {
++        generated->retired = true;
++        dropped_pairs.insert(attempt->pair);
++        write("generated_dropped", attempt->pair.b, attempt->tick_id,
++              attempt->kind, attempt->pair.a, attempt->pair.b, 0, 0,
++              generated->ready_ns, 0, 0, attempt->target_ns,
++              attempt->actual_presented_ns, 0, 0,
++              "G visible callback no longer matches the chronological slot",
++              attempt->presentation_seq, 0, 0, 0, 0,
++              0, 0, attempt->epoch);
++      }
++    } else {
++      generated->retired = true;
++      dropped_pairs.insert(attempt->pair);
++      write("generated_dropped", attempt->pair.b, attempt->tick_id,
++            attempt->kind, attempt->pair.a, attempt->pair.b, 0, 0,
++            generated->ready_ns, 0, 0, attempt->target_ns,
++            attempt->actual_presented_ns, 0, 0, reason,
++            attempt->presentation_seq, 0, 0, 0, 0,
++            attempt->gpu_complete_ns, 0, attempt->epoch);
++      if (attempt->drawable_feedback_received &&
++          !attempt->drawable_was_presented) {
++        write("presented_time_zero", attempt->pair.b, attempt->tick_id,
++              attempt->kind, attempt->pair.a, attempt->pair.b, 0, 0,
++              generated->ready_ns, attempt->drawable_feedback_ns, 0,
++              attempt->target_ns, 0, 0, 0,
++              reason, attempt->presentation_seq, 0, 0, 0, 0,
++              attempt->gpu_complete_ns, 0, attempt->epoch);
++      }
++    }
++  }
++  if (active_attempt == attempt)
++    active_attempt.reset();
++}
++
++void NativeState::on_display_update(CAMetalDisplayLinkUpdate *update) {
++  const int64_t callback_start_ns = mach_now_ns();
++  if (stopping.load(std::memory_order_acquire) || update == nil)
++    return;
++  const double raw_callback = ca_now();
++  const double raw_deadline = update.targetTimestamp;
++  const double raw_target = update.targetPresentationTimestamp;
++  const int64_t callback_ns = callback_start_ns;
++  const int64_t deadline_ns = clock.to_mach(raw_deadline);
++  const int64_t target_ns = clock.to_mach(raw_target);
++  const int64_t phase_ns = target_ns - callback_ns;
++  if (phase_ns > 0 && phase_ns < 100'000'000) {
++    const int64_t previous = display_phase_ns.load(std::memory_order_relaxed);
++    display_phase_ns.store((previous * 7 + phase_ns) / 8,
++                           std::memory_order_relaxed);
++  }
++  const uint64_t tick_id = next_tick_id.fetch_add(1, std::memory_order_relaxed);
++  WMTDXMTFramegenTick tick{};
++  tick.tick_id = tick_id;
++  tick.epoch = epoch.load(std::memory_order_acquire);
++  tick.callback_ns = callback_ns;
++  tick.render_deadline_ns = deadline_ns;
++  tick.target_presentation_ns = target_ns;
++  tick.raw_callback_time_bits = double_bits(raw_callback);
++  tick.raw_render_deadline_bits = double_bits(raw_deadline);
++  tick.raw_target_presentation_bits = double_bits(raw_target);
++
++  // The callback only timestamps, retains its drawable, and enqueues a bounded
++  // record. It does not call Framegen, touch the state/log locks, or wait for
++  // the worker.
++  TickRecord item;
++  item.drawable = fail_at("drawable") ? nil : update.drawable;
++  {
++    std::scoped_lock lock(tick_mutex);
++    if (ticks.size() >= kTickQueueLimit) {
++      ticks.pop_front();
++      dropped_tick_count.fetch_add(1, std::memory_order_relaxed);
++    }
++    display_callback_count.fetch_add(1, std::memory_order_relaxed);
++    item.data = tick;
++    item.data.callback_duration_ns = static_cast<uint64_t>(
++        std::max<int64_t>(0, mach_now_ns() - callback_start_ns));
++    ticks.push_back(std::move(item));
++  }
++  tick_cv.notify_one();
++}
++
++void NativeState::generation_loop() {
++  try {
++  while (!stopping.load(std::memory_order_acquire)) {
++    std::shared_ptr<HistoryRecord> a;
++    std::shared_ptr<HistoryRecord> b;
++    {
++      std::unique_lock lock(mutex);
++      generation_cv.wait_for(lock, std::chrono::milliseconds(4), [&] {
++        if (stopping.load(std::memory_order_acquire))
++          return true;
++        if (!enabled.load(std::memory_order_acquire) ||
++            circuit_open.load(std::memory_order_acquire))
++          return false;
++        for (size_t i = 1; i < history.size(); ++i) {
++          const auto &previous = history[i - 1];
++          const auto &current = history[i];
++          if (previous->epoch == epoch.load() && current->epoch == epoch.load() &&
++              previous->source_id < current->source_id &&
++              previous->generation_allowed && current->generation_allowed &&
++              previous->snapshot_complete && current->snapshot_complete &&
++              previous->history_copy_complete && current->history_copy_complete &&
++              !previous->history_copy_failed && !current->history_copy_failed &&
++              !current->generation_submitted)
++            return true;
++        }
++        return false;
++      });
++      if (stopping.load(std::memory_order_acquire))
++        break;
++      if (!enabled.load(std::memory_order_acquire) ||
++          circuit_open.load(std::memory_order_acquire))
++        continue;
++      for (size_t i = 1; i < history.size(); ++i) {
++        const auto &previous = history[i - 1];
++        const auto &current = history[i];
++        if (previous->epoch == epoch.load() && current->epoch == epoch.load() &&
++            previous->source_id < current->source_id &&
++            previous->generation_allowed && current->generation_allowed &&
++            previous->snapshot_complete && current->snapshot_complete &&
++            previous->history_copy_complete && current->history_copy_complete &&
++            !previous->history_copy_failed && !current->history_copy_failed &&
++            !current->generation_submitted) {
++          a = previous;
++          b = current;
++          current->generation_submitted = true;
++          break;
++        }
++      }
++    }
++    if (!a || !b)
++      continue;
++    const PairKey pair{a->source_id, b->source_id};
++    std::unique_lock generator_lock(generator_mutex);
++    if (stopping.load(std::memory_order_acquire) ||
++        b->epoch != epoch.load(std::memory_order_acquire))
++      continue;
++    if (fail_at("submit")) {
++      write("generated_dropped", b->source_id, 0,
++            WMTDXMTFramegenOutputGenerated, pair.a, pair.b,
++            b->source_timestamp_ns, b->copy_ready_ns, 0, 0, 0,
++            (a->scheduled_source_ns + b->scheduled_source_ns) / 2,
++            0, 0, 0, "injected Framegen submission failure");
++      open_circuit("Framegen submission failure");
++      continue;
++    }
++    auto texture_a = backend->wrap_texture(a->history, framegen::ColorSpace::srgb,
++                                           framegen::AlphaMode::opaque);
++    auto texture_b = backend->wrap_texture(b->history, framegen::ColorSpace::srgb,
++                                           framegen::AlphaMode::opaque);
++    if (!texture_a || !texture_b) {
++      write("generated_dropped", b->source_id, 0,
++            WMTDXMTFramegenOutputGenerated, pair.a, pair.b,
++            b->source_timestamp_ns, b->copy_ready_ns, 0, 0, 0,
++            (a->scheduled_source_ns + b->scheduled_source_ns) / 2,
++            0, 0, 0, "Framegen could not import completed history textures");
++      open_circuit("Framegen history import failed");
++      continue;
++    }
++    const int64_t interpolation_ns =
++        a->source_timestamp_ns +
++        (b->source_timestamp_ns - a->source_timestamp_ns) / 2;
++    const int64_t scheduled_ns =
++        (a->scheduled_source_ns + b->scheduled_source_ns) / 2;
++    const int64_t now_ns = mach_now_ns();
++    framegen::FrameSubmission submission{
++        .previous = framegen::FrameInput{
++            .texture = std::move(*texture_a),
++            .timing = framegen::FrameTiming{
++                .sequence = a->source_id,
++                .timestamp_ns = a->source_timestamp_ns,
++                .clock_domain = kClockDomainMach,
++                .duration_ns = b->source_timestamp_ns - a->source_timestamp_ns,
++                .render_completion_timestamp_ns = a->copy_ready_ns,
++                .desired_presentation_timestamp_ns = a->scheduled_source_ns,
++            },
++            .color_metadata = {framegen::TransferFunction::srgb,
++                               framegen::DynamicRange::sdr},
++        },
++        .current = framegen::FrameInput{
++            .texture = std::move(*texture_b),
++            .timing = framegen::FrameTiming{
++                .sequence = b->source_id,
++                .timestamp_ns = b->source_timestamp_ns,
++                .clock_domain = kClockDomainMach,
++                .duration_ns = b->source_timestamp_ns - a->source_timestamp_ns,
++                .render_completion_timestamp_ns = b->copy_ready_ns,
++                .desired_presentation_timestamp_ns = b->scheduled_source_ns,
++            },
++            .color_metadata = {framegen::TransferFunction::srgb,
++                               framegen::DynamicRange::sdr},
++        },
++        .interpolation = 0.5F,
++        .reset_history = false,
++        .interpolation_timestamp_ns = interpolation_ns,
++        .desired_presentation_timestamp_ns = scheduled_ns,
++        .presentation_deadline_ns = scheduled_ns - 8'333'333,
++    };
++    if (fail_at("generation")) {
++      write("generated_dropped", b->source_id, 0,
++            WMTDXMTFramegenOutputGenerated, pair.a, pair.b,
++            b->source_timestamp_ns, b->copy_ready_ns, 0, 0, 0,
++            scheduled_ns, 0, 0, 0,
++            "injected synthetic GPU generation failure");
++      open_circuit("synthetic GPU generation failed");
++      continue;
++    }
++    submission.reset_history = startup_reset_pending.exchange(false);
++    auto generated_result = generator->submit(submission);
++    generator_lock.unlock();
++    if (!generated_result) {
++      write("generated_dropped", b->source_id, 0,
++            WMTDXMTFramegenOutputGenerated, pair.a, pair.b,
++            b->source_timestamp_ns, b->copy_ready_ns, 0, 0, 0,
++            scheduled_ns, 0, 0, 0, generated_result.error().message.c_str());
++      open_circuit("Framegen submit returned an error");
++      continue;
++    }
++    auto record = std::make_shared<GeneratedRecord>();
++    record->epoch = b->epoch;
++    record->pair = pair;
++    record->requested_ns = now_ns;
++    record->scheduled_ns = scheduled_ns;
++    record->frame = std::move(*generated_result);
++    record->injected_completion_failure = fail_at("generated-completion");
++    {
++      std::scoped_lock lock(mutex);
++      if (record->epoch == epoch.load() && !stopping.load()) {
++        generated[pair] = record;
++      } else {
++        record->retired = true;
++      }
++    }
++    write("generated_requested", b->source_id, 0,
++          WMTDXMTFramegenOutputGenerated, pair.a, pair.b,
++          b->source_timestamp_ns, b->copy_ready_ns, 0, 0, 0,
++          scheduled_ns, 0, 0, 0, "exact adjacent source pair submitted",
++          0, 0, 0, 0, 0, 0, now_ns);
++    generation_cv.notify_all();
++  }
++  } catch (const std::exception &error) {
++    generation_thread_failed.store(true, std::memory_order_release);
++    circuit_open.store(true, std::memory_order_release);
++    // The optional generator is disabled, but accepted real sources remain
++    // presentable through their retained source snapshots.
++    try {
++      write("generation_exception", 0, 0, WMTDXMTFramegenOutputNone,
++            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, error.what());
++    } catch (...) {
++    }
++  } catch (...) {
++    generation_thread_failed.store(true, std::memory_order_release);
++    circuit_open.store(true, std::memory_order_release);
++    // The optional generator is disabled, but accepted real sources remain
++    // presentable through their retained source snapshots.
++    try {
++      write("generation_exception", 0, 0, WMTDXMTFramegenOutputNone,
++            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
++            "unknown native generation exception");
++    } catch (...) {
++    }
++  }
++}
++
++size_t NativeState::queued_tick_count() {
++  std::scoped_lock lock(tick_mutex);
++  return ticks.size();
++}
++
++bool NativeState::wait_tick(uint64_t timeout_ms, WMTDXMTFramegenTick &out) {
++  std::unique_lock lock(tick_mutex);
++  tick_cv.wait_for(lock, std::chrono::milliseconds(timeout_ms), [&] {
++    return stopping.load(std::memory_order_acquire) || !ticks.empty();
++  });
++  if (stopping.load(std::memory_order_acquire) || ticks.empty())
++    return false;
++  auto item = std::move(ticks.front());
++  ticks.pop_front();
++  out = item.data;
++  out.drawable = (obj_handle_t)(uintptr_t)(__bridge_retained void *)item.drawable;
++  return true;
++}
++
++bool NativeState::prune_history_locked() {
++  while (history.size() >= kHistoryLimit) {
++    const auto &oldest = history.front();
++    const bool source_terminal =
++        oldest->source_state == SourceState::Presented ||
++        oldest->source_state == SourceState::Retired ||
++        oldest->source_state == SourceState::Failed;
++    if (!source_terminal || oldest->source_id >= last_source_committed)
++      return false;
++    if (!oldest->history_copy_complete && !oldest->history_copy_failed)
++      return false;
++    if (active_attempt && active_attempt->source == oldest)
++      return false;
++    bool generation_uses_oldest = false;
++    for (const auto &[pair, record] : generated) {
++      if (pair.a != oldest->source_id && pair.b != oldest->source_id)
++        continue;
++      auto status = record->frame.completion->poll_status();
++      if (record->injected_completion_failure &&
++          status == framegen::GpuCompletionStatus::complete)
++        status = framegen::GpuCompletionStatus::failed;
++      if (status == framegen::GpuCompletionStatus::pending) {
++        generation_uses_oldest = true;
++        break;
++      }
++    }
++    if (generation_uses_oldest)
++      return false;
++    if (oldest->source_state == SourceState::Presented)
++      transition_source_locked(oldest, SourceState::Retired,
++                               "source is older than committed frontier");
++    oldest->presentable = nil;
++    oldest->history = nil;
++    history.pop_front();
++  }
++  return true;
++}
++
++static id<MTLTexture>
++presentable_source_texture(const std::shared_ptr<HistoryRecord> &source) {
++  return source && source->snapshot_complete && !source->snapshot_failed
++      ? source->presentable : nil;
++}
++
++void NativeState::select(const WMTDXMTFramegenTick &tick,
++                         WMTDXMTFramegenSelection &out) {
++  out = {};
++  const uint64_t current_epoch = epoch.load(std::memory_order_acquire);
++  if (tick.epoch != current_epoch || !enabled.load(std::memory_order_acquire) ||
++      stopping.load(std::memory_order_acquire))
++    return;
++  const size_t queue_depth = queued_tick_count();
++  if (tick.drawable == 0) {
++    write("drawable_unavailable", 0, tick.tick_id, 0, 0, 0, 0, 0, 0,
++          tick.callback_ns, tick.render_deadline_ns,
++          tick.target_presentation_ns, 0, tick.callback_duration_ns,
++          queue_depth, "drawable unavailable; accepted sources remain pending");
++    open_circuit("display link returned no drawable");
++    return;
++  }
++  const uint64_t dropped_ticks =
++      dropped_tick_count.load(std::memory_order_relaxed);
++  if (dropped_ticks > last_reported_dropped_ticks) {
++    const uint64_t newly_dropped = dropped_ticks - last_reported_dropped_ticks;
++    last_reported_dropped_ticks = dropped_ticks;
++    const std::string detail = "retired oldest ticks; count=" +
++                               std::to_string(newly_dropped);
++    write("tick_queue_overflow", 0, tick.tick_id, 0, 0, 0, 0, 0, 0,
++          tick.callback_ns, tick.render_deadline_ns,
++          tick.target_presentation_ns, 0, tick.callback_duration_ns,
++          queue_depth, detail.c_str());
++  }
++  const int64_t selection_ns = mach_now_ns();
++  if (selection_ns >= tick.render_deadline_ns) {
++    write("display_tick_expired", 0, tick.tick_id, 0, 0, 0,
++          selection_ns, 0, 0, tick.callback_ns, tick.render_deadline_ns,
++          tick.target_presentation_ns, 0, tick.callback_duration_ns,
++          queue_depth, "expired tick; source remains retryable");
++    return;
++  }
++
++  std::scoped_lock lock(mutex);
++  if (epoch.load(std::memory_order_acquire) != current_epoch ||
++      !enabled.load(std::memory_order_acquire) ||
++      stopping.load(std::memory_order_acquire))
++    return;
++
++  if (active_attempt && !active_attempt->resolved->load(std::memory_order_acquire)) {
++    const int64_t timeout_ns = std::max<int64_t>(
++        2 * source_period_ns.load(std::memory_order_relaxed), 50'000'000);
++    if (tick.target_presentation_ns <= active_attempt->target_ns + timeout_ns)
++      return;
++    if (!active_attempt->resolved->exchange(true, std::memory_order_acq_rel)) {
++      if (active_attempt->source &&
++          active_attempt->source->source_state == SourceState::PresentPending)
++        transition_source_locked(active_attempt->source,
++            SourceState::ReplayPending, "presentation feedback timed out");
++      if (active_attempt->generated) {
++        active_attempt->generated->selected = false;
++        active_attempt->generated->retired = true;
++        dropped_pairs.insert(active_attempt->pair);
++      }
++      write("presentation_feedback_timeout", active_attempt->source
++                ? active_attempt->source->source_id : active_attempt->pair.b,
++            active_attempt->tick_id, active_attempt->kind,
++            active_attempt->pair.a, active_attempt->pair.b, 0, 0, 0,
++            tick.callback_ns, tick.render_deadline_ns,
++            tick.target_presentation_ns, 0, tick.callback_duration_ns,
++            queue_depth, "source replay queued after unresolved presentation");
++    }
++    active_attempt.reset();
++  }
++
++  for (auto &[pair, record] : generated) {
++    if (record->epoch != current_epoch || record->retired || record->ready_logged)
++      continue;
++    auto status = record->frame.completion->poll_status();
++    if (record->injected_completion_failure &&
++        status == framegen::GpuCompletionStatus::complete)
++      status = framegen::GpuCompletionStatus::failed;
++    if (status == framegen::GpuCompletionStatus::complete) {
++      record->ready_ns = mach_now_ns();
++      record->ready_logged = true;
++      write("generated_ready", pair.b, tick.tick_id,
++            WMTDXMTFramegenOutputGenerated, pair.a, pair.b,
++            0, 0, record->ready_ns, tick.callback_ns,
++            tick.render_deadline_ns, record->scheduled_ns, 0,
++            tick.callback_duration_ns, queue_depth, "Metal status completed");
++    } else if (status == framegen::GpuCompletionStatus::failed) {
++      record->retired = true;
++      dropped_pairs.insert(pair);
++      write("generated_dropped", pair.b, tick.tick_id,
++            WMTDXMTFramegenOutputGenerated, pair.a, pair.b,
++            0, 0, 0, tick.callback_ns, tick.render_deadline_ns,
++            record->scheduled_ns, 0, tick.callback_duration_ns,
++            queue_depth, "generated command buffer failed");
++      open_circuit("generated completion failed");
++    }
++  }
++
++  for (auto iter = generated.begin(); iter != generated.end();) {
++    auto status = iter->second->frame.completion->poll_status();
++    if (iter->second->injected_completion_failure &&
++        status == framegen::GpuCompletionStatus::complete)
++      status = framegen::GpuCompletionStatus::failed;
++    const bool terminal = status == framegen::GpuCompletionStatus::complete ||
++                          status == framegen::GpuCompletionStatus::failed;
++    const bool past_pair = iter->first.b <= last_source_committed;
++    const bool active = active_attempt && active_attempt->generated == iter->second;
++    if (terminal && !active &&
++        (iter->second->retired || iter->second->presented || past_pair)) {
++      dropped_pairs.erase(iter->first);
++      iter = generated.erase(iter);
++    } else {
++      ++iter;
++    }
++  }
++
++  std::shared_ptr<HistoryRecord> source_a;
++  std::shared_ptr<HistoryRecord> source_b;
++  if (last_source_committed != 0)
++    source_a = find_source_locked(last_source_committed);
++  for (const auto &source : history) {
++    if (source->source_id > last_source_committed) {
++      source_b = source;
++      break;
++    }
++  }
++
++  if (!source_b) {
++    if (source_a && source_a->source_state == SourceState::Presented) {
++      id<MTLTexture> texture = presentable_source_texture(source_a);
++      if (texture != nil) {
++        out.kind = WMTDXMTFramegenOutputSource;
++        out.epoch = current_epoch;
++        out.source_id = source_a->source_id;
++        out.source_timestamp_ns = source_a->source_timestamp_ns;
++        out.selected_target_ns = source_a->scheduled_source_ns;
++        out.texture = (obj_handle_t)(uintptr_t)(__bridge_retained void *)texture;
++        write("selected_source_repeat", out.source_id, tick.tick_id, out.kind,
++              0, 0, out.source_timestamp_ns, source_a->copy_ready_ns, 0,
++              tick.callback_ns, tick.render_deadline_ns,
++              tick.target_presentation_ns, 0, tick.callback_duration_ns,
++              queue_depth, "repeat current committed source while next is absent");
++      }
++    }
++    return;
++  }
++
++  id<MTLTexture> next_texture = presentable_source_texture(source_b);
++  if (next_texture == nil) {
++    if (source_a && source_a->source_state == SourceState::Presented) {
++      id<MTLTexture> texture = presentable_source_texture(source_a);
++      if (texture != nil) {
++        out.kind = WMTDXMTFramegenOutputSource;
++        out.epoch = current_epoch;
++        out.source_id = source_a->source_id;
++        out.source_timestamp_ns = source_a->source_timestamp_ns;
++        out.selected_target_ns = source_a->scheduled_source_ns;
++        out.texture = (obj_handle_t)(uintptr_t)(__bridge_retained void *)texture;
++        write("selected_source_repeat", out.source_id, tick.tick_id, out.kind,
++              0, 0, out.source_timestamp_ns, source_a->copy_ready_ns, 0,
++              tick.callback_ns, tick.render_deadline_ns,
++              tick.target_presentation_ns, 0, tick.callback_duration_ns,
++              queue_depth, "next snapshot is pending; accepted source is retained");
++      }
++    }
++    return;
++  }
++
++  if (!source_a) {
++    if (tick.target_presentation_ns < source_b->scheduled_source_ns)
++      return;
++    out.kind = WMTDXMTFramegenOutputSource;
++    out.epoch = current_epoch;
++    out.source_id = source_b->source_id;
++    out.source_timestamp_ns = source_b->source_timestamp_ns;
++    out.selected_target_ns = source_b->scheduled_source_ns;
++    out.texture = (obj_handle_t)(uintptr_t)(__bridge_retained void *)next_texture;
++    write("selected_source", out.source_id, tick.tick_id, out.kind,
++          0, 0, out.source_timestamp_ns, source_b->copy_ready_ns, 0,
++          tick.callback_ns, tick.render_deadline_ns,
++          tick.target_presentation_ns, 0, tick.callback_duration_ns,
++          queue_depth, "first accepted source; provisional until presented feedback");
++    return;
++  }
++
++  const PairKey pair{source_a->source_id, source_b->source_id};
++  const int64_t midpoint_ns =
++      (source_a->scheduled_source_ns + source_b->scheduled_source_ns) / 2;
++  auto generated_frame = generated.find(pair);
++  const bool exact_adjacent_pair = source_a->generation_allowed &&
++      source_b->generation_allowed &&
++      source_a->history_copy_complete && source_b->history_copy_complete &&
++      !source_a->history_copy_failed && !source_b->history_copy_failed;
++
++  if (tick.target_presentation_ns < midpoint_ns) {
++    id<MTLTexture> texture = presentable_source_texture(source_a);
++    if (texture != nil) {
++      out.kind = WMTDXMTFramegenOutputSource;
++      out.epoch = current_epoch;
++      out.source_id = source_a->source_id;
++      out.source_timestamp_ns = source_a->source_timestamp_ns;
++      out.selected_target_ns = source_a->scheduled_source_ns;
++      out.texture = (obj_handle_t)(uintptr_t)(__bridge_retained void *)texture;
++      write("selected_source_repeat", out.source_id, tick.tick_id, out.kind,
++            0, 0, out.source_timestamp_ns, source_a->copy_ready_ns, 0,
++            tick.callback_ns, tick.render_deadline_ns,
++            tick.target_presentation_ns, 0, tick.callback_duration_ns,
++            queue_depth, "chronological A slot before pair midpoint");
++    }
++    return;
++  }
++
++  const bool b_deadline =
++      tick.target_presentation_ns >= source_b->scheduled_source_ns;
++  const bool g_already_presented = generated_frame != generated.end() &&
++      generated_frame->second->presented && !generated_frame->second->retired;
++  if (g_already_presented || b_deadline) {
++    if (generated_frame != generated.end() && !g_already_presented &&
++        !generated_frame->second->retired) {
++      generated_frame->second->retired = true;
++      dropped_pairs.insert(pair);
++      write("generated_dropped", pair.b, tick.tick_id,
++            WMTDXMTFramegenOutputGenerated, pair.a, pair.b,
++            source_b->source_timestamp_ns, source_b->copy_ready_ns,
++            generated_frame->second->ready_ns, tick.callback_ns,
++            tick.render_deadline_ns, midpoint_ns, 0,
++            tick.callback_duration_ns, queue_depth,
++            "source B progresses; optional G missed its slot");
++    }
++    out.kind = WMTDXMTFramegenOutputSource;
++    out.epoch = current_epoch;
++    out.source_id = source_b->source_id;
++    out.source_timestamp_ns = source_b->source_timestamp_ns;
++    out.selected_target_ns = source_b->scheduled_source_ns;
++    out.texture = (obj_handle_t)(uintptr_t)(__bridge_retained void *)next_texture;
++    write("selected_source", out.source_id, tick.tick_id, out.kind,
++          0, 0, out.source_timestamp_ns, source_b->copy_ready_ns, 0,
++          tick.callback_ns, tick.render_deadline_ns,
++          tick.target_presentation_ns, 0, tick.callback_duration_ns,
++          queue_depth, "next accepted source B; A cannot reappear after commit");
++    return;
++  }
++
++  const bool g_ready = exact_adjacent_pair &&
++      generated_frame != generated.end() && generated_frame->second->ready_logged &&
++      !generated_frame->second->retired && !generated_frame->second->presented &&
++      !circuit_open.load(std::memory_order_acquire) &&
++      generated_frame->second->ready_ns <= tick.render_deadline_ns &&
++      generated_frame->second->ready_ns <= generated_frame->second->scheduled_ns &&
++      !dropped_pairs.contains(pair) && !fail_at("deadline");
++  if (g_ready) {
++    auto &record = *generated_frame->second;
++    id<MTLTexture> texture = backend->native_texture(record.frame.texture);
++    if (texture != nil) {
++      out.kind = WMTDXMTFramegenOutputGenerated;
++      out.epoch = current_epoch;
++      out.source_id = pair.b;
++      out.pair_a_id = pair.a;
++      out.pair_b_id = pair.b;
++      out.source_timestamp_ns = source_a->source_timestamp_ns +
++          (source_b->source_timestamp_ns - source_a->source_timestamp_ns) / 2;
++      out.selected_target_ns = record.scheduled_ns;
++      out.generated_ready_ns = record.ready_ns;
++      out.texture = (obj_handle_t)(uintptr_t)(__bridge_retained void *)texture;
++      write("generated_selected", pair.b, tick.tick_id, out.kind,
++            pair.a, pair.b, out.source_timestamp_ns,
++            source_b->copy_ready_ns, record.ready_ns,
++            tick.callback_ns, tick.render_deadline_ns,
++            tick.target_presentation_ns, 0, tick.callback_duration_ns,
++            queue_depth, "provisional G for exact adjacent committed A and next B");
++      return;
++    }
++  }
++
++  if (!dropped_pairs.contains(pair)) {
++    dropped_pairs.insert(pair);
++    const int64_t ready_ns = generated_frame == generated.end()
++        ? 0 : generated_frame->second->ready_ns;
++    if (generated_frame != generated.end())
++      generated_frame->second->retired = true;
++    write("generated_dropped", pair.b, tick.tick_id,
++          WMTDXMTFramegenOutputGenerated, pair.a, pair.b,
++          source_b->source_timestamp_ns, source_b->copy_ready_ns,
++          ready_ns, tick.callback_ns, tick.render_deadline_ns,
++          midpoint_ns, 0, tick.callback_duration_ns, queue_depth,
++          fail_at("deadline") ? "injected expired generated deadline"
++                               : (exact_adjacent_pair
++                                      ? "optional G was not ready; progress to source B"
++                                      : "pair history invalid; progress to source B"));
++  }
++  out.kind = WMTDXMTFramegenOutputSource;
++  out.epoch = current_epoch;
++  out.source_id = source_b->source_id;
++  out.source_timestamp_ns = source_b->source_timestamp_ns;
++  out.selected_target_ns = source_b->scheduled_source_ns;
++  out.texture = (obj_handle_t)(uintptr_t)(__bridge_retained void *)next_texture;
++  write("selected_source", out.source_id, tick.tick_id, out.kind,
++        0, 0, out.source_timestamp_ns, source_b->copy_ready_ns, 0,
++        tick.callback_ns, tick.render_deadline_ns,
++        tick.target_presentation_ns, 0, tick.callback_duration_ns,
++        queue_depth, "G dropped; chronological source B progresses");
++}
++
++void NativeState::reset() {
++  std::scoped_lock generation_lock(generator_mutex);
++  {
++    std::scoped_lock lock(tick_mutex);
++    ticks.clear();
++  }
++  uint64_t new_epoch = 0;
++  {
++    std::scoped_lock lock(mutex);
++    new_epoch = epoch.fetch_add(1, std::memory_order_acq_rel) + 1;
++    for (auto &[pair, record] : generated) {
++      record->retired = true;
++      record->selected = false;
++      dropped_pairs.insert(pair);
++    }
++    dropped_pairs.clear();
++    for (const auto &record : history) {
++      if (record->outcome != SourceOutcome::None)
++        continue;
++      record->epoch = new_epoch;
++      // Old-epoch history is retained for source replay, but it must not be
++      // combined with a new-epoch source for generated output.
++      record->generation_allowed = false;
++    }
++    if (active_attempt) {
++      if (active_attempt->generated) {
++        active_attempt->generated->selected = false;
++        active_attempt->generated->retired = true;
++        dropped_pairs.insert(active_attempt->pair);
++        active_attempt->resolved->store(true, std::memory_order_release);
++        active_attempt.reset();
++      } else if (active_attempt->source) {
++        active_attempt->epoch = new_epoch;
++      }
++    }
++    startup_reset_pending.store(true, std::memory_order_release);
++  }
++  circuit_open.store(generation_thread_failed.load(std::memory_order_acquire),
++                     std::memory_order_release);
++  consecutive_failures.store(0, std::memory_order_relaxed);
++  write("epoch_reset", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
++        0, 0, 0, std::to_string(new_epoch).c_str());
++  generation_cv.notify_all();
++  tick_cv.notify_all();
++}
++
++void NativeState::request_stop() {
++  if (stopping.exchange(true, std::memory_order_acq_rel))
++    return;
++  enabled.store(false, std::memory_order_release);
++  {
++    std::scoped_lock lock(mutex);
++    for (const auto &record : history) {
++      if (record->outcome != SourceOutcome::None)
++        continue;
++      if (!record->committed && record->source_state == SourceState::Accepted) {
++        transition_source_locked(record, SourceState::Retired,
++                                 "uncommitted reservation returns to ordinary path");
++        finish_source_locked(record, SourceOutcome::OrdinaryFallback,
++                             "ordinary DXMT Presenter retains uncommitted source");
++        continue;
++      }
++      if (record->source_state != SourceState::Failed &&
++          record->source_state != SourceState::Retired &&
++          record->source_state != SourceState::Presented)
++        transition_source_locked(record, SourceState::Failed,
++                                 "session destroyed before source presentation");
++      finish_source_locked(record, SourceOutcome::DestroyedBeforePresentation,
++                           "session destroyed with accepted source pending");
++    }
++    if (active_attempt &&
++        !active_attempt->resolved->exchange(true, std::memory_order_acq_rel)) {
++      if (active_attempt->generated) {
++        active_attempt->generated->selected = false;
++        active_attempt->generated->retired = true;
++        dropped_pairs.insert(active_attempt->pair);
++      }
++      active_attempt.reset();
++    }
++  }
++  {
++    std::scoped_lock lock(tick_mutex);
++    ticks.clear();
++  }
++  generation_cv.notify_all();
++  tick_cv.notify_all();
++}
++
++void NativeState::join_generation_thread() {
++  if (generation_thread.joinable())
++    generation_thread.join();
++}
++
++void NativeState::stop() {
++  request_stop();
++  join_generation_thread();
++}
++
++DXMTFramegenNativeSession *session_from_handle(obj_handle_t handle) {
++  // This conversion exists only on WineMetal's Unix side, where WMT handles
++  // are Objective-C object handles. No Windows-side code performs this cast.
++  return (__bridge DXMTFramegenNativeSession *)(void *)(uintptr_t)handle;
++}
++
++obj_handle_t retained_handle(id object) {
++  return object == nil ? 0 : (obj_handle_t)(uintptr_t)(__bridge_retained void *)object;
++}
++
++} // namespace
++
++extern "C" NTSTATUS _DXMTFramegenSession_create(void *obj) {
++  auto *params = static_cast<unixcall_dxmtfg_session_create *>(obj);
++  params->ret_session = 0;
++  params->ret_available = 0;
++  try {
++    @autoreleasepool {
++      id<MTLDevice> device = (__bridge id<MTLDevice>)(void *)(uintptr_t)params->device;
++      CAMetalLayer *layer = (__bridge CAMetalLayer *)(void *)(uintptr_t)params->layer;
++      DXMTFramegenNativeSession *session =
++          [[DXMTFramegenNativeSession alloc] initWithLayer:layer device:device];
++      if (session != nil) {
++        auto *state = static_cast<NativeState *>(session->_native_state);
++        if (state == nullptr)
++          return STATUS_SUCCESS;
++        // Construct the worker before enabling display-link delivery so a
++        // thread creation failure leaves the ordinary DXGI path available.
++        state->generation_thread =
++            std::thread([state] { state->generation_loop(); });
++        [session start];
++        params->ret_session = retained_handle(session);
++        params->ret_available = 1;
++      }
++    }
++  } catch (const std::exception &) {
++    params->ret_session = 0;
++    params->ret_available = 0;
++  } catch (...) {
++    params->ret_session = 0;
++    params->ret_available = 0;
++  }
++  return STATUS_SUCCESS;
++}
++
++extern "C" NTSTATUS _DXMTFramegenMachNow(void *obj) {
++  auto *params = static_cast<unixcall_dxmtfg_now *>(obj);
++  params->ret_ns = mach_now_ns();
++  return STATUS_SUCCESS;
++}
++
++extern "C" NTSTATUS _DXMTFramegenSession_epoch(void *obj) {
++  auto *params = static_cast<unixcall_dxmtfg_session_epoch *>(obj);
++  auto *state = static_cast<NativeState *>(session_from_handle(params->session)->_native_state);
++  params->ret_epoch = state == nullptr ? 0 : state->epoch.load();
++  return STATUS_SUCCESS;
++}
++
++extern "C" NTSTATUS _DXMTFramegenSession_setEnabled(void *obj) {
++  auto *params = static_cast<unixcall_dxmtfg_session_set_enabled *>(obj);
++  auto *state = static_cast<NativeState *>(session_from_handle(params->session)->_native_state);
++  params->ret_enabled = 0;
++  if (state == nullptr)
++    return STATUS_SUCCESS;
++  auto *session = session_from_handle(params->session);
++  if (!params->enabled) {
++    const bool was_enabled = state->enabled.exchange(false,
++                                                      std::memory_order_acq_rel);
++    [session pauseDelivery];
++    if (was_enabled) {
++      state->reset();
++      state->epoch_prepared_for_resume.store(true, std::memory_order_release);
++      state->write("session_bypass", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
++                   0, 0, 0, 0,
++                   "display callbacks paused; pending accepted sources retained");
++    }
++    state->generation_cv.notify_all();
++    return STATUS_SUCCESS;
++  }
++
++  if (state->stopping.load(std::memory_order_acquire))
++    return STATUS_SUCCESS;
++  if (!state->enabled.load(std::memory_order_acquire)) {
++    if (!state->epoch_prepared_for_resume.exchange(
++            false, std::memory_order_acq_rel))
++      state->reset();
++    state->enabled.store(true, std::memory_order_release);
++    if (![session resumeDelivery]) {
++      state->enabled.store(false, std::memory_order_release);
++      state->write("session_bypass", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
++                   0, 0, 0, 0,
++                   "display link recreation failed; session remains in bypass");
++      return STATUS_SUCCESS;
++    }
++    state->write("session_active", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
++                 0, 0, 0, 0,
++                 state->circuit_open.load()
++                     ? "display resumed source-only with generator circuit open"
++                     : "display resumed in fresh epoch");
++  }
++  // `setEnabled` reports renderer availability. `canCapture` separately
++  // reports whether new optional generation sources may be admitted.
++  params->ret_enabled = state->enabled.load(std::memory_order_acquire);
++  state->generation_cv.notify_all();
++  return STATUS_SUCCESS;
++}
++
++extern "C" NTSTATUS _DXMTFramegenSession_canCapture(void *obj) {
++  auto *params = static_cast<unixcall_dxmtfg_session_can_capture *>(obj);
++  auto *state = static_cast<NativeState *>(session_from_handle(params->session)->_native_state);
++  params->ret_can_capture = state != nullptr && state->enabled.load() &&
++      !state->circuit_open.load() && !state->stopping.load();
++  return STATUS_SUCCESS;
++}
++
++extern "C" NTSTATUS _DXMTFramegenReserveSource(void *obj) {
++  auto *params = static_cast<unixcall_dxmtfg_reserve_source *>(obj);
++  params->ret_reservation = 0;
++  auto *session = session_from_handle(params->session);
++  auto *state = session == nil
++      ? nullptr
++      : static_cast<NativeState *>(session->_native_state);
++  if (state == nullptr)
++    return STATUS_SUCCESS;
++  try {
++    @autoreleasepool {
++      if (!state->enabled.load() || state->stopping.load() ||
++          params->epoch != state->epoch.load())
++        return STATUS_SUCCESS;
++      const bool generator_circuit_open =
++          state->circuit_open.load(std::memory_order_acquire);
++      id<MTLCommandQueue> command_queue =
++          (__bridge id<MTLCommandQueue>)(void *)(uintptr_t)params->command_queue;
++      id<MTLTexture> source =
++          (__bridge id<MTLTexture>)(void *)(uintptr_t)params->source_texture;
++      const bool supported = source != nil && command_queue != nil &&
++          source.device == state->device &&
++          source.textureType == MTLTextureType2D && source.sampleCount == 1 &&
++          source.width > 0 && source.height > 0 &&
++          (source.pixelFormat == MTLPixelFormatRGBA8Unorm ||
++           source.pixelFormat == MTLPixelFormatBGRA8Unorm);
++      if (!supported || fail_at("allocation")) {
++        state->write("source_candidate_rejected", params->source_id, 0, 0,
++                     0, 0, params->source_timestamp_ns, 0, 0, 0, 0, 0,
++                     0, 0, 0,
++                     supported ? "injected required snapshot allocation failure"
++                               : "unsupported source descriptor");
++        state->open_circuit("required source snapshot unavailable");
++        return STATUS_SUCCESS;
++      }
++
++      MTLTextureDescriptor *descriptor = [MTLTextureDescriptor
++          texture2DDescriptorWithPixelFormat:source.pixelFormat
++                                       width:source.width
++                                      height:source.height
++                                   mipmapped:NO];
++      descriptor.storageMode = MTLStorageModePrivate;
++      descriptor.usage = MTLTextureUsageShaderRead | MTLTextureUsageShaderWrite;
++      id<MTLTexture> snapshot =
++          [state->device newTextureWithDescriptor:descriptor];
++      id<MTLCommandBuffer> snapshot_buffer = [command_queue commandBuffer];
++      id<MTLBlitCommandEncoder> snapshot_blit =
++          [snapshot_buffer blitCommandEncoder];
++      if (snapshot == nil || snapshot_buffer == nil || snapshot_blit == nil) {
++        state->write("source_candidate_rejected", params->source_id, 0, 0,
++                     0, 0, params->source_timestamp_ns, 0, 0, 0, 0, 0,
++                     0, 0, 0, "required immutable snapshot could not be encoded");
++        state->open_circuit("required source snapshot encoding failed");
++        return STATUS_SUCCESS;
++      }
++      [snapshot_blit copyFromTexture:source sourceSlice:0 sourceLevel:0
++                         toTexture:snapshot destinationSlice:0 destinationLevel:0
++                        sliceCount:1 levelCount:1];
++      [snapshot_blit endEncoding];
++
++      auto record = std::make_shared<HistoryRecord>();
++      record->epoch = params->epoch;
++      record->source_id = params->source_id;
++      record->source_timestamp_ns = params->source_timestamp_ns;
++      record->scheduled_source_ns = params->source_timestamp_ns +
++          state->display_phase_ns.load() + state->source_period_ns.load();
++      record->source = source;
++      record->presentable = snapshot;
++      record->snapshot_copy_buffer = snapshot_buffer;
++      record->generation_allowed = !generator_circuit_open;
++
++      // The history texture and command are optional. Failure here disables
++      // only G; the required presentable snapshot can still be transferred.
++      // A generator circuit-open session still owns source presentation and
++      // therefore continues to reserve source-only snapshots.
++      if (record->generation_allowed && !fail_at("copy")) {
++        id<MTLTexture> history =
++            [state->device newTextureWithDescriptor:descriptor];
++        id<MTLCommandBuffer> history_buffer = [command_queue commandBuffer];
++        id<MTLBlitCommandEncoder> history_blit =
++            [history_buffer blitCommandEncoder];
++        if (history != nil && history_buffer != nil && history_blit != nil) {
++          [history_blit copyFromTexture:source sourceSlice:0 sourceLevel:0
++                            toTexture:history destinationSlice:0
++                        destinationLevel:0 sliceCount:1 levelCount:1];
++          [history_blit endEncoding];
++          record->history = history;
++          record->history_copy_buffer = history_buffer;
++        } else {
++          record->generation_allowed = false;
++          record->history_copy_failed = true;
++        }
++      } else {
++        record->generation_allowed = false;
++        record->history_copy_failed = true;
++      }
++
++      auto reservation = std::make_shared<ReservationState>();
++      reservation->record = record;
++      auto *token = [[DXMTFramegenReservationToken alloc]
++          initWithReservation:std::move(reservation)];
++      bool history_slot_available = false;
++      size_t history_depth = 0;
++      {
++        std::scoped_lock lock(state->mutex);
++        history_slot_available = state->prune_history_locked();
++        if (history_slot_available) {
++          state->history.push_back(record);
++          history_depth = state->history.size();
++        }
++      }
++      if (!history_slot_available) {
++        state->write("source_candidate_rejected", params->source_id, 0, 0,
++                     0, 0, params->source_timestamp_ns, 0, 0, 0, 0, 0,
++                     0, 0, kHistoryLimit,
++                     "bounded source history has no retired slot");
++        state->open_circuit("source history capacity exhausted");
++        return STATUS_SUCCESS;
++      }
++      if (record->history_copy_failed) {
++        if (generator_circuit_open) {
++          state->write("history_copy_skipped", params->source_id, 0, 0, 0, 0,
++                       params->source_timestamp_ns, 0, 0, 0, 0,
++                       record->scheduled_source_ns, 0, 0, 0,
++                       "generator circuit open; source-only snapshot retained");
++        } else {
++          state->write("history_copy_failed", params->source_id, 0, 0, 0, 0,
++                       params->source_timestamp_ns, 0, 0, 0, 0,
++                       record->scheduled_source_ns, 0, 0, 0,
++                       fail_at("copy")
++                           ? "injected history copy preflight failure; snapshot retained"
++                           : "optional history resources unavailable; snapshot retained");
++          state->open_circuit("optional history copy preflight failed", true);
++        }
++      }
++      state->write("source_candidate_reserved", params->source_id, 0,
++                   WMTDXMTFramegenOutputSource, 0, 0,
++                   params->source_timestamp_ns, 0, 0, 0, 0,
++                   record->scheduled_source_ns, 0, 0, history_depth,
++                   "required snapshot encoded; ownership waits for afterCommit queueing");
++      params->ret_reservation = retained_handle(token);
++    }
++  } catch (const std::exception &error) {
++    try {
++      state->write("source_candidate_rejected", params->source_id, 0, 0, 0, 0,
++                   params->source_timestamp_ns, 0, 0, 0, 0, 0, 0, 0, 0,
++                   error.what());
++      state->open_circuit("required source snapshot allocation threw");
++    } catch (...) {
++    }
++  } catch (...) {
++    try {
++      state->write("source_candidate_rejected", params->source_id, 0, 0, 0, 0,
++                   params->source_timestamp_ns, 0, 0, 0, 0, 0, 0, 0, 0,
++                   "unknown source reservation exception");
++      state->open_circuit("required source snapshot allocation threw");
++    } catch (...) {
++    }
++  }
++  return STATUS_SUCCESS;
++}
++
++extern "C" NTSTATUS _DXMTFramegenCommitSource(void *obj) {
++  auto *params = static_cast<unixcall_dxmtfg_commit_source *>(obj);
++  @autoreleasepool {
++    auto *session = session_from_handle(params->session);
++    auto *state = static_cast<NativeState *>(session->_native_state);
++    auto *token = (__bridge DXMTFramegenReservationToken *)(void *)(uintptr_t)params->reservation;
++    if (state == nullptr || token == nil || token->_reservation == nullptr)
++      return STATUS_SUCCESS;
++    auto record = token->_reservation->record;
++    if (!record)
++      return STATUS_SUCCESS;
++    __strong DXMTFramegenNativeSession *keep_session = session;
++    id<MTLCommandBuffer> snapshot_buffer = record->snapshot_copy_buffer;
++    id<MTLCommandBuffer> history_buffer = record->history_copy_buffer;
++    {
++      std::scoped_lock lock(state->mutex);
++      if (record->committed)
++        return STATUS_SUCCESS;
++      record->committed = true;
++      record->epoch = state->epoch.load(std::memory_order_acquire);
++      state->transition_source_locked(record, SourceState::SnapshotCopyPending,
++                                      "required snapshot queued on DXMT Metal queue");
++    }
++
++    [snapshot_buffer addCompletedHandler:^(id<MTLCommandBuffer> completed) {
++      auto *completion_state = static_cast<NativeState *>(keep_session->_native_state);
++      if (completion_state == nullptr)
++        return;
++      const int64_t ready_ns = mach_now_ns();
++      {
++        std::scoped_lock lock(completion_state->mutex);
++        const bool injected_snapshot_failure = fail_at("snapshot-completion");
++        const bool success = completed.status == MTLCommandBufferStatusCompleted &&
++                             !injected_snapshot_failure;
++        record->snapshot_ready_ns = ready_ns;
++        record->snapshot_complete = success;
++        record->snapshot_failed = !success;
++        record->snapshot_copy_buffer = nil;
++        record->source = nil;
++        if (success) {
++          if (record->source_state == SourceState::SnapshotCopyPending)
++            completion_state->transition_source_locked(
++                record, SourceState::Owned, "presentable snapshot completed");
++          completion_state->write("source_snapshot_complete", record->source_id,
++              0, WMTDXMTFramegenOutputSource, 0, 0,
++              record->source_timestamp_ns, ready_ns, 0, 0, 0,
++              record->scheduled_source_ns, 0, 0, 0,
++              "immutable presenter snapshot is ready", 0, 0, 0, 0, 0, 0,
++              0, record->epoch);
++        } else {
++          if (record->outcome == SourceOutcome::None) {
++            if (record->source_state == SourceState::SnapshotCopyPending)
++              completion_state->transition_source_locked(
++                  record, SourceState::Failed, "required snapshot command failed");
++            completion_state->finish_source_locked(
++                record, SourceOutcome::UnsafeLostSnapshot,
++                "required snapshot command failed after ownership transfer");
++          }
++          completion_state->write("source_snapshot_failed", record->source_id,
++              0, WMTDXMTFramegenOutputSource, 0, 0,
++              record->source_timestamp_ns, ready_ns, 0, 0, 0,
++              record->scheduled_source_ns, 0, 0, 0,
++              injected_snapshot_failure
++                  ? "injected required snapshot completion failure; source cannot be replayed from immutable storage"
++                  : (completed.error.localizedDescription.UTF8String == nullptr
++                         ? "required snapshot command buffer failed"
++                         : completed.error.localizedDescription.UTF8String),
++              0, 0, 0, 0, 0, 0, 0, record->epoch);
++          completion_state->open_circuit("required source snapshot failed", true);
++        }
++      }
++      completion_state->generation_cv.notify_all();
++    }];
++    [history_buffer addCompletedHandler:^(id<MTLCommandBuffer> completed) {
++      auto *completion_state = static_cast<NativeState *>(keep_session->_native_state);
++      if (completion_state == nullptr)
++        return;
++      const int64_t ready_ns = mach_now_ns();
++      const bool injected = fail_at("copy-completion");
++      const bool success = completed.status == MTLCommandBufferStatusCompleted &&
++                           !injected;
++      {
++        std::scoped_lock lock(completion_state->mutex);
++        record->copy_ready_ns = ready_ns;
++        record->history_copy_complete = success;
++        record->history_copy_failed = !success;
++        record->history_copy_buffer = nil;
++        if (success) {
++          completion_state->write("history_copy_complete", record->source_id,
++              0, 0, 0, 0, record->source_timestamp_ns, ready_ns, 0, 0, 0,
++              record->scheduled_source_ns, 0, 0, 0,
++              "optional generation history copy completed", 0, 0, 0, 0,
++              0, 0, 0, record->epoch);
++        } else {
++          record->generation_allowed = false;
++          const char *detail = completed.status == MTLCommandBufferStatusCompleted
++              ? "injected asynchronous history copy failure; source snapshot retained"
++              : "optional history command buffer failed; source snapshot retained";
++          for (auto &[pair, generated] : completion_state->generated) {
++            if (pair.a == record->source_id || pair.b == record->source_id) {
++              generated->retired = true;
++              completion_state->dropped_pairs.insert(pair);
++            }
++          }
++          completion_state->write("history_copy_failed", record->source_id,
++              0, 0, 0, 0, record->source_timestamp_ns, ready_ns, 0, 0, 0,
++              record->scheduled_source_ns, 0, 0, 0, detail, 0, 0, 0, 0,
++              0, 0, 0, record->epoch);
++          completion_state->open_circuit("asynchronous history copy failed", true);
++        }
++      }
++      completion_state->generation_cv.notify_all();
++    }];
++    {
++      // Commit both GPU copies on the same DXMT Metal queue and keep the state
++      // lock until the ownership-transfer event is recorded. Completion
++      // callbacks may run immediately, but cannot overtake this commit point.
++      std::scoped_lock lock(state->mutex);
++      [snapshot_buffer commit];
++      if (history_buffer != nil)
++        [history_buffer commit];
++      else {
++        record->history_copy_complete = false;
++        record->history_copy_failed = true;
++        record->generation_allowed = false;
++      }
++      state->write("source_accepted", record->source_id, 0,
++                   WMTDXMTFramegenOutputSource, 0, 0,
++                   record->source_timestamp_ns, 0, 0, 0, 0,
++                   record->scheduled_source_ns, 0, 0, 0,
++                   "ownership transferred after required snapshot was committed on the DXMT queue",
++                   0, 0, 0, 0, 0, 0, 0, record->epoch);
++    }
++  }
++  return STATUS_SUCCESS;
++}
++
++extern "C" NTSTATUS _DXMTFramegenCancelSource(void *obj) {
++  auto *params = static_cast<unixcall_dxmtfg_cancel_source *>(obj);
++  auto *session = session_from_handle(params->session);
++  auto *state = session == nil ? nullptr : static_cast<NativeState *>(session->_native_state);
++  auto *token = (__bridge DXMTFramegenReservationToken *)(void *)(uintptr_t)params->reservation;
++  if (state == nullptr || token == nil || token->_reservation == nullptr)
++    return STATUS_SUCCESS;
++  auto record = token->_reservation->record;
++  if (!record)
++    return STATUS_SUCCESS;
++  std::scoped_lock lock(state->mutex);
++  if (record->committed)
++    return STATUS_SUCCESS;
++  std::erase_if(state->history, [&](const auto &candidate) {
++    return candidate == record;
++  });
++  record->source = nil;
++  record->snapshot_copy_buffer = nil;
++  record->history_copy_buffer = nil;
++  if (record->source_state == SourceState::Accepted) {
++    state->transition_source_locked(record, SourceState::Retired,
++                                    "reservation cancelled before transfer");
++    state->finish_source_locked(record, SourceOutcome::OrdinaryFallback,
++                                "ordinary DXMT Presenter retained this source");
++  }
++  state->write("source_candidate_cancelled", record->source_id, 0,
++               WMTDXMTFramegenOutputSource, 0, 0,
++               record->source_timestamp_ns, 0, 0, 0, 0,
++               record->scheduled_source_ns, 0, 0, 0,
++               "uncommitted reservation returned to ordinary Presenter",
++               0, 0, 0, 0, 0, 0, 0, record->epoch);
++  return STATUS_SUCCESS;
++}
++
++extern "C" NTSTATUS _DXMTFramegenWaitTick(void *obj) {
++  auto *params = static_cast<unixcall_dxmtfg_wait_tick *>(obj);
++  params->ret_has_tick = 0;
++  auto *session = session_from_handle(params->session);
++  auto *state = session == nil ? nullptr : static_cast<NativeState *>(session->_native_state);
++  auto *out = static_cast<WMTDXMTFramegenTick *>(params->out_tick.ptr);
++  if (state != nullptr && out != nullptr)
++    params->ret_has_tick = state->wait_tick(params->timeout_ms, *out);
++  return STATUS_SUCCESS;
++}
++
++extern "C" NTSTATUS _DXMTFramegenSelectOutput(void *obj) {
++  auto *params = static_cast<unixcall_dxmtfg_select_output *>(obj);
++  auto *session = session_from_handle(params->session);
++  auto *state = session == nil ? nullptr : static_cast<NativeState *>(session->_native_state);
++  auto *tick = static_cast<const WMTDXMTFramegenTick *>(params->tick.ptr);
++  auto *out = static_cast<WMTDXMTFramegenSelection *>(params->out_selection.ptr);
++  if (state != nullptr && tick != nullptr && out != nullptr)
++    state->select(*tick, *out);
++  return STATUS_SUCCESS;
++}
++
++extern "C" NTSTATUS _DXMTFramegenReportPresentation(void *obj) {
++  auto *params = static_cast<unixcall_dxmtfg_report_presentation *>(obj);
++  auto *session = session_from_handle(params->session);
++  auto *state = session == nil
++      ? nullptr : static_cast<NativeState *>(session->_native_state);
++  auto *tick = static_cast<const WMTDXMTFramegenTick *>(params->tick.ptr);
++  auto *selection =
++      static_cast<const WMTDXMTFramegenSelection *>(params->selection.ptr);
++  if (state == nullptr || tick == nullptr || selection == nullptr)
++    return STATUS_SUCCESS;
++
++  id<MTLCommandBuffer> command_buffer =
++      (__bridge id<MTLCommandBuffer>)(void *)(uintptr_t)params->command_buffer;
++  if (command_buffer == nil) {
++    // The caller uses a null command buffer only after submission/present to
++    // append stage timings. This path is deliberately log-only.
++    state->write_presentation_stages(*tick, *selection);
++    return STATUS_SUCCESS;
++  }
++
++  if (selection->kind == WMTDXMTFramegenOutputNone) {
++    if (selection->pair_a_id != 0 && selection->pair_b_id != 0) {
++      std::scoped_lock lock(state->mutex);
++      const PairKey pair{selection->pair_a_id, selection->pair_b_id};
++      if (auto record = state->generated.find(pair);
++          record != state->generated.end()) {
++        record->second->selected = false;
++        record->second->retired = true;
++        state->dropped_pairs.insert(pair);
++      }
++      state->write("generated_dropped", selection->pair_b_id, tick->tick_id,
++                   WMTDXMTFramegenOutputGenerated, pair.a, pair.b, 0, 0,
++                   selection->generated_ready_ns, tick->callback_ns,
++                   tick->render_deadline_ns, tick->target_presentation_ns,
++                   0, tick->callback_duration_ns, 0,
++                   "worker declined optional G before presentation submission",
++                   0, tick->raw_callback_time_bits,
++                   tick->raw_render_deadline_bits,
++                   tick->raw_target_presentation_bits, 0, 0, 0, tick->epoch);
++    }
++    return STATUS_SUCCESS;
++  }
++
++  id<CAMetalDrawable> drawable =
++      (__bridge id<CAMetalDrawable>)(void *)(uintptr_t)tick->drawable;
++  if (drawable == nil) {
++    if (selection->kind == WMTDXMTFramegenOutputGenerated) {
++      std::scoped_lock lock(state->mutex);
++      const PairKey pair{selection->pair_a_id, selection->pair_b_id};
++      if (auto record = state->generated.find(pair);
++          record != state->generated.end()) {
++        record->second->selected = false;
++        record->second->retired = true;
++      }
++      state->dropped_pairs.insert(pair);
++      state->write("generated_dropped", selection->source_id, tick->tick_id,
++                   selection->kind, pair.a, pair.b, 0, 0,
++                   selection->generated_ready_ns, tick->callback_ns,
++                   tick->render_deadline_ns, tick->target_presentation_ns,
++                   0, tick->callback_duration_ns, 0,
++                   "drawable unavailable; optional G dropped");
++    } else {
++      state->write("source_retryable", selection->source_id, tick->tick_id,
++                   selection->kind, 0, 0, selection->source_timestamp_ns,
++                   0, 0, tick->callback_ns, tick->render_deadline_ns,
++                   tick->target_presentation_ns, 0,
++                   tick->callback_duration_ns, 0,
++                   "drawable unavailable before source submission");
++    }
++    return STATUS_SUCCESS;
++  }
++
++  auto attempt = std::make_shared<PresentationAttempt>();
++  const uint64_t presentation_seq =
++      state->next_presentation_seq.fetch_add(1, std::memory_order_relaxed);
++  bool valid = false;
++  {
++    std::scoped_lock lock(state->mutex);
++    if (tick->epoch != state->epoch.load(std::memory_order_acquire) ||
++        selection->epoch != tick->epoch || state->active_attempt)
++      return STATUS_SUCCESS;
++
++    attempt->epoch = tick->epoch;
++    attempt->tick_id = tick->tick_id;
++    attempt->presentation_seq = presentation_seq;
++    attempt->kind = selection->kind;
++    attempt->pair = {selection->pair_a_id, selection->pair_b_id};
++    attempt->resolved = std::make_shared<std::atomic<bool>>(false);
++    attempt->target_ns = tick->target_presentation_ns;
++
++    if (selection->kind == WMTDXMTFramegenOutputSource) {
++      auto source = state->find_source_locked(selection->source_id);
++      if (source == nullptr || !source->snapshot_complete ||
++          source->snapshot_failed || source->presentable == nil ||
++          source->outcome != SourceOutcome::None)
++        return STATUS_SUCCESS;
++
++      attempt->source_was_already_presented =
++          source->source_id == state->last_source_committed &&
++          source->source_state == SourceState::Presented;
++      if (!attempt->source_was_already_presented) {
++        uint64_t next_source_id = 0;
++        for (const auto &candidate : state->history) {
++          if (candidate->source_id > state->last_source_committed &&
++              candidate->outcome == SourceOutcome::None) {
++            next_source_id = candidate->source_id;
++            break;
++          }
++        }
++        if (source->source_id != next_source_id ||
++            (source->source_state != SourceState::Owned &&
++             source->source_state != SourceState::ReplayPending))
++          return STATUS_SUCCESS;
++        attempt->source = source;
++        state->transition_source_locked(
++            source, SourceState::PresentPending,
++            "provisional selection; source frontier remains unchanged");
++      } else {
++        attempt->source = source;
++      }
++      valid = true;
++    } else if (selection->kind == WMTDXMTFramegenOutputGenerated) {
++      const PairKey pair{selection->pair_a_id, selection->pair_b_id};
++      auto generated = state->generated.find(pair);
++      auto source_a = state->find_source_locked(pair.a);
++      auto source_b = state->find_source_locked(pair.b);
++      uint64_t next_source_id = 0;
++      for (const auto &candidate : state->history) {
++        if (candidate->source_id > state->last_source_committed &&
++            candidate->outcome == SourceOutcome::None) {
++          next_source_id = candidate->source_id;
++          break;
++        }
++      }
++      if (generated != state->generated.end() && source_a && source_b &&
++          pair.a == state->last_source_committed && pair.b == next_source_id &&
++          source_a->source_state == SourceState::Presented &&
++          source_a->generation_allowed && source_b->generation_allowed &&
++          source_a->snapshot_complete && source_b->snapshot_complete &&
++          source_a->history_copy_complete && source_b->history_copy_complete &&
++          !source_a->history_copy_failed && !source_b->history_copy_failed &&
++          !generated->second->retired && !generated->second->presented &&
++          generated->second->ready_logged) {
++        attempt->generated = generated->second;
++        generated->second->selected = true;
++        valid = true;
++      } else {
++        if (generated != state->generated.end()) {
++          generated->second->selected = false;
++          generated->second->retired = true;
++        }
++        state->dropped_pairs.insert(pair);
++        state->write("generated_dropped", pair.b, tick->tick_id,
++                     WMTDXMTFramegenOutputGenerated, pair.a, pair.b,
++                     selection->source_timestamp_ns, 0,
++                     selection->generated_ready_ns, tick->callback_ns,
++                     tick->render_deadline_ns, tick->target_presentation_ns,
++                     0, tick->callback_duration_ns, 0,
++                     "G failed exact previous/next committed source validation");
++      }
++    }
++
++    if (valid)
++      state->active_attempt = attempt;
++  }
++
++  if (!valid)
++    return STATUS_SUCCESS;
++
++  __strong DXMTFramegenNativeSession *keep_session = session;
++  auto drawable_attempt = attempt;
++  auto gpu_attempt = attempt;
++  [drawable addPresentedHandler:^(id<MTLDrawable> presented) {
++    auto *present_state =
++        static_cast<NativeState *>(keep_session->_native_state);
++    if (present_state == nullptr || !drawable_attempt)
++      return;
++    id<MTLDrawable> metal_drawable = (id<MTLDrawable>)presented;
++    const double presented_time = metal_drawable.presentedTime;
++    const int64_t actual_ns = presented_time > 0.0
++        ? present_state->clock.to_mach(presented_time) : 0;
++    present_state->resolve_attempt(
++        drawable_attempt, true, false, actual_ns,
++        presented_time > 0.0
++            ? "positive presentedTime feedback"
++            : "presentedTime was zero; real source remains retryable");
++  }];
++  [command_buffer addCompletedHandler:^(id<MTLCommandBuffer> completed) {
++    auto *present_state =
++        static_cast<NativeState *>(keep_session->_native_state);
++    if (present_state == nullptr || !gpu_attempt)
++      return;
++    const bool failed = completed.status != MTLCommandBufferStatusCompleted;
++    const char *reason = failed
++        ? (completed.error.localizedDescription.UTF8String == nullptr
++               ? "presentation command buffer failed"
++               : completed.error.localizedDescription.UTF8String)
++        : "presentation GPU work completed";
++    present_state->resolve_attempt(gpu_attempt, false, failed, 0, reason);
++  }];
++
++  state->write("presentation_callbacks_registered", selection->source_id,
++               tick->tick_id, selection->kind, selection->pair_a_id,
++               selection->pair_b_id, selection->source_timestamp_ns, 0,
++               selection->generated_ready_ns, tick->callback_ns,
++               tick->render_deadline_ns, tick->target_presentation_ns, 0,
++               tick->callback_duration_ns, state->queued_tick_count(),
++               "selection remains provisional; presentation_stages contains actual submit time",
++               presentation_seq, tick->raw_callback_time_bits,
++               tick->raw_render_deadline_bits,
++               tick->raw_target_presentation_bits, 0, 0, 0,
++               tick->epoch);
++  return STATUS_SUCCESS;
++}
++
++extern "C" NTSTATUS _DXMTFramegenSession_reset(void *obj) {
++  const obj_handle_t handle = *static_cast<obj_handle_t *>(obj);
++  auto *session = session_from_handle(handle);
++  auto *state = session == nil ? nullptr : static_cast<NativeState *>(session->_native_state);
++  if (state != nullptr) {
++    const bool was_enabled = state->enabled.load(std::memory_order_acquire);
++    if (was_enabled)
++      [session pauseDelivery];
++    state->reset();
++    if (was_enabled && ![session resumeDelivery]) {
++      state->enabled.store(false, std::memory_order_release);
++      state->write("session_bypass", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
++                   0, 0, 0, 0,
++                   "display link recreation failed during epoch reset");
++    }
++  }
++  return STATUS_SUCCESS;
++}
++
++extern "C" NTSTATUS _DXMTFramegenSession_stop(void *obj) {
++  const obj_handle_t handle = *static_cast<obj_handle_t *>(obj);
++  auto *session = session_from_handle(handle);
++  if (session != nil)
++    [session stop];
++  return STATUS_SUCCESS;
++}
+diff --git a/src/winemetal/unix/meson.build b/src/winemetal/unix/meson.build
+index 3f20c2b..f536b33 100644
+--- a/src/winemetal/unix/meson.build
++++ b/src/winemetal/unix/meson.build
+@@ -3,6 +3,34 @@ winemetal_unix_src = [
+   'cache.c',
+ ]
+ 
++winemetal_unix_deps = [airconv_dep_darwin]
++winemetal_unix_args = []
++winemetal_unix_override_options = {'b_asneeded' : false}
++
++if get_option('enable_dxmt_framegen_experiment')
++  framegen_root = get_option('framegen_root')
++  framegen_static_library = get_option('framegen_static_library')
++  if framegen_root == '' or framegen_static_library == ''
++    error('The downstream framegen experiment requires -Dframegen_root and -Dframegen_static_library')
++  endif
++  if not fs.is_absolute(framegen_root) or not fs.is_absolute(framegen_static_library)
++    error('framegen_root and framegen_static_library must be absolute paths')
++  endif
++  framegen_include = include_directories(
++    join_paths(framegen_root, 'include'),
++    join_paths(framegen_root, 'experiments/dxmt_framegen/synthetic'))
++  winemetal_unix_src += [
++    'dxmt_framegen_bridge.mm',
++    join_paths(framegen_root,
++      'experiments/dxmt_framegen/synthetic/synthetic_metal_backend.mm'),
++  ]
++  winemetal_unix_deps += [declare_dependency(
++    include_directories: framegen_include,
++    link_args: [framegen_static_library])]
++  winemetal_unix_args += ['-std=c++23']
++  winemetal_unix_override_options += {'cpp_std' : 'c++23'}
++endif
++
+ if wine_build_path != ''
+   winemac_so = join_paths(wine_build_path, 'dlls/winemac.drv/winemac.so')
+   ntdll_so = join_paths(wine_build_path, 'dlls/ntdll/ntdll.so')
+@@ -26,18 +54,19 @@ winemetal_unix_link_depends = []
+ 
+ shared_library('winemetal', winemetal_unix_src,
+   name_prefix         : '',
+-  dependencies        : [ airconv_dep_darwin ],
+-  include_directories : dxmt_include_path,
++  dependencies        : winemetal_unix_deps,
++  include_directories : [dxmt_include_path],
++  cpp_args            : winemetal_unix_args,
+   c_args              : ['-ObjC'],
+   link_args           : winemetal_unix_ld_args,
+   native              : true,
+   name_suffix         : 'so',
+   install_rpath       : '',
+   build_rpath         : '@loader_path/:@loader_path/../../',
+-  override_options    : { 'b_asneeded' : false },
++  override_options    : winemetal_unix_override_options,
+ )
+ 
+ meson.add_install_script(
+   'install.sh', get_option('strip').to_string(), unix_install_dir, 
+   install_tag: 'runtime'
+-)
+\ No newline at end of file
++)
+diff --git a/src/winemetal/unix/winemetal_unix.c b/src/winemetal/unix/winemetal_unix.c
+index 3327b29..7aa2505 100644
+--- a/src/winemetal/unix/winemetal_unix.c
++++ b/src/winemetal/unix/winemetal_unix.c
+@@ -1599,6 +1599,13 @@ _MetalDrawable_texture(void *obj) {
+   return STATUS_SUCCESS;
+ }
+ 
++static NTSTATUS
++_MetalDrawable_present(void *obj) {
++  struct unixcall_generic_obj_noret *params = obj;
++  [(id<CAMetalDrawable>)params->handle present];
++  return STATUS_SUCCESS;
++}
++
+ static NTSTATUS
+ _MetalLayer_nextDrawable(void *obj) {
+   struct unixcall_generic_obj_obj_ret *params = obj;
+@@ -3162,6 +3169,19 @@ NTSTATUS _CacheReader_get(void *obj);
+ NTSTATUS _CacheWriter_alloc_init(void *obj);
+ NTSTATUS _CacheWriter_set(void *obj);
+ NTSTATUS _WMTSetMetalShaderCachePath(void *obj);
++NTSTATUS _DXMTFramegenSession_create(void *obj);
++NTSTATUS _DXMTFramegenMachNow(void *obj);
++NTSTATUS _DXMTFramegenSession_epoch(void *obj);
++NTSTATUS _DXMTFramegenSession_setEnabled(void *obj);
++NTSTATUS _DXMTFramegenSession_canCapture(void *obj);
++NTSTATUS _DXMTFramegenReserveSource(void *obj);
++NTSTATUS _DXMTFramegenCommitSource(void *obj);
++NTSTATUS _DXMTFramegenCancelSource(void *obj);
++NTSTATUS _DXMTFramegenWaitTick(void *obj);
++NTSTATUS _DXMTFramegenSelectOutput(void *obj);
++NTSTATUS _DXMTFramegenReportPresentation(void *obj);
++NTSTATUS _DXMTFramegenSession_reset(void *obj);
++NTSTATUS _DXMTFramegenSession_stop(void *obj);
+ 
+ const void *__wine_unix_call_funcs[] = {
+     &_NSObject_retain,
+@@ -3310,6 +3330,20 @@ const void *__wine_unix_call_funcs[] = {
+     &_MTLDevice_newIndirectCommandBuffer,
+     &_MTLDevice_newLibraryWithSource,
+     &_MTLTexture_getBytes,
++    &_DXMTFramegenSession_create,
++    &_DXMTFramegenMachNow,
++    &_DXMTFramegenSession_epoch,
++    &_DXMTFramegenSession_setEnabled,
++    &_DXMTFramegenSession_canCapture,
++    &_DXMTFramegenReserveSource,
++    &_DXMTFramegenCommitSource,
++    &_DXMTFramegenWaitTick,
++    &_DXMTFramegenSelectOutput,
++    &_DXMTFramegenReportPresentation,
++    &_DXMTFramegenSession_reset,
++    &_DXMTFramegenSession_stop,
++    &_DXMTFramegenCancelSource,
++    &_MetalDrawable_present,
+ };
+ 
+ #ifndef DXMT_NATIVE
+@@ -3460,5 +3494,19 @@ const void *__wine_unix_call_wow64_funcs[] = {
+     &_MTLDevice_newIndirectCommandBuffer,
+     &_MTLDevice_newLibraryWithSource,
+     &_MTLTexture_getBytes,
++    &_DXMTFramegenSession_create,
++    &_DXMTFramegenMachNow,
++    &_DXMTFramegenSession_epoch,
++    &_DXMTFramegenSession_setEnabled,
++    &_DXMTFramegenSession_canCapture,
++    &_DXMTFramegenReserveSource,
++    &_DXMTFramegenCommitSource,
++    &_DXMTFramegenWaitTick,
++    &_DXMTFramegenSelectOutput,
++    &_DXMTFramegenReportPresentation,
++    &_DXMTFramegenSession_reset,
++    &_DXMTFramegenSession_stop,
++    &_DXMTFramegenCancelSource,
++    &_MetalDrawable_present,
+ };
+ #endif
+diff --git a/src/winemetal/winemetal.h b/src/winemetal/winemetal.h
+index 97fffc7..a27f030 100644
+--- a/src/winemetal/winemetal.h
++++ b/src/winemetal/winemetal.h
+@@ -1758,6 +1758,8 @@ WINEMETAL_API void DeveloperHUDProperties_remove(obj_handle_t obj, obj_handle_t
+ 
+ WINEMETAL_API obj_handle_t MetalDrawable_texture(obj_handle_t drawable);
+ 
++WINEMETAL_API void MetalDrawable_present(obj_handle_t drawable);
++
+ WINEMETAL_API obj_handle_t MetalLayer_nextDrawable(obj_handle_t layer);
+ 
+ WINEMETAL_API bool MTLDevice_supportsFXSpatialScaler(obj_handle_t device);
+@@ -2148,4 +2150,73 @@ WINEMETAL_API void MTLTexture_getBytes(
+     struct WMTMemoryPointer data, uint64_t bytes_per_row, uint64_t bytes_per_image
+ );
+ 
+-#endif
+\ No newline at end of file
++// Local-only, downstream DXMT display-tick experiment. Handles remain opaque
++// to the Windows side; native ownership and Objective-C object access stay in
++// WineMetal's Unix implementation.
++enum WMTDXMTFramegenOutputKind : uint32_t {
++  WMTDXMTFramegenOutputNone = 0,
++  WMTDXMTFramegenOutputSource = 1,
++  WMTDXMTFramegenOutputGenerated = 2,
++};
++
++struct WMTDXMTFramegenTick {
++  obj_handle_t drawable;
++  uint64_t tick_id;
++  uint64_t epoch;
++  int64_t callback_ns;
++  int64_t render_deadline_ns;
++  int64_t target_presentation_ns;
++  uint64_t raw_callback_time_bits;
++  uint64_t raw_render_deadline_bits;
++  uint64_t raw_target_presentation_bits;
++  uint64_t callback_duration_ns;
++  // Filled by the DXMT presentation worker and consumed by the Unix bridge
++  // for stage-level pacing diagnostics. Times share the Mach nanosecond epoch.
++  uint64_t worker_wake_ns;
++  uint64_t mutex_wait_start_ns;
++  uint64_t mutex_acquired_ns;
++  uint64_t presenter_encode_start_ns;
++  uint64_t presenter_encode_end_ns;
++  uint64_t gpu_submit_ns;
++  uint64_t present_call_ns;
++  uint64_t lifecycle_state;
++  uint64_t circuit_state;
++};
++
++struct WMTDXMTFramegenSelection {
++  obj_handle_t texture;
++  uint32_t kind;
++  uint32_t reserved;
++  uint64_t epoch;
++  uint64_t source_id;
++  uint64_t pair_a_id;
++  uint64_t pair_b_id;
++  int64_t source_timestamp_ns;
++  int64_t selected_target_ns;
++  int64_t generated_ready_ns;
++};
++
++WINEMETAL_API obj_handle_t DXMTFramegenSession_create(
++    obj_handle_t layer, obj_handle_t device, uint32_t *out_available);
++WINEMETAL_API int64_t DXMTFramegenMachNow(void);
++WINEMETAL_API uint64_t DXMTFramegenSession_epoch(obj_handle_t session);
++WINEMETAL_API bool DXMTFramegenSession_setEnabled(obj_handle_t session, bool enabled);
++WINEMETAL_API bool DXMTFramegenSession_canCapture(obj_handle_t session);
++WINEMETAL_API obj_handle_t DXMTFramegenReserveSource(
++    obj_handle_t session, obj_handle_t command_queue, obj_handle_t source_texture,
++    uint64_t epoch, uint64_t source_id, int64_t source_timestamp_ns);
++WINEMETAL_API void DXMTFramegenCommitSource(obj_handle_t session, obj_handle_t reservation);
++WINEMETAL_API void DXMTFramegenCancelSource(obj_handle_t session, obj_handle_t reservation);
++WINEMETAL_API bool DXMTFramegenWaitTick(
++    obj_handle_t session, uint64_t timeout_ms, struct WMTDXMTFramegenTick *out_tick);
++WINEMETAL_API void DXMTFramegenSelectOutput(
++    obj_handle_t session, const struct WMTDXMTFramegenTick *tick,
++    struct WMTDXMTFramegenSelection *out_selection);
++WINEMETAL_API void DXMTFramegenReportPresentation(
++    obj_handle_t session, obj_handle_t command_buffer,
++    const struct WMTDXMTFramegenTick *tick,
++    const struct WMTDXMTFramegenSelection *selection);
++WINEMETAL_API void DXMTFramegenSession_reset(obj_handle_t session);
++WINEMETAL_API void DXMTFramegenSession_stop(obj_handle_t session);
++
++#endif
+diff --git a/src/winemetal/winemetal_thunks.c b/src/winemetal/winemetal_thunks.c
+index 42286c9..3870ed6 100644
+--- a/src/winemetal/winemetal_thunks.c
++++ b/src/winemetal/winemetal_thunks.c
+@@ -1331,3 +1331,124 @@ MTLTexture_getBytes(
+   params.bytes_per_image = bytes_per_image;
+   UNIX_CALL(145, &params);
+ }
++
++WINEMETAL_API obj_handle_t
++DXMTFramegenSession_create(obj_handle_t layer, obj_handle_t device, uint32_t *out_available) {
++  struct unixcall_dxmtfg_session_create params = {0};
++  params.layer = layer;
++  params.device = device;
++  UNIX_CALL(146, &params);
++  if (out_available)
++    *out_available = params.ret_available;
++  return params.ret_session;
++}
++
++WINEMETAL_API int64_t
++DXMTFramegenMachNow(void) {
++  struct unixcall_dxmtfg_now params = {0};
++  UNIX_CALL(147, &params);
++  return params.ret_ns;
++}
++
++WINEMETAL_API uint64_t
++DXMTFramegenSession_epoch(obj_handle_t session) {
++  struct unixcall_dxmtfg_session_epoch params = {0};
++  params.session = session;
++  UNIX_CALL(148, &params);
++  return params.ret_epoch;
++}
++
++WINEMETAL_API bool
++DXMTFramegenSession_setEnabled(obj_handle_t session, bool enabled) {
++  struct unixcall_dxmtfg_session_set_enabled params = {0};
++  params.session = session;
++  params.enabled = enabled;
++  UNIX_CALL(149, &params);
++  return params.ret_enabled != 0;
++}
++
++WINEMETAL_API bool
++DXMTFramegenSession_canCapture(obj_handle_t session) {
++  struct unixcall_dxmtfg_session_can_capture params = {0};
++  params.session = session;
++  UNIX_CALL(150, &params);
++  return params.ret_can_capture != 0;
++}
++
++WINEMETAL_API obj_handle_t
++DXMTFramegenReserveSource(
++    obj_handle_t session, obj_handle_t command_queue, obj_handle_t source_texture,
++    uint64_t epoch, uint64_t source_id, int64_t source_timestamp_ns) {
++  struct unixcall_dxmtfg_reserve_source params = {0};
++  params.session = session;
++  params.command_queue = command_queue;
++  params.source_texture = source_texture;
++  params.epoch = epoch;
++  params.source_id = source_id;
++  params.source_timestamp_ns = source_timestamp_ns;
++  UNIX_CALL(151, &params);
++  return params.ret_reservation;
++}
++
++WINEMETAL_API void
++DXMTFramegenCommitSource(obj_handle_t session, obj_handle_t reservation) {
++  struct unixcall_dxmtfg_commit_source params = {session, reservation};
++  UNIX_CALL(152, &params);
++}
++
++WINEMETAL_API void
++DXMTFramegenCancelSource(obj_handle_t session, obj_handle_t reservation) {
++  struct unixcall_dxmtfg_cancel_source params = {session, reservation};
++  UNIX_CALL(158, &params);
++}
++
++WINEMETAL_API bool
++DXMTFramegenWaitTick(obj_handle_t session, uint64_t timeout_ms,
++                     struct WMTDXMTFramegenTick *out_tick) {
++  struct unixcall_dxmtfg_wait_tick params = {0};
++  params.session = session;
++  params.timeout_ms = timeout_ms;
++  WMT_MEMPTR_SET(params.out_tick, out_tick);
++  UNIX_CALL(153, &params);
++  return params.ret_has_tick != 0;
++}
++
++WINEMETAL_API void
++DXMTFramegenSelectOutput(obj_handle_t session,
++                         const struct WMTDXMTFramegenTick *tick,
++                         struct WMTDXMTFramegenSelection *out_selection) {
++  struct unixcall_dxmtfg_select_output params = {0};
++  params.session = session;
++  WMT_MEMPTR_SET(params.tick, (void *)tick);
++  WMT_MEMPTR_SET(params.out_selection, out_selection);
++  UNIX_CALL(154, &params);
++}
++
++WINEMETAL_API void
++DXMTFramegenReportPresentation(
++    obj_handle_t session, obj_handle_t command_buffer,
++    const struct WMTDXMTFramegenTick *tick,
++    const struct WMTDXMTFramegenSelection *selection) {
++  struct unixcall_dxmtfg_report_presentation params = {0};
++  params.session = session;
++  params.command_buffer = command_buffer;
++  WMT_MEMPTR_SET(params.tick, (void *)tick);
++  WMT_MEMPTR_SET(params.selection, (void *)selection);
++  UNIX_CALL(155, &params);
++}
++
++WINEMETAL_API void
++DXMTFramegenSession_reset(obj_handle_t session) {
++  UNIX_CALL(156, &session);
++}
++
++WINEMETAL_API void
++DXMTFramegenSession_stop(obj_handle_t session) {
++  UNIX_CALL(157, &session);
++}
++
++WINEMETAL_API void
++MetalDrawable_present(obj_handle_t drawable) {
++  struct unixcall_generic_obj_noret params = {drawable};
++  UNIX_CALL(159, &params);
++}
+diff --git a/src/winemetal/winemetal_thunks.h b/src/winemetal/winemetal_thunks.h
+index 37645c9..f473723 100644
+--- a/src/winemetal/winemetal_thunks.h
++++ b/src/winemetal/winemetal_thunks.h
+@@ -435,6 +435,74 @@ struct unixcall_mtldevice_newicb {
+   obj_handle_t ret;
+ };
+ 
++struct unixcall_dxmtfg_session_create {
++  obj_handle_t layer;
++  obj_handle_t device;
++  obj_handle_t ret_session;
++  uint32_t ret_available;
++};
++
++struct unixcall_dxmtfg_now {
++  int64_t ret_ns;
++};
++
++struct unixcall_dxmtfg_session_epoch {
++  obj_handle_t session;
++  uint64_t ret_epoch;
++};
++
++struct unixcall_dxmtfg_session_set_enabled {
++  obj_handle_t session;
++  uint32_t enabled;
++  uint32_t ret_enabled;
++};
++
++struct unixcall_dxmtfg_session_can_capture {
++  obj_handle_t session;
++  uint32_t ret_can_capture;
++};
++
++struct unixcall_dxmtfg_reserve_source {
++  obj_handle_t session;
++  obj_handle_t command_queue;
++  obj_handle_t source_texture;
++  uint64_t epoch;
++  uint64_t source_id;
++  int64_t source_timestamp_ns;
++  obj_handle_t ret_reservation;
++};
++
++struct unixcall_dxmtfg_commit_source {
++  obj_handle_t session;
++  obj_handle_t reservation;
++};
++
++struct unixcall_dxmtfg_cancel_source {
++  obj_handle_t session;
++  obj_handle_t reservation;
++};
++
++struct unixcall_dxmtfg_wait_tick {
++  obj_handle_t session;
++  uint64_t timeout_ms;
++  uint32_t ret_has_tick;
++  uint32_t reserved;
++  struct WMTMemoryPointer out_tick;
++};
++
++struct unixcall_dxmtfg_select_output {
++  obj_handle_t session;
++  struct WMTConstMemoryPointer tick;
++  struct WMTMemoryPointer out_selection;
++};
++
++struct unixcall_dxmtfg_report_presentation {
++  obj_handle_t session;
++  obj_handle_t command_buffer;
++  struct WMTConstMemoryPointer tick;
++  struct WMTConstMemoryPointer selection;
++};
++
+ #pragma pack(pop)
+ 
+ #endif

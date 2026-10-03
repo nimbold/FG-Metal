@@ -1,0 +1,1 @@
+event,presenter_id,epoch,presentation_seq,tick_id,kind,source_id,pair_a_id,pair_b_id,source_ns,copy_ready_ns,generated_ready_ns,callback_ns,deadline_ns,target_ns,actual_presented_ns,present_submit_ns,gpu_complete_ns,callback_duration_ns,queue_depth,raw_callback_ca_bits,raw_deadline_ca_bits,raw_target_ca_bits,detail

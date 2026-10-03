@@ -1,0 +1,876 @@
+ninja: Entering directory `/private/tmp/dxmt-fb451568-evidence.opkf8x/build-wine-x64'
+[1/161] /opt/homebrew/bin/meson --internal vcstagger ../repo/version.h.in version.h v0.1 /private/tmp/dxmt-fb451568-evidence.opkf8x/repo @VCS_TAG@ '(.*)' /opt/homebrew/bin/git describe --always
+[2/161] x86_64-w64-mingw32-g++ -Isrc/util/libutil.a.p -Isrc/util -I../repo/src/util -I../repo/include -Ilibs -I../repo/libs -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/util/libutil.a.p/util_bloom.cpp.obj -MF src/util/libutil.a.p/util_bloom.cpp.obj.d -o src/util/libutil.a.p/util_bloom.cpp.obj -c ../repo/src/util/util_bloom.cpp
+[3/161] x86_64-w64-mingw32-gcc -Isrc/winemetal/winemetal.dll.p -Isrc/winemetal -I../repo/src/winemetal -I../repo/include -Ilibs -I../repo/libs -Isrc/airconv -I../repo/src/airconv -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -O3 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/winemetal/winemetal.dll.p/main.c.obj -MF src/winemetal/winemetal.dll.p/main.c.obj.d -o src/winemetal/winemetal.dll.p/main.c.obj -c ../repo/src/winemetal/main.c
+[4/161] x86_64-w64-mingw32-gcc -Isrc/winemetal/winemetal.dll.p -Isrc/winemetal -I../repo/src/winemetal -I../repo/include -Ilibs -I../repo/libs -Isrc/airconv -I../repo/src/airconv -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -O3 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/winemetal/winemetal.dll.p/airconv_thunks.c.obj -MF src/winemetal/winemetal.dll.p/airconv_thunks.c.obj.d -o src/winemetal/winemetal.dll.p/airconv_thunks.c.obj -c ../repo/src/winemetal/airconv_thunks.c
+[5/161] x86_64-w64-mingw32-gcc -Isrc/winemetal/winemetal.dll.p -Isrc/winemetal -I../repo/src/winemetal -I../repo/include -Ilibs -I../repo/libs -Isrc/airconv -I../repo/src/airconv -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -O3 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/winemetal/winemetal.dll.p/winemetal_thunks.c.obj -MF src/winemetal/winemetal.dll.p/winemetal_thunks.c.obj.d -o src/winemetal/winemetal.dll.p/winemetal_thunks.c.obj -c ../repo/src/winemetal/winemetal_thunks.c
+[6/161] x86_64-w64-mingw32-g++ -Isrc/util/libutil.a.p -Isrc/util -I../repo/src/util -I../repo/include -Ilibs -I../repo/libs -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/util/libutil.a.p/util_md5.cpp.obj -MF src/util/libutil.a.p/util_md5.cpp.obj.d -o src/util/libutil.a.p/util_md5.cpp.obj -c ../repo/src/util/util_md5.cpp
+[7/161] x86_64-w64-mingw32-g++ -Isrc/util/libutil.a.p -Isrc/util -I../repo/src/util -I../repo/include -Ilibs -I../repo/libs -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/util/libutil.a.p/util_string.cpp.obj -MF src/util/libutil.a.p/util_string.cpp.obj.d -o src/util/libutil.a.p/util_string.cpp.obj -c ../repo/src/util/util_string.cpp
+[8/161] x86_64-w64-mingw32-g++ -Isrc/util/libutil.a.p -Isrc/util -I../repo/src/util -I../repo/include -Ilibs -I../repo/libs -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/util/libutil.a.p/util_env.cpp.obj -MF src/util/libutil.a.p/util_env.cpp.obj.d -o src/util/libutil.a.p/util_env.cpp.obj -c ../repo/src/util/util_env.cpp
+[9/161] x86_64-w64-mingw32-gcc -Isrc/util/libutil.a.p -Isrc/util -I../repo/src/util -I../repo/include -Ilibs -I../repo/libs -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -O3 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/util/libutil.a.p/sha1_sha1.c.obj -MF src/util/libutil.a.p/sha1_sha1.c.obj.d -o src/util/libutil.a.p/sha1_sha1.c.obj -c ../repo/src/util/sha1/sha1.c
+[10/161] x86_64-w64-mingw32-g++ -Isrc/util/libutil.a.p -Isrc/util -I../repo/src/util -I../repo/include -Ilibs -I../repo/libs -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/util/libutil.a.p/thread.cpp.obj -MF src/util/libutil.a.p/thread.cpp.obj.d -o src/util/libutil.a.p/thread.cpp.obj -c ../repo/src/util/thread.cpp
+[11/161] x86_64-w64-mingw32-g++ -Isrc/util/libutil.a.p -Isrc/util -I../repo/src/util -I../repo/include -Ilibs -I../repo/libs -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/util/libutil.a.p/sha1_sha1_util.cpp.obj -MF src/util/libutil.a.p/sha1_sha1_util.cpp.obj.d -o src/util/libutil.a.p/sha1_sha1_util.cpp.obj -c ../repo/src/util/sha1/sha1_util.cpp
+[12/161] x86_64-w64-mingw32-g++ -Isrc/util/libutil.a.p -Isrc/util -I../repo/src/util -I../repo/include -Ilibs -I../repo/libs -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/util/libutil.a.p/wsi_platform_win32.cpp.obj -MF src/util/libutil.a.p/wsi_platform_win32.cpp.obj.d -o src/util/libutil.a.p/wsi_platform_win32.cpp.obj -c ../repo/src/util/wsi_platform_win32.cpp
+[13/161] x86_64-w64-mingw32-gcc  -o src/winemetal/winemetal.dll src/winemetal/winemetal.dll.p/main.c.obj src/winemetal/winemetal.dll.p/airconv_thunks.c.obj src/winemetal/winemetal.dll.p/winemetal_thunks.c.obj -Wl,--allow-shlib-undefined -Wl,-O1 -shared -Wl,--start-group -Wl,--out-implib=src/winemetal/winemetal.dll.a -static -Wl,--file-alignment=4096 /tmp/dxmt-fb451568-evidence.opkf8x/wine-install-v8.16-3shain/lib/wine/x86_64-windows/libwinecrt0.a /tmp/dxmt-fb451568-evidence.opkf8x/wine-install-v8.16-3shain/lib/wine/x86_64-windows/libntdll.a /tmp/dxmt-fb451568-evidence.opkf8x/wine-install-v8.16-3shain/lib/wine/x86_64-windows/dbghelp.dll -Wl,--subsystem,console -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32 -Wl,--end-group
+[14/161] /opt/homebrew/bin/meson --internal symbolextractor /private/tmp/dxmt-fb451568-evidence.opkf8x/build-wine-x64 src/winemetal/winemetal.dll src/winemetal/winemetal.dll.a src/winemetal/winemetal.dll.p/winemetal.dll.symbols --cross-host=windows
+WARNING: ['lib', 'llvm-lib', 'dlltool'] do not work or were not found. Relinking will always happen on source changes.
+'lib' not found
+'llvm-lib' not found
+'dlltool' not found
+
+[15/161] x86_64-w64-mingw32-g++ -Isrc/util/libutil.a.p -Isrc/util -I../repo/src/util -I../repo/include -Ilibs -I../repo/libs -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/util/libutil.a.p/com_com_guid.cpp.obj -MF src/util/libutil.a.p/com_com_guid.cpp.obj.d -o src/util/libutil.a.p/com_com_guid.cpp.obj -c ../repo/src/util/com/com_guid.cpp
+[16/161] x86_64-w64-mingw32-g++ -Isrc/util/libutil.a.p -Isrc/util -I../repo/src/util -I../repo/include -Ilibs -I../repo/libs -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/util/libutil.a.p/com_com_private_data.cpp.obj -MF src/util/libutil.a.p/com_com_private_data.cpp.obj.d -o src/util/libutil.a.p/com_com_private_data.cpp.obj -c ../repo/src/util/com/com_private_data.cpp
+[17/161] /opt/homebrew/bin/x86_64-w64-mingw32-windres -i ../repo/src/dxgi/version.rc -o src/dxgi/dxgi.dll.p/version.o
+[18/161] x86_64-w64-mingw32-g++ -Isrc/util/libutil.a.p -Isrc/util -I../repo/src/util -I../repo/include -Ilibs -I../repo/libs -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/util/libutil.a.p/log_log.cpp.obj -MF src/util/libutil.a.p/log_log.cpp.obj.d -o src/util/libutil.a.p/log_log.cpp.obj -c ../repo/src/util/log/log.cpp
+[19/161] x86_64-w64-mingw32-g++ -Isrc/util/libutil.a.p -Isrc/util -I../repo/src/util -I../repo/include -Ilibs -I../repo/libs -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/util/libutil.a.p/wsi_monitor_win32.cpp.obj -MF src/util/libutil.a.p/wsi_monitor_win32.cpp.obj.d -o src/util/libutil.a.p/wsi_monitor_win32.cpp.obj -c ../repo/src/util/wsi_monitor_win32.cpp
+[20/161] x86_64-w64-mingw32-g++ -Ilibs/DXBCParser/libDXBCParser.a.p -Ilibs/DXBCParser -I../repo/libs/DXBCParser -I../repo/include -Ilibs -I../repo/libs -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -Wno-extern-c-compat -Wno-unknown-pragmas -MD -MQ libs/DXBCParser/libDXBCParser.a.p/BlobContainer.cpp.obj -MF libs/DXBCParser/libDXBCParser.a.p/BlobContainer.cpp.obj.d -o libs/DXBCParser/libDXBCParser.a.p/BlobContainer.cpp.obj -c ../repo/libs/DXBCParser/BlobContainer.cpp
+[21/161] /usr/bin/xcrun -sdk macosx metal -o src/airconv/darwin/libairconv.a.p/air_samplepos.air -c ../repo/src/airconv/shaders/air_samplepos.metal -std=metal3.1 --target=air64-apple-macos14.0
+[22/161] /usr/bin/xcrun -sdk macosx metal -o src/airconv/darwin/libairconv.a.p/air_msad.air -c ../repo/src/airconv/shaders/air_msad.metal -std=metal3.1 --target=air64-apple-macos14.0
+[23/161] /usr/bin/xxd -n air_msad -i src/airconv/darwin/libairconv.a.p/air_msad.air src/airconv/darwin/libairconv.a.p/air_msad.h
+[24/161] /usr/bin/xxd -n air_samplepos -i src/airconv/darwin/libairconv.a.p/air_samplepos.air src/airconv/darwin/libairconv.a.p/air_samplepos.h
+[25/161] /opt/homebrew/bin/x86_64-w64-mingw32-windres -i ../repo/src/d3d11/version.rc -o src/d3d11/d3d11.dll.p/version.o
+[26/161] /usr/bin/xcrun -sdk macosx metal -o src/airconv/darwin/airconv.p/air_msad.air -c ../repo/src/airconv/shaders/air_msad.metal -std=metal3.1 --target=air64-apple-macos14.0
+[27/161] /usr/bin/xcrun -sdk macosx metal -o src/airconv/darwin/airconv.p/air_samplepos.air -c ../repo/src/airconv/shaders/air_samplepos.metal -std=metal3.1 --target=air64-apple-macos14.0
+[28/161] x86_64-w64-mingw32-g++ -Ilibs/DXBCParser/libDXBCParser.a.p -Ilibs/DXBCParser -I../repo/libs/DXBCParser -I../repo/include -Ilibs -I../repo/libs -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -Wno-extern-c-compat -Wno-unknown-pragmas -MD -MQ libs/DXBCParser/libDXBCParser.a.p/DXBCUtils.cpp.obj -MF libs/DXBCParser/libDXBCParser.a.p/DXBCUtils.cpp.obj.d -o libs/DXBCParser/libDXBCParser.a.p/DXBCUtils.cpp.obj -c ../repo/libs/DXBCParser/DXBCUtils.cpp
+[29/161] /usr/bin/xcrun -sdk macosx metal -o src/airconv/darwin/libairconv.a.p/air_tessellation.air -c ../repo/src/airconv/shaders/air_tessellation.metal -std=metal3.1 --target=air64-apple-macos14.0
+[30/161] /usr/bin/xxd -n air_tessellation -i src/airconv/darwin/libairconv.a.p/air_tessellation.air src/airconv/darwin/libairconv.a.p/air_tessellation.h
+[31/161] /usr/bin/xcrun -sdk macosx metal -o src/airconv/darwin/airconv.p/air_tessellation.air -c ../repo/src/airconv/shaders/air_tessellation.metal -std=metal3.1 --target=air64-apple-macos14.0
+[32/161] x86_64-w64-mingw32-g++ -Isrc/util/libutil.a.p -Isrc/util -I../repo/src/util -I../repo/include -Ilibs -I../repo/libs -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/util/libutil.a.p/wsi_window_win32.cpp.obj -MF src/util/libutil.a.p/wsi_window_win32.cpp.obj.d -o src/util/libutil.a.p/wsi_window_win32.cpp.obj -c ../repo/src/util/wsi_window_win32.cpp
+[33/161] c++ -Ilibs/DXBCParser/libDXBCParserNative.a.p -Ilibs/DXBCParser -I../repo/libs/DXBCParser -I../repo/include/native/windows -I../repo/include/native/directx -fdiagnostics-color=always -DNDEBUG -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -Wimplicit-fallthrough -Wno-unused-parameter -Wno-unused-private-field -Wno-unused-const-variable -Wno-missing-braces -fblocks -arch x86_64 -Wno-extern-c-compat -Wno-unknown-pragmas -MD -MQ libs/DXBCParser/libDXBCParserNative.a.p/BlobContainer.cpp.o -MF libs/DXBCParser/libDXBCParserNative.a.p/BlobContainer.cpp.o.d -o libs/DXBCParser/libDXBCParserNative.a.p/BlobContainer.cpp.o -c ../repo/libs/DXBCParser/BlobContainer.cpp
+[34/161] c++ -Ilibs/DXBCParser/libDXBCParserNative.a.p -Ilibs/DXBCParser -I../repo/libs/DXBCParser -I../repo/include/native/windows -I../repo/include/native/directx -fdiagnostics-color=always -DNDEBUG -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -Wimplicit-fallthrough -Wno-unused-parameter -Wno-unused-private-field -Wno-unused-const-variable -Wno-missing-braces -fblocks -arch x86_64 -Wno-extern-c-compat -Wno-unknown-pragmas -MD -MQ libs/DXBCParser/libDXBCParserNative.a.p/DXBCUtils.cpp.o -MF libs/DXBCParser/libDXBCParserNative.a.p/DXBCUtils.cpp.o.d -o libs/DXBCParser/libDXBCParserNative.a.p/DXBCUtils.cpp.o -c ../repo/libs/DXBCParser/DXBCUtils.cpp
+[35/161] c++ -Ilibs/DXBCParser/libDXBCParserNative.a.p -Ilibs/DXBCParser -I../repo/libs/DXBCParser -I../repo/include/native/windows -I../repo/include/native/directx -fdiagnostics-color=always -DNDEBUG -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -Wimplicit-fallthrough -Wno-unused-parameter -Wno-unused-private-field -Wno-unused-const-variable -Wno-missing-braces -fblocks -arch x86_64 -Wno-extern-c-compat -Wno-unknown-pragmas -MD -MQ libs/DXBCParser/libDXBCParserNative.a.p/ShaderBinary.cpp.o -MF libs/DXBCParser/libDXBCParserNative.a.p/ShaderBinary.cpp.o.d -o libs/DXBCParser/libDXBCParserNative.a.p/ShaderBinary.cpp.o -c ../repo/libs/DXBCParser/ShaderBinary.cpp
+[36/161] x86_64-w64-mingw32-g++ -Ilibs/DXBCParser/libDXBCParser.a.p -Ilibs/DXBCParser -I../repo/libs/DXBCParser -I../repo/include -Ilibs -I../repo/libs -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -Wno-extern-c-compat -Wno-unknown-pragmas -MD -MQ libs/DXBCParser/libDXBCParser.a.p/ShaderBinary.cpp.obj -MF libs/DXBCParser/libDXBCParser.a.p/ShaderBinary.cpp.obj.d -o libs/DXBCParser/libDXBCParser.a.p/ShaderBinary.cpp.obj -c ../repo/libs/DXBCParser/ShaderBinary.cpp
+[37/161] rm -f libs/DXBCParser/libDXBCParser.a && x86_64-w64-mingw32-ar csrDT libs/DXBCParser/libDXBCParser.a libs/DXBCParser/libDXBCParser.a.p/DXBCUtils.cpp.obj libs/DXBCParser/libDXBCParser.a.p/BlobContainer.cpp.obj libs/DXBCParser/libDXBCParser.a.p/ShaderBinary.cpp.obj
+[38/161] /usr/bin/xcrun -sdk macosx metal -o src/dxmt/libdxmt.a.p/dxmt_command.air -c ../repo/src/dxmt/dxmt_command.metal
+[39/161] /usr/bin/xcrun -sdk macosx metallib -o src/dxmt/libdxmt.a.p/dxmt_command.metallib src/dxmt/libdxmt.a.p/dxmt_command.air
+[40/161] /usr/bin/xxd -n dxmt_command -i src/dxmt/libdxmt.a.p/dxmt_command.metallib src/dxmt/libdxmt.a.p/dxmt_command.h
+[41/161] c++ -Isrc/airconv/darwin/libairconv.a.p -Isrc/airconv/darwin -I../repo/src/airconv/darwin -I../repo/include -Ilibs -I../repo/libs -I/tmp/dxmt-fb451568-evidence.opkf8x/clang+llvm-15.0.7-x86_64-apple-darwin21.0/include -I../repo/include/native/windows -I../repo/include/native/directx -fdiagnostics-color=always -DNDEBUG -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -Wimplicit-fallthrough -Wno-unused-parameter -Wno-unused-private-field -Wno-unused-const-variable -Wno-missing-braces -fblocks -arch x86_64 -Wno-extern-c-compat -fno-exceptions -funwind-tables -fno-rtti -D_FILE_OFFSET_BITS=64 -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wno-unnecessary-virtual-specifier -MD -MQ src/airconv/darwin/libairconv.a.p/.._air_type.cpp.o -MF src/airconv/darwin/libairconv.a.p/.._air_type.cpp.o.d -o src/airconv/darwin/libairconv.a.p/.._air_type.cpp.o -c ../repo/src/airconv/air_type.cpp
+In file included from ../repo/src/airconv/air_type.cpp:1:
+../repo/src/airconv/air_type.hpp:85:3: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+   85 |   };
+      |   ^
+In file included from ../repo/src/airconv/air_type.cpp:2:
+../repo/src/airconv/air_signature.hpp:679:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  679 | };
+      | ^
+../repo/src/airconv/air_signature.hpp:694:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  694 | }
+      | ^
+3 warnings generated.
+[42/161] c++ -Isrc/airconv/darwin/libairconv.a.p -Isrc/airconv/darwin -I../repo/src/airconv/darwin -I../repo/include -Ilibs -I../repo/libs -I/tmp/dxmt-fb451568-evidence.opkf8x/clang+llvm-15.0.7-x86_64-apple-darwin21.0/include -I../repo/include/native/windows -I../repo/include/native/directx -fdiagnostics-color=always -DNDEBUG -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -Wimplicit-fallthrough -Wno-unused-parameter -Wno-unused-private-field -Wno-unused-const-variable -Wno-missing-braces -fblocks -arch x86_64 -Wno-extern-c-compat -fno-exceptions -funwind-tables -fno-rtti -D_FILE_OFFSET_BITS=64 -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wno-unnecessary-virtual-specifier -MD -MQ src/airconv/darwin/libairconv.a.p/.._air_operations.cpp.o -MF src/airconv/darwin/libairconv.a.p/.._air_operations.cpp.o.d -o src/airconv/darwin/libairconv.a.p/.._air_operations.cpp.o -c ../repo/src/airconv/air_operations.cpp
+In file included from ../repo/src/airconv/air_operations.cpp:1:
+In file included from ../repo/src/airconv/air_operations.hpp:3:
+../repo/src/airconv/air_signature.hpp:679:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  679 | };
+      | ^
+../repo/src/airconv/air_signature.hpp:694:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  694 | }
+      | ^
+In file included from ../repo/src/airconv/air_operations.cpp:1:
+In file included from ../repo/src/airconv/air_operations.hpp:4:
+../repo/src/airconv/air_type.hpp:85:3: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+   85 |   };
+      |   ^
+3 warnings generated.
+[43/161] c++ -Isrc/airconv/darwin/libairconv.a.p -Isrc/airconv/darwin -I../repo/src/airconv/darwin -I../repo/include -Ilibs -I../repo/libs -I/tmp/dxmt-fb451568-evidence.opkf8x/clang+llvm-15.0.7-x86_64-apple-darwin21.0/include -I../repo/include/native/windows -I../repo/include/native/directx -fdiagnostics-color=always -DNDEBUG -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -Wimplicit-fallthrough -Wno-unused-parameter -Wno-unused-private-field -Wno-unused-const-variable -Wno-missing-braces -fblocks -arch x86_64 -Wno-extern-c-compat -fno-exceptions -funwind-tables -fno-rtti -D_FILE_OFFSET_BITS=64 -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wno-unnecessary-virtual-specifier -MD -MQ src/airconv/darwin/libairconv.a.p/.._dxbc_binding_sm50.cpp.o -MF src/airconv/darwin/libairconv.a.p/.._dxbc_binding_sm50.cpp.o.d -o src/airconv/darwin/libairconv.a.p/.._dxbc_binding_sm50.cpp.o -c ../repo/src/airconv/dxbc_binding_sm50.cpp
+In file included from ../repo/src/airconv/dxbc_binding_sm50.cpp:2:
+In file included from ../repo/src/airconv/dxbc_converter.hpp:12:
+In file included from ../repo/src/airconv/air_operations.hpp:3:
+../repo/src/airconv/air_signature.hpp:679:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  679 | };
+      | ^
+../repo/src/airconv/air_signature.hpp:694:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  694 | }
+      | ^
+In file included from ../repo/src/airconv/dxbc_binding_sm50.cpp:2:
+In file included from ../repo/src/airconv/dxbc_converter.hpp:12:
+In file included from ../repo/src/airconv/air_operations.hpp:4:
+../repo/src/airconv/air_type.hpp:85:3: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+   85 |   };
+      |   ^
+In file included from ../repo/src/airconv/dxbc_binding_sm50.cpp:2:
+../repo/src/airconv/dxbc_converter.hpp:310:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  310 | }
+      | ^
+4 warnings generated.
+[44/161] x86_64-w64-mingw32-g++ -Isrc/dxmt/libdxmt.a.p -Isrc/dxmt -I../repo/src/dxmt -I../repo/include -Ilibs -I../repo/libs -Isrc/util -I../repo/src/util -Isrc/airconv -I../repo/src/airconv -Isrc/winemetal -I../repo/src/winemetal -I. -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/dxmt/libdxmt.a.p/dxmt_names.cpp.obj -MF src/dxmt/libdxmt.a.p/dxmt_names.cpp.obj.d -o src/dxmt/libdxmt.a.p/dxmt_names.cpp.obj -c ../repo/src/dxmt/dxmt_names.cpp
+[45/161] x86_64-w64-mingw32-g++ -Isrc/util/libutil.a.p -Isrc/util -I../repo/src/util -I../repo/include -Ilibs -I../repo/libs -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/util/libutil.a.p/config_config.cpp.obj -MF src/util/libutil.a.p/config_config.cpp.obj.d -o src/util/libutil.a.p/config_config.cpp.obj -c ../repo/src/util/config/config.cpp
+[46/161] c++ -Isrc/airconv/darwin/libairconv.a.p -Isrc/airconv/darwin -I../repo/src/airconv/darwin -I../repo/include -Ilibs -I../repo/libs -I/tmp/dxmt-fb451568-evidence.opkf8x/clang+llvm-15.0.7-x86_64-apple-darwin21.0/include -I../repo/include/native/windows -I../repo/include/native/directx -fdiagnostics-color=always -DNDEBUG -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -Wimplicit-fallthrough -Wno-unused-parameter -Wno-unused-private-field -Wno-unused-const-variable -Wno-missing-braces -fblocks -arch x86_64 -Wno-extern-c-compat -fno-exceptions -funwind-tables -fno-rtti -D_FILE_OFFSET_BITS=64 -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wno-unnecessary-virtual-specifier -MD -MQ src/airconv/darwin/libairconv.a.p/.._airconv_context.cpp.o -MF src/airconv/darwin/libairconv.a.p/.._airconv_context.cpp.o.d -o src/airconv/darwin/libairconv.a.p/.._airconv_context.cpp.o -c ../repo/src/airconv/airconv_context.cpp
+[47/161] c++ -Isrc/airconv/darwin/libairconv.a.p -Isrc/airconv/darwin -I../repo/src/airconv/darwin -I../repo/include -Ilibs -I../repo/libs -I/tmp/dxmt-fb451568-evidence.opkf8x/clang+llvm-15.0.7-x86_64-apple-darwin21.0/include -I../repo/include/native/windows -I../repo/include/native/directx -fdiagnostics-color=always -DNDEBUG -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -Wimplicit-fallthrough -Wno-unused-parameter -Wno-unused-private-field -Wno-unused-const-variable -Wno-missing-braces -fblocks -arch x86_64 -Wno-extern-c-compat -fno-exceptions -funwind-tables -fno-rtti -D_FILE_OFFSET_BITS=64 -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wno-unnecessary-virtual-specifier -MD -MQ src/airconv/darwin/libairconv.a.p/.._dxbc_binding_rootsig.cpp.o -MF src/airconv/darwin/libairconv.a.p/.._dxbc_binding_rootsig.cpp.o.d -o src/airconv/darwin/libairconv.a.p/.._dxbc_binding_rootsig.cpp.o -c ../repo/src/airconv/dxbc_binding_rootsig.cpp
+In file included from ../repo/src/airconv/dxbc_binding_rootsig.cpp:19:
+../repo/src/airconv/air_signature.hpp:679:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  679 | };
+      | ^
+../repo/src/airconv/air_signature.hpp:694:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  694 | }
+      | ^
+In file included from ../repo/src/airconv/dxbc_binding_rootsig.cpp:20:
+In file included from ../repo/src/airconv/dxbc_converter.hpp:12:
+In file included from ../repo/src/airconv/air_operations.hpp:4:
+../repo/src/airconv/air_type.hpp:85:3: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+   85 |   };
+      |   ^
+In file included from ../repo/src/airconv/dxbc_binding_rootsig.cpp:20:
+../repo/src/airconv/dxbc_converter.hpp:310:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  310 | }
+      | ^
+4 warnings generated.
+[48/161] x86_64-w64-mingw32-g++ -Isrc/dxmt/libdxmt.a.p -Isrc/dxmt -I../repo/src/dxmt -I../repo/include -Ilibs -I../repo/libs -Isrc/util -I../repo/src/util -Isrc/airconv -I../repo/src/airconv -Isrc/winemetal -I../repo/src/winemetal -I. -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/dxmt/libdxmt.a.p/dxmt_format.cpp.obj -MF src/dxmt/libdxmt.a.p/dxmt_format.cpp.obj.d -o src/dxmt/libdxmt.a.p/dxmt_format.cpp.obj -c ../repo/src/dxmt/dxmt_format.cpp
+[49/161] c++ -Isrc/airconv/darwin/libairconv.a.p -Isrc/airconv/darwin -I../repo/src/airconv/darwin -I../repo/include -Ilibs -I../repo/libs -I/tmp/dxmt-fb451568-evidence.opkf8x/clang+llvm-15.0.7-x86_64-apple-darwin21.0/include -I../repo/include/native/windows -I../repo/include/native/directx -fdiagnostics-color=always -DNDEBUG -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -Wimplicit-fallthrough -Wno-unused-parameter -Wno-unused-private-field -Wno-unused-const-variable -Wno-missing-braces -fblocks -arch x86_64 -Wno-extern-c-compat -fno-exceptions -funwind-tables -fno-rtti -D_FILE_OFFSET_BITS=64 -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wno-unnecessary-virtual-specifier -MD -MQ src/airconv/darwin/libairconv.a.p/.._air_signature.cpp.o -MF src/airconv/darwin/libairconv.a.p/.._air_signature.cpp.o.d -o src/airconv/darwin/libairconv.a.p/.._air_signature.cpp.o -c ../repo/src/airconv/air_signature.cpp
+In file included from ../repo/src/airconv/air_signature.cpp:19:
+../repo/src/airconv/air_signature.hpp:679:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  679 | };
+      | ^
+../repo/src/airconv/air_signature.hpp:694:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  694 | }
+      | ^
+2 warnings generated.
+[50/161] x86_64-w64-mingw32-g++ -Isrc/dxmt/libdxmt.a.p -Isrc/dxmt -I../repo/src/dxmt -I../repo/include -Ilibs -I../repo/libs -Isrc/util -I../repo/src/util -Isrc/airconv -I../repo/src/airconv -Isrc/winemetal -I../repo/src/winemetal -I. -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/dxmt/libdxmt.a.p/dxmt_info.cpp.obj -MF src/dxmt/libdxmt.a.p/dxmt_info.cpp.obj.d -o src/dxmt/libdxmt.a.p/dxmt_info.cpp.obj -c ../repo/src/dxmt/dxmt_info.cpp
+[51/161] x86_64-w64-mingw32-g++ -Isrc/dxmt/libdxmt.a.p -Isrc/dxmt -I../repo/src/dxmt -I../repo/include -Ilibs -I../repo/libs -Isrc/util -I../repo/src/util -Isrc/airconv -I../repo/src/airconv -Isrc/winemetal -I../repo/src/winemetal -I. -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/dxmt/libdxmt.a.p/dxmt_capture.cpp.obj -MF src/dxmt/libdxmt.a.p/dxmt_capture.cpp.obj.d -o src/dxmt/libdxmt.a.p/dxmt_capture.cpp.obj -c ../repo/src/dxmt/dxmt_capture.cpp
+[52/161] x86_64-w64-mingw32-g++ -Isrc/dxmt/libdxmt.a.p -Isrc/dxmt -I../repo/src/dxmt -I../repo/include -Ilibs -I../repo/libs -Isrc/util -I../repo/src/util -Isrc/airconv -I../repo/src/airconv -Isrc/winemetal -I../repo/src/winemetal -I. -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/dxmt/libdxmt.a.p/dxmt_buffer.cpp.obj -MF src/dxmt/libdxmt.a.p/dxmt_buffer.cpp.obj.d -o src/dxmt/libdxmt.a.p/dxmt_buffer.cpp.obj -c ../repo/src/dxmt/dxmt_buffer.cpp
+[53/161] x86_64-w64-mingw32-g++ -Isrc/dxmt/libdxmt.a.p -Isrc/dxmt -I../repo/src/dxmt -I../repo/include -Ilibs -I../repo/libs -Isrc/util -I../repo/src/util -Isrc/airconv -I../repo/src/airconv -Isrc/winemetal -I../repo/src/winemetal -I. -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/dxmt/libdxmt.a.p/dxmt_device.cpp.obj -MF src/dxmt/libdxmt.a.p/dxmt_device.cpp.obj.d -o src/dxmt/libdxmt.a.p/dxmt_device.cpp.obj -c ../repo/src/dxmt/dxmt_device.cpp
+[54/161] x86_64-w64-mingw32-g++ -Isrc/dxmt/libdxmt.a.p -Isrc/dxmt -I../repo/src/dxmt -I../repo/include -Ilibs -I../repo/libs -Isrc/util -I../repo/src/util -Isrc/airconv -I../repo/src/airconv -Isrc/winemetal -I../repo/src/winemetal -I. -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/dxmt/libdxmt.a.p/dxmt_hud_state.cpp.obj -MF src/dxmt/libdxmt.a.p/dxmt_hud_state.cpp.obj.d -o src/dxmt/libdxmt.a.p/dxmt_hud_state.cpp.obj -c ../repo/src/dxmt/dxmt_hud_state.cpp
+[55/161] x86_64-w64-mingw32-g++ -Isrc/dxmt/libdxmt.a.p -Isrc/dxmt -I../repo/src/dxmt -I../repo/include -Ilibs -I../repo/libs -Isrc/util -I../repo/src/util -Isrc/airconv -I../repo/src/airconv -Isrc/winemetal -I../repo/src/winemetal -I. -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/dxmt/libdxmt.a.p/dxmt_command.cpp.obj -MF src/dxmt/libdxmt.a.p/dxmt_command.cpp.obj.d -o src/dxmt/libdxmt.a.p/dxmt_command.cpp.obj -c ../repo/src/dxmt/dxmt_command.cpp
+[56/161] x86_64-w64-mingw32-g++ -Isrc/dxmt/libdxmt.a.p -Isrc/dxmt -I../repo/src/dxmt -I../repo/include -Ilibs -I../repo/libs -Isrc/util -I../repo/src/util -Isrc/airconv -I../repo/src/airconv -Isrc/winemetal -I../repo/src/winemetal -I. -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/dxmt/libdxmt.a.p/dxmt_texture.cpp.obj -MF src/dxmt/libdxmt.a.p/dxmt_texture.cpp.obj.d -o src/dxmt/libdxmt.a.p/dxmt_texture.cpp.obj -c ../repo/src/dxmt/dxmt_texture.cpp
+[57/161] x86_64-w64-mingw32-g++ -Isrc/dxmt/libdxmt.a.p -Isrc/dxmt -I../repo/src/dxmt -I../repo/include -Ilibs -I../repo/libs -Isrc/util -I../repo/src/util -Isrc/airconv -I../repo/src/airconv -Isrc/winemetal -I../repo/src/winemetal -I. -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/dxmt/libdxmt.a.p/dxmt_command_queue.cpp.obj -MF src/dxmt/libdxmt.a.p/dxmt_command_queue.cpp.obj.d -o src/dxmt/libdxmt.a.p/dxmt_command_queue.cpp.obj -c ../repo/src/dxmt/dxmt_command_queue.cpp
+[58/161] x86_64-w64-mingw32-g++ -Isrc/dxmt/libdxmt.a.p -Isrc/dxmt -I../repo/src/dxmt -I../repo/include -Ilibs -I../repo/libs -Isrc/util -I../repo/src/util -Isrc/airconv -I../repo/src/airconv -Isrc/winemetal -I../repo/src/winemetal -I. -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/dxmt/libdxmt.a.p/dxmt_allocation.cpp.obj -MF src/dxmt/libdxmt.a.p/dxmt_allocation.cpp.obj.d -o src/dxmt/libdxmt.a.p/dxmt_allocation.cpp.obj -c ../repo/src/dxmt/dxmt_allocation.cpp
+[59/161] x86_64-w64-mingw32-g++ -Isrc/dxmt/libdxmt.a.p -Isrc/dxmt -I../repo/src/dxmt -I../repo/include -Ilibs -I../repo/libs -Isrc/util -I../repo/src/util -Isrc/airconv -I../repo/src/airconv -Isrc/winemetal -I../repo/src/winemetal -I. -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/dxmt/libdxmt.a.p/dxmt_sampler.cpp.obj -MF src/dxmt/libdxmt.a.p/dxmt_sampler.cpp.obj.d -o src/dxmt/libdxmt.a.p/dxmt_sampler.cpp.obj -c ../repo/src/dxmt/dxmt_sampler.cpp
+[60/161] x86_64-w64-mingw32-g++ -Isrc/dxmt/libdxmt.a.p -Isrc/dxmt -I../repo/src/dxmt -I../repo/include -Ilibs -I../repo/libs -Isrc/util -I../repo/src/util -Isrc/airconv -I../repo/src/airconv -Isrc/winemetal -I../repo/src/winemetal -I. -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/dxmt/libdxmt.a.p/dxmt_scaler.cpp.obj -MF src/dxmt/libdxmt.a.p/dxmt_scaler.cpp.obj.d -o src/dxmt/libdxmt.a.p/dxmt_scaler.cpp.obj -c ../repo/src/dxmt/dxmt_scaler.cpp
+[61/161] x86_64-w64-mingw32-g++ -Isrc/dxmt/libdxmt.a.p -Isrc/dxmt -I../repo/src/dxmt -I../repo/include -Ilibs -I../repo/libs -Isrc/util -I../repo/src/util -Isrc/airconv -I../repo/src/airconv -Isrc/winemetal -I../repo/src/winemetal -I. -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/dxmt/libdxmt.a.p/dxmt_dynamic.cpp.obj -MF src/dxmt/libdxmt.a.p/dxmt_dynamic.cpp.obj.d -o src/dxmt/libdxmt.a.p/dxmt_dynamic.cpp.obj -c ../repo/src/dxmt/dxmt_dynamic.cpp
+[62/161] x86_64-w64-mingw32-g++ -Isrc/dxmt/libdxmt.a.p -Isrc/dxmt -I../repo/src/dxmt -I../repo/include -Ilibs -I../repo/libs -Isrc/util -I../repo/src/util -Isrc/airconv -I../repo/src/airconv -Isrc/winemetal -I../repo/src/winemetal -I. -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/dxmt/libdxmt.a.p/dxmt_staging.cpp.obj -MF src/dxmt/libdxmt.a.p/dxmt_staging.cpp.obj.d -o src/dxmt/libdxmt.a.p/dxmt_staging.cpp.obj -c ../repo/src/dxmt/dxmt_staging.cpp
+[63/161] x86_64-w64-mingw32-g++ -Isrc/dxmt/libdxmt.a.p -Isrc/dxmt -I../repo/src/dxmt -I../repo/include -Ilibs -I../repo/libs -Isrc/util -I../repo/src/util -Isrc/airconv -I../repo/src/airconv -Isrc/winemetal -I../repo/src/winemetal -I. -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/dxmt/libdxmt.a.p/dxmt_deptrack.cpp.obj -MF src/dxmt/libdxmt.a.p/dxmt_deptrack.cpp.obj.d -o src/dxmt/libdxmt.a.p/dxmt_deptrack.cpp.obj -c ../repo/src/dxmt/dxmt_deptrack.cpp
+[64/161] x86_64-w64-mingw32-g++ -Isrc/dxmt/libdxmt.a.p -Isrc/dxmt -I../repo/src/dxmt -I../repo/include -Ilibs -I../repo/libs -Isrc/util -I../repo/src/util -Isrc/airconv -I../repo/src/airconv -Isrc/winemetal -I../repo/src/winemetal -I. -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/dxmt/libdxmt.a.p/dxmt_presenter.cpp.obj -MF src/dxmt/libdxmt.a.p/dxmt_presenter.cpp.obj.d -o src/dxmt/libdxmt.a.p/dxmt_presenter.cpp.obj -c ../repo/src/dxmt/dxmt_presenter.cpp
+[65/161] rm -f src/util/libutil.a && x86_64-w64-mingw32-ar csrDT src/util/libutil.a src/util/libutil.a.p/util_env.cpp.obj src/util/libutil.a.p/util_string.cpp.obj src/util/libutil.a.p/util_bloom.cpp.obj src/util/libutil.a.p/util_md5.cpp.obj src/util/libutil.a.p/thread.cpp.obj src/util/libutil.a.p/com_com_guid.cpp.obj src/util/libutil.a.p/com_com_private_data.cpp.obj src/util/libutil.a.p/config_config.cpp.obj src/util/libutil.a.p/log_log.cpp.obj src/util/libutil.a.p/sha1_sha1.c.obj src/util/libutil.a.p/sha1_sha1_util.cpp.obj src/util/libutil.a.p/wsi_monitor_win32.cpp.obj src/util/libutil.a.p/wsi_window_win32.cpp.obj src/util/libutil.a.p/wsi_platform_win32.cpp.obj
+[66/161] x86_64-w64-mingw32-g++ -Isrc/dxmt/libdxmt.a.p -Isrc/dxmt -I../repo/src/dxmt -I../repo/include -Ilibs -I../repo/libs -Isrc/util -I../repo/src/util -Isrc/airconv -I../repo/src/airconv -Isrc/winemetal -I../repo/src/winemetal -I. -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/dxmt/libdxmt.a.p/dxmt_shader_cache.cpp.obj -MF src/dxmt/libdxmt.a.p/dxmt_shader_cache.cpp.obj.d -o src/dxmt/libdxmt.a.p/dxmt_shader_cache.cpp.obj -c ../repo/src/dxmt/dxmt_shader_cache.cpp
+[67/161] x86_64-w64-mingw32-g++ -Isrc/dxmt/libdxmt.a.p -Isrc/dxmt -I../repo/src/dxmt -I../repo/include -Ilibs -I../repo/libs -Isrc/util -I../repo/src/util -Isrc/airconv -I../repo/src/airconv -Isrc/winemetal -I../repo/src/winemetal -I. -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/dxmt/libdxmt.a.p/dxmt_subresource.cpp.obj -MF src/dxmt/libdxmt.a.p/dxmt_subresource.cpp.obj.d -o src/dxmt/libdxmt.a.p/dxmt_subresource.cpp.obj -c ../repo/src/dxmt/dxmt_subresource.cpp
+[68/161] x86_64-w64-mingw32-g++ -Isrc/dxmt/libdxmt.a.p -Isrc/dxmt -I../repo/src/dxmt -I../repo/include -Ilibs -I../repo/libs -Isrc/util -I../repo/src/util -Isrc/airconv -I../repo/src/airconv -Isrc/winemetal -I../repo/src/winemetal -I. -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/dxmt/libdxmt.a.p/dxmt_resource_initializer.cpp.obj -MF src/dxmt/libdxmt.a.p/dxmt_resource_initializer.cpp.obj.d -o src/dxmt/libdxmt.a.p/dxmt_resource_initializer.cpp.obj -c ../repo/src/dxmt/dxmt_resource_initializer.cpp
+[69/161] x86_64-w64-mingw32-g++ -Isrc/dxmt/libdxmt.a.p -Isrc/dxmt -I../repo/src/dxmt -I../repo/include -Ilibs -I../repo/libs -Isrc/util -I../repo/src/util -Isrc/airconv -I../repo/src/airconv -Isrc/winemetal -I../repo/src/winemetal -I. -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/dxmt/libdxmt.a.p/dxmt_fence.cpp.obj -MF src/dxmt/libdxmt.a.p/dxmt_fence.cpp.obj.d -o src/dxmt/libdxmt.a.p/dxmt_fence.cpp.obj -c ../repo/src/dxmt/dxmt_fence.cpp
+[70/161] x86_64-w64-mingw32-g++ -Isrc/dxmt/libdxmt.a.p -Isrc/dxmt -I../repo/src/dxmt -I../repo/include -Ilibs -I../repo/libs -Isrc/util -I../repo/src/util -Isrc/airconv -I../repo/src/airconv -Isrc/winemetal -I../repo/src/winemetal -I. -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/dxmt/libdxmt.a.p/dxmt_counter.cpp.obj -MF src/dxmt/libdxmt.a.p/dxmt_counter.cpp.obj.d -o src/dxmt/libdxmt.a.p/dxmt_counter.cpp.obj -c ../repo/src/dxmt/dxmt_counter.cpp
+[71/161] x86_64-w64-mingw32-g++ -Isrc/dxgi/dxgi.dll.p -Isrc/dxgi -I../repo/src/dxgi -I../repo/include -Ilibs -I../repo/libs -Isrc/dxmt -I../repo/src/dxmt -Isrc/util -I../repo/src/util -Isrc/winemetal -I../repo/src/winemetal -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/dxgi/dxgi.dll.p/dxgi_options.cpp.obj -MF src/dxgi/dxgi.dll.p/dxgi_options.cpp.obj.d -o src/dxgi/dxgi.dll.p/dxgi_options.cpp.obj -c ../repo/src/dxgi/dxgi_options.cpp
+[72/161] x86_64-w64-mingw32-g++ -Isrc/dxmt/libdxmt.a.p -Isrc/dxmt -I../repo/src/dxmt -I../repo/include -Ilibs -I../repo/libs -Isrc/util -I../repo/src/util -Isrc/airconv -I../repo/src/airconv -Isrc/winemetal -I../repo/src/winemetal -I. -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/dxmt/libdxmt.a.p/dxmt_keyed_mutex.cpp.obj -MF src/dxmt/libdxmt.a.p/dxmt_keyed_mutex.cpp.obj.d -o src/dxmt/libdxmt.a.p/dxmt_keyed_mutex.cpp.obj -c ../repo/src/dxmt/dxmt_keyed_mutex.cpp
+[73/161] x86_64-w64-mingw32-g++ -Isrc/dxgi/dxgi.dll.p -Isrc/dxgi -I../repo/src/dxgi -I../repo/include -Ilibs -I../repo/libs -Isrc/dxmt -I../repo/src/dxmt -Isrc/util -I../repo/src/util -Isrc/winemetal -I../repo/src/winemetal -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/dxgi/dxgi.dll.p/dxgi_adapter.cpp.obj -MF src/dxgi/dxgi.dll.p/dxgi_adapter.cpp.obj.d -o src/dxgi/dxgi.dll.p/dxgi_adapter.cpp.obj -c ../repo/src/dxgi/dxgi_adapter.cpp
+../repo/src/dxgi/dxgi_adapter.cpp: In member function 'virtual HRESULT dxmt::MTLDXGIAdapter::RegisterHardwareContentProtectionTeardownStatusEvent(HANDLE, DWORD*)':
+../repo/src/dxgi/dxgi_adapter.cpp:229:3: warning: no return statement in function returning non-void [-Wreturn-type]
+  229 |   }
+      |   ^
+[74/161] x86_64-w64-mingw32-g++ -Isrc/dxmt/libdxmt.a.p -Isrc/dxmt -I../repo/src/dxmt -I../repo/include -Ilibs -I../repo/libs -Isrc/util -I../repo/src/util -Isrc/airconv -I../repo/src/airconv -Isrc/winemetal -I../repo/src/winemetal -I. -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/dxmt/libdxmt.a.p/dxmt_context.cpp.obj -MF src/dxmt/libdxmt.a.p/dxmt_context.cpp.obj.d -o src/dxmt/libdxmt.a.p/dxmt_context.cpp.obj -c ../repo/src/dxmt/dxmt_context.cpp
+[75/161] rm -f src/dxmt/libdxmt.a && x86_64-w64-mingw32-ar csrDT src/dxmt/libdxmt.a src/dxmt/libdxmt.a.p/dxmt_format.cpp.obj src/dxmt/libdxmt.a.p/dxmt_names.cpp.obj src/dxmt/libdxmt.a.p/dxmt_command_queue.cpp.obj src/dxmt/libdxmt.a.p/dxmt_command.cpp.obj src/dxmt/libdxmt.a.p/dxmt_capture.cpp.obj src/dxmt/libdxmt.a.p/dxmt_info.cpp.obj src/dxmt/libdxmt.a.p/dxmt_device.cpp.obj src/dxmt/libdxmt.a.p/dxmt_buffer.cpp.obj src/dxmt/libdxmt.a.p/dxmt_texture.cpp.obj src/dxmt/libdxmt.a.p/dxmt_context.cpp.obj src/dxmt/libdxmt.a.p/dxmt_dynamic.cpp.obj src/dxmt/libdxmt.a.p/dxmt_staging.cpp.obj src/dxmt/libdxmt.a.p/dxmt_hud_state.cpp.obj src/dxmt/libdxmt.a.p/dxmt_allocation.cpp.obj src/dxmt/libdxmt.a.p/dxmt_presenter.cpp.obj src/dxmt/libdxmt.a.p/dxmt_sampler.cpp.obj src/dxmt/libdxmt.a.p/dxmt_resource_initializer.cpp.obj src/dxmt/libdxmt.a.p/dxmt_shader_cache.cpp.obj src/dxmt/libdxmt.a.p/dxmt_scaler.cpp.obj src/dxmt/libdxmt.a.p/dxmt_subresource.cpp.obj src/dxmt/libdxmt.a.p/dxmt_deptrack.cpp.obj src/dxmt/libdxmt.a.p/dxmt_counter.cpp.obj src/dxmt/libdxmt.a.p/dxmt_fence.cpp.obj src/dxmt/libdxmt.a.p/dxmt_keyed_mutex.cpp.obj
+[76/161] x86_64-w64-mingw32-g++ -Isrc/dxgi/dxgi.dll.p -Isrc/dxgi -I../repo/src/dxgi -I../repo/include -Ilibs -I../repo/libs -Isrc/dxmt -I../repo/src/dxmt -Isrc/util -I../repo/src/util -Isrc/winemetal -I../repo/src/winemetal -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/dxgi/dxgi.dll.p/dxgi_factory.cpp.obj -MF src/dxgi/dxgi.dll.p/dxgi_factory.cpp.obj.d -o src/dxgi/dxgi.dll.p/dxgi_factory.cpp.obj -c ../repo/src/dxgi/dxgi_factory.cpp
+[77/161] x86_64-w64-mingw32-g++ -Isrc/dxgi/dxgi.dll.p -Isrc/dxgi -I../repo/src/dxgi -I../repo/include -Ilibs -I../repo/libs -Isrc/dxmt -I../repo/src/dxmt -Isrc/util -I../repo/src/util -Isrc/winemetal -I../repo/src/winemetal -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/dxgi/dxgi.dll.p/dxgi.cpp.obj -MF src/dxgi/dxgi.dll.p/dxgi.cpp.obj.d -o src/dxgi/dxgi.dll.p/dxgi.cpp.obj -c ../repo/src/dxgi/dxgi.cpp
+[78/161] x86_64-w64-mingw32-g++ -Isrc/dxgi/dxgi.dll.p -Isrc/dxgi -I../repo/src/dxgi -I../repo/include -Ilibs -I../repo/libs -Isrc/dxmt -I../repo/src/dxmt -Isrc/util -I../repo/src/util -Isrc/winemetal -I../repo/src/winemetal -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/dxgi/dxgi.dll.p/dxgi_output.cpp.obj -MF src/dxgi/dxgi.dll.p/dxgi_output.cpp.obj.d -o src/dxgi/dxgi.dll.p/dxgi_output.cpp.obj -c ../repo/src/dxgi/dxgi_output.cpp
+[79/161] x86_64-w64-mingw32-g++ -Isrc/d3d11/d3d11.dll.p -Isrc/d3d11 -I../repo/src/d3d11 -I../repo/include -Ilibs -I../repo/libs -Isrc/dxgi -I../repo/src/dxgi -Isrc/airconv -I../repo/src/airconv -Isrc/dxmt -I../repo/src/dxmt -Isrc/winemetal -I../repo/src/winemetal -Isrc/util -I../repo/src/util -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/d3d11/d3d11.dll.p/d3d11_class_linkage.cpp.obj -MF src/d3d11/d3d11.dll.p/d3d11_class_linkage.cpp.obj.d -o src/d3d11/d3d11.dll.p/d3d11_class_linkage.cpp.obj -c ../repo/src/d3d11/d3d11_class_linkage.cpp
+[80/161] x86_64-w64-mingw32-g++  -o src/dxgi/dxgi.dll src/dxgi/dxgi.dll.p/version.o src/dxgi/dxgi.dll.p/dxgi_adapter.cpp.obj src/dxgi/dxgi.dll.p/dxgi_factory.cpp.obj src/dxgi/dxgi.dll.p/dxgi_output.cpp.obj src/dxgi/dxgi.dll.p/dxgi_options.cpp.obj src/dxgi/dxgi.dll.p/dxgi.cpp.obj -Lx86_64-windows -Wl,--allow-shlib-undefined -Wl,-O1 -shared ../repo/src/dxgi/dxgi.def -Wl,--start-group -Wl,--out-implib=src/dxgi/dxgi.dll.a -static -Wl,--file-alignment=4096 src/dxmt/libdxmt.a src/util/libutil.a src/winemetal/winemetal.dll.a -Wl,--subsystem,console -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32 -Wl,--end-group
+[81/161] /opt/homebrew/bin/meson --internal symbolextractor /private/tmp/dxmt-fb451568-evidence.opkf8x/build-wine-x64 src/dxgi/dxgi.dll src/dxgi/dxgi.dll.a src/dxgi/dxgi.dll.p/dxgi.dll.symbols --cross-host=windows
+[82/161] x86_64-w64-mingw32-g++ -Isrc/d3d11/d3d11.dll.p -Isrc/d3d11 -I../repo/src/d3d11 -I../repo/include -Ilibs -I../repo/libs -Isrc/dxgi -I../repo/src/dxgi -Isrc/airconv -I../repo/src/airconv -Isrc/dxmt -I../repo/src/dxmt -Isrc/winemetal -I../repo/src/winemetal -Isrc/util -I../repo/src/util -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/d3d11/d3d11.dll.p/d3d11_inspection.cpp.obj -MF src/d3d11/d3d11.dll.p/d3d11_inspection.cpp.obj.d -o src/d3d11/d3d11.dll.p/d3d11_inspection.cpp.obj -c ../repo/src/d3d11/d3d11_inspection.cpp
+[83/161] x86_64-w64-mingw32-g++ -Isrc/d3d11/d3d11.dll.p -Isrc/d3d11 -I../repo/src/d3d11 -I../repo/include -Ilibs -I../repo/libs -Isrc/dxgi -I../repo/src/dxgi -Isrc/airconv -I../repo/src/airconv -Isrc/dxmt -I../repo/src/dxmt -Isrc/winemetal -I../repo/src/winemetal -Isrc/util -I../repo/src/util -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/d3d11/d3d11.dll.p/d3d11_device.cpp.obj -MF src/d3d11/d3d11.dll.p/d3d11_device.cpp.obj.d -o src/d3d11/d3d11.dll.p/d3d11_device.cpp.obj -c ../repo/src/d3d11/d3d11_device.cpp
+[84/161] x86_64-w64-mingw32-g++ -Isrc/d3d11/d3d11.dll.p -Isrc/d3d11 -I../repo/src/d3d11 -I../repo/include -Ilibs -I../repo/libs -Isrc/dxgi -I../repo/src/dxgi -Isrc/airconv -I../repo/src/airconv -Isrc/dxmt -I../repo/src/dxmt -Isrc/winemetal -I../repo/src/winemetal -Isrc/util -I../repo/src/util -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/d3d11/d3d11.dll.p/d3d11_query.cpp.obj -MF src/d3d11/d3d11.dll.p/d3d11_query.cpp.obj.d -o src/d3d11/d3d11.dll.p/d3d11_query.cpp.obj -c ../repo/src/d3d11/d3d11_query.cpp
+[85/161] x86_64-w64-mingw32-g++ -Isrc/d3d11/d3d11.dll.p -Isrc/d3d11 -I../repo/src/d3d11 -I../repo/include -Ilibs -I../repo/libs -Isrc/dxgi -I../repo/src/dxgi -Isrc/airconv -I../repo/src/airconv -Isrc/dxmt -I../repo/src/dxmt -Isrc/winemetal -I../repo/src/winemetal -Isrc/util -I../repo/src/util -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/d3d11/d3d11.dll.p/d3d11_input_layout.cpp.obj -MF src/d3d11/d3d11.dll.p/d3d11_input_layout.cpp.obj.d -o src/d3d11/d3d11.dll.p/d3d11_input_layout.cpp.obj -c ../repo/src/d3d11/d3d11_input_layout.cpp
+[86/161] x86_64-w64-mingw32-g++ -Isrc/d3d11/d3d11.dll.p -Isrc/d3d11 -I../repo/src/d3d11 -I../repo/include -Ilibs -I../repo/libs -Isrc/dxgi -I../repo/src/dxgi -Isrc/airconv -I../repo/src/airconv -Isrc/dxmt -I../repo/src/dxmt -Isrc/winemetal -I../repo/src/winemetal -Isrc/util -I../repo/src/util -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/d3d11/d3d11.dll.p/d3d11_shader.cpp.obj -MF src/d3d11/d3d11.dll.p/d3d11_shader.cpp.obj.d -o src/d3d11/d3d11.dll.p/d3d11_shader.cpp.obj -c ../repo/src/d3d11/d3d11_shader.cpp
+[87/161] x86_64-w64-mingw32-g++ -Isrc/d3d11/d3d11.dll.p -Isrc/d3d11 -I../repo/src/d3d11 -I../repo/include -Ilibs -I../repo/libs -Isrc/dxgi -I../repo/src/dxgi -Isrc/airconv -I../repo/src/airconv -Isrc/dxmt -I../repo/src/dxmt -Isrc/winemetal -I../repo/src/winemetal -Isrc/util -I../repo/src/util -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/d3d11/d3d11.dll.p/d3d11_texture.cpp.obj -MF src/d3d11/d3d11.dll.p/d3d11_texture.cpp.obj.d -o src/d3d11/d3d11.dll.p/d3d11_texture.cpp.obj -c ../repo/src/d3d11/d3d11_texture.cpp
+[88/161] x86_64-w64-mingw32-g++ -Isrc/d3d11/d3d11.dll.p -Isrc/d3d11 -I../repo/src/d3d11 -I../repo/include -Ilibs -I../repo/libs -Isrc/dxgi -I../repo/src/dxgi -Isrc/airconv -I../repo/src/airconv -Isrc/dxmt -I../repo/src/dxmt -Isrc/winemetal -I../repo/src/winemetal -Isrc/util -I../repo/src/util -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/d3d11/d3d11.dll.p/d3d11_state_object.cpp.obj -MF src/d3d11/d3d11.dll.p/d3d11_state_object.cpp.obj.d -o src/d3d11/d3d11.dll.p/d3d11_state_object.cpp.obj -c ../repo/src/d3d11/d3d11_state_object.cpp
+[89/161] x86_64-w64-mingw32-g++ -Isrc/d3d11/d3d11.dll.p -Isrc/d3d11 -I../repo/src/d3d11 -I../repo/include -Ilibs -I../repo/libs -Isrc/dxgi -I../repo/src/dxgi -Isrc/airconv -I../repo/src/airconv -Isrc/dxmt -I../repo/src/dxmt -Isrc/winemetal -I../repo/src/winemetal -Isrc/util -I../repo/src/util -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/d3d11/d3d11.dll.p/d3d11_buffer.cpp.obj -MF src/d3d11/d3d11.dll.p/d3d11_buffer.cpp.obj.d -o src/d3d11/d3d11.dll.p/d3d11_buffer.cpp.obj -c ../repo/src/d3d11/d3d11_buffer.cpp
+[90/161] x86_64-w64-mingw32-g++ -Isrc/d3d11/d3d11.dll.p -Isrc/d3d11 -I../repo/src/d3d11 -I../repo/include -Ilibs -I../repo/libs -Isrc/dxgi -I../repo/src/dxgi -Isrc/airconv -I../repo/src/airconv -Isrc/dxmt -I../repo/src/dxmt -Isrc/winemetal -I../repo/src/winemetal -Isrc/util -I../repo/src/util -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/d3d11/d3d11.dll.p/d3d11_swapchain.cpp.obj -MF src/d3d11/d3d11.dll.p/d3d11_swapchain.cpp.obj.d -o src/d3d11/d3d11.dll.p/d3d11_swapchain.cpp.obj -c ../repo/src/d3d11/d3d11_swapchain.cpp
+[91/161] x86_64-w64-mingw32-g++ -Isrc/d3d11/d3d11.dll.p -Isrc/d3d11 -I../repo/src/d3d11 -I../repo/include -Ilibs -I../repo/libs -Isrc/dxgi -I../repo/src/dxgi -Isrc/airconv -I../repo/src/airconv -Isrc/dxmt -I../repo/src/dxmt -Isrc/winemetal -I../repo/src/winemetal -Isrc/util -I../repo/src/util -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/d3d11/d3d11.dll.p/d3d11_resource_view_helper.cpp.obj -MF src/d3d11/d3d11.dll.p/d3d11_resource_view_helper.cpp.obj.d -o src/d3d11/d3d11.dll.p/d3d11_resource_view_helper.cpp.obj -c ../repo/src/d3d11/d3d11_resource_view_helper.cpp
+[92/161] x86_64-w64-mingw32-g++ -Isrc/d3d11/d3d11.dll.p -Isrc/d3d11 -I../repo/src/d3d11 -I../repo/include -Ilibs -I../repo/libs -Isrc/dxgi -I../repo/src/dxgi -Isrc/airconv -I../repo/src/airconv -Isrc/dxmt -I../repo/src/dxmt -Isrc/winemetal -I../repo/src/winemetal -Isrc/util -I../repo/src/util -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/d3d11/d3d11.dll.p/d3d11.cpp.obj -MF src/d3d11/d3d11.dll.p/d3d11.cpp.obj.d -o src/d3d11/d3d11.dll.p/d3d11.cpp.obj -c ../repo/src/d3d11/d3d11.cpp
+[93/161] x86_64-w64-mingw32-g++ -Isrc/d3d11/d3d11.dll.p -Isrc/d3d11 -I../repo/src/d3d11 -I../repo/include -Ilibs -I../repo/libs -Isrc/dxgi -I../repo/src/dxgi -Isrc/airconv -I../repo/src/airconv -Isrc/dxmt -I../repo/src/dxmt -Isrc/winemetal -I../repo/src/winemetal -Isrc/util -I../repo/src/util -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/d3d11/d3d11.dll.p/d3d11_resource_helper.cpp.obj -MF src/d3d11/d3d11.dll.p/d3d11_resource_helper.cpp.obj.d -o src/d3d11/d3d11.dll.p/d3d11_resource_helper.cpp.obj -c ../repo/src/d3d11/d3d11_resource_helper.cpp
+[94/161] x86_64-w64-mingw32-g++ -Isrc/d3d11/d3d11.dll.p -Isrc/d3d11 -I../repo/src/d3d11 -I../repo/include -Ilibs -I../repo/libs -Isrc/dxgi -I../repo/src/dxgi -Isrc/airconv -I../repo/src/airconv -Isrc/dxmt -I../repo/src/dxmt -Isrc/winemetal -I../repo/src/winemetal -Isrc/util -I../repo/src/util -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/d3d11/d3d11.dll.p/d3d11_texture_linear.cpp.obj -MF src/d3d11/d3d11.dll.p/d3d11_texture_linear.cpp.obj.d -o src/d3d11/d3d11.dll.p/d3d11_texture_linear.cpp.obj -c ../repo/src/d3d11/d3d11_texture_linear.cpp
+[95/161] x86_64-w64-mingw32-g++ -Isrc/d3d11/d3d11.dll.p -Isrc/d3d11 -I../repo/src/d3d11 -I../repo/include -Ilibs -I../repo/libs -Isrc/dxgi -I../repo/src/dxgi -Isrc/airconv -I../repo/src/airconv -Isrc/dxmt -I../repo/src/dxmt -Isrc/winemetal -I../repo/src/winemetal -Isrc/util -I../repo/src/util -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/d3d11/d3d11.dll.p/d3d11_texture_dynamic.cpp.obj -MF src/d3d11/d3d11.dll.p/d3d11_texture_dynamic.cpp.obj.d -o src/d3d11/d3d11.dll.p/d3d11_texture_dynamic.cpp.obj -c ../repo/src/d3d11/d3d11_texture_dynamic.cpp
+[96/161] x86_64-w64-mingw32-g++ -Isrc/d3d11/d3d11.dll.p -Isrc/d3d11 -I../repo/src/d3d11 -I../repo/include -Ilibs -I../repo/libs -Isrc/dxgi -I../repo/src/dxgi -Isrc/airconv -I../repo/src/airconv -Isrc/dxmt -I../repo/src/dxmt -Isrc/winemetal -I../repo/src/winemetal -Isrc/util -I../repo/src/util -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/d3d11/d3d11.dll.p/d3d11_texture_device.cpp.obj -MF src/d3d11/d3d11.dll.p/d3d11_texture_device.cpp.obj.d -o src/d3d11/d3d11.dll.p/d3d11_texture_device.cpp.obj -c ../repo/src/d3d11/d3d11_texture_device.cpp
+[97/161] x86_64-w64-mingw32-g++ -Isrc/d3d11/d3d11.dll.p -Isrc/d3d11 -I../repo/src/d3d11 -I../repo/include -Ilibs -I../repo/libs -Isrc/dxgi -I../repo/src/dxgi -Isrc/airconv -I../repo/src/airconv -Isrc/dxmt -I../repo/src/dxmt -Isrc/winemetal -I../repo/src/winemetal -Isrc/util -I../repo/src/util -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/d3d11/d3d11.dll.p/d3d11_pipeline.cpp.obj -MF src/d3d11/d3d11.dll.p/d3d11_pipeline.cpp.obj.d -o src/d3d11/d3d11.dll.p/d3d11_pipeline.cpp.obj -c ../repo/src/d3d11/d3d11_pipeline.cpp
+[98/161] x86_64-w64-mingw32-g++ -Isrc/d3d11/d3d11.dll.p -Isrc/d3d11 -I../repo/src/d3d11 -I../repo/include -Ilibs -I../repo/libs -Isrc/dxgi -I../repo/src/dxgi -Isrc/airconv -I../repo/src/airconv -Isrc/dxmt -I../repo/src/dxmt -Isrc/winemetal -I../repo/src/winemetal -Isrc/util -I../repo/src/util -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/d3d11/d3d11.dll.p/d3d11_enumerable.cpp.obj -MF src/d3d11/d3d11.dll.p/d3d11_enumerable.cpp.obj.d -o src/d3d11/d3d11.dll.p/d3d11_enumerable.cpp.obj -c ../repo/src/d3d11/d3d11_enumerable.cpp
+[99/161] x86_64-w64-mingw32-g++ -Isrc/d3d11/d3d11.dll.p -Isrc/d3d11 -I../repo/src/d3d11 -I../repo/include -Ilibs -I../repo/libs -Isrc/dxgi -I../repo/src/dxgi -Isrc/airconv -I../repo/src/airconv -Isrc/dxmt -I../repo/src/dxmt -Isrc/winemetal -I../repo/src/winemetal -Isrc/util -I../repo/src/util -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/d3d11/d3d11.dll.p/d3d11_pipeline_gs.cpp.obj -MF src/d3d11/d3d11.dll.p/d3d11_pipeline_gs.cpp.obj.d -o src/d3d11/d3d11.dll.p/d3d11_pipeline_gs.cpp.obj -c ../repo/src/d3d11/d3d11_pipeline_gs.cpp
+[100/161] x86_64-w64-mingw32-g++ -Isrc/d3d11/d3d11.dll.p -Isrc/d3d11 -I../repo/src/d3d11 -I../repo/include -Ilibs -I../repo/libs -Isrc/dxgi -I../repo/src/dxgi -Isrc/airconv -I../repo/src/airconv -Isrc/dxmt -I../repo/src/dxmt -Isrc/winemetal -I../repo/src/winemetal -Isrc/util -I../repo/src/util -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/d3d11/d3d11.dll.p/d3d11_pipeline_ts.cpp.obj -MF src/d3d11/d3d11.dll.p/d3d11_pipeline_ts.cpp.obj.d -o src/d3d11/d3d11.dll.p/d3d11_pipeline_ts.cpp.obj -c ../repo/src/d3d11/d3d11_pipeline_ts.cpp
+[101/161] x86_64-w64-mingw32-g++ -Isrc/d3d11/d3d11.dll.p -Isrc/d3d11 -I../repo/src/d3d11 -I../repo/include -Ilibs -I../repo/libs -Isrc/dxgi -I../repo/src/dxgi -Isrc/airconv -I../repo/src/airconv -Isrc/dxmt -I../repo/src/dxmt -Isrc/winemetal -I../repo/src/winemetal -Isrc/util -I../repo/src/util -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/d3d11/d3d11.dll.p/d3d11_resource_staging.cpp.obj -MF src/d3d11/d3d11.dll.p/d3d11_resource_staging.cpp.obj.d -o src/d3d11/d3d11.dll.p/d3d11_resource_staging.cpp.obj -c ../repo/src/d3d11/d3d11_resource_staging.cpp
+[102/161] x86_64-w64-mingw32-g++ -Isrc/d3d11/d3d11.dll.p -Isrc/d3d11 -I../repo/src/d3d11 -I../repo/include -Ilibs -I../repo/libs -Isrc/dxgi -I../repo/src/dxgi -Isrc/airconv -I../repo/src/airconv -Isrc/dxmt -I../repo/src/dxmt -Isrc/winemetal -I../repo/src/winemetal -Isrc/util -I../repo/src/util -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/d3d11/d3d11.dll.p/.._d3d10_d3d10_buffer.cpp.obj -MF src/d3d11/d3d11.dll.p/.._d3d10_d3d10_buffer.cpp.obj.d -o src/d3d11/d3d11.dll.p/.._d3d10_d3d10_buffer.cpp.obj -c ../repo/src/d3d10/d3d10_buffer.cpp
+[103/161] x86_64-w64-mingw32-g++ -Isrc/d3d11/d3d11.dll.p -Isrc/d3d11 -I../repo/src/d3d11 -I../repo/include -Ilibs -I../repo/libs -Isrc/dxgi -I../repo/src/dxgi -Isrc/airconv -I../repo/src/airconv -Isrc/dxmt -I../repo/src/dxmt -Isrc/winemetal -I../repo/src/winemetal -Isrc/util -I../repo/src/util -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/d3d11/d3d11.dll.p/.._d3d10_d3d10_state_object.cpp.obj -MF src/d3d11/d3d11.dll.p/.._d3d10_d3d10_state_object.cpp.obj.d -o src/d3d11/d3d11.dll.p/.._d3d10_d3d10_state_object.cpp.obj -c ../repo/src/d3d10/d3d10_state_object.cpp
+[104/161] x86_64-w64-mingw32-g++ -Isrc/d3d11/d3d11.dll.p -Isrc/d3d11 -I../repo/src/d3d11 -I../repo/include -Ilibs -I../repo/libs -Isrc/dxgi -I../repo/src/dxgi -Isrc/airconv -I../repo/src/airconv -Isrc/dxmt -I../repo/src/dxmt -Isrc/winemetal -I../repo/src/winemetal -Isrc/util -I../repo/src/util -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/d3d11/d3d11.dll.p/d3d11_multithread.cpp.obj -MF src/d3d11/d3d11.dll.p/d3d11_multithread.cpp.obj.d -o src/d3d11/d3d11.dll.p/d3d11_multithread.cpp.obj -c ../repo/src/d3d11/d3d11_multithread.cpp
+[105/161] x86_64-w64-mingw32-g++ -Isrc/d3d11/d3d11.dll.p -Isrc/d3d11 -I../repo/src/d3d11 -I../repo/include -Ilibs -I../repo/libs -Isrc/dxgi -I../repo/src/dxgi -Isrc/airconv -I../repo/src/airconv -Isrc/dxmt -I../repo/src/dxmt -Isrc/winemetal -I../repo/src/winemetal -Isrc/util -I../repo/src/util -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/d3d11/d3d11.dll.p/.._d3d10_d3d10_texture.cpp.obj -MF src/d3d11/d3d11.dll.p/.._d3d10_d3d10_texture.cpp.obj.d -o src/d3d11/d3d11.dll.p/.._d3d10_d3d10_texture.cpp.obj -c ../repo/src/d3d10/d3d10_texture.cpp
+[106/161] x86_64-w64-mingw32-g++ -Isrc/d3d11/d3d11.dll.p -Isrc/d3d11 -I../repo/src/d3d11 -I../repo/include -Ilibs -I../repo/libs -Isrc/dxgi -I../repo/src/dxgi -Isrc/airconv -I../repo/src/airconv -Isrc/dxmt -I../repo/src/dxmt -Isrc/winemetal -I../repo/src/winemetal -Isrc/util -I../repo/src/util -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/d3d11/d3d11.dll.p/.._d3d10_d3d10_util.cpp.obj -MF src/d3d11/d3d11.dll.p/.._d3d10_d3d10_util.cpp.obj.d -o src/d3d11/d3d11.dll.p/.._d3d10_d3d10_util.cpp.obj -c ../repo/src/d3d10/d3d10_util.cpp
+[107/161] x86_64-w64-mingw32-g++ -Isrc/d3d11/d3d11.dll.p -Isrc/d3d11 -I../repo/src/d3d11 -I../repo/include -Ilibs -I../repo/libs -Isrc/dxgi -I../repo/src/dxgi -Isrc/airconv -I../repo/src/airconv -Isrc/dxmt -I../repo/src/dxmt -Isrc/winemetal -I../repo/src/winemetal -Isrc/util -I../repo/src/util -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/d3d11/d3d11.dll.p/.._d3d10_d3d10_view.cpp.obj -MF src/d3d11/d3d11.dll.p/.._d3d10_d3d10_view.cpp.obj.d -o src/d3d11/d3d11.dll.p/.._d3d10_d3d10_view.cpp.obj -c ../repo/src/d3d10/d3d10_view.cpp
+[108/161] x86_64-w64-mingw32-g++ -Isrc/d3d11/d3d11.dll.p -Isrc/d3d11 -I../repo/src/d3d11 -I../repo/include -Ilibs -I../repo/libs -Isrc/dxgi -I../repo/src/dxgi -Isrc/airconv -I../repo/src/airconv -Isrc/dxmt -I../repo/src/dxmt -Isrc/winemetal -I../repo/src/winemetal -Isrc/util -I../repo/src/util -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/d3d11/d3d11.dll.p/d3d11_fence.cpp.obj -MF src/d3d11/d3d11.dll.p/d3d11_fence.cpp.obj.d -o src/d3d11/d3d11.dll.p/d3d11_fence.cpp.obj -c ../repo/src/d3d11/d3d11_fence.cpp
+[109/161] x86_64-w64-mingw32-g++ -Isrc/d3d11/d3d11.dll.p -Isrc/d3d11 -I../repo/src/d3d11 -I../repo/include -Ilibs -I../repo/libs -Isrc/dxgi -I../repo/src/dxgi -Isrc/airconv -I../repo/src/airconv -Isrc/dxmt -I../repo/src/dxmt -Isrc/winemetal -I../repo/src/winemetal -Isrc/util -I../repo/src/util -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/d3d11/d3d11.dll.p/.._d3d10_d3d10_device.cpp.obj -MF src/d3d11/d3d11.dll.p/.._d3d10_d3d10_device.cpp.obj.d -o src/d3d11/d3d11.dll.p/.._d3d10_d3d10_device.cpp.obj -c ../repo/src/d3d10/d3d10_device.cpp
+[110/161] x86_64-w64-mingw32-g++ -Isrc/d3d11/d3d11.dll.p -Isrc/d3d11 -I../repo/src/d3d11 -I../repo/include -Ilibs -I../repo/libs -Isrc/dxgi -I../repo/src/dxgi -Isrc/airconv -I../repo/src/airconv -Isrc/dxmt -I../repo/src/dxmt -Isrc/winemetal -I../repo/src/winemetal -Isrc/util -I../repo/src/util -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/d3d11/d3d11.dll.p/d3d11_pipeline_cache.cpp.obj -MF src/d3d11/d3d11.dll.p/d3d11_pipeline_cache.cpp.obj.d -o src/d3d11/d3d11.dll.p/d3d11_pipeline_cache.cpp.obj -c ../repo/src/d3d11/d3d11_pipeline_cache.cpp
+[111/161] c++ -Isrc/airconv/darwin/libairconv.a.p -Isrc/airconv/darwin -I../repo/src/airconv/darwin -I../repo/include -Ilibs -I../repo/libs -I/tmp/dxmt-fb451568-evidence.opkf8x/clang+llvm-15.0.7-x86_64-apple-darwin21.0/include -I../repo/include/native/windows -I../repo/include/native/directx -fdiagnostics-color=always -DNDEBUG -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -Wimplicit-fallthrough -Wno-unused-parameter -Wno-unused-private-field -Wno-unused-const-variable -Wno-missing-braces -fblocks -arch x86_64 -Wno-extern-c-compat -fno-exceptions -funwind-tables -fno-rtti -D_FILE_OFFSET_BITS=64 -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wno-unnecessary-virtual-specifier -MD -MQ src/airconv/darwin/libairconv.a.p/.._dxbc_converter.cpp.o -MF src/airconv/darwin/libairconv.a.p/.._dxbc_converter.cpp.o.d -o src/airconv/darwin/libairconv.a.p/.._dxbc_converter.cpp.o -c ../repo/src/airconv/dxbc_converter.cpp
+In file included from ../repo/src/airconv/dxbc_converter.cpp:1:
+In file included from ../repo/src/airconv/dxbc_converter.hpp:12:
+In file included from ../repo/src/airconv/air_operations.hpp:3:
+../repo/src/airconv/air_signature.hpp:679:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  679 | };
+      | ^
+../repo/src/airconv/air_signature.hpp:694:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  694 | }
+      | ^
+In file included from ../repo/src/airconv/dxbc_converter.cpp:1:
+In file included from ../repo/src/airconv/dxbc_converter.hpp:12:
+In file included from ../repo/src/airconv/air_operations.hpp:4:
+../repo/src/airconv/air_type.hpp:85:3: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+   85 |   };
+      |   ^
+In file included from ../repo/src/airconv/dxbc_converter.cpp:1:
+../repo/src/airconv/dxbc_converter.hpp:310:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  310 | }
+      | ^
+../repo/src/airconv/dxbc_converter.cpp:91:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+   91 | }
+      | ^
+5 warnings generated.
+[112/161] c++ -Isrc/airconv/darwin/libairconv.a.p -Isrc/airconv/darwin -I../repo/src/airconv/darwin -I../repo/include -Ilibs -I../repo/libs -I/tmp/dxmt-fb451568-evidence.opkf8x/clang+llvm-15.0.7-x86_64-apple-darwin21.0/include -I../repo/include/native/windows -I../repo/include/native/directx -fdiagnostics-color=always -DNDEBUG -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -Wimplicit-fallthrough -Wno-unused-parameter -Wno-unused-private-field -Wno-unused-const-variable -Wno-missing-braces -fblocks -arch x86_64 -Wno-extern-c-compat -fno-exceptions -funwind-tables -fno-rtti -D_FILE_OFFSET_BITS=64 -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wno-unnecessary-virtual-specifier -MD -MQ src/airconv/darwin/libairconv.a.p/.._dxbc_converter_gs.cpp.o -MF src/airconv/darwin/libairconv.a.p/.._dxbc_converter_gs.cpp.o.d -o src/airconv/darwin/libairconv.a.p/.._dxbc_converter_gs.cpp.o -c ../repo/src/airconv/dxbc_converter_gs.cpp
+In file included from ../repo/src/airconv/dxbc_converter_gs.cpp:1:
+In file included from ../repo/src/airconv/air_operations.hpp:3:
+../repo/src/airconv/air_signature.hpp:679:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  679 | };
+      | ^
+../repo/src/airconv/air_signature.hpp:694:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  694 | }
+      | ^
+In file included from ../repo/src/airconv/dxbc_converter_gs.cpp:1:
+In file included from ../repo/src/airconv/air_operations.hpp:4:
+../repo/src/airconv/air_type.hpp:85:3: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+   85 |   };
+      |   ^
+In file included from ../repo/src/airconv/dxbc_converter_gs.cpp:4:
+../repo/src/airconv/dxbc_converter.hpp:310:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  310 | }
+      | ^
+4 warnings generated.
+[113/161] c++ -Isrc/airconv/darwin/libairconv.a.p -Isrc/airconv/darwin -I../repo/src/airconv/darwin -I../repo/include -Ilibs -I../repo/libs -I/tmp/dxmt-fb451568-evidence.opkf8x/clang+llvm-15.0.7-x86_64-apple-darwin21.0/include -I../repo/include/native/windows -I../repo/include/native/directx -fdiagnostics-color=always -DNDEBUG -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -Wimplicit-fallthrough -Wno-unused-parameter -Wno-unused-private-field -Wno-unused-const-variable -Wno-missing-braces -fblocks -arch x86_64 -Wno-extern-c-compat -fno-exceptions -funwind-tables -fno-rtti -D_FILE_OFFSET_BITS=64 -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wno-unnecessary-virtual-specifier -MD -MQ src/airconv/darwin/libairconv.a.p/.._dxbc_converter_ts.cpp.o -MF src/airconv/darwin/libairconv.a.p/.._dxbc_converter_ts.cpp.o.d -o src/airconv/darwin/libairconv.a.p/.._dxbc_converter_ts.cpp.o -c ../repo/src/airconv/dxbc_converter_ts.cpp
+In file included from ../repo/src/airconv/dxbc_converter_ts.cpp:1:
+../repo/src/airconv/air_signature.hpp:679:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  679 | };
+      | ^
+../repo/src/airconv/air_signature.hpp:694:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  694 | }
+      | ^
+In file included from ../repo/src/airconv/dxbc_converter_ts.cpp:3:
+In file included from ../repo/src/airconv/dxbc_converter.hpp:12:
+In file included from ../repo/src/airconv/air_operations.hpp:4:
+../repo/src/airconv/air_type.hpp:85:3: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+   85 |   };
+      |   ^
+In file included from ../repo/src/airconv/dxbc_converter_ts.cpp:3:
+../repo/src/airconv/dxbc_converter.hpp:310:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  310 | }
+      | ^
+4 warnings generated.
+[114/161] c++ -Isrc/airconv/darwin/libairconv.a.p -Isrc/airconv/darwin -I../repo/src/airconv/darwin -I../repo/include -Ilibs -I../repo/libs -I/tmp/dxmt-fb451568-evidence.opkf8x/clang+llvm-15.0.7-x86_64-apple-darwin21.0/include -I../repo/include/native/windows -I../repo/include/native/directx -fdiagnostics-color=always -DNDEBUG -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -Wimplicit-fallthrough -Wno-unused-parameter -Wno-unused-private-field -Wno-unused-const-variable -Wno-missing-braces -fblocks -arch x86_64 -Wno-extern-c-compat -fno-exceptions -funwind-tables -fno-rtti -D_FILE_OFFSET_BITS=64 -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wno-unnecessary-virtual-specifier -MD -MQ src/airconv/darwin/libairconv.a.p/.._dxbc_converter_basicblock.cpp.o -MF src/airconv/darwin/libairconv.a.p/.._dxbc_converter_basicblock.cpp.o.d -o src/airconv/darwin/libairconv.a.p/.._dxbc_converter_basicblock.cpp.o -c ../repo/src/airconv/dxbc_converter_basicblock.cpp
+In file included from ../repo/src/airconv/dxbc_converter_basicblock.cpp:1:
+In file included from ../repo/src/airconv/air_operations.hpp:3:
+../repo/src/airconv/air_signature.hpp:679:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  679 | };
+      | ^
+../repo/src/airconv/air_signature.hpp:694:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  694 | }
+      | ^
+In file included from ../repo/src/airconv/dxbc_converter_basicblock.cpp:1:
+In file included from ../repo/src/airconv/air_operations.hpp:4:
+../repo/src/airconv/air_type.hpp:85:3: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+   85 |   };
+      |   ^
+In file included from ../repo/src/airconv/dxbc_converter_basicblock.cpp:6:
+../repo/src/airconv/dxbc_converter.hpp:310:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  310 | }
+      | ^
+../repo/src/airconv/dxbc_converter_basicblock.cpp:86:3: warning: non-void lambda does not return a value in all control paths [-Wreturn-type]
+   86 |   });
+      |   ^
+../repo/src/airconv/dxbc_converter_basicblock.cpp:128:7: warning: non-void lambda does not return a value in all control paths [-Wreturn-type]
+  128 |       };
+      |       ^
+6 warnings generated.
+[115/161] c++ -Isrc/airconv/darwin/libairconv.a.p -Isrc/airconv/darwin -I../repo/src/airconv/darwin -I../repo/include -Ilibs -I../repo/libs -I/tmp/dxmt-fb451568-evidence.opkf8x/clang+llvm-15.0.7-x86_64-apple-darwin21.0/include -I../repo/include/native/windows -I../repo/include/native/directx -fdiagnostics-color=always -DNDEBUG -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -Wimplicit-fallthrough -Wno-unused-parameter -Wno-unused-private-field -Wno-unused-const-variable -Wno-missing-braces -fblocks -arch x86_64 -Wno-extern-c-compat -fno-exceptions -funwind-tables -fno-rtti -D_FILE_OFFSET_BITS=64 -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wno-unnecessary-virtual-specifier -MD -MQ src/airconv/darwin/libairconv.a.p/.._dxbc_instructions.cpp.o -MF src/airconv/darwin/libairconv.a.p/.._dxbc_instructions.cpp.o.d -o src/airconv/darwin/libairconv.a.p/.._dxbc_instructions.cpp.o -c ../repo/src/airconv/dxbc_instructions.cpp
+In file included from ../repo/src/airconv/dxbc_instructions.cpp:20:
+In file included from ../repo/src/airconv/dxbc_converter.hpp:12:
+In file included from ../repo/src/airconv/air_operations.hpp:3:
+../repo/src/airconv/air_signature.hpp:679:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  679 | };
+      | ^
+../repo/src/airconv/air_signature.hpp:694:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  694 | }
+      | ^
+In file included from ../repo/src/airconv/dxbc_instructions.cpp:20:
+In file included from ../repo/src/airconv/dxbc_converter.hpp:12:
+In file included from ../repo/src/airconv/air_operations.hpp:4:
+../repo/src/airconv/air_type.hpp:85:3: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+   85 |   };
+      |   ^
+In file included from ../repo/src/airconv/dxbc_instructions.cpp:20:
+../repo/src/airconv/dxbc_converter.hpp:310:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  310 | }
+      | ^
+../repo/src/airconv/dxbc_instructions.cpp:54:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+   54 | };
+      | ^
+../repo/src/airconv/dxbc_instructions.cpp:88:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+   88 | };
+      | ^
+../repo/src/airconv/dxbc_instructions.cpp:162:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  162 | }
+      | ^
+../repo/src/airconv/dxbc_instructions.cpp:189:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  189 | }
+      | ^
+../repo/src/airconv/dxbc_instructions.cpp:413:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  413 | };
+      | ^
+../repo/src/airconv/dxbc_instructions.cpp:437:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  437 | }
+      | ^
+../repo/src/airconv/dxbc_instructions.cpp:524:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  524 | }
+      | ^
+../repo/src/airconv/dxbc_instructions.cpp:538:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  538 | }
+      | ^
+../repo/src/airconv/dxbc_instructions.cpp:549:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  549 | }
+      | ^
+../repo/src/airconv/dxbc_instructions.cpp:2103:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+ 2103 | };
+      | ^
+14 warnings generated.
+[116/161] c++ -Isrc/airconv/darwin/libairconv.a.p -Isrc/airconv/darwin -I../repo/src/airconv/darwin -I../repo/include -Ilibs -I../repo/libs -I/tmp/dxmt-fb451568-evidence.opkf8x/clang+llvm-15.0.7-x86_64-apple-darwin21.0/include -I../repo/include/native/windows -I../repo/include/native/directx -fdiagnostics-color=always -DNDEBUG -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -Wimplicit-fallthrough -Wno-unused-parameter -Wno-unused-private-field -Wno-unused-const-variable -Wno-missing-braces -fblocks -arch x86_64 -Wno-extern-c-compat -fno-exceptions -funwind-tables -fno-rtti -D_FILE_OFFSET_BITS=64 -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wno-unnecessary-virtual-specifier -MD -MQ src/airconv/darwin/libairconv.a.p/.._dxbc_converter_cfg.cpp.o -MF src/airconv/darwin/libairconv.a.p/.._dxbc_converter_cfg.cpp.o.d -o src/airconv/darwin/libairconv.a.p/.._dxbc_converter_cfg.cpp.o -c ../repo/src/airconv/dxbc_converter_cfg.cpp
+In file included from ../repo/src/airconv/dxbc_converter_cfg.cpp:2:
+In file included from ../repo/src/airconv/dxbc_converter.hpp:12:
+In file included from ../repo/src/airconv/air_operations.hpp:3:
+../repo/src/airconv/air_signature.hpp:679:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  679 | };
+      | ^
+../repo/src/airconv/air_signature.hpp:694:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  694 | }
+      | ^
+In file included from ../repo/src/airconv/dxbc_converter_cfg.cpp:2:
+In file included from ../repo/src/airconv/dxbc_converter.hpp:12:
+In file included from ../repo/src/airconv/air_operations.hpp:4:
+../repo/src/airconv/air_type.hpp:85:3: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+   85 |   };
+      |   ^
+In file included from ../repo/src/airconv/dxbc_converter_cfg.cpp:2:
+../repo/src/airconv/dxbc_converter.hpp:310:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  310 | }
+      | ^
+../repo/src/airconv/dxbc_converter_cfg.cpp:62:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+   62 | };
+      | ^
+../repo/src/airconv/dxbc_converter_cfg.cpp:366:7: warning: variable 'LB' is used uninitialized whenever switch default is taken [-Wsometimes-uninitialized]
+  366 |       default:
+      |       ^~~~~~~
+../repo/src/airconv/dxbc_converter_cfg.cpp:370:57: note: uninitialized use occurs here
+  370 |           .range = {.range_id = RangeID, .lower_bound = LB, .size = RangeSize, .space = Inst.m_SamplerDecl.Space},
+      |                                                         ^~
+../repo/src/airconv/dxbc_converter_cfg.cpp:354:18: note: initialize the variable 'LB' to silence this warning
+  354 |       unsigned LB, RangeSize;
+      |                  ^
+      |                   = 0
+../repo/src/airconv/dxbc_converter_cfg.cpp:366:7: warning: variable 'RangeSize' is used uninitialized whenever switch default is taken [-Wsometimes-uninitialized]
+  366 |       default:
+      |       ^~~~~~~
+../repo/src/airconv/dxbc_converter_cfg.cpp:370:69: note: uninitialized use occurs here
+  370 |           .range = {.range_id = RangeID, .lower_bound = LB, .size = RangeSize, .space = Inst.m_SamplerDecl.Space},
+      |                                                                     ^~~~~~~~~
+../repo/src/airconv/dxbc_converter_cfg.cpp:354:29: note: initialize the variable 'RangeSize' to silence this warning
+  354 |       unsigned LB, RangeSize;
+      |                             ^
+      |                              = 0
+../repo/src/airconv/dxbc_converter_cfg.cpp:340:7: warning: variable 'LB' is used uninitialized whenever switch default is taken [-Wsometimes-uninitialized]
+  340 |       default:
+      |       ^~~~~~~
+../repo/src/airconv/dxbc_converter_cfg.cpp:345:52: note: uninitialized use occurs here
+  345 |               {.range_id = RangeID, .lower_bound = LB, .size = RangeSize, .space = Inst.m_ConstantBufferDecl.Space},
+      |                                                    ^~
+../repo/src/airconv/dxbc_converter_cfg.cpp:328:18: note: initialize the variable 'LB' to silence this warning
+  328 |       unsigned LB, RangeSize;
+      |                  ^
+      |                   = 0
+../repo/src/airconv/dxbc_converter_cfg.cpp:340:7: warning: variable 'RangeSize' is used uninitialized whenever switch default is taken [-Wsometimes-uninitialized]
+  340 |       default:
+      |       ^~~~~~~
+../repo/src/airconv/dxbc_converter_cfg.cpp:345:64: note: uninitialized use occurs here
+  345 |               {.range_id = RangeID, .lower_bound = LB, .size = RangeSize, .space = Inst.m_ConstantBufferDecl.Space},
+      |                                                                ^~~~~~~~~
+../repo/src/airconv/dxbc_converter_cfg.cpp:328:29: note: initialize the variable 'RangeSize' to silence this warning
+  328 |       unsigned LB, RangeSize;
+      |                             ^
+      |                              = 0
+9 warnings generated.
+[117/161] c++ -Isrc/airconv/darwin/libairconv.a.p -Isrc/airconv/darwin -I../repo/src/airconv/darwin -I../repo/include -Ilibs -I../repo/libs -I/tmp/dxmt-fb451568-evidence.opkf8x/clang+llvm-15.0.7-x86_64-apple-darwin21.0/include -I../repo/include/native/windows -I../repo/include/native/directx -fdiagnostics-color=always -DNDEBUG -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -Wimplicit-fallthrough -Wno-unused-parameter -Wno-unused-private-field -Wno-unused-const-variable -Wno-missing-braces -fblocks -arch x86_64 -Wno-extern-c-compat -fno-exceptions -funwind-tables -fno-rtti -D_FILE_OFFSET_BITS=64 -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wno-unnecessary-virtual-specifier -MD -MQ src/airconv/darwin/libairconv.a.p/.._metallib_writer.cpp.o -MF src/airconv/darwin/libairconv.a.p/.._metallib_writer.cpp.o.d -o src/airconv/darwin/libairconv.a.p/.._metallib_writer.cpp.o -c ../repo/src/airconv/metallib_writer.cpp
+[118/161] /usr/bin/xxd -n air_msad -i src/airconv/darwin/airconv.p/air_msad.air src/airconv/darwin/airconv.p/air_msad.h
+[119/161] /usr/bin/xxd -n air_samplepos -i src/airconv/darwin/airconv.p/air_samplepos.air src/airconv/darwin/airconv.p/air_samplepos.h
+[120/161] /usr/bin/xxd -n air_tessellation -i src/airconv/darwin/airconv.p/air_tessellation.air src/airconv/darwin/airconv.p/air_tessellation.h
+[121/161] /opt/homebrew/bin/x86_64-w64-mingw32-windres -i ../repo/src/d3d10/version.rc -o src/d3d10/d3d10core.dll.p/version.o
+[122/161] c++ -Isrc/airconv/darwin/libairconv.a.p -Isrc/airconv/darwin -I../repo/src/airconv/darwin -I../repo/include -Ilibs -I../repo/libs -I/tmp/dxmt-fb451568-evidence.opkf8x/clang+llvm-15.0.7-x86_64-apple-darwin21.0/include -I../repo/include/native/windows -I../repo/include/native/directx -fdiagnostics-color=always -DNDEBUG -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -Wimplicit-fallthrough -Wno-unused-parameter -Wno-unused-private-field -Wno-unused-const-variable -Wno-missing-braces -fblocks -arch x86_64 -Wno-extern-c-compat -fno-exceptions -funwind-tables -fno-rtti -D_FILE_OFFSET_BITS=64 -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wno-unnecessary-virtual-specifier -MD -MQ src/airconv/darwin/libairconv.a.p/.._transforms_lower_16bit_texread.cpp.o -MF src/airconv/darwin/libairconv.a.p/.._transforms_lower_16bit_texread.cpp.o.d -o src/airconv/darwin/libairconv.a.p/.._transforms_lower_16bit_texread.cpp.o -c ../repo/src/airconv/transforms/lower_16bit_texread.cpp
+[123/161] rm -f libs/DXBCParser/libDXBCParserNative.a && ar csr libs/DXBCParser/libDXBCParserNative.a libs/DXBCParser/libDXBCParserNative.a.p/DXBCUtils.cpp.o libs/DXBCParser/libDXBCParserNative.a.p/BlobContainer.cpp.o libs/DXBCParser/libDXBCParserNative.a.p/ShaderBinary.cpp.o && ranlib -c libs/DXBCParser/libDXBCParserNative.a
+[124/161] c++ -Isrc/airconv/darwin/libairconv.a.p -Isrc/airconv/darwin -I../repo/src/airconv/darwin -I../repo/include -Ilibs -I../repo/libs -I/tmp/dxmt-fb451568-evidence.opkf8x/clang+llvm-15.0.7-x86_64-apple-darwin21.0/include -I../repo/include/native/windows -I../repo/include/native/directx -fdiagnostics-color=always -DNDEBUG -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -Wimplicit-fallthrough -Wno-unused-parameter -Wno-unused-private-field -Wno-unused-const-variable -Wno-missing-braces -fblocks -arch x86_64 -Wno-extern-c-compat -fno-exceptions -funwind-tables -fno-rtti -D_FILE_OFFSET_BITS=64 -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wno-unnecessary-virtual-specifier -MD -MQ src/airconv/darwin/libairconv.a.p/.._transforms_simdgroup_implicit_membarrier.cpp.o -MF src/airconv/darwin/libairconv.a.p/.._transforms_simdgroup_implicit_membarrier.cpp.o.d -o src/airconv/darwin/libairconv.a.p/.._transforms_simdgroup_implicit_membarrier.cpp.o -c ../repo/src/airconv/transforms/simdgroup_implicit_membarrier.cpp
+[125/161] c++ -Isrc/airconv/darwin/libairconv.a.p -Isrc/airconv/darwin -I../repo/src/airconv/darwin -I../repo/include -Ilibs -I../repo/libs -I/tmp/dxmt-fb451568-evidence.opkf8x/clang+llvm-15.0.7-x86_64-apple-darwin21.0/include -I../repo/include/native/windows -I../repo/include/native/directx -fdiagnostics-color=always -DNDEBUG -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -Wimplicit-fallthrough -Wno-unused-parameter -Wno-unused-private-field -Wno-unused-const-variable -Wno-missing-braces -fblocks -arch x86_64 -Wno-extern-c-compat -fno-exceptions -funwind-tables -fno-rtti -D_FILE_OFFSET_BITS=64 -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wno-unnecessary-virtual-specifier -MD -MQ src/airconv/darwin/libairconv.a.p/.._nt_air_builder.cpp.o -MF src/airconv/darwin/libairconv.a.p/.._nt_air_builder.cpp.o.d -o src/airconv/darwin/libairconv.a.p/.._nt_air_builder.cpp.o -c ../repo/src/airconv/nt/air_builder.cpp
+[126/161] c++ -Isrc/airconv/darwin/libairconv.a.p -Isrc/airconv/darwin -I../repo/src/airconv/darwin -I../repo/include -Ilibs -I../repo/libs -I/tmp/dxmt-fb451568-evidence.opkf8x/clang+llvm-15.0.7-x86_64-apple-darwin21.0/include -I../repo/include/native/windows -I../repo/include/native/directx -fdiagnostics-color=always -DNDEBUG -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -Wimplicit-fallthrough -Wno-unused-parameter -Wno-unused-private-field -Wno-unused-const-variable -Wno-missing-braces -fblocks -arch x86_64 -Wno-extern-c-compat -fno-exceptions -funwind-tables -fno-rtti -D_FILE_OFFSET_BITS=64 -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wno-unnecessary-virtual-specifier -MD -MQ src/airconv/darwin/libairconv.a.p/.._nt_dxbc_converter_base.cpp.o -MF src/airconv/darwin/libairconv.a.p/.._nt_dxbc_converter_base.cpp.o.d -o src/airconv/darwin/libairconv.a.p/.._nt_dxbc_converter_base.cpp.o -c ../repo/src/airconv/nt/dxbc_converter_base.cpp
+In file included from ../repo/src/airconv/nt/dxbc_converter_base.cpp:20:
+In file included from ../repo/src/airconv/nt/../dxbc_converter.hpp:12:
+In file included from ../repo/src/airconv/nt/../air_operations.hpp:3:
+../repo/src/airconv/nt/../air_signature.hpp:679:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  679 | };
+      | ^
+../repo/src/airconv/nt/../air_signature.hpp:694:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  694 | }
+      | ^
+In file included from ../repo/src/airconv/nt/dxbc_converter_base.cpp:20:
+In file included from ../repo/src/airconv/nt/../dxbc_converter.hpp:12:
+In file included from ../repo/src/airconv/nt/../air_operations.hpp:4:
+../repo/src/airconv/nt/../air_type.hpp:85:3: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+   85 |   };
+      |   ^
+In file included from ../repo/src/airconv/nt/dxbc_converter_base.cpp:20:
+../repo/src/airconv/nt/../dxbc_converter.hpp:310:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  310 | }
+      | ^
+4 warnings generated.
+[127/161] c++ -Isrc/airconv/darwin/libairconv.a.p -Isrc/airconv/darwin -I../repo/src/airconv/darwin -I../repo/include -Ilibs -I../repo/libs -I/tmp/dxmt-fb451568-evidence.opkf8x/clang+llvm-15.0.7-x86_64-apple-darwin21.0/include -I../repo/include/native/windows -I../repo/include/native/directx -fdiagnostics-color=always -DNDEBUG -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -Wimplicit-fallthrough -Wno-unused-parameter -Wno-unused-private-field -Wno-unused-const-variable -Wno-missing-braces -fblocks -arch x86_64 -Wno-extern-c-compat -fno-exceptions -funwind-tables -fno-rtti -D_FILE_OFFSET_BITS=64 -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wno-unnecessary-virtual-specifier -MD -MQ src/airconv/darwin/libairconv.a.p/.._dxbc_signature.cpp.o -MF src/airconv/darwin/libairconv.a.p/.._dxbc_signature.cpp.o.d -o src/airconv/darwin/libairconv.a.p/.._dxbc_signature.cpp.o -c ../repo/src/airconv/dxbc_signature.cpp
+In file included from ../repo/src/airconv/dxbc_signature.cpp:19:
+In file included from ../repo/src/airconv/dxbc_converter.hpp:12:
+In file included from ../repo/src/airconv/air_operations.hpp:3:
+../repo/src/airconv/air_signature.hpp:679:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  679 | };
+      | ^
+../repo/src/airconv/air_signature.hpp:694:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  694 | }
+      | ^
+In file included from ../repo/src/airconv/dxbc_signature.cpp:19:
+In file included from ../repo/src/airconv/dxbc_converter.hpp:12:
+In file included from ../repo/src/airconv/air_operations.hpp:4:
+../repo/src/airconv/air_type.hpp:85:3: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+   85 |   };
+      |   ^
+In file included from ../repo/src/airconv/dxbc_signature.cpp:19:
+../repo/src/airconv/dxbc_converter.hpp:310:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  310 | }
+      | ^
+../repo/src/airconv/dxbc_signature.cpp:49:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+   49 | }
+      | ^
+../repo/src/airconv/dxbc_signature.cpp:421:5: warning: variable 'assigned_index' is used uninitialized whenever switch default is taken [-Wsometimes-uninitialized]
+  421 |     default:
+      |     ^~~~~~~
+../repo/src/airconv/dxbc_signature.cpp:425:35: note: uninitialized use occurs here
+  425 |     signature_handlers.push_back([=](SignatureContext &ctx) {
+      |                                   ^
+../repo/src/airconv/dxbc_signature.cpp:408:28: note: initialize the variable 'assigned_index' to silence this warning
+  408 |     uint32_t assigned_index;
+      |                            ^
+      |                             = 0
+../repo/src/airconv/dxbc_signature.cpp:390:5: warning: variable 'assigned_index' is used uninitialized whenever switch default is taken [-Wsometimes-uninitialized]
+  390 |     default:
+      |     ^~~~~~~
+../repo/src/airconv/dxbc_signature.cpp:394:35: note: uninitialized use occurs here
+  394 |     signature_handlers.push_back([=](SignatureContext &ctx) {
+      |                                   ^
+../repo/src/airconv/dxbc_signature.cpp:352:28: note: initialize the variable 'assigned_index' to silence this warning
+  352 |     uint32_t assigned_index;
+      |                            ^
+      |                             = 0
+7 warnings generated.
+[128/161] rm -f src/airconv/darwin/libairconv.a && ar csr src/airconv/darwin/libairconv.a src/airconv/darwin/libairconv.a.p/.._airconv_context.cpp.o src/airconv/darwin/libairconv.a.p/.._air_type.cpp.o src/airconv/darwin/libairconv.a.p/.._air_signature.cpp.o src/airconv/darwin/libairconv.a.p/.._air_operations.cpp.o src/airconv/darwin/libairconv.a.p/.._dxbc_binding_sm50.cpp.o src/airconv/darwin/libairconv.a.p/.._dxbc_binding_rootsig.cpp.o src/airconv/darwin/libairconv.a.p/.._dxbc_converter.cpp.o src/airconv/darwin/libairconv.a.p/.._dxbc_converter_gs.cpp.o src/airconv/darwin/libairconv.a.p/.._dxbc_converter_ts.cpp.o src/airconv/darwin/libairconv.a.p/.._dxbc_converter_basicblock.cpp.o src/airconv/darwin/libairconv.a.p/.._dxbc_converter_cfg.cpp.o src/airconv/darwin/libairconv.a.p/.._dxbc_instructions.cpp.o src/airconv/darwin/libairconv.a.p/.._dxbc_signature.cpp.o src/airconv/darwin/libairconv.a.p/.._metallib_writer.cpp.o src/airconv/darwin/libairconv.a.p/.._nt_air_builder.cpp.o src/airconv/darwin/libairconv.a.p/.._nt_dxbc_converter_base.cpp.o src/airconv/darwin/libairconv.a.p/.._transforms_lower_16bit_texread.cpp.o src/airconv/darwin/libairconv.a.p/.._transforms_simdgroup_implicit_membarrier.cpp.o && ranlib -c src/airconv/darwin/libairconv.a
+[129/161] x86_64-w64-mingw32-g++ -Isrc/d3d10/d3d10core.dll.p -Isrc/d3d10 -I../repo/src/d3d10 -I../repo/include -Ilibs -I../repo/libs -Isrc/dxgi -I../repo/src/dxgi -Isrc/util -I../repo/src/util -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/d3d10/d3d10core.dll.p/d3d10core.cpp.obj -MF src/d3d10/d3d10core.dll.p/d3d10core.cpp.obj.d -o src/d3d10/d3d10core.dll.p/d3d10core.cpp.obj -c ../repo/src/d3d10/d3d10core.cpp
+[130/161] c++ -Isrc/airconv/darwin/airconv.p -Isrc/airconv/darwin -I../repo/src/airconv/darwin -I../repo/include -Ilibs -I../repo/libs -I/tmp/dxmt-fb451568-evidence.opkf8x/clang+llvm-15.0.7-x86_64-apple-darwin21.0/include -I../repo/include/native/windows -I../repo/include/native/directx -fdiagnostics-color=always -DNDEBUG -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -Wimplicit-fallthrough -Wno-unused-parameter -Wno-unused-private-field -Wno-unused-const-variable -Wno-missing-braces -fblocks -arch x86_64 -Wno-extern-c-compat -fno-exceptions -funwind-tables -fno-rtti -D_FILE_OFFSET_BITS=64 -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wno-unnecessary-virtual-specifier -MD -MQ src/airconv/darwin/airconv.p/.._air_type.cpp.o -MF src/airconv/darwin/airconv.p/.._air_type.cpp.o.d -o src/airconv/darwin/airconv.p/.._air_type.cpp.o -c ../repo/src/airconv/air_type.cpp
+In file included from ../repo/src/airconv/air_type.cpp:1:
+../repo/src/airconv/air_type.hpp:85:3: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+   85 |   };
+      |   ^
+In file included from ../repo/src/airconv/air_type.cpp:2:
+../repo/src/airconv/air_signature.hpp:679:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  679 | };
+      | ^
+../repo/src/airconv/air_signature.hpp:694:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  694 | }
+      | ^
+3 warnings generated.
+[131/161] c++ -Isrc/airconv/darwin/airconv.p -Isrc/airconv/darwin -I../repo/src/airconv/darwin -I../repo/include -Ilibs -I../repo/libs -I/tmp/dxmt-fb451568-evidence.opkf8x/clang+llvm-15.0.7-x86_64-apple-darwin21.0/include -I../repo/include/native/windows -I../repo/include/native/directx -fdiagnostics-color=always -DNDEBUG -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -Wimplicit-fallthrough -Wno-unused-parameter -Wno-unused-private-field -Wno-unused-const-variable -Wno-missing-braces -fblocks -arch x86_64 -Wno-extern-c-compat -fno-exceptions -funwind-tables -fno-rtti -D_FILE_OFFSET_BITS=64 -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wno-unnecessary-virtual-specifier -MD -MQ src/airconv/darwin/airconv.p/.._air_operations.cpp.o -MF src/airconv/darwin/airconv.p/.._air_operations.cpp.o.d -o src/airconv/darwin/airconv.p/.._air_operations.cpp.o -c ../repo/src/airconv/air_operations.cpp
+In file included from ../repo/src/airconv/air_operations.cpp:1:
+In file included from ../repo/src/airconv/air_operations.hpp:3:
+../repo/src/airconv/air_signature.hpp:679:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  679 | };
+      | ^
+../repo/src/airconv/air_signature.hpp:694:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  694 | }
+      | ^
+In file included from ../repo/src/airconv/air_operations.cpp:1:
+In file included from ../repo/src/airconv/air_operations.hpp:4:
+../repo/src/airconv/air_type.hpp:85:3: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+   85 |   };
+      |   ^
+3 warnings generated.
+[132/161] c++ -Isrc/airconv/darwin/airconv.p -Isrc/airconv/darwin -I../repo/src/airconv/darwin -I../repo/include -Ilibs -I../repo/libs -I/tmp/dxmt-fb451568-evidence.opkf8x/clang+llvm-15.0.7-x86_64-apple-darwin21.0/include -I../repo/include/native/windows -I../repo/include/native/directx -fdiagnostics-color=always -DNDEBUG -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -Wimplicit-fallthrough -Wno-unused-parameter -Wno-unused-private-field -Wno-unused-const-variable -Wno-missing-braces -fblocks -arch x86_64 -Wno-extern-c-compat -fno-exceptions -funwind-tables -fno-rtti -D_FILE_OFFSET_BITS=64 -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wno-unnecessary-virtual-specifier -MD -MQ src/airconv/darwin/airconv.p/.._airconv_context.cpp.o -MF src/airconv/darwin/airconv.p/.._airconv_context.cpp.o.d -o src/airconv/darwin/airconv.p/.._airconv_context.cpp.o -c ../repo/src/airconv/airconv_context.cpp
+[133/161] c++ -Isrc/airconv/darwin/airconv.p -Isrc/airconv/darwin -I../repo/src/airconv/darwin -I../repo/include -Ilibs -I../repo/libs -I/tmp/dxmt-fb451568-evidence.opkf8x/clang+llvm-15.0.7-x86_64-apple-darwin21.0/include -I../repo/include/native/windows -I../repo/include/native/directx -fdiagnostics-color=always -DNDEBUG -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -Wimplicit-fallthrough -Wno-unused-parameter -Wno-unused-private-field -Wno-unused-const-variable -Wno-missing-braces -fblocks -arch x86_64 -Wno-extern-c-compat -fno-exceptions -funwind-tables -fno-rtti -D_FILE_OFFSET_BITS=64 -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wno-unnecessary-virtual-specifier -MD -MQ src/airconv/darwin/airconv.p/.._dxbc_binding_sm50.cpp.o -MF src/airconv/darwin/airconv.p/.._dxbc_binding_sm50.cpp.o.d -o src/airconv/darwin/airconv.p/.._dxbc_binding_sm50.cpp.o -c ../repo/src/airconv/dxbc_binding_sm50.cpp
+In file included from ../repo/src/airconv/dxbc_binding_sm50.cpp:2:
+In file included from ../repo/src/airconv/dxbc_converter.hpp:12:
+In file included from ../repo/src/airconv/air_operations.hpp:3:
+../repo/src/airconv/air_signature.hpp:679:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  679 | };
+      | ^
+../repo/src/airconv/air_signature.hpp:694:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  694 | }
+      | ^
+In file included from ../repo/src/airconv/dxbc_binding_sm50.cpp:2:
+In file included from ../repo/src/airconv/dxbc_converter.hpp:12:
+In file included from ../repo/src/airconv/air_operations.hpp:4:
+../repo/src/airconv/air_type.hpp:85:3: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+   85 |   };
+      |   ^
+In file included from ../repo/src/airconv/dxbc_binding_sm50.cpp:2:
+../repo/src/airconv/dxbc_converter.hpp:310:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  310 | }
+      | ^
+4 warnings generated.
+[134/161] c++ -Isrc/airconv/darwin/airconv.p -Isrc/airconv/darwin -I../repo/src/airconv/darwin -I../repo/include -Ilibs -I../repo/libs -I/tmp/dxmt-fb451568-evidence.opkf8x/clang+llvm-15.0.7-x86_64-apple-darwin21.0/include -I../repo/include/native/windows -I../repo/include/native/directx -fdiagnostics-color=always -DNDEBUG -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -Wimplicit-fallthrough -Wno-unused-parameter -Wno-unused-private-field -Wno-unused-const-variable -Wno-missing-braces -fblocks -arch x86_64 -Wno-extern-c-compat -fno-exceptions -funwind-tables -fno-rtti -D_FILE_OFFSET_BITS=64 -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wno-unnecessary-virtual-specifier -MD -MQ src/airconv/darwin/airconv.p/.._dxbc_binding_rootsig.cpp.o -MF src/airconv/darwin/airconv.p/.._dxbc_binding_rootsig.cpp.o.d -o src/airconv/darwin/airconv.p/.._dxbc_binding_rootsig.cpp.o -c ../repo/src/airconv/dxbc_binding_rootsig.cpp
+In file included from ../repo/src/airconv/dxbc_binding_rootsig.cpp:19:
+../repo/src/airconv/air_signature.hpp:679:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  679 | };
+      | ^
+../repo/src/airconv/air_signature.hpp:694:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  694 | }
+      | ^
+In file included from ../repo/src/airconv/dxbc_binding_rootsig.cpp:20:
+In file included from ../repo/src/airconv/dxbc_converter.hpp:12:
+In file included from ../repo/src/airconv/air_operations.hpp:4:
+../repo/src/airconv/air_type.hpp:85:3: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+   85 |   };
+      |   ^
+In file included from ../repo/src/airconv/dxbc_binding_rootsig.cpp:20:
+../repo/src/airconv/dxbc_converter.hpp:310:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  310 | }
+      | ^
+4 warnings generated.
+[135/161] x86_64-w64-mingw32-g++ -Isrc/d3d11/d3d11.dll.p -Isrc/d3d11 -I../repo/src/d3d11 -I../repo/include -Ilibs -I../repo/libs -Isrc/dxgi -I../repo/src/dxgi -Isrc/airconv -I../repo/src/airconv -Isrc/dxmt -I../repo/src/dxmt -Isrc/winemetal -I../repo/src/winemetal -Isrc/util -I../repo/src/util -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/d3d11/d3d11.dll.p/d3d11_context_imm.cpp.obj -MF src/d3d11/d3d11.dll.p/d3d11_context_imm.cpp.obj.d -o src/d3d11/d3d11.dll.p/d3d11_context_imm.cpp.obj -c ../repo/src/d3d11/d3d11_context_imm.cpp
+[136/161] c++ -Isrc/airconv/darwin/airconv.p -Isrc/airconv/darwin -I../repo/src/airconv/darwin -I../repo/include -Ilibs -I../repo/libs -I/tmp/dxmt-fb451568-evidence.opkf8x/clang+llvm-15.0.7-x86_64-apple-darwin21.0/include -I../repo/include/native/windows -I../repo/include/native/directx -fdiagnostics-color=always -DNDEBUG -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -Wimplicit-fallthrough -Wno-unused-parameter -Wno-unused-private-field -Wno-unused-const-variable -Wno-missing-braces -fblocks -arch x86_64 -Wno-extern-c-compat -fno-exceptions -funwind-tables -fno-rtti -D_FILE_OFFSET_BITS=64 -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wno-unnecessary-virtual-specifier -MD -MQ src/airconv/darwin/airconv.p/.._air_signature.cpp.o -MF src/airconv/darwin/airconv.p/.._air_signature.cpp.o.d -o src/airconv/darwin/airconv.p/.._air_signature.cpp.o -c ../repo/src/airconv/air_signature.cpp
+In file included from ../repo/src/airconv/air_signature.cpp:19:
+../repo/src/airconv/air_signature.hpp:679:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  679 | };
+      | ^
+../repo/src/airconv/air_signature.hpp:694:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  694 | }
+      | ^
+2 warnings generated.
+[137/161] x86_64-w64-mingw32-g++ -Isrc/d3d11/d3d11.dll.p -Isrc/d3d11 -I../repo/src/d3d11 -I../repo/include -Ilibs -I../repo/libs -Isrc/dxgi -I../repo/src/dxgi -Isrc/airconv -I../repo/src/airconv -Isrc/dxmt -I../repo/src/dxmt -Isrc/winemetal -I../repo/src/winemetal -Isrc/util -I../repo/src/util -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -DDXMT_PAGE_SIZE=4096 -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -fmacro-prefix-map=../repo/= -DNOMINMAX -D_WIN32_WINNT=0xa00 -MD -MQ src/d3d11/d3d11.dll.p/d3d11_context_def.cpp.obj -MF src/d3d11/d3d11.dll.p/d3d11_context_def.cpp.obj.d -o src/d3d11/d3d11.dll.p/d3d11_context_def.cpp.obj -c ../repo/src/d3d11/d3d11_context_def.cpp
+[138/161] c++ -Isrc/airconv/darwin/airconv.p -Isrc/airconv/darwin -I../repo/src/airconv/darwin -I../repo/include -Ilibs -I../repo/libs -I/tmp/dxmt-fb451568-evidence.opkf8x/clang+llvm-15.0.7-x86_64-apple-darwin21.0/include -I../repo/include/native/windows -I../repo/include/native/directx -fdiagnostics-color=always -DNDEBUG -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -Wimplicit-fallthrough -Wno-unused-parameter -Wno-unused-private-field -Wno-unused-const-variable -Wno-missing-braces -fblocks -arch x86_64 -Wno-extern-c-compat -fno-exceptions -funwind-tables -fno-rtti -D_FILE_OFFSET_BITS=64 -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wno-unnecessary-virtual-specifier -MD -MQ src/airconv/darwin/airconv.p/.._dxbc_converter.cpp.o -MF src/airconv/darwin/airconv.p/.._dxbc_converter.cpp.o.d -o src/airconv/darwin/airconv.p/.._dxbc_converter.cpp.o -c ../repo/src/airconv/dxbc_converter.cpp
+In file included from ../repo/src/airconv/dxbc_converter.cpp:1:
+In file included from ../repo/src/airconv/dxbc_converter.hpp:12:
+In file included from ../repo/src/airconv/air_operations.hpp:3:
+../repo/src/airconv/air_signature.hpp:679:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  679 | };
+      | ^
+../repo/src/airconv/air_signature.hpp:694:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  694 | }
+      | ^
+In file included from ../repo/src/airconv/dxbc_converter.cpp:1:
+In file included from ../repo/src/airconv/dxbc_converter.hpp:12:
+In file included from ../repo/src/airconv/air_operations.hpp:4:
+../repo/src/airconv/air_type.hpp:85:3: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+   85 |   };
+      |   ^
+In file included from ../repo/src/airconv/dxbc_converter.cpp:1:
+../repo/src/airconv/dxbc_converter.hpp:310:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  310 | }
+      | ^
+../repo/src/airconv/dxbc_converter.cpp:91:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+   91 | }
+      | ^
+5 warnings generated.
+[139/161] x86_64-w64-mingw32-g++  -o src/d3d11/d3d11.dll src/d3d11/d3d11.dll.p/version.o src/d3d11/d3d11.dll.p/d3d11_class_linkage.cpp.obj src/d3d11/d3d11.dll.p/d3d11_device.cpp.obj src/d3d11/d3d11.dll.p/d3d11_input_layout.cpp.obj src/d3d11/d3d11.dll.p/d3d11_inspection.cpp.obj src/d3d11/d3d11.dll.p/d3d11_query.cpp.obj src/d3d11/d3d11.dll.p/d3d11_shader.cpp.obj src/d3d11/d3d11.dll.p/d3d11_state_object.cpp.obj src/d3d11/d3d11.dll.p/d3d11_swapchain.cpp.obj src/d3d11/d3d11.dll.p/d3d11_texture.cpp.obj src/d3d11/d3d11.dll.p/d3d11_buffer.cpp.obj src/d3d11/d3d11.dll.p/d3d11.cpp.obj src/d3d11/d3d11.dll.p/d3d11_resource_helper.cpp.obj src/d3d11/d3d11.dll.p/d3d11_resource_view_helper.cpp.obj src/d3d11/d3d11.dll.p/d3d11_texture_device.cpp.obj src/d3d11/d3d11.dll.p/d3d11_texture_linear.cpp.obj src/d3d11/d3d11.dll.p/d3d11_texture_dynamic.cpp.obj src/d3d11/d3d11.dll.p/d3d11_resource_staging.cpp.obj src/d3d11/d3d11.dll.p/d3d11_pipeline.cpp.obj src/d3d11/d3d11.dll.p/d3d11_pipeline_gs.cpp.obj src/d3d11/d3d11.dll.p/d3d11_pipeline_ts.cpp.obj src/d3d11/d3d11.dll.p/d3d11_enumerable.cpp.obj src/d3d11/d3d11.dll.p/d3d11_pipeline_cache.cpp.obj src/d3d11/d3d11.dll.p/d3d11_context_imm.cpp.obj src/d3d11/d3d11.dll.p/d3d11_context_def.cpp.obj src/d3d11/d3d11.dll.p/d3d11_multithread.cpp.obj src/d3d11/d3d11.dll.p/d3d11_fence.cpp.obj src/d3d11/d3d11.dll.p/.._d3d10_d3d10_buffer.cpp.obj src/d3d11/d3d11.dll.p/.._d3d10_d3d10_device.cpp.obj src/d3d11/d3d11.dll.p/.._d3d10_d3d10_state_object.cpp.obj src/d3d11/d3d11.dll.p/.._d3d10_d3d10_texture.cpp.obj src/d3d11/d3d11.dll.p/.._d3d10_d3d10_util.cpp.obj src/d3d11/d3d11.dll.p/.._d3d10_d3d10_view.cpp.obj -Lx86_64-windows -Wl,--allow-shlib-undefined -Wl,-O1 -shared ../repo/src/d3d11/d3d11.def -Wl,--start-group -Wl,--out-implib=src/d3d11/d3d11.dll.a -static -Wl,--file-alignment=4096 src/dxgi/dxgi.dll.a libs/DXBCParser/libDXBCParser.a src/dxmt/libdxmt.a src/util/libutil.a src/winemetal/winemetal.dll.a -Wl,--subsystem,console -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32 -Wl,--end-group
+[140/161] /opt/homebrew/bin/meson --internal symbolextractor /private/tmp/dxmt-fb451568-evidence.opkf8x/build-wine-x64 src/d3d11/d3d11.dll src/d3d11/d3d11.dll.a src/d3d11/d3d11.dll.p/d3d11.dll.symbols --cross-host=windows
+[141/161] c++ -Isrc/airconv/darwin/airconv.p -Isrc/airconv/darwin -I../repo/src/airconv/darwin -I../repo/include -Ilibs -I../repo/libs -I/tmp/dxmt-fb451568-evidence.opkf8x/clang+llvm-15.0.7-x86_64-apple-darwin21.0/include -I../repo/include/native/windows -I../repo/include/native/directx -fdiagnostics-color=always -DNDEBUG -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -Wimplicit-fallthrough -Wno-unused-parameter -Wno-unused-private-field -Wno-unused-const-variable -Wno-missing-braces -fblocks -arch x86_64 -Wno-extern-c-compat -fno-exceptions -funwind-tables -fno-rtti -D_FILE_OFFSET_BITS=64 -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wno-unnecessary-virtual-specifier -MD -MQ src/airconv/darwin/airconv.p/.._dxbc_converter_basicblock.cpp.o -MF src/airconv/darwin/airconv.p/.._dxbc_converter_basicblock.cpp.o.d -o src/airconv/darwin/airconv.p/.._dxbc_converter_basicblock.cpp.o -c ../repo/src/airconv/dxbc_converter_basicblock.cpp
+In file included from ../repo/src/airconv/dxbc_converter_basicblock.cpp:1:
+In file included from ../repo/src/airconv/air_operations.hpp:3:
+../repo/src/airconv/air_signature.hpp:679:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  679 | };
+      | ^
+../repo/src/airconv/air_signature.hpp:694:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  694 | }
+      | ^
+In file included from ../repo/src/airconv/dxbc_converter_basicblock.cpp:1:
+In file included from ../repo/src/airconv/air_operations.hpp:4:
+../repo/src/airconv/air_type.hpp:85:3: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+   85 |   };
+      |   ^
+In file included from ../repo/src/airconv/dxbc_converter_basicblock.cpp:6:
+../repo/src/airconv/dxbc_converter.hpp:310:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  310 | }
+      | ^
+../repo/src/airconv/dxbc_converter_basicblock.cpp:86:3: warning: non-void lambda does not return a value in all control paths [-Wreturn-type]
+   86 |   });
+      |   ^
+../repo/src/airconv/dxbc_converter_basicblock.cpp:128:7: warning: non-void lambda does not return a value in all control paths [-Wreturn-type]
+  128 |       };
+      |       ^
+6 warnings generated.
+[142/161] c++ -Isrc/airconv/darwin/airconv.p -Isrc/airconv/darwin -I../repo/src/airconv/darwin -I../repo/include -Ilibs -I../repo/libs -I/tmp/dxmt-fb451568-evidence.opkf8x/clang+llvm-15.0.7-x86_64-apple-darwin21.0/include -I../repo/include/native/windows -I../repo/include/native/directx -fdiagnostics-color=always -DNDEBUG -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -Wimplicit-fallthrough -Wno-unused-parameter -Wno-unused-private-field -Wno-unused-const-variable -Wno-missing-braces -fblocks -arch x86_64 -Wno-extern-c-compat -fno-exceptions -funwind-tables -fno-rtti -D_FILE_OFFSET_BITS=64 -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wno-unnecessary-virtual-specifier -MD -MQ src/airconv/darwin/airconv.p/.._metallib_writer.cpp.o -MF src/airconv/darwin/airconv.p/.._metallib_writer.cpp.o.d -o src/airconv/darwin/airconv.p/.._metallib_writer.cpp.o -c ../repo/src/airconv/metallib_writer.cpp
+[143/161] c++ -Isrc/airconv/darwin/airconv.p -Isrc/airconv/darwin -I../repo/src/airconv/darwin -I../repo/include -Ilibs -I../repo/libs -I/tmp/dxmt-fb451568-evidence.opkf8x/clang+llvm-15.0.7-x86_64-apple-darwin21.0/include -I../repo/include/native/windows -I../repo/include/native/directx -fdiagnostics-color=always -DNDEBUG -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -Wimplicit-fallthrough -Wno-unused-parameter -Wno-unused-private-field -Wno-unused-const-variable -Wno-missing-braces -fblocks -arch x86_64 -Wno-extern-c-compat -fno-exceptions -funwind-tables -fno-rtti -D_FILE_OFFSET_BITS=64 -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wno-unnecessary-virtual-specifier -MD -MQ src/airconv/darwin/airconv.p/.._dxbc_converter_ts.cpp.o -MF src/airconv/darwin/airconv.p/.._dxbc_converter_ts.cpp.o.d -o src/airconv/darwin/airconv.p/.._dxbc_converter_ts.cpp.o -c ../repo/src/airconv/dxbc_converter_ts.cpp
+In file included from ../repo/src/airconv/dxbc_converter_ts.cpp:1:
+../repo/src/airconv/air_signature.hpp:679:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  679 | };
+      | ^
+../repo/src/airconv/air_signature.hpp:694:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  694 | }
+      | ^
+In file included from ../repo/src/airconv/dxbc_converter_ts.cpp:3:
+In file included from ../repo/src/airconv/dxbc_converter.hpp:12:
+In file included from ../repo/src/airconv/air_operations.hpp:4:
+../repo/src/airconv/air_type.hpp:85:3: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+   85 |   };
+      |   ^
+In file included from ../repo/src/airconv/dxbc_converter_ts.cpp:3:
+../repo/src/airconv/dxbc_converter.hpp:310:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  310 | }
+      | ^
+4 warnings generated.
+[144/161] c++ -Isrc/airconv/darwin/airconv.p -Isrc/airconv/darwin -I../repo/src/airconv/darwin -I../repo/include -Ilibs -I../repo/libs -I/tmp/dxmt-fb451568-evidence.opkf8x/clang+llvm-15.0.7-x86_64-apple-darwin21.0/include -I../repo/include/native/windows -I../repo/include/native/directx -fdiagnostics-color=always -DNDEBUG -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -Wimplicit-fallthrough -Wno-unused-parameter -Wno-unused-private-field -Wno-unused-const-variable -Wno-missing-braces -fblocks -arch x86_64 -Wno-extern-c-compat -fno-exceptions -funwind-tables -fno-rtti -D_FILE_OFFSET_BITS=64 -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wno-unnecessary-virtual-specifier -MD -MQ src/airconv/darwin/airconv.p/.._dxbc_instructions.cpp.o -MF src/airconv/darwin/airconv.p/.._dxbc_instructions.cpp.o.d -o src/airconv/darwin/airconv.p/.._dxbc_instructions.cpp.o -c ../repo/src/airconv/dxbc_instructions.cpp
+In file included from ../repo/src/airconv/dxbc_instructions.cpp:20:
+In file included from ../repo/src/airconv/dxbc_converter.hpp:12:
+In file included from ../repo/src/airconv/air_operations.hpp:3:
+../repo/src/airconv/air_signature.hpp:679:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  679 | };
+      | ^
+../repo/src/airconv/air_signature.hpp:694:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  694 | }
+      | ^
+In file included from ../repo/src/airconv/dxbc_instructions.cpp:20:
+In file included from ../repo/src/airconv/dxbc_converter.hpp:12:
+In file included from ../repo/src/airconv/air_operations.hpp:4:
+../repo/src/airconv/air_type.hpp:85:3: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+   85 |   };
+      |   ^
+In file included from ../repo/src/airconv/dxbc_instructions.cpp:20:
+../repo/src/airconv/dxbc_converter.hpp:310:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  310 | }
+      | ^
+../repo/src/airconv/dxbc_instructions.cpp:54:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+   54 | };
+      | ^
+../repo/src/airconv/dxbc_instructions.cpp:88:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+   88 | };
+      | ^
+../repo/src/airconv/dxbc_instructions.cpp:162:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  162 | }
+      | ^
+../repo/src/airconv/dxbc_instructions.cpp:189:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  189 | }
+      | ^
+../repo/src/airconv/dxbc_instructions.cpp:413:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  413 | };
+      | ^
+../repo/src/airconv/dxbc_instructions.cpp:437:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  437 | }
+      | ^
+../repo/src/airconv/dxbc_instructions.cpp:524:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  524 | }
+      | ^
+../repo/src/airconv/dxbc_instructions.cpp:538:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  538 | }
+      | ^
+../repo/src/airconv/dxbc_instructions.cpp:549:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  549 | }
+      | ^
+../repo/src/airconv/dxbc_instructions.cpp:2103:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+ 2103 | };
+      | ^
+14 warnings generated.
+[145/161] c++ -Isrc/airconv/darwin/airconv.p -Isrc/airconv/darwin -I../repo/src/airconv/darwin -I../repo/include -Ilibs -I../repo/libs -I/tmp/dxmt-fb451568-evidence.opkf8x/clang+llvm-15.0.7-x86_64-apple-darwin21.0/include -I../repo/include/native/windows -I../repo/include/native/directx -fdiagnostics-color=always -DNDEBUG -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -Wimplicit-fallthrough -Wno-unused-parameter -Wno-unused-private-field -Wno-unused-const-variable -Wno-missing-braces -fblocks -arch x86_64 -Wno-extern-c-compat -fno-exceptions -funwind-tables -fno-rtti -D_FILE_OFFSET_BITS=64 -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wno-unnecessary-virtual-specifier -MD -MQ src/airconv/darwin/airconv.p/.._dxbc_converter_gs.cpp.o -MF src/airconv/darwin/airconv.p/.._dxbc_converter_gs.cpp.o.d -o src/airconv/darwin/airconv.p/.._dxbc_converter_gs.cpp.o -c ../repo/src/airconv/dxbc_converter_gs.cpp
+In file included from ../repo/src/airconv/dxbc_converter_gs.cpp:1:
+In file included from ../repo/src/airconv/air_operations.hpp:3:
+../repo/src/airconv/air_signature.hpp:679:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  679 | };
+      | ^
+../repo/src/airconv/air_signature.hpp:694:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  694 | }
+      | ^
+In file included from ../repo/src/airconv/dxbc_converter_gs.cpp:1:
+In file included from ../repo/src/airconv/air_operations.hpp:4:
+../repo/src/airconv/air_type.hpp:85:3: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+   85 |   };
+      |   ^
+In file included from ../repo/src/airconv/dxbc_converter_gs.cpp:4:
+../repo/src/airconv/dxbc_converter.hpp:310:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  310 | }
+      | ^
+4 warnings generated.
+[146/161] c++ -Isrc/airconv/darwin/airconv.p -Isrc/airconv/darwin -I../repo/src/airconv/darwin -I../repo/include -Ilibs -I../repo/libs -I/tmp/dxmt-fb451568-evidence.opkf8x/clang+llvm-15.0.7-x86_64-apple-darwin21.0/include -I../repo/include/native/windows -I../repo/include/native/directx -fdiagnostics-color=always -DNDEBUG -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -Wimplicit-fallthrough -Wno-unused-parameter -Wno-unused-private-field -Wno-unused-const-variable -Wno-missing-braces -fblocks -arch x86_64 -Wno-extern-c-compat -fno-exceptions -funwind-tables -fno-rtti -D_FILE_OFFSET_BITS=64 -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wno-unnecessary-virtual-specifier -MD -MQ src/airconv/darwin/airconv.p/.._dxbc_converter_cfg.cpp.o -MF src/airconv/darwin/airconv.p/.._dxbc_converter_cfg.cpp.o.d -o src/airconv/darwin/airconv.p/.._dxbc_converter_cfg.cpp.o -c ../repo/src/airconv/dxbc_converter_cfg.cpp
+In file included from ../repo/src/airconv/dxbc_converter_cfg.cpp:2:
+In file included from ../repo/src/airconv/dxbc_converter.hpp:12:
+In file included from ../repo/src/airconv/air_operations.hpp:3:
+../repo/src/airconv/air_signature.hpp:679:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  679 | };
+      | ^
+../repo/src/airconv/air_signature.hpp:694:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  694 | }
+      | ^
+In file included from ../repo/src/airconv/dxbc_converter_cfg.cpp:2:
+In file included from ../repo/src/airconv/dxbc_converter.hpp:12:
+In file included from ../repo/src/airconv/air_operations.hpp:4:
+../repo/src/airconv/air_type.hpp:85:3: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+   85 |   };
+      |   ^
+In file included from ../repo/src/airconv/dxbc_converter_cfg.cpp:2:
+../repo/src/airconv/dxbc_converter.hpp:310:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  310 | }
+      | ^
+../repo/src/airconv/dxbc_converter_cfg.cpp:62:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+   62 | };
+      | ^
+../repo/src/airconv/dxbc_converter_cfg.cpp:366:7: warning: variable 'LB' is used uninitialized whenever switch default is taken [-Wsometimes-uninitialized]
+  366 |       default:
+      |       ^~~~~~~
+../repo/src/airconv/dxbc_converter_cfg.cpp:370:57: note: uninitialized use occurs here
+  370 |           .range = {.range_id = RangeID, .lower_bound = LB, .size = RangeSize, .space = Inst.m_SamplerDecl.Space},
+      |                                                         ^~
+../repo/src/airconv/dxbc_converter_cfg.cpp:354:18: note: initialize the variable 'LB' to silence this warning
+  354 |       unsigned LB, RangeSize;
+      |                  ^
+      |                   = 0
+../repo/src/airconv/dxbc_converter_cfg.cpp:366:7: warning: variable 'RangeSize' is used uninitialized whenever switch default is taken [-Wsometimes-uninitialized]
+  366 |       default:
+      |       ^~~~~~~
+../repo/src/airconv/dxbc_converter_cfg.cpp:370:69: note: uninitialized use occurs here
+  370 |           .range = {.range_id = RangeID, .lower_bound = LB, .size = RangeSize, .space = Inst.m_SamplerDecl.Space},
+      |                                                                     ^~~~~~~~~
+../repo/src/airconv/dxbc_converter_cfg.cpp:354:29: note: initialize the variable 'RangeSize' to silence this warning
+  354 |       unsigned LB, RangeSize;
+      |                             ^
+      |                              = 0
+../repo/src/airconv/dxbc_converter_cfg.cpp:340:7: warning: variable 'LB' is used uninitialized whenever switch default is taken [-Wsometimes-uninitialized]
+  340 |       default:
+      |       ^~~~~~~
+../repo/src/airconv/dxbc_converter_cfg.cpp:345:52: note: uninitialized use occurs here
+  345 |               {.range_id = RangeID, .lower_bound = LB, .size = RangeSize, .space = Inst.m_ConstantBufferDecl.Space},
+      |                                                    ^~
+../repo/src/airconv/dxbc_converter_cfg.cpp:328:18: note: initialize the variable 'LB' to silence this warning
+  328 |       unsigned LB, RangeSize;
+      |                  ^
+      |                   = 0
+../repo/src/airconv/dxbc_converter_cfg.cpp:340:7: warning: variable 'RangeSize' is used uninitialized whenever switch default is taken [-Wsometimes-uninitialized]
+  340 |       default:
+      |       ^~~~~~~
+../repo/src/airconv/dxbc_converter_cfg.cpp:345:64: note: uninitialized use occurs here
+  345 |               {.range_id = RangeID, .lower_bound = LB, .size = RangeSize, .space = Inst.m_ConstantBufferDecl.Space},
+      |                                                                ^~~~~~~~~
+../repo/src/airconv/dxbc_converter_cfg.cpp:328:29: note: initialize the variable 'RangeSize' to silence this warning
+  328 |       unsigned LB, RangeSize;
+      |                             ^
+      |                              = 0
+9 warnings generated.
+[147/161] c++ -Isrc/airconv/darwin/airconv.p -Isrc/airconv/darwin -I../repo/src/airconv/darwin -I../repo/include -Ilibs -I../repo/libs -I/tmp/dxmt-fb451568-evidence.opkf8x/clang+llvm-15.0.7-x86_64-apple-darwin21.0/include -I../repo/include/native/windows -I../repo/include/native/directx -fdiagnostics-color=always -DNDEBUG -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -Wimplicit-fallthrough -Wno-unused-parameter -Wno-unused-private-field -Wno-unused-const-variable -Wno-missing-braces -fblocks -arch x86_64 -Wno-extern-c-compat -fno-exceptions -funwind-tables -fno-rtti -D_FILE_OFFSET_BITS=64 -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wno-unnecessary-virtual-specifier -MD -MQ src/airconv/darwin/airconv.p/.._transforms_lower_16bit_texread.cpp.o -MF src/airconv/darwin/airconv.p/.._transforms_lower_16bit_texread.cpp.o.d -o src/airconv/darwin/airconv.p/.._transforms_lower_16bit_texread.cpp.o -c ../repo/src/airconv/transforms/lower_16bit_texread.cpp
+[148/161] cc -Isrc/winemetal/unix/winemetal.so.p -Isrc/winemetal/unix -I../repo/src/winemetal/unix -I../repo/include -Ilibs -I../repo/libs -Isrc/airconv -I../repo/src/airconv -fdiagnostics-color=always -DNDEBUG -Wall -Winvalid-pch -Wextra -O3 -Wimplicit-fallthrough -Wno-unused-parameter -Wno-unused-private-field -Wno-unused-const-variable -Wno-missing-braces -fblocks -arch x86_64 -ObjC -MD -MQ src/winemetal/unix/winemetal.so.p/cache.c.o -MF src/winemetal/unix/winemetal.so.p/cache.c.o.d -o src/winemetal/unix/winemetal.so.p/cache.c.o -c ../repo/src/winemetal/unix/cache.c
+[149/161] c++ -Isrc/airconv/darwin/airconv.p -Isrc/airconv/darwin -I../repo/src/airconv/darwin -I../repo/include -Ilibs -I../repo/libs -I/tmp/dxmt-fb451568-evidence.opkf8x/clang+llvm-15.0.7-x86_64-apple-darwin21.0/include -I../repo/include/native/windows -I../repo/include/native/directx -fdiagnostics-color=always -DNDEBUG -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -Wimplicit-fallthrough -Wno-unused-parameter -Wno-unused-private-field -Wno-unused-const-variable -Wno-missing-braces -fblocks -arch x86_64 -Wno-extern-c-compat -fno-exceptions -funwind-tables -fno-rtti -D_FILE_OFFSET_BITS=64 -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wno-unnecessary-virtual-specifier -MD -MQ src/airconv/darwin/airconv.p/.._transforms_simdgroup_implicit_membarrier.cpp.o -MF src/airconv/darwin/airconv.p/.._transforms_simdgroup_implicit_membarrier.cpp.o.d -o src/airconv/darwin/airconv.p/.._transforms_simdgroup_implicit_membarrier.cpp.o -c ../repo/src/airconv/transforms/simdgroup_implicit_membarrier.cpp
+[150/161] x86_64-w64-mingw32-g++  -o src/d3d10/d3d10core.dll src/d3d10/d3d10core.dll.p/version.o src/d3d10/d3d10core.dll.p/d3d10core.cpp.obj -Lx86_64-windows -Wl,--allow-shlib-undefined -Wl,-O1 -shared ../repo/src/d3d10/d3d10core.def -Wl,--start-group -Wl,--out-implib=src/d3d10/d3d10core.dll.a -static -Wl,--file-alignment=4096 src/d3d11/d3d11.dll.a src/dxgi/dxgi.dll.a src/util/libutil.a -Wl,--subsystem,console -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32 -Wl,--end-group
+[151/161] cc -Isrc/winemetal/unix/winemetal.so.p -Isrc/winemetal/unix -I../repo/src/winemetal/unix -I../repo/include -Ilibs -I../repo/libs -Isrc/airconv -I../repo/src/airconv -fdiagnostics-color=always -DNDEBUG -Wall -Winvalid-pch -Wextra -O3 -Wimplicit-fallthrough -Wno-unused-parameter -Wno-unused-private-field -Wno-unused-const-variable -Wno-missing-braces -fblocks -arch x86_64 -ObjC -MD -MQ src/winemetal/unix/winemetal.so.p/winemetal_unix.c.o -MF src/winemetal/unix/winemetal.so.p/winemetal_unix.c.o.d -o src/winemetal/unix/winemetal.so.p/winemetal_unix.c.o -c ../repo/src/winemetal/unix/winemetal_unix.c
+../repo/src/winemetal/unix/winemetal_unix.c:1299:34: warning: 'didModifyRange:' is deprecated: first deprecated in macOS 27.0 - Managed storage has no effect on Apple Silicon, use Shared storage instead [-Wdeprecated-declarations]
+ 1299 |   [(id<MTLBuffer>)params->handle didModifyRange:NSMakeRange(params->arg, params->ret)];
+      |                                  ^
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/Metal.framework/Headers/MTLBuffer.h:60:1: note: 'didModifyRange:' has been explicitly marked deprecated here
+   60 | - (void)didModifyRange:(NSRange)range API_DEPRECATED("Managed storage has no effect on Apple Silicon, use Shared storage instead", macos(10.11, 27.0), macCatalyst(13.0, 27.0)) API_UNAVAILABLE(ios);
+      | ^
+../repo/src/winemetal/unix/winemetal_unix.c:2644:54: warning: 'MTLStorageModeManaged' is deprecated: first deprecated in macOS 27.0 - Managed storage has no effect on Apple Silicon, use Shared storage instead [-Wdeprecated-declarations]
+ 2644 |   if ([(id<MTLBuffer>)params->buffer storageMode] == MTLStorageModeManaged)
+      |                                                      ^
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/Metal.framework/Headers/MTLResource.h:85:5: note: 'MTLStorageModeManaged' has been explicitly marked deprecated here
+   85 |     MTLStorageModeManaged API_DEPRECATED("Managed storage has no effect on Apple Silicon, use Shared storage instead", macos(10.11, 27.0), macCatalyst(13.0, 27.0)) API_UNAVAILABLE(ios) = 1,
+      |     ^
+../repo/src/winemetal/unix/winemetal_unix.c:2645:36: warning: 'didModifyRange:' is deprecated: first deprecated in macOS 27.0 - Managed storage has no effect on Apple Silicon, use Shared storage instead [-Wdeprecated-declarations]
+ 2645 |     [(id<MTLBuffer>)params->buffer didModifyRange:NSMakeRange(params->offset, params->length)];
+      |                                    ^
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/Metal.framework/Headers/MTLBuffer.h:60:1: note: 'didModifyRange:' has been explicitly marked deprecated here
+   60 | - (void)didModifyRange:(NSRange)range API_DEPRECATED("Managed storage has no effect on Apple Silicon, use Shared storage instead", macos(10.11, 27.0), macCatalyst(13.0, 27.0)) API_UNAVAILABLE(ios);
+      | ^
+3 warnings generated.
+[152/161] c++ -Isrc/airconv/darwin/airconv.p -Isrc/airconv/darwin -I../repo/src/airconv/darwin -I../repo/include -Ilibs -I../repo/libs -I/tmp/dxmt-fb451568-evidence.opkf8x/clang+llvm-15.0.7-x86_64-apple-darwin21.0/include -I../repo/include/native/windows -I../repo/include/native/directx -fdiagnostics-color=always -DNDEBUG -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -Wimplicit-fallthrough -Wno-unused-parameter -Wno-unused-private-field -Wno-unused-const-variable -Wno-missing-braces -fblocks -arch x86_64 -Wno-extern-c-compat -fno-exceptions -funwind-tables -fno-rtti -D_FILE_OFFSET_BITS=64 -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wno-unnecessary-virtual-specifier -MD -MQ src/airconv/darwin/airconv.p/.._nt_air_builder.cpp.o -MF src/airconv/darwin/airconv.p/.._nt_air_builder.cpp.o.d -o src/airconv/darwin/airconv.p/.._nt_air_builder.cpp.o -c ../repo/src/airconv/nt/air_builder.cpp
+[153/161] /tmp/dxmt-fb451568-evidence.opkf8x/wine-install-v8.16-3shain/bin/winebuild --builtin src/d3d11/d3d11.dll
+[154/161] /tmp/dxmt-fb451568-evidence.opkf8x/wine-install-v8.16-3shain/bin/winebuild --builtin src/d3d10/d3d10core.dll
+[155/161] /tmp/dxmt-fb451568-evidence.opkf8x/wine-install-v8.16-3shain/bin/winebuild --builtin src/winemetal/winemetal.dll
+[156/161] /tmp/dxmt-fb451568-evidence.opkf8x/wine-install-v8.16-3shain/bin/winebuild --builtin src/dxgi/dxgi.dll
+[157/161] c++  -o src/winemetal/unix/winemetal.so src/winemetal/unix/winemetal.so.p/winemetal_unix.c.o src/winemetal/unix/winemetal.so.p/cache.c.o -Wl,-headerpad_max_install_names -shared -Wl,-install_name,@rpath/winemetal.so -arch x86_64 -Wl,-rpath,@loader_path/ -Wl,-rpath,@loader_path/../../ src/airconv/darwin/libairconv.a libs/DXBCParser/libDXBCParserNative.a /tmp/dxmt-fb451568-evidence.opkf8x/wine-install-v8.16-3shain/lib/wine/x86_64-unix/winemac.so /tmp/dxmt-fb451568-evidence.opkf8x/wine-install-v8.16-3shain/lib/wine/x86_64-unix/ntdll.so -weak_framework CoreFoundation -weak_framework Metal -framework MetalFX -weak_framework Foundation -weak_framework CoreGraphics -weak_framework QuartzCore -weak_framework ColorSync -weak_framework Cocoa -lsqlite3 -lm -L/tmp/dxmt-fb451568-evidence.opkf8x/clang+llvm-15.0.7-x86_64-apple-darwin21.0/lib -lz -lcurses -lxml2 -lLLVMPasses -lLLVMTarget -lLLVMObjCARCOpts -lLLVMCoroutines -lLLVMipo -lLLVMInstrumentation -lLLVMVectorize -lLLVMLinker -lLLVMIRReader -lLLVMAsmParser -lLLVMFrontendOpenMP -lLLVMScalarOpts -lLLVMInstCombine -lLLVMAggressiveInstCombine -lLLVMTransformUtils -lLLVMBitWriter -lLLVMAnalysis -lLLVMProfileData -lLLVMSymbolize -lLLVMDebugInfoPDB -lLLVMDebugInfoMSF -lLLVMDebugInfoDWARF -lLLVMObject -lLLVMTextAPI -lLLVMMCParser -lLLVMMC -lLLVMDebugInfoCodeView -lLLVMBitReader -lLLVMCore -lLLVMRemarks -lLLVMBitstreamReader -lLLVMBinaryFormat -lLLVMSupport -lLLVMDemangle
+ld: warning: reexported library with install name '@rpath/libunwind.1.dylib' found at '/private/tmp/dxmt-fb451568-evidence.opkf8x/clang+llvm-15.0.7-x86_64-apple-darwin21.0/lib/libunwind.1.0.dylib' couldn't be matched with any parent library and will be linked directly
+[158/161] c++ -Isrc/airconv/darwin/airconv.p -Isrc/airconv/darwin -I../repo/src/airconv/darwin -I../repo/include -Ilibs -I../repo/libs -I/tmp/dxmt-fb451568-evidence.opkf8x/clang+llvm-15.0.7-x86_64-apple-darwin21.0/include -I../repo/include/native/windows -I../repo/include/native/directx -fdiagnostics-color=always -DNDEBUG -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -Wimplicit-fallthrough -Wno-unused-parameter -Wno-unused-private-field -Wno-unused-const-variable -Wno-missing-braces -fblocks -arch x86_64 -Wno-extern-c-compat -fno-exceptions -funwind-tables -fno-rtti -D_FILE_OFFSET_BITS=64 -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wno-unnecessary-virtual-specifier -MD -MQ src/airconv/darwin/airconv.p/.._dxbc_signature.cpp.o -MF src/airconv/darwin/airconv.p/.._dxbc_signature.cpp.o.d -o src/airconv/darwin/airconv.p/.._dxbc_signature.cpp.o -c ../repo/src/airconv/dxbc_signature.cpp
+In file included from ../repo/src/airconv/dxbc_signature.cpp:19:
+In file included from ../repo/src/airconv/dxbc_converter.hpp:12:
+In file included from ../repo/src/airconv/air_operations.hpp:3:
+../repo/src/airconv/air_signature.hpp:679:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  679 | };
+      | ^
+../repo/src/airconv/air_signature.hpp:694:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  694 | }
+      | ^
+In file included from ../repo/src/airconv/dxbc_signature.cpp:19:
+In file included from ../repo/src/airconv/dxbc_converter.hpp:12:
+In file included from ../repo/src/airconv/air_operations.hpp:4:
+../repo/src/airconv/air_type.hpp:85:3: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+   85 |   };
+      |   ^
+In file included from ../repo/src/airconv/dxbc_signature.cpp:19:
+../repo/src/airconv/dxbc_converter.hpp:310:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  310 | }
+      | ^
+../repo/src/airconv/dxbc_signature.cpp:49:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+   49 | }
+      | ^
+../repo/src/airconv/dxbc_signature.cpp:421:5: warning: variable 'assigned_index' is used uninitialized whenever switch default is taken [-Wsometimes-uninitialized]
+  421 |     default:
+      |     ^~~~~~~
+../repo/src/airconv/dxbc_signature.cpp:425:35: note: uninitialized use occurs here
+  425 |     signature_handlers.push_back([=](SignatureContext &ctx) {
+      |                                   ^
+../repo/src/airconv/dxbc_signature.cpp:408:28: note: initialize the variable 'assigned_index' to silence this warning
+  408 |     uint32_t assigned_index;
+      |                            ^
+      |                             = 0
+../repo/src/airconv/dxbc_signature.cpp:390:5: warning: variable 'assigned_index' is used uninitialized whenever switch default is taken [-Wsometimes-uninitialized]
+  390 |     default:
+      |     ^~~~~~~
+../repo/src/airconv/dxbc_signature.cpp:394:35: note: uninitialized use occurs here
+  394 |     signature_handlers.push_back([=](SignatureContext &ctx) {
+      |                                   ^
+../repo/src/airconv/dxbc_signature.cpp:352:28: note: initialize the variable 'assigned_index' to silence this warning
+  352 |     uint32_t assigned_index;
+      |                            ^
+      |                             = 0
+7 warnings generated.
+[159/161] c++ -Isrc/airconv/darwin/airconv.p -Isrc/airconv/darwin -I../repo/src/airconv/darwin -I../repo/include -Ilibs -I../repo/libs -I/tmp/dxmt-fb451568-evidence.opkf8x/clang+llvm-15.0.7-x86_64-apple-darwin21.0/include -I../repo/include/native/windows -I../repo/include/native/directx -fdiagnostics-color=always -DNDEBUG -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -Wimplicit-fallthrough -Wno-unused-parameter -Wno-unused-private-field -Wno-unused-const-variable -Wno-missing-braces -fblocks -arch x86_64 -Wno-extern-c-compat -fno-exceptions -funwind-tables -fno-rtti -D_FILE_OFFSET_BITS=64 -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wno-unnecessary-virtual-specifier -MD -MQ src/airconv/darwin/airconv.p/.._airconv_cli.cpp.o -MF src/airconv/darwin/airconv.p/.._airconv_cli.cpp.o.d -o src/airconv/darwin/airconv.p/.._airconv_cli.cpp.o -c ../repo/src/airconv/airconv_cli.cpp
+In file included from ../repo/src/airconv/airconv_cli.cpp:23:
+In file included from ../repo/src/airconv/dxbc_converter.hpp:12:
+In file included from ../repo/src/airconv/air_operations.hpp:3:
+../repo/src/airconv/air_signature.hpp:679:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  679 | };
+      | ^
+../repo/src/airconv/air_signature.hpp:694:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  694 | }
+      | ^
+In file included from ../repo/src/airconv/airconv_cli.cpp:23:
+In file included from ../repo/src/airconv/dxbc_converter.hpp:12:
+In file included from ../repo/src/airconv/air_operations.hpp:4:
+../repo/src/airconv/air_type.hpp:85:3: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+   85 |   };
+      |   ^
+In file included from ../repo/src/airconv/airconv_cli.cpp:23:
+../repo/src/airconv/dxbc_converter.hpp:310:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  310 | }
+      | ^
+4 warnings generated.
+[160/161] c++ -Isrc/airconv/darwin/airconv.p -Isrc/airconv/darwin -I../repo/src/airconv/darwin -I../repo/include -Ilibs -I../repo/libs -I/tmp/dxmt-fb451568-evidence.opkf8x/clang+llvm-15.0.7-x86_64-apple-darwin21.0/include -I../repo/include/native/windows -I../repo/include/native/directx -fdiagnostics-color=always -DNDEBUG -Wall -Winvalid-pch -Wextra -std=c++20 -O3 -Wimplicit-fallthrough -Wno-unused-parameter -Wno-unused-private-field -Wno-unused-const-variable -Wno-missing-braces -fblocks -arch x86_64 -Wno-extern-c-compat -fno-exceptions -funwind-tables -fno-rtti -D_FILE_OFFSET_BITS=64 -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wno-unnecessary-virtual-specifier -MD -MQ src/airconv/darwin/airconv.p/.._nt_dxbc_converter_base.cpp.o -MF src/airconv/darwin/airconv.p/.._nt_dxbc_converter_base.cpp.o.d -o src/airconv/darwin/airconv.p/.._nt_dxbc_converter_base.cpp.o -c ../repo/src/airconv/nt/dxbc_converter_base.cpp
+In file included from ../repo/src/airconv/nt/dxbc_converter_base.cpp:20:
+In file included from ../repo/src/airconv/nt/../dxbc_converter.hpp:12:
+In file included from ../repo/src/airconv/nt/../air_operations.hpp:3:
+../repo/src/airconv/nt/../air_signature.hpp:679:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  679 | };
+      | ^
+../repo/src/airconv/nt/../air_signature.hpp:694:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  694 | }
+      | ^
+In file included from ../repo/src/airconv/nt/dxbc_converter_base.cpp:20:
+In file included from ../repo/src/airconv/nt/../dxbc_converter.hpp:12:
+In file included from ../repo/src/airconv/nt/../air_operations.hpp:4:
+../repo/src/airconv/nt/../air_type.hpp:85:3: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+   85 |   };
+      |   ^
+In file included from ../repo/src/airconv/nt/dxbc_converter_base.cpp:20:
+../repo/src/airconv/nt/../dxbc_converter.hpp:310:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  310 | }
+      | ^
+4 warnings generated.
+[161/161] c++  -o src/airconv/darwin/airconv src/airconv/darwin/airconv.p/.._airconv_context.cpp.o src/airconv/darwin/airconv.p/.._air_type.cpp.o src/airconv/darwin/airconv.p/.._air_signature.cpp.o src/airconv/darwin/airconv.p/.._air_operations.cpp.o src/airconv/darwin/airconv.p/.._dxbc_binding_sm50.cpp.o src/airconv/darwin/airconv.p/.._dxbc_binding_rootsig.cpp.o src/airconv/darwin/airconv.p/.._dxbc_converter.cpp.o src/airconv/darwin/airconv.p/.._dxbc_converter_gs.cpp.o src/airconv/darwin/airconv.p/.._dxbc_converter_ts.cpp.o src/airconv/darwin/airconv.p/.._dxbc_converter_basicblock.cpp.o src/airconv/darwin/airconv.p/.._dxbc_converter_cfg.cpp.o src/airconv/darwin/airconv.p/.._dxbc_instructions.cpp.o src/airconv/darwin/airconv.p/.._dxbc_signature.cpp.o src/airconv/darwin/airconv.p/.._metallib_writer.cpp.o src/airconv/darwin/airconv.p/.._nt_air_builder.cpp.o src/airconv/darwin/airconv.p/.._nt_dxbc_converter_base.cpp.o src/airconv/darwin/airconv.p/.._transforms_lower_16bit_texread.cpp.o src/airconv/darwin/airconv.p/.._transforms_simdgroup_implicit_membarrier.cpp.o src/airconv/darwin/airconv.p/.._airconv_cli.cpp.o -L/tmp/dxmt-fb451568-evidence.opkf8x/clang+llvm-15.0.7-x86_64-apple-darwin21.0/lib -Wl,-dead_strip_dylibs -Wl,-headerpad_max_install_names -arch x86_64 libs/DXBCParser/libDXBCParserNative.a -lm -lz -lcurses -lxml2 -lLLVMPasses -lLLVMTarget -lLLVMObjCARCOpts -lLLVMCoroutines -lLLVMipo -lLLVMInstrumentation -lLLVMVectorize -lLLVMLinker -lLLVMIRReader -lLLVMAsmParser -lLLVMFrontendOpenMP -lLLVMScalarOpts -lLLVMInstCombine -lLLVMAggressiveInstCombine -lLLVMTransformUtils -lLLVMBitWriter -lLLVMAnalysis -lLLVMProfileData -lLLVMSymbolize -lLLVMDebugInfoPDB -lLLVMDebugInfoMSF -lLLVMDebugInfoDWARF -lLLVMObject -lLLVMTextAPI -lLLVMMCParser -lLLVMMC -lLLVMDebugInfoCodeView -lLLVMBitReader -lLLVMCore -lLLVMRemarks -lLLVMBitstreamReader -lLLVMBinaryFormat -lLLVMSupport -lLLVMDemangle
+ld: warning: reexported library with install name '@rpath/libunwind.1.dylib' found at '/private/tmp/dxmt-fb451568-evidence.opkf8x/clang+llvm-15.0.7-x86_64-apple-darwin21.0/lib/libunwind.1.0.dylib' couldn't be matched with any parent library and will be linked directly
+INFO: autodetecting backend as ninja
+INFO: calculating backend command to run: /opt/homebrew/bin/ninja -C /private/tmp/dxmt-fb451568-evidence.opkf8x/build-wine-x64 -j 8 -v

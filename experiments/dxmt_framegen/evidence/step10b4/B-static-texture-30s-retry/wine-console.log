@@ -1,0 +1,42 @@
+02b0:trace:loaddll:build_module Loaded L"Z:\\Users\\<user>\\Documents\\Code\\FG-Metal\\experiments\\dxmt_framegen\\evidence\\step10b4\\B-static-texture-30s-retry\\d3d11_clear_window.exe" at 0000000140000000: native
+02b0:trace:loaddll:build_module Loaded L"C:\\windows\\system32\\kernelbase.dll" at 00006FFFFFC10000: builtin
+02b0:trace:loaddll:build_module Loaded L"C:\\windows\\system32\\kernel32.dll" at 00006FFFFFEC0000: builtin
+02b0:trace:loaddll:build_module Loaded L"C:\\windows\\system32\\msvcrt.dll" at 00006FFFFFAF0000: builtin
+02b0:trace:loaddll:build_module Loaded L"C:\\windows\\system32\\ucrtbase.dll" at 00006FFFFF9D0000: builtin
+02b0:trace:loaddll:build_module Loaded L"C:\\windows\\system32\\sechost.dll" at 00006FFFFFAC0000: builtin
+02b0:trace:loaddll:build_module Loaded L"C:\\windows\\system32\\advapi32.dll" at 00006FFFFFBB0000: builtin
+02b0:trace:loaddll:build_module Loaded L"C:\\windows\\system32\\win32u.dll" at 00006FFFFF570000: builtin
+02b0:trace:loaddll:build_module Loaded L"C:\\windows\\system32\\user32.dll" at 00006FFFFF660000: builtin
+02b0:trace:loaddll:build_module Loaded L"C:\\windows\\system32\\GDI32.dll" at 00006FFFFF5C0000: builtin
+02b0:trace:loaddll:build_module Loaded L"C:\\windows\\system32\\winemetal.dll" at 00006FFFFE820000: builtin
+02b0:trace:loaddll:build_module Loaded L"C:\\windows\\system32\\DXGI.DLL" at 00006FFFFC6C0000: builtin
+02b0:trace:loaddll:build_module Loaded L"C:\\windows\\system32\\d3d11.dll" at 00006FFFFD290000: builtin
+Wine cannot find the FreeType font library.  To enable Wine to
+use TrueType fonts please install a version of FreeType greater than
+or equal to 2.0.5.
+http://www.freetype.org
+02b0:trace:loaddll:build_module Loaded L"C:\\windows\\system32\\imm32.dll" at 00006FFFFF540000: builtin
+02b0:trace:loaddll:build_module Loaded L"c:\\windows\\system32\\winemac.drv" at 00006FFFFF520000: builtin
+02b0:trace:loaddll:build_module Loaded L"C:\\windows\\system32\\uxtheme.dll" at 00006FFFFE890000: builtin
+02b0:trace:loaddll:build_module Loaded L"C:\\windows\\system32\\rpcrt4.dll" at 00006FFFFF8F0000: builtin
+02b0:trace:loaddll:build_module Loaded L"C:\\windows\\system32\\combase.dll" at 00006FFFFEA20000: builtin
+02b0:trace:loaddll:build_module Loaded L"C:\\windows\\system32\\coml2.dll" at 00006FFFFE9F0000: builtin
+02b0:trace:loaddll:build_module Loaded L"C:\\windows\\system32\\ole32.dll" at 00006FFFFEA80000: builtin
+02b0:err:vulkan:vulkan_init_once Failed to load libMoltenVK.dylib
+info:  Maximum supported feature level: D3D_FEATURE_LEVEL_11_1
+info:  Using feature level D3D_FEATURE_LEVEL_11_0
+info:  DXMT framegen enablement inputs changed: requested=1 occluded=0 source_supported=1 layer_owner=0 source_sequence=0
+info:  DXMT framegen session reactivation: enabled=1 layer_owner=1 source_sequence=1
+info:  DXMT framegen enablement inputs changed: requested=1 occluded=0 source_supported=1 layer_owner=1 source_sequence=2
+info:  DXMT framegen enablement inputs changed: requested=1 occluded=0 source_supported=1 layer_owner=0 source_sequence=90
+info:  DXMT framegen session reactivation: enabled=1 layer_owner=1 source_sequence=90
+info:  DXMT framegen enablement inputs changed: requested=1 occluded=0 source_supported=1 layer_owner=1 source_sequence=91
+info:  DXMT framegen enablement inputs changed: requested=1 occluded=0 source_supported=1 layer_owner=0 source_sequence=95
+info:  DXMT framegen session reactivation: enabled=1 layer_owner=1 source_sequence=95
+info:  DXMT framegen enablement inputs changed: requested=1 occluded=0 source_supported=1 layer_owner=1 source_sequence=96
+info:  DXMT framegen enablement inputs changed: requested=1 occluded=0 source_supported=1 layer_owner=0 source_sequence=100
+info:  DXMT framegen session reactivation: enabled=1 layer_owner=1 source_sequence=100
+info:  DXMT framegen enablement inputs changed: requested=1 occluded=0 source_supported=1 layer_owner=1 source_sequence=101
+info:  DXMT framegen enablement inputs changed: requested=1 occluded=0 source_supported=1 layer_owner=0 source_sequence=105
+info:  DXMT framegen session reactivation: enabled=1 layer_owner=1 source_sequence=105
+info:  DXMT framegen enablement inputs changed: requested=1 occluded=0 source_supported=1 layer_owner=1 source_sequence=106

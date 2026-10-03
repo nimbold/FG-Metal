@@ -12,7 +12,7 @@ Framegen is an experimental renderer-independent frame-generation library. Its p
 | Metal backend | Practical-RIFE v4.26 GPU inference and a standalone macOS preview host. Model weights are prepared separately and are not checked in. |
 | Quality and pacing | Optional HUD/temporal controls and a model-independent pacing scheduler; results are synthetic and do not establish in-game quality or display pacing. |
 | GPTK / D3DMetal | Cooperative D3D12 tests passed on Highball GPTK 4. Transparent DXGI attachment reached **PARTIAL PASS** on a controlled app; same-chain generated presents break common application buffer progression. It is not a product adapter. |
-| Other renderer adapters | Not implemented. DXMT is the next renderer-integration investigation. |
+| DXMT | Step 10B.4 **PARTIAL PASS**: the final advance-B candidate retained all 1,796 accepted sources safely. It reduced no-output ticks 26→19; callbacks/submissions/positive feedback were 60.045/59.726/57.079 Hz, while the p95 positive interval remained 45.183 ms. Of 1,638 positive G timestamps, 269 followed B's display target and 56 lacked a complete positive A/G/B endpoint bracket. B's early selection also returned positive timestamps before its scheduled source time in 125 of 152 advance cases. No RIFE or Highball change is part of this result. See the [Step 10B.4 report](docs/feasibility/dxmt-framegen-step10b4.md) and [retained evidence](experiments/dxmt_framegen/evidence/step10b4/). |
 
 See [the current decisions](DECISIONS.md), [work status](TASKS.md), and the [Step 8D.1 feasibility report](docs/feasibility/dxgi-d3d12-gptk4-step8d1.md) for evidence and limits.
 

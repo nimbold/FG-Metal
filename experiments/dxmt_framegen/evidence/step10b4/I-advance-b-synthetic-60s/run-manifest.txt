@@ -1,0 +1,10 @@
+engine=/private/tmp/dxmt-step10b4-run-v10/engine
+prefix=/private/tmp/dxmt-step10b4-advance-b-v2-prefix
+app=experiments/dxmt_framegen/evidence/step10b4/I-advance-b-synthetic-60s/d3d11_clear_window.exe
+app_sha256=9a88448479f0ae34eea9f093ec311308f0b10925cdd5d69d920e9f61b36e682a
+seconds=60
+generation=1
+static_texture=0
+lifecycle_test=0
+skip_resize_test=1
+failure_injection=none

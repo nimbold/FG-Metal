@@ -1,0 +1,14 @@
+app_presents=1801 duration_s=59.973 rate_hz=30.030
+app_present_errors=0 buffer0_query_errors=0
+native_events=21556 display_events=3456
+native_event_counts=display_tick_expired:9,epoch_reset:2,generated_displayed:1678,generated_dropped:20,generated_ready:1799,generated_requested:1799,generated_selected:1777,history_copy_complete:1801,presentation_dropped:125,presentation_gpu_completed:3581,presentation_submitted:3581,selected_source:1803,selected_source_repeat:2,source_accepted:1801,source_displayed:1778
+exact_pair_brackets=1634 immediate_A_G_B_triples=1634
+incorrect_pair_selections=44 source_regressions=0 repeated_source_selections=2
+presentation_drops=125 generated_drops=20
+display_interval_ms: n=3455 p50=16.666 p95=44.954 p99=47.080 max=86.541
+history_copy_completion_ms: n=1801 p50=1.330 p95=3.103 p99=7.840 max=88.620
+generation_submit_to_ready_ms: n=0
+gpu_submit_to_complete_ms: n=3581 p50=0.708 p95=1.423 p99=1.972 max=5.046
+deadline_slack_ms: n=10743 p50=16.232 p95=16.561 p99=16.576 max=16.591
+display_callback_us: n=16153 p50=8.125 p95=24.542 p99=42.709 max=137.709
+tick_queue_depth: n=21556 p50=0.000 p95=0.000 p99=0.000 max=2.000

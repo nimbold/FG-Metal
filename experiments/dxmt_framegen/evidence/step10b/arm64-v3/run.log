@@ -1,0 +1,18 @@
+process_arch=arm64
+metal_device=Apple M3
+submission=FrameGenerator::submit interpolation=0.5 source_updates_hz=30 display_link_hz=60 duration_seconds=60.0 cpu_readback=none
+progress callbacks=1 sources=1 submits=0 ready=0 presented_pending=0 drops=0
+progress callbacks=300 sources=152 submits=146 ready=145 presented_pending=3 drops=3
+progress callbacks=600 sources=302 submits=296 ready=296 presented_pending=3 drops=3
+progress callbacks=900 sources=452 submits=446 ready=446 presented_pending=4 drops=3
+progress callbacks=1200 sources=603 submits=563 ready=562 presented_pending=3 drops=3
+progress callbacks=1500 sources=753 submits=713 ready=712 presented_pending=4 drops=3
+progress callbacks=1800 sources=904 submits=846 ready=845 presented_pending=4 drops=4
+progress callbacks=2100 sources=1054 submits=996 ready=995 presented_pending=4 drops=4
+progress callbacks=2400 sources=1204 submits=1146 ready=1145 presented_pending=3 drops=4
+progress callbacks=2700 sources=1354 submits=1296 ready=1295 presented_pending=3 drops=4
+progress callbacks=3000 sources=1504 submits=1446 ready=1445 presented_pending=3 drops=4
+progress callbacks=3300 sources=1655 submits=1535 ready=1534 presented_pending=4 drops=4
+evidence_csv=build/step10b-synthetic-arm64/evidence-v3/synthetic-display.csv
+evidence_summary=build/step10b-synthetic-arm64/evidence-v3/synthetic-summary.txt
+final callbacks=3562 sources=1757 submissions=1578 ready=1578 A=1003 G=1572 B=986 actual=3557 drops=4 pending=0

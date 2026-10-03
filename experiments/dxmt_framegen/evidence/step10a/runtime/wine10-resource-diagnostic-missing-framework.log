@@ -1,0 +1,3 @@
+dyld[29494]: Library not loaded: @rpath/libinotify.0.dylib
+  Referenced from: <D1ECB722-F14E-3B4B-B086-D1C48E96C843> /private/tmp/step10a-resource-diagnostic/engine/bin/wineserver
+  Reason: tried: '/private/tmp/step10a-resource-diagnostic/engine/bin/../lib/libinotify.0.dylib' (no such file), '/private/tmp/step10a-resource-diagnostic/engine/bin/../lib/libinotify.0.dylib' (no such file)

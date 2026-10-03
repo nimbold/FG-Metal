@@ -1,0 +1,3 @@
+Outcome: INCOMPLETE / HUNG
+
+This experiment replaced immediate drawable presentation with MTLCommandBuffer.presentDrawable:atTime: using the normalized CAMetalDisplayLink targetPresentationTimestamp. The app emitted six successful D3D11 Presents (through 167.910 ms) and then stopped progressing; the worker did not emit presentation rows. The disposable app process was terminated after 70 seconds with SIGTERM (exit 143). This result is preserved as a failed scheduling experiment and is not acceptance evidence.

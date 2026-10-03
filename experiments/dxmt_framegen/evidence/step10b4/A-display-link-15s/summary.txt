@@ -1,0 +1,12 @@
+samples=899
+callback_interval_ms: n=898 mean=16.663940609 median=16.666062500 min=14.220333000 max=16.843084000 population_sd=0.086030743
+target_interval_ms: n=898 mean=16.664743597 median=16.666000010 min=14.991041971 max=16.821208003 population_sd=0.056624105
+presentation_interval_ms: n=898 mean=16.683301874 median=16.666000010 min=14.991040982 max=33.486542001 population_sd=0.563869853
+ca_minus_mach_callback_ns: n=899 mean=199.670859357 median=125.030055642 min=0.000000000 max=21042.011212558 population_sd=724.227875279
+target_minus_mach_callback_ms: n=899 mean=16.538600675 median=16.534375000 min=15.854375000 max=16.633500000 population_sd=0.046278603
+presentation_minus_mach_callback_ms: n=899 mean=49.833525406 median=49.866042000 min=32.521042000 max=49.965500000 population_sd=0.800500042
+presentation_minus_target_ms: n=899 mean=33.294924731 median=33.332000021 min=16.666666023 max=33.332000021 population_sd=0.785173324
+callback_delta_gt_1.5_refresh_periods= 0
+callback_delta_gt_2_refresh_periods= 0
+first_row= {'callback_host_ns_since_mach_epoch': '285246385821250', 'ca_now_seconds': '285246.385821250', 'target_seconds': '285246.401675625', 'target_presentation_seconds': '285246.418342292', 'target_minus_callback_ms': '15.854375029', 'presentation_minus_callback_ms': '32.521041692'}
+last_row= {'callback_host_ns_since_mach_epoch': '285261350039917', 'ca_now_seconds': '285261.350040042', 'target_seconds': '285261.366615375', 'target_presentation_seconds': '285261.399947375', 'target_minus_callback_ms': '16.575333313', 'presentation_minus_callback_ms': '49.907333334'}

@@ -1,0 +1,38 @@
+app_presents=3 duration_s=0.034 rate_hz=89.387
+app_present_errors=0 app_present_nonzero_success_statuses=0 app_present_occluded_statuses=0 buffer0_query_errors=0
+native_events=22 positive_display_events=0 display_rate_hz=0.000
+native_event_counts=circuit_open:2,display_tick_expired:1,epoch_reset:1,history_copy_failed:2,presentation_callbacks_registered:1,presentation_stages:2,selected_source:1,session_active:1,source_accepted:2,source_candidate_reserved:2,source_snapshot_complete:2,source_state_transition:5
+accepted_source_ids=2 acceptance_mode=ownership_acceptance_event
+source_acceptance_coverage=ownership_acceptance_records
+source_terminal_mode=positive_source_display_fallback missing_terminal_ids=2 missing_terminal_records=2 duplicate_terminal_ids=0 duplicate_terminal_records=0 duplicate_accept_ids=0 orphan_terminal_ids=0 lost_source_ids=2
+lost_source_id_list=1:1,1:2
+source_terminal_records=0 safe_terminal_ids=0 unsafe_terminal_ids=0 source_safety_violation_ids=0
+unsafe_terminal_id_list=none
+source_safety_violation_id_list=none
+source_state_transition_records=5 transitions=accepted->snapshot_copy_pending:required snapshot queued on DXMT Metal queue:2,owned->present_pending:provisional selection; source frontier remains unchanged:1,snapshot_copy_pending->owned:presentable snapshot completed:2
+source_terminal_details=unavailable
+source_zero_feedback_ids=0 accepted_source_zero_feedback=0 lost_ids_with_zero_feedback=0
+displayed_generated_frames=0 immediate_A_G_B_triples=0 unbracketed_G=0 immediate_missing_A=0 immediate_missing_B=0
+nearest_source_pair_brackets=0 nearest_missing_A=0 nearest_missing_B=0 nearest_unmatched_endpoints_with_zero_feedback=0 immediate_missing_endpoints_with_zero_feedback=0
+malformed_requested_pairs=0 malformed_displayed_pairs=0 source_regressions=0 repeated_source_events=0
+generated_drops=0 generated_failures=0 generated_failure_drop_details=0 generated_presentation_failures=0
+generated_zero_presentedTime=0 source_zero_presentedTime=0
+zero_presentedTime=0 by_kind=
+zero_presentedTime_gpu_status=none circuit_state=unavailable lifecycle_epoch=unavailable zero_feedback_presentation_records=0 zero_feedback_with_stage_records=0
+display_interval_ms: n=0 (unavailable)
+history_copy_completion_ms: n=0 (unavailable)
+generation_submit_to_ready_ms: n=0 (unavailable)
+callback_to_worker_wake_ms: n=2 p50=0.029 p95=7.477 p99=7.477 max=7.477
+device_mutex_wait_ms: n=2 p50=0.000 p95=0.001 p99=0.001 max=0.001
+presenter_encode_ms: n=0 (unavailable)
+callback_to_gpu_submit_ms: n=0 (unavailable)
+gpu_submit_to_completion_ms: n=0 (unavailable)
+callback_to_present_call_ms: n=0 (unavailable)
+gpu_submit_to_present_call_ms: n=0 (unavailable)
+present_call_to_feedback_ms: n=0 (unavailable)
+callback_to_feedback_ms: n=0 (unavailable)
+presentedTime_minus_target_ms: n=0 (unavailable)
+legacy_precommit_record_to_gpu_completion_ms: n=0 (unavailable)
+callback_to_legacy_precommit_record_ms: n=0 (unavailable)
+display_callback_duration_us: n=3 p50=5.750 p95=17.000 p99=17.000 max=17.000
+tick_queue_depth: n=3 p50=0.000 p95=1.000 p99=1.000 max=1.000

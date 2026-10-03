@@ -1,0 +1,1 @@
+probe_result path=experiments/dxmt_framegen/evidence/step10b4/A-display-link-15s/cametal.csv samples=899 elapsed_seconds=15.001010 main_screen_max_fps=60 cg_mode_refresh_hz=60.000 mach_timebase_numer=125 mach_timebase_denom=3

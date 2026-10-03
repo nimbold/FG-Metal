@@ -1,0 +1,38 @@
+002c:fixme:winediag:loader_init wine-sikarugir 10.0 is a testing version containing experimental patches.
+002c:fixme:winediag:loader_init Please mention your exact version when filing bug reports to Sikarugir-App.
+002c:err:wineboot:process_run_key Error running cmd L"C:\\windows\\system32\\winemenubuilder.exe -a -r" (2).
+Wine cannot find the FreeType font library.  To enable Wine to
+use TrueType fonts please install a version of FreeType greater than
+or equal to 2.0.5.
+http://www.freetype.org
+00b4:err:hid:handle_DeviceMatchingCallback Ignoring HID device 0x7ff5f99124b0 (vid 0000, pid 0000): not a joystick or gamepad
+00b4:err:hid:handle_DeviceMatchingCallback Ignoring HID device 0x7ff5f99135f0 (vid 0000, pid 0000): not a joystick or gamepad
+00b4:err:hid:handle_DeviceMatchingCallback Ignoring HID device 0x7ff5f9914030 (vid 0000, pid 0000): not a joystick or gamepad
+00b4:err:hid:handle_DeviceMatchingCallback Ignoring HID device 0x7ff5f9912e50 (vid 0000, pid 0000): not a joystick or gamepad
+00b4:err:hid:handle_DeviceMatchingCallback Ignoring HID device 0x7ff5f9913a40 (vid 0000, pid 0000): not a joystick or gamepad
+00b4:err:hid:handle_DeviceMatchingCallback Ignoring HID device 0x7ff5f99128c0 (vid 0000, pid 0000): not a joystick or gamepad
+00b4:err:hid:handle_DeviceMatchingCallback Ignoring HID device 0x7ff5f9914410 (vid 05ac, pid 8104): not a joystick or gamepad
+00b4:err:hid:handle_DeviceMatchingCallback Ignoring HID device 0x7ff5f9912c70 (vid 0000, pid 0000): not a joystick or gamepad
+00b4:err:hid:handle_DeviceMatchingCallback Ignoring HID device 0x7ff5f9911eb0 (vid 05ac, pid 0000): not a joystick or gamepad
+00b4:err:hid:handle_DeviceMatchingCallback Ignoring HID device 0x7ff5f9913e90 (vid 0000, pid 0000): not a joystick or gamepad
+00b4:err:hid:handle_DeviceMatchingCallback Ignoring HID device 0x7ff5f9914cb0 (vid 05ac, pid 8104): not a joystick or gamepad
+00b4:err:hid:handle_DeviceMatchingCallback Ignoring HID device 0x7ff5f9915090 (vid 05ac, pid 8104): not a joystick or gamepad
+00b4:err:hid:handle_DeviceMatchingCallback Ignoring HID device 0x7ff5f99153b0 (vid 0000, pid 0000): not a joystick or gamepad
+00b4:err:hid:handle_DeviceMatchingCallback Ignoring HID device 0x7ff5f9915720 (vid 0000, pid 0000): not a joystick or gamepad
+00b4:err:hid:handle_DeviceMatchingCallback Ignoring HID device 0x7ff5f9915a90 (vid 0000, pid 0000): not a joystick or gamepad
+00b4:err:hid:handle_DeviceMatchingCallback Ignoring HID device 0x7ff5f99132e0 (vid 0000, pid 0000): not a joystick or gamepad
+00b4:err:hid:handle_DeviceMatchingCallback Ignoring HID device 0x7ff5f9914870 (vid 05ac, pid 8104): not a joystick or gamepad
+Wine cannot find the FreeType font library.  To enable Wine to
+use TrueType fonts please install a version of FreeType greater than
+or equal to 2.0.5.
+http://www.freetype.org
+Wine cannot find the FreeType font library.  To enable Wine to
+use TrueType fonts please install a version of FreeType greater than
+or equal to 2.0.5.
+http://www.freetype.org
+Wine cannot find the FreeType font library.  To enable Wine to
+use TrueType fonts please install a version of FreeType greater than
+or equal to 2.0.5.
+http://www.freetype.org
+0024:err:module:loader_init "winemetal.dll" failed to initialize, aborting
+0024:err:module:loader_init Initializing dlls for L"Z:\\tmp\\step10a5-d3d11-nBU7gu\\d3d11_clear_window.exe" failed, status c0000142

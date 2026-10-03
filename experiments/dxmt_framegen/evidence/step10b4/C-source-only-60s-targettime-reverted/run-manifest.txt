@@ -1,0 +1,10 @@
+engine=/private/tmp/dxmt-step10b3-run-v8/engine
+prefix=/private/tmp/dxmt-step10b4-c-final-prefix
+app=/Users/<user>/Documents/Code/FG-Metal/experiments/dxmt_framegen/evidence/step10b4/C-source-only-60s-targettime-reverted/d3d11_clear_window.exe
+app_sha256=9a88448479f0ae34eea9f093ec311308f0b10925cdd5d69d920e9f61b36e682a
+seconds=60
+generation=0
+static_texture=0
+lifecycle_test=0
+skip_resize_test=1
+failure_injection=none
