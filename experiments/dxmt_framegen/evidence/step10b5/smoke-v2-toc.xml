@@ -1,0 +1,489 @@
+<?xml version="1.0"?>
+
+<trace-toc>
+    <run number="1">
+        <info>
+            <target>
+                <device platform="macOS" model="MacBook Air" memory-size="17179869184" name="Nima’s MacBook Air" os-version="27.0.1 (26A434)" uuid="8EFB7151-ADD4-50D6-93C7-10AD5EB1B82A"/>
+                <all-processes/>
+            </target>
+            <summary>
+                <start-date>2026-10-03T23:57:33.382+03:30</start-date>
+                <end-date>2026-10-03T23:57:59.256+03:30</end-date>
+                <duration>25.873783</duration>
+                <end-reason>Time limit reached</end-reason>
+                <instruments-version>27.0 (27A266a)</instruments-version>
+                <template-name>Metal System Trace</template-name>
+                <recording-mode>Deferred</recording-mode>
+                <time-limit>25 seconds</time-limit>
+                <intruments-recording-settings>
+                    <instrument name="Metal Application">
+                        <array>
+                            <dictionary>
+                                <key name="GPU">
+                                    <value>Counter Set: (null)</value>
+                                    <value>Shader Timeline: Disabled</value>
+                                    <value>Induced GPU Performance State: Default</value>
+                                </key>
+                            </dictionary>
+                        </array>
+                    </instrument>
+                    <instrument name="Hangs">
+                        <options>
+                            <option key="Reporting Threshold" value="Include Brief Unresponsiveness (&gt;100ms)"/>
+                        </options>
+                    </instrument>
+                </intruments-recording-settings>
+            </summary>
+        </info>
+        <processes>
+            <process name="SAExtensionOrchestrator" pid="68697" path="/System/Library/PrivateFrameworks/SiriAnalytics.framework/Versions/A/XPCServices/SAExtensionOrchestrator.xpc/Contents/MacOS/SAExtensionOrchestrator"/>
+            <process name="services.exe" pid="30945" path="/private/tmp/dxmt-step10b5-run-v2/engine/bin/wine"/>
+            <process name="CallHistorySyncHelper" pid="70992" path="/System/Library/PrivateFrameworks/CallHistory.framework/Support/CallHistorySyncHelper"/>
+            <process name="findmydeviced" pid="68707" path="findmydeviced"/>
+            <process name="rundll32.exe" pid="30966" path="/private/tmp/dxmt-step10b5-run-v2/engine/bin/wine"/>
+            <process name="oahd-helper" pid="30983" path="Unknown"/>
+            <process name="uptime" pid="30989" path="Unknown"/>
+            <process name="osascript" pid="30922" path="Unknown"/>
+            <process name="bluetoothd" pid="169" path="bluetoothd"/>
+            <process name="distnoted" pid="292" path="distnoted"/>
+            <process name="appleeventsd" pid="385" path="appleeventsd"/>
+            <process name="filederivatived" pid="68889" path="/System/Library/PrivateFrameworks/FileDerivatives.framework/Support/filederivatived"/>
+            <process name="suggestd" pid="68795" path="/System/Library/PrivateFrameworks/CoreSuggestions.framework/Versions/A/Support/suggestd"/>
+            <process name="duetexpertd" pid="718" path="/usr/libexec/duetexpertd"/>
+            <process name="replayd" pid="68636" path="/usr/libexec/replayd"/>
+            <process name="rundll32.exe" pid="30975" path="/private/tmp/dxmt-step10b5-run-v2/engine/bin/wine"/>
+            <process name="nsurlsessiond" pid="532" path="/usr/libexec/nsurlsessiond"/>
+            <process name="plugin-container" pid="11625" path="/Applications/Firefox.app/Contents/MacOS/plugin-container.app/Contents/MacOS/plugin-container"/>
+            <process name="routined" pid="56125" path="/usr/libexec/routined"/>
+            <process name="distnoted" pid="334" path="distnoted"/>
+            <process name="apsd" pid="147" path="apsd"/>
+            <process name="commerce" pid="68634" path="/System/Library/PrivateFrameworks/CommerceKit.framework/Versions/A/Resources/commerce"/>
+            <process name="VTEncoderXPCService" pid="88812" path="/System/Library/Frameworks/VideoToolbox.framework/Versions/A/XPCServices/VTEncoderXPCService.xpc/Contents/MacOS/VTEncoderXPCService"/>
+            <process name="plugin-container" pid="69556" path="/Applications/Firefox.app/Contents/MacOS/plugin-container.app/Contents/MacOS/plugin-container"/>
+            <process name="akd" pid="598" path="/System/Library/PrivateFrameworks/AuthKit.framework/Versions/A/Support/akd"/>
+            <process name="oahd-helper" pid="30953" path="Unknown"/>
+            <process name="SetStoreUpdateService" pid="30942" path="/System/Library/PrivateFrameworks/CascadeSets.framework/Versions/A/XPCServices/SetStoreUpdateService.xpc/Contents/MacOS/SetStoreUpdateService"/>
+            <process name="SetStoreUpdateService" pid="69536" path="/System/Library/PrivateFrameworks/CascadeSets.framework/Versions/A/XPCServices/SetStoreUpdateService.xpc/Contents/MacOS/SetStoreUpdateService"/>
+            <process name="corespeechd" pid="646" path="/System/Library/PrivateFrameworks/CoreSpeech.framework/corespeechd"/>
+            <process name="com.apple.SafariPlatformSupport" pid="16293" path="/System/Library/PrivateFrameworks/SafariPlatformSupport.framework/Versions/A/XPCServices/com.apple.SafariPlatformSupport.Helper.xpc/Contents/MacOS/com.apple.SafariPlatformSupport.Helper"/>
+            <process name="netbiosd" pid="15617" path="netbiosd"/>
+            <process name="SkyComputerUseService" pid="88730" path="/Users/nima/.codex/computer-use/Codex Computer Use.app/Contents/MacOS/SkyComputerUseService"/>
+            <process name="wineboot.exe" pid="30935" path="/private/tmp/dxmt-step10b5-run-v2/engine/bin/wine"/>
+            <process name="calaccessd" pid="68666" path="/System/Library/PrivateFrameworks/CalendarDaemon.framework/Support/calaccessd"/>
+            <process name="d3d11_clear_window.exe" pid="30911" path="/private/tmp/dxmt-step10b5-run-v2/engine/bin/wine"/>
+            <process name="SystemUIServer" pid="866" path="/System/Library/CoreServices/SystemUIServer.app/Contents/MacOS/SystemUIServer"/>
+            <process name="plugin-container" pid="69552" path="/Applications/Firefox.app/Contents/MacOS/plugin-container.app/Contents/MacOS/plugin-container"/>
+            <process name="watchdogd" pid="131" path="watchdogd"/>
+            <process name="installinf-x86_64.exe" pid="30964" path="/private/tmp/dxmt-step10b5-run-v2/engine/bin/wine"/>
+            <process name="services.exe" pid="30979" path="/private/tmp/dxmt-step10b5-run-v2/engine/bin/wine"/>
+            <process name="heard" pid="63263" path="/System/Library/PrivateFrameworks/HearingCore.framework/heard"/>
+            <process name="AMPLibraryAgent" pid="71088" path="/System/Library/PrivateFrameworks/AMPLibrary.framework/Versions/A/Support/AMPLibraryAgent"/>
+            <process name="explorer.exe" pid="30937" path="/private/tmp/dxmt-step10b5-run-v2/engine/bin/wine"/>
+            <process name="com.apple.CloudPhotosConfigurat" pid="92871" path="/System/Library/PrivateFrameworks/CloudPhotoServices.framework/Versions/A/XPCServices/com.apple.CloudPhotosConfiguration.xpc/Contents/MacOS/com.apple.CloudPhotosConfiguration"/>
+            <process name="rundll32.exe" pid="30961" path="/private/tmp/dxmt-step10b5-run-v2/engine/bin/wine"/>
+            <process name="ControlCenter" pid="657" path="/System/Library/CoreServices/ControlCenter.app/Contents/MacOS/ControlCenter"/>
+            <process name="gamed" pid="86896" path="/usr/libexec/gamed"/>
+            <process name="rundll32.exe" pid="30936" path="/private/tmp/dxmt-step10b5-run-v2/engine/bin/wine"/>
+            <process name="codex" pid="88785" path="/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex"/>
+            <process name="remindd" pid="68667" path="/usr/libexec/remindd"/>
+            <process name="coreservicesd" pid="192" path="coreservicesd"/>
+            <process name="wineserver" pid="30925" path="/private/tmp/dxmt-step10b5-run-v2/engine/bin/wineserver"/>
+            <process name="searchpartyuseragent" pid="68704" path="/usr/libexec/searchpartyuseragent"/>
+            <process name="CursorUIViewService" pid="883" path="/System/Library/PrivateFrameworks/TextInputUIMacHelper.framework/Versions/A/XPCServices/CursorUIViewService.xpc/Contents/MacOS/CursorUIViewService"/>
+            <process name="UsageTrackingAgent" pid="70171" path="/System/Library/PrivateFrameworks/UsageTracking.framework/Versions/A/UsageTrackingAgent"/>
+            <process name="AMPDeviceDiscoveryAgent" pid="20138" path="/System/Library/PrivateFrameworks/AMPDevices.framework/Versions/A/Support/AMPDeviceDiscoveryAgent"/>
+            <process name="oahd" pid="449" path="oahd"/>
+            <process name="Codex (Renderer)" pid="88807" path="/Applications/ChatGPT.app/Contents/Frameworks/Codex Framework.framework/Versions/154.0.8037.98/Helpers/Codex (Renderer).app/Contents/MacOS/Codex (Renderer)"/>
+            <process name="plugin-container" pid="69549" path="/Applications/Firefox.app/Contents/MacOS/plugin-container.app/Contents/MacOS/plugin-container"/>
+            <process name="cfprefsd" pid="491" path="/usr/sbin/cfprefsd"/>
+            <process name="MTLAssetUpgraderD" pid="69528" path="/usr/libexec/MTLAssetUpgraderD"/>
+            <process name="dasd" pid="157" path="dasd"/>
+            <process name="DiskUnmountWatcher" pid="14206" path="/System/Library/PrivateFrameworks/KerberosHelper/Helpers/DiskUnmountWatcher"/>
+            <process name="Dock" pid="865" path="/System/Library/CoreServices/Dock.app/Contents/MacOS/Dock"/>
+            <process name="DiskManagementSubscriber" pid="88166" path="DiskManagementSu"/>
+            <process name="Codex (Service)" pid="88615" path="/Applications/ChatGPT.app/Contents/Frameworks/Codex Framework.framework/Versions/154.0.8037.98/Helpers/Codex (Service).app/Contents/MacOS/Codex (Service)"/>
+            <process name="oahd-helper" pid="30958" path="Unknown"/>
+            <process name="trustd" pid="193" path="trustd"/>
+            <process name="plugplay.exe" pid="30971" path="/private/tmp/dxmt-step10b5-run-v2/engine/bin/wine"/>
+            <process name="sharedfilelistd" pid="608" path="/System/Library/CoreServices/sharedfilelistd"/>
+            <process name="mdworker_shared" pid="30686" path="/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/Metadata.framework/Versions/A/Support/mdworker_shared"/>
+            <process name="cloudd" pid="565" path="/System/Library/PrivateFrameworks/CloudKitDaemon.framework/Support/cloudd"/>
+            <process name="SafariBookmarksSyncAgent" pid="86903" path="/System/Cryptexes/App/usr/libexec/SafariBookmarksSyncAgent"/>
+            <process name="parsecd" pid="68890" path="/System/Library/PrivateFrameworks/CoreParsec.framework/parsecd"/>
+            <process name="coreauthd" pid="573" path="/System/Library/Frameworks/LocalAuthentication.framework/Support/coreauthd"/>
+            <process name="useractivityd" pid="711" path="/System/Library/PrivateFrameworks/UserActivity.framework/Agents/useractivityd"/>
+            <process name="Siri AI" pid="68887" path="/System/Applications/Siri AI.app/Contents/MacOS/Siri AI"/>
+            <process name="winedevice.exe" pid="30946" path="/private/tmp/dxmt-step10b5-run-v2/engine/bin/wine"/>
+            <process name="com.apple.iCloudHelper" pid="30874" path="/System/Library/PrivateFrameworks/AOSKit.framework/Versions/A/XPCServices/com.apple.iCloudHelper.xpc/Contents/MacOS/com.apple.iCloudHelper"/>
+            <process name="AppleIntelligenceReportingProce" pid="88269" path="/System/Library/PrivateFrameworks/AppleIntelligenceReportingProcessing.framework/Versions/A/XPCServices/AppleIntelligenceReportingProcessingService.xpc/Contents/MacOS/AppleIntelligenceReportingProcessingService"/>
+            <process name="svchost.exe" pid="30969" path="/private/tmp/dxmt-step10b5-run-v2/engine/bin/wine"/>
+            <process name="UserNotificationCenter" pid="35438" path="/System/Library/CoreServices/UserNotificationCenter.app/Contents/MacOS/UserNotificationCenter"/>
+            <process name="oahd-helper" pid="30956" path="Unknown"/>
+            <process name="naturallanguaged" pid="68880" path="/usr/libexec/naturallanguaged"/>
+            <process name="WirelessRadioManagerd" pid="277" path="WirelessRadioMan"/>
+            <process name="trustd" pid="501" path="/usr/libexec/trustd"/>
+            <process name="diagnostics_agent" pid="763" path="/System/Library/CoreServices/diagnostics_agent"/>
+            <process name="sharingd" pid="574" path="/usr/libexec/sharingd"/>
+            <process name="launchd" pid="1" path="launchd"/>
+            <process name="mds" pid="134" path="mds"/>
+            <process name="plugin-container" pid="26305" path="/Applications/Firefox.app/Contents/MacOS/plugin-container.app/Contents/MacOS/plugin-container"/>
+            <process name="Mounty" pid="1010" path="/Applications/Mounty.app/Contents/MacOS/Mounty"/>
+            <process name="oahd-helper" pid="30939" path="Unknown"/>
+            <process name="SetStoreUpdateService" pid="30950" path="Unknown"/>
+            <process name="ContextStoreAgent" pid="531" path="/System/Library/PrivateFrameworks/CoreDuetContext.framework/Resources/ContextStoreAgent"/>
+            <process name="distnoted" pid="654" path="distnoted"/>
+            <process name="nsurlsessiond" pid="226" path="nsurlsessiond"/>
+            <process name="distnoted" pid="1268" path="distnoted"/>
+            <process name="Codex (Renderer)" pid="88658" path="/Applications/ChatGPT.app/Contents/Frameworks/Codex Framework.framework/Versions/154.0.8037.98/Helpers/Codex (Renderer).app/Contents/MacOS/Codex (Renderer)"/>
+            <process name="Codex (Service)" pid="88599" path="/Applications/ChatGPT.app/Contents/Frameworks/Codex Framework.framework/Versions/154.0.8037.98/Helpers/Codex (Service).app/Contents/MacOS/Codex (Service)"/>
+            <process name="rundll32.exe" pid="30963" path="/private/tmp/dxmt-step10b5-run-v2/engine/bin/wine"/>
+            <process name="distnoted" pid="481" path="/usr/sbin/distnoted"/>
+            <process name="tccd" pid="177" path="tccd"/>
+            <process name="rundll32.exe" pid="30977" path="/private/tmp/dxmt-step10b5-run-v2/engine/bin/wine"/>
+            <process name="avconferenced" pid="710" path="/usr/libexec/avconferenced"/>
+            <process name="callservicesd" pid="580" path="/System/Library/PrivateFrameworks/TelephonyUtilities.framework/callservicesd"/>
+            <process name="oahd-helper" pid="30972" path="Unknown"/>
+            <process name="cloudphotod" pid="68903" path="/System/Library/PrivateFrameworks/CloudPhotoLibrary.framework/Versions/A/Support//cloudphotod"/>
+            <process name="Codex (Renderer)" pid="88741" path="/Applications/ChatGPT.app/Contents/Frameworks/Codex Framework.framework/Versions/154.0.8037.98/Helpers/Codex (Renderer).app/Contents/MacOS/Codex (Renderer)"/>
+            <process name="studentd" pid="92867" path="/usr/libexec/studentd"/>
+            <process name="XprotectService" pid="71929" path="XprotectService"/>
+            <process name="notifyd" pid="170" path="notifyd"/>
+            <process name="promotedcontentd" pid="68765" path="/usr/libexec/promotedcontentd"/>
+            <process name="kernel" pid="0" path="/System/Library/Kernels/kernel.release.t8122"/>
+            <process name="node" pid="28313" path="/Applications/ChatGPT.app/Contents/Resources/cua_node/bin/node"/>
+            <process name="backupd" pid="95289" path="backupd"/>
+            <process name="mobiletimerd" pid="68844" path="/System/Library/PrivateFrameworks/MobileTimer.framework/Executables/mobiletimerd"/>
+            <process name="replicatord" pid="68843" path="/System/Library/PrivateFrameworks/ReplicatorCore.framework/Support/replicatord"/>
+            <process name="oahd-helper" pid="30924" path="Unknown"/>
+            <process name="TextInputSwitcher" pid="86880" path="/System/Library/CoreServices/TextInputSwitcher.app/Contents/MacOS/TextInputSwitcher"/>
+            <process name="CampoRemoteService" pid="885" path="/System/Library/PrivateFrameworks/CampoUIServices.framework/Versions/A/XPCServices/CampoRemoteService.xpc/Contents/MacOS/CampoRemoteService"/>
+            <process name="coreduetd" pid="68657" path="coreduetd"/>
+            <process name="logd" pid="104" path="logd"/>
+            <process name="adprivacyd" pid="18764" path="/usr/libexec/adprivacyd"/>
+            <process name="MacPacketTunnel" pid="16294" path="/Applications/Shadowrocket.app/Contents/PlugIns/MacPacketTunnel.appex/Contents/MacOS/MacPacketTunnel"/>
+            <process name="cupsd" pid="30955" path="/usr/sbin/cupsd"/>
+            <process name="oahd-helper" pid="30965" path="Unknown"/>
+            <process name="appstored" pid="68763" path="appstored"/>
+            <process name="GSSCred" pid="88186" path="GSSCred"/>
+            <process name="wineboot.exe" pid="30974" path="/private/tmp/dxmt-step10b5-run-v2/engine/bin/wine"/>
+            <process name="deleted_helper" pid="68713" path="deleted_helper"/>
+            <process name="TextInputMenuAgent" pid="996" path="/System/Library/CoreServices/TextInputMenuAgent.app/Contents/MacOS/TextInputMenuAgent"/>
+            <process name="explorer.exe" pid="30938" path="/private/tmp/dxmt-step10b5-run-v2/engine/bin/wine"/>
+            <process name="ReportCrash" pid="68767" path="/System/Library/CoreServices/ReportCrash"/>
+            <process name="oahd-helper" pid="30952" path="Unknown"/>
+            <process name="mobileassetd" pid="60377" path="mobileassetd"/>
+            <process name="CommCenter" pid="68637" path="/System/Library/Frameworks/CoreTelephony.framework/Support/CommCenter"/>
+            <process name="corebrightnessd" pid="172" path="corebrightnessd"/>
+            <process name="Stats" pid="99500" path="/Applications/Stats.app/Contents/MacOS/Stats"/>
+            <process name="VTDecoderXPCService" pid="88539" path="VTDecoderXPCServ"/>
+            <process name="DTServiceHub" pid="30912" path="/Applications/Xcode.app/Contents/SharedFrameworks/DVTInstrumentsFoundation.framework/Versions/A/Resources/DTServiceHub"/>
+            <process name="services.exe" pid="30931" path="/private/tmp/dxmt-step10b5-run-v2/engine/bin/wine"/>
+            <process name="MenuBarAgent" pid="666" path="/System/Library/CoreServices/MenuBarAgent.app/Contents/MacOS/MenuBarAgent"/>
+            <process name="WallpaperAerialsExtension" pid="743" path="/System/Library/ExtensionKit/Extensions/WallpaperAerialsExtension.appex/Contents/MacOS/WallpaperAerialsExtension"/>
+            <process name="gamepolicyd" pid="289" path="gamepolicyd"/>
+            <process name="oahd-helper" pid="30951" path="Unknown"/>
+            <process name="com.apple.AppStoreDaemon.StoreP" pid="68762" path="com.apple.AppSto"/>
+            <process name="AppPredictionIntentsHelperServi" pid="68836" path="/System/Library/PrivateFrameworks/AppPredictionFoundation.framework/Versions/A/XPCServices/AppPredictionIntentsHelperService.xpc/Contents/MacOS/AppPredictionIntentsHelperService"/>
+            <process name="Finder" pid="867" path="/System/Library/CoreServices/Finder.app/Contents/MacOS/Finder"/>
+            <process name="com.apple.geod" pid="68725" path="com.apple.geod"/>
+            <process name="PerfPowerServices" pid="18484" path="PerfPowerService"/>
+            <process name="rapportd" pid="533" path="/usr/libexec/rapportd"/>
+            <process name="cfprefsd" pid="90988" path="cfprefsd"/>
+            <process name="uptime" pid="30941" path="Unknown"/>
+            <process name="trustd" pid="90007" path="trustd"/>
+            <process name="plugin-container" pid="69554" path="/Applications/Firefox.app/Contents/MacOS/plugin-container.app/Contents/MacOS/plugin-container"/>
+            <process name="systemstats" pid="114" path="systemstats"/>
+            <process name="runningboardd" pid="188" path="runningboardd"/>
+            <process name="powerd" pid="120" path="powerd"/>
+            <process name="WallpaperAgent" pid="679" path="/System/Library/CoreServices/WallpaperAgent.app/Contents/MacOS/WallpaperAgent"/>
+            <process name="oahd-helper" pid="30986" path="Unknown"/>
+            <process name="amfid" pid="68851" path="amfid"/>
+            <process name="accountsd" pid="515" path="/System/Library/Frameworks/Accounts.framework/Versions/A/Support/accountsd"/>
+            <process name="UserEventAgent" pid="107" path="UserEventAgent"/>
+            <process name="oahd-helper" pid="30982" path="Unknown"/>
+            <process name="CoreServicesUIAgent" pid="68665" path="/System/Library/CoreServices/CoreServicesUIAgent.app/Contents/MacOS/CoreServicesUIAgent"/>
+            <process name="stickersd" pid="68907" path="/System/Library/PrivateFrameworks/Stickers.framework/Support/stickersd"/>
+            <process name="coreautha" pid="86877" path="/System/Library/Frameworks/LocalAuthentication.framework/Support/coreautha.bundle/Contents/MacOS/coreautha"/>
+            <process name="amsengagementd" pid="68764" path="/System/Library/PrivateFrameworks/AppleMediaServicesUI.framework/amsengagementd"/>
+            <process name="ecosystemd" pid="69560" path="ecosystemd"/>
+            <process name="AuthenticationServicesAgent" pid="70987" path="/System/Cryptexes/App/usr/libexec/AuthenticationServicesAgent"/>
+            <process name="gamecontrolleragentd" pid="68623" path="/usr/libexec/gamecontrolleragentd"/>
+            <process name="axassetsd" pid="69116" path="/System/Library/PrivateFrameworks/AXAssetLoader.framework/Support/axassetsd"/>
+            <process name="mdwrite" pid="70358" path="/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/Metadata.framework/Versions/A/Support/mdwrite"/>
+            <process name="NotificationCenter" pid="698" path="/System/Library/CoreServices/NotificationCenter.app/Contents/MacOS/NotificationCenter"/>
+            <process name="iexplore.exe" pid="30967" path="/private/tmp/dxmt-step10b5-run-v2/engine/bin/wine"/>
+            <process name="loginwindow" pid="180" path="/System/Library/CoreServices/loginwindow.app/Contents/MacOS/loginwindow"/>
+            <process name="WindowManager" pid="671" path="/System/Library/CoreServices/WindowManager.app/Contents/MacOS/WindowManager"/>
+            <process name="webprivacyd" pid="11481" path="/System/Library/PrivateFrameworks/WebPrivacy.framework/webprivacyd"/>
+            <process name="contextstored" pid="144" path="contextstored"/>
+            <process name="oahd-helper" pid="30984" path="Unknown"/>
+            <process name="rundll32.exe" pid="30949" path="/private/tmp/dxmt-step10b5-run-v2/engine/bin/wine"/>
+            <process name="MTLCompilerService" pid="74622" path="/System/Library/Frameworks/Metal.framework/Versions/A/XPCServices/MTLCompilerService.xpc/Contents/MacOS/MTLCompilerService"/>
+            <process name="xctrace" pid="30878" path="/Applications/Xcode.app/Contents/Developer/usr/bin/xctrace"/>
+            <process name="AMPArtworkAgent" pid="68743" path="/System/Library/PrivateFrameworks/AMPLibrary.framework/Versions/A/Support/AMPArtworkAgent"/>
+            <process name="thermalmonitord" pid="143" path="thermalmonitord"/>
+            <process name="audioanalyticsd" pid="68635" path="audioanalyticsd"/>
+            <process name="backgroundtaskmanagementd" pid="301" path="backgroundtaskma"/>
+            <process name="mDNSResponder" pid="274" path="mDNSResponder"/>
+            <process name="lockoutagent" pid="536" path="/System/Library/CoreServices/lockoutagent"/>
+            <process name="Shadowrocket" pid="16280" path="/Applications/Shadowrocket.app/Contents/MacOS/Shadowrocket"/>
+            <process name="SetStoreUpdateService" pid="30943" path="Unknown"/>
+            <process name="lsd" pid="498" path="/usr/libexec/lsd"/>
+            <process name="mediaanalysisd" pid="68892" path="/System/Library/PrivateFrameworks/MediaAnalysis.framework/Versions/A/mediaanalysisd"/>
+            <process name="WallpaperImageExtension" pid="744" path="/System/Library/ExtensionKit/Extensions/WallpaperImageExtension.appex/Contents/MacOS/WallpaperImageExtension"/>
+            <process name="SetStoreUpdateService" pid="30987" path="/System/Library/PrivateFrameworks/CascadeSets.framework/Versions/A/XPCServices/SetStoreUpdateService.xpc/Contents/MacOS/SetStoreUpdateService"/>
+            <process name="Notes" pid="35977" path="/System/Applications/Notes.app/Contents/MacOS/Notes"/>
+            <process name="services.exe" pid="30968" path="/private/tmp/dxmt-step10b5-run-v2/engine/bin/wine"/>
+            <process name="wineserver" pid="30920" path="/private/tmp/dxmt-step10b5-run-v2/engine/bin/wineserver"/>
+            <process name="photoanalysisd" pid="68901" path="/System/Library/PrivateFrameworks/PhotoAnalysis.framework/Versions/A/Support/photoanalysisd"/>
+            <process name="wineboot.exe" pid="30948" path="/private/tmp/dxmt-step10b5-run-v2/engine/bin/wine"/>
+            <process name="codex" pid="88659" path="/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex"/>
+            <process name="rundll32.exe" pid="30933" path="/private/tmp/dxmt-step10b5-run-v2/engine/bin/wine"/>
+            <process name="com.apple.geod" pid="74803" path="com.apple.geod"/>
+            <process name="distnoted" pid="1658" path="distnoted"/>
+            <process name="fileproviderd" pid="579" path="/System/Library/PrivateFrameworks/FileProvider.framework/Support/fileproviderd"/>
+            <process name="iconservicesagent" pid="68861" path="/System/Library/CoreServices/iconservicesagent"/>
+            <process name="AddressBookSourceSync" pid="30854" path="Unknown"/>
+            <process name="cfprefsd" pid="179" path="cfprefsd"/>
+            <process name="plugin-container" pid="69544" path="/Applications/Firefox.app/Contents/MacOS/plugin-container.app/Contents/MacOS/plugin-container"/>
+            <process name="ContextService" pid="68797" path="/System/Library/PrivateFrameworks/ContextKit.framework/Versions/A/XPCServices/ContextService.xpc/Contents/MacOS/ContextService"/>
+            <process name="launchservicesd" pid="148" path="launchservicesd"/>
+            <process name="oahd-helper" pid="30934" path="Unknown"/>
+            <process name="findmybeaconingd" pid="68708" path="findmybeaconingd"/>
+            <process name="com.apple.Safari.SafeBrowsing.S" pid="1403" path="/System/Library/PrivateFrameworks/SafariSafeBrowsing.framework/com.apple.Safari.SafeBrowsing.Service"/>
+            <process name="oahd-helper" pid="30988" path="Unknown"/>
+            <process name="spotlightknowledged.updater" pid="74907" path="/usr/libexec/spotlightknowledged.updater"/>
+            <process name="UserEventAgent" pid="512" path="/usr/libexec/UserEventAgent"/>
+            <process name="securityd" pid="151" path="securityd"/>
+            <process name="deleted" pid="68711" path="/System/Library/PrivateFrameworks/CacheDelete.framework/deleted"/>
+            <process name="itunescloudd" pid="68895" path="/System/Library/PrivateFrameworks/iTunesCloud.framework/Support/itunescloudd"/>
+            <process name="fseventsd" pid="109" path="fseventsd"/>
+            <process name="amsaccountsd" pid="68659" path="/System/Library/PrivateFrameworks/AppleMediaServices.framework/Resources/amsaccountsd"/>
+            <process name="airportd" pid="241" path="airportd"/>
+            <process name="systemsoundserverd" pid="68875" path="systemsoundserve"/>
+            <process name="FeatureAccessAgent" pid="80027" path="/System/Library/PrivateFrameworks/CloudSubscriptionFeatures.framework/FeatureAccessAgent"/>
+            <process name="oahd-helper" pid="30981" path="Unknown"/>
+            <process name="oahd-helper" pid="30940" path="Unknown"/>
+            <process name="distnoted" pid="1055" path="distnoted"/>
+            <process name="SoftwareUpdateNotificationManag" pid="68488" path="/System/Library/PrivateFrameworks/SoftwareUpdate.framework/Resources/SoftwareUpdateNotificationManager.app/Contents/MacOS/SoftwareUpdateNotificationManager"/>
+            <process name="contactsd" pid="68662" path="/System/Library/Frameworks/Contacts.framework/Support/contactsd"/>
+            <process name="removeuserinstalls-x86.exe" pid="30960" path="/private/tmp/dxmt-step10b5-run-v2/engine/bin/wine"/>
+            <process name="com.apple.CodeSigningHelper" pid="68647" path="com.apple.CodeSi"/>
+            <process name="rundll32.exe" pid="30959" path="/private/tmp/dxmt-step10b5-run-v2/engine/bin/wine"/>
+            <process name="universalaccessd" pid="521" path="/usr/sbin/universalaccessd"/>
+            <process name="oahd-helper" pid="30957" path="Unknown"/>
+            <process name="oahd-helper" pid="30929" path="Unknown"/>
+            <process name="wine" pid="30927" path="/private/tmp/dxmt-step10b5-run-v2/engine/bin/wine"/>
+            <process name="logd_helper" pid="68866" path="logd_helper"/>
+            <process name="installinf-x86.exe" pid="30962" path="/private/tmp/dxmt-step10b5-run-v2/engine/bin/wine"/>
+            <process name="amsondevicestoraged" pid="71300" path="/System/Library/PrivateFrameworks/OnDeviceStorage.framework/Support/amsondevicestoraged"/>
+            <process name="oahd-helper" pid="30947" path="Unknown"/>
+            <process name="System Events" pid="30923" path="/System/Library/CoreServices/System Events.app/Contents/MacOS/System Events"/>
+            <process name="WindowServer" pid="176" path="WindowServer"/>
+            <process name="zsh" pid="30879" path="/bin/zsh"/>
+            <process name="StocksKitService" pid="68899" path="/System/Library/PrivateFrameworks/StocksKit.framework/XPCServices/StocksKitService.xpc/Contents/MacOS/StocksKitService"/>
+            <process name="pbs" pid="68806" path="/System/Library/CoreServices/pbs"/>
+            <process name="siriactionsd" pid="68840" path="/System/Library/PrivateFrameworks/VoiceShortcuts.framework/Versions/A/Support/siriactionsd"/>
+            <process name="oahd-helper" pid="30918" path="Unknown"/>
+            <process name="tccd" pid="527" path="/System/Library/PrivateFrameworks/TCC.framework/Support/tccd"/>
+            <process name="plugin-container" pid="12589" path="/Applications/Firefox.app/Contents/MacOS/plugin-container.app/Contents/MacOS/plugin-container"/>
+            <process name="biomed" pid="57832" path="biomed"/>
+            <process name="ThemeWidgetControlViewService" pid="82226" path="/System/Library/Frameworks/AppKit.framework/Versions/C/XPCServices/ThemeWidgetControlViewService.xpc/Contents/MacOS/ThemeWidgetControlViewService"/>
+            <process name="com.apple.SafariPlatformSupport" pid="69555" path="/System/Library/PrivateFrameworks/SafariPlatformSupport.framework/Versions/A/XPCServices/com.apple.SafariPlatformSupport.Helper.xpc/Contents/MacOS/com.apple.SafariPlatformSupport.Helper"/>
+            <process name="wineboot.exe" pid="30928" path="/private/tmp/dxmt-step10b5-run-v2/engine/bin/wine"/>
+            <process name="distnoted" pid="160" path="distnoted"/>
+            <process name="SetStoreUpdateService" pid="30944" path="Unknown"/>
+            <process name="SubmitDiagInfo" pid="853" path="SubmitDiagInfo"/>
+            <process name="pboard" pid="523" path="/usr/libexec/pboard"/>
+            <process name="ctkd" pid="68663" path="/System/Library/Frameworks/CryptoTokenKit.framework/ctkd"/>
+            <process name="corespotlightd" pid="617" path="/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/Metadata.framework/Versions/A/Support/corespotlightd"/>
+            <process name="distnoted" pid="783" path="distnoted"/>
+            <process name="com.apple.DriverKit-AppleBCMWLA" pid="298" path="com.apple.Driver"/>
+            <process name="Firefox GPU Helper" pid="69543" path="/Applications/Firefox.app/Contents/MacOS/gpu-helper.app/Contents/MacOS/Firefox GPU Helper"/>
+            <process name="SetStoreUpdateService" pid="30976" path="Unknown"/>
+            <process name="geph" pid="388" path="geph"/>
+            <process name="coreauthd" pid="507" path="coreauthd"/>
+            <process name="knowledge-agent" pid="68661" path="/usr/libexec/knowledge-agent"/>
+            <process name="ChatGPT" pid="88576" path="/Applications/ChatGPT.app/Contents/MacOS/ChatGPT"/>
+            <process name="winedevice.exe" pid="30980" path="/private/tmp/dxmt-step10b5-run-v2/engine/bin/wine"/>
+            <process name="VTDecoderXPCService" pid="69551" path="/System/Library/Frameworks/VideoToolbox.framework/Versions/A/XPCServices/VTDecoderXPCService.xpc/Contents/MacOS/VTDecoderXPCService"/>
+            <process name="distnoted" pid="368" path="distnoted"/>
+            <process name="ecosystemanalyticsd" pid="69559" path="ecosystemanalyti"/>
+            <process name="services.exe" pid="30970" path="/private/tmp/dxmt-step10b5-run-v2/engine/bin/wine"/>
+            <process name="configd" pid="118" path="configd"/>
+            <process name="searchpartyd" pid="303" path="searchpartyd"/>
+            <process name="gamecontrollerd" pid="68621" path="gamecontrollerd"/>
+            <process name="cloudtelemetryd" pid="68656" path="cloudtelemetryd"/>
+            <process name="clocksyncd" pid="203" path="clocksyncd"/>
+            <process name="fontd" pid="673" path="/System/Library/Frameworks/ApplicationServices.framework/Frameworks/ATS.framework/Support/fontd"/>
+            <process name="WiFiAgent" pid="543" path="/System/Library/CoreServices/WiFiAgent.app/Contents/MacOS/WiFiAgent"/>
+            <process name="distnoted" pid="674" path="distnoted"/>
+            <process name="opendirectoryd" pid="146" path="opendirectoryd"/>
+            <process name="mbuseragent" pid="3622" path="/System/Library/CoreServices/Setup Assistant.app/Contents/Resources/mbuseragent"/>
+            <process name="contentlinkingd" pid="68789" path="/System/Library/PrivateFrameworks/Synapse.framework/Support/contentlinkingd"/>
+            <process name="symptomsd" pid="243" path="symptomsd"/>
+            <process name="distnoted" pid="288" path="distnoted"/>
+            <process name="oahd-helper" pid="30985" path="Unknown"/>
+            <process name="locationd" pid="153" path="locationd"/>
+            <process name="oahd-helper" pid="30954" path="Unknown"/>
+            <process name="Codex (Renderer)" pid="88800" path="/Applications/ChatGPT.app/Contents/Frameworks/Codex Framework.framework/Versions/154.0.8037.98/Helpers/Codex (Renderer).app/Contents/MacOS/Codex (Renderer)"/>
+            <process name="FolderActionsDispatcher" pid="30926" path="/System/Library/CoreServices/FolderActionsDispatcher.app/Contents/MacOS/FolderActionsDispatcher"/>
+            <process name="managedappdistributiond" pid="87305" path="managedappdistri"/>
+            <process name="dataaccessd" pid="68680" path="/System/Library/PrivateFrameworks/DataAccess.framework/Support/dataaccessd"/>
+            <process name="SetStoreUpdateService" pid="88760" path="/System/Library/PrivateFrameworks/CascadeSets.framework/Versions/A/XPCServices/SetStoreUpdateService.xpc/Contents/MacOS/SetStoreUpdateService"/>
+            <process name="distnoted" pid="267" path="distnoted"/>
+            <process name="backupd-helper" pid="68716" path="backupd-helper"/>
+            <process name="plugin-container" pid="69553" path="/Applications/Firefox.app/Contents/MacOS/plugin-container.app/Contents/MacOS/plugin-container"/>
+            <process name="KeepingYouAwake" pid="1697" path="/Applications/KeepingYouAwake.app/Contents/MacOS/KeepingYouAwake"/>
+            <process name="wineboot.exe" pid="30930" path="/private/tmp/dxmt-step10b5-run-v2/engine/bin/wine"/>
+            <process name="appleaccountd" pid="68671" path="/usr/libexec/appleaccountd"/>
+            <process name="oahd-helper" pid="30919" path="Unknown"/>
+            <process name="managedappdistributionagent" pid="86974" path="/System/Library/Frameworks/ManagedAppDistribution.framework/Support/managedappdistributionagent"/>
+            <process name="CategoriesService" pid="70920" path="/System/Library/PrivateFrameworks/Categories.framework/Versions/A/XPCServices/CategoriesService.xpc/Contents/MacOS/CategoriesService"/>
+            <process name="iexplore.exe" pid="30978" path="/private/tmp/dxmt-step10b5-run-v2/engine/bin/wine"/>
+            <process name="com.apple.SafariPlatformSupport" pid="88732" path="/System/Library/PrivateFrameworks/SafariPlatformSupport.framework/Versions/A/XPCServices/com.apple.SafariPlatformSupport.Helper.xpc/Contents/MacOS/com.apple.SafariPlatformSupport.Helper"/>
+            <process name="syspolicyd" pid="272" path="syspolicyd"/>
+            <process name="com.apple.geod" pid="68721" path="/System/Library/PrivateFrameworks/GeoServices.framework/Versions/A/XPCServices/com.apple.geod.xpc/Contents/MacOS/com.apple.geod"/>
+            <process name="wineboot.exe" pid="30932" path="/private/tmp/dxmt-step10b5-run-v2/engine/bin/wine"/>
+            <process name="linkd" pid="555" path="/usr/libexec/linkd"/>
+            <process name="com.apple.dt.instruments.dtsecur" pid="30914" path="com.apple.dt.ins"/>
+            <process name="mds_stores" pid="409" path="mds_stores"/>
+            <process name="Alfred" pid="1000" path="/Applications/Alfred 5.app/Contents/MacOS/Alfred"/>
+            <process name="recentsd" pid="71179" path="/System/Library/PrivateFrameworks/CoreRecents.framework/Versions/A/Support/recentsd"/>
+            <process name="softwareupdated" pid="70918" path="softwareupdated"/>
+            <process name="firefox" pid="69533" path="/Applications/Firefox.app/Contents/MacOS/firefox"/>
+            <process name="analyticsd" pid="239" path="analyticsd"/>
+            <process name="diskarbitrationd" pid="137" path="diskarbitrationd"/>
+            <process name="oahd-helper" pid="30973" path="Unknown"/>
+            <process name="oahd-helper" pid="30921" path="Unknown"/>
+            <process name="coreaudiod" pid="331" path="coreaudiod"/>
+        </processes>
+        <data>
+            <table swift-table="&quot;OSSignpostIntervals(layoutScope: InstrumentsPlugIn.OSSignpostLayoutScope.name, categories: Set([\&quot;PointsOfInterest\&quot;]), mustTargetAllProcesses: false)&quot;" schema="OSSignpostIntervals"/>
+            <table schema="metal-gpu-submission-to-command-buffer-id" documentation="Maps between Metal command buffer ID and accelerator ID"/>
+            <table schema="process-info" documentation="Associates processes with their process names."/>
+            <table target-pid="ALL" schema="potential-hangs" hangs-threshold="100"/>
+            <table swift-table="&quot;PointsOfInterestEvents(excludeOSLogs: false, mustTargetAllProcesses: false)&quot;" schema="PointsOfInterestEvents"/>
+            <table schema="metal-application-encoders-list" target-pid="ALL" documentation="Denotes an a list of encoders created by the tracing Metal application."/>
+            <table schema="metal-object-label" documentation="Metal Object Label"/>
+            <table codes="&quot;0x85,0x20&quot; &quot;0x31,0x80&quot;" schema="kdebug" documentation="Tracing the kernel and some system frameworks."/>
+            <table codes="&quot;0x85,0x80&quot;" schema="kdebug" documentation="Tracing the kernel and some system frameworks."/>
+            <table codes="&quot;0x85,0x92&quot; &quot;0x85,0x93&quot; &quot;0x85,0xae&quot; &quot;0x06,0x1b&quot; &quot;0x2b,0x24&quot;" schema="kdebug" documentation="Tracing the kernel and some system frameworks."/>
+            <table codes="&quot;0x85,0x3&quot; &quot;0x85,0x90&quot; &quot;0x85,0xA9&quot;" schema="kdebug" documentation="Tracing the kernel and some system frameworks."/>
+            <table codes="&quot;0x07,0x00&quot; &quot;0x1f,0x05&quot;" target="ALL" schema="kdebug" documentation="Tracing the kernel and some system frameworks."/>
+            <table codes="&quot;0x31,0xb0&quot; &quot;0x31,0xd0&quot;" schema="kdebug" documentation="Tracing the kernel and some system frameworks."/>
+            <table codes="&quot;0x2b,0x2b&quot;" schema="kdebug" documentation="Tracing the kernel and some system frameworks."/>
+            <table codes="&quot;0x07,0x00&quot;" target="ALL" schema="kdebug" documentation="Tracing the kernel and some system frameworks."/>
+            <table codes="&quot;0x1,0x25&quot;" target="ALL" schema="kdebug" documentation="Tracing the kernel and some system frameworks."/>
+            <table codes="&quot;0x2b,0x87&quot;" target="ALL" schema="kdebug" documentation="Tracing the kernel and some system frameworks."/>
+            <table codes="&quot;0x2b,0xdc&quot;" target="ALL" schema="kdebug" documentation="Tracing the kernel and some system frameworks."/>
+            <table codes="&quot;0x1f,0x7&quot;" target="ALL" schema="kdebug" documentation="Tracing the kernel and some system frameworks."/>
+            <table codes="&quot;0x85,0x9&quot; &quot;0x85,0x18&quot;" callstack="user" schema="kdebug" documentation="Tracing the kernel and some system frameworks."/>
+            <table codes="&quot;0x85,0xc2&quot;" schema="kdebug" documentation="Tracing the kernel and some system frameworks."/>
+            <table codes="&quot;0x34,0x11&quot; &quot;0x34,0x0f&quot;" schema="kdebug" documentation="Tracing the kernel and some system frameworks."/>
+            <table codes="&quot;0x85,0xc0&quot; &quot;0x85,0xc1&quot; &quot;0x31,0xca&quot;" schema="kdebug" documentation="Tracing the kernel and some system frameworks."/>
+            <table codes="&quot;0x85,0x2&quot;" callstack="user" schema="kdebug" documentation="Tracing the kernel and some system frameworks."/>
+            <table codes="&quot;0x85,0x30&quot;" callstack="user" schema="kdebug" documentation="Tracing the kernel and some system frameworks."/>
+            <table codes="&quot;0x85,0x1&quot; &quot;0x85,0x8&quot;" callstack="user" schema="kdebug" documentation="Tracing the kernel and some system frameworks."/>
+            <table codes="&quot;0x85,0x12&quot;" schema="kdebug" documentation="Tracing the kernel and some system frameworks."/>
+            <table codes="&quot;0x85,0x92&quot; &quot;0x85,0x93&quot; &quot;0x85,0xae&quot;" schema="kdebug" documentation="Tracing the kernel and some system frameworks."/>
+            <table codes="&quot;0x2b,0xd8&quot;" target="ALL" schema="kdebug" documentation="Tracing the kernel and some system frameworks."/>
+            <table codes="&quot;0x31,0xca&quot;" target="ALL" schema="kdebug" documentation="Tracing the kernel and some system frameworks."/>
+            <table codes="&quot;0x2b,0x65&quot;" schema="kdebug" documentation="Tracing the kernel and some system frameworks."/>
+            <table codes="&quot;0x2d,*&quot;" schema="kdebug" callstack="user" target="ALL" documentation="Tracing the kernel and some system frameworks."/>
+            <table codes="&quot;33,0x11&quot;" target="ALL" schema="kdebug" documentation="Tracing the kernel and some system frameworks."/>
+            <table schema="dyld-library-load" target-pid="ALL"/>
+            <table schema="metal-visual-highlight-chain-gpu" documentation="Visual highlight for Metal System Trace"/>
+            <table requested-consistent-state="0" schema="gpu-performance-state-info" documentation="GPU Performance State Info"/>
+            <table schema="hang-risks" detect-priority-inversions="0" target-pid="ALL"/>
+            <table schema="metal-wired-sysmem-level-interval" documentation="Denotes wired system memory level"/>
+            <table schema="metal-current-allocated-size" target-pid="ALL" documentation="Marks the total allocated Metal device memory of the app (MTLDevice.currentAllocatedSize)"/>
+            <table schema="metal-application-intervals" target-pid="ALL" documentation="Denotes an interesting period of activity in the Metal applications."/>
+            <table schema="display-compositor-events-interval" documentation="Shows generic compositor events"/>
+            <table content="metal-connection-chains" schema="visual-chain" target-pid="ALL" documentation="Connects multiple objects on a graph to be treated a single, selectable chain of events."/>
+            <table requested-consistent-state="0" schema="gpu-performance-state-intervals" documentation="Denotes the current and induced performance state of the device."/>
+            <table schema="gpu-aps-stream" documentation="GPU APS Stream"/>
+            <table schema="metal-ar-events" documentation="Marks AR events"/>
+            <table schema="device-thermal-state-intervals" documentation="Denotes the current thermal state of the device."/>
+            <table schema="metal-gpu-state-intervals" documentation="Denotes GPU state (on/off) periods"/>
+            <table schema="ca-client-buffer-wait-interval" documentation="Denotes an waiting for next available drawable."/>
+            <table schema="mps-hw-intervals" target-pid="ALL" documentation="Denotes an interesting period of activity caused by Metal Applications."/>
+            <table track-id-base="2000" schema="metal-object-dependency-chain-driver" documentation="Object Dependency for Metal System Trace"/>
+            <table schema="display-surface-swap" documentation="Describes display surface swap events."/>
+            <table codes="&quot;0x85,0xAF&quot; &quot;0x34,0x11&quot; &quot;0x34,0x0f&quot;" schema="kdebug" documentation="Tracing the kernel and some system frameworks."/>
+            <table schema="gpu-shader-profiler-sample" documentation="GPU Shader Profiler Sample"/>
+            <table schema="time-info" documentation="Raw data needed transform a mach-absolute-time to a trace relative timestamp"/>
+            <table track-id-base="1000" schema="metal-object-dependency-chain-app" documentation="Object Dependency for Metal System Trace"/>
+            <table schema="tick" frequency="10" documentation="Provides modelers with a regular reference time for modeling fixed time-based statistics. The ticks are evenly spaced with a configurable frequency specifying the number of events to generate per second, so a tick schema with a frequency of 10 will generate a row every 100ms."/>
+            <table schema="tick" documentation="Provides modelers with a regular reference time for modeling fixed time-based statistics. The ticks are evenly spaced with a configurable frequency specifying the number of events to generate per second, so a tick schema with a frequency of 10 will generate a row every 100ms."/>
+            <table schema="tick" frequency="1" documentation="Provides modelers with a regular reference time for modeling fixed time-based statistics. The ticks are evenly spaced with a configurable frequency specifying the number of events to generate per second, so a tick schema with a frequency of 10 will generate a row every 100ms."/>
+            <table schema="metal-resource-allocations" target-pid="ALL" documentation="Marks a point in time where the application may created a Metal resource"/>
+            <table schema="metal-visual-highlight-chain-driver" documentation="Visual highlight for Metal System Trace"/>
+            <table schema="display-vsyncs-interval" documentation="Marks display vsyncs"/>
+            <table schema="metal-shader-profiler-shader-list" target-pid="ALL" documentation="Denotes compiled shaders"/>
+            <table schema="metal-command-buffer-completed" documentation="Marks when Metal Command Buffer are completed"/>
+            <table schema="metal-visual-highlight-chain-app" documentation="Visual highlight for Metal System Trace"/>
+            <table schema="gpu-counter-value" documentation="GPU Counter Value"/>
+            <table schema="metal-residency-set-usage-event" documentation="Denotes a MTLResidencySet usage"/>
+            <table schema="metal-driver-event-per-thread-intervals" target-pid="ALL" documentation="Denotes an interesting period of memory activity in the Metal driver."/>
+            <table schema="thread-info" documentation="Associates threads with their owning process."/>
+            <table schema="display-compositor-interval" target-pid="ALL" documentation="Shows compositor events."/>
+            <table track-id-base="2000" schema="metal-object-dependency-chain-display" documentation="VObject Dependency for Metal System Trace"/>
+            <table schema="metal-visual-highlight-chain-display" documentation="Visual Highlight for Metal System Trace"/>
+            <table schema="metal-command-buffer-error" documentation="Marks Metal command buffer error"/>
+            <table schema="metal-driver-intervals" target-pid="ALL" documentation="Denotes an interesting period of activity in the Metal driver."/>
+            <table schema="metal-residency-set-resource-event" documentation="Denotes a MTLResidencySet resource"/>
+            <table schema="life-cycle-period" target-pid="ALL" documentation="Identifies where an application is in its lifecycle."/>
+            <table schema="os-signpost-arg" category="PointsOfInterest" target-pid="ALL" documentation="Holds a signpost metadata argument from the OS's Unified Logging and Tracing component."/>
+            <table sample-rate-micro-seconds="1000" target="ALL" schema="time-sample" callstack="user" all-thread-states="NO" documentation="Holds a raw CPU profiling sample."/>
+            <table schema="os-signpost-arg" category="ShaderTimeline" subsystem="&quot;com.apple.Metal.AGXSignposts&quot;" documentation="Holds a signpost metadata argument from the OS's Unified Logging and Tracing component."/>
+            <table schema="gpu-shader-profiler-interval" documentation="GPU Shader Profiler Interval"/>
+            <table schema="metal-driver-event-intervals" target-pid="ALL" documentation="Denotes an interesting period of memory activity in the Metal driver."/>
+            <table schema="displayed-surfaces-interval" target-pid="ALL" documentation="Shows when a surface is being displayed."/>
+            <table schema="display-events-interval" documentation="Shows generic display events"/>
+            <table schema="metal-shader-profiler-intervals" target-pid="ALL" documentation="Denotes Shader Timeline intervals"/>
+            <table schema="metal-gpu-intervals" target-pid="ALL" documentation="Denotes an interesting period of activity in the GPU."/>
+            <table target-pid="ALL" context-switch-sampling="0" high-frequency-sampling="0" schema="time-profile" record-waiting-threads="0" needs-kernel-callstack="0" documentation="When combined with other time-profile samples, creates a statistical picture of where your application is spending its time."/>
+            <table requested-consistent-state="0" schema="gpu-performance-device-state-intervals" documentation="Denotes the average performance state of the device."/>
+            <table schema="gpu-counter-info" counter-profile="0" counter-device="0" shader-profiler="0" documentation="GPU Counter Info"/>
+            <table schema="metal-application-command-buffer-submissions" target-pid="ALL" documentation="Marks Metal command buffer submissions"/>
+            <table schema="device-gpu-info" documentation="Marks related info about GPUs connected to the machine."/>
+            <table schema="metal-known-compositor-process" documentation="Marks compositor processes"/>
+            <table enable-priority-inversion-detection="0" target-pid="ALL" message-type="Fault" schema="os-log" category="&quot;Hang Risk&quot; &quot;Severe Hang Risk&quot; CFNetwork Contacts CoreML" subsystem="&quot;com.apple.runtime-issues&quot;" documentation="Holds a message from the OS's Unified Logging and Tracing component."/>
+            <table schema="os-log" category="PointsOfInterest" target-pid="ALL" documentation="Holds a message from the OS's Unified Logging and Tracing component."/>
+            <table schema="metal-gpu-info" documentation="Marks GPU info"/>
+            <table schema="graphics-compiler-activity-intervals" target-pid="ALL" documentation="Denotes a period of activity in the graphics compiler in the Metal API."/>
+            <table schema="metal-command-buffer-frame-assignment" documentation="Resolves Metal Command Buffer frame assignment"/>
+            <table codes="&quot;33,0x11&quot;" target="ALL" schema="kdebug-strings" documentation="Associates numeric arguments with strings in kdebug trace points."/>
+            <table codes="&quot;0x1f,0x05&quot;" target="ALL" schema="kdebug-strings" documentation="Associates numeric arguments with strings in kdebug trace points."/>
+            <table codes="&quot;0x85,0x1&quot; &quot;0x85,0x2&quot; &quot;0x85,0x8&quot; &quot;0x85,0x30&quot; &quot;0x85,0xc0&quot; &quot;0x85,0xc1&quot; &quot;0x31,0xca&quot;" schema="kdebug-strings" documentation="Associates numeric arguments with strings in kdebug trace points."/>
+            <table schema="device-display-info" documentation="Marks related info about Displays connected to the machine."/>
+            <table schema="metal-gpu-counter-profile" counter-profile="0" counter-device="0" shader-profiler="0" documentation="Denotes GPU Counter value intervals"/>
+            <table schema="display-surface-queue" documentation="Describes display surface queueing events."/>
+            <table schema="metal-application-event-interval" target-pid="ALL" documentation="Marks metal application events such as Debug Groups on command buffer"/>
+            <table schema="metal-gpu-counter-intervals" documentation="Denotes GPU Counter value intervals"/>
+            <table schema="metal-gpu-execution-points" documentation="Denotes an interesting points of activity in the GPU."/>
+            <table schema="os-signpost" category="PointsOfInterest" target-pid="ALL" documentation="Holds a signpost event from the OS's Unified Logging and Tracing component."/>
+            <table schema="os-signpost" subsystem="&quot;com.apple.StateReporting.Volatile&quot; &quot;com.apple.StateReporting.Transition&quot; &quot;com.apple.StateReporting.Heartbeat&quot;" target-pid="ALL" documentation="Holds a signpost event from the OS's Unified Logging and Tracing component."/>
+            <table schema="os-signpost" category="ShaderTimeline" subsystem="&quot;com.apple.Metal.AGXSignposts&quot;" documentation="Holds a signpost event from the OS's Unified Logging and Tracing component."/>
+            <table schema="os-signpost" category="&quot;CAMetalLayer.Stalls&quot;" subsystem="&quot;com.apple.coreanimation&quot;" documentation="Holds a signpost event from the OS's Unified Logging and Tracing component."/>
+            <table schema="os-signpost" category="CAMetalLayer" subsystem="&quot;com.apple.coreanimation&quot;" documentation="Holds a signpost event from the OS's Unified Logging and Tracing component."/>
+            <table target-pid="ALL" dynamic-tracing-enabled-subsystems="&quot;com.apple.neappprivacy&quot;" category="PointsOfInterest" schema="os-signpost" documentation="Holds a signpost event from the OS's Unified Logging and Tracing component."/>
+            <table schema="os-signpost" category="InduceCondition" subsystem="&quot;com.apple.ConditionInducer.LowSeverity&quot;" documentation="Holds a signpost event from the OS's Unified Logging and Tracing component."/>
+            <table content="metal-connections" schema="visual-connection" target-pid="ALL" documentation="Connects points on a graph between instruments or tracks."/>
+            <table schema="runloop-events" target-pid="ALL"/>
+            <table schema="graphics-compiler-spill-events" documentation="Marks compiler spill events"/>
+            <table schema="displayed-surfaces-per-second" documentation="Shows how many surfaces have been displayed per second"/>
+            <table schema="metal-kernel-resource-allocations" target-pid="ALL" documentation="Marks a point in time where the application may created a driver back for Metal resource"/>
+            <table schema="metal-command-buffer-to-accelerator-id" documentation="Maps between Metal command buffer ID and accelerator ID"/>
+            <table schema="metal-residency-set-interval" documentation="Denotes a MTLResidencySet interval"/>
+            <table schema="metal-io-surface-access" documentation="Denotes IO Surface accesses by Metal Applications"/>
+            <table swift-table="&quot;StateReportingIntervals()&quot;" schema="StateReportingIntervals" documentation="Tracks named application states, volatile updates, and rate-limit windows reported via the State Reporting API, per process and domain"/>
+            <table track-id-base="2000" schema="metal-object-dependency-chain-gpu" documentation="Visual highlight for Metal System Trace"/>
+            <table schema="ca-client-presented-handler" documentation="Denotes CAMetalDrawable presented handlers."/>
+            <table schema="ca-client-present-request" documentation="Denotes client requests to present a CAMetalDrawable."/>
+        </data>
+        <tracks/>
+    </run>
+</trace-toc>

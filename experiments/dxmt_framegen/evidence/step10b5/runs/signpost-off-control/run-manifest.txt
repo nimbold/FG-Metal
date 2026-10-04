@@ -1,0 +1,10 @@
+engine=/private/tmp/dxmt-step10b5-run-v7/engine
+prefix=/private/tmp/dxmt-step10b5-run-v7/prefix
+app=/private/tmp/dxmt-step10b5-run-v7/output/d3d11_clear_window.exe
+app_sha256=6c919596ba659493e8d66fe5c9197a67ae0671424eab746f92c5a71a2de37c71
+seconds=12
+generation=0
+static_texture=1
+lifecycle_test=0
+skip_resize_test=1
+failure_injection=none

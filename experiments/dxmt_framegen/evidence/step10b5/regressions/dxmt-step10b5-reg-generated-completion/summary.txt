@@ -1,0 +1,50 @@
+app_presents=361 duration_s=11.985 rate_hz=30.121
+app_present_errors=0 app_present_nonzero_success_statuses=0 app_present_occluded_statuses=0 buffer0_query_errors=0
+app_window_state: visible=361 hidden=0 iconic=0 not_iconic=361 foreground=361 background=0 unavailable_visible=0 unavailable_iconic=0 unavailable_foreground=0
+native_events=9774 positive_display_events=689 display_rate_hz=57.731
+native_event_counts=circuit_open:1,display_callback_summary:1,display_callbacks_enabled:1,display_callbacks_stopped:1,display_link_attached:1,display_link_latency_1:1,epoch_reset:1,framegen_failure:2,generated_dropped:362,generated_requested:3,generation_submissions_drained:1,layer_owner_claimed:1,layer_owner_draining:1,layer_owner_released:1,ordinary_source_present_submitted:1,presentation_callbacks_registered:719,presentation_feedback_drained:1,presentation_feedback_result:719,presentation_stages:723,presented_time_zero:60,real_presentation_submitted:719,selected_source:360,selected_source_repeat:359,session_active:1,source_candidate_reserved:361,source_displayed:334,source_escrow_complete:361,source_gpu_progress_unblocked:719,source_ownership_transfer:360,source_repeat_presented:355,source_state_transition:2132,source_submission_unconfirmed:26,source_terminal:361,synthetic_gpu_work_drained:1,worker_drawables_retired:1,worker_tick_retired:723
+accepted_source_ids=360 acceptance_mode=ownership_acceptance_event
+source_acceptance_coverage=ownership_acceptance_records
+source_terminal_mode=explicit missing_terminal_ids=0 missing_terminal_records=0 duplicate_terminal_ids=0 duplicate_terminal_records=0 duplicate_accept_ids=0 orphan_terminal_ids=1 lost_source_ids=0
+lost_source_id_list=none
+source_terminal_records=361 safe_terminal_ids=360 unsafe_terminal_ids=0 source_safety_violation_ids=0
+submitted_unconfirmed_accepted_ids=26
+unsafe_terminal_id_list=none
+source_safety_violation_id_list=none
+source_state_transition_records=2132 transitions=display_confirmed->retired:terminal source is older than committed frontier:330,display_pending->display_submitted:worker committed presenter work after scheduling drawable presentation:360,display_submitted->display_confirmed:submitted source has positive presentedTime feedback:334,display_submitted->retired:terminal source is older than committed frontier:25,escrow_preparing->escrow_submitted:DXMT source command buffer committed on ordinary Presenter path:1,escrow_preparing->escrow_submitted:DXMT source command buffer committed with mandatory escrow copy:360,escrow_ready->display_pending:provisional selection; source frontier remains unchanged:360,escrow_ready->display_submitted:ordinary Presenter submitted priming source:1,escrow_submitted->escrow_ready:same-buffer SourceEscrow copy completed:361
+source_terminal_details=display_submitted_unconfirmed:presentedTime did not confirm an already-submitted source:26,ordinary_fallback:ordinary DXMT Presenter retained this source:1,renderer_presented:display submission received positive feedback and GPU completion:334
+source_zero_feedback_ids=30 accepted_source_zero_feedback=30 lost_ids_with_zero_feedback=0
+displayed_generated_frames=0 immediate_A_G_B_triples=0 unbracketed_G=0 immediate_missing_A=0 immediate_missing_B=0 immediate_missing_both=0
+nearest_source_pair_brackets=0 nearest_missing_A=0 nearest_missing_B=0 nearest_unmatched_endpoints_with_zero_feedback=0 nearest_missing_both=0 immediate_missing_endpoints_with_zero_feedback=0
+malformed_requested_pairs=0 malformed_displayed_pairs=0 source_regressions=0 repeated_source_events=330
+generated_drops=362 generated_failures=0 generated_failure_drop_details=3 generated_presentation_failures=0
+generated_zero_presentedTime=0 source_zero_presentedTime=60
+zero_presentedTime=60 by_kind=source:60
+zero_presentedTime_gpu_status=completed:60 circuit_state=0:2,1:58 lifecycle_epoch=1:60 zero_feedback_presentation_records=30 zero_feedback_with_stage_records=30
+display_interval_ms: n=688 p50=16.666 p95=33.333 p99=46.345 max=47.638
+history_copy_completion_ms: n=0 (unavailable)
+generation_submit_to_ready_ms: n=0 (unavailable)
+callback_to_worker_wake_ms: n=723 p50=0.048 p95=0.182 p99=0.774 max=7.928
+callback_to_selection_ms: n=723 p50=0.101 p95=0.264 p99=0.866 max=7.979
+device_mutex_wait_ms: n=723 p50=0.001 p95=0.001 p99=0.002 max=0.098
+device_mutex_hold_ms: n=723 p50=0.994 p95=1.663 p99=3.488 max=7.014
+presenter_encode_ms: n=719 p50=0.227 p95=0.354 p99=0.705 max=1.498
+callback_to_gpu_submit_ms: n=719 p50=0.621 p95=1.209 p99=2.154 max=8.665
+gpu_submit_to_completion_ms: n=718 p50=1.078 p95=1.322 p99=1.807 max=3.278
+callback_to_present_call_ms: n=719 p50=0.764 p95=1.502 p99=2.764 max=8.719
+gpu_submit_to_present_call_ms: n=719 p50=0.130 p95=0.482 p99=0.663 max=5.097
+present_call_to_feedback_ms: n=719 p50=48.625 p95=71.077 p99=74.784 max=78.424
+callback_to_feedback_ms: n=719 p50=50.160 p95=71.839 p99=75.612 max=78.665
+positive_presentedTime_gap_ms: n=688 p50=16.666 p95=33.333 p99=46.345 max=47.638
+presentedTime_minus_target_ms: n=689 p50=-7.050 p95=16.756 p99=16.789 max=18.758
+legacy_precommit_record_to_gpu_completion_ms: n=0 (unavailable)
+callback_to_legacy_precommit_record_ms: n=0 (unavailable)
+display_callback_duration_us: n=723 p50=12.750 p95=34.875 p99=56.167 max=86.667
+tick_queue_depth: n=723 p50=1.000 p95=1.000 p99=1.000 max=1.000
+callback_tick_ledger: status=PASS callback_count=723 callback_hz=60.326 terminal_count=723 callback_terminal_delta=0 terminal_rows=723 unique_ticks=723 duplicate_tick_terminals=0 terminal_rows_without_tick_id=0 terminal_rows_without_class=0 malformed_callback_summaries=0 callback_summary_counter_regressions=0 outstanding_drawable_high_water=1 classes=no_output_available:4,source_submitted:719
+display_drawable_feedback: submitted_source=719 submitted_generated=0 gpu_completed=719 gpu_failed=0 positive_presentedTime=689 zero_presentedTime=30 positive_feedback_hz=57.489 source_submission_hz=59.992 generated_submission_hz=0.000
+generated_frame_feedback: requested=3 ready=0 selected=0 submitted=0 positive=0 zero=0 dropped_before_submit_unique_pairs=3
+gpu_result_status=completed:719
+long_positive_feedback_gaps_over_25ms=86 correlated_target_window_outcomes=positive_feedback_spacing_or_target_phase:66,zero_feedback_in_target_window:20
+selection_counts_by_kind=0:4,source:719 late_G_feedback_after_source_B_schedule=0 late_G_feedback_after_B_display_target=0 before_B_display_target=0 B_target_unavailable=0 late_G_after_B_positive_feedback=0 B_positive_feedback_unavailable=0
+positive_generated_timestamp_order=none

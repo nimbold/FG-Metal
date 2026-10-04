@@ -270,6 +270,37 @@ void test_interpolation_timestamp_must_match_fraction() {
     CHECK(backend->submit_count == 1);
 }
 
+void test_rounded_pair_midpoint_fraction_matches_timestamp() {
+    auto backend = std::make_shared<FakeBackend>();
+    auto generator = make_generator(backend);
+
+    // This pair reproduces the short, odd-nanosecond interval seen in the
+    // Step 10B.4 DXMT run. Rounding the midpoint down makes its exact fraction
+    // differ from 0.5 by more than FrameGenerator's timestamp tolerance.
+    constexpr std::int64_t source_a_ns = 294'470'926'456'000;
+    constexpr std::int64_t source_b_ns = 294'470'926'573'833;
+    constexpr std::int64_t midpoint_ns =
+        source_a_ns + (source_b_ns - source_a_ns) / 2;
+    constexpr std::int64_t interval_ns = source_b_ns - source_a_ns;
+    constexpr std::int64_t midpoint_offset_ns = midpoint_ns - source_a_ns;
+
+    auto submission = valid_submission();
+    submission.previous.timing.timestamp_ns = source_a_ns;
+    submission.current.timing.timestamp_ns = source_b_ns;
+    submission.interpolation_timestamp_ns = midpoint_ns;
+    submission.interpolation = static_cast<float>(
+        static_cast<long double>(midpoint_offset_ns) /
+        static_cast<long double>(interval_ns));
+
+    CHECK(midpoint_ns == 294'470'926'514'916);
+    CHECK(submission.interpolation != 0.5F);
+    CHECK(generator.submit(submission).has_value());
+
+    submission.interpolation = 0.5F;
+    expect_error(generator.submit(submission), ErrorCode::invalid_argument);
+    CHECK(backend->submit_count == 1);
+}
+
 void test_backend_and_device_mismatches_are_rejected() {
     auto backend = std::make_shared<FakeBackend>();
     auto generator = make_generator(backend);
@@ -607,6 +638,8 @@ int main() {
          test_interpolation_requires_finite_value_in_closed_unit_interval},
         {"interpolation timestamp and fraction agreement",
          test_interpolation_timestamp_must_match_fraction},
+        {"rounded midpoint fraction uses the exact source-pair interval",
+         test_rounded_pair_midpoint_fraction_matches_timestamp},
         {"backend and device mismatch validation",
          test_backend_and_device_mismatches_are_rejected},
         {"input descriptor compatibility", test_input_descriptors_must_match},

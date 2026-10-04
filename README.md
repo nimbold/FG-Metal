@@ -4,6 +4,8 @@ Framegen is an experimental renderer-independent frame-generation library. Its p
 
 > **Status: experimental; not a drop-in game mod or overlay.** The C ABI is a draft, and there is no supported adapter for an unmodified game.
 
+> **Current renderer-feasibility status: DXMT Step 10B.5 failed the display gate; RIFE is not cleared.** Callback, submission, and GPU-completion rates stayed near 60 Hz, but independent motion probes showed only 8.0–8.6 consecutive Wine-attributed displayed-surface gaps per second during 60 Hz VSync, with median surface holds near 65 ms. Surface-update coalescing is inferred from those traces; drawable-level attribution and physical scanout remain unverified. See the [Step 10B.5 report](experiments/dxmt_framegen/evidence/step10b5/report.md) and its [retained evidence](experiments/dxmt_framegen/evidence/step10b5/).
+
 ## What works today
 
 | Area | Current status |
@@ -12,7 +14,7 @@ Framegen is an experimental renderer-independent frame-generation library. Its p
 | Metal backend | Practical-RIFE v4.26 GPU inference and a standalone macOS preview host. Model weights are prepared separately and are not checked in. |
 | Quality and pacing | Optional HUD/temporal controls and a model-independent pacing scheduler; results are synthetic and do not establish in-game quality or display pacing. |
 | GPTK / D3DMetal | Cooperative D3D12 tests passed on Highball GPTK 4. Transparent DXGI attachment reached **PARTIAL PASS** on a controlled app; same-chain generated presents break common application buffer progression. It is not a product adapter. |
-| DXMT | Step 10B.4 **PARTIAL PASS**: the final advance-B candidate retained all 1,796 accepted sources safely. It reduced no-output ticks 26→19; callbacks/submissions/positive feedback were 60.045/59.726/57.079 Hz, while the p95 positive interval remained 45.183 ms. Of 1,638 positive G timestamps, 269 followed B's display target and 56 lacked a complete positive A/G/B endpoint bracket. B's early selection also returned positive timestamps before its scheduled source time in 125 of 152 advance cases. No RIFE or Highball change is part of this result. See the [Step 10B.4 report](docs/feasibility/dxmt-framegen-step10b4.md) and [retained evidence](experiments/dxmt_framegen/evidence/step10b4/). |
+| DXMT | Latest gate, Step 10B.5: **FAIL — RIFE NOT CLEARED.** In source-only and F-equivalent runs, per-Present color-motion probes showed about 8.0–8.6 consecutive Wine-attributed displayed-surface gaps/s and ~65 ms median holds while VSync remained 60.001 Hz. Callback, submission, GPU completion, and accepted-source safety passed their qualified checks, but Display rows could not be mapped to individual drawable attempts and physical scanout was not established. The Step 10B.4 result remains historical evidence; see its [report](docs/feasibility/dxmt-framegen-step10b4.md), plus the latest [Step 10B.5 report](experiments/dxmt_framegen/evidence/step10b5/report.md) and [retained evidence](experiments/dxmt_framegen/evidence/step10b5/). No RIFE or Highball change is part of either result. |
 
 See [the current decisions](DECISIONS.md), [work status](TASKS.md), and the [Step 8D.1 feasibility report](docs/feasibility/dxgi-d3d12-gptk4-step8d1.md) for evidence and limits.
 

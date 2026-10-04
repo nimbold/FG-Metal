@@ -1,0 +1,23 @@
+Starting recording with the Metal System Trace template and Display, Points of Interest Instruments. Attaching to: wine (38420). Time limit: 25.0 s
+Ctrl-C to stop the recording
+Reached specified time limit, ending recording...
+Timeline modification failed -- dylibs overlap by 0xcfc18:
+    0x7ff8452c5de0-0x7ff845300888 [0x3aaa8] (7507782645173-9223372036854775807) /System/Library/PrivateFrameworks/UIFoundation.framework/Versions/A/UIFoundation
+    0x7ff8452ade90-0x7ff84537daa8 [0xcfc18] (7507854936881-9223372036854775807) /System/Library/Frameworks/Vision.framework/Versions/A/Vision
+Timeline modification failed -- dylibs overlap by 0x2a40:
+    0x7ff946e612a0-0x7ff946e619c0 [0x720] (7507782641348-9223372036854775807) /usr/lib/swift/libswiftCompression.dylib
+    0x7ff946e5ef80-0x7ff946e612b5 [0x2335] (7507856297785-9223372036854775807) /System/Library/PrivateFrameworks/NetworkServiceProxy.framework/Versions/A/NetworkServiceProxy
+Timeline modification failed -- dylibs overlap by 0x49f938:
+    0x7ff935fc5c48-0x7ff935fd3a10 [0xddc8] (7507856102749-9223372036854775807) /System/Library/PrivateFrameworks/IOGPU.framework/Versions/A/IOGPU
+    0x7ff935ce0000-0x7ff93617f938 [0x49f938] (7507856299462-9223372036854775807) /System/Library/Frameworks/JavaScriptCore.framework/Versions/A/JavaScriptCore
+Timeline modification failed -- dylibs overlap by 0x2a82b0:
+    0x7ff936f7da50-0x7ff936f7f4bc [0x1a6c] (7507782642371-9223372036854775807) /System/Library/PrivateFrameworks/RenderBox.framework/Versions/A/RenderBox
+    0x7ff936e22180-0x7ff9370ca430 [0x2a82b0] (7507856299484-9223372036854775807) /System/Library/Frameworks/WebKit.framework/Versions/A/Frameworks/WebCore.framework/Versions/A/WebCore
+Timeline modification failed -- dylibs overlap by 0x39a10:
+    0x7ff94262f540-0x7ff942630090 [0xb50] (7507782643862-9223372036854775807) /System/Library/PrivateFrameworks/AttributeGraph.framework/Versions/A/AttributeGraph
+    0x7ff942622690-0x7ff94265c0a0 [0x39a10] (7507856307682-9223372036854775807) /System/Library/PrivateFrameworks/ContactsUICore.framework/Versions/A/ContactsUICore
+Timeline modification failed -- dylibs overlap by 0x15340:
+    0x7ff941b2c838-0x7ff941b2fb70 [0x3338] (7507782643862-9223372036854775807) /System/Library/PrivateFrameworks/AttributeGraph.framework/Versions/A/AttributeGraph
+    0x7ff941b21c70-0x7ff941b36fb0 [0x15340] (7507856310742-9223372036854775807) /System/Library/PrivateFrameworks/ChunkingLibrary.framework/Versions/A/ChunkingLibrary
+Recording completed. Saving output file...
+Output file saved as: motion-source30-attached.trace

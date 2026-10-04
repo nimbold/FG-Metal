@@ -1,0 +1,13 @@
+candidate_id=step10b5-display-motion-probe-v1
+parent_candidate_id=step10b5-local-f-equivalent-signpost-v3
+scope=secondary display-attribution calibration; not a primary A/B/C/D result
+single_intentional_variable=harness clear color advances on every application Present (kFramesPerColor 60 to 1); application Present rate and progression unchanged
+source_tree_sha256=e315dd2c7c5aeaa734ec550902fe376624b17d0ffc95e4798b1d767a403d4185
+harness_binary=/private/tmp/step10b5-d3d11/d3d11_clear_window_motion.exe
+harness_binary_sha256=1f6147376d786ec7cc9e86faa66c87e2a1bafc2b591ef655ac5b9bf917eef5e9
+compiler=/opt/homebrew/bin/x86_64-w64-mingw32-g++
+compile_flags=-std=c++17 -O2 -Wall -Wextra -Wpedantic -static-libgcc -static-libstdc++ -static -mwindows; -ld3d11 -luser32 -lkernel32
+parent_runtime_identity=runtime-identity.txt
+parent_runtime_identity_sha256=58d6be95e8d7c4f8fe24ba031420da03762a1528dbcdae56d45da713ea6626c0
+dxmt_staged_hashes_match_parent=true
+prohibited_behavior=none; no extra Present calls; no screen capture/readback; no production-source changes

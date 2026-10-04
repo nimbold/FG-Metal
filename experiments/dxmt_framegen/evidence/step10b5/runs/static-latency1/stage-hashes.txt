@@ -1,0 +1,5 @@
+786d42842609a07bd63409def87ddeb1ef29471ddc5853352b5f6040f320e2be  /private/tmp/dxmt-step10b5-run-v16/engine/lib/wine/x86_64-windows/d3d10core.dll
+a8a80faac6231fc3e997702c05f838d69752c05739087b8d2ad07a00b072fecc  /private/tmp/dxmt-step10b5-run-v16/engine/lib/wine/x86_64-windows/d3d11.dll
+086f0c433a191cc20967682ed437e62b0f1a5c2d6c641bd41732808c06c3bc7f  /private/tmp/dxmt-step10b5-run-v16/engine/lib/wine/x86_64-windows/dxgi.dll
+abd5ff1e9c0873513c778736596d848037e057784b081ccd430c6070fca7aa75  /private/tmp/dxmt-step10b5-run-v16/engine/lib/wine/x86_64-windows/winemetal.dll
+8079c6779f401727d3ec22b51b4b2837d786363b910f61ee77077b7d28f0f68f  /private/tmp/dxmt-step10b5-run-v16/engine/lib/wine/x86_64-unix/winemetal.so
