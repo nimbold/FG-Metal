@@ -1,0 +1,91 @@
+xctrace version 27.0 (27A266a)
+== Standard Templates ==
+Activity Monitor
+Allocations
+Animation Hitches
+App Launch
+Audio System Trace
+CPU Counters
+CPU Profiler
+Core AI
+Data Persistence
+File Activity
+Foundation Models
+Game Memory
+Game Performance
+Game Performance Overview
+Leaks
+Logging
+Metal System Trace
+Network
+Power Profiler
+Processor Trace
+RealityKit Trace
+Swift Concurrency
+SwiftUI
+System Trace
+Time Profiler
+== Standard Instruments ==
+Activity Monitor
+Advanced Graphics Statistics
+Allocations
+Audio Client
+Audio Server
+Audio Statistics
+CPU Counters
+CPU Profiler
+Core AI
+Core Animation Activity
+Core Animation Commits
+Core Animation FPS
+Core Animation Server
+Core ML
+Data Faults
+Data Fetches
+Data Saves
+Disk I/O Latency
+Disk Usage
+Display
+Filesystem Activity
+Filesystem Suggestions
+Foundation Models
+Foveated Streaming Statistics
+Frame Lifetimes
+GCD Performance
+GPU
+HTTP Traffic
+Hangs
+Hitches
+Leaks
+Location Energy Model
+Metal Application
+Metal GPU Counters
+Metal Performance Overview
+Metal Resource Events
+Network Connections
+Neural Engine
+Points of Interest
+Power Profiler
+Processor Trace
+RealityKit Frames
+RealityKit Metrics
+Run Loops
+Sampler
+SceneKit Application
+Swift Actors
+Swift Executors
+Swift Tasks
+SwiftUI
+System Call Trace
+System Load
+Thermal State
+Thread Activity
+Time Profiler
+VM Tracker
+View Body (Legacy)
+View Properties (Legacy)
+Virtual Memory Trace
+dyld Activity
+os_log
+os_signpost
+stdout/stderr
