@@ -6,7 +6,7 @@ Framegen is an experimental renderer-independent frame-generation library. Its p
 
 > **Current renderer-feasibility status: DXMT Step 10B.5 failed the display gate; RIFE is not cleared.** Callback, submission, and GPU-completion rates stayed near 60 Hz, but independent motion probes showed only 8.0–8.6 consecutive Wine-attributed displayed-surface gaps per second during 60 Hz VSync, with median surface holds near 65 ms. Surface-update coalescing is inferred from those traces; drawable-level attribution and physical scanout remain unverified. See the [Step 10B.5 report](experiments/dxmt_framegen/evidence/step10b5/report.md) and its [retained evidence](experiments/dxmt_framegen/evidence/step10b5/).
 
-> **DXVK-MacOS Step 11C: PARTIAL PASS; Step 11D is not cleared.** A rebuilt matched 20-second, 15 Hz run preserved measured DXGI accounting while issuing 42 extra WSI presents for 301 application Presents. The user directly confirmed brief magenta and cyan flashes in the experiment window. The scheduler remains far below doubled cadence, and fullscreen, recreation, failure, and pending-work shutdown checks remain unverified. See the [Step 11C report](experiments/dxvk_macos_step11c/REPORT.md).
+> **DXVK-MacOS Step 11C: PARTIAL PASS; Step 11D is not cleared.** A rebuilt matched 20-second, 15 Hz run preserved measured DXGI accounting while issuing 42 extra WSI presents for 301 application Presents. The user directly confirmed brief magenta and cyan flashes in the post-audit candidate; the newest matched build has a separate API run. The scheduler remains far below doubled cadence, and fullscreen, recreation, failure, and pending-work shutdown checks remain unverified. See the [Step 11C report](experiments/dxvk_macos_step11c/REPORT.md).
 
 ## What works today
 
