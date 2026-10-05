@@ -1,0 +1,38 @@
+{
+  "run": "visual-user-confirmation-20261005-final",
+  "purpose": "Direct visual observation of the final Step 11C candidate",
+  "duration_seconds": 60,
+  "exit_status": 0,
+  "source_cadence_variant": "30hz-baseline-harness",
+  "internal_wsi_enabled": true,
+  "sha256": {
+    "d3d11-semantics.exe": "3d610e4e5738ed3332c009acb805c668acc8f6f5c1a57781b3e4d3b5940653cb",
+    "d3d11.dll": "09e73ab505da1cb5740fdd2d413f331144f58ca2def357426633762525cbfe03",
+    "dxgi.dll": "17cbe8e84906ce9657493b1301e712cfc8123413034666fd9387dfe1bbf5b33c"
+  },
+  "counts": {
+    "successful_app_presents": 1801,
+    "source_wsi_presents": 1801,
+    "internal_wsi_presents": 262,
+    "total_wsi_presents": 2063,
+    "internal_magenta_pattern_presents": 131,
+    "internal_cyan_pattern_presents": 131,
+    "internal_drop_events": 1539,
+    "internal_drop_reasons": {
+      "queue-full": 876,
+      "deadline-expired": 625,
+      "source-pending": 35,
+      "source-queue-nonempty": 3
+    }
+  },
+  "window_observations": {
+    "visible_app_present_samples": 1801,
+    "foreground_app_present_samples": 1420
+  },
+  "human_visual_observation": {
+    "confidence": "low",
+    "user_report": "I think the flashes have magneta and cyan color in them, but as they are just flashes (die fast) I can't confidently. But I think I saw them both during flashes. They are not static like, red, green, blue and violet ones.",
+    "interpretation": "Suggestive direct observation of both internal colors as brief flashes among the steady source colors; not a confident color-by-color confirmation.",
+    "screen_capture_used": false
+  }
+}

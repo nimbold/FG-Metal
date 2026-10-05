@@ -1,0 +1,23 @@
+{
+  "A": {
+    "path": "/tmp/fgmetal-step11c/A-pristine",
+    "base": "8d348236e14a3db25ffbe528a83010b3dd69a3ef",
+    "status": "clean"
+  },
+  "B": {
+    "path": "/tmp/fgmetal-step11b1/dxvk-diagnostic",
+    "base": "8d348236e14a3db25ffbe528a83010b3dd69a3ef",
+    "status": "separate Step 11B.1 prerequisite patch only",
+    "patch_sha256": "4f4973000d0ce0783d05e11b7acae0efdff2d6bfe898bf49305408d72280e758"
+  },
+  "C": {
+    "path": "/tmp/fgmetal-step11c/C-internal-wsi",
+    "base": "8d348236e14a3db25ffbe528a83010b3dd69a3ef",
+    "prerequisite_patch_sha256": "4f4973000d0ce0783d05e11b7acae0efdff2d6bfe898bf49305408d72280e758",
+    "experimental_changes": "Step 11C renderer-internal WSI experiment, layered above the separate Step 11B.1 prerequisite",
+    "downstream_patch": "patches/internal-presentation-experiment.patch",
+    "downstream_patch_sha256": "4df3af55c9491a44d5e8cec79d458bf7cecc18d71b61312b19e80b461023d352",
+    "built_d3d11_dll_sha256": "3c39a706d2fb577825592b9bfbc335feb218f93f933e7b83a25dcda8e1f32c3c"
+  },
+  "prerequisite_patch_workspace_copy": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11c/patches/prerequisite-step11b1.patch"
+}

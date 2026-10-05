@@ -1,0 +1,12 @@
+{
+  "run": "postaudit-final-internal-15hz-20s",
+  "purpose": "Direct user visual confirmation of renderer-generated internal colors",
+  "run_duration_seconds": 20,
+  "d3d11_dll_sha256": "0c8eedad69d98a6c0e98c44a5d1120274d0f324733b15ad68542d6e1e7abe1c8",
+  "internal_wsi_enabled": true,
+  "observation": {
+    "user_report": "Cyan and magneta are visible but in flashes in your second window that launched",
+    "interpretation": "The user confirmed cyan and magenta were visible as brief flashes. This observation is tied to the post-audit candidate, not the later final hardening rebuild.",
+    "screen_capture_used": false
+  }
+}

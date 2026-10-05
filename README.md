@@ -6,6 +6,8 @@ Framegen is an experimental renderer-independent frame-generation library. Its p
 
 > **Current renderer-feasibility status: DXMT Step 10B.5 failed the display gate; RIFE is not cleared.** Callback, submission, and GPU-completion rates stayed near 60 Hz, but independent motion probes showed only 8.0–8.6 consecutive Wine-attributed displayed-surface gaps per second during 60 Hz VSync, with median surface holds near 65 ms. Surface-update coalescing is inferred from those traces; drawable-level attribution and physical scanout remain unverified. See the [Step 10B.5 report](experiments/dxmt_framegen/evidence/step10b5/report.md) and its [retained evidence](experiments/dxmt_framegen/evidence/step10b5/).
 
+> **DXVK-MacOS Step 11C: PARTIAL PASS; Step 11D is not cleared.** A rebuilt matched 20-second, 15 Hz run preserved measured DXGI accounting while issuing 42 extra WSI presents for 301 application Presents. The user directly confirmed brief magenta and cyan flashes in the experiment window. The scheduler remains far below doubled cadence, and fullscreen, recreation, failure, and pending-work shutdown checks remain unverified. See the [Step 11C report](experiments/dxvk_macos_step11c/REPORT.md).
+
 ## What works today
 
 | Area | Current status |
@@ -15,6 +17,7 @@ Framegen is an experimental renderer-independent frame-generation library. Its p
 | Quality and pacing | Optional HUD/temporal controls and a model-independent pacing scheduler; results are synthetic and do not establish in-game quality or display pacing. |
 | GPTK / D3DMetal | Cooperative D3D12 tests passed on Highball GPTK 4. Transparent DXGI attachment reached **PARTIAL PASS** on a controlled app; same-chain generated presents break common application buffer progression. It is not a product adapter. |
 | DXMT | Latest gate, Step 10B.5: **FAIL — RIFE NOT CLEARED.** In source-only and F-equivalent runs, per-Present color-motion probes showed about 8.0–8.6 consecutive Wine-attributed displayed-surface gaps/s and ~65 ms median holds while VSync remained 60.001 Hz. Callback, submission, GPU completion, and accepted-source safety passed their qualified checks, but Display rows could not be mapped to individual drawable attempts and physical scanout was not established. The Step 10B.4 result remains historical evidence; see its [report](docs/feasibility/dxmt-framegen-step10b4.md), plus the latest [Step 10B.5 report](experiments/dxmt_framegen/evidence/step10b5/report.md) and [retained evidence](experiments/dxmt_framegen/evidence/step10b5/). No RIFE or Highball change is part of either result. |
+| DXVK-MacOS | Step 11C: **PARTIAL PASS.** Separate AppFrameId/WSI/internal identity and measured DXGI accounting invariants pass in a matched low-rate windowed run; the user confirmed brief magenta and cyan flashes. The scheduler misses doubled cadence. Fullscreen/recreation/failure/pending-work shutdown checks remain unverified. See the [report and evidence](experiments/dxvk_macos_step11c/REPORT.md). |
 
 See [the current decisions](DECISIONS.md), [work status](TASKS.md), and the [Step 8D.1 feasibility report](docs/feasibility/dxgi-d3d12-gptk4-step8d1.md) for evidence and limits.
 

@@ -1,0 +1,78 @@
+{
+  "run": {
+    "name": "baseline-semantics-15s",
+    "exit_status": 0,
+    "wall_seconds": 15.588052167033311,
+    "visual": "DIRECT VISUAL CHECK REQUIRED",
+    "environment": {
+      "WINEPREFIX": "/tmp/fgmetal-step11c/prefix-baseline-semantics-15s",
+      "WINEDLLOVERRIDES": "d3d11,dxgi=n,b",
+      "WINEDEBUG": "+loaddll",
+      "DXVK_LOG_LEVEL": "info",
+      "DXVK_LOG_PATH": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11c/evidence/baseline-semantics-15s",
+      "DXVK_HUD": "",
+      "DYLD_PRINT_LIBRARIES": "1",
+      "FG_AUDIT_ENABLE": "1",
+      "FG_AUDIT_RUN_SECONDS": "15",
+      "FG_AUDIT_SKIP_RESIZE": "1",
+      "FG_AB_BGRA": "0",
+      "FG_AUDIT_WAITABLE": "1"
+    },
+    "hashes": {
+      "d3d11.dll": "b63c935e55a0854dc6857414fceaf7fde850da9f201e027b41a4cf97fed59352",
+      "d3d11-semantics.exe": "3d610e4e5738ed3332c009acb805c668acc8f6f5c1a57781b3e4d3b5940653cb",
+      "dxgi.dll": "17cbe8e84906ce9657493b1301e712cfc8123413034666fd9387dfe1bbf5b33c"
+    }
+  },
+  "app_present_count": 451,
+  "present_hresult_counts": {
+    "0x00000000": 451
+  },
+  "app_visible_foreground_observations": {
+    "visible=1,foreground=1": 451
+  },
+  "get_last_present_count": {
+    "query_hresult_counts": {
+      "00000000": 451
+    },
+    "all_counts_equal_app_sequence": true,
+    "first": 1,
+    "last": 451
+  },
+  "get_frame_statistics": {
+    "hresult_counts": {
+      "887a000b": 1,
+      "00000000": 450
+    },
+    "last_success_present_count": 450,
+    "last_app_present_count": 451,
+    "lag": "Observed lag ranges 0-2 app frames; max lag 2 at sequence 376, and final lag 1. Allow this measured healthy baseline envelope.",
+    "max_observed_lag": 2,
+    "max_lag_sequence": 376,
+    "api_warning": "Frame statistics may be inaccurate; refresh counts/QPC are not physical display cadence proof."
+  },
+  "frame_latency_waitable": {
+    "interface_query_hresult": "00000000",
+    "handle": "00000000000000ac",
+    "set_maximum_frame_latency_hresult": "00000000",
+    "get_maximum_frame_latency_hresult": "00000000",
+    "maximum_frame_latency": 1,
+    "zero_timeout_wait_results": {
+      "0": 450,
+      "258": 1
+    }
+  },
+  "backbuffer": {
+    "index_values": [
+      0
+    ],
+    "buffer0_identity_values": [
+      "00000000008c8830"
+    ]
+  },
+  "device_removed_hresult_counts": {
+    "00000000": 451
+  },
+  "exit_status": 0,
+  "direct_visual": "This run was not independently marked by a direct human visual observation. Exact same fixed DLL, app binary, RGBA8 mode, and Wine/MoltenVK path have direct changing-color confirmation in Step 11B.1 evidence/final-original-30s and final-waitable-30s."
+}

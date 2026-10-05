@@ -1,0 +1,1638 @@
+info:  Creating device:
+info:  Apple M3:
+info:    Driver   : MoltenVK 0.2.2210
+info:  Queues:
+info:    Graphics : (0, 0)
+info:    Transfer : (0, 0)
+info:    Sparse   : (4294967295, 0)
+info:  Memory:
+info:    Heap 0: 16.0 GiB (DEVICE_LOCAL)
+info:    Budget: 11.84 GiB
+info:      Type  0: DEVICE_LOCAL
+info:      Type  1: DEVICE_LOCAL | HOST_VISIBLE | HOST_COHERENT | HOST_CACHED
+info:      Type  2: DEVICE_LOCAL | LAZILY_ALLOCATED
+info:  Enabled extensions:
+info:    VK_EXT_extended_dynamic_state3
+info:    VK_EXT_fragment_shader_interlock
+info:    VK_EXT_hdr_metadata
+info:    VK_EXT_robustness2
+info:    VK_EXT_sample_locations
+info:    VK_EXT_shader_stencil_export
+info:    VK_EXT_vertex_attribute_divisor
+info:    VK_KHR_calibrated_timestamps
+info:    VK_KHR_dynamic_rendering_local_read
+info:    VK_KHR_incremental_present
+info:    VK_KHR_load_store_op_none
+info:    VK_KHR_maintenance5
+info:    VK_KHR_maintenance6
+info:    VK_KHR_maintenance7
+info:    VK_KHR_maintenance8
+info:    VK_KHR_maintenance9
+info:    VK_KHR_present_id
+info:    VK_KHR_present_wait
+info:    VK_KHR_shader_float_controls2
+info:    VK_KHR_shader_subgroup_uniform_control_flow
+info:    VK_KHR_swapchain
+info:    VK_KHR_swapchain_maintenance1
+info:    VK_KHR_swapchain_mutable_format
+info:  Enabled features:
+info:    depthBiasClamp                 : 1
+info:    depthBounds                    : 0
+info:    depthClamp                     : 1
+info:    drawIndirectFirstInstance      : 1
+info:    dualSrcBlend                   : 1
+info:    fillModeNonSolid               : 1
+info:    fragmentStoresAndAtomics       : 1
+info:    fullDrawIndexUint32            : 1
+info:    geometryShader                 : 0
+info:    imageCubeArray                 : 1
+info:    independentBlend               : 1
+info:    largePoints                    : 1
+info:    logicOp                        : 0
+info:    multiDrawIndirect              : 1
+info:    multiViewport                  : 1
+info:    occlusionQueryPrecise          : 1
+info:    pipelineStatisticsQuery        : 0
+info:    robustBufferAccess             : 1
+info:    sampleRateShading              : 1
+info:    samplerAnisotropy              : 1
+info:    shaderClipDistance             : 1
+info:    shaderCullDistance             : 0
+info:    shaderFloat64                  : 0
+info:    shaderImageGatherExtended      : 1
+info:    shaderInt16                    : 1
+info:    shaderInt64                    : 1
+info:    shaderUniformBufferArrayDynamicIndexing : 1
+info:    shaderSampledImageArrayDynamicIndexing : 1
+info:    shaderStorageBufferArrayDynamicIndexing : 1
+info:    shaderStorageImageArrayDynamicIndexing : 1
+info:    sparseBinding                  : 0
+info:    sparseResidencyBuffer          : 0
+info:    sparseResidencyImage2D         : 0
+info:    sparseResidencyImage3D         : 0
+info:    sparseResidency2Samples        : 0
+info:    sparseResidency4Samples        : 0
+info:    sparseResidency8Samples        : 0
+info:    sparseResidency16Samples       : 0
+info:    sparseResidencyAliased         : 0
+info:    shaderResourceResidency        : 0
+info:    shaderResourceMinLod           : 1
+info:    tessellationShader             : 1
+info:    textureCompressionBC           : 1
+info:    variableMultisampleRate        : 0
+info:    vertexPipelineStoresAndAtomics : 1
+info:    wideLines                      : 0
+info:    shaderDrawParameters           : 1
+info:    storageBuffer16BitAccess       : 1
+info:    storagePushConstant16          : 1
+info:    bufferDeviceAddress            : 1
+info:    descriptorIndexing             : 1
+info:    storageBuffer8BitAccess        : 1
+info:    storagePushConstant8           : 1
+info:    shaderUniformTexelBufferArrayDynamicIndexing : 1
+info:    shaderStorageTexelBufferArrayDynamicIndexing : 1
+info:    shaderUniformBufferArrayNonUniformIndexing : 1
+info:    shaderSampledImageArrayNonUniformIndexing : 1
+info:    shaderStorageBufferArrayNonUniformIndexing : 1
+info:    shaderStorageImageArrayNonUniformIndexing : 1
+info:    shaderUniformTexelBufferArrayNonUniformIndexing : 1
+info:    shaderStorageTexelBufferArrayNonUniformIndexing : 1
+info:    descriptorBindingSampledImageUpdateAfterBind : 1
+info:    descriptorBindingUpdateUnusedWhilePending : 1
+info:    descriptorBindingPartiallyBound : 1
+info:    drawIndirectCount              : 0
+info:    hostQueryReset                 : 1
+info:    runtimeDescriptorArray         : 1
+info:    samplerFilterMinmax            : 0
+info:    samplerMirrorClampToEdge       : 1
+info:    scalarBlockLayout              : 1
+info:    shaderFloat16                  : 1
+info:    shaderInt8                     : 1
+info:    shaderOutputViewportIndex      : 1
+info:    shaderOutputLayer              : 1
+info:    timelineSemaphore              : 1
+info:    uniformBufferStandardLayout    : 1
+info:    vulkanMemoryModel              : 1
+info:    inlineUniformBlock             : 1
+info:    computeFullSubgroups           : 1
+info:    dynamicRendering               : 1
+info:    maintenance4                   : 1
+info:    robustImageAccess              : 0
+info:    pipelineCreationCacheControl   : 1
+info:    shaderDemoteToHelperInvocation : 1
+info:    shaderZeroInitializeWorkgroupMemory : 1
+info:    subgroupSizeControl            : 1
+info:    synchronization2               : 1
+info:  VK_EXT_attachment_feedback_loop_layout:
+info:    attachmentFeedbackLoopLayout   : 0
+info:  VK_EXT_border_color_swizzle:
+info:    borderColorSwizzle             : 0
+info:    borderColorSwizzleFromImage    : 0
+info:  VK_EXT_conservative_rasterization:
+info:    extConservativeRasterization   : 0
+info:  VK_EXT_custom_border_color:
+info:    customBorderColors             : 0
+info:    customBorderColorWithoutFormat : 0
+info:  VK_EXT_depth_clip_enable:
+info:    depthClipEnable                : 0
+info:  VK_EXT_depth_bias_control:
+info:    depthBiasControl               : 0
+info:    leastRepresentableValueForceUnormRepresentation : 0
+info:    floatRepresentation            : 0
+info:    depthBiasExact                 : 0
+info:  VK_EXT_descriptor_buffer:
+info:    descriptorBuffer               : 0
+info:  VK_EXT_descriptor_heap:
+info:    descriptorHeap                 : 0
+info:  VK_EXT_dynamic_rendering_unused_attachments:
+info:    dynamicRenderingUnusedAttachments : 0
+info:  VK_EXT_extended_dynamic_state3:
+info:    extendedDynamicState3AlphaToCoverageEnable : 0
+info:    extendedDynamicState3DepthClipEnable : 1
+info:    extendedDynamicState3RasterizationSamples : 0
+info:    extendedDynamicState3SampleMask : 0
+info:    extendedDynamicState3LineRasterizationMode : 1
+info:    extendedDynamicState3SampleLocationsEnable : 1
+info:  VK_EXT_fragment_shader_interlock:
+info:    fragmentShaderSampleInterlock  : 1
+info:    fragmentShaderPixelInterlock   : 1
+info:  VK_EXT_full_screen_exclusive:
+info:    extFullScreenExclusive         : 0
+info:  VK_EXT_graphics_pipeline_library:
+info:    graphicsPipelineLibrary        : 0
+info:  VK_EXT_hdr_metadata:
+info:    extHdrMetadata                 : 1
+info:  VK_EXT_line_rasterization:
+info:    rectangularLines               : 0
+info:    smoothLines                    : 0
+info:  VK_EXT_memory_budget:
+info:    extMemoryBudget                : 1
+info:  VK_EXT_memory_priority:
+info:    memoryPriority                 : 0
+info:  VK_EXT_multi_draw:
+info:    multiDraw                      : 0
+info:  VK_EXT_non_seamless_cube_map:
+info:    nonSeamlessCubeMap             : 0
+info:  VK_EXT_pageable_device_local_memory:
+info:    pageableDeviceLocalMemory      : 0
+info:  VK_EXT_present_timing:
+info:    presentTiming                  : 0
+info:    presentAtAbsoluteTime          : 0
+info:    presentAtRelativeTime          : 0
+info:  VK_EXT_robustness2:
+info:    robustBufferAccess2            : 0
+info:    robustImageAccess2             : 1
+info:    nullDescriptor                 : 0
+info:  VK_EXT_sample_locations:
+info:    extSampleLocations             : 1
+info:  VK_EXT_shader_module_identifier:
+info:    shaderModuleIdentifier         : 0
+info:  VK_EXT_shader_stencil_export:
+info:    extShaderStencilExport         : 1
+info:  VK_EXT_swapchain_colorspace:
+info:    extSwapchainColorSpace         : 0
+info:  VK_EXT_swapchain_maintenance1:
+info:    swapchainMaintenance1          : 0
+info:  VK_EXT_transform_feedback:
+info:    transformFeedback              : 0
+info:    geometryStreams                : 0
+info:  VK_EXT_vertex_attribute_divisor:
+info:    vertexAttributeInstanceRateDivisor : 1
+info:    vertexAttributeInstanceRateZeroDivisor : 1
+info:  VK_KHR_calibrated_timestamps:
+info:    khrCalibratedTimestamps        : 1
+info:  VK_KHR_device_fault:
+info:    deviceFault                    : 0
+info:    deviceFaultVendorBinary        : 0
+info:  VK_KHR_dynamic_rendering_local_read:
+info:    dynamicRenderingLocalRead      : 1
+info:  VK_KHR_external_memory_win32:
+info:    khrExternalMemoryWin32         : 0
+info:  VK_KHR_external_semaphore_win32:
+info:    khrExternalSemaphoreWin32      : 0
+info:  VK_KHR_incremental_present:
+info:    khrIncrementalPresent          : 1
+info:  VK_KHR_load_store_op_none:
+info:    khrLoadStoreOpNone             : 1
+info:  VK_KHR_maintenance5:
+info:    maintenance5                   : 1
+info:  VK_KHR_maintenance6:
+info:    maintenance6                   : 1
+info:  VK_KHR_maintenance7:
+info:    maintenance7                   : 1
+info:  VK_KHR_maintenance8:
+info:    maintenance8                   : 1
+info:  VK_KHR_maintenance9:
+info:    maintenance9                   : 1
+info:  VK_KHR_maintenance10:
+info:    maintenance10                  : 0
+info:  VK_KHR_maintenance11:
+info:    maintenance11                  : 0
+info:  VK_KHR_pipeline_library:
+info:    khrPipelineLibrary             : 0
+info:  VK_KHR_present_id:
+info:    presentId                      : 1
+info:  VK_KHR_present_id2:
+info:    presentId2                     : 0
+info:  VK_KHR_present_wait:
+info:    presentWait                    : 1
+info:  VK_KHR_present_wait2:
+info:    presentWait2                   : 0
+info:  VK_KHR_shader_float_controls2:
+info:    shaderFloatControls2           : 1
+info:  VK_KHR_shader_subgroup_uniform_control_flow:
+info:    shaderSubgroupUniformControlFlow : 1
+info:  VK_KHR_shader_untyped_pointers:
+info:    shaderUntypedPointers          : 0
+info:  VK_KHR_swapchain:
+info:    khrSwapchain                   : 1
+info:  VK_KHR_swapchain_maintenance1:
+info:    swapchainMaintenance1          : 1
+info:  VK_KHR_swapchain_mutable_format:
+info:    khrSwapchainMutableFormat      : 1
+info:  VK_KHR_unified_image_layouts:
+info:    unifiedImageLayouts            : 0
+info:  VK_KHR_win32_keyed_mutex:
+info:    khrWin32KeyedMutex             : 0
+info:  VK_AMD_buffer_marker:
+info:    amdBufferMarker                : 0
+info:  VK_NV_device_diagnostic_checkpoints:
+info:    nvDeviceDiagnosticCheckpoints  : 0
+info:  VK_NV_low_latency2:
+info:    nvLowLatency2                  : 0
+info:  VK_NV_raw_access_chains:
+info:    shaderRawAccessChains          : 0
+info:  VK_NVX_binary_import:
+info:    nvxBinaryImport                : 0
+info:  VK_NVX_image_view_handle:
+info:    nvxImageViewHandle             : 0
+info:  Memory type mask for buffer resources: 0x3, usage: 0x201ff
+info:  Graphics pipeline libraries not supported
+info:  Binding model: Legacy
+warn:  D3D11DeviceFeatures: External memory features not supported
+info:  D3D11InternalCreateDevice: Maximum supported feature level: D3D_FEATURE_LEVEL_11_0
+info:  D3D11InternalCreateDevice: Using feature level D3D_FEATURE_LEVEL_11_0
+info:  DXGI: VK_FORMAT_D24_UNORM_S8_UINT -> VK_FORMAT_D32_SFLOAT_S8_UINT
+warn:  D3D11DXGIDevice::QueryInterface: Unknown interface query
+warn:  0ec870a6-5d7e-4c22-8cfc-5baae07616ed
+info:  Presenter: Actual swapchain properties:
+info:    Format:          VK_FORMAT_B8G8R8A8_UNORM
+info:    Color space:     VK_COLOR_SPACE_SRGB_NONLINEAR_KHR
+info:    Present mode:    VK_PRESENT_MODE_FIFO_KHR (dynamic: yes)
+info:    Buffer size:     640x360
+info:    Image count:     3
+info:    Timing:          no
+info:  Presenter: Created swapchain generation 2
+info:  WSI: present origin=APPLICATION_SOURCE wsi=1 app=17 internal=0 acquire=1 image=0 generation=2
+info:  WSI: present origin=APPLICATION_SOURCE wsi=2 app=18 internal=0 acquire=2 image=1 generation=2
+info:  WSI: present origin=APPLICATION_SOURCE wsi=3 app=19 internal=0 acquire=3 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=17 via=source-submit-completion
+info:  WSI: app-completion app=17 app-signal=signaled
+info:  WSI: app-frame-latency-signal app=18 via=source-submit-completion
+info:  WSI: app-completion app=18 app-signal=signaled
+info:  WSI: app-frame-latency-signal app=19 via=source-submit-completion
+info:  WSI: app-completion app=19 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=4 app=20 internal=0 acquire=4 image=0 generation=2
+info:  WSI: app-completion app=20 app-signal=deferred
+info:  WSI: present origin=APPLICATION_SOURCE wsi=5 app=21 internal=0 acquire=5 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=20 via=source-present-retirement
+info:  WSI: app-completion app=21 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=21 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=6 app=22 internal=0 acquire=6 image=2 generation=2
+info:  WSI: app-completion app=22 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=22 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=7 app=23 internal=0 acquire=7 image=0 generation=2
+info:  WSI: app-completion app=23 app-signal=deferred
+info:  WSI: present origin=APPLICATION_SOURCE wsi=8 app=24 internal=0 acquire=8 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=23 via=source-present-retirement
+info:  WSI: app-completion app=24 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=24 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=9 app=25 internal=0 acquire=9 image=2 generation=2
+info:  WSI: app-completion app=25 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=25 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=10 app=26 internal=0 acquire=10 image=0 generation=2
+info:  WSI: app-completion app=26 app-signal=deferred
+info:  WSI: present origin=APPLICATION_SOURCE wsi=11 app=27 internal=0 acquire=11 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=26 via=source-present-retirement
+info:  WSI: app-completion app=27 app-signal=deferred
+info:  WSI: present origin=APPLICATION_SOURCE wsi=12 app=28 internal=0 acquire=12 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=27 via=source-present-retirement
+info:  WSI: app-completion app=28 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=28 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=13 app=29 internal=0 acquire=13 image=0 generation=2
+info:  WSI: app-completion app=29 app-signal=deferred
+info:  WSI: present origin=APPLICATION_SOURCE wsi=14 app=30 internal=0 acquire=14 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=29 via=source-present-retirement
+info:  WSI: app-completion app=30 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=30 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=15 app=31 internal=0 acquire=15 image=2 generation=2
+info:  WSI: app-completion app=31 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=31 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=16 app=32 internal=0 acquire=16 image=0 generation=2
+info:  WSI: app-completion app=32 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=32 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=17 app=33 internal=0 acquire=17 image=1 generation=2
+info:  WSI: app-completion app=33 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=33 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=18 app=34 internal=0 acquire=18 image=2 generation=2
+info:  WSI: app-completion app=34 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=34 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=19 app=35 internal=0 acquire=19 image=0 generation=2
+info:  WSI: app-completion app=35 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=35 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=20 app=36 internal=0 acquire=20 image=1 generation=2
+info:  WSI: app-completion app=36 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=36 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=21 app=37 internal=0 acquire=21 image=2 generation=2
+info:  WSI: app-completion app=37 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=37 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=22 app=38 internal=0 acquire=22 image=0 generation=2
+info:  WSI: app-completion app=38 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=38 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=23 app=39 internal=0 acquire=23 image=1 generation=2
+info:  WSI: app-completion app=39 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=39 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=24 app=40 internal=0 acquire=24 image=2 generation=2
+info:  WSI: app-completion app=40 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=40 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=25 app=41 internal=0 acquire=25 image=0 generation=2
+info:  WSI: app-completion app=41 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=41 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=26 app=42 internal=0 acquire=26 image=1 generation=2
+info:  WSI: app-completion app=42 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=42 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=27 app=43 internal=0 acquire=27 image=2 generation=2
+info:  WSI: app-completion app=43 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=43 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=28 app=44 internal=0 acquire=28 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=44 via=source-submit-completion
+info:  WSI: app-completion app=44 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=29 app=45 internal=0 acquire=29 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=45 via=source-submit-completion
+info:  WSI: app-completion app=45 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=30 app=46 internal=0 acquire=30 image=2 generation=2
+info:  WSI: app-completion app=46 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=46 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=31 app=47 internal=0 acquire=31 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=47 via=source-submit-completion
+info:  WSI: app-completion app=47 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=32 app=48 internal=0 acquire=32 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=48 via=source-submit-completion
+info:  WSI: app-completion app=48 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=33 app=49 internal=0 acquire=33 image=2 generation=2
+info:  WSI: app-completion app=49 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=49 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=34 app=50 internal=0 acquire=34 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=50 via=source-submit-completion
+info:  WSI: app-completion app=50 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=35 app=51 internal=0 acquire=35 image=1 generation=2
+info:  WSI: app-completion app=51 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=51 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=36 app=52 internal=0 acquire=36 image=2 generation=2
+info:  WSI: app-completion app=52 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=52 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=37 app=53 internal=0 acquire=37 image=0 generation=2
+info:  WSI: app-completion app=53 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=53 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=38 app=54 internal=0 acquire=38 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=54 via=source-submit-completion
+info:  WSI: app-completion app=54 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=39 app=55 internal=0 acquire=39 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=55 via=source-submit-completion
+info:  WSI: app-completion app=55 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=40 app=56 internal=0 acquire=40 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=56 via=source-submit-completion
+info:  WSI: app-completion app=56 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=41 app=57 internal=0 acquire=41 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=57 via=source-submit-completion
+info:  WSI: app-completion app=57 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=42 app=58 internal=0 acquire=42 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=58 via=source-submit-completion
+info:  WSI: app-completion app=58 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=43 app=59 internal=0 acquire=43 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=59 via=source-submit-completion
+info:  WSI: app-completion app=59 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=44 app=60 internal=0 acquire=44 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=60 via=source-submit-completion
+info:  WSI: app-completion app=60 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=45 app=61 internal=0 acquire=45 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=61 via=source-submit-completion
+info:  WSI: app-completion app=61 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=46 app=62 internal=0 acquire=46 image=0 generation=2
+info:  WSI: app-completion app=62 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=62 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=47 app=63 internal=0 acquire=47 image=1 generation=2
+info:  WSI: app-completion app=63 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=63 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=48 app=64 internal=0 acquire=48 image=2 generation=2
+info:  WSI: app-completion app=64 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=64 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=49 app=65 internal=0 acquire=49 image=0 generation=2
+info:  WSI: app-completion app=65 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=65 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=50 app=66 internal=0 acquire=50 image=1 generation=2
+info:  WSI: app-completion app=66 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=66 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=51 app=67 internal=0 acquire=51 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=67 via=source-submit-completion
+info:  WSI: app-completion app=67 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=52 app=68 internal=0 acquire=52 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=68 via=source-submit-completion
+info:  WSI: app-completion app=68 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=53 app=69 internal=0 acquire=53 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=69 via=source-submit-completion
+info:  WSI: app-completion app=69 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=54 app=70 internal=0 acquire=54 image=2 generation=2
+info:  WSI: app-completion app=70 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=70 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=55 app=71 internal=0 acquire=55 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=71 via=source-submit-completion
+info:  WSI: app-completion app=71 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=56 app=72 internal=0 acquire=56 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=72 via=source-submit-completion
+info:  WSI: app-completion app=72 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=57 app=73 internal=0 acquire=57 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=73 via=source-submit-completion
+info:  WSI: app-completion app=73 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=58 app=74 internal=0 acquire=58 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=74 via=source-submit-completion
+info:  WSI: app-completion app=74 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=59 app=75 internal=0 acquire=59 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=75 via=source-submit-completion
+info:  WSI: app-completion app=75 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=60 app=76 internal=0 acquire=60 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=76 via=source-submit-completion
+info:  WSI: app-completion app=76 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=61 app=77 internal=0 acquire=61 image=0 generation=2
+info:  WSI: app-completion app=77 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=77 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=62 app=78 internal=0 acquire=62 image=1 generation=2
+info:  WSI: app-completion app=78 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=78 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=63 app=79 internal=0 acquire=63 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=79 via=source-submit-completion
+info:  WSI: app-completion app=79 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=64 app=80 internal=0 acquire=64 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=80 via=source-submit-completion
+info:  WSI: app-completion app=80 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=65 app=81 internal=0 acquire=65 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=81 via=source-submit-completion
+info:  WSI: app-completion app=81 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=66 app=82 internal=0 acquire=66 image=2 generation=2
+info:  WSI: app-completion app=82 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=82 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=67 app=83 internal=0 acquire=67 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=83 via=source-submit-completion
+info:  WSI: app-completion app=83 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=68 app=84 internal=0 acquire=68 image=1 generation=2
+info:  WSI: app-completion app=84 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=84 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=69 app=85 internal=0 acquire=69 image=2 generation=2
+info:  WSI: app-completion app=85 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=85 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=70 app=86 internal=0 acquire=70 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=86 via=source-submit-completion
+info:  WSI: app-completion app=86 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=71 app=87 internal=0 acquire=71 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=87 via=source-submit-completion
+info:  WSI: app-completion app=87 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=72 app=88 internal=0 acquire=72 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=88 via=source-submit-completion
+info:  WSI: app-completion app=88 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=73 app=89 internal=0 acquire=73 image=0 generation=2
+info:  WSI: app-completion app=89 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=89 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=74 app=90 internal=0 acquire=74 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=90 via=source-submit-completion
+info:  WSI: app-completion app=90 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=75 app=91 internal=0 acquire=75 image=2 generation=2
+info:  WSI: app-completion app=91 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=91 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=76 app=92 internal=0 acquire=76 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=92 via=source-submit-completion
+info:  WSI: app-completion app=92 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=77 app=93 internal=0 acquire=77 image=1 generation=2
+info:  WSI: app-completion app=93 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=93 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=78 app=94 internal=0 acquire=78 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=94 via=source-submit-completion
+info:  WSI: app-completion app=94 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=79 app=95 internal=0 acquire=79 image=0 generation=2
+info:  WSI: app-completion app=95 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=95 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=80 app=96 internal=0 acquire=80 image=1 generation=2
+info:  WSI: app-completion app=96 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=96 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=81 app=97 internal=0 acquire=81 image=2 generation=2
+info:  WSI: app-completion app=97 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=97 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=82 app=98 internal=0 acquire=82 image=0 generation=2
+info:  WSI: app-completion app=98 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=98 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=83 app=99 internal=0 acquire=83 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=99 via=source-submit-completion
+info:  WSI: app-completion app=99 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=84 app=100 internal=0 acquire=84 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=100 via=source-submit-completion
+info:  WSI: app-completion app=100 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=85 app=101 internal=0 acquire=85 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=101 via=source-submit-completion
+info:  WSI: app-completion app=101 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=86 app=102 internal=0 acquire=86 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=102 via=source-submit-completion
+info:  WSI: app-completion app=102 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=87 app=103 internal=0 acquire=87 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=103 via=source-submit-completion
+info:  WSI: app-completion app=103 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=88 app=104 internal=0 acquire=88 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=104 via=source-submit-completion
+info:  WSI: app-completion app=104 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=89 app=105 internal=0 acquire=89 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=105 via=source-submit-completion
+info:  WSI: app-completion app=105 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=90 app=106 internal=0 acquire=90 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=106 via=source-submit-completion
+info:  WSI: app-completion app=106 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=91 app=107 internal=0 acquire=91 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=107 via=source-submit-completion
+info:  WSI: app-completion app=107 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=92 app=108 internal=0 acquire=92 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=108 via=source-submit-completion
+info:  WSI: app-completion app=108 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=93 app=109 internal=0 acquire=93 image=2 generation=2
+info:  WSI: app-completion app=109 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=109 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=94 app=110 internal=0 acquire=94 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=110 via=source-submit-completion
+info:  WSI: app-completion app=110 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=95 app=111 internal=0 acquire=95 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=111 via=source-submit-completion
+info:  WSI: app-completion app=111 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=96 app=112 internal=0 acquire=96 image=2 generation=2
+info:  WSI: app-completion app=112 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=112 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=97 app=113 internal=0 acquire=97 image=0 generation=2
+info:  WSI: app-completion app=113 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=113 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=98 app=114 internal=0 acquire=98 image=1 generation=2
+info:  WSI: app-completion app=114 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=114 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=99 app=115 internal=0 acquire=99 image=2 generation=2
+info:  WSI: app-completion app=115 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=115 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=100 app=116 internal=0 acquire=100 image=0 generation=2
+info:  WSI: app-completion app=116 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=116 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=101 app=117 internal=0 acquire=101 image=1 generation=2
+info:  WSI: app-completion app=117 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=117 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=102 app=118 internal=0 acquire=102 image=2 generation=2
+info:  WSI: app-completion app=118 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=118 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=103 app=119 internal=0 acquire=103 image=0 generation=2
+info:  WSI: app-completion app=119 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=119 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=104 app=120 internal=0 acquire=104 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=120 via=source-submit-completion
+info:  WSI: app-completion app=120 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=105 app=121 internal=0 acquire=105 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=121 via=source-submit-completion
+info:  WSI: app-completion app=121 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=106 app=122 internal=0 acquire=106 image=0 generation=2
+info:  WSI: app-completion app=122 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=122 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=107 app=123 internal=0 acquire=107 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=123 via=source-submit-completion
+info:  WSI: app-completion app=123 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=108 app=124 internal=0 acquire=108 image=2 generation=2
+info:  WSI: app-completion app=124 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=124 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=109 app=125 internal=0 acquire=109 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=125 via=source-submit-completion
+info:  WSI: app-completion app=125 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=110 app=126 internal=0 acquire=110 image=1 generation=2
+info:  WSI: app-completion app=126 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=126 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=111 app=127 internal=0 acquire=111 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=127 via=source-submit-completion
+info:  WSI: app-completion app=127 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=112 app=128 internal=0 acquire=112 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=128 via=source-submit-completion
+info:  WSI: app-completion app=128 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=113 app=129 internal=0 acquire=113 image=1 generation=2
+info:  WSI: app-completion app=129 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=129 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=114 app=130 internal=0 acquire=114 image=2 generation=2
+info:  WSI: app-completion app=130 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=130 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=115 app=131 internal=0 acquire=115 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=131 via=source-submit-completion
+info:  WSI: app-completion app=131 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=116 app=132 internal=0 acquire=116 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=132 via=source-submit-completion
+info:  WSI: app-completion app=132 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=117 app=133 internal=0 acquire=117 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=133 via=source-submit-completion
+info:  WSI: app-completion app=133 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=118 app=134 internal=0 acquire=118 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=134 via=source-submit-completion
+info:  WSI: app-completion app=134 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=119 app=135 internal=0 acquire=119 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=135 via=source-submit-completion
+info:  WSI: app-completion app=135 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=120 app=136 internal=0 acquire=120 image=2 generation=2
+info:  WSI: app-completion app=136 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=136 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=121 app=137 internal=0 acquire=121 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=137 via=source-submit-completion
+info:  WSI: app-completion app=137 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=122 app=138 internal=0 acquire=122 image=1 generation=2
+info:  WSI: app-completion app=138 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=138 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=123 app=139 internal=0 acquire=123 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=139 via=source-submit-completion
+info:  WSI: app-completion app=139 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=124 app=140 internal=0 acquire=124 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=140 via=source-submit-completion
+info:  WSI: app-completion app=140 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=125 app=141 internal=0 acquire=125 image=1 generation=2
+info:  WSI: app-completion app=141 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=141 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=126 app=142 internal=0 acquire=126 image=2 generation=2
+info:  WSI: app-completion app=142 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=142 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=127 app=143 internal=0 acquire=127 image=0 generation=2
+info:  WSI: app-completion app=143 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=143 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=128 app=144 internal=0 acquire=128 image=1 generation=2
+info:  WSI: app-completion app=144 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=144 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=129 app=145 internal=0 acquire=129 image=2 generation=2
+info:  WSI: app-completion app=145 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=145 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=130 app=146 internal=0 acquire=130 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=146 via=source-submit-completion
+info:  WSI: app-completion app=146 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=131 app=147 internal=0 acquire=131 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=147 via=source-submit-completion
+info:  WSI: app-completion app=147 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=132 app=148 internal=0 acquire=132 image=2 generation=2
+info:  WSI: app-completion app=148 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=148 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=133 app=149 internal=0 acquire=133 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=149 via=source-submit-completion
+info:  WSI: app-completion app=149 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=134 app=150 internal=0 acquire=134 image=1 generation=2
+info:  WSI: app-completion app=150 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=150 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=135 app=151 internal=0 acquire=135 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=151 via=source-submit-completion
+info:  WSI: app-completion app=151 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=136 app=152 internal=0 acquire=136 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=152 via=source-submit-completion
+info:  WSI: app-completion app=152 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=137 app=153 internal=0 acquire=137 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=153 via=source-submit-completion
+info:  WSI: app-completion app=153 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=138 app=154 internal=0 acquire=138 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=154 via=source-submit-completion
+info:  WSI: app-completion app=154 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=139 app=155 internal=0 acquire=139 image=0 generation=2
+info:  WSI: app-completion app=155 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=155 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=140 app=156 internal=0 acquire=140 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=156 via=source-submit-completion
+info:  WSI: app-completion app=156 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=141 app=157 internal=0 acquire=141 image=2 generation=2
+info:  WSI: app-completion app=157 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=157 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=142 app=158 internal=0 acquire=142 image=0 generation=2
+info:  WSI: app-completion app=158 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=158 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=143 app=159 internal=0 acquire=143 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=159 via=source-submit-completion
+info:  WSI: app-completion app=159 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=144 app=160 internal=0 acquire=144 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=160 via=source-submit-completion
+info:  WSI: app-completion app=160 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=145 app=161 internal=0 acquire=145 image=0 generation=2
+info:  WSI: app-completion app=161 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=161 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=146 app=162 internal=0 acquire=146 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=162 via=source-submit-completion
+info:  WSI: app-completion app=162 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=147 app=163 internal=0 acquire=147 image=2 generation=2
+info:  WSI: app-completion app=163 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=163 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=148 app=164 internal=0 acquire=148 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=164 via=source-submit-completion
+info:  WSI: app-completion app=164 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=149 app=165 internal=0 acquire=149 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=165 via=source-submit-completion
+info:  WSI: app-completion app=165 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=150 app=166 internal=0 acquire=150 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=166 via=source-submit-completion
+info:  WSI: app-completion app=166 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=151 app=167 internal=0 acquire=151 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=167 via=source-submit-completion
+info:  WSI: app-completion app=167 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=152 app=168 internal=0 acquire=152 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=168 via=source-submit-completion
+info:  WSI: app-completion app=168 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=153 app=169 internal=0 acquire=153 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=169 via=source-submit-completion
+info:  WSI: app-completion app=169 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=154 app=170 internal=0 acquire=154 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=170 via=source-submit-completion
+info:  WSI: app-completion app=170 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=155 app=171 internal=0 acquire=155 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=171 via=source-submit-completion
+info:  WSI: app-completion app=171 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=156 app=172 internal=0 acquire=156 image=2 generation=2
+info:  WSI: app-completion app=172 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=172 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=157 app=173 internal=0 acquire=157 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=173 via=source-submit-completion
+info:  WSI: app-completion app=173 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=158 app=174 internal=0 acquire=158 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=174 via=source-submit-completion
+info:  WSI: app-completion app=174 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=159 app=175 internal=0 acquire=159 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=175 via=source-submit-completion
+info:  WSI: app-completion app=175 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=160 app=176 internal=0 acquire=160 image=0 generation=2
+info:  WSI: app-completion app=176 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=176 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=161 app=177 internal=0 acquire=161 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=177 via=source-submit-completion
+info:  WSI: app-completion app=177 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=162 app=178 internal=0 acquire=162 image=2 generation=2
+info:  WSI: app-completion app=178 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=178 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=163 app=179 internal=0 acquire=163 image=0 generation=2
+info:  WSI: app-completion app=179 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=179 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=164 app=180 internal=0 acquire=164 image=1 generation=2
+info:  WSI: app-completion app=180 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=180 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=165 app=181 internal=0 acquire=165 image=2 generation=2
+info:  WSI: app-completion app=181 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=181 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=166 app=182 internal=0 acquire=166 image=0 generation=2
+info:  WSI: app-completion app=182 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=182 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=167 app=183 internal=0 acquire=167 image=1 generation=2
+info:  WSI: app-completion app=183 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=183 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=168 app=184 internal=0 acquire=168 image=2 generation=2
+info:  WSI: app-completion app=184 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=184 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=169 app=185 internal=0 acquire=169 image=0 generation=2
+info:  WSI: app-completion app=185 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=185 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=170 app=186 internal=0 acquire=170 image=1 generation=2
+info:  WSI: app-completion app=186 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=186 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=171 app=187 internal=0 acquire=171 image=2 generation=2
+info:  WSI: app-completion app=187 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=187 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=172 app=188 internal=0 acquire=172 image=0 generation=2
+info:  WSI: app-completion app=188 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=188 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=173 app=189 internal=0 acquire=173 image=1 generation=2
+info:  WSI: app-completion app=189 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=189 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=174 app=190 internal=0 acquire=174 image=2 generation=2
+info:  WSI: app-completion app=190 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=190 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=175 app=191 internal=0 acquire=175 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=191 via=source-submit-completion
+info:  WSI: app-completion app=191 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=176 app=192 internal=0 acquire=176 image=1 generation=2
+info:  WSI: app-completion app=192 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=192 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=177 app=193 internal=0 acquire=177 image=2 generation=2
+info:  WSI: app-completion app=193 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=193 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=178 app=194 internal=0 acquire=178 image=0 generation=2
+info:  WSI: app-completion app=194 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=194 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=179 app=195 internal=0 acquire=179 image=1 generation=2
+info:  WSI: app-completion app=195 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=195 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=180 app=196 internal=0 acquire=180 image=2 generation=2
+info:  WSI: app-completion app=196 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=196 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=181 app=197 internal=0 acquire=181 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=197 via=source-submit-completion
+info:  WSI: app-completion app=197 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=182 app=198 internal=0 acquire=182 image=1 generation=2
+info:  WSI: present origin=APPLICATION_SOURCE wsi=183 app=199 internal=0 acquire=183 image=2 generation=2
+info:  WSI: app-completion app=198 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=198 via=source-present-retirement
+info:  WSI: app-completion app=199 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=199 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=184 app=200 internal=0 acquire=184 image=0 generation=2
+info:  WSI: app-completion app=200 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=200 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=185 app=201 internal=0 acquire=185 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=201 via=source-submit-completion
+info:  WSI: app-completion app=201 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=186 app=202 internal=0 acquire=186 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=202 via=source-submit-completion
+info:  WSI: app-completion app=202 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=187 app=203 internal=0 acquire=187 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=203 via=source-submit-completion
+info:  WSI: app-completion app=203 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=188 app=204 internal=0 acquire=188 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=204 via=source-submit-completion
+info:  WSI: app-completion app=204 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=189 app=205 internal=0 acquire=189 image=2 generation=2
+info:  WSI: app-completion app=205 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=205 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=190 app=206 internal=0 acquire=190 image=0 generation=2
+info:  WSI: app-completion app=206 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=206 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=191 app=207 internal=0 acquire=191 image=1 generation=2
+info:  WSI: present origin=APPLICATION_SOURCE wsi=192 app=208 internal=0 acquire=192 image=2 generation=2
+info:  WSI: app-completion app=207 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=207 via=source-present-retirement
+info:  WSI: app-completion app=208 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=208 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=193 app=209 internal=0 acquire=193 image=0 generation=2
+info:  WSI: app-completion app=209 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=209 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=194 app=210 internal=0 acquire=194 image=1 generation=2
+info:  WSI: app-completion app=210 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=210 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=195 app=211 internal=0 acquire=195 image=2 generation=2
+info:  WSI: app-completion app=211 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=211 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=196 app=212 internal=0 acquire=196 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=212 via=source-submit-completion
+info:  WSI: app-completion app=212 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=197 app=213 internal=0 acquire=197 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=213 via=source-submit-completion
+info:  WSI: app-completion app=213 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=198 app=214 internal=0 acquire=198 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=214 via=source-submit-completion
+info:  WSI: app-completion app=214 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=199 app=215 internal=0 acquire=199 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=215 via=source-submit-completion
+info:  WSI: app-completion app=215 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=200 app=216 internal=0 acquire=200 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=216 via=source-submit-completion
+info:  WSI: app-completion app=216 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=201 app=217 internal=0 acquire=201 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=217 via=source-submit-completion
+info:  WSI: app-completion app=217 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=202 app=218 internal=0 acquire=202 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=218 via=source-submit-completion
+info:  WSI: app-completion app=218 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=203 app=219 internal=0 acquire=203 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=219 via=source-submit-completion
+info:  WSI: app-completion app=219 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=204 app=220 internal=0 acquire=204 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=220 via=source-submit-completion
+info:  WSI: app-completion app=220 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=205 app=221 internal=0 acquire=205 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=221 via=source-submit-completion
+info:  WSI: app-completion app=221 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=206 app=222 internal=0 acquire=206 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=222 via=source-submit-completion
+info:  WSI: app-completion app=222 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=207 app=223 internal=0 acquire=207 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=223 via=source-submit-completion
+info:  WSI: app-completion app=223 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=208 app=224 internal=0 acquire=208 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=224 via=source-submit-completion
+info:  WSI: app-completion app=224 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=209 app=225 internal=0 acquire=209 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=225 via=source-submit-completion
+info:  WSI: app-completion app=225 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=210 app=226 internal=0 acquire=210 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=226 via=source-present-retirement
+info:  WSI: app-completion app=226 app-signal=deferred
+info:  WSI: present origin=APPLICATION_SOURCE wsi=211 app=227 internal=0 acquire=211 image=0 generation=2
+info:  WSI: app-completion app=227 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=227 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=212 app=228 internal=0 acquire=212 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=228 via=source-submit-completion
+info:  WSI: app-completion app=228 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=213 app=229 internal=0 acquire=213 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=229 via=source-submit-completion
+info:  WSI: app-completion app=229 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=214 app=230 internal=0 acquire=214 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=230 via=source-present-retirement
+info:  WSI: app-completion app=230 app-signal=deferred
+info:  WSI: present origin=APPLICATION_SOURCE wsi=215 app=231 internal=0 acquire=215 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=231 via=source-submit-completion
+info:  WSI: app-completion app=231 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=216 app=232 internal=0 acquire=216 image=2 generation=2
+info:  WSI: app-completion app=232 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=232 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=217 app=233 internal=0 acquire=217 image=0 generation=2
+info:  WSI: app-completion app=233 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=233 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=218 app=234 internal=0 acquire=218 image=1 generation=2
+info:  WSI: app-completion app=234 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=234 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=219 app=235 internal=0 acquire=219 image=2 generation=2
+info:  WSI: app-completion app=235 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=235 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=220 app=236 internal=0 acquire=220 image=0 generation=2
+info:  WSI: app-completion app=236 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=236 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=221 app=237 internal=0 acquire=221 image=1 generation=2
+info:  WSI: app-completion app=237 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=237 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=222 app=238 internal=0 acquire=222 image=2 generation=2
+info:  WSI: app-completion app=238 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=238 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=223 app=239 internal=0 acquire=223 image=0 generation=2
+info:  WSI: app-completion app=239 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=239 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=224 app=240 internal=0 acquire=224 image=1 generation=2
+info:  WSI: app-completion app=240 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=240 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=225 app=241 internal=0 acquire=225 image=2 generation=2
+info:  WSI: app-completion app=241 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=241 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=226 app=242 internal=0 acquire=226 image=0 generation=2
+info:  WSI: app-completion app=242 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=242 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=227 app=243 internal=0 acquire=227 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=243 via=source-submit-completion
+info:  WSI: app-completion app=243 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=228 app=244 internal=0 acquire=228 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=244 via=source-submit-completion
+info:  WSI: app-completion app=244 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=229 app=245 internal=0 acquire=229 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=245 via=source-submit-completion
+info:  WSI: app-completion app=245 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=230 app=246 internal=0 acquire=230 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=246 via=source-submit-completion
+info:  WSI: app-completion app=246 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=231 app=247 internal=0 acquire=231 image=2 generation=2
+info:  WSI: app-completion app=247 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=247 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=232 app=248 internal=0 acquire=232 image=0 generation=2
+info:  WSI: app-completion app=248 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=248 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=233 app=249 internal=0 acquire=233 image=1 generation=2
+info:  WSI: app-completion app=249 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=249 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=234 app=250 internal=0 acquire=234 image=2 generation=2
+info:  WSI: app-completion app=250 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=250 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=235 app=251 internal=0 acquire=235 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=251 via=source-submit-completion
+info:  WSI: app-completion app=251 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=236 app=252 internal=0 acquire=236 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=252 via=source-submit-completion
+info:  WSI: app-completion app=252 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=237 app=253 internal=0 acquire=237 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=253 via=source-submit-completion
+info:  WSI: app-completion app=253 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=238 app=254 internal=0 acquire=238 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=254 via=source-submit-completion
+info:  WSI: app-completion app=254 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=239 app=255 internal=0 acquire=239 image=1 generation=2
+info:  WSI: app-completion app=255 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=255 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=240 app=256 internal=0 acquire=240 image=2 generation=2
+info:  WSI: app-completion app=256 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=256 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=241 app=257 internal=0 acquire=241 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=257 via=source-submit-completion
+info:  WSI: app-completion app=257 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=242 app=258 internal=0 acquire=242 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=258 via=source-submit-completion
+info:  WSI: app-completion app=258 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=243 app=259 internal=0 acquire=243 image=2 generation=2
+info:  WSI: app-completion app=259 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=259 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=244 app=260 internal=0 acquire=244 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=260 via=source-submit-completion
+info:  WSI: app-completion app=260 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=245 app=261 internal=0 acquire=245 image=1 generation=2
+info:  WSI: app-completion app=261 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=261 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=246 app=262 internal=0 acquire=246 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=262 via=source-submit-completion
+info:  WSI: app-completion app=262 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=247 app=263 internal=0 acquire=247 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=263 via=source-submit-completion
+info:  WSI: app-completion app=263 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=248 app=264 internal=0 acquire=248 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=264 via=source-submit-completion
+info:  WSI: app-completion app=264 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=249 app=265 internal=0 acquire=249 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=265 via=source-submit-completion
+info:  WSI: app-completion app=265 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=250 app=266 internal=0 acquire=250 image=0 generation=2
+info:  WSI: app-completion app=266 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=266 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=251 app=267 internal=0 acquire=251 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=267 via=source-submit-completion
+info:  WSI: app-completion app=267 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=252 app=268 internal=0 acquire=252 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=268 via=source-submit-completion
+info:  WSI: app-completion app=268 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=253 app=269 internal=0 acquire=253 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=269 via=source-submit-completion
+info:  WSI: app-completion app=269 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=254 app=270 internal=0 acquire=254 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=270 via=source-submit-completion
+info:  WSI: app-completion app=270 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=255 app=271 internal=0 acquire=255 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=271 via=source-submit-completion
+info:  WSI: app-completion app=271 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=256 app=272 internal=0 acquire=256 image=0 generation=2
+info:  WSI: app-completion app=272 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=272 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=257 app=273 internal=0 acquire=257 image=1 generation=2
+info:  WSI: app-completion app=273 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=273 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=258 app=274 internal=0 acquire=258 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=274 via=source-submit-completion
+info:  WSI: app-completion app=274 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=259 app=275 internal=0 acquire=259 image=0 generation=2
+info:  WSI: app-completion app=275 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=275 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=260 app=276 internal=0 acquire=260 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=276 via=source-submit-completion
+info:  WSI: app-completion app=276 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=261 app=277 internal=0 acquire=261 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=277 via=source-submit-completion
+info:  WSI: app-completion app=277 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=262 app=278 internal=0 acquire=262 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=278 via=source-submit-completion
+info:  WSI: app-completion app=278 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=263 app=279 internal=0 acquire=263 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=279 via=source-submit-completion
+info:  WSI: app-completion app=279 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=264 app=280 internal=0 acquire=264 image=2 generation=2
+info:  WSI: app-completion app=280 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=280 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=265 app=281 internal=0 acquire=265 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=281 via=source-submit-completion
+info:  WSI: app-completion app=281 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=266 app=282 internal=0 acquire=266 image=1 generation=2
+info:  WSI: app-completion app=282 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=282 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=267 app=283 internal=0 acquire=267 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=283 via=source-submit-completion
+info:  WSI: app-completion app=283 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=268 app=284 internal=0 acquire=268 image=0 generation=2
+info:  WSI: app-completion app=284 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=284 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=269 app=285 internal=0 acquire=269 image=1 generation=2
+info:  WSI: app-completion app=285 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=285 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=270 app=286 internal=0 acquire=270 image=2 generation=2
+info:  WSI: app-completion app=286 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=286 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=271 app=287 internal=0 acquire=271 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=287 via=source-submit-completion
+info:  WSI: app-completion app=287 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=272 app=288 internal=0 acquire=272 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=288 via=source-submit-completion
+info:  WSI: app-completion app=288 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=273 app=289 internal=0 acquire=273 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=289 via=source-submit-completion
+info:  WSI: app-completion app=289 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=274 app=290 internal=0 acquire=274 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=290 via=source-submit-completion
+info:  WSI: app-completion app=290 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=275 app=291 internal=0 acquire=275 image=1 generation=2
+info:  WSI: app-completion app=291 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=291 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=276 app=292 internal=0 acquire=276 image=2 generation=2
+info:  WSI: app-completion app=292 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=292 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=277 app=293 internal=0 acquire=277 image=0 generation=2
+info:  WSI: app-completion app=293 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=293 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=278 app=294 internal=0 acquire=278 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=294 via=source-submit-completion
+info:  WSI: app-completion app=294 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=279 app=295 internal=0 acquire=279 image=2 generation=2
+info:  WSI: app-completion app=295 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=295 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=280 app=296 internal=0 acquire=280 image=0 generation=2
+info:  WSI: app-completion app=296 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=296 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=281 app=297 internal=0 acquire=281 image=1 generation=2
+info:  WSI: app-completion app=297 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=297 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=282 app=298 internal=0 acquire=282 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=298 via=source-submit-completion
+info:  WSI: app-completion app=298 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=283 app=299 internal=0 acquire=283 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=299 via=source-submit-completion
+info:  WSI: app-completion app=299 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=284 app=300 internal=0 acquire=284 image=1 generation=2
+info:  WSI: app-completion app=300 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=300 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=285 app=301 internal=0 acquire=285 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=301 via=source-submit-completion
+info:  WSI: app-completion app=301 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=286 app=302 internal=0 acquire=286 image=0 generation=2
+info:  WSI: app-completion app=302 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=302 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=287 app=303 internal=0 acquire=287 image=1 generation=2
+info:  WSI: app-completion app=303 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=303 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=288 app=304 internal=0 acquire=288 image=2 generation=2
+info:  WSI: app-completion app=304 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=304 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=289 app=305 internal=0 acquire=289 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=305 via=source-submit-completion
+info:  WSI: app-completion app=305 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=290 app=306 internal=0 acquire=290 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=306 via=source-submit-completion
+info:  WSI: app-completion app=306 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=291 app=307 internal=0 acquire=291 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=307 via=source-submit-completion
+info:  WSI: app-completion app=307 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=292 app=308 internal=0 acquire=292 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=308 via=source-submit-completion
+info:  WSI: app-completion app=308 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=293 app=309 internal=0 acquire=293 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=309 via=source-submit-completion
+info:  WSI: app-completion app=309 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=294 app=310 internal=0 acquire=294 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=310 via=source-submit-completion
+info:  WSI: app-completion app=310 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=295 app=311 internal=0 acquire=295 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=311 via=source-submit-completion
+info:  WSI: app-completion app=311 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=296 app=312 internal=0 acquire=296 image=1 generation=2
+info:  WSI: app-completion app=312 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=312 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=297 app=313 internal=0 acquire=297 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=313 via=source-submit-completion
+info:  WSI: app-completion app=313 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=298 app=314 internal=0 acquire=298 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=314 via=source-submit-completion
+info:  WSI: app-completion app=314 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=299 app=315 internal=0 acquire=299 image=1 generation=2
+info:  WSI: app-completion app=315 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=315 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=300 app=316 internal=0 acquire=300 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=316 via=source-submit-completion
+info:  WSI: app-completion app=316 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=301 app=317 internal=0 acquire=301 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=317 via=source-submit-completion
+info:  WSI: app-completion app=317 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=302 app=318 internal=0 acquire=302 image=1 generation=2
+info:  WSI: app-completion app=318 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=318 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=303 app=319 internal=0 acquire=303 image=2 generation=2
+info:  WSI: app-completion app=319 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=319 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=304 app=320 internal=0 acquire=304 image=0 generation=2
+info:  WSI: app-completion app=320 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=320 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=305 app=321 internal=0 acquire=305 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=321 via=source-submit-completion
+info:  WSI: app-completion app=321 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=306 app=322 internal=0 acquire=306 image=2 generation=2
+info:  WSI: app-completion app=322 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=322 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=307 app=323 internal=0 acquire=307 image=0 generation=2
+info:  WSI: app-completion app=323 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=323 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=308 app=324 internal=0 acquire=308 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=324 via=source-submit-completion
+info:  WSI: app-completion app=324 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=309 app=325 internal=0 acquire=309 image=2 generation=2
+info:  WSI: app-completion app=325 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=325 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=310 app=326 internal=0 acquire=310 image=0 generation=2
+info:  WSI: app-completion app=326 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=326 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=311 app=327 internal=0 acquire=311 image=1 generation=2
+info:  WSI: app-completion app=327 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=327 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=312 app=328 internal=0 acquire=312 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=328 via=source-submit-completion
+info:  WSI: app-completion app=328 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=313 app=329 internal=0 acquire=313 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=329 via=source-submit-completion
+info:  WSI: app-completion app=329 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=314 app=330 internal=0 acquire=314 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=330 via=source-submit-completion
+info:  WSI: app-completion app=330 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=315 app=331 internal=0 acquire=315 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=331 via=source-submit-completion
+info:  WSI: app-completion app=331 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=316 app=332 internal=0 acquire=316 image=0 generation=2
+info:  WSI: app-completion app=332 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=332 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=317 app=333 internal=0 acquire=317 image=1 generation=2
+info:  WSI: app-completion app=333 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=333 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=318 app=334 internal=0 acquire=318 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=334 via=source-submit-completion
+info:  WSI: app-completion app=334 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=319 app=335 internal=0 acquire=319 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=335 via=source-submit-completion
+info:  WSI: app-completion app=335 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=320 app=336 internal=0 acquire=320 image=1 generation=2
+info:  WSI: app-completion app=336 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=336 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=321 app=337 internal=0 acquire=321 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=337 via=source-submit-completion
+info:  WSI: app-completion app=337 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=322 app=338 internal=0 acquire=322 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=338 via=source-submit-completion
+info:  WSI: app-completion app=338 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=323 app=339 internal=0 acquire=323 image=1 generation=2
+info:  WSI: app-completion app=339 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=339 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=324 app=340 internal=0 acquire=324 image=2 generation=2
+info:  WSI: app-completion app=340 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=340 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=325 app=341 internal=0 acquire=325 image=0 generation=2
+info:  WSI: app-completion app=341 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=341 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=326 app=342 internal=0 acquire=326 image=1 generation=2
+info:  WSI: app-completion app=342 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=342 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=327 app=343 internal=0 acquire=327 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=343 via=source-submit-completion
+info:  WSI: app-completion app=343 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=328 app=344 internal=0 acquire=328 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=344 via=source-submit-completion
+info:  WSI: app-completion app=344 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=329 app=345 internal=0 acquire=329 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=345 via=source-submit-completion
+info:  WSI: app-completion app=345 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=330 app=346 internal=0 acquire=330 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=346 via=source-submit-completion
+info:  WSI: app-completion app=346 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=331 app=347 internal=0 acquire=331 image=0 generation=2
+info:  WSI: app-completion app=347 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=347 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=332 app=348 internal=0 acquire=332 image=1 generation=2
+info:  WSI: app-completion app=348 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=348 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=333 app=349 internal=0 acquire=333 image=2 generation=2
+info:  WSI: app-completion app=349 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=349 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=334 app=350 internal=0 acquire=334 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=350 via=source-submit-completion
+info:  WSI: app-completion app=350 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=335 app=351 internal=0 acquire=335 image=1 generation=2
+info:  WSI: app-completion app=351 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=351 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=336 app=352 internal=0 acquire=336 image=2 generation=2
+info:  WSI: app-completion app=352 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=352 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=337 app=353 internal=0 acquire=337 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=353 via=source-submit-completion
+info:  WSI: app-completion app=353 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=338 app=354 internal=0 acquire=338 image=1 generation=2
+info:  WSI: app-completion app=354 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=354 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=339 app=355 internal=0 acquire=339 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=355 via=source-submit-completion
+info:  WSI: app-completion app=355 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=340 app=356 internal=0 acquire=340 image=0 generation=2
+info:  WSI: app-completion app=356 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=356 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=341 app=357 internal=0 acquire=341 image=1 generation=2
+info:  WSI: app-completion app=357 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=357 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=342 app=358 internal=0 acquire=342 image=2 generation=2
+info:  WSI: app-completion app=358 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=358 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=343 app=359 internal=0 acquire=343 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=359 via=source-submit-completion
+info:  WSI: app-completion app=359 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=344 app=360 internal=0 acquire=344 image=1 generation=2
+info:  WSI: app-completion app=360 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=360 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=345 app=361 internal=0 acquire=345 image=2 generation=2
+info:  WSI: app-completion app=361 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=361 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=346 app=362 internal=0 acquire=346 image=0 generation=2
+info:  WSI: app-completion app=362 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=362 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=347 app=363 internal=0 acquire=347 image=1 generation=2
+info:  WSI: app-completion app=363 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=363 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=348 app=364 internal=0 acquire=348 image=2 generation=2
+info:  WSI: app-completion app=364 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=364 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=349 app=365 internal=0 acquire=349 image=0 generation=2
+info:  WSI: app-completion app=365 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=365 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=350 app=366 internal=0 acquire=350 image=1 generation=2
+info:  WSI: app-completion app=366 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=366 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=351 app=367 internal=0 acquire=351 image=2 generation=2
+info:  WSI: app-completion app=367 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=367 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=352 app=368 internal=0 acquire=352 image=0 generation=2
+info:  WSI: app-completion app=368 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=368 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=353 app=369 internal=0 acquire=353 image=1 generation=2
+info:  WSI: app-completion app=369 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=369 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=354 app=370 internal=0 acquire=354 image=2 generation=2
+info:  WSI: app-completion app=370 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=370 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=355 app=371 internal=0 acquire=355 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=371 via=source-submit-completion
+info:  WSI: app-completion app=371 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=356 app=372 internal=0 acquire=356 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=372 via=source-submit-completion
+info:  WSI: app-completion app=372 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=357 app=373 internal=0 acquire=357 image=2 generation=2
+info:  WSI: app-completion app=373 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=373 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=358 app=374 internal=0 acquire=358 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=374 via=source-submit-completion
+info:  WSI: app-completion app=374 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=359 app=375 internal=0 acquire=359 image=1 generation=2
+info:  WSI: app-completion app=375 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=375 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=360 app=376 internal=0 acquire=360 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=376 via=source-submit-completion
+info:  WSI: app-completion app=376 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=361 app=377 internal=0 acquire=361 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=377 via=source-submit-completion
+info:  WSI: app-completion app=377 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=362 app=378 internal=0 acquire=362 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=378 via=source-submit-completion
+info:  WSI: app-completion app=378 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=363 app=379 internal=0 acquire=363 image=2 generation=2
+info:  WSI: app-completion app=379 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=379 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=364 app=380 internal=0 acquire=364 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=380 via=source-submit-completion
+info:  WSI: app-completion app=380 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=365 app=381 internal=0 acquire=365 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=381 via=source-submit-completion
+info:  WSI: app-completion app=381 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=366 app=382 internal=0 acquire=366 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=382 via=source-submit-completion
+info:  WSI: app-completion app=382 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=367 app=383 internal=0 acquire=367 image=0 generation=2
+info:  WSI: app-completion app=383 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=383 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=368 app=384 internal=0 acquire=368 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=384 via=source-submit-completion
+info:  WSI: app-completion app=384 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=369 app=385 internal=0 acquire=369 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=385 via=source-submit-completion
+info:  WSI: app-completion app=385 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=370 app=386 internal=0 acquire=370 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=386 via=source-submit-completion
+info:  WSI: app-completion app=386 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=371 app=387 internal=0 acquire=371 image=1 generation=2
+info:  WSI: app-completion app=387 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=387 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=372 app=388 internal=0 acquire=372 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=388 via=source-submit-completion
+info:  WSI: app-completion app=388 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=373 app=389 internal=0 acquire=373 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=389 via=source-submit-completion
+info:  WSI: app-completion app=389 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=374 app=390 internal=0 acquire=374 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=390 via=source-submit-completion
+info:  WSI: app-completion app=390 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=375 app=391 internal=0 acquire=375 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=391 via=source-submit-completion
+info:  WSI: app-completion app=391 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=376 app=392 internal=0 acquire=376 image=0 generation=2
+info:  WSI: app-completion app=392 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=392 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=377 app=393 internal=0 acquire=377 image=1 generation=2
+info:  WSI: app-completion app=393 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=393 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=378 app=394 internal=0 acquire=378 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=394 via=source-submit-completion
+info:  WSI: app-completion app=394 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=379 app=395 internal=0 acquire=379 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=395 via=source-submit-completion
+info:  WSI: app-completion app=395 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=380 app=396 internal=0 acquire=380 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=396 via=source-submit-completion
+info:  WSI: app-completion app=396 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=381 app=397 internal=0 acquire=381 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=397 via=source-submit-completion
+info:  WSI: app-completion app=397 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=382 app=398 internal=0 acquire=382 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=398 via=source-submit-completion
+info:  WSI: app-completion app=398 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=383 app=399 internal=0 acquire=383 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=399 via=source-submit-completion
+info:  WSI: app-completion app=399 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=384 app=400 internal=0 acquire=384 image=2 generation=2
+info:  WSI: app-completion app=400 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=400 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=385 app=401 internal=0 acquire=385 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=401 via=source-submit-completion
+info:  WSI: app-completion app=401 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=386 app=402 internal=0 acquire=386 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=402 via=source-submit-completion
+info:  WSI: app-completion app=402 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=387 app=403 internal=0 acquire=387 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=403 via=source-submit-completion
+info:  WSI: app-completion app=403 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=388 app=404 internal=0 acquire=388 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=404 via=source-submit-completion
+info:  WSI: app-completion app=404 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=389 app=405 internal=0 acquire=389 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=405 via=source-submit-completion
+info:  WSI: app-completion app=405 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=390 app=406 internal=0 acquire=390 image=2 generation=2
+info:  WSI: app-completion app=406 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=406 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=391 app=407 internal=0 acquire=391 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=407 via=source-submit-completion
+info:  WSI: app-completion app=407 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=392 app=408 internal=0 acquire=392 image=1 generation=2
+info:  WSI: app-completion app=408 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=408 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=393 app=409 internal=0 acquire=393 image=2 generation=2
+info:  WSI: app-completion app=409 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=409 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=394 app=410 internal=0 acquire=394 image=0 generation=2
+info:  WSI: app-completion app=410 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=410 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=395 app=411 internal=0 acquire=395 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=411 via=source-submit-completion
+info:  WSI: app-completion app=411 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=396 app=412 internal=0 acquire=396 image=2 generation=2
+info:  WSI: app-completion app=412 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=412 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=397 app=413 internal=0 acquire=397 image=0 generation=2
+info:  WSI: app-completion app=413 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=413 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=398 app=414 internal=0 acquire=398 image=1 generation=2
+info:  WSI: app-completion app=414 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=414 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=399 app=415 internal=0 acquire=399 image=2 generation=2
+info:  WSI: app-completion app=415 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=415 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=400 app=416 internal=0 acquire=400 image=0 generation=2
+info:  WSI: app-completion app=416 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=416 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=401 app=417 internal=0 acquire=401 image=1 generation=2
+info:  WSI: app-completion app=417 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=417 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=402 app=418 internal=0 acquire=402 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=418 via=source-submit-completion
+info:  WSI: app-completion app=418 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=403 app=419 internal=0 acquire=403 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=419 via=source-submit-completion
+info:  WSI: app-completion app=419 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=404 app=420 internal=0 acquire=404 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=420 via=source-submit-completion
+info:  WSI: app-completion app=420 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=405 app=421 internal=0 acquire=405 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=421 via=source-submit-completion
+info:  WSI: app-completion app=421 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=406 app=422 internal=0 acquire=406 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=422 via=source-submit-completion
+info:  WSI: app-completion app=422 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=407 app=423 internal=0 acquire=407 image=1 generation=2
+info:  WSI: app-completion app=423 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=423 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=408 app=424 internal=0 acquire=408 image=2 generation=2
+info:  WSI: app-completion app=424 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=424 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=409 app=425 internal=0 acquire=409 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=425 via=source-submit-completion
+info:  WSI: app-completion app=425 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=410 app=426 internal=0 acquire=410 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=426 via=source-submit-completion
+info:  WSI: app-completion app=426 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=411 app=427 internal=0 acquire=411 image=2 generation=2
+info:  WSI: app-completion app=427 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=427 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=412 app=428 internal=0 acquire=412 image=0 generation=2
+info:  WSI: app-completion app=428 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=428 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=413 app=429 internal=0 acquire=413 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=429 via=source-submit-completion
+info:  WSI: app-completion app=429 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=414 app=430 internal=0 acquire=414 image=2 generation=2
+info:  WSI: app-completion app=430 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=430 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=415 app=431 internal=0 acquire=415 image=0 generation=2
+info:  WSI: app-completion app=431 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=431 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=416 app=432 internal=0 acquire=416 image=1 generation=2
+info:  WSI: app-completion app=432 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=432 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=417 app=433 internal=0 acquire=417 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=433 via=source-submit-completion
+info:  WSI: app-completion app=433 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=418 app=434 internal=0 acquire=418 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=434 via=source-submit-completion
+info:  WSI: app-completion app=434 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=419 app=435 internal=0 acquire=419 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=435 via=source-submit-completion
+info:  WSI: app-completion app=435 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=420 app=436 internal=0 acquire=420 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=436 via=source-submit-completion
+info:  WSI: app-completion app=436 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=421 app=437 internal=0 acquire=421 image=0 generation=2
+info:  WSI: app-completion app=437 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=437 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=422 app=438 internal=0 acquire=422 image=1 generation=2
+info:  WSI: app-completion app=438 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=438 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=423 app=439 internal=0 acquire=423 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=439 via=source-submit-completion
+info:  WSI: app-completion app=439 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=424 app=440 internal=0 acquire=424 image=0 generation=2
+info:  WSI: app-completion app=440 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=440 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=425 app=441 internal=0 acquire=425 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=441 via=source-submit-completion
+info:  WSI: app-completion app=441 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=426 app=442 internal=0 acquire=426 image=2 generation=2
+info:  WSI: app-completion app=442 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=442 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=427 app=443 internal=0 acquire=427 image=0 generation=2
+info:  WSI: app-completion app=443 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=443 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=428 app=444 internal=0 acquire=428 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=444 via=source-submit-completion
+info:  WSI: app-completion app=444 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=429 app=445 internal=0 acquire=429 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=445 via=source-submit-completion
+info:  WSI: app-completion app=445 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=430 app=446 internal=0 acquire=430 image=0 generation=2
+info:  WSI: app-completion app=446 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=446 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=431 app=447 internal=0 acquire=431 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=447 via=source-submit-completion
+info:  WSI: app-completion app=447 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=432 app=448 internal=0 acquire=432 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=448 via=source-submit-completion
+info:  WSI: app-completion app=448 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=433 app=449 internal=0 acquire=433 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=449 via=source-submit-completion
+info:  WSI: app-completion app=449 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=434 app=450 internal=0 acquire=434 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=450 via=source-submit-completion
+info:  WSI: app-completion app=450 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=435 app=451 internal=0 acquire=435 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=451 via=source-submit-completion
+info:  WSI: app-completion app=451 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=436 app=452 internal=0 acquire=436 image=0 generation=2
+info:  WSI: app-completion app=452 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=452 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=437 app=453 internal=0 acquire=437 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=453 via=source-submit-completion
+info:  WSI: app-completion app=453 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=438 app=454 internal=0 acquire=438 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=454 via=source-submit-completion
+info:  WSI: app-completion app=454 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=439 app=455 internal=0 acquire=439 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=455 via=source-submit-completion
+info:  WSI: app-completion app=455 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=440 app=456 internal=0 acquire=440 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=456 via=source-submit-completion
+info:  WSI: app-completion app=456 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=441 app=457 internal=0 acquire=441 image=2 generation=2
+info:  WSI: app-completion app=457 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=457 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=442 app=458 internal=0 acquire=442 image=0 generation=2
+info:  WSI: app-completion app=458 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=458 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=443 app=459 internal=0 acquire=443 image=1 generation=2
+info:  WSI: app-completion app=459 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=459 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=444 app=460 internal=0 acquire=444 image=2 generation=2
+info:  WSI: app-completion app=460 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=460 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=445 app=461 internal=0 acquire=445 image=0 generation=2
+info:  WSI: app-completion app=461 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=461 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=446 app=462 internal=0 acquire=446 image=1 generation=2
+info:  WSI: app-completion app=462 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=462 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=447 app=463 internal=0 acquire=447 image=2 generation=2
+info:  WSI: app-completion app=463 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=463 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=448 app=464 internal=0 acquire=448 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=464 via=source-submit-completion
+info:  WSI: app-completion app=464 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=449 app=465 internal=0 acquire=449 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=465 via=source-submit-completion
+info:  WSI: app-completion app=465 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=450 app=466 internal=0 acquire=450 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=466 via=source-submit-completion
+info:  WSI: app-completion app=466 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=451 app=467 internal=0 acquire=451 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=467 via=source-submit-completion
+info:  WSI: app-completion app=467 app-signal=signaled

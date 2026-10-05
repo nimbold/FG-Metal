@@ -1,0 +1,29 @@
+{
+  "name": "final-current-internal-15hz-20s",
+  "exit_status": 0,
+  "wall_seconds": 20.79907229199307,
+  "internal_wsi_enabled": true,
+  "source_cadence_variant": "15hz",
+  "visual": "DIRECT VISUAL CHECK REQUIRED",
+  "environment": {
+    "WINEPREFIX": "/tmp/fgmetal-step11c/prefix-final-release-proof-rgba8-15s",
+    "WINEDLLOVERRIDES": "d3d11,dxgi=n,b",
+    "WINEDEBUG": "+loaddll",
+    "DXVK_LOG_LEVEL": "info",
+    "DXVK_LOG_PATH": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11c/evidence/final-current-internal-15hz-20s",
+    "DXVK_HUD": "",
+    "DXVK_INTERNAL_WSI_TRACE": "1",
+    "DYLD_PRINT_LIBRARIES": "1",
+    "FG_AUDIT_ENABLE": "1",
+    "FG_AUDIT_RUN_SECONDS": "20",
+    "FG_AUDIT_SKIP_RESIZE": "1",
+    "FG_AUDIT_WAITABLE": "1",
+    "FG_AB_BGRA": "0",
+    "DXVK_INTERNAL_WSI_PROOF": "1"
+  },
+  "sha256": {
+    "d3d11-semantics-15hz.exe": "70cef984126cc47cc3fa4a314dee0ad9428edafa2421805b2309b09328ac0d28",
+    "d3d11.dll": "3c39a706d2fb577825592b9bfbc335feb218f93f933e7b83a25dcda8e1f32c3c",
+    "dxgi.dll": "17cbe8e84906ce9657493b1301e712cfc8123413034666fd9387dfe1bbf5b33c"
+  }
+}

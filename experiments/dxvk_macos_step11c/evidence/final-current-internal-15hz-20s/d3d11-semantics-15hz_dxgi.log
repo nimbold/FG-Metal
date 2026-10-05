@@ -1,0 +1,17 @@
+info:  Game: d3d11-semantics-15hz.exe
+info:  DXVK: v3.1-macos1.0-48-g8d348236
+info:  Build: x86_64 gcc 16.2.0
+info:  Vulkan: Found vkGetInstanceProcAddr in winevulkan.dll @ 0x6ffff90b79c0
+info:  Extension providers:
+info:    Platform WSI
+info:    OpenVR
+info:  OpenVR: could not open registry key, status 2
+info:  OpenVR: Failed to locate module
+info:    OpenXR
+info:  Enabled instance extensions:
+info:    VK_KHR_get_surface_capabilities2
+info:    VK_KHR_surface
+info:    VK_KHR_surface_maintenance1
+info:    VK_KHR_win32_surface
+info:  Found device: Apple M3 (MoltenVK 0.2.2210)
+warn:  DxgiSwapChain::GetFrameStatistics: Frame statistics may be inaccurate

@@ -1,0 +1,29 @@
+{
+  "name": "cooperative-final-candidate-30hz-15s",
+  "exit_status": 0,
+  "wall_seconds": 15.490176249993965,
+  "internal_wsi_enabled": true,
+  "source_cadence_variant": "30hz-baseline-harness",
+  "visual": "DIRECT VISUAL CHECK REQUIRED",
+  "environment": {
+    "WINEPREFIX": "/tmp/fgmetal-step11c/prefix-cooperative-final-candidate-30hz-15s",
+    "WINEDLLOVERRIDES": "d3d11,dxgi=n,b",
+    "WINEDEBUG": "+loaddll",
+    "DXVK_LOG_LEVEL": "info",
+    "DXVK_LOG_PATH": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11c/evidence/cooperative-final-candidate-30hz-15s",
+    "DXVK_HUD": "",
+    "DXVK_INTERNAL_WSI_TRACE": "1",
+    "DYLD_PRINT_LIBRARIES": "1",
+    "FG_AUDIT_ENABLE": "1",
+    "FG_AUDIT_RUN_SECONDS": "15",
+    "FG_AUDIT_SKIP_RESIZE": "1",
+    "FG_AUDIT_WAITABLE": "1",
+    "FG_AB_BGRA": "0",
+    "DXVK_INTERNAL_WSI_PROOF": "1"
+  },
+  "sha256": {
+    "d3d11.dll": "09e73ab505da1cb5740fdd2d413f331144f58ca2def357426633762525cbfe03",
+    "d3d11-semantics.exe": "3d610e4e5738ed3332c009acb805c668acc8f6f5c1a57781b3e4d3b5940653cb",
+    "dxgi.dll": "17cbe8e84906ce9657493b1301e712cfc8123413034666fd9387dfe1bbf5b33c"
+  }
+}

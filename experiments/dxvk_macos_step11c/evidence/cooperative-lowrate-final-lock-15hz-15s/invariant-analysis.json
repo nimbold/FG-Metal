@@ -1,0 +1,88 @@
+{
+  "verdict": "PASS_API_ID_SEPARATION",
+  "baseline": {
+    "name": "lowrate-disabled-final-lock-15hz-15s",
+    "application_present_count": 226,
+    "last_present_count_final": 226,
+    "frame_statistics_success_count": 225,
+    "frame_statistics_timing_span": {
+      "sample_count": 225,
+      "present_refresh_delta": 895,
+      "sync_refresh_delta": 897,
+      "sync_qpc_delta": 149129930
+    },
+    "frame_statistics_lag_min_max": [
+      1,
+      1
+    ],
+    "waitable_status_counts": {
+      "0": 226
+    },
+    "app_frame_latency_signal_count": 226,
+    "source_present_cpu_us": {
+      "samples": 226,
+      "p50_us": 27,
+      "p95_us": 54,
+      "p99_us": 142,
+      "max_us": 6960
+    }
+  },
+  "experiment": {
+    "name": "cooperative-lowrate-final-lock-15hz-15s",
+    "application_present_count": 226,
+    "last_present_count_final": 226,
+    "frame_statistics_success_count": 225,
+    "frame_statistics_lag_min_max": [
+      1,
+      1
+    ],
+    "frame_statistics_timing_span": {
+      "sample_count": 225,
+      "present_refresh_delta": 895,
+      "sync_refresh_delta": 896,
+      "sync_qpc_delta": 149172606
+    },
+    "waitable_status_counts": {
+      "0": 226
+    },
+    "app_frame_latency_signal_count": 226,
+    "source_wsi": 226,
+    "internal_wsi": 43,
+    "total_wsi": 269,
+    "internal_to_source_ratio": 0.1902654867256637,
+    "internal_drop_reasons": {
+      "deadline-expired": 71,
+      "queue-full": 111
+    },
+    "source_present_cpu_us": {
+      "samples": 226,
+      "p50_us": 30,
+      "p95_us": 90,
+      "p99_us": 163,
+      "max_us": 8385
+    }
+  },
+  "checks": {
+    "compared_common_application_presents": 226,
+    "application_present_count_delta_experiment_minus_baseline": 0,
+    "present_hresult_prefix_equal": true,
+    "last_present_count_prefix_equal": true,
+    "frame_statistics_hresult_prefix_equal": true,
+    "frame_statistics_app_count_stays_within_baseline_lag_envelope": true,
+    "waitable_status_count_distribution_equal": true,
+    "waitable_poll_order_equal": true,
+    "app_frame_latency_signals_source_only_and_unique": true,
+    "app_frame_latency_signal_count_equal": true,
+    "maximum_frame_latency_equal": true,
+    "backbuffer_index_sequence_equal": true,
+    "getbuffer_identity_stable_within_each_run": true,
+    "device_removed_prefix_equal_and_ok": true,
+    "app_source_present_matches_successful_app_present_count": true,
+    "wsi_count_equals_source_plus_internal": true,
+    "wsi_ids_unique_and_monotonic": true,
+    "internal_has_no_app_frame_id": true
+  },
+  "visual_gate": "DIRECT HUMAN OBSERVATION REQUIRED",
+  "timing_note": "GetFrameStatistics HRESULTs are compared; PresentCount must be monotonic, never exceed app LastPresentCount, and remain within the frozen baseline 0-2 frame lag envelope. Zero-timeout waitable poll results are timing observations and may shift with asynchronous completion; actual app-frame latency signal calls are logged and checked for uniqueness and source-only identity. Refresh and QPC fields are timing observations because added output changes actual display scheduling.",
+  "display_timing": "VK_GOOGLE_display_timing not integrated; present submission/retirement is not actual display timing"
+}

@@ -1,0 +1,1501 @@
+info:  Creating device:
+info:  Apple M3:
+info:    Driver   : MoltenVK 0.2.2210
+info:  Queues:
+info:    Graphics : (0, 0)
+info:    Transfer : (0, 0)
+info:    Sparse   : (4294967295, 0)
+info:  Memory:
+info:    Heap 0: 16.0 GiB (DEVICE_LOCAL)
+info:    Budget: 11.84 GiB
+info:      Type  0: DEVICE_LOCAL
+info:      Type  1: DEVICE_LOCAL | HOST_VISIBLE | HOST_COHERENT | HOST_CACHED
+info:      Type  2: DEVICE_LOCAL | LAZILY_ALLOCATED
+info:  Enabled extensions:
+info:    VK_EXT_extended_dynamic_state3
+info:    VK_EXT_fragment_shader_interlock
+info:    VK_EXT_hdr_metadata
+info:    VK_EXT_robustness2
+info:    VK_EXT_sample_locations
+info:    VK_EXT_shader_stencil_export
+info:    VK_EXT_vertex_attribute_divisor
+info:    VK_KHR_calibrated_timestamps
+info:    VK_KHR_dynamic_rendering_local_read
+info:    VK_KHR_incremental_present
+info:    VK_KHR_load_store_op_none
+info:    VK_KHR_maintenance5
+info:    VK_KHR_maintenance6
+info:    VK_KHR_maintenance7
+info:    VK_KHR_maintenance8
+info:    VK_KHR_maintenance9
+info:    VK_KHR_present_id
+info:    VK_KHR_present_wait
+info:    VK_KHR_shader_float_controls2
+info:    VK_KHR_shader_subgroup_uniform_control_flow
+info:    VK_KHR_swapchain
+info:    VK_KHR_swapchain_maintenance1
+info:    VK_KHR_swapchain_mutable_format
+info:  Enabled features:
+info:    depthBiasClamp                 : 1
+info:    depthBounds                    : 0
+info:    depthClamp                     : 1
+info:    drawIndirectFirstInstance      : 1
+info:    dualSrcBlend                   : 1
+info:    fillModeNonSolid               : 1
+info:    fragmentStoresAndAtomics       : 1
+info:    fullDrawIndexUint32            : 1
+info:    geometryShader                 : 0
+info:    imageCubeArray                 : 1
+info:    independentBlend               : 1
+info:    largePoints                    : 1
+info:    logicOp                        : 0
+info:    multiDrawIndirect              : 1
+info:    multiViewport                  : 1
+info:    occlusionQueryPrecise          : 1
+info:    pipelineStatisticsQuery        : 0
+info:    robustBufferAccess             : 1
+info:    sampleRateShading              : 1
+info:    samplerAnisotropy              : 1
+info:    shaderClipDistance             : 1
+info:    shaderCullDistance             : 0
+info:    shaderFloat64                  : 0
+info:    shaderImageGatherExtended      : 1
+info:    shaderInt16                    : 1
+info:    shaderInt64                    : 1
+info:    shaderUniformBufferArrayDynamicIndexing : 1
+info:    shaderSampledImageArrayDynamicIndexing : 1
+info:    shaderStorageBufferArrayDynamicIndexing : 1
+info:    shaderStorageImageArrayDynamicIndexing : 1
+info:    sparseBinding                  : 0
+info:    sparseResidencyBuffer          : 0
+info:    sparseResidencyImage2D         : 0
+info:    sparseResidencyImage3D         : 0
+info:    sparseResidency2Samples        : 0
+info:    sparseResidency4Samples        : 0
+info:    sparseResidency8Samples        : 0
+info:    sparseResidency16Samples       : 0
+info:    sparseResidencyAliased         : 0
+info:    shaderResourceResidency        : 0
+info:    shaderResourceMinLod           : 1
+info:    tessellationShader             : 1
+info:    textureCompressionBC           : 1
+info:    variableMultisampleRate        : 0
+info:    vertexPipelineStoresAndAtomics : 1
+info:    wideLines                      : 0
+info:    shaderDrawParameters           : 1
+info:    storageBuffer16BitAccess       : 1
+info:    storagePushConstant16          : 1
+info:    bufferDeviceAddress            : 1
+info:    descriptorIndexing             : 1
+info:    storageBuffer8BitAccess        : 1
+info:    storagePushConstant8           : 1
+info:    shaderUniformTexelBufferArrayDynamicIndexing : 1
+info:    shaderStorageTexelBufferArrayDynamicIndexing : 1
+info:    shaderUniformBufferArrayNonUniformIndexing : 1
+info:    shaderSampledImageArrayNonUniformIndexing : 1
+info:    shaderStorageBufferArrayNonUniformIndexing : 1
+info:    shaderStorageImageArrayNonUniformIndexing : 1
+info:    shaderUniformTexelBufferArrayNonUniformIndexing : 1
+info:    shaderStorageTexelBufferArrayNonUniformIndexing : 1
+info:    descriptorBindingSampledImageUpdateAfterBind : 1
+info:    descriptorBindingUpdateUnusedWhilePending : 1
+info:    descriptorBindingPartiallyBound : 1
+info:    drawIndirectCount              : 0
+info:    hostQueryReset                 : 1
+info:    runtimeDescriptorArray         : 1
+info:    samplerFilterMinmax            : 0
+info:    samplerMirrorClampToEdge       : 1
+info:    scalarBlockLayout              : 1
+info:    shaderFloat16                  : 1
+info:    shaderInt8                     : 1
+info:    shaderOutputViewportIndex      : 1
+info:    shaderOutputLayer              : 1
+info:    timelineSemaphore              : 1
+info:    uniformBufferStandardLayout    : 1
+info:    vulkanMemoryModel              : 1
+info:    inlineUniformBlock             : 1
+info:    computeFullSubgroups           : 1
+info:    dynamicRendering               : 1
+info:    maintenance4                   : 1
+info:    robustImageAccess              : 0
+info:    pipelineCreationCacheControl   : 1
+info:    shaderDemoteToHelperInvocation : 1
+info:    shaderZeroInitializeWorkgroupMemory : 1
+info:    subgroupSizeControl            : 1
+info:    synchronization2               : 1
+info:  VK_EXT_attachment_feedback_loop_layout:
+info:    attachmentFeedbackLoopLayout   : 0
+info:  VK_EXT_border_color_swizzle:
+info:    borderColorSwizzle             : 0
+info:    borderColorSwizzleFromImage    : 0
+info:  VK_EXT_conservative_rasterization:
+info:    extConservativeRasterization   : 0
+info:  VK_EXT_custom_border_color:
+info:    customBorderColors             : 0
+info:    customBorderColorWithoutFormat : 0
+info:  VK_EXT_depth_clip_enable:
+info:    depthClipEnable                : 0
+info:  VK_EXT_depth_bias_control:
+info:    depthBiasControl               : 0
+info:    leastRepresentableValueForceUnormRepresentation : 0
+info:    floatRepresentation            : 0
+info:    depthBiasExact                 : 0
+info:  VK_EXT_descriptor_buffer:
+info:    descriptorBuffer               : 0
+info:  VK_EXT_descriptor_heap:
+info:    descriptorHeap                 : 0
+info:  VK_EXT_dynamic_rendering_unused_attachments:
+info:    dynamicRenderingUnusedAttachments : 0
+info:  VK_EXT_extended_dynamic_state3:
+info:    extendedDynamicState3AlphaToCoverageEnable : 0
+info:    extendedDynamicState3DepthClipEnable : 1
+info:    extendedDynamicState3RasterizationSamples : 0
+info:    extendedDynamicState3SampleMask : 0
+info:    extendedDynamicState3LineRasterizationMode : 1
+info:    extendedDynamicState3SampleLocationsEnable : 1
+info:  VK_EXT_fragment_shader_interlock:
+info:    fragmentShaderSampleInterlock  : 1
+info:    fragmentShaderPixelInterlock   : 1
+info:  VK_EXT_full_screen_exclusive:
+info:    extFullScreenExclusive         : 0
+info:  VK_EXT_graphics_pipeline_library:
+info:    graphicsPipelineLibrary        : 0
+info:  VK_EXT_hdr_metadata:
+info:    extHdrMetadata                 : 1
+info:  VK_EXT_line_rasterization:
+info:    rectangularLines               : 0
+info:    smoothLines                    : 0
+info:  VK_EXT_memory_budget:
+info:    extMemoryBudget                : 1
+info:  VK_EXT_memory_priority:
+info:    memoryPriority                 : 0
+info:  VK_EXT_multi_draw:
+info:    multiDraw                      : 0
+info:  VK_EXT_non_seamless_cube_map:
+info:    nonSeamlessCubeMap             : 0
+info:  VK_EXT_pageable_device_local_memory:
+info:    pageableDeviceLocalMemory      : 0
+info:  VK_EXT_present_timing:
+info:    presentTiming                  : 0
+info:    presentAtAbsoluteTime          : 0
+info:    presentAtRelativeTime          : 0
+info:  VK_EXT_robustness2:
+info:    robustBufferAccess2            : 0
+info:    robustImageAccess2             : 1
+info:    nullDescriptor                 : 0
+info:  VK_EXT_sample_locations:
+info:    extSampleLocations             : 1
+info:  VK_EXT_shader_module_identifier:
+info:    shaderModuleIdentifier         : 0
+info:  VK_EXT_shader_stencil_export:
+info:    extShaderStencilExport         : 1
+info:  VK_EXT_swapchain_colorspace:
+info:    extSwapchainColorSpace         : 0
+info:  VK_EXT_swapchain_maintenance1:
+info:    swapchainMaintenance1          : 0
+info:  VK_EXT_transform_feedback:
+info:    transformFeedback              : 0
+info:    geometryStreams                : 0
+info:  VK_EXT_vertex_attribute_divisor:
+info:    vertexAttributeInstanceRateDivisor : 1
+info:    vertexAttributeInstanceRateZeroDivisor : 1
+info:  VK_KHR_calibrated_timestamps:
+info:    khrCalibratedTimestamps        : 1
+info:  VK_KHR_device_fault:
+info:    deviceFault                    : 0
+info:    deviceFaultVendorBinary        : 0
+info:  VK_KHR_dynamic_rendering_local_read:
+info:    dynamicRenderingLocalRead      : 1
+info:  VK_KHR_external_memory_win32:
+info:    khrExternalMemoryWin32         : 0
+info:  VK_KHR_external_semaphore_win32:
+info:    khrExternalSemaphoreWin32      : 0
+info:  VK_KHR_incremental_present:
+info:    khrIncrementalPresent          : 1
+info:  VK_KHR_load_store_op_none:
+info:    khrLoadStoreOpNone             : 1
+info:  VK_KHR_maintenance5:
+info:    maintenance5                   : 1
+info:  VK_KHR_maintenance6:
+info:    maintenance6                   : 1
+info:  VK_KHR_maintenance7:
+info:    maintenance7                   : 1
+info:  VK_KHR_maintenance8:
+info:    maintenance8                   : 1
+info:  VK_KHR_maintenance9:
+info:    maintenance9                   : 1
+info:  VK_KHR_maintenance10:
+info:    maintenance10                  : 0
+info:  VK_KHR_maintenance11:
+info:    maintenance11                  : 0
+info:  VK_KHR_pipeline_library:
+info:    khrPipelineLibrary             : 0
+info:  VK_KHR_present_id:
+info:    presentId                      : 1
+info:  VK_KHR_present_id2:
+info:    presentId2                     : 0
+info:  VK_KHR_present_wait:
+info:    presentWait                    : 1
+info:  VK_KHR_present_wait2:
+info:    presentWait2                   : 0
+info:  VK_KHR_shader_float_controls2:
+info:    shaderFloatControls2           : 1
+info:  VK_KHR_shader_subgroup_uniform_control_flow:
+info:    shaderSubgroupUniformControlFlow : 1
+info:  VK_KHR_shader_untyped_pointers:
+info:    shaderUntypedPointers          : 0
+info:  VK_KHR_swapchain:
+info:    khrSwapchain                   : 1
+info:  VK_KHR_swapchain_maintenance1:
+info:    swapchainMaintenance1          : 1
+info:  VK_KHR_swapchain_mutable_format:
+info:    khrSwapchainMutableFormat      : 1
+info:  VK_KHR_unified_image_layouts:
+info:    unifiedImageLayouts            : 0
+info:  VK_KHR_win32_keyed_mutex:
+info:    khrWin32KeyedMutex             : 0
+info:  VK_AMD_buffer_marker:
+info:    amdBufferMarker                : 0
+info:  VK_NV_device_diagnostic_checkpoints:
+info:    nvDeviceDiagnosticCheckpoints  : 0
+info:  VK_NV_low_latency2:
+info:    nvLowLatency2                  : 0
+info:  VK_NV_raw_access_chains:
+info:    shaderRawAccessChains          : 0
+info:  VK_NVX_binary_import:
+info:    nvxBinaryImport                : 0
+info:  VK_NVX_image_view_handle:
+info:    nvxImageViewHandle             : 0
+info:  Memory type mask for buffer resources: 0x3, usage: 0x201ff
+info:  Graphics pipeline libraries not supported
+warn:  InternalWSI: experimental synthetic output enabled; app-facing accounting remains source-only
+info:  Binding model: Legacy
+warn:  D3D11DeviceFeatures: External memory features not supported
+info:  D3D11InternalCreateDevice: Maximum supported feature level: D3D_FEATURE_LEVEL_11_0
+info:  D3D11InternalCreateDevice: Using feature level D3D_FEATURE_LEVEL_11_0
+info:  DXGI: VK_FORMAT_D24_UNORM_S8_UINT -> VK_FORMAT_D32_SFLOAT_S8_UINT
+warn:  D3D11DXGIDevice::QueryInterface: Unknown interface query
+warn:  0ec870a6-5d7e-4c22-8cfc-5baae07616ed
+info:  Presenter: Actual swapchain properties:
+info:    Format:          VK_FORMAT_B8G8R8A8_UNORM
+info:    Color space:     VK_COLOR_SPACE_SRGB_NONLINEAR_KHR
+info:    Present mode:    VK_PRESENT_MODE_FIFO_KHR (dynamic: yes)
+info:    Buffer size:     640x360
+info:    Image count:     3
+info:    Timing:          no
+info:  Presenter: Created swapchain generation 2
+info:  InternalWSI: source-present app=17 duration-us=8385 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=1 app=17 internal=0 acquire=1 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=17 via=source-submit-completion
+info:  WSI: app-completion app=17 app-signal=signaled
+info:  InternalWSI: source-present app=18 duration-us=19 hr=0x0
+info:  InternalWSI: dropped request internal=1 reason=deadline-expired
+info:  WSI: present origin=APPLICATION_SOURCE wsi=2 app=18 internal=0 acquire=2 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=18 via=source-submit-completion
+info:  WSI: app-completion app=18 app-signal=signaled
+info:  InternalWSI: source-present app=19 duration-us=15 hr=0x0
+info:  InternalWSI: dropped request internal=2 reason=deadline-expired
+info:  WSI: present origin=APPLICATION_SOURCE wsi=3 app=19 internal=0 acquire=3 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=19 via=source-submit-completion
+info:  WSI: app-completion app=19 app-signal=signaled
+info:  InternalWSI: source-present app=20 duration-us=12 hr=0x0
+info:  InternalWSI: dropped request internal=3 reason=deadline-expired
+info:  WSI: present origin=APPLICATION_SOURCE wsi=4 app=20 internal=0 acquire=4 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=20 via=source-submit-completion
+info:  WSI: app-completion app=20 app-signal=signaled
+info:  InternalWSI: source-present app=21 duration-us=24 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=5 app=21 internal=0 acquire=5 image=1 generation=2
+info:  InternalWSI: dropped opportunity=5 reason=queue-full
+info:  InternalWSI: dropped request internal=4 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=21 via=source-submit-completion
+info:  WSI: app-completion app=21 app-signal=signaled
+info:  InternalWSI: source-present app=22 duration-us=59 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=6 app=22 internal=0 acquire=6 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=22 via=source-submit-completion
+info:  WSI: app-completion app=22 app-signal=signaled
+info:  InternalWSI: source-present app=23 duration-us=53 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=7 app=23 internal=0 acquire=7 image=0 generation=2
+info:  InternalWSI: dropped opportunity=7 reason=queue-full
+info:  InternalWSI: dropped request internal=6 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=23 via=source-submit-completion
+info:  WSI: app-completion app=23 app-signal=signaled
+info:  InternalWSI: source-present app=24 duration-us=43 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=8 app=24 internal=0 acquire=8 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=24 via=source-submit-completion
+info:  WSI: app-completion app=24 app-signal=signaled
+info:  InternalWSI: source-present app=25 duration-us=49 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=9 app=25 internal=0 acquire=9 image=2 generation=2
+info:  InternalWSI: dropped opportunity=9 reason=queue-full
+info:  InternalWSI: dropped request internal=8 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=25 via=source-submit-completion
+info:  WSI: app-completion app=25 app-signal=signaled
+info:  InternalWSI: source-present app=26 duration-us=51 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=10 app=26 internal=0 acquire=10 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=26 via=source-submit-completion
+info:  WSI: app-completion app=26 app-signal=signaled
+info:  InternalWSI: source-present app=27 duration-us=54 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=11 app=27 internal=0 acquire=11 image=1 generation=2
+info:  InternalWSI: dropped opportunity=11 reason=queue-full
+info:  WSI: app-frame-latency-signal app=27 via=source-submit-completion
+info:  WSI: app-completion app=27 app-signal=signaled
+info:  WSI: present origin=INTERNAL_OUTPUT wsi=12 app=0 internal=1 acquire=12 image=2 generation=2
+info:  InternalWSI: queued origin=INTERNAL_OUTPUT wsi=12 internal=1 app=none pattern=magenta vkPresent=VK_SUCCESS
+info:  InternalWSI: retirement outcome=present-submitted wsi=12 internal=1 app-signals=unchanged actual-display-timing=separate
+info:  InternalWSI: source-present app=28 duration-us=163 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=13 app=28 internal=0 acquire=13 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=28 via=source-submit-completion
+info:  WSI: app-completion app=28 app-signal=signaled
+info:  InternalWSI: source-present app=29 duration-us=27 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=14 app=29 internal=0 acquire=14 image=1 generation=2
+info:  InternalWSI: dropped opportunity=13 reason=queue-full
+info:  WSI: app-frame-latency-signal app=29 via=source-submit-completion
+info:  WSI: app-completion app=29 app-signal=signaled
+info:  WSI: present origin=INTERNAL_OUTPUT wsi=15 app=0 internal=2 acquire=15 image=2 generation=2
+info:  InternalWSI: queued origin=INTERNAL_OUTPUT wsi=15 internal=2 app=none pattern=cyan vkPresent=VK_SUCCESS
+info:  InternalWSI: retirement outcome=present-submitted wsi=15 internal=2 app-signals=unchanged actual-display-timing=separate
+info:  InternalWSI: source-present app=30 duration-us=109 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=16 app=30 internal=0 acquire=16 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=30 via=source-submit-completion
+info:  WSI: app-completion app=30 app-signal=signaled
+info:  InternalWSI: source-present app=31 duration-us=29 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=17 app=31 internal=0 acquire=17 image=1 generation=2
+info:  InternalWSI: dropped opportunity=15 reason=queue-full
+info:  InternalWSI: dropped request internal=14 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=31 via=source-submit-completion
+info:  WSI: app-completion app=31 app-signal=signaled
+info:  InternalWSI: source-present app=32 duration-us=35 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=18 app=32 internal=0 acquire=18 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=32 via=source-submit-completion
+info:  WSI: app-completion app=32 app-signal=signaled
+info:  InternalWSI: source-present app=33 duration-us=15 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=19 app=33 internal=0 acquire=19 image=0 generation=2
+info:  InternalWSI: dropped opportunity=17 reason=queue-full
+info:  WSI: app-frame-latency-signal app=33 via=source-submit-completion
+info:  WSI: app-completion app=33 app-signal=signaled
+info:  WSI: present origin=INTERNAL_OUTPUT wsi=20 app=0 internal=3 acquire=20 image=1 generation=2
+info:  InternalWSI: queued origin=INTERNAL_OUTPUT wsi=20 internal=3 app=none pattern=magenta vkPresent=VK_SUCCESS
+info:  InternalWSI: retirement outcome=present-submitted wsi=20 internal=3 app-signals=unchanged actual-display-timing=separate
+info:  InternalWSI: source-present app=34 duration-us=90 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=21 app=34 internal=0 acquire=21 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=34 via=source-submit-completion
+info:  WSI: app-completion app=34 app-signal=signaled
+info:  InternalWSI: source-present app=35 duration-us=27 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=22 app=35 internal=0 acquire=22 image=0 generation=2
+info:  InternalWSI: dropped opportunity=19 reason=queue-full
+info:  WSI: app-frame-latency-signal app=35 via=source-submit-completion
+info:  WSI: app-completion app=35 app-signal=signaled
+info:  WSI: present origin=INTERNAL_OUTPUT wsi=23 app=0 internal=4 acquire=23 image=1 generation=2
+info:  InternalWSI: queued origin=INTERNAL_OUTPUT wsi=23 internal=4 app=none pattern=cyan vkPresent=VK_SUCCESS
+info:  InternalWSI: retirement outcome=present-submitted wsi=23 internal=4 app-signals=unchanged actual-display-timing=separate
+info:  InternalWSI: source-present app=36 duration-us=75 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=24 app=36 internal=0 acquire=24 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=36 via=source-submit-completion
+info:  WSI: app-completion app=36 app-signal=signaled
+info:  InternalWSI: source-present app=37 duration-us=27 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=25 app=37 internal=0 acquire=25 image=0 generation=2
+info:  InternalWSI: dropped opportunity=21 reason=queue-full
+info:  WSI: app-frame-latency-signal app=37 via=source-submit-completion
+info:  WSI: app-completion app=37 app-signal=signaled
+info:  WSI: present origin=INTERNAL_OUTPUT wsi=26 app=0 internal=5 acquire=26 image=1 generation=2
+info:  InternalWSI: queued origin=INTERNAL_OUTPUT wsi=26 internal=5 app=none pattern=magenta vkPresent=VK_SUCCESS
+info:  InternalWSI: retirement outcome=present-submitted wsi=26 internal=5 app-signals=unchanged actual-display-timing=separate
+info:  InternalWSI: source-present app=38 duration-us=72 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=27 app=38 internal=0 acquire=27 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=38 via=source-submit-completion
+info:  WSI: app-completion app=38 app-signal=signaled
+info:  InternalWSI: source-present app=39 duration-us=32 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=28 app=39 internal=0 acquire=28 image=0 generation=2
+info:  InternalWSI: dropped opportunity=23 reason=queue-full
+info:  InternalWSI: dropped request internal=22 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=39 via=source-submit-completion
+info:  WSI: app-completion app=39 app-signal=signaled
+info:  InternalWSI: source-present app=40 duration-us=48 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=29 app=40 internal=0 acquire=29 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=40 via=source-submit-completion
+info:  WSI: app-completion app=40 app-signal=signaled
+info:  InternalWSI: source-present app=41 duration-us=33 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=30 app=41 internal=0 acquire=30 image=2 generation=2
+info:  InternalWSI: dropped opportunity=25 reason=queue-full
+info:  WSI: app-frame-latency-signal app=41 via=source-submit-completion
+info:  WSI: app-completion app=41 app-signal=signaled
+info:  WSI: present origin=INTERNAL_OUTPUT wsi=31 app=0 internal=6 acquire=31 image=0 generation=2
+info:  InternalWSI: queued origin=INTERNAL_OUTPUT wsi=31 internal=6 app=none pattern=cyan vkPresent=VK_SUCCESS
+info:  InternalWSI: retirement outcome=present-submitted wsi=31 internal=6 app-signals=unchanged actual-display-timing=separate
+info:  InternalWSI: source-present app=42 duration-us=116 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=32 app=42 internal=0 acquire=32 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=42 via=source-submit-completion
+info:  WSI: app-completion app=42 app-signal=signaled
+info:  InternalWSI: source-present app=43 duration-us=35 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=33 app=43 internal=0 acquire=33 image=2 generation=2
+info:  InternalWSI: dropped opportunity=27 reason=queue-full
+info:  WSI: app-frame-latency-signal app=43 via=source-submit-completion
+info:  WSI: app-completion app=43 app-signal=signaled
+info:  WSI: present origin=INTERNAL_OUTPUT wsi=34 app=0 internal=7 acquire=34 image=0 generation=2
+info:  InternalWSI: queued origin=INTERNAL_OUTPUT wsi=34 internal=7 app=none pattern=magenta vkPresent=VK_SUCCESS
+info:  InternalWSI: retirement outcome=present-submitted wsi=34 internal=7 app-signals=unchanged actual-display-timing=separate
+info:  InternalWSI: source-present app=44 duration-us=83 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=35 app=44 internal=0 acquire=35 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=44 via=source-submit-completion
+info:  WSI: app-completion app=44 app-signal=signaled
+info:  InternalWSI: source-present app=45 duration-us=25 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=36 app=45 internal=0 acquire=36 image=2 generation=2
+info:  InternalWSI: dropped opportunity=29 reason=queue-full
+info:  InternalWSI: dropped request internal=28 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=45 via=source-submit-completion
+info:  WSI: app-completion app=45 app-signal=signaled
+info:  InternalWSI: source-present app=46 duration-us=24 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=37 app=46 internal=0 acquire=37 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=46 via=source-submit-completion
+info:  WSI: app-completion app=46 app-signal=signaled
+info:  InternalWSI: source-present app=47 duration-us=28 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=38 app=47 internal=0 acquire=38 image=1 generation=2
+info:  InternalWSI: dropped opportunity=31 reason=queue-full
+info:  InternalWSI: dropped request internal=30 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=47 via=source-submit-completion
+info:  WSI: app-completion app=47 app-signal=signaled
+info:  InternalWSI: source-present app=48 duration-us=27 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=39 app=48 internal=0 acquire=39 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=48 via=source-submit-completion
+info:  WSI: app-completion app=48 app-signal=signaled
+info:  InternalWSI: source-present app=49 duration-us=25 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=40 app=49 internal=0 acquire=40 image=0 generation=2
+info:  InternalWSI: dropped opportunity=33 reason=queue-full
+info:  InternalWSI: dropped request internal=32 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=49 via=source-submit-completion
+info:  WSI: app-completion app=49 app-signal=signaled
+info:  InternalWSI: source-present app=50 duration-us=21 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=41 app=50 internal=0 acquire=41 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=50 via=source-submit-completion
+info:  WSI: app-completion app=50 app-signal=signaled
+info:  InternalWSI: source-present app=51 duration-us=31 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=42 app=51 internal=0 acquire=42 image=2 generation=2
+info:  InternalWSI: dropped opportunity=35 reason=queue-full
+info:  WSI: app-frame-latency-signal app=51 via=source-submit-completion
+info:  WSI: app-completion app=51 app-signal=signaled
+info:  WSI: present origin=INTERNAL_OUTPUT wsi=43 app=0 internal=8 acquire=43 image=0 generation=2
+info:  InternalWSI: queued origin=INTERNAL_OUTPUT wsi=43 internal=8 app=none pattern=cyan vkPresent=VK_SUCCESS
+info:  InternalWSI: retirement outcome=present-submitted wsi=43 internal=8 app-signals=unchanged actual-display-timing=separate
+info:  InternalWSI: source-present app=52 duration-us=54 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=44 app=52 internal=0 acquire=44 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=52 via=source-submit-completion
+info:  WSI: app-completion app=52 app-signal=signaled
+info:  InternalWSI: source-present app=53 duration-us=34 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=45 app=53 internal=0 acquire=45 image=2 generation=2
+info:  InternalWSI: dropped opportunity=37 reason=queue-full
+info:  InternalWSI: dropped request internal=36 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=53 via=source-submit-completion
+info:  WSI: app-completion app=53 app-signal=signaled
+info:  InternalWSI: source-present app=54 duration-us=25 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=46 app=54 internal=0 acquire=46 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=54 via=source-submit-completion
+info:  WSI: app-completion app=54 app-signal=signaled
+info:  InternalWSI: source-present app=55 duration-us=44 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=47 app=55 internal=0 acquire=47 image=1 generation=2
+info:  InternalWSI: dropped opportunity=39 reason=queue-full
+info:  InternalWSI: dropped request internal=38 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=55 via=source-submit-completion
+info:  WSI: app-completion app=55 app-signal=signaled
+info:  InternalWSI: source-present app=56 duration-us=41 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=48 app=56 internal=0 acquire=48 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=56 via=source-submit-completion
+info:  WSI: app-completion app=56 app-signal=signaled
+info:  InternalWSI: source-present app=57 duration-us=29 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=49 app=57 internal=0 acquire=49 image=0 generation=2
+info:  InternalWSI: dropped opportunity=41 reason=queue-full
+info:  InternalWSI: dropped request internal=40 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=57 via=source-submit-completion
+info:  WSI: app-completion app=57 app-signal=signaled
+info:  InternalWSI: source-present app=58 duration-us=26 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=50 app=58 internal=0 acquire=50 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=58 via=source-submit-completion
+info:  WSI: app-completion app=58 app-signal=signaled
+info:  InternalWSI: source-present app=59 duration-us=23 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=51 app=59 internal=0 acquire=51 image=2 generation=2
+info:  InternalWSI: dropped opportunity=43 reason=queue-full
+info:  InternalWSI: dropped request internal=42 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=59 via=source-submit-completion
+info:  WSI: app-completion app=59 app-signal=signaled
+info:  InternalWSI: source-present app=60 duration-us=29 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=52 app=60 internal=0 acquire=52 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=60 via=source-submit-completion
+info:  WSI: app-completion app=60 app-signal=signaled
+info:  InternalWSI: source-present app=61 duration-us=23 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=53 app=61 internal=0 acquire=53 image=1 generation=2
+info:  InternalWSI: dropped opportunity=45 reason=queue-full
+info:  InternalWSI: dropped request internal=44 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=61 via=source-submit-completion
+info:  WSI: app-completion app=61 app-signal=signaled
+info:  InternalWSI: source-present app=62 duration-us=20 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=54 app=62 internal=0 acquire=54 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=62 via=source-submit-completion
+info:  WSI: app-completion app=62 app-signal=signaled
+info:  InternalWSI: source-present app=63 duration-us=27 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=55 app=63 internal=0 acquire=55 image=0 generation=2
+info:  InternalWSI: dropped opportunity=47 reason=queue-full
+info:  WSI: app-frame-latency-signal app=63 via=source-submit-completion
+info:  WSI: app-completion app=63 app-signal=signaled
+info:  WSI: present origin=INTERNAL_OUTPUT wsi=56 app=0 internal=9 acquire=56 image=1 generation=2
+info:  InternalWSI: queued origin=INTERNAL_OUTPUT wsi=56 internal=9 app=none pattern=magenta vkPresent=VK_SUCCESS
+info:  InternalWSI: retirement outcome=present-submitted wsi=56 internal=9 app-signals=unchanged actual-display-timing=separate
+info:  InternalWSI: source-present app=64 duration-us=58 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=57 app=64 internal=0 acquire=57 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=64 via=source-submit-completion
+info:  WSI: app-completion app=64 app-signal=signaled
+info:  InternalWSI: source-present app=65 duration-us=23 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=58 app=65 internal=0 acquire=58 image=0 generation=2
+info:  InternalWSI: dropped opportunity=49 reason=queue-full
+info:  WSI: app-frame-latency-signal app=65 via=source-submit-completion
+info:  WSI: app-completion app=65 app-signal=signaled
+info:  WSI: present origin=INTERNAL_OUTPUT wsi=59 app=0 internal=10 acquire=59 image=1 generation=2
+info:  InternalWSI: retirement outcome=present-submitted wsi=59 internal=10 app-signals=unchanged actual-display-timing=separate
+info:  InternalWSI: queued origin=INTERNAL_OUTPUT wsi=59 internal=10 app=none pattern=cyan vkPresent=VK_SUCCESS
+info:  InternalWSI: source-present app=66 duration-us=62 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=60 app=66 internal=0 acquire=60 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=66 via=source-submit-completion
+info:  WSI: app-completion app=66 app-signal=signaled
+info:  InternalWSI: source-present app=67 duration-us=23 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=61 app=67 internal=0 acquire=61 image=0 generation=2
+info:  InternalWSI: dropped opportunity=51 reason=queue-full
+info:  InternalWSI: dropped request internal=50 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=67 via=source-submit-completion
+info:  WSI: app-completion app=67 app-signal=signaled
+info:  InternalWSI: source-present app=68 duration-us=25 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=62 app=68 internal=0 acquire=62 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=68 via=source-submit-completion
+info:  WSI: app-completion app=68 app-signal=signaled
+info:  InternalWSI: source-present app=69 duration-us=22 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=63 app=69 internal=0 acquire=63 image=2 generation=2
+info:  InternalWSI: dropped opportunity=53 reason=queue-full
+info:  WSI: app-frame-latency-signal app=69 via=source-submit-completion
+info:  WSI: app-completion app=69 app-signal=signaled
+info:  WSI: present origin=INTERNAL_OUTPUT wsi=64 app=0 internal=11 acquire=64 image=0 generation=2
+info:  InternalWSI: queued origin=INTERNAL_OUTPUT wsi=64 internal=11 app=none pattern=magenta vkPresent=VK_SUCCESS
+info:  InternalWSI: retirement outcome=present-submitted wsi=64 internal=11 app-signals=unchanged actual-display-timing=separate
+info:  InternalWSI: source-present app=70 duration-us=105 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=65 app=70 internal=0 acquire=65 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=70 via=source-submit-completion
+info:  WSI: app-completion app=70 app-signal=signaled
+info:  InternalWSI: source-present app=71 duration-us=40 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=66 app=71 internal=0 acquire=66 image=2 generation=2
+info:  InternalWSI: dropped opportunity=55 reason=queue-full
+info:  WSI: app-frame-latency-signal app=71 via=source-submit-completion
+info:  WSI: app-completion app=71 app-signal=signaled
+info:  WSI: present origin=INTERNAL_OUTPUT wsi=67 app=0 internal=12 acquire=67 image=0 generation=2
+info:  InternalWSI: queued origin=INTERNAL_OUTPUT wsi=67 internal=12 app=none pattern=cyan vkPresent=VK_SUCCESS
+info:  InternalWSI: retirement outcome=present-submitted wsi=67 internal=12 app-signals=unchanged actual-display-timing=separate
+info:  InternalWSI: source-present app=72 duration-us=57 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=68 app=72 internal=0 acquire=68 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=72 via=source-submit-completion
+info:  WSI: app-completion app=72 app-signal=signaled
+info:  InternalWSI: source-present app=73 duration-us=26 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=69 app=73 internal=0 acquire=69 image=2 generation=2
+info:  InternalWSI: dropped opportunity=57 reason=queue-full
+info:  WSI: app-frame-latency-signal app=73 via=source-submit-completion
+info:  WSI: app-completion app=73 app-signal=signaled
+info:  WSI: present origin=INTERNAL_OUTPUT wsi=70 app=0 internal=13 acquire=70 image=0 generation=2
+info:  InternalWSI: retirement outcome=present-submitted wsi=70 internal=13 app-signals=unchanged actual-display-timing=separate
+info:  InternalWSI: queued origin=INTERNAL_OUTPUT wsi=70 internal=13 app=none pattern=magenta vkPresent=VK_SUCCESS
+info:  InternalWSI: source-present app=74 duration-us=49 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=71 app=74 internal=0 acquire=71 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=74 via=source-submit-completion
+info:  WSI: app-completion app=74 app-signal=signaled
+info:  InternalWSI: source-present app=75 duration-us=25 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=72 app=75 internal=0 acquire=72 image=2 generation=2
+info:  InternalWSI: dropped opportunity=59 reason=queue-full
+info:  WSI: app-frame-latency-signal app=75 via=source-submit-completion
+info:  WSI: app-completion app=75 app-signal=signaled
+info:  WSI: present origin=INTERNAL_OUTPUT wsi=73 app=0 internal=14 acquire=73 image=0 generation=2
+info:  InternalWSI: queued origin=INTERNAL_OUTPUT wsi=73 internal=14 app=none pattern=cyan vkPresent=VK_SUCCESS
+info:  InternalWSI: retirement outcome=present-submitted wsi=73 internal=14 app-signals=unchanged actual-display-timing=separate
+info:  InternalWSI: source-present app=76 duration-us=49 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=74 app=76 internal=0 acquire=74 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=76 via=source-submit-completion
+info:  WSI: app-completion app=76 app-signal=signaled
+info:  InternalWSI: source-present app=77 duration-us=21 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=75 app=77 internal=0 acquire=75 image=2 generation=2
+info:  InternalWSI: dropped opportunity=61 reason=queue-full
+info:  InternalWSI: dropped request internal=60 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=77 via=source-submit-completion
+info:  WSI: app-completion app=77 app-signal=signaled
+info:  InternalWSI: source-present app=78 duration-us=32 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=76 app=78 internal=0 acquire=76 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=78 via=source-submit-completion
+info:  WSI: app-completion app=78 app-signal=signaled
+info:  InternalWSI: source-present app=79 duration-us=28 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=77 app=79 internal=0 acquire=77 image=1 generation=2
+info:  InternalWSI: dropped opportunity=63 reason=queue-full
+info:  InternalWSI: dropped request internal=62 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=79 via=source-submit-completion
+info:  WSI: app-completion app=79 app-signal=signaled
+info:  InternalWSI: source-present app=80 duration-us=24 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=78 app=80 internal=0 acquire=78 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=80 via=source-submit-completion
+info:  WSI: app-completion app=80 app-signal=signaled
+info:  InternalWSI: source-present app=81 duration-us=23 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=79 app=81 internal=0 acquire=79 image=0 generation=2
+info:  InternalWSI: dropped opportunity=65 reason=queue-full
+info:  InternalWSI: dropped request internal=64 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=81 via=source-submit-completion
+info:  WSI: app-completion app=81 app-signal=signaled
+info:  InternalWSI: source-present app=82 duration-us=24 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=80 app=82 internal=0 acquire=80 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=82 via=source-submit-completion
+info:  WSI: app-completion app=82 app-signal=signaled
+info:  InternalWSI: source-present app=83 duration-us=24 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=81 app=83 internal=0 acquire=81 image=2 generation=2
+info:  InternalWSI: dropped opportunity=67 reason=queue-full
+info:  InternalWSI: dropped request internal=66 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=83 via=source-submit-completion
+info:  WSI: app-completion app=83 app-signal=signaled
+info:  InternalWSI: source-present app=84 duration-us=21 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=82 app=84 internal=0 acquire=82 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=84 via=source-submit-completion
+info:  WSI: app-completion app=84 app-signal=signaled
+info:  InternalWSI: source-present app=85 duration-us=41 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=83 app=85 internal=0 acquire=83 image=1 generation=2
+info:  InternalWSI: dropped opportunity=69 reason=queue-full
+info:  WSI: app-frame-latency-signal app=85 via=source-submit-completion
+info:  WSI: app-completion app=85 app-signal=signaled
+info:  WSI: present origin=INTERNAL_OUTPUT wsi=84 app=0 internal=15 acquire=84 image=2 generation=2
+info:  InternalWSI: queued origin=INTERNAL_OUTPUT wsi=84 internal=15 app=none pattern=magenta vkPresent=VK_SUCCESS
+info:  InternalWSI: retirement outcome=present-submitted wsi=84 internal=15 app-signals=unchanged actual-display-timing=separate
+info:  InternalWSI: source-present app=86 duration-us=75 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=85 app=86 internal=0 acquire=85 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=86 via=source-submit-completion
+info:  WSI: app-completion app=86 app-signal=signaled
+info:  InternalWSI: source-present app=87 duration-us=31 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=86 app=87 internal=0 acquire=86 image=1 generation=2
+info:  InternalWSI: dropped opportunity=71 reason=queue-full
+info:  InternalWSI: dropped request internal=70 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=87 via=source-submit-completion
+info:  WSI: app-completion app=87 app-signal=signaled
+info:  InternalWSI: source-present app=88 duration-us=29 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=87 app=88 internal=0 acquire=87 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=88 via=source-submit-completion
+info:  WSI: app-completion app=88 app-signal=signaled
+info:  InternalWSI: source-present app=89 duration-us=33 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=88 app=89 internal=0 acquire=88 image=0 generation=2
+info:  InternalWSI: dropped opportunity=73 reason=queue-full
+info:  WSI: app-frame-latency-signal app=89 via=source-submit-completion
+info:  WSI: app-completion app=89 app-signal=signaled
+info:  WSI: present origin=INTERNAL_OUTPUT wsi=89 app=0 internal=16 acquire=89 image=1 generation=2
+info:  InternalWSI: queued origin=INTERNAL_OUTPUT wsi=89 internal=16 app=none pattern=cyan vkPresent=VK_SUCCESS
+info:  InternalWSI: retirement outcome=present-submitted wsi=89 internal=16 app-signals=unchanged actual-display-timing=separate
+info:  InternalWSI: source-present app=90 duration-us=94 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=90 app=90 internal=0 acquire=90 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=90 via=source-submit-completion
+info:  WSI: app-completion app=90 app-signal=signaled
+info:  InternalWSI: source-present app=91 duration-us=57 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=91 app=91 internal=0 acquire=91 image=0 generation=2
+info:  InternalWSI: dropped opportunity=75 reason=queue-full
+info:  InternalWSI: dropped request internal=74 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=91 via=source-submit-completion
+info:  WSI: app-completion app=91 app-signal=signaled
+info:  InternalWSI: source-present app=92 duration-us=30 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=92 app=92 internal=0 acquire=92 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=92 via=source-submit-completion
+info:  WSI: app-completion app=92 app-signal=signaled
+info:  InternalWSI: source-present app=93 duration-us=29 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=93 app=93 internal=0 acquire=93 image=2 generation=2
+info:  InternalWSI: dropped opportunity=77 reason=queue-full
+info:  InternalWSI: dropped request internal=76 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=93 via=source-submit-completion
+info:  WSI: app-completion app=93 app-signal=signaled
+info:  InternalWSI: source-present app=94 duration-us=25 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=94 app=94 internal=0 acquire=94 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=94 via=source-submit-completion
+info:  WSI: app-completion app=94 app-signal=signaled
+info:  InternalWSI: source-present app=95 duration-us=48 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=95 app=95 internal=0 acquire=95 image=1 generation=2
+info:  InternalWSI: dropped opportunity=79 reason=queue-full
+info:  WSI: app-frame-latency-signal app=95 via=source-submit-completion
+info:  WSI: app-completion app=95 app-signal=signaled
+info:  WSI: present origin=INTERNAL_OUTPUT wsi=96 app=0 internal=17 acquire=96 image=2 generation=2
+info:  InternalWSI: queued origin=INTERNAL_OUTPUT wsi=96 internal=17 app=none pattern=magenta vkPresent=VK_SUCCESS
+info:  InternalWSI: retirement outcome=present-submitted wsi=96 internal=17 app-signals=unchanged actual-display-timing=separate
+info:  InternalWSI: source-present app=96 duration-us=180 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=97 app=96 internal=0 acquire=97 image=0 generation=2
+info:  WSI: app-completion app=96 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=96 via=source-present-retirement
+info:  InternalWSI: source-present app=97 duration-us=133 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=98 app=97 internal=0 acquire=98 image=1 generation=2
+info:  InternalWSI: dropped opportunity=81 reason=queue-full
+info:  InternalWSI: dropped request internal=80 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=97 via=source-submit-completion
+info:  WSI: app-completion app=97 app-signal=signaled
+info:  InternalWSI: source-present app=98 duration-us=49 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=99 app=98 internal=0 acquire=99 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=98 via=source-submit-completion
+info:  WSI: app-completion app=98 app-signal=signaled
+info:  InternalWSI: source-present app=99 duration-us=54 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=100 app=99 internal=0 acquire=100 image=0 generation=2
+info:  InternalWSI: dropped opportunity=83 reason=queue-full
+info:  InternalWSI: dropped request internal=82 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=99 via=source-submit-completion
+info:  WSI: app-completion app=99 app-signal=signaled
+info:  InternalWSI: source-present app=100 duration-us=50 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=101 app=100 internal=0 acquire=101 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=100 via=source-submit-completion
+info:  WSI: app-completion app=100 app-signal=signaled
+info:  InternalWSI: source-present app=101 duration-us=38 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=102 app=101 internal=0 acquire=102 image=2 generation=2
+info:  InternalWSI: dropped opportunity=85 reason=queue-full
+info:  WSI: app-frame-latency-signal app=101 via=source-submit-completion
+info:  WSI: app-completion app=101 app-signal=signaled
+info:  WSI: present origin=INTERNAL_OUTPUT wsi=103 app=0 internal=18 acquire=103 image=0 generation=2
+info:  InternalWSI: queued origin=INTERNAL_OUTPUT wsi=103 internal=18 app=none pattern=cyan vkPresent=VK_SUCCESS
+info:  InternalWSI: retirement outcome=present-submitted wsi=103 internal=18 app-signals=unchanged actual-display-timing=separate
+info:  InternalWSI: source-present app=102 duration-us=58 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=104 app=102 internal=0 acquire=104 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=102 via=source-submit-completion
+info:  WSI: app-completion app=102 app-signal=signaled
+info:  InternalWSI: source-present app=103 duration-us=44 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=105 app=103 internal=0 acquire=105 image=2 generation=2
+info:  InternalWSI: dropped opportunity=87 reason=queue-full
+info:  InternalWSI: dropped request internal=86 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=103 via=source-submit-completion
+info:  WSI: app-completion app=103 app-signal=signaled
+info:  InternalWSI: source-present app=104 duration-us=21 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=106 app=104 internal=0 acquire=106 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=104 via=source-submit-completion
+info:  WSI: app-completion app=104 app-signal=signaled
+info:  InternalWSI: source-present app=105 duration-us=25 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=107 app=105 internal=0 acquire=107 image=1 generation=2
+info:  InternalWSI: dropped opportunity=89 reason=queue-full
+info:  WSI: app-frame-latency-signal app=105 via=source-submit-completion
+info:  WSI: app-completion app=105 app-signal=signaled
+info:  WSI: present origin=INTERNAL_OUTPUT wsi=108 app=0 internal=19 acquire=108 image=2 generation=2
+info:  InternalWSI: retirement outcome=present-submitted wsi=108 internal=19 app-signals=unchanged actual-display-timing=separate
+info:  InternalWSI: queued origin=INTERNAL_OUTPUT wsi=108 internal=19 app=none pattern=magenta vkPresent=VK_SUCCESS
+info:  InternalWSI: source-present app=106 duration-us=46 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=109 app=106 internal=0 acquire=109 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=106 via=source-submit-completion
+info:  WSI: app-completion app=106 app-signal=signaled
+info:  InternalWSI: source-present app=107 duration-us=14 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=110 app=107 internal=0 acquire=110 image=1 generation=2
+info:  InternalWSI: dropped opportunity=91 reason=queue-full
+info:  InternalWSI: dropped request internal=90 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=107 via=source-submit-completion
+info:  WSI: app-completion app=107 app-signal=signaled
+info:  InternalWSI: source-present app=108 duration-us=28 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=111 app=108 internal=0 acquire=111 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=108 via=source-submit-completion
+info:  WSI: app-completion app=108 app-signal=signaled
+info:  InternalWSI: source-present app=109 duration-us=28 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=112 app=109 internal=0 acquire=112 image=0 generation=2
+info:  InternalWSI: dropped opportunity=93 reason=queue-full
+info:  WSI: app-frame-latency-signal app=109 via=source-submit-completion
+info:  WSI: app-completion app=109 app-signal=signaled
+info:  WSI: present origin=INTERNAL_OUTPUT wsi=113 app=0 internal=20 acquire=113 image=1 generation=2
+info:  InternalWSI: queued origin=INTERNAL_OUTPUT wsi=113 internal=20 app=none pattern=cyan vkPresent=VK_SUCCESS
+info:  InternalWSI: retirement outcome=present-submitted wsi=113 internal=20 app-signals=unchanged actual-display-timing=separate
+info:  InternalWSI: source-present app=110 duration-us=50 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=114 app=110 internal=0 acquire=114 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=110 via=source-submit-completion
+info:  WSI: app-completion app=110 app-signal=signaled
+info:  InternalWSI: source-present app=111 duration-us=24 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=115 app=111 internal=0 acquire=115 image=0 generation=2
+info:  InternalWSI: dropped opportunity=95 reason=queue-full
+info:  InternalWSI: dropped request internal=94 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=111 via=source-submit-completion
+info:  WSI: app-completion app=111 app-signal=signaled
+info:  InternalWSI: source-present app=112 duration-us=24 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=116 app=112 internal=0 acquire=116 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=112 via=source-submit-completion
+info:  WSI: app-completion app=112 app-signal=signaled
+info:  InternalWSI: source-present app=113 duration-us=20 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=117 app=113 internal=0 acquire=117 image=2 generation=2
+info:  InternalWSI: dropped opportunity=97 reason=queue-full
+info:  InternalWSI: dropped request internal=96 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=113 via=source-submit-completion
+info:  WSI: app-completion app=113 app-signal=signaled
+info:  InternalWSI: source-present app=114 duration-us=22 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=118 app=114 internal=0 acquire=118 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=114 via=source-submit-completion
+info:  WSI: app-completion app=114 app-signal=signaled
+info:  InternalWSI: source-present app=115 duration-us=81 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=119 app=115 internal=0 acquire=119 image=1 generation=2
+info:  InternalWSI: dropped opportunity=99 reason=queue-full
+info:  InternalWSI: dropped request internal=98 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=115 via=source-submit-completion
+info:  WSI: app-completion app=115 app-signal=signaled
+info:  InternalWSI: source-present app=116 duration-us=41 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=120 app=116 internal=0 acquire=120 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=116 via=source-submit-completion
+info:  WSI: app-completion app=116 app-signal=signaled
+info:  InternalWSI: source-present app=117 duration-us=28 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=121 app=117 internal=0 acquire=121 image=0 generation=2
+info:  InternalWSI: dropped opportunity=101 reason=queue-full
+info:  InternalWSI: dropped request internal=100 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=117 via=source-submit-completion
+info:  WSI: app-completion app=117 app-signal=signaled
+info:  InternalWSI: source-present app=118 duration-us=28 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=122 app=118 internal=0 acquire=122 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=118 via=source-submit-completion
+info:  WSI: app-completion app=118 app-signal=signaled
+info:  InternalWSI: source-present app=119 duration-us=24 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=123 app=119 internal=0 acquire=123 image=2 generation=2
+info:  InternalWSI: dropped opportunity=103 reason=queue-full
+info:  InternalWSI: dropped request internal=102 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=119 via=source-submit-completion
+info:  WSI: app-completion app=119 app-signal=signaled
+info:  InternalWSI: source-present app=120 duration-us=27 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=124 app=120 internal=0 acquire=124 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=120 via=source-submit-completion
+info:  WSI: app-completion app=120 app-signal=signaled
+info:  InternalWSI: source-present app=121 duration-us=114 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=125 app=121 internal=0 acquire=125 image=1 generation=2
+info:  InternalWSI: dropped opportunity=105 reason=queue-full
+info:  InternalWSI: dropped request internal=104 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=121 via=source-submit-completion
+info:  WSI: app-completion app=121 app-signal=signaled
+info:  InternalWSI: source-present app=122 duration-us=32 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=126 app=122 internal=0 acquire=126 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=122 via=source-submit-completion
+info:  WSI: app-completion app=122 app-signal=signaled
+info:  InternalWSI: source-present app=123 duration-us=29 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=127 app=123 internal=0 acquire=127 image=0 generation=2
+info:  InternalWSI: dropped opportunity=107 reason=queue-full
+info:  WSI: app-frame-latency-signal app=123 via=source-submit-completion
+info:  WSI: app-completion app=123 app-signal=signaled
+info:  WSI: present origin=INTERNAL_OUTPUT wsi=128 app=0 internal=21 acquire=128 image=1 generation=2
+info:  InternalWSI: queued origin=INTERNAL_OUTPUT wsi=128 internal=21 app=none pattern=magenta vkPresent=VK_SUCCESS
+info:  InternalWSI: retirement outcome=present-submitted wsi=128 internal=21 app-signals=unchanged actual-display-timing=separate
+info:  InternalWSI: source-present app=124 duration-us=55 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=129 app=124 internal=0 acquire=129 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=124 via=source-submit-completion
+info:  WSI: app-completion app=124 app-signal=signaled
+info:  InternalWSI: source-present app=125 duration-us=28 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=130 app=125 internal=0 acquire=130 image=0 generation=2
+info:  InternalWSI: dropped opportunity=109 reason=queue-full
+info:  InternalWSI: dropped request internal=108 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=125 via=source-submit-completion
+info:  WSI: app-completion app=125 app-signal=signaled
+info:  InternalWSI: source-present app=126 duration-us=26 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=131 app=126 internal=0 acquire=131 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=126 via=source-submit-completion
+info:  WSI: app-completion app=126 app-signal=signaled
+info:  InternalWSI: source-present app=127 duration-us=107 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=132 app=127 internal=0 acquire=132 image=2 generation=2
+info:  InternalWSI: dropped opportunity=111 reason=queue-full
+info:  WSI: app-frame-latency-signal app=127 via=source-submit-completion
+info:  WSI: app-completion app=127 app-signal=signaled
+info:  WSI: present origin=INTERNAL_OUTPUT wsi=133 app=0 internal=22 acquire=133 image=0 generation=2
+info:  InternalWSI: queued origin=INTERNAL_OUTPUT wsi=133 internal=22 app=none pattern=cyan vkPresent=VK_SUCCESS
+info:  InternalWSI: retirement outcome=present-submitted wsi=133 internal=22 app-signals=unchanged actual-display-timing=separate
+info:  InternalWSI: source-present app=128 duration-us=50 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=134 app=128 internal=0 acquire=134 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=128 via=source-submit-completion
+info:  WSI: app-completion app=128 app-signal=signaled
+info:  InternalWSI: source-present app=129 duration-us=22 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=135 app=129 internal=0 acquire=135 image=2 generation=2
+info:  InternalWSI: dropped opportunity=113 reason=queue-full
+info:  InternalWSI: dropped request internal=112 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=129 via=source-submit-completion
+info:  WSI: app-completion app=129 app-signal=signaled
+info:  InternalWSI: source-present app=130 duration-us=42 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=136 app=130 internal=0 acquire=136 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=130 via=source-submit-completion
+info:  WSI: app-completion app=130 app-signal=signaled
+info:  InternalWSI: source-present app=131 duration-us=38 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=137 app=131 internal=0 acquire=137 image=1 generation=2
+info:  InternalWSI: dropped opportunity=115 reason=queue-full
+info:  InternalWSI: dropped request internal=114 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=131 via=source-submit-completion
+info:  WSI: app-completion app=131 app-signal=signaled
+info:  InternalWSI: source-present app=132 duration-us=33 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=138 app=132 internal=0 acquire=138 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=132 via=source-submit-completion
+info:  WSI: app-completion app=132 app-signal=signaled
+info:  InternalWSI: source-present app=133 duration-us=31 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=139 app=133 internal=0 acquire=139 image=0 generation=2
+info:  InternalWSI: dropped opportunity=117 reason=queue-full
+info:  InternalWSI: dropped request internal=116 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=133 via=source-submit-completion
+info:  WSI: app-completion app=133 app-signal=signaled
+info:  InternalWSI: source-present app=134 duration-us=25 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=140 app=134 internal=0 acquire=140 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=134 via=source-submit-completion
+info:  WSI: app-completion app=134 app-signal=signaled
+info:  InternalWSI: source-present app=135 duration-us=25 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=141 app=135 internal=0 acquire=141 image=2 generation=2
+info:  InternalWSI: dropped opportunity=119 reason=queue-full
+info:  InternalWSI: dropped request internal=118 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=135 via=source-submit-completion
+info:  WSI: app-completion app=135 app-signal=signaled
+info:  InternalWSI: source-present app=136 duration-us=24 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=142 app=136 internal=0 acquire=142 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=136 via=source-submit-completion
+info:  WSI: app-completion app=136 app-signal=signaled
+info:  InternalWSI: source-present app=137 duration-us=25 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=143 app=137 internal=0 acquire=143 image=1 generation=2
+info:  InternalWSI: dropped opportunity=121 reason=queue-full
+info:  WSI: app-frame-latency-signal app=137 via=source-submit-completion
+info:  WSI: app-completion app=137 app-signal=signaled
+info:  WSI: present origin=INTERNAL_OUTPUT wsi=144 app=0 internal=23 acquire=144 image=2 generation=2
+info:  InternalWSI: queued origin=INTERNAL_OUTPUT wsi=144 internal=23 app=none pattern=magenta vkPresent=VK_SUCCESS
+info:  InternalWSI: retirement outcome=present-submitted wsi=144 internal=23 app-signals=unchanged actual-display-timing=separate
+info:  InternalWSI: source-present app=138 duration-us=55 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=145 app=138 internal=0 acquire=145 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=138 via=source-submit-completion
+info:  WSI: app-completion app=138 app-signal=signaled
+info:  InternalWSI: source-present app=139 duration-us=60 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=146 app=139 internal=0 acquire=146 image=1 generation=2
+info:  InternalWSI: dropped opportunity=123 reason=queue-full
+info:  InternalWSI: dropped request internal=122 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=139 via=source-submit-completion
+info:  WSI: app-completion app=139 app-signal=signaled
+info:  InternalWSI: source-present app=140 duration-us=25 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=147 app=140 internal=0 acquire=147 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=140 via=source-submit-completion
+info:  WSI: app-completion app=140 app-signal=signaled
+info:  InternalWSI: source-present app=141 duration-us=27 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=148 app=141 internal=0 acquire=148 image=0 generation=2
+info:  InternalWSI: dropped opportunity=125 reason=queue-full
+info:  WSI: app-frame-latency-signal app=141 via=source-submit-completion
+info:  WSI: app-completion app=141 app-signal=signaled
+info:  WSI: present origin=INTERNAL_OUTPUT wsi=149 app=0 internal=24 acquire=149 image=1 generation=2
+info:  InternalWSI: queued origin=INTERNAL_OUTPUT wsi=149 internal=24 app=none pattern=cyan vkPresent=VK_SUCCESS
+info:  InternalWSI: retirement outcome=present-submitted wsi=149 internal=24 app-signals=unchanged actual-display-timing=separate
+info:  InternalWSI: source-present app=142 duration-us=68 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=150 app=142 internal=0 acquire=150 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=142 via=source-submit-completion
+info:  WSI: app-completion app=142 app-signal=signaled
+info:  InternalWSI: source-present app=143 duration-us=25 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=151 app=143 internal=0 acquire=151 image=0 generation=2
+info:  InternalWSI: dropped opportunity=127 reason=queue-full
+info:  InternalWSI: dropped request internal=126 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=143 via=source-submit-completion
+info:  WSI: app-completion app=143 app-signal=signaled
+info:  InternalWSI: source-present app=144 duration-us=25 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=152 app=144 internal=0 acquire=152 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=144 via=source-submit-completion
+info:  WSI: app-completion app=144 app-signal=signaled
+info:  InternalWSI: source-present app=145 duration-us=36 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=153 app=145 internal=0 acquire=153 image=2 generation=2
+info:  InternalWSI: dropped opportunity=129 reason=queue-full
+info:  WSI: app-frame-latency-signal app=145 via=source-submit-completion
+info:  WSI: app-completion app=145 app-signal=signaled
+info:  WSI: present origin=INTERNAL_OUTPUT wsi=154 app=0 internal=25 acquire=154 image=0 generation=2
+info:  InternalWSI: queued origin=INTERNAL_OUTPUT wsi=154 internal=25 app=none pattern=magenta vkPresent=VK_SUCCESS
+info:  InternalWSI: retirement outcome=present-submitted wsi=154 internal=25 app-signals=unchanged actual-display-timing=separate
+info:  InternalWSI: source-present app=146 duration-us=85 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=155 app=146 internal=0 acquire=155 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=146 via=source-submit-completion
+info:  WSI: app-completion app=146 app-signal=signaled
+info:  InternalWSI: source-present app=147 duration-us=38 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=156 app=147 internal=0 acquire=156 image=2 generation=2
+info:  InternalWSI: dropped opportunity=131 reason=queue-full
+info:  InternalWSI: dropped request internal=130 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=147 via=source-submit-completion
+info:  WSI: app-completion app=147 app-signal=signaled
+info:  InternalWSI: source-present app=148 duration-us=29 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=157 app=148 internal=0 acquire=157 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=148 via=source-submit-completion
+info:  WSI: app-completion app=148 app-signal=signaled
+info:  InternalWSI: source-present app=149 duration-us=23 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=158 app=149 internal=0 acquire=158 image=1 generation=2
+info:  InternalWSI: dropped opportunity=133 reason=queue-full
+info:  WSI: app-frame-latency-signal app=149 via=source-submit-completion
+info:  WSI: app-completion app=149 app-signal=signaled
+info:  WSI: present origin=INTERNAL_OUTPUT wsi=159 app=0 internal=26 acquire=159 image=2 generation=2
+info:  InternalWSI: queued origin=INTERNAL_OUTPUT wsi=159 internal=26 app=none pattern=cyan vkPresent=VK_SUCCESS
+info:  InternalWSI: retirement outcome=present-submitted wsi=159 internal=26 app-signals=unchanged actual-display-timing=separate
+info:  InternalWSI: source-present app=150 duration-us=63 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=160 app=150 internal=0 acquire=160 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=150 via=source-submit-completion
+info:  WSI: app-completion app=150 app-signal=signaled
+info:  InternalWSI: source-present app=151 duration-us=24 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=161 app=151 internal=0 acquire=161 image=1 generation=2
+info:  InternalWSI: dropped opportunity=135 reason=queue-full
+info:  InternalWSI: dropped request internal=134 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=151 via=source-submit-completion
+info:  WSI: app-completion app=151 app-signal=signaled
+info:  InternalWSI: source-present app=152 duration-us=33 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=162 app=152 internal=0 acquire=162 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=152 via=source-submit-completion
+info:  WSI: app-completion app=152 app-signal=signaled
+info:  InternalWSI: source-present app=153 duration-us=26 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=163 app=153 internal=0 acquire=163 image=0 generation=2
+info:  InternalWSI: dropped opportunity=137 reason=queue-full
+info:  WSI: app-frame-latency-signal app=153 via=source-submit-completion
+info:  WSI: app-completion app=153 app-signal=signaled
+info:  WSI: present origin=INTERNAL_OUTPUT wsi=164 app=0 internal=27 acquire=164 image=1 generation=2
+info:  InternalWSI: queued origin=INTERNAL_OUTPUT wsi=164 internal=27 app=none pattern=magenta vkPresent=VK_SUCCESS
+info:  InternalWSI: retirement outcome=present-submitted wsi=164 internal=27 app-signals=unchanged actual-display-timing=separate
+info:  InternalWSI: source-present app=154 duration-us=54 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=165 app=154 internal=0 acquire=165 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=154 via=source-submit-completion
+info:  WSI: app-completion app=154 app-signal=signaled
+info:  InternalWSI: source-present app=155 duration-us=23 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=166 app=155 internal=0 acquire=166 image=0 generation=2
+info:  InternalWSI: dropped opportunity=139 reason=queue-full
+info:  InternalWSI: dropped request internal=138 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=155 via=source-submit-completion
+info:  WSI: app-completion app=155 app-signal=signaled
+info:  InternalWSI: source-present app=156 duration-us=23 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=167 app=156 internal=0 acquire=167 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=156 via=source-submit-completion
+info:  WSI: app-completion app=156 app-signal=signaled
+info:  InternalWSI: source-present app=157 duration-us=23 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=168 app=157 internal=0 acquire=168 image=2 generation=2
+info:  InternalWSI: dropped opportunity=141 reason=queue-full
+info:  WSI: app-frame-latency-signal app=157 via=source-submit-completion
+info:  WSI: app-completion app=157 app-signal=signaled
+info:  WSI: present origin=INTERNAL_OUTPUT wsi=169 app=0 internal=28 acquire=169 image=0 generation=2
+info:  InternalWSI: queued origin=INTERNAL_OUTPUT wsi=169 internal=28 app=none pattern=cyan vkPresent=VK_SUCCESS
+info:  InternalWSI: retirement outcome=present-submitted wsi=169 internal=28 app-signals=unchanged actual-display-timing=separate
+info:  InternalWSI: source-present app=158 duration-us=48 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=170 app=158 internal=0 acquire=170 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=158 via=source-submit-completion
+info:  WSI: app-completion app=158 app-signal=signaled
+info:  InternalWSI: source-present app=159 duration-us=19 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=171 app=159 internal=0 acquire=171 image=2 generation=2
+info:  InternalWSI: dropped opportunity=143 reason=queue-full
+info:  InternalWSI: dropped request internal=142 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=159 via=source-submit-completion
+info:  WSI: app-completion app=159 app-signal=signaled
+info:  InternalWSI: source-present app=160 duration-us=40 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=172 app=160 internal=0 acquire=172 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=160 via=source-submit-completion
+info:  WSI: app-completion app=160 app-signal=signaled
+info:  InternalWSI: source-present app=161 duration-us=41 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=173 app=161 internal=0 acquire=173 image=1 generation=2
+info:  InternalWSI: dropped opportunity=145 reason=queue-full
+info:  InternalWSI: dropped request internal=144 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=161 via=source-submit-completion
+info:  WSI: app-completion app=161 app-signal=signaled
+info:  InternalWSI: source-present app=162 duration-us=30 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=174 app=162 internal=0 acquire=174 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=162 via=source-submit-completion
+info:  WSI: app-completion app=162 app-signal=signaled
+info:  InternalWSI: source-present app=163 duration-us=26 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=175 app=163 internal=0 acquire=175 image=0 generation=2
+info:  InternalWSI: dropped opportunity=147 reason=queue-full
+info:  WSI: app-frame-latency-signal app=163 via=source-submit-completion
+info:  WSI: app-completion app=163 app-signal=signaled
+info:  WSI: present origin=INTERNAL_OUTPUT wsi=176 app=0 internal=29 acquire=176 image=1 generation=2
+info:  InternalWSI: retirement outcome=present-submitted wsi=176 internal=29 app-signals=unchanged actual-display-timing=separate
+info:  InternalWSI: queued origin=INTERNAL_OUTPUT wsi=176 internal=29 app=none pattern=magenta vkPresent=VK_SUCCESS
+info:  InternalWSI: source-present app=164 duration-us=49 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=177 app=164 internal=0 acquire=177 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=164 via=source-submit-completion
+info:  WSI: app-completion app=164 app-signal=signaled
+info:  InternalWSI: source-present app=165 duration-us=31 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=178 app=165 internal=0 acquire=178 image=0 generation=2
+info:  InternalWSI: dropped opportunity=149 reason=queue-full
+info:  WSI: app-frame-latency-signal app=165 via=source-submit-completion
+info:  WSI: app-completion app=165 app-signal=signaled
+info:  WSI: present origin=INTERNAL_OUTPUT wsi=179 app=0 internal=30 acquire=179 image=1 generation=2
+info:  InternalWSI: queued origin=INTERNAL_OUTPUT wsi=179 internal=30 app=none pattern=cyan vkPresent=VK_SUCCESS
+info:  InternalWSI: retirement outcome=present-submitted wsi=179 internal=30 app-signals=unchanged actual-display-timing=separate
+info:  InternalWSI: source-present app=166 duration-us=50 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=180 app=166 internal=0 acquire=180 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=166 via=source-submit-completion
+info:  WSI: app-completion app=166 app-signal=signaled
+info:  InternalWSI: source-present app=167 duration-us=25 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=181 app=167 internal=0 acquire=181 image=0 generation=2
+info:  InternalWSI: dropped opportunity=151 reason=queue-full
+info:  WSI: app-frame-latency-signal app=167 via=source-submit-completion
+info:  WSI: app-completion app=167 app-signal=signaled
+info:  WSI: present origin=INTERNAL_OUTPUT wsi=182 app=0 internal=31 acquire=182 image=1 generation=2
+info:  InternalWSI: queued origin=INTERNAL_OUTPUT wsi=182 internal=31 app=none pattern=magenta vkPresent=VK_SUCCESS
+info:  InternalWSI: retirement outcome=present-submitted wsi=182 internal=31 app-signals=unchanged actual-display-timing=separate
+info:  InternalWSI: source-present app=168 duration-us=50 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=183 app=168 internal=0 acquire=183 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=168 via=source-submit-completion
+info:  WSI: app-completion app=168 app-signal=signaled
+info:  InternalWSI: source-present app=169 duration-us=38 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=184 app=169 internal=0 acquire=184 image=0 generation=2
+info:  InternalWSI: dropped opportunity=153 reason=queue-full
+info:  InternalWSI: dropped request internal=152 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=169 via=source-submit-completion
+info:  WSI: app-completion app=169 app-signal=signaled
+info:  InternalWSI: source-present app=170 duration-us=24 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=185 app=170 internal=0 acquire=185 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=170 via=source-submit-completion
+info:  WSI: app-completion app=170 app-signal=signaled
+info:  InternalWSI: source-present app=171 duration-us=24 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=186 app=171 internal=0 acquire=186 image=2 generation=2
+info:  InternalWSI: dropped opportunity=155 reason=queue-full
+info:  InternalWSI: dropped request internal=154 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=171 via=source-submit-completion
+info:  WSI: app-completion app=171 app-signal=signaled
+info:  InternalWSI: source-present app=172 duration-us=25 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=187 app=172 internal=0 acquire=187 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=172 via=source-submit-completion
+info:  WSI: app-completion app=172 app-signal=signaled
+info:  InternalWSI: source-present app=173 duration-us=24 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=188 app=173 internal=0 acquire=188 image=1 generation=2
+info:  InternalWSI: dropped opportunity=157 reason=queue-full
+info:  InternalWSI: dropped request internal=156 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=173 via=source-submit-completion
+info:  WSI: app-completion app=173 app-signal=signaled
+info:  InternalWSI: source-present app=174 duration-us=24 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=189 app=174 internal=0 acquire=189 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=174 via=source-submit-completion
+info:  WSI: app-completion app=174 app-signal=signaled
+info:  InternalWSI: source-present app=175 duration-us=70 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=190 app=175 internal=0 acquire=190 image=0 generation=2
+info:  InternalWSI: dropped opportunity=159 reason=queue-full
+info:  InternalWSI: dropped request internal=158 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=175 via=source-submit-completion
+info:  WSI: app-completion app=175 app-signal=signaled
+info:  InternalWSI: source-present app=176 duration-us=34 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=191 app=176 internal=0 acquire=191 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=176 via=source-submit-completion
+info:  WSI: app-completion app=176 app-signal=signaled
+info:  InternalWSI: source-present app=177 duration-us=31 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=192 app=177 internal=0 acquire=192 image=2 generation=2
+info:  InternalWSI: dropped opportunity=161 reason=queue-full
+info:  InternalWSI: dropped request internal=160 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=177 via=source-submit-completion
+info:  WSI: app-completion app=177 app-signal=signaled
+info:  InternalWSI: source-present app=178 duration-us=32 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=193 app=178 internal=0 acquire=193 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=178 via=source-submit-completion
+info:  WSI: app-completion app=178 app-signal=signaled
+info:  InternalWSI: source-present app=179 duration-us=28 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=194 app=179 internal=0 acquire=194 image=1 generation=2
+info:  InternalWSI: dropped opportunity=163 reason=queue-full
+info:  WSI: app-frame-latency-signal app=179 via=source-submit-completion
+info:  WSI: app-completion app=179 app-signal=signaled
+info:  WSI: present origin=INTERNAL_OUTPUT wsi=195 app=0 internal=32 acquire=195 image=2 generation=2
+info:  InternalWSI: queued origin=INTERNAL_OUTPUT wsi=195 internal=32 app=none pattern=cyan vkPresent=VK_SUCCESS
+info:  InternalWSI: retirement outcome=present-submitted wsi=195 internal=32 app-signals=unchanged actual-display-timing=separate
+info:  InternalWSI: source-present app=180 duration-us=75 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=196 app=180 internal=0 acquire=196 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=180 via=source-submit-completion
+info:  WSI: app-completion app=180 app-signal=signaled
+info:  InternalWSI: source-present app=181 duration-us=27 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=197 app=181 internal=0 acquire=197 image=1 generation=2
+info:  InternalWSI: dropped opportunity=165 reason=queue-full
+info:  InternalWSI: dropped request internal=164 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=181 via=source-submit-completion
+info:  WSI: app-completion app=181 app-signal=signaled
+info:  InternalWSI: source-present app=182 duration-us=26 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=198 app=182 internal=0 acquire=198 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=182 via=source-submit-completion
+info:  WSI: app-completion app=182 app-signal=signaled
+info:  InternalWSI: source-present app=183 duration-us=21 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=199 app=183 internal=0 acquire=199 image=0 generation=2
+info:  InternalWSI: dropped opportunity=167 reason=queue-full
+info:  InternalWSI: dropped request internal=166 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=183 via=source-submit-completion
+info:  WSI: app-completion app=183 app-signal=signaled
+info:  InternalWSI: source-present app=184 duration-us=28 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=200 app=184 internal=0 acquire=200 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=184 via=source-submit-completion
+info:  WSI: app-completion app=184 app-signal=signaled
+info:  InternalWSI: source-present app=185 duration-us=23 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=201 app=185 internal=0 acquire=201 image=2 generation=2
+info:  InternalWSI: dropped opportunity=169 reason=queue-full
+info:  InternalWSI: dropped request internal=168 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=185 via=source-submit-completion
+info:  WSI: app-completion app=185 app-signal=signaled
+info:  InternalWSI: source-present app=186 duration-us=22 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=202 app=186 internal=0 acquire=202 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=186 via=source-submit-completion
+info:  WSI: app-completion app=186 app-signal=signaled
+info:  InternalWSI: source-present app=187 duration-us=33 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=203 app=187 internal=0 acquire=203 image=1 generation=2
+info:  InternalWSI: dropped opportunity=171 reason=queue-full
+info:  InternalWSI: dropped request internal=170 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=187 via=source-submit-completion
+info:  WSI: app-completion app=187 app-signal=signaled
+info:  InternalWSI: source-present app=188 duration-us=23 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=204 app=188 internal=0 acquire=204 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=188 via=source-submit-completion
+info:  WSI: app-completion app=188 app-signal=signaled
+info:  InternalWSI: source-present app=189 duration-us=26 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=205 app=189 internal=0 acquire=205 image=0 generation=2
+info:  InternalWSI: dropped opportunity=173 reason=queue-full
+info:  WSI: app-frame-latency-signal app=189 via=source-submit-completion
+info:  WSI: app-completion app=189 app-signal=signaled
+info:  WSI: present origin=INTERNAL_OUTPUT wsi=206 app=0 internal=33 acquire=206 image=1 generation=2
+info:  InternalWSI: queued origin=INTERNAL_OUTPUT wsi=206 internal=33 app=none pattern=magenta vkPresent=VK_SUCCESS
+info:  InternalWSI: retirement outcome=present-submitted wsi=206 internal=33 app-signals=unchanged actual-display-timing=separate
+info:  InternalWSI: source-present app=190 duration-us=116 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=207 app=190 internal=0 acquire=207 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=190 via=source-submit-completion
+info:  WSI: app-completion app=190 app-signal=signaled
+info:  InternalWSI: source-present app=191 duration-us=43 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=208 app=191 internal=0 acquire=208 image=0 generation=2
+info:  InternalWSI: dropped opportunity=175 reason=queue-full
+info:  WSI: app-frame-latency-signal app=191 via=source-submit-completion
+info:  WSI: app-completion app=191 app-signal=signaled
+info:  WSI: present origin=INTERNAL_OUTPUT wsi=209 app=0 internal=34 acquire=209 image=1 generation=2
+info:  InternalWSI: queued origin=INTERNAL_OUTPUT wsi=209 internal=34 app=none pattern=cyan vkPresent=VK_SUCCESS
+info:  InternalWSI: retirement outcome=present-submitted wsi=209 internal=34 app-signals=unchanged actual-display-timing=separate
+info:  InternalWSI: source-present app=192 duration-us=64 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=210 app=192 internal=0 acquire=210 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=192 via=source-submit-completion
+info:  WSI: app-completion app=192 app-signal=signaled
+info:  InternalWSI: source-present app=193 duration-us=32 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=211 app=193 internal=0 acquire=211 image=0 generation=2
+info:  InternalWSI: dropped opportunity=177 reason=queue-full
+info:  WSI: app-frame-latency-signal app=193 via=source-submit-completion
+info:  WSI: app-completion app=193 app-signal=signaled
+info:  WSI: present origin=INTERNAL_OUTPUT wsi=212 app=0 internal=35 acquire=212 image=1 generation=2
+info:  InternalWSI: queued origin=INTERNAL_OUTPUT wsi=212 internal=35 app=none pattern=magenta vkPresent=VK_SUCCESS
+info:  InternalWSI: retirement outcome=present-submitted wsi=212 internal=35 app-signals=unchanged actual-display-timing=separate
+info:  InternalWSI: source-present app=194 duration-us=52 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=213 app=194 internal=0 acquire=213 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=194 via=source-submit-completion
+info:  WSI: app-completion app=194 app-signal=signaled
+info:  InternalWSI: source-present app=195 duration-us=25 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=214 app=195 internal=0 acquire=214 image=0 generation=2
+info:  InternalWSI: dropped opportunity=179 reason=queue-full
+info:  WSI: app-frame-latency-signal app=195 via=source-submit-completion
+info:  WSI: app-completion app=195 app-signal=signaled
+info:  WSI: present origin=INTERNAL_OUTPUT wsi=215 app=0 internal=36 acquire=215 image=1 generation=2
+info:  InternalWSI: queued origin=INTERNAL_OUTPUT wsi=215 internal=36 app=none pattern=cyan vkPresent=VK_SUCCESS
+info:  InternalWSI: retirement outcome=present-submitted wsi=215 internal=36 app-signals=unchanged actual-display-timing=separate
+info:  InternalWSI: source-present app=196 duration-us=52 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=216 app=196 internal=0 acquire=216 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=196 via=source-submit-completion
+info:  WSI: app-completion app=196 app-signal=signaled
+info:  InternalWSI: source-present app=197 duration-us=23 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=217 app=197 internal=0 acquire=217 image=0 generation=2
+info:  InternalWSI: dropped opportunity=181 reason=queue-full
+info:  InternalWSI: dropped request internal=180 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=197 via=source-submit-completion
+info:  WSI: app-completion app=197 app-signal=signaled
+info:  InternalWSI: source-present app=198 duration-us=29 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=218 app=198 internal=0 acquire=218 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=198 via=source-submit-completion
+info:  WSI: app-completion app=198 app-signal=signaled
+info:  InternalWSI: source-present app=199 duration-us=24 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=219 app=199 internal=0 acquire=219 image=2 generation=2
+info:  InternalWSI: dropped opportunity=183 reason=queue-full
+info:  InternalWSI: dropped request internal=182 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=199 via=source-submit-completion
+info:  WSI: app-completion app=199 app-signal=signaled
+info:  InternalWSI: source-present app=200 duration-us=24 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=220 app=200 internal=0 acquire=220 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=200 via=source-submit-completion
+info:  WSI: app-completion app=200 app-signal=signaled
+info:  InternalWSI: source-present app=201 duration-us=21 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=221 app=201 internal=0 acquire=221 image=1 generation=2
+info:  InternalWSI: dropped opportunity=185 reason=queue-full
+info:  WSI: app-frame-latency-signal app=201 via=source-submit-completion
+info:  WSI: app-completion app=201 app-signal=signaled
+info:  WSI: present origin=INTERNAL_OUTPUT wsi=222 app=0 internal=37 acquire=222 image=2 generation=2
+info:  InternalWSI: retirement outcome=present-submitted wsi=222 internal=37 app-signals=unchanged actual-display-timing=separate
+info:  InternalWSI: queued origin=INTERNAL_OUTPUT wsi=222 internal=37 app=none pattern=magenta vkPresent=VK_SUCCESS
+info:  InternalWSI: source-present app=202 duration-us=45 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=223 app=202 internal=0 acquire=223 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=202 via=source-submit-completion
+info:  WSI: app-completion app=202 app-signal=signaled
+info:  InternalWSI: source-present app=203 duration-us=28 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=224 app=203 internal=0 acquire=224 image=1 generation=2
+info:  InternalWSI: dropped opportunity=187 reason=queue-full
+info:  InternalWSI: dropped request internal=186 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=203 via=source-submit-completion
+info:  WSI: app-completion app=203 app-signal=signaled
+info:  InternalWSI: source-present app=204 duration-us=26 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=225 app=204 internal=0 acquire=225 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=204 via=source-submit-completion
+info:  WSI: app-completion app=204 app-signal=signaled
+info:  InternalWSI: source-present app=205 duration-us=49 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=226 app=205 internal=0 acquire=226 image=0 generation=2
+info:  InternalWSI: dropped opportunity=189 reason=queue-full
+info:  InternalWSI: dropped request internal=188 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=205 via=source-submit-completion
+info:  WSI: app-completion app=205 app-signal=signaled
+info:  InternalWSI: source-present app=206 duration-us=37 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=227 app=206 internal=0 acquire=227 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=206 via=source-submit-completion
+info:  WSI: app-completion app=206 app-signal=signaled
+info:  InternalWSI: source-present app=207 duration-us=35 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=228 app=207 internal=0 acquire=228 image=2 generation=2
+info:  InternalWSI: dropped opportunity=191 reason=queue-full
+info:  WSI: app-frame-latency-signal app=207 via=source-submit-completion
+info:  WSI: app-completion app=207 app-signal=signaled
+info:  WSI: present origin=INTERNAL_OUTPUT wsi=229 app=0 internal=38 acquire=229 image=0 generation=2
+info:  InternalWSI: queued origin=INTERNAL_OUTPUT wsi=229 internal=38 app=none pattern=cyan vkPresent=VK_SUCCESS
+info:  InternalWSI: retirement outcome=present-submitted wsi=229 internal=38 app-signals=unchanged actual-display-timing=separate
+info:  InternalWSI: source-present app=208 duration-us=55 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=230 app=208 internal=0 acquire=230 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=208 via=source-submit-completion
+info:  WSI: app-completion app=208 app-signal=signaled
+info:  InternalWSI: source-present app=209 duration-us=23 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=231 app=209 internal=0 acquire=231 image=2 generation=2
+info:  InternalWSI: dropped opportunity=193 reason=queue-full
+info:  InternalWSI: dropped request internal=192 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=209 via=source-submit-completion
+info:  WSI: app-completion app=209 app-signal=signaled
+info:  InternalWSI: source-present app=210 duration-us=40 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=232 app=210 internal=0 acquire=232 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=210 via=source-submit-completion
+info:  WSI: app-completion app=210 app-signal=signaled
+info:  InternalWSI: source-present app=211 duration-us=57 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=233 app=211 internal=0 acquire=233 image=1 generation=2
+info:  InternalWSI: dropped opportunity=195 reason=queue-full
+info:  InternalWSI: dropped request internal=194 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=211 via=source-submit-completion
+info:  WSI: app-completion app=211 app-signal=signaled
+info:  InternalWSI: source-present app=212 duration-us=26 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=234 app=212 internal=0 acquire=234 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=212 via=source-submit-completion
+info:  WSI: app-completion app=212 app-signal=signaled
+info:  InternalWSI: source-present app=213 duration-us=31 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=235 app=213 internal=0 acquire=235 image=0 generation=2
+info:  InternalWSI: dropped opportunity=197 reason=queue-full
+info:  WSI: app-frame-latency-signal app=213 via=source-submit-completion
+info:  WSI: app-completion app=213 app-signal=signaled
+info:  WSI: present origin=INTERNAL_OUTPUT wsi=236 app=0 internal=39 acquire=236 image=1 generation=2
+info:  InternalWSI: queued origin=INTERNAL_OUTPUT wsi=236 internal=39 app=none pattern=magenta vkPresent=VK_SUCCESS
+info:  InternalWSI: retirement outcome=present-submitted wsi=236 internal=39 app-signals=unchanged actual-display-timing=separate
+info:  InternalWSI: source-present app=214 duration-us=65 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=237 app=214 internal=0 acquire=237 image=2 generation=2
+info:  WSI: app-completion app=214 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=214 via=source-present-retirement
+info:  InternalWSI: source-present app=215 duration-us=14 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=238 app=215 internal=0 acquire=238 image=0 generation=2
+info:  InternalWSI: dropped opportunity=199 reason=queue-full
+info:  WSI: app-frame-latency-signal app=215 via=source-submit-completion
+info:  WSI: app-completion app=215 app-signal=signaled
+info:  WSI: present origin=INTERNAL_OUTPUT wsi=239 app=0 internal=40 acquire=239 image=1 generation=2
+info:  InternalWSI: queued origin=INTERNAL_OUTPUT wsi=239 internal=40 app=none pattern=cyan vkPresent=VK_SUCCESS
+info:  InternalWSI: retirement outcome=present-submitted wsi=239 internal=40 app-signals=unchanged actual-display-timing=separate
+info:  InternalWSI: source-present app=216 duration-us=25 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=240 app=216 internal=0 acquire=240 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=216 via=source-submit-completion
+info:  WSI: app-completion app=216 app-signal=signaled
+info:  InternalWSI: source-present app=217 duration-us=21 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=241 app=217 internal=0 acquire=241 image=0 generation=2
+info:  InternalWSI: dropped opportunity=201 reason=queue-full
+info:  WSI: app-frame-latency-signal app=217 via=source-submit-completion
+info:  WSI: app-completion app=217 app-signal=signaled
+info:  WSI: present origin=INTERNAL_OUTPUT wsi=242 app=0 internal=41 acquire=242 image=1 generation=2
+info:  InternalWSI: queued origin=INTERNAL_OUTPUT wsi=242 internal=41 app=none pattern=magenta vkPresent=VK_SUCCESS
+info:  InternalWSI: retirement outcome=present-submitted wsi=242 internal=41 app-signals=unchanged actual-display-timing=separate
+info:  InternalWSI: source-present app=218 duration-us=71 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=243 app=218 internal=0 acquire=243 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=218 via=source-submit-completion
+info:  WSI: app-completion app=218 app-signal=signaled
+info:  InternalWSI: source-present app=219 duration-us=24 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=244 app=219 internal=0 acquire=244 image=0 generation=2
+info:  InternalWSI: dropped opportunity=203 reason=queue-full
+info:  InternalWSI: dropped request internal=202 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=219 via=source-submit-completion
+info:  WSI: app-completion app=219 app-signal=signaled
+info:  InternalWSI: source-present app=220 duration-us=49 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=245 app=220 internal=0 acquire=245 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=220 via=source-submit-completion
+info:  WSI: app-completion app=220 app-signal=signaled
+info:  InternalWSI: source-present app=221 duration-us=35 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=246 app=221 internal=0 acquire=246 image=2 generation=2
+info:  InternalWSI: dropped opportunity=205 reason=queue-full
+info:  InternalWSI: dropped request internal=204 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=221 via=source-submit-completion
+info:  WSI: app-completion app=221 app-signal=signaled
+info:  InternalWSI: source-present app=222 duration-us=26 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=247 app=222 internal=0 acquire=247 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=222 via=source-submit-completion
+info:  WSI: app-completion app=222 app-signal=signaled
+info:  InternalWSI: source-present app=223 duration-us=33 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=248 app=223 internal=0 acquire=248 image=1 generation=2
+info:  InternalWSI: dropped opportunity=207 reason=queue-full
+info:  InternalWSI: dropped request internal=206 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=223 via=source-submit-completion
+info:  WSI: app-completion app=223 app-signal=signaled
+info:  InternalWSI: source-present app=224 duration-us=32 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=249 app=224 internal=0 acquire=249 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=224 via=source-submit-completion
+info:  WSI: app-completion app=224 app-signal=signaled
+info:  InternalWSI: source-present app=225 duration-us=27 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=250 app=225 internal=0 acquire=250 image=0 generation=2
+info:  InternalWSI: dropped opportunity=209 reason=queue-full
+info:  InternalWSI: dropped request internal=208 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=225 via=source-submit-completion
+info:  WSI: app-completion app=225 app-signal=signaled
+info:  InternalWSI: source-present app=226 duration-us=24 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=251 app=226 internal=0 acquire=251 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=226 via=source-submit-completion
+info:  WSI: app-completion app=226 app-signal=signaled
+info:  InternalWSI: source-present app=227 duration-us=26 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=252 app=227 internal=0 acquire=252 image=2 generation=2
+info:  InternalWSI: dropped opportunity=211 reason=queue-full
+info:  WSI: app-frame-latency-signal app=227 via=source-submit-completion
+info:  WSI: app-completion app=227 app-signal=signaled
+info:  WSI: present origin=INTERNAL_OUTPUT wsi=253 app=0 internal=42 acquire=253 image=0 generation=2
+info:  InternalWSI: queued origin=INTERNAL_OUTPUT wsi=253 internal=42 app=none pattern=cyan vkPresent=VK_SUCCESS
+info:  InternalWSI: retirement outcome=present-submitted wsi=253 internal=42 app-signals=unchanged actual-display-timing=separate
+info:  InternalWSI: source-present app=228 duration-us=52 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=254 app=228 internal=0 acquire=254 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=228 via=source-submit-completion
+info:  WSI: app-completion app=228 app-signal=signaled
+info:  InternalWSI: source-present app=229 duration-us=28 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=255 app=229 internal=0 acquire=255 image=2 generation=2
+info:  InternalWSI: dropped opportunity=213 reason=queue-full
+info:  InternalWSI: dropped request internal=212 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=229 via=source-submit-completion
+info:  WSI: app-completion app=229 app-signal=signaled
+info:  InternalWSI: source-present app=230 duration-us=23 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=256 app=230 internal=0 acquire=256 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=230 via=source-submit-completion
+info:  WSI: app-completion app=230 app-signal=signaled
+info:  InternalWSI: source-present app=231 duration-us=29 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=257 app=231 internal=0 acquire=257 image=1 generation=2
+info:  InternalWSI: dropped opportunity=215 reason=queue-full
+info:  InternalWSI: dropped request internal=214 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=231 via=source-submit-completion
+info:  WSI: app-completion app=231 app-signal=signaled
+info:  InternalWSI: source-present app=232 duration-us=33 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=258 app=232 internal=0 acquire=258 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=232 via=source-submit-completion
+info:  WSI: app-completion app=232 app-signal=signaled
+info:  InternalWSI: source-present app=233 duration-us=24 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=259 app=233 internal=0 acquire=259 image=0 generation=2
+info:  InternalWSI: dropped opportunity=217 reason=queue-full
+info:  InternalWSI: dropped request internal=216 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=233 via=source-submit-completion
+info:  WSI: app-completion app=233 app-signal=signaled
+info:  InternalWSI: source-present app=234 duration-us=32 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=260 app=234 internal=0 acquire=260 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=234 via=source-submit-completion
+info:  WSI: app-completion app=234 app-signal=signaled
+info:  InternalWSI: source-present app=235 duration-us=15 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=261 app=235 internal=0 acquire=261 image=2 generation=2
+info:  InternalWSI: dropped opportunity=219 reason=queue-full
+info:  WSI: app-frame-latency-signal app=235 via=source-submit-completion
+info:  WSI: app-completion app=235 app-signal=signaled
+info:  WSI: present origin=INTERNAL_OUTPUT wsi=262 app=0 internal=43 acquire=262 image=0 generation=2
+info:  InternalWSI: queued origin=INTERNAL_OUTPUT wsi=262 internal=43 app=none pattern=magenta vkPresent=VK_SUCCESS
+info:  InternalWSI: retirement outcome=present-submitted wsi=262 internal=43 app-signals=unchanged actual-display-timing=separate
+info:  InternalWSI: source-present app=236 duration-us=43 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=263 app=236 internal=0 acquire=263 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=236 via=source-submit-completion
+info:  WSI: app-completion app=236 app-signal=signaled
+info:  InternalWSI: source-present app=237 duration-us=12 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=264 app=237 internal=0 acquire=264 image=2 generation=2
+info:  InternalWSI: dropped opportunity=221 reason=queue-full
+info:  InternalWSI: dropped request internal=220 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=237 via=source-submit-completion
+info:  WSI: app-completion app=237 app-signal=signaled
+info:  InternalWSI: source-present app=238 duration-us=32 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=265 app=238 internal=0 acquire=265 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=238 via=source-submit-completion
+info:  WSI: app-completion app=238 app-signal=signaled
+info:  InternalWSI: source-present app=239 duration-us=38 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=266 app=239 internal=0 acquire=266 image=1 generation=2
+info:  InternalWSI: dropped opportunity=223 reason=queue-full
+info:  InternalWSI: dropped request internal=222 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=239 via=source-submit-completion
+info:  WSI: app-completion app=239 app-signal=signaled
+info:  InternalWSI: source-present app=240 duration-us=42 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=267 app=240 internal=0 acquire=267 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=240 via=source-submit-completion
+info:  WSI: app-completion app=240 app-signal=signaled
+info:  InternalWSI: source-present app=241 duration-us=78 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=268 app=241 internal=0 acquire=268 image=0 generation=2
+info:  InternalWSI: dropped opportunity=225 reason=queue-full
+info:  InternalWSI: dropped request internal=224 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=241 via=source-submit-completion
+info:  WSI: app-completion app=241 app-signal=signaled
+info:  InternalWSI: source-present app=242 duration-us=40 hr=0x0
+info:  WSI: present origin=APPLICATION_SOURCE wsi=269 app=242 internal=0 acquire=269 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=242 via=source-submit-completion
+info:  WSI: app-completion app=242 app-signal=signaled

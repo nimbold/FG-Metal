@@ -1,0 +1,26 @@
+{
+  "name": "final-current-bgra8-15s",
+  "exit_status": 0,
+  "wall_seconds": 15.591503167001065,
+  "format": "BGRA8",
+  "internal_wsi_enabled": false,
+  "visual": "DIRECT VISUAL CHECK REQUIRED",
+  "environment": {
+    "WINEPREFIX": "/tmp/fgmetal-step11c/prefix-final-release-proof-rgba8-15s",
+    "WINEDLLOVERRIDES": "d3d11,dxgi=n,b",
+    "WINEDEBUG": "+loaddll",
+    "DXVK_LOG_LEVEL": "info",
+    "DXVK_LOG_PATH": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11c/evidence/final-current-bgra8-15s",
+    "DXVK_HUD": "",
+    "DYLD_PRINT_LIBRARIES": "1",
+    "FG_AUDIT_ENABLE": "1",
+    "FG_AUDIT_RUN_SECONDS": "15",
+    "FG_AUDIT_SKIP_RESIZE": "1",
+    "FG_AB_BGRA": "1"
+  },
+  "sha256": {
+    "format-ab.exe": "4419ad8d46e2d96df93a4bf8d7d8e0cb4fee853282414fdbc28fe5f4d210e973",
+    "d3d11.dll": "3c39a706d2fb577825592b9bfbc335feb218f93f933e7b83a25dcda8e1f32c3c",
+    "dxgi.dll": "17cbe8e84906ce9657493b1301e712cfc8123413034666fd9387dfe1bbf5b33c"
+  }
+}
