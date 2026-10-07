@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "review_type": "independent_read_only_wine_launcher_review",
+  "status": "PASS",
+  "reviewer": "independent Codex reviewer",
+  "reviewed_files": {
+    "source": {
+      "path": "experiments/storage/storage_policy.py",
+      "sha256": "5885dd97e4e5fb7fa767a43a4063465ca354ffc18724a5f0846638086507dc9f"
+    },
+    "tests": {
+      "path": "experiments/storage/test_wine_launcher_policy.py",
+      "sha256": "46e20bd1c495e45170bd4bb383df5e115c44fb2b63c76e353e6122d1907c8a00"
+    }
+  },
+  "coverage": [
+    {
+      "area": "Gate 0 admission and evidence freshness",
+      "result": "PASS",
+      "evidence": "Admission checks signed Gate 0 evidence, current inventory and cleanup hashes, supplemental/control-file hashes, storage budgets, retention state, certified template identity, and active or unreconciled leases. begin_experiment rejects invalid estimates, unauthorized runner paths, identity overrides, and noncanonical output paths."
+    },
+    {
+      "area": "Wine executable, PATH, and DYLD selection",
+      "result": "PASS",
+      "evidence": "Launch accepts only the certified absolute Wine executable or fixed /usr/bin/arch -x86_64 form, rechecks executable/candidate/runtime identity before spawn, restricts DYLD components to canonical roots, rewrites only the exact legacy alias, and constrains differing-hash fallback to the certified runtime path and order."
+    },
+    {
+      "area": "PrefixLease lifecycle and cleanup",
+      "result": "PASS",
+      "evidence": "PrefixLease rechecks admission and storage limits under shared locks, binds clone and published-prefix directory identities, supervises managed processes, and deletes only the bound prefix after Wine shutdown. Uncertain identity, incomplete cleanup, or an unreaped process preserves reconciliation evidence and keeps admission blocked."
+    },
+    {
+      "area": "NativeRunLease architecture and integrity",
+      "result": "PASS",
+      "evidence": "NativeRunLease binds the signed architecture and manifest, hashes thin Mach-O files through no-follow descriptors, rejects mismatches, and rechecks executable and dylib identities before spawn. Runner authentication checks the authorized path and hash."
+    }
+  ],
+  "findings": [],
+  "validation": {
+    "focused_launcher_tests": {
+      "command": "python3 -m unittest -v test_wine_launcher_policy",
+      "passed": 17,
+      "failed": 0
+    },
+    "full_storage_suite": {
+      "command": "python3 -m unittest discover -s experiments/storage -p 'test_*.py' -v",
+      "passed": 265,
+      "failed": 0
+    }
+  },
+  "limitations": [
+    "Lease and launcher tests use synthetic files and mocked process launches; they do not demonstrate a real Wine process, real prefix run, or loader resolution."
+  ]
+}

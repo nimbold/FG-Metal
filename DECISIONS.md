@@ -111,10 +111,17 @@ This log records decisions that constrain implementation. Pending items are not 
 
 ### D-016 — DXMT Metal presentation integration (Step 10)
 
-**Status:** Step 10A PASS; Steps 10B.3 and 10B.4 **PARTIAL PASS**; 15-minute soak complete for 10B.3 only<br>
-**Decision:** Keep the local downstream DXMT presenter as a viable source-safe route. Continue cadence and feedback work. Do not implement RIFE. Keep the D3DMetal/DXGI experiments as historical negative evidence; this decision does not reopen them.<br>
-**Rationale:** The pinned DXMT build uses a single layer owner and mandatory same-command-buffer SourceEscrow before ownership transfer. The Step 10B.3 soak retained all 27,000 accepted sources safely. Step 10B.4's final advance-B run retained all 1,796 accepted sources and delivered 60.045 callbacks/s, 59.726 submissions/s, and 57.079 positive feedback/s, with a 45.183 ms p95 positive interval. It reduced no-output ticks from 26 to 19, but 269 positive G timestamps followed B's display target and 56 of 1,638 positive G results lacked one or both positive endpoint timestamps. Among 152 B advances before B's scheduled source time, 125 positive B timestamps were early. The advance-B policy did not meet the cadence and feedback gate; the conditional 15-minute soak was skipped. See the [Step 10B.4 report](docs/feasibility/dxmt-framegen-step10b4.md), [Step 10B.3 report](docs/feasibility/dxmt-framegen-step10b3.md), [Step 10 report](docs/feasibility/dxmt-framegen-step10.md), and retained [Step 10B.4 evidence](experiments/dxmt_framegen/evidence/step10b4/).<br>
-**Consequence:** Keep the downstream candidate local; do not modify Highball or prepare an upstream DXMT contribution. The conditional 15-minute soak was not run because final I did not meet the synthetic correctness gate. Cadence and public feedback interpretation remain unresolved, and this is not a physical-scanout claim. No RIFE implementation was made.
+**Status:** Step 10A PASS; Steps 10B.3–10B.4 PARTIAL PASS; Step 10B.6.1 **FAIL / STOP**<br>
+**Decision:** Stop the current downstream DXMT CAMetalDisplayLink architecture and return to renderer-strategy selection. Do not implement RIFE. Keep D3DMetal/DXGI results as historical negative evidence; this decision does not reopen them.<br>
+**Rationale:** The Step 10B.3 soak retained all 27,000 accepted sources safely. Step 10B.4 did not meet cadence and feedback gates. The later matched windowed and fullscreen runs retained source safety but failed presentation health; a public `contentsScale` probe improved a short trace but failed the fresh 60-second validation. Corrected Xcode Display field interpretation shows long surface durations, while physical scanout and per-drawable association remain unverified. See the [Step 10B.5 report](experiments/dxmt_framegen/evidence/step10b5/report.md), [Step 10B.6.1 report](experiments/dxmt_framegen/evidence/step10b6_1/report.md), and earlier Step 10 reports.<br>
+**Consequence:** Do not continue tuning the current architecture, modify Highball, prepare an upstream DXMT contribution, or start RIFE on this evidence. Revisit integration only after selecting a strategy with a measurable public presentation path.
+
+### D-017 — Native MoltenVK baseline readiness (Step 11D.3-A)
+
+**Status:** **CASE A3 — INCONCLUSIVE**; Gate 0 PASS; graphics not run<br>
+**Decision:** Keep x86_64 as the primary control architecture to match the translated STEP 11D.2 Wine/MoltenVK path. Do not classify native health or begin Step 11D.3-B until a fresh provenance-bound x86_64 MoltenVK build and NativeRunLease loader probe succeed.<br>
+**Rationale:** STEP 11D.2 evidence shows the relevant `vkQueueSubmit2` and `CAMetalLayer nextDrawable` stack in an x86_64-translated process. The trace ring and correlation validator pass their synthetic, normal stress, and ThreadSanitizer checks. The current Xcode command reached project loading but failed under the leased Seatbelt build profile before compiler output; no native dylib or executable exists. Gate 0 is current and passing after the required PrefixLease certification smoke.<br>
+**Consequence:** Preserve BuildLease write confinement and storage admission while resolving Xcode's project-load/service failure. Do not start graphics before the native build and loader checkpoint; do not start Step 11D.3-B from this A3 result. See the [Step 11D.3-A1 report](experiments/dxvk_macos_step11d3a/STEP-11D3-A1-REPORT.md).
 
 ## Open decisions
 
@@ -132,8 +139,8 @@ This log records decisions that constrain implementation. Pending items are not 
 ### O-005 — Renderer adapter feasibility and order
 
 **Question:** Which public/documented integration route and renderer should be validated first?<br>
-**Status:** The transparent D3DMetal route remains blocked. Step 10B.4 reached **PARTIAL PASS** with a DXMT-native presenter, safe accepted-source outcomes, balanced callback accounting, and near-60 submission cadence; positive drawable feedback and strict A/G/B timing remain unresolved.<br>
-**Need:** Keep the DXGI/D3DMetal negative results in D-013–D-015. Continue DXMT cadence and feedback validation within the single-owner/source-safety architecture. Do not begin RIFE until the remaining timing and feedback limits have an evidence-backed disposition. Do not modify Highball or reverse engineer D3DMetal.
+**Status:** The transparent D3DMetal route remains blocked; the current DXMT presentation architecture is stopped at Step 10B.6.1; DXVK-MacOS Step 11C is partial; Step 11D.3-A is A3 because the native build has not completed.<br>
+**Need:** Select the next renderer strategy from evidence. Resume Step 11D.3-A only by resolving the Xcode/BuildLease failure while preserving storage controls. Do not start Step 11D.3-B or RIFE without the required evidence and explicit authorization. Do not modify Highball or reverse engineer D3DMetal.
 
 ### O-006 — Quality datasets and redistribution
 

@@ -1,0 +1,136 @@
+{
+  "runs": [
+    {
+      "name": "source-only",
+      "exit_status": 0,
+      "application_presents": 901,
+      "application_present_sequences_contiguous": true,
+      "last_application_present": 901,
+      "get_last_present_count_observations": 901,
+      "get_last_present_count_identical_to_present_sequence": true,
+      "last_get_last_present_count": 901,
+      "frame_statistics_lag_present_minus_stats": {
+        "count": 901,
+        "p50": 1,
+        "p95": 1,
+        "p99": 2,
+        "max": 2
+      },
+      "frame_latency_wait_status_counts": {
+        "0": 900,
+        "258": 1
+      },
+      "getbuffer0_identity_unique_count": 1,
+      "internal_wsi_queued": 0,
+      "internal_wsi_presented": 0,
+      "internal_wsi_dropped": 0,
+      "source_present_cpu_duration_us": {
+        "count": 901,
+        "p50": 206,
+        "p95": 396,
+        "p99": 16458,
+        "max": 57662
+      },
+      "backbuffer_trace": {
+        "trace_events": 0,
+        "create_slot_count": 0,
+        "create_slots": {},
+        "present_begin_slots": 0,
+        "present_count": 0,
+        "rotation_slot_events": 0,
+        "rotation_count": 0,
+        "rotation_serial_final": 0,
+        "skipped_rotations": 0,
+        "rejected_presents": 0,
+        "stable_com_identity_by_slot": {
+          "0": false,
+          "1": false
+        },
+        "stable_dxvk_image_identity_by_slot": {
+          "0": false,
+          "1": false
+        },
+        "allocation_ring_exact_two_slot_exchange": false,
+        "rotation_errors": [
+          "slot 0: COM identity is not stable across Presents",
+          "slot 0: DxvkImage identity is not stable across Presents",
+          "slot 1: COM identity is not stable across Presents",
+          "slot 1: DxvkImage identity is not stable across Presents"
+        ]
+      }
+    },
+    {
+      "name": "internal-enabled",
+      "exit_status": 0,
+      "application_presents": 901,
+      "application_present_sequences_contiguous": true,
+      "last_application_present": 901,
+      "get_last_present_count_observations": 901,
+      "get_last_present_count_identical_to_present_sequence": true,
+      "last_get_last_present_count": 901,
+      "frame_statistics_lag_present_minus_stats": {
+        "count": 901,
+        "p50": 1,
+        "p95": 1,
+        "p99": 2,
+        "max": 2
+      },
+      "frame_latency_wait_status_counts": {
+        "0": 900,
+        "258": 1
+      },
+      "getbuffer0_identity_unique_count": 1,
+      "internal_wsi_queued": 802,
+      "internal_wsi_presented": 802,
+      "internal_wsi_dropped": 81,
+      "source_present_cpu_duration_us": {
+        "count": 901,
+        "p50": 277,
+        "p95": 2700,
+        "p99": 16616,
+        "max": 50403
+      },
+      "backbuffer_trace": {
+        "trace_events": 0,
+        "create_slot_count": 0,
+        "create_slots": {},
+        "present_begin_slots": 0,
+        "present_count": 0,
+        "rotation_slot_events": 0,
+        "rotation_count": 0,
+        "rotation_serial_final": 0,
+        "skipped_rotations": 0,
+        "rejected_presents": 0,
+        "stable_com_identity_by_slot": {
+          "0": false,
+          "1": false
+        },
+        "stable_dxvk_image_identity_by_slot": {
+          "0": false,
+          "1": false
+        },
+        "allocation_ring_exact_two_slot_exchange": false,
+        "rotation_errors": [
+          "slot 0: COM identity is not stable across Presents",
+          "slot 0: DxvkImage identity is not stable across Presents",
+          "slot 1: COM identity is not stable across Presents",
+          "slot 1: DxvkImage identity is not stable across Presents"
+        ]
+      }
+    }
+  ],
+  "checks": {
+    "both_runs_exit_zero": true,
+    "application_present_count_identical": true,
+    "last_present_count_identical": true,
+    "get_last_present_count_correct_in_both": true,
+    "rotation_equals_application_presents_in_both": false,
+    "trace_slots_stable_and_rotate_in_both": false,
+    "internal_wsi_does_not_change_source_rotation_count": true,
+    "no_rejected_presents_or_rotation_skips": true,
+    "internal_path_emitted_internal_wsi": true,
+    "source_only_has_no_internal_wsi": true,
+    "waitable_status_distribution_identical": true
+  },
+  "p0_2_pass": false
+}

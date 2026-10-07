@@ -55,7 +55,9 @@ The matrix and failpoint runners default to the controlled-only proxy at `/tmp/s
 
 The `step8d1-final-matrix/run-manifest.txt` and `step8d1-final-failpoints/run-manifest.txt` record the tested controlled-app and proxy binary hashes and runtime selection.
 
-## Highball test configuration
+## Legacy Highball test configuration
+
+The command below documents the historical test setup. Current execution is gated by `experiments/storage/prefix_preflight.py`: direct invocation is refused unless the selected prefix is under an active, authenticated PrefixLease and the runner is authorized by its manifest. The script sets `WINELOADER` and `WINESERVER` to the selected engine binaries and runs this preflight before launching the controlled app. It does not create a prefix itself.
 
 The run script uses the Highball 0.10.1 engine `x64-sikarugir10.0_6-r14`, a disposable prefix, and these Wine overrides:
 
@@ -71,7 +73,7 @@ FG_DXGI_LOG=1 FG_DXGI_COPY=1 FG_DXGI_G=0 \
 bash /path/to/FG-Metal/experiments/dxgi_public_attachment/run_highball.sh ./step8d_unmodified.exe
 ```
 
-The run script sets the Highball renderer paths and public per-prefix Wine environment. No Highball source change was made. The tested setup proves that this configuration can select the app-local proxy for the controlled application; it does not establish one-click Highball packaging or compatibility with existing app-local DXGI files.
+The run script sets the Highball renderer paths and public per-prefix Wine environment. No Highball source change was made. The historical test proves that this configuration can select the app-local proxy for the controlled application; it does not establish one-click Highball packaging or compatibility with existing app-local DXGI files. A standalone invocation of the example now fails closed without a valid active PrefixLease.
 
 ## Diagnostic controls
 

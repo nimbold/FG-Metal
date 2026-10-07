@@ -1,0 +1,17 @@
+# Captured experiment outputs are byte-preserved evidence. Their CRLF records,
+# padded fields, and terminal blank lines are part of the retained artifacts;
+# whitespace checks apply to source and project documentation instead.
+experiments/**/evidence/** -whitespace
+experiments/storage/**/*.json -whitespace
+experiments/storage/**/*.log -whitespace
+experiments/storage/**/*.txt -whitespace
+experiments/storage/**/*.status -whitespace
+experiments/storage/build-manifests/**/*.h -whitespace
+experiments/dxvk_macos_step11a/REPORT.md -whitespace
+experiments/dxvk_macos_step11b/audits/shader.md -whitespace
+experiments/dxvk_macos_step11c1r/patches/** -whitespace
+experiments/dxvk_macos_step11c1r2/patches/** -whitespace
+experiments/dxvk_macos_step11d3a/STEP11D3_A0_REPORT.md -whitespace
+experiments/dxvk_macos_step11d3a/moltenvk-instrumentation-a0.patch -whitespace
+experiments/dxvk_macos_step11d3a/moltenvk-instrumentation.patch -whitespace
+experiments/storage/build-manifests/**/*.patch -whitespace

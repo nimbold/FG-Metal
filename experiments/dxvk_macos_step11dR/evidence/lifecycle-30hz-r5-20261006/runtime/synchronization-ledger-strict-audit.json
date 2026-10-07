@@ -1,0 +1,110 @@
+{
+  "async_failure_jobs": [],
+  "captured_interop_jobs": 1721,
+  "consumer_attempts": 1619,
+  "consumer_wsi_retirements_missing_or_multiple": [],
+  "event_counts": {
+    "captured": 1721,
+    "committed": 1720,
+    "consumer_attempt": 1619,
+    "consumer_claimed": 1541,
+    "dropped": 50,
+    "internal_opportunity_drop": 173,
+    "output_ready": 1548,
+    "retired": 1720,
+    "terminal": 1721,
+    "wsi_retirement": 1619,
+    "wsi_submit": 1541
+  },
+  "internal_opportunity_drop_reason_counts": {
+    "deadline-expired-before-submit": 1,
+    "lease-validation-before-submit": 71,
+    "presenter-busy": 1,
+    "queue-full": 68,
+    "source-or-swapchain-conflict-before-submit": 6,
+    "source-pending": 22,
+    "source-queue-nonempty": 3,
+    "surface-or-swapchain-dirty": 1
+  },
+  "interop_jobs_missing_job_retired": [
+    724
+  ],
+  "issues": [
+    {
+      "InteropJobId": 724,
+      "code": "interop-retirement-field-mismatch",
+      "message": "CSV retired flag does not match the job-retired event count"
+    },
+    {
+      "InteropJobId": 724,
+      "code": "interop-job-not-retired",
+      "message": "captured job has no job-retired marker (distinct from WSI retirement)"
+    },
+    {
+      "code": "slot-owned-at-log-end",
+      "message": "generation/slot (6, 5) still has job 724 as its last logged owner"
+    }
+  ],
+  "max_concurrent_owned_slots_by_generation": {
+    "10": 2,
+    "12": 2,
+    "2": 2,
+    "4": 2,
+    "6": 2,
+    "8": 2
+  },
+  "pre_capture_drop_classes": {
+    "NO_FREE_HISTORY": 50
+  },
+  "row_count": 1721,
+  "run_dir": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/lifecycle-30hz-r5-20261006/runtime",
+  "scope_note": "This audits captured InteropJobId lifecycles and logged internal-WSI opportunities. It does not replace deterministic shutdown-state hooks or generation-invalidation tests.",
+  "slot_ids_by_generation": {
+    "10": [
+      9,
+      10
+    ],
+    "12": [
+      11,
+      12
+    ],
+    "2": [
+      1,
+      2,
+      13,
+      14
+    ],
+    "4": [
+      3,
+      4
+    ],
+    "6": [
+      5,
+      6
+    ],
+    "8": [
+      7,
+      8
+    ]
+  },
+  "slots_owned_at_log_end": {
+    "generation=6 slot=5 history=24 output=25": 724
+  },
+  "source_identity": {
+    "dll_sha256_match_frozen_r5": true,
+    "failure_injection": null,
+    "native_provider_build_id": null,
+    "source_build_id": null
+  },
+  "status": "FAIL",
+  "successful_consumer_submits": 1541,
+  "terminal_classes": {
+    "DEADLINE_EXPIRED": 6,
+    "GENERATION_INVALIDATED": 1,
+    "OTHER_EXPLICIT": 2,
+    "PRESENTED": 1541,
+    "SCHEDULER_QUEUE_FULL": 68,
+    "SOURCE_PRIORITY": 32,
+    "WSI_FAILURE": 71
+  }
+}
