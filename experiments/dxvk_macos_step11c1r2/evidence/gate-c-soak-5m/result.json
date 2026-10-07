@@ -1,0 +1,11 @@
+{
+  "name": "gate-c-soak-5m",
+  "exit_status": 0,
+  "wall_seconds": 304.31661066698143,
+  "sha256": {
+    "d3d9.dll": "6a7a6da092075655ac64a5da0c79f491988407ccf320145bb0b56268014b1cda",
+    "d3d11.dll": "530a7a4b12f09f155cc34e209c63103a6c7f89eabf2965c8e76bed862384a71b",
+    "dxgi.dll": "f72aee702098627ec36617eb2b6e2142a082277b67bf712fbbdef28c0ef0771d",
+    "d3d11-semantics-30hz.exe": "fd3cad69203f030d370d772730d6a3bb96d9df7fe23d98fb0a4af01606e44134"
+  }
+}

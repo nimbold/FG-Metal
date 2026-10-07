@@ -1,0 +1,82 @@
+{
+  "async_failure_jobs": [],
+  "captured_interop_jobs": 7046,
+  "consumer_attempts": 4600,
+  "consumer_wsi_retirements_missing_or_multiple": [],
+  "event_counts": {
+    "captured": 7046,
+    "committed": 7046,
+    "consumer_attempt": 4600,
+    "consumer_claimed": 4470,
+    "dropped": 1955,
+    "internal_opportunity_drop": 2574,
+    "output_ready": 4480,
+    "retired": 7045,
+    "terminal": 7046,
+    "wsi_retirement": 4600,
+    "wsi_submit": 4470
+  },
+  "internal_opportunity_drop_reason_counts": {
+    "deadline-expired": 1,
+    "deadline-expired-before-submit": 5,
+    "lease-validation-before-submit": 120,
+    "presenter-busy": 1,
+    "queue-full": 2389,
+    "source-or-swapchain-conflict-before-submit": 5,
+    "source-pending": 44,
+    "source-queue-nonempty": 9
+  },
+  "interop_jobs_missing_job_retired": [
+    7046
+  ],
+  "issues": [
+    {
+      "InteropJobId": 7046,
+      "code": "interop-retirement-field-mismatch",
+      "message": "CSV retired flag does not match the job-retired event count"
+    },
+    {
+      "InteropJobId": 7046,
+      "code": "interop-job-not-retired",
+      "message": "captured job has no job-retired marker (distinct from WSI retirement)"
+    },
+    {
+      "code": "slot-owned-at-log-end",
+      "message": "generation/slot (2, 2) still has job 7046 as its last logged owner"
+    }
+  ],
+  "max_concurrent_owned_slots_by_generation": {
+    "2": 2
+  },
+  "pre_capture_drop_classes": {
+    "NO_FREE_HISTORY": 1955
+  },
+  "row_count": 7046,
+  "run_dir": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/cadence-repeatability-r5-20261006/A1",
+  "scope_note": "This audits captured InteropJobId lifecycles and logged internal-WSI opportunities. It does not replace deterministic shutdown-state hooks or generation-invalidation tests.",
+  "slot_ids_by_generation": {
+    "2": [
+      1,
+      2
+    ]
+  },
+  "slots_owned_at_log_end": {
+    "generation=2 slot=2 history=8 output=9": 7046
+  },
+  "source_identity": {
+    "dll_sha256_match_frozen_r5": true,
+    "failure_injection": null,
+    "native_provider_build_id": "status-v3-current-20261006",
+    "source_build_id": "current-r5-build-A-20261006"
+  },
+  "status": "FAIL",
+  "successful_consumer_submits": 4470,
+  "terminal_classes": {
+    "DEADLINE_EXPIRED": 8,
+    "OTHER_EXPLICIT": 1,
+    "PRESENTED": 4470,
+    "SCHEDULER_QUEUE_FULL": 2389,
+    "SOURCE_PRIORITY": 58,
+    "WSI_FAILURE": 120
+  }
+}

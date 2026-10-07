@@ -1,0 +1,8 @@
+test_early_window_close_cannot_receive_runner_pass (experiments.storage.test_native_control_runner.TestNativeControlRunnerValidation.test_early_window_close_cannot_receive_runner_pass) ... ok
+test_trace_duration_must_match_runner_mode (experiments.storage.test_native_control_runner.TestNativeControlRunnerValidation.test_trace_duration_must_match_runner_mode) ... ok
+test_valid_complete_trace_allows_runner_pass (experiments.storage.test_native_control_runner.TestNativeControlRunnerValidation.test_valid_complete_trace_allows_runner_pass) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.002s
+
+OK

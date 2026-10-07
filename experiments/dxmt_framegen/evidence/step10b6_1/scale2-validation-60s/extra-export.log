@@ -1,0 +1,12 @@
+Finished export to the file: /Users/nima/Documents/Code/FG-Metal/experiments/dxmt_framegen/evidence/step10b6_1/scale2-validation-60s/metal-command-buffer-completed-63.xml
+Finished export to the file: /Users/nima/Documents/Code/FG-Metal/experiments/dxmt_framegen/evidence/step10b6_1/scale2-validation-60s/metal-command-buffer-error-72.xml
+Finished export to the file: /Users/nima/Documents/Code/FG-Metal/experiments/dxmt_framegen/evidence/step10b6_1/scale2-validation-60s/os-signpost-arg-76.xml
+Finished export to the file: /Users/nima/Documents/Code/FG-Metal/experiments/dxmt_framegen/evidence/step10b6_1/scale2-validation-60s/metal-application-command-buffer-submissions-88.xml
+Finished export to the file: /Users/nima/Documents/Code/FG-Metal/experiments/dxmt_framegen/evidence/step10b6_1/scale2-validation-60s/os-signpost-107.xml
+Finished export to the file: /Users/nima/Documents/Code/FG-Metal/experiments/dxmt_framegen/evidence/step10b6_1/scale2-validation-60s/os-signpost-108.xml
+metal-command-buffer-completed-63.xml rows= 15460
+metal-command-buffer-error-72.xml rows= 0
+os-signpost-arg-76.xml rows= 325566
+metal-application-command-buffer-submissions-88.xml rows= 7256
+os-signpost-107.xml rows= 36174
+os-signpost-108.xml rows= 36174

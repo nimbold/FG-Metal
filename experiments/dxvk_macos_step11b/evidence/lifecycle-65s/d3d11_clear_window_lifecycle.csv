@@ -1,0 +1,11 @@
+event,frame,elapsed_us,result,hr
+resize_begin,90,3003175,800x450,0x00000000
+resize_complete,90,3008633,succeeded,0x00000000
+framegen_disabled,451,15003109,verified_env_0,0x00000000
+framegen_enabled,601,20003739,verified_env_1,0x00000000
+focus_loss,752,25034550,minimized,0x00000000
+focus_recovery,782,26041914,restore_requested,0x00000000
+fullscreen_enter,1052,35036749,succeeded,0x00000000
+fullscreen_exit,1097,36595914,succeeded,0x00000000
+swapchain_recreation,1352,45054222,succeeded,0x00000000
+exit,1951,65037417,success,0x00000000

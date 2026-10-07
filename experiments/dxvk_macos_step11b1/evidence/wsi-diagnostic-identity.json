@@ -1,0 +1,8 @@
+{
+  "base": "8d348236e14a3db25ffbe528a83010b3dd69a3ef",
+  "d3d11_sha256": "af7856a5ca30df68241c9ef8ee575e0e2bfc5ae3d47576b1e4c42137109b9f38",
+  "patch_sha256": "ea63f9a01cfbc1ffb5483074699560996f192a2c80e1dba5c4d783742492e389",
+  "mode": "FG_STEP11B1_WSI_CLEAR=1",
+  "default": "OFF",
+  "present_count": "existing single presentImage call only"
+}

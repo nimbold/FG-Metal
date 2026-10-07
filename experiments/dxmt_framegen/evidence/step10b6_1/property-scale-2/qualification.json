@@ -1,0 +1,25 @@
+{
+  "qualified": true,
+  "f_policy_generation_present": true,
+  "circuit_states": [
+    "0"
+  ],
+  "epochs": [
+    "2"
+  ],
+  "transitions_in_aligned_measurement": [],
+  "two_source_proof_claim_active_ordered": true,
+  "measurement_app_presents_visible_foreground": true,
+  "visibility_checked_app_rows": 680,
+  "visibility_margin_seconds": 1,
+  "all_app_presents_visible_foreground": false,
+  "full_run_safety_ledger_checked": true,
+  "native_row_range": [
+    4102,
+    21439
+  ],
+  "measurement_seconds": 20.649943791,
+  "alignment_p95_ms": 0.29575,
+  "alignment_max_ms": 0.828042,
+  "physical_scanout_verified": false
+}

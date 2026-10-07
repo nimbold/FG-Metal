@@ -1,0 +1,12 @@
+Finished export to the file: /Users/nima/Documents/Code/FG-Metal/experiments/dxmt_framegen/evidence/step10b6_1/property-scale-2/metal-command-buffer-completed-63.xml
+Finished export to the file: /Users/nima/Documents/Code/FG-Metal/experiments/dxmt_framegen/evidence/step10b6_1/property-scale-2/metal-command-buffer-error-72.xml
+Finished export to the file: /Users/nima/Documents/Code/FG-Metal/experiments/dxmt_framegen/evidence/step10b6_1/property-scale-2/os-signpost-arg-76.xml
+Finished export to the file: /Users/nima/Documents/Code/FG-Metal/experiments/dxmt_framegen/evidence/step10b6_1/property-scale-2/metal-application-command-buffer-submissions-88.xml
+Finished export to the file: /Users/nima/Documents/Code/FG-Metal/experiments/dxmt_framegen/evidence/step10b6_1/property-scale-2/os-signpost-108.xml
+Finished export to the file: /Users/nima/Documents/Code/FG-Metal/experiments/dxmt_framegen/evidence/step10b6_1/property-scale-2/os-signpost-111.xml
+metal-command-buffer-completed-63.xml rows= 5452
+metal-command-buffer-error-72.xml rows= 0
+os-signpost-arg-76.xml rows= 111582
+metal-application-command-buffer-submissions-88.xml rows= 2477
+os-signpost-108.xml rows= 12398
+os-signpost-111.xml rows= 12398

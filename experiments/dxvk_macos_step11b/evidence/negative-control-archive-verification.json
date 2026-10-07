@@ -1,0 +1,102 @@
+[
+  {
+    "path": "app/d3d11.dll",
+    "matches_manifest": true
+  },
+  {
+    "path": "app/dxgi.dll",
+    "matches_manifest": true
+  },
+  {
+    "path": "runtime/wine/etc/etc/vulkan/icd.d/MoltenVK_icd.json",
+    "matches_manifest": true
+  },
+  {
+    "path": "runtime/wine/etc/etc/vulkan/icd.d/MoltenVK_x86_64_icd.json",
+    "matches_manifest": true
+  },
+  {
+    "path": "runtime/wine/etc/vulkan/icd.d/MoltenVK_icd.json",
+    "matches_manifest": true
+  },
+  {
+    "path": "runtime/wine/etc/vulkan/icd.d/MoltenVK_x86_64_icd.json",
+    "matches_manifest": true
+  },
+  {
+    "path": "runtime/wine/lib/moltenvk-vkmt/MoltenVK_icd.json",
+    "matches_manifest": true
+  },
+  {
+    "path": "runtime/wine/lib/moltenvk-vkmt/libMoltenVK.1.dylib",
+    "matches_manifest": true
+  },
+  {
+    "path": "runtime/wine/lib/moltenvk-vkmt/libMoltenVK.dylib",
+    "matches_manifest": true
+  },
+  {
+    "path": "runtime/wine/lib/wine/i386-windows/libvulkan-1.a",
+    "matches_manifest": true
+  },
+  {
+    "path": "runtime/wine/lib/wine/i386-windows/libwinevulkan.a",
+    "matches_manifest": true
+  },
+  {
+    "path": "runtime/wine/lib/wine/i386-windows/vulkan-1.dll",
+    "matches_manifest": true
+  },
+  {
+    "path": "runtime/wine/lib/wine/i386-windows/winevulkan.dll",
+    "matches_manifest": true
+  },
+  {
+    "path": "runtime/wine/lib/wine/i386-windows/winevulkan.dll.115",
+    "matches_manifest": true
+  },
+  {
+    "path": "runtime/wine/lib/wine/x86_64-unix/libMoltenVK.1.dylib",
+    "matches_manifest": true
+  },
+  {
+    "path": "runtime/wine/lib/wine/x86_64-unix/libMoltenVK.dylib",
+    "matches_manifest": true
+  },
+  {
+    "path": "runtime/wine/lib/wine/x86_64-unix/libvulkan.1.dylib",
+    "matches_manifest": true
+  },
+  {
+    "path": "runtime/wine/lib/wine/x86_64-unix/libvulkan.dylib",
+    "matches_manifest": true
+  },
+  {
+    "path": "runtime/wine/lib/wine/x86_64-unix/winevulkan.so",
+    "matches_manifest": true
+  },
+  {
+    "path": "runtime/wine/lib/wine/x86_64-unix/winevulkan.so.115",
+    "matches_manifest": true
+  },
+  {
+    "path": "runtime/wine/lib/wine/x86_64-windows/libvulkan-1.a",
+    "matches_manifest": true
+  },
+  {
+    "path": "runtime/wine/lib/wine/x86_64-windows/libwinevulkan.a",
+    "matches_manifest": true
+  },
+  {
+    "path": "runtime/wine/lib/wine/x86_64-windows/vulkan-1.dll",
+    "matches_manifest": true
+  },
+  {
+    "path": "runtime/wine/lib/wine/x86_64-windows/winevulkan.dll",
+    "matches_manifest": true
+  },
+  {
+    "path": "runtime/wine/lib/wine/x86_64-windows/winevulkan.dll.115",
+    "matches_manifest": true
+  }
+]

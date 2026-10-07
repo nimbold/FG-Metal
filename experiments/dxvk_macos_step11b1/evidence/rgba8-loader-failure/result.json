@@ -1,0 +1,24 @@
+{
+  "name": "rgba8",
+  "exit_status": 53,
+  "wall_seconds": 0.07471016701310873,
+  "visual": "VISUAL CHECK REQUIRED",
+  "environment": {
+    "WINEPREFIX": "/tmp/fgmetal-step11b1/prefix-rgba8",
+    "WINEDLLOVERRIDES": "d3d11,dxgi=n,b",
+    "WINEDEBUG": "+loaddll",
+    "DXVK_LOG_LEVEL": "info",
+    "DXVK_LOG_PATH": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11b1/evidence/rgba8",
+    "DXVK_HUD": "",
+    "DYLD_PRINT_LIBRARIES": "1",
+    "FG_AUDIT_ENABLE": "1",
+    "FG_AUDIT_RUN_SECONDS": "60",
+    "FG_AUDIT_SKIP_RESIZE": "1",
+    "FG_AB_BGRA": "0"
+  },
+  "hashes": {
+    "format-ab.exe": "65d1aff8e47f4eb90f9d15b2a67b072c69c3d4464705d79a34fd3f1ab21b6f6d",
+    "d3d11.dll": "6940b883fb4bc1b744fb7ca3aa6a486303eaf180c9fe85c03ed7cb175057bf28",
+    "dxgi.dll": "17cbe8e84906ce9657493b1301e712cfc8123413034666fd9387dfe1bbf5b33c"
+  }
+}

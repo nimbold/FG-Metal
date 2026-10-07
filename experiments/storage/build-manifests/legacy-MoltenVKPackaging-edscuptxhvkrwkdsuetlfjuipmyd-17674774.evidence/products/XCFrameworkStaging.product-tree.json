@@ -1,0 +1,152 @@
+{
+  "entries": [
+    {
+      "mode": "0o755",
+      "path": "Headers",
+      "type": "directory"
+    },
+    {
+      "mode": "0o755",
+      "path": "Headers/MoltenVK",
+      "type": "directory"
+    },
+    {
+      "evidence_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd-17674774.evidence/products/XCFrameworkStaging/Headers/MoltenVK/mvk_config.h",
+      "path": "Headers/MoltenVK/mvk_config.h",
+      "sha256": "af29d0b556f91c5435ab9dd7173d64d2133ff3bdc67f7cf3ce4398ac2c815e18",
+      "size_bytes": 1399,
+      "type": "evidence_file"
+    },
+    {
+      "evidence_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd-17674774.evidence/products/XCFrameworkStaging/Headers/MoltenVK/mvk_datatypes.h",
+      "path": "Headers/MoltenVK/mvk_datatypes.h",
+      "sha256": "137fb8b9d39719ca013fc459fd873f924c93c28744fb9993acfba64250054fc7",
+      "size_bytes": 24851,
+      "type": "evidence_file"
+    },
+    {
+      "evidence_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd-17674774.evidence/products/XCFrameworkStaging/Headers/MoltenVK/mvk_deprecated_api.h",
+      "path": "Headers/MoltenVK/mvk_deprecated_api.h",
+      "sha256": "ba263887ae74215a1bc562374e6af6a688fccd4ae3ad9e15ed6befc687038cb0",
+      "size_bytes": 25617,
+      "type": "evidence_file"
+    },
+    {
+      "evidence_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd-17674774.evidence/products/XCFrameworkStaging/Headers/MoltenVK/mvk_private_api.h",
+      "path": "Headers/MoltenVK/mvk_private_api.h",
+      "sha256": "eb0c20649a3f377723aa8d24ae2de7bf0931d1568d9d16ca152a89bbbf2faa9d",
+      "size_bytes": 32404,
+      "type": "evidence_file"
+    },
+    {
+      "evidence_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd-17674774.evidence/products/XCFrameworkStaging/Headers/MoltenVK/mvk_vulkan.h",
+      "path": "Headers/MoltenVK/mvk_vulkan.h",
+      "sha256": "4559af38c2f9a02c68bf3acbabfc8002e745a6a6f77c5b88ee399de3dd3e4dd2",
+      "size_bytes": 1707,
+      "type": "evidence_file"
+    },
+    {
+      "evidence_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd-17674774.evidence/products/XCFrameworkStaging/Headers/MoltenVK/vk_mvk_moltenvk.h",
+      "path": "Headers/MoltenVK/vk_mvk_moltenvk.h",
+      "sha256": "9e2a2f0ef6cd8404f6b06298be285cbd1f54a7208b3038ea555cad80e3256603",
+      "size_bytes": 1815,
+      "type": "evidence_file"
+    },
+    {
+      "mode": "0o755",
+      "path": "Headers/MoltenVKShaderConverter",
+      "type": "directory"
+    },
+    {
+      "evidence_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd-17674774.evidence/products/XCFrameworkStaging/Headers/MoltenVKShaderConverter/SPIRVConversion.h",
+      "path": "Headers/MoltenVKShaderConverter/SPIRVConversion.h",
+      "sha256": "ca891ce0b661f5ef31915a07ad0ac73eb137ff1fcbe9386f42dab0ddcdd6f760",
+      "size_bytes": 3362,
+      "type": "evidence_file"
+    },
+    {
+      "evidence_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd-17674774.evidence/products/XCFrameworkStaging/Headers/MoltenVKShaderConverter/SPIRVToMSLConverter.h",
+      "path": "Headers/MoltenVKShaderConverter/SPIRVToMSLConverter.h",
+      "sha256": "124e571b7327c76ca0e340fc786deb53f114361dee3a1ae6d98c3d657a2878dc",
+      "size_bytes": 13266,
+      "type": "evidence_file"
+    },
+    {
+      "mode": "0o755",
+      "path": "Release",
+      "type": "directory"
+    },
+    {
+      "mode": "0o755",
+      "path": "Release/Platform",
+      "type": "directory"
+    },
+    {
+      "mode": "0o755",
+      "path": "Release/Platform/MoltenVK.framework",
+      "type": "directory"
+    },
+    {
+      "path": "Release/Platform/MoltenVK.framework/MoltenVK",
+      "target": "Versions/Current/MoltenVK",
+      "type": "symlink"
+    },
+    {
+      "path": "Release/Platform/MoltenVK.framework/Resources",
+      "target": "Versions/Current/Resources",
+      "type": "symlink"
+    },
+    {
+      "mode": "0o755",
+      "path": "Release/Platform/MoltenVK.framework/Versions",
+      "type": "directory"
+    },
+    {
+      "mode": "0o755",
+      "path": "Release/Platform/MoltenVK.framework/Versions/A",
+      "type": "directory"
+    },
+    {
+      "canonical_artifact_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/aa7dbe20932daea8722946e15838241bc5dd6a1d990dcbc98c1a7ad3c7036c4a/MoltenVK",
+      "path": "Release/Platform/MoltenVK.framework/Versions/A/MoltenVK",
+      "sha256": "aa7dbe20932daea8722946e15838241bc5dd6a1d990dcbc98c1a7ad3c7036c4a",
+      "size_bytes": 10873728,
+      "type": "canonical_artifact"
+    },
+    {
+      "mode": "0o755",
+      "path": "Release/Platform/MoltenVK.framework/Versions/A/Resources",
+      "type": "directory"
+    },
+    {
+      "evidence_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd-17674774.evidence/products/XCFrameworkStaging/Release/Platform/MoltenVK.framework/Versions/A/Resources/Info.plist",
+      "path": "Release/Platform/MoltenVK.framework/Versions/A/Resources/Info.plist",
+      "sha256": "4850a29cc7fcf7d3f35ba7ce27581d299cba9eac440cb4265abcf3f535111d94",
+      "size_bytes": 1289,
+      "type": "evidence_file"
+    },
+    {
+      "path": "Release/Platform/MoltenVK.framework/Versions/Current",
+      "target": "A",
+      "type": "symlink"
+    },
+    {
+      "canonical_artifact_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/91cc6eedca276d252e9fb4087282407e56a3cb3f840739176ac56f178c2219f8/libMoltenVK.a",
+      "path": "Release/Platform/libMoltenVK.a",
+      "sha256": "91cc6eedca276d252e9fb4087282407e56a3cb3f840739176ac56f178c2219f8",
+      "size_bytes": 14581464,
+      "type": "canonical_artifact"
+    },
+    {
+      "canonical_artifact_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/be440874606959c6ef3a7d5f54d22632455672c74b387157b89900509d3580d9/libMoltenVKShaderConverter.a",
+      "path": "Release/Platform/libMoltenVKShaderConverter.a",
+      "sha256": "be440874606959c6ef3a7d5f54d22632455672c74b387157b89900509d3580d9",
+      "size_bytes": 42264984,
+      "type": "canonical_artifact"
+    }
+  ],
+  "product_name": "XCFrameworkStaging",
+  "schema_version": 1,
+  "source_product_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd-17674774/Build/Products/XCFrameworkStaging",
+  "tree_sha256": "25963dd5ba43ed9a71f0d3e1e732cfd12baf19e1fb5ac908392e1b6f5a16dfe3"
+}

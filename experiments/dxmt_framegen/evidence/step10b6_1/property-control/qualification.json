@@ -1,0 +1,22 @@
+{
+  "qualified": true,
+  "f_policy_generation_present": true,
+  "circuit_states": [
+    "0"
+  ],
+  "epochs": [
+    "2"
+  ],
+  "transitions_in_aligned_measurement": [],
+  "two_source_proof_claim_active_ordered": true,
+  "all_app_presents_visible_foreground": true,
+  "full_run_safety_ledger_checked": true,
+  "native_row_range": [
+    4034,
+    21375
+  ],
+  "measurement_seconds": 20.666747875,
+  "alignment_p95_ms": 0.329667,
+  "alignment_max_ms": 3.389875,
+  "physical_scanout_verified": false
+}

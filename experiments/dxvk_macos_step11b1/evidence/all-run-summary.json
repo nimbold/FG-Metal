@@ -1,0 +1,911 @@
+{
+  "bgra8": {
+    "name": "bgra8",
+    "exit_status": 0,
+    "wall_seconds": 60.577333249966614,
+    "visual": "BLACK",
+    "environment": {
+      "WINEPREFIX": "/tmp/fgmetal-step11b1/prefix-bgra8",
+      "WINEDLLOVERRIDES": "d3d11,dxgi=n,b",
+      "WINEDEBUG": "+loaddll",
+      "DXVK_LOG_LEVEL": "info",
+      "DXVK_LOG_PATH": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11b1/evidence/bgra8",
+      "DXVK_HUD": "",
+      "DYLD_PRINT_LIBRARIES": "1",
+      "FG_AUDIT_ENABLE": "1",
+      "FG_AUDIT_RUN_SECONDS": "60",
+      "FG_AUDIT_SKIP_RESIZE": "1",
+      "FG_AB_BGRA": "1"
+    },
+    "hashes": {
+      "format-ab.exe": "4419ad8d46e2d96df93a4bf8d7d8e0cb4fee853282414fdbc28fe5f4d210e973",
+      "d3d11.dll": "6940b883fb4bc1b744fb7ca3aa6a486303eaf180c9fe85c03ed7cb175057bf28",
+      "dxgi.dll": "17cbe8e84906ce9657493b1301e712cfc8123413034666fd9387dfe1bbf5b33c"
+    },
+    "renderer_error_lines": [],
+    "swapchain_lines": [
+      "[mvk-info] MoltenVK version 1.4.2, supporting Vulkan version 1.4.357.",
+      "[mvk-info] MoltenVK version 1.4.2, supporting Vulkan version 1.4.357.",
+      "info:    Format:          VK_FORMAT_B8G8R8A8_UNORM",
+      "info:    Color space:     VK_COLOR_SPACE_SRGB_NONLINEAR_KHR",
+      "info:    Present mode:    VK_PRESENT_MODE_FIFO_KHR (dynamic: yes)",
+      "[mvk-info] Created 3 swapchain images with size (640, 360) and contents scale 1.0 in layer WineMetalLayer: WineMetalView (0x7fe6dd08dfa0) on screen Main Screen."
+    ],
+    "application_presents": 1801,
+    "present_hresult_counts": {
+      "0x00000000": 1801
+    },
+    "color_ids": [
+      "0",
+      "1",
+      "2",
+      "3"
+    ],
+    "last_app_row": [
+      "exit",
+      "1801",
+      "60036884",
+      "0x00000000",
+      "0",
+      "0"
+    ]
+  },
+  "constant-blitter": {
+    "name": "constant-blitter",
+    "exit_status": 0,
+    "wall_seconds": 60.859382374968845,
+    "visual": "VISIBLE MAGENTA",
+    "environment": {
+      "WINEPREFIX": "/tmp/fgmetal-step11b1/prefix-constant-blitter",
+      "WINEDLLOVERRIDES": "d3d11,dxgi=n,b",
+      "WINEDEBUG": "+loaddll",
+      "DXVK_LOG_LEVEL": "info",
+      "DXVK_LOG_PATH": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11b1/evidence/constant-blitter",
+      "DXVK_HUD": "",
+      "DYLD_PRINT_LIBRARIES": "1",
+      "FG_AUDIT_ENABLE": "1",
+      "FG_AUDIT_RUN_SECONDS": "60",
+      "FG_AUDIT_SKIP_RESIZE": "1",
+      "FG_AB_BGRA": "0",
+      "FG_STEP11B1_CONSTANT_BLITTER": "1"
+    },
+    "hashes": {
+      "format-ab.exe": "4419ad8d46e2d96df93a4bf8d7d8e0cb4fee853282414fdbc28fe5f4d210e973",
+      "d3d11.dll": "108aedb08cf1c48a04685c0b98cf6ab509967526355d5db8e9db8c4777304625",
+      "dxgi.dll": "17cbe8e84906ce9657493b1301e712cfc8123413034666fd9387dfe1bbf5b33c"
+    },
+    "renderer_error_lines": [],
+    "swapchain_lines": [
+      "[mvk-info] MoltenVK version 1.4.2, supporting Vulkan version 1.4.357.",
+      "[mvk-info] MoltenVK version 1.4.2, supporting Vulkan version 1.4.357.",
+      "info:    Format:          VK_FORMAT_B8G8R8A8_UNORM",
+      "info:    Color space:     VK_COLOR_SPACE_SRGB_NONLINEAR_KHR",
+      "info:    Present mode:    VK_PRESENT_MODE_FIFO_KHR (dynamic: yes)",
+      "[mvk-info] Created 3 swapchain images with size (640, 360) and contents scale 1.0 in layer WineMetalLayer: WineMetalView (0x7f79c9a43990) on screen Main Screen."
+    ],
+    "application_presents": 1801,
+    "present_hresult_counts": {
+      "0x00000000": 1801
+    },
+    "color_ids": [
+      "0",
+      "1",
+      "2",
+      "3"
+    ],
+    "last_app_row": [
+      "exit",
+      "1801",
+      "60034220",
+      "0x00000000",
+      "0",
+      "0"
+    ]
+  },
+  "direct-wsi": {
+    "name": "direct-wsi",
+    "exit_status": 0,
+    "wall_seconds": 61.17196183296619,
+    "visual": "VISIBLE MAGENTA",
+    "environment": {
+      "WINEPREFIX": "/tmp/fgmetal-step11b1/prefix-direct-wsi",
+      "WINEDLLOVERRIDES": "d3d11,dxgi=n,b",
+      "WINEDEBUG": "+loaddll",
+      "DXVK_LOG_LEVEL": "info",
+      "DXVK_LOG_PATH": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11b1/evidence/direct-wsi",
+      "DXVK_HUD": "",
+      "DYLD_PRINT_LIBRARIES": "1",
+      "FG_AUDIT_ENABLE": "1",
+      "FG_AUDIT_RUN_SECONDS": "60",
+      "FG_AUDIT_SKIP_RESIZE": "1",
+      "FG_AB_BGRA": "0",
+      "FG_STEP11B1_WSI_CLEAR": "1"
+    },
+    "hashes": {
+      "format-ab.exe": "4419ad8d46e2d96df93a4bf8d7d8e0cb4fee853282414fdbc28fe5f4d210e973",
+      "d3d11.dll": "af7856a5ca30df68241c9ef8ee575e0e2bfc5ae3d47576b1e4c42137109b9f38",
+      "dxgi.dll": "17cbe8e84906ce9657493b1301e712cfc8123413034666fd9387dfe1bbf5b33c"
+    },
+    "renderer_error_lines": [],
+    "swapchain_lines": [
+      "[mvk-info] MoltenVK version 1.4.2, supporting Vulkan version 1.4.357.",
+      "[mvk-info] MoltenVK version 1.4.2, supporting Vulkan version 1.4.357.",
+      "info:    Format:          VK_FORMAT_B8G8R8A8_UNORM",
+      "info:    Color space:     VK_COLOR_SPACE_SRGB_NONLINEAR_KHR",
+      "info:    Present mode:    VK_PRESENT_MODE_FIFO_KHR (dynamic: yes)",
+      "[mvk-info] Created 3 swapchain images with size (640, 360) and contents scale 1.0 in layer WineMetalLayer: WineMetalView (0x7fc95b7db7e0) on screen Main Screen."
+    ],
+    "application_presents": 1801,
+    "present_hresult_counts": {
+      "0x00000000": 1801
+    },
+    "color_ids": [
+      "0",
+      "1",
+      "2",
+      "3"
+    ],
+    "last_app_row": [
+      "exit",
+      "1801",
+      "60036275",
+      "0x00000000",
+      "0",
+      "0"
+    ]
+  },
+  "final-bgra8-60s": {
+    "name": "final-bgra8-60s",
+    "exit_status": 0,
+    "wall_seconds": 60.82302800001344,
+    "visual": "VISIBLE CHANGING COLOR THROUGH SHUTDOWN",
+    "environment": {
+      "WINEPREFIX": "/tmp/fgmetal-step11b1/prefix-final-bgra8-60s",
+      "WINEDLLOVERRIDES": "d3d11,dxgi=n,b",
+      "WINEDEBUG": "+loaddll",
+      "DXVK_LOG_LEVEL": "info",
+      "DXVK_LOG_PATH": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11b1/evidence/final-bgra8-60s",
+      "DXVK_HUD": "",
+      "DYLD_PRINT_LIBRARIES": "1",
+      "FG_AUDIT_ENABLE": "1",
+      "FG_AUDIT_RUN_SECONDS": "60",
+      "FG_AUDIT_SKIP_RESIZE": "1",
+      "FG_AB_BGRA": "1"
+    },
+    "hashes": {
+      "format-ab.exe": "4419ad8d46e2d96df93a4bf8d7d8e0cb4fee853282414fdbc28fe5f4d210e973",
+      "d3d11.dll": "b63c935e55a0854dc6857414fceaf7fde850da9f201e027b41a4cf97fed59352",
+      "dxgi.dll": "17cbe8e84906ce9657493b1301e712cfc8123413034666fd9387dfe1bbf5b33c"
+    },
+    "renderer_error_lines": [],
+    "swapchain_lines": [
+      "[mvk-info] MoltenVK version 1.4.2, supporting Vulkan version 1.4.357.",
+      "[mvk-info] MoltenVK version 1.4.2, supporting Vulkan version 1.4.357.",
+      "info:    Format:          VK_FORMAT_B8G8R8A8_UNORM",
+      "info:    Color space:     VK_COLOR_SPACE_SRGB_NONLINEAR_KHR",
+      "info:    Present mode:    VK_PRESENT_MODE_FIFO_KHR (dynamic: yes)",
+      "[mvk-info] Created 3 swapchain images with size (640, 360) and contents scale 1.0 in layer WineMetalLayer: WineMetalView (0x7fb2b01e1660) on screen Main Screen."
+    ],
+    "application_presents": 1800,
+    "present_hresult_counts": {
+      "0x00000000": 1800
+    },
+    "color_ids": [
+      "0",
+      "1",
+      "2",
+      "3"
+    ],
+    "last_app_row": [
+      "exit",
+      "1800",
+      "60003449",
+      "0x00000000",
+      "0",
+      "0"
+    ]
+  },
+  "final-lifecycle-65s": {
+    "name": "final-lifecycle-65s",
+    "exit_status": 0,
+    "wall_seconds": 65.61966679198667,
+    "visual": "ALL LIFECYCLE TRANSITIONS VISIBLY HEALTHY",
+    "environment": {
+      "WINEPREFIX": "/tmp/fgmetal-step11b1/prefix-final-lifecycle-65s",
+      "WINEDLLOVERRIDES": "d3d11,dxgi=n,b",
+      "WINEDEBUG": "+loaddll",
+      "DXVK_LOG_LEVEL": "info",
+      "DXVK_LOG_PATH": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11b1/evidence/final-lifecycle-65s",
+      "DXVK_HUD": "",
+      "DYLD_PRINT_LIBRARIES": "1",
+      "FG_AUDIT_ENABLE": "1",
+      "FG_AUDIT_RUN_SECONDS": "65",
+      "FG_AUDIT_SKIP_RESIZE": "0",
+      "FG_AB_BGRA": "0",
+      "FG_AUDIT_LIFECYCLE_TEST": "1"
+    },
+    "hashes": {
+      "d3d11.dll": "b63c935e55a0854dc6857414fceaf7fde850da9f201e027b41a4cf97fed59352",
+      "d3d11_clear_window.exe": "18509edad2e1ae8d49941bd1868dd384d03cf693cc66b5542e7bba1611e21163",
+      "dxgi.dll": "17cbe8e84906ce9657493b1301e712cfc8123413034666fd9387dfe1bbf5b33c"
+    },
+    "renderer_error_lines": [],
+    "swapchain_lines": [
+      "[mvk-info] MoltenVK version 1.4.2, supporting Vulkan version 1.4.357.",
+      "[mvk-info] MoltenVK version 1.4.2, supporting Vulkan version 1.4.357.",
+      "info:    Format:          VK_FORMAT_B8G8R8A8_UNORM",
+      "info:    Color space:     VK_COLOR_SPACE_SRGB_NONLINEAR_KHR",
+      "info:    Present mode:    VK_PRESENT_MODE_FIFO_KHR (dynamic: yes)",
+      "[mvk-info] Created 3 swapchain images with size (640, 360) and contents scale 1.0 in layer WineMetalLayer: WineMetalView (0x7fac8e593870) on screen Main Screen.",
+      "info:    Format:          VK_FORMAT_B8G8R8A8_UNORM",
+      "info:    Color space:     VK_COLOR_SPACE_SRGB_NONLINEAR_KHR",
+      "info:    Present mode:    VK_PRESENT_MODE_FIFO_KHR (dynamic: yes)",
+      "[mvk-info] Created 3 swapchain images with size (800, 450) and contents scale 1.0 in layer WineMetalLayer: WineMetalView (0x7fac8e593870) on screen Main Screen.",
+      "info:    Format:          VK_FORMAT_B8G8R8A8_UNORM",
+      "info:    Color space:     VK_COLOR_SPACE_SRGB_NONLINEAR_KHR",
+      "info:    Present mode:    VK_PRESENT_MODE_FIFO_KHR (dynamic: yes)",
+      "[mvk-info] Created 3 swapchain images with size (1470, 956) and contents scale 1.0 in layer WineMetalLayer: WineMetalView (0x7fac8e593870) on screen Main Screen.",
+      "info:    Format:          VK_FORMAT_B8G8R8A8_UNORM",
+      "info:    Color space:     VK_COLOR_SPACE_SRGB_NONLINEAR_KHR",
+      "info:    Present mode:    VK_PRESENT_MODE_FIFO_KHR (dynamic: yes)",
+      "[mvk-info] Created 3 swapchain images with size (800, 450) and contents scale 1.0 in layer WineMetalLayer: WineMetalView (0x7fac8e593870) on screen Main Screen.",
+      "info:    Format:          VK_FORMAT_B8G8R8A8_UNORM",
+      "info:    Color space:     VK_COLOR_SPACE_SRGB_NONLINEAR_KHR",
+      "info:    Present mode:    VK_PRESENT_MODE_FIFO_KHR (dynamic: yes)",
+      "[mvk-info] Created 3 swapchain images with size (800, 450) and contents scale 1.0 in layer WineMetalLayer: WineMetalView (0x7fac8e593870) on screen Main Screen."
+    ],
+    "application_presents": 1951,
+    "present_hresult_counts": {
+      "0x00000000": 1920,
+      "0x087a0001": 31
+    },
+    "color_ids": [
+      "0",
+      "1",
+      "2",
+      "3"
+    ],
+    "last_app_row": [
+      "exit",
+      "1951",
+      "65037603",
+      "0x00000000",
+      "0",
+      "0"
+    ],
+    "lifecycle_rows": [
+      [
+        "event",
+        "frame",
+        "elapsed_us",
+        "result",
+        "hr"
+      ],
+      [
+        "resize_begin",
+        "90",
+        "3002154",
+        "800x450",
+        "0x00000000"
+      ],
+      [
+        "resize_complete",
+        "90",
+        "3018554",
+        "succeeded",
+        "0x00000000"
+      ],
+      [
+        "framegen_disabled",
+        "451",
+        "15003529",
+        "verified_env_0",
+        "0x00000000"
+      ],
+      [
+        "framegen_enabled",
+        "601",
+        "20004174",
+        "verified_env_1",
+        "0x00000000"
+      ],
+      [
+        "focus_loss",
+        "751",
+        "25003682",
+        "minimized",
+        "0x00000000"
+      ],
+      [
+        "focus_recovery",
+        "782",
+        "26044525",
+        "restore_requested",
+        "0x00000000"
+      ],
+      [
+        "fullscreen_enter",
+        "1052",
+        "35036749",
+        "succeeded",
+        "0x00000000"
+      ],
+      [
+        "fullscreen_exit",
+        "1096",
+        "36531546",
+        "succeeded",
+        "0x00000000"
+      ],
+      [
+        "swapchain_recreation",
+        "1352",
+        "45048024",
+        "succeeded",
+        "0x00000000"
+      ],
+      [
+        "exit",
+        "1951",
+        "65038524",
+        "success",
+        "0x00000000"
+      ]
+    ]
+  },
+  "final-original-30s": {
+    "name": "final-original-30s",
+    "exit_status": 0,
+    "wall_seconds": 30.608344833017327,
+    "visual": "VISIBLE CHANGING COLOR THROUGH SHUTDOWN",
+    "environment": {
+      "WINEPREFIX": "/tmp/fgmetal-step11b1/prefix-final-original-30s",
+      "WINEDLLOVERRIDES": "d3d11,dxgi=n,b",
+      "WINEDEBUG": "+loaddll",
+      "DXVK_LOG_LEVEL": "info",
+      "DXVK_LOG_PATH": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11b1/evidence/final-original-30s",
+      "DXVK_HUD": "",
+      "DYLD_PRINT_LIBRARIES": "1",
+      "FG_AUDIT_ENABLE": "1",
+      "FG_AUDIT_RUN_SECONDS": "30",
+      "FG_AUDIT_SKIP_RESIZE": "1",
+      "FG_AB_BGRA": "0"
+    },
+    "hashes": {
+      "d3d11.dll": "b63c935e55a0854dc6857414fceaf7fde850da9f201e027b41a4cf97fed59352",
+      "d3d11_clear_window.exe": "18509edad2e1ae8d49941bd1868dd384d03cf693cc66b5542e7bba1611e21163",
+      "dxgi.dll": "17cbe8e84906ce9657493b1301e712cfc8123413034666fd9387dfe1bbf5b33c"
+    },
+    "renderer_error_lines": [],
+    "swapchain_lines": [
+      "[mvk-info] MoltenVK version 1.4.2, supporting Vulkan version 1.4.357.",
+      "[mvk-info] MoltenVK version 1.4.2, supporting Vulkan version 1.4.357.",
+      "info:    Format:          VK_FORMAT_B8G8R8A8_UNORM",
+      "info:    Color space:     VK_COLOR_SPACE_SRGB_NONLINEAR_KHR",
+      "info:    Present mode:    VK_PRESENT_MODE_FIFO_KHR (dynamic: yes)",
+      "[mvk-info] Created 3 swapchain images with size (640, 360) and contents scale 1.0 in layer WineMetalLayer: WineMetalView (0x7f7906bf1890) on screen Main Screen."
+    ],
+    "application_presents": 901,
+    "present_hresult_counts": {
+      "0x00000000": 901
+    },
+    "color_ids": [
+      "0",
+      "1",
+      "2",
+      "3"
+    ],
+    "last_app_row": [
+      "exit",
+      "901",
+      "30034454",
+      "0x00000000",
+      "0",
+      "0"
+    ]
+  },
+  "final-original-60s": {
+    "name": "final-original-60s",
+    "exit_status": 0,
+    "wall_seconds": 60.811425582971424,
+    "visual": "VISIBLE CHANGING COLOR THROUGH SHUTDOWN",
+    "environment": {
+      "WINEPREFIX": "/tmp/fgmetal-step11b1/prefix-final-original-60s",
+      "WINEDLLOVERRIDES": "d3d11,dxgi=n,b",
+      "WINEDEBUG": "+loaddll",
+      "DXVK_LOG_LEVEL": "info",
+      "DXVK_LOG_PATH": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11b1/evidence/final-original-60s",
+      "DXVK_HUD": "",
+      "DYLD_PRINT_LIBRARIES": "1",
+      "FG_AUDIT_ENABLE": "1",
+      "FG_AUDIT_RUN_SECONDS": "60",
+      "FG_AUDIT_SKIP_RESIZE": "1",
+      "FG_AB_BGRA": "0"
+    },
+    "hashes": {
+      "d3d11.dll": "b63c935e55a0854dc6857414fceaf7fde850da9f201e027b41a4cf97fed59352",
+      "d3d11_clear_window.exe": "18509edad2e1ae8d49941bd1868dd384d03cf693cc66b5542e7bba1611e21163",
+      "dxgi.dll": "17cbe8e84906ce9657493b1301e712cfc8123413034666fd9387dfe1bbf5b33c"
+    },
+    "renderer_error_lines": [],
+    "swapchain_lines": [
+      "[mvk-info] MoltenVK version 1.4.2, supporting Vulkan version 1.4.357.",
+      "[mvk-info] MoltenVK version 1.4.2, supporting Vulkan version 1.4.357.",
+      "info:    Format:          VK_FORMAT_B8G8R8A8_UNORM",
+      "info:    Color space:     VK_COLOR_SPACE_SRGB_NONLINEAR_KHR",
+      "info:    Present mode:    VK_PRESENT_MODE_FIFO_KHR (dynamic: yes)",
+      "[mvk-info] Created 3 swapchain images with size (640, 360) and contents scale 1.0 in layer WineMetalLayer: WineMetalView (0x7fad40590b50) on screen Main Screen."
+    ],
+    "application_presents": 1801,
+    "present_hresult_counts": {
+      "0x00000000": 1801
+    },
+    "color_ids": [
+      "0",
+      "1",
+      "2",
+      "3"
+    ],
+    "last_app_row": [
+      "exit",
+      "1801",
+      "60037130",
+      "0x00000000",
+      "0",
+      "0"
+    ]
+  },
+  "final-repository-smoke": {
+    "name": "final-repository-smoke",
+    "exit_status": 0,
+    "wall_seconds": 57.381857500004116,
+    "visual": "VISIBLE CHANGING COLOR THROUGH SHUTDOWN",
+    "environment": {
+      "WINEPREFIX": "/tmp/fgmetal-step11b1/prefix-final-repository-smoke",
+      "WINEDLLOVERRIDES": "d3d11,dxgi=n,b",
+      "WINEDEBUG": "+loaddll",
+      "DXVK_LOG_LEVEL": "info",
+      "DXVK_LOG_PATH": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11b1/evidence/final-repository-smoke",
+      "DXVK_HUD": "",
+      "DYLD_PRINT_LIBRARIES": "1",
+      "FG_AUDIT_ENABLE": "1",
+      "FG_AUDIT_RUN_SECONDS": "60",
+      "FG_AUDIT_SKIP_RESIZE": "1",
+      "FG_AB_BGRA": "0"
+    },
+    "hashes": {
+      "repo-smoke.exe": "a4414cf011f9102deb3d35eafddb81c1180fe940cd00b9f7f0fffcac70fda8d9",
+      "d3d11.dll": "b63c935e55a0854dc6857414fceaf7fde850da9f201e027b41a4cf97fed59352",
+      "dxgi.dll": "17cbe8e84906ce9657493b1301e712cfc8123413034666fd9387dfe1bbf5b33c"
+    },
+    "renderer_error_lines": [],
+    "swapchain_lines": [
+      "[mvk-info] MoltenVK version 1.4.2, supporting Vulkan version 1.4.357.",
+      "[mvk-info] MoltenVK version 1.4.2, supporting Vulkan version 1.4.357.",
+      "info:    Format:          VK_FORMAT_B8G8R8A8_UNORM",
+      "info:    Color space:     VK_COLOR_SPACE_SRGB_NONLINEAR_KHR",
+      "info:    Present mode:    VK_PRESENT_MODE_FIFO_KHR (dynamic: yes)",
+      "[mvk-info] Created 3 swapchain images with size (312, 206) and contents scale 1.0 in layer WineMetalLayer: WineMetalView (0x7fc84f99a420) on screen Main Screen."
+    ]
+  },
+  "final-waitable-30s": {
+    "name": "final-waitable-30s",
+    "exit_status": 0,
+    "wall_seconds": 30.561995958036277,
+    "visual": "VISIBLE CHANGING COLOR THROUGH SHUTDOWN",
+    "environment": {
+      "WINEPREFIX": "/tmp/fgmetal-step11b1/prefix-final-waitable-30s",
+      "WINEDLLOVERRIDES": "d3d11,dxgi=n,b",
+      "WINEDEBUG": "+loaddll",
+      "DXVK_LOG_LEVEL": "info",
+      "DXVK_LOG_PATH": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11b1/evidence/final-waitable-30s",
+      "DXVK_HUD": "",
+      "DYLD_PRINT_LIBRARIES": "1",
+      "FG_AUDIT_ENABLE": "1",
+      "FG_AUDIT_RUN_SECONDS": "30",
+      "FG_AUDIT_SKIP_RESIZE": "1",
+      "FG_AB_BGRA": "0",
+      "FG_AUDIT_WAITABLE": "1"
+    },
+    "hashes": {
+      "d3d11.dll": "b63c935e55a0854dc6857414fceaf7fde850da9f201e027b41a4cf97fed59352",
+      "d3d11-semantics.exe": "3d610e4e5738ed3332c009acb805c668acc8f6f5c1a57781b3e4d3b5940653cb",
+      "dxgi.dll": "17cbe8e84906ce9657493b1301e712cfc8123413034666fd9387dfe1bbf5b33c"
+    },
+    "renderer_error_lines": [],
+    "swapchain_lines": [
+      "[mvk-info] MoltenVK version 1.4.2, supporting Vulkan version 1.4.357.",
+      "[mvk-info] MoltenVK version 1.4.2, supporting Vulkan version 1.4.357.",
+      "info:    Format:          VK_FORMAT_B8G8R8A8_UNORM",
+      "info:    Color space:     VK_COLOR_SPACE_SRGB_NONLINEAR_KHR",
+      "info:    Present mode:    VK_PRESENT_MODE_FIFO_KHR (dynamic: yes)",
+      "[mvk-info] Created 3 swapchain images with size (640, 360) and contents scale 1.0 in layer WineMetalLayer: WineMetalView (0x7faec790e5c0) on screen Main Screen."
+    ],
+    "application_presents": 900,
+    "present_hresult_counts": {
+      "0x00000000": 900
+    },
+    "color_ids": [
+      "0",
+      "1",
+      "2",
+      "3"
+    ],
+    "last_app_row": [
+      "exit",
+      "900",
+      "30003608",
+      "0x00000000",
+      "0",
+      "0"
+    ],
+    "semantics": {
+      "setup": [
+        [
+          "setup",
+          "0",
+          "00000000",
+          "00000000000000ac",
+          "00000000",
+          "00000000",
+          "1"
+        ]
+      ],
+      "frames": 900,
+      "all_last_present_counts_equal_app_sequence": true,
+      "count_hresult_counts": {
+        "00000000": 900
+      },
+      "stats_hresult_counts": {
+        "887a000b": 1,
+        "00000000": 899
+      },
+      "wait_result_counts": {
+        "0": 899,
+        "258": 1
+      },
+      "indices": [
+        "0"
+      ],
+      "COM_buffer_identities": [
+        "00000000008c92d0"
+      ],
+      "device_removed_hresult_counts": {
+        "00000000": 900
+      },
+      "last_frame": [
+        "observe",
+        "900",
+        "00000000",
+        "900",
+        "00000000",
+        "899",
+        "30797469",
+        "30797470",
+        "5132911372093",
+        "0",
+        "0",
+        "00000000008c92d0",
+        "00000000"
+      ]
+    }
+  },
+  "known-source": {
+    "name": "known-source",
+    "exit_status": 0,
+    "wall_seconds": 60.933399832982104,
+    "visual": "VISIBLE GREEN",
+    "environment": {
+      "WINEPREFIX": "/tmp/fgmetal-step11b1/prefix-known-source",
+      "WINEDLLOVERRIDES": "d3d11,dxgi=n,b",
+      "WINEDEBUG": "+loaddll",
+      "DXVK_LOG_LEVEL": "info",
+      "DXVK_LOG_PATH": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11b1/evidence/known-source",
+      "DXVK_HUD": "",
+      "DYLD_PRINT_LIBRARIES": "1",
+      "FG_AUDIT_ENABLE": "1",
+      "FG_AUDIT_RUN_SECONDS": "60",
+      "FG_AUDIT_SKIP_RESIZE": "1",
+      "FG_AB_BGRA": "0",
+      "FG_STEP11B1_KNOWN_SOURCE": "1"
+    },
+    "hashes": {
+      "format-ab.exe": "4419ad8d46e2d96df93a4bf8d7d8e0cb4fee853282414fdbc28fe5f4d210e973",
+      "d3d11.dll": "573e9a40a01df7e96a7a917e1fd48557a1a592f9f2b503e701279b0edc0b5825",
+      "dxgi.dll": "17cbe8e84906ce9657493b1301e712cfc8123413034666fd9387dfe1bbf5b33c"
+    },
+    "renderer_error_lines": [],
+    "swapchain_lines": [
+      "[mvk-info] MoltenVK version 1.4.2, supporting Vulkan version 1.4.357.",
+      "[mvk-info] MoltenVK version 1.4.2, supporting Vulkan version 1.4.357.",
+      "info:    Format:          VK_FORMAT_B8G8R8A8_UNORM",
+      "info:    Color space:     VK_COLOR_SPACE_SRGB_NONLINEAR_KHR",
+      "info:    Present mode:    VK_PRESENT_MODE_FIFO_KHR (dynamic: yes)",
+      "[mvk-info] Created 3 swapchain images with size (640, 360) and contents scale 1.0 in layer WineMetalLayer: WineMetalView (0x7f8162483140) on screen Main Screen."
+    ],
+    "application_presents": 1801,
+    "present_hresult_counts": {
+      "0x00000000": 1801
+    },
+    "color_ids": [
+      "0",
+      "1",
+      "2",
+      "3"
+    ],
+    "last_app_row": [
+      "exit",
+      "1801",
+      "60036782",
+      "0x00000000",
+      "0",
+      "0"
+    ]
+  },
+  "repository-smoke": {
+    "name": "repository-smoke",
+    "exit_status": 0,
+    "wall_seconds": 44.12782416702248,
+    "visual": "BLACK",
+    "environment": {
+      "WINEPREFIX": "/tmp/fgmetal-step11b1/prefix-repository-smoke",
+      "WINEDLLOVERRIDES": "d3d11,dxgi=n,b",
+      "WINEDEBUG": "+loaddll",
+      "DXVK_LOG_LEVEL": "info",
+      "DXVK_LOG_PATH": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11b1/evidence/repository-smoke",
+      "DXVK_HUD": "",
+      "DYLD_PRINT_LIBRARIES": "1",
+      "FG_AUDIT_ENABLE": "1",
+      "FG_AUDIT_RUN_SECONDS": "60",
+      "FG_AUDIT_SKIP_RESIZE": "1",
+      "FG_AB_BGRA": "0"
+    },
+    "hashes": {
+      "repo-smoke.exe": "a4414cf011f9102deb3d35eafddb81c1180fe940cd00b9f7f0fffcac70fda8d9",
+      "d3d11.dll": "6940b883fb4bc1b744fb7ca3aa6a486303eaf180c9fe85c03ed7cb175057bf28",
+      "dxgi.dll": "17cbe8e84906ce9657493b1301e712cfc8123413034666fd9387dfe1bbf5b33c"
+    },
+    "renderer_error_lines": [],
+    "swapchain_lines": [
+      "[mvk-info] MoltenVK version 1.4.2, supporting Vulkan version 1.4.357.",
+      "[mvk-info] MoltenVK version 1.4.2, supporting Vulkan version 1.4.357.",
+      "info:    Format:          VK_FORMAT_B8G8R8A8_UNORM",
+      "info:    Color space:     VK_COLOR_SPACE_SRGB_NONLINEAR_KHR",
+      "info:    Present mode:    VK_PRESENT_MODE_FIFO_KHR (dynamic: yes)",
+      "[mvk-info] Created 3 swapchain images with size (312, 206) and contents scale 1.0 in layer WineMetalLayer: WineMetalView (0x7ff11c22a670) on screen Main Screen."
+    ]
+  },
+  "rgba8": {
+    "name": "rgba8",
+    "exit_status": 0,
+    "wall_seconds": 60.90443137497641,
+    "visual": "BLACK",
+    "environment": {
+      "WINEPREFIX": "/tmp/fgmetal-step11b1/prefix-rgba8",
+      "WINEDLLOVERRIDES": "d3d11,dxgi=n,b",
+      "WINEDEBUG": "+loaddll",
+      "DXVK_LOG_LEVEL": "info",
+      "DXVK_LOG_PATH": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11b1/evidence/rgba8",
+      "DXVK_HUD": "",
+      "DYLD_PRINT_LIBRARIES": "1",
+      "FG_AUDIT_ENABLE": "1",
+      "FG_AUDIT_RUN_SECONDS": "60",
+      "FG_AUDIT_SKIP_RESIZE": "1",
+      "FG_AB_BGRA": "0"
+    },
+    "hashes": {
+      "format-ab.exe": "4419ad8d46e2d96df93a4bf8d7d8e0cb4fee853282414fdbc28fe5f4d210e973",
+      "d3d11.dll": "6940b883fb4bc1b744fb7ca3aa6a486303eaf180c9fe85c03ed7cb175057bf28",
+      "dxgi.dll": "17cbe8e84906ce9657493b1301e712cfc8123413034666fd9387dfe1bbf5b33c"
+    },
+    "renderer_error_lines": [],
+    "swapchain_lines": [
+      "[mvk-info] MoltenVK version 1.4.2, supporting Vulkan version 1.4.357.",
+      "[mvk-info] MoltenVK version 1.4.2, supporting Vulkan version 1.4.357.",
+      "info:    Format:          VK_FORMAT_B8G8R8A8_UNORM",
+      "info:    Color space:     VK_COLOR_SPACE_SRGB_NONLINEAR_KHR",
+      "info:    Present mode:    VK_PRESENT_MODE_FIFO_KHR (dynamic: yes)",
+      "[mvk-info] Created 3 swapchain images with size (640, 360) and contents scale 1.0 in layer WineMetalLayer: WineMetalView (0x7fb7167c9ec0) on screen Main Screen."
+    ],
+    "application_presents": 1800,
+    "present_hresult_counts": {
+      "0x00000000": 1800
+    },
+    "color_ids": [
+      "0",
+      "1",
+      "2",
+      "3"
+    ],
+    "last_app_row": [
+      "exit",
+      "1800",
+      "60003322",
+      "0x00000000",
+      "0",
+      "0"
+    ]
+  },
+  "rgba8-clean-replay": {
+    "name": "rgba8-clean-replay",
+    "exit_status": 0,
+    "wall_seconds": 60.596647374972235,
+    "visual": "BLACK",
+    "environment": {
+      "WINEPREFIX": "/tmp/fgmetal-step11b1/prefix-rgba8-clean-replay",
+      "WINEDLLOVERRIDES": "d3d11,dxgi=n,b",
+      "WINEDEBUG": "+loaddll",
+      "DXVK_LOG_LEVEL": "info",
+      "DXVK_LOG_PATH": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11b1/evidence/rgba8-clean-replay",
+      "DXVK_HUD": "",
+      "DYLD_PRINT_LIBRARIES": "1",
+      "FG_AUDIT_ENABLE": "1",
+      "FG_AUDIT_RUN_SECONDS": "60",
+      "FG_AUDIT_SKIP_RESIZE": "1",
+      "FG_AB_BGRA": "0"
+    },
+    "hashes": {
+      "format-ab.exe": "4419ad8d46e2d96df93a4bf8d7d8e0cb4fee853282414fdbc28fe5f4d210e973",
+      "d3d11.dll": "6940b883fb4bc1b744fb7ca3aa6a486303eaf180c9fe85c03ed7cb175057bf28",
+      "dxgi.dll": "17cbe8e84906ce9657493b1301e712cfc8123413034666fd9387dfe1bbf5b33c"
+    },
+    "renderer_error_lines": [],
+    "swapchain_lines": [
+      "[mvk-info] MoltenVK version 1.4.2, supporting Vulkan version 1.4.357.",
+      "[mvk-info] MoltenVK version 1.4.2, supporting Vulkan version 1.4.357.",
+      "info:    Format:          VK_FORMAT_B8G8R8A8_UNORM",
+      "info:    Color space:     VK_COLOR_SPACE_SRGB_NONLINEAR_KHR",
+      "info:    Present mode:    VK_PRESENT_MODE_FIFO_KHR (dynamic: yes)",
+      "[mvk-info] Created 3 swapchain images with size (640, 360) and contents scale 1.0 in layer WineMetalLayer: WineMetalView (0x7f8949f1a910) on screen Main Screen."
+    ],
+    "application_presents": 1801,
+    "present_hresult_counts": {
+      "0x00000000": 1801
+    },
+    "color_ids": [
+      "0",
+      "1",
+      "2",
+      "3"
+    ],
+    "last_app_row": [
+      "exit",
+      "1801",
+      "60034065",
+      "0x00000000",
+      "0",
+      "0"
+    ]
+  },
+  "rgba8-loader-failure": {
+    "name": "rgba8",
+    "exit_status": 53,
+    "wall_seconds": 0.07471016701310873,
+    "visual": "VISUAL CHECK REQUIRED",
+    "environment": {
+      "WINEPREFIX": "/tmp/fgmetal-step11b1/prefix-rgba8",
+      "WINEDLLOVERRIDES": "d3d11,dxgi=n,b",
+      "WINEDEBUG": "+loaddll",
+      "DXVK_LOG_LEVEL": "info",
+      "DXVK_LOG_PATH": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11b1/evidence/rgba8",
+      "DXVK_HUD": "",
+      "DYLD_PRINT_LIBRARIES": "1",
+      "FG_AUDIT_ENABLE": "1",
+      "FG_AUDIT_RUN_SECONDS": "60",
+      "FG_AUDIT_SKIP_RESIZE": "1",
+      "FG_AB_BGRA": "0"
+    },
+    "hashes": {
+      "format-ab.exe": "65d1aff8e47f4eb90f9d15b2a67b072c69c3d4464705d79a34fd3f1ab21b6f6d",
+      "d3d11.dll": "6940b883fb4bc1b744fb7ca3aa6a486303eaf180c9fe85c03ed7cb175057bf28",
+      "dxgi.dll": "17cbe8e84906ce9657493b1301e712cfc8123413034666fd9387dfe1bbf5b33c"
+    },
+    "renderer_error_lines": [],
+    "swapchain_lines": []
+  },
+  "source-after": {
+    "name": "source-after",
+    "exit_status": 0,
+    "wall_seconds": 30.929227915999945,
+    "visual": "VISIBLE CHANGING COLOR",
+    "environment": {
+      "WINEPREFIX": "/tmp/fgmetal-step11b1/prefix-source-after",
+      "WINEDLLOVERRIDES": "d3d11,dxgi=n,b",
+      "WINEDEBUG": "+loaddll",
+      "DXVK_LOG_LEVEL": "info",
+      "DXVK_LOG_PATH": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11b1/evidence/source-after",
+      "DXVK_HUD": "",
+      "DYLD_PRINT_LIBRARIES": "1",
+      "FG_AUDIT_ENABLE": "1",
+      "FG_AUDIT_RUN_SECONDS": "30",
+      "FG_AUDIT_SKIP_RESIZE": "1",
+      "FG_AB_BGRA": "0",
+      "FG_STEP11B1_TRACE_SOURCE": "1",
+      "FG_STEP11B1_FLUSH_SOURCE": "1"
+    },
+    "hashes": {
+      "format-ab.exe": "4419ad8d46e2d96df93a4bf8d7d8e0cb4fee853282414fdbc28fe5f4d210e973",
+      "d3d11.dll": "22679d64f9956843f1b62d0a26134bd47527f2e7328b4d8bbb8468e0f05d67cb",
+      "dxgi.dll": "17cbe8e84906ce9657493b1301e712cfc8123413034666fd9387dfe1bbf5b33c"
+    },
+    "renderer_error_lines": [],
+    "swapchain_lines": [
+      "[mvk-info] MoltenVK version 1.4.2, supporting Vulkan version 1.4.357.",
+      "[mvk-info] MoltenVK version 1.4.2, supporting Vulkan version 1.4.357.",
+      "info:    Format:          VK_FORMAT_B8G8R8A8_UNORM",
+      "info:    Color space:     VK_COLOR_SPACE_SRGB_NONLINEAR_KHR",
+      "info:    Present mode:    VK_PRESENT_MODE_FIFO_KHR (dynamic: yes)",
+      "[mvk-info] Created 3 swapchain images with size (640, 360) and contents scale 1.0 in layer WineMetalLayer: WineMetalView (0x7fdf8e3558e0) on screen Main Screen."
+    ],
+    "application_presents": 901,
+    "present_hresult_counts": {
+      "0x00000000": 901
+    },
+    "color_ids": [
+      "0",
+      "1",
+      "2",
+      "3"
+    ],
+    "last_app_row": [
+      "exit",
+      "901",
+      "30033713",
+      "0x00000000",
+      "0",
+      "0"
+    ]
+  },
+  "source-before": {
+    "name": "source-before",
+    "exit_status": 0,
+    "wall_seconds": 30.779058333020657,
+    "visual": "BLACK",
+    "environment": {
+      "WINEPREFIX": "/tmp/fgmetal-step11b1/prefix-source-before",
+      "WINEDLLOVERRIDES": "d3d11,dxgi=n,b",
+      "WINEDEBUG": "+loaddll",
+      "DXVK_LOG_LEVEL": "info",
+      "DXVK_LOG_PATH": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11b1/evidence/source-before",
+      "DXVK_HUD": "",
+      "DYLD_PRINT_LIBRARIES": "1",
+      "FG_AUDIT_ENABLE": "1",
+      "FG_AUDIT_RUN_SECONDS": "30",
+      "FG_AUDIT_SKIP_RESIZE": "1",
+      "FG_AB_BGRA": "0",
+      "FG_STEP11B1_TRACE_SOURCE": "1"
+    },
+    "hashes": {
+      "format-ab.exe": "4419ad8d46e2d96df93a4bf8d7d8e0cb4fee853282414fdbc28fe5f4d210e973",
+      "d3d11.dll": "22679d64f9956843f1b62d0a26134bd47527f2e7328b4d8bbb8468e0f05d67cb",
+      "dxgi.dll": "17cbe8e84906ce9657493b1301e712cfc8123413034666fd9387dfe1bbf5b33c"
+    },
+    "renderer_error_lines": [],
+    "swapchain_lines": [
+      "[mvk-info] MoltenVK version 1.4.2, supporting Vulkan version 1.4.357.",
+      "[mvk-info] MoltenVK version 1.4.2, supporting Vulkan version 1.4.357.",
+      "info:    Format:          VK_FORMAT_B8G8R8A8_UNORM",
+      "info:    Color space:     VK_COLOR_SPACE_SRGB_NONLINEAR_KHR",
+      "info:    Present mode:    VK_PRESENT_MODE_FIFO_KHR (dynamic: yes)",
+      "[mvk-info] Created 3 swapchain images with size (640, 360) and contents scale 1.0 in layer WineMetalLayer: WineMetalView (0x7ff2e949b860) on screen Main Screen."
+    ],
+    "application_presents": 900,
+    "present_hresult_counts": {
+      "0x00000000": 900
+    },
+    "color_ids": [
+      "0",
+      "1",
+      "2",
+      "3"
+    ],
+    "last_app_row": [
+      "exit",
+      "900",
+      "30004111",
+      "0x00000000",
+      "0",
+      "0"
+    ]
+  }
+}

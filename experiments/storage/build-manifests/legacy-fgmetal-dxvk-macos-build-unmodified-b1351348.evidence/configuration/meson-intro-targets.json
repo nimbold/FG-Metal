@@ -1,0 +1,1366 @@
+[
+  {
+    "name": "pnp-id-table.c",
+    "id": "cdb7675@@pnp-id-table.c@cus",
+    "type": "custom",
+    "defined_in": "/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/libdisplay-info/meson.build",
+    "filename": [
+      "/private/tmp/fgmetal-dxvk-macos-build-unmodified/subprojects/libdisplay-info/pnp-id-table.c"
+    ],
+    "build_by_default": false,
+    "target_sources": [
+      {
+        "language": "unknown",
+        "compiler": [
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/libdisplay-info/tool/gen-search-table.py",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/libdisplay-info/pnp.ids",
+          "@OUTPUT@",
+          "pnp_id_table"
+        ],
+        "parameters": [],
+        "sources": [],
+        "generated_sources": []
+      }
+    ],
+    "extra_files": [],
+    "subproject": "libdisplay-info",
+    "dependencies": [],
+    "depends": [],
+    "installed": false
+  },
+  {
+    "name": "display-info",
+    "id": "cdb7675@@display-info@sta",
+    "type": "static library",
+    "defined_in": "/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/libdisplay-info/meson.build",
+    "filename": [
+      "/private/tmp/fgmetal-dxvk-macos-build-unmodified/subprojects/libdisplay-info/libdisplay-info.a"
+    ],
+    "build_by_default": true,
+    "target_sources": [
+      {
+        "language": "c",
+        "machine": "host",
+        "compiler": [
+          "x86_64-w64-mingw32-gcc"
+        ],
+        "parameters": [
+          "-I/private/tmp/fgmetal-dxvk-macos-build-unmodified/subprojects/libdisplay-info/libdisplay-info.a.p",
+          "-I/private/tmp/fgmetal-dxvk-macos-build-unmodified/subprojects/libdisplay-info",
+          "-I/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/libdisplay-info",
+          "-I/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/libdisplay-info/include",
+          "-fdiagnostics-color=always",
+          "-D_FILE_OFFSET_BITS=64",
+          "-Wall",
+          "-Winvalid-pch",
+          "-Wextra",
+          "-Wpedantic",
+          "-std=c11",
+          "-O3",
+          "-D_POSIX_C_SOURCE=200809L",
+          "-Dstatic_array=static",
+          "-Wundef",
+          "-Wmissing-prototypes",
+          "-Walloca",
+          "-Wdeclaration-after-statement",
+          "-Wconversion",
+          "-Wno-unused-parameter",
+          "-Wno-missing-field-initializers",
+          "-Werror=implicit"
+        ],
+        "sources": [
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/libdisplay-info/cta.c",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/libdisplay-info/displayid.c",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/libdisplay-info/dmt-table.c",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/libdisplay-info/edid.c",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/libdisplay-info/gtf.c",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/libdisplay-info/info.c",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/libdisplay-info/log.c",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/libdisplay-info/memory-stream.c"
+        ],
+        "generated_sources": [
+          "/private/tmp/fgmetal-dxvk-macos-build-unmodified/subprojects/libdisplay-info/pnp-id-table.c"
+        ],
+        "unity_sources": []
+      },
+      {
+        "linker": [
+          "x86_64-w64-mingw32-ar"
+        ],
+        "parameters": [
+          "csrDT"
+        ]
+      }
+    ],
+    "extra_files": [],
+    "subproject": "libdisplay-info",
+    "dependencies": [
+      "m"
+    ],
+    "depends": [],
+    "installed": false
+  },
+  {
+    "name": "dxbc_spv",
+    "id": "7453481@@dxbc_spv@sta",
+    "type": "static library",
+    "defined_in": "/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/dxbc-spirv/meson.build",
+    "filename": [
+      "/private/tmp/fgmetal-dxvk-macos-build-unmodified/subprojects/dxbc-spirv/libdxbc_spv.a"
+    ],
+    "build_by_default": true,
+    "target_sources": [
+      {
+        "language": "cpp",
+        "machine": "host",
+        "compiler": [
+          "x86_64-w64-mingw32-g++"
+        ],
+        "parameters": [
+          "-I/private/tmp/fgmetal-dxvk-macos-build-unmodified/subprojects/dxbc-spirv/libdxbc_spv.a.p",
+          "-I/private/tmp/fgmetal-dxvk-macos-build-unmodified/subprojects/dxbc-spirv",
+          "-I/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/dxbc-spirv",
+          "-fdiagnostics-color=always",
+          "-D_GLIBCXX_ASSERTIONS=1",
+          "-D_FILE_OFFSET_BITS=64",
+          "-Wall",
+          "-Winvalid-pch",
+          "-Wextra",
+          "-fno-exceptions",
+          "-std=c++17",
+          "-O3",
+          "-DDXBC_SPV_ENABLE_SM3",
+          "-DDXBC_SPV_ENABLE_SM5",
+          "-DDXBC_SPV_ENABLE_SPIRV"
+        ],
+        "sources": [
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/dxbc-spirv/ir/ir.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/dxbc-spirv/ir/ir_builder.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/dxbc-spirv/ir/ir_disasm.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/dxbc-spirv/ir/ir_divergence.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/dxbc-spirv/ir/ir_dominance.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/dxbc-spirv/ir/ir_legalize.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/dxbc-spirv/ir/ir_serialize.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/dxbc-spirv/ir/ir_utils.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/dxbc-spirv/ir/passes/ir_pass_arithmetic.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/dxbc-spirv/ir/passes/ir_pass_buffer_kind.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/dxbc-spirv/ir/passes/ir_pass_cfg_cleanup.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/dxbc-spirv/ir/passes/ir_pass_cfg_convert.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/dxbc-spirv/ir/passes/ir_pass_cse.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/dxbc-spirv/ir/passes/ir_pass_derivative.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/dxbc-spirv/ir/passes/ir_pass_descriptor_indexing.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/dxbc-spirv/ir/passes/ir_pass_function.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/dxbc-spirv/ir/passes/ir_pass_lower_consume.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/dxbc-spirv/ir/passes/ir_pass_lower_io.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/dxbc-spirv/ir/passes/ir_pass_lower_min16.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/dxbc-spirv/ir/passes/ir_pass_propagate_resource_types.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/dxbc-spirv/ir/passes/ir_pass_propagate_types.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/dxbc-spirv/ir/passes/ir_pass_remove_unused.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/dxbc-spirv/ir/passes/ir_pass_scalarize.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/dxbc-spirv/ir/passes/ir_pass_scratch.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/dxbc-spirv/ir/passes/ir_pass_ssa.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/dxbc-spirv/ir/passes/ir_pass_sync.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/dxbc-spirv/util/util_float16.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/dxbc-spirv/util/util_log.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/dxbc-spirv/util/util_md5.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/dxbc-spirv/util/util_swizzle.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/dxbc-spirv/sm3/sm3_types.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/dxbc-spirv/sm3/sm3_parser.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/dxbc-spirv/sm3/sm3_disasm.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/dxbc-spirv/sm3/sm3_converter.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/dxbc-spirv/sm3/sm3_io_map.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/dxbc-spirv/sm3/sm3_registers.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/dxbc-spirv/sm3/sm3_resources.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/dxbc-spirv/dxbc/dxbc_api.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/dxbc-spirv/dxbc/dxbc_container.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/dxbc-spirv/dxbc/dxbc_converter.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/dxbc-spirv/dxbc/dxbc_disasm.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/dxbc-spirv/dxbc/dxbc_interface.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/dxbc-spirv/dxbc/dxbc_io_map.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/dxbc-spirv/dxbc/dxbc_parser.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/dxbc-spirv/dxbc/dxbc_registers.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/dxbc-spirv/dxbc/dxbc_resources.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/dxbc-spirv/dxbc/dxbc_signature.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/dxbc-spirv/dxbc/dxbc_types.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/dxbc-spirv/spirv/spirv_builder.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/dxbc-spirv/spirv/spirv_mapping.cpp"
+        ],
+        "generated_sources": [],
+        "unity_sources": []
+      },
+      {
+        "linker": [
+          "x86_64-w64-mingw32-ar"
+        ],
+        "parameters": [
+          "csrDT"
+        ]
+      }
+    ],
+    "extra_files": [],
+    "subproject": "dxbc-spirv",
+    "dependencies": [],
+    "depends": [],
+    "installed": false
+  },
+  {
+    "name": "version.h",
+    "id": "version.h@cus",
+    "type": "custom",
+    "defined_in": "/private/tmp/fgmetal-dxvk-macos-audit-20261004/meson.build",
+    "filename": [
+      "/private/tmp/fgmetal-dxvk-macos-build-unmodified/version.h"
+    ],
+    "build_by_default": true,
+    "target_sources": [
+      {
+        "language": "unknown",
+        "compiler": [
+          "/opt/homebrew/bin/meson",
+          "--internal",
+          "vcstagger",
+          "@INPUT0@",
+          "@OUTPUT0@",
+          "3.1.1",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004",
+          "@VCS_TAG@",
+          "(.*)",
+          "/opt/homebrew/bin/git",
+          "describe",
+          "--dirty=+"
+        ],
+        "parameters": [],
+        "sources": [
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/version.h.in"
+        ],
+        "generated_sources": []
+      }
+    ],
+    "extra_files": [],
+    "subproject": null,
+    "dependencies": [],
+    "depends": [],
+    "installed": false
+  },
+  {
+    "name": "wsi",
+    "id": "2e05b50@@wsi@sta",
+    "type": "static library",
+    "defined_in": "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/wsi/meson.build",
+    "filename": [
+      "/private/tmp/fgmetal-dxvk-macos-build-unmodified/src/wsi/libwsi.a"
+    ],
+    "build_by_default": true,
+    "target_sources": [
+      {
+        "language": "cpp",
+        "machine": "host",
+        "compiler": [
+          "x86_64-w64-mingw32-g++"
+        ],
+        "parameters": [
+          "-I/private/tmp/fgmetal-dxvk-macos-build-unmodified/src/wsi/libwsi.a.p",
+          "-I/private/tmp/fgmetal-dxvk-macos-build-unmodified/src/wsi",
+          "-I/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/wsi",
+          "-I/private/tmp/fgmetal-dxvk-macos-audit-20261004/include",
+          "-I/private/tmp/fgmetal-dxvk-macos-audit-20261004/include/vulkan/include",
+          "-I/private/tmp/fgmetal-dxvk-macos-audit-20261004/include/spirv/include",
+          "-I/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/libdisplay-info/include",
+          "-fdiagnostics-color=always",
+          "-D_GLIBCXX_ASSERTIONS=1",
+          "-D_FILE_OFFSET_BITS=64",
+          "-Wall",
+          "-Winvalid-pch",
+          "-Wextra",
+          "-std=c++17",
+          "-O3",
+          "-msse",
+          "-msse2",
+          "-msse3",
+          "-mfpmath=sse",
+          "-Wimplicit-fallthrough",
+          "-Wno-missing-field-initializers",
+          "-Wno-unused-parameter",
+          "-Wno-misleading-indentation",
+          "-Wno-cast-function-type",
+          "-Wno-unused-const-variable",
+          "-Wno-missing-braces",
+          "-DNOMINMAX",
+          "-D_WIN32_WINNT=0xa00",
+          "-DDXVK_WSI_WIN32"
+        ],
+        "sources": [
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/wsi/wsi_edid.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/wsi/wsi_platform.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/wsi/win32/wsi_monitor_win32.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/wsi/win32/wsi_platform_win32.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/wsi/win32/wsi_window_win32.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/wsi/sdl3/wsi_monitor_sdl3.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/wsi/sdl3/wsi_platform_sdl3.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/wsi/sdl3/wsi_window_sdl3.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/wsi/sdl2/wsi_monitor_sdl2.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/wsi/sdl2/wsi_platform_sdl2.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/wsi/sdl2/wsi_window_sdl2.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/wsi/glfw/wsi_monitor_glfw.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/wsi/glfw/wsi_platform_glfw.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/wsi/glfw/wsi_window_glfw.cpp"
+        ],
+        "generated_sources": [],
+        "unity_sources": []
+      },
+      {
+        "linker": [
+          "x86_64-w64-mingw32-ar"
+        ],
+        "parameters": [
+          "csrDT"
+        ]
+      }
+    ],
+    "extra_files": [],
+    "subproject": null,
+    "dependencies": [
+      "setupapi"
+    ],
+    "depends": [],
+    "installed": false
+  },
+  {
+    "name": "util",
+    "id": "ed6d25d@@util@sta",
+    "type": "static library",
+    "defined_in": "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/util/meson.build",
+    "filename": [
+      "/private/tmp/fgmetal-dxvk-macos-build-unmodified/src/util/libutil.a"
+    ],
+    "build_by_default": true,
+    "target_sources": [
+      {
+        "language": "cpp",
+        "machine": "host",
+        "compiler": [
+          "x86_64-w64-mingw32-g++"
+        ],
+        "parameters": [
+          "-I/private/tmp/fgmetal-dxvk-macos-build-unmodified/src/util/libutil.a.p",
+          "-I/private/tmp/fgmetal-dxvk-macos-build-unmodified/src/util",
+          "-I/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/util",
+          "-I/private/tmp/fgmetal-dxvk-macos-audit-20261004/include",
+          "-I/private/tmp/fgmetal-dxvk-macos-audit-20261004/include/vulkan/include",
+          "-I/private/tmp/fgmetal-dxvk-macos-audit-20261004/include/spirv/include",
+          "-fdiagnostics-color=always",
+          "-D_GLIBCXX_ASSERTIONS=1",
+          "-D_FILE_OFFSET_BITS=64",
+          "-Wall",
+          "-Winvalid-pch",
+          "-Wextra",
+          "-std=c++17",
+          "-O3",
+          "-msse",
+          "-msse2",
+          "-msse3",
+          "-mfpmath=sse",
+          "-Wimplicit-fallthrough",
+          "-Wno-missing-field-initializers",
+          "-Wno-unused-parameter",
+          "-Wno-misleading-indentation",
+          "-Wno-cast-function-type",
+          "-Wno-unused-const-variable",
+          "-Wno-missing-braces",
+          "-DNOMINMAX",
+          "-D_WIN32_WINNT=0xa00",
+          "-DDXVK_WSI_WIN32"
+        ],
+        "sources": [
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/util/util_env.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/util/util_string.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/util/util_fps_limiter.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/util/util_file.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/util/util_flush.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/util/util_gdi.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/util/util_luid.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/util/util_matrix.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/util/util_shared_res.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/util/util_sleep.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/util/util_unmap.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/util/thread.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/util/com/com_destruction_notifier.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/util/com/com_guid.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/util/com/com_private_data.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/util/config/config.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/util/log/log.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/util/log/log_debug.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/util/sha1/sha1_util.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/util/sync/sync_recursive.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/util/sync/sync_scoped.cpp"
+        ],
+        "generated_sources": [],
+        "unity_sources": []
+      },
+      {
+        "language": "c",
+        "machine": "host",
+        "compiler": [
+          "x86_64-w64-mingw32-gcc"
+        ],
+        "parameters": [
+          "-I/private/tmp/fgmetal-dxvk-macos-build-unmodified/src/util/libutil.a.p",
+          "-I/private/tmp/fgmetal-dxvk-macos-build-unmodified/src/util",
+          "-I/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/util",
+          "-I/private/tmp/fgmetal-dxvk-macos-audit-20261004/include",
+          "-I/private/tmp/fgmetal-dxvk-macos-audit-20261004/include/vulkan/include",
+          "-I/private/tmp/fgmetal-dxvk-macos-audit-20261004/include/spirv/include",
+          "-fdiagnostics-color=always",
+          "-D_FILE_OFFSET_BITS=64",
+          "-Wall",
+          "-Winvalid-pch",
+          "-Wextra",
+          "-O3",
+          "-msse",
+          "-msse2",
+          "-msse3",
+          "-mfpmath=sse",
+          "-Wimplicit-fallthrough",
+          "-Wno-missing-field-initializers",
+          "-Wno-unused-parameter",
+          "-Wno-misleading-indentation",
+          "-Wno-cast-function-type",
+          "-Wno-unused-const-variable",
+          "-Wno-missing-braces",
+          "-DNOMINMAX",
+          "-D_WIN32_WINNT=0xa00",
+          "-DDXVK_WSI_WIN32"
+        ],
+        "sources": [
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/util/sha1/sha1.c"
+        ],
+        "generated_sources": [],
+        "unity_sources": []
+      },
+      {
+        "linker": [
+          "x86_64-w64-mingw32-ar"
+        ],
+        "parameters": [
+          "csrDT"
+        ]
+      }
+    ],
+    "extra_files": [],
+    "subproject": null,
+    "dependencies": [],
+    "depends": [],
+    "installed": false
+  },
+  {
+    "name": "spirv",
+    "id": "e922df6@@spirv@sta",
+    "type": "static library",
+    "defined_in": "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/spirv/meson.build",
+    "filename": [
+      "/private/tmp/fgmetal-dxvk-macos-build-unmodified/src/spirv/libspirv.a"
+    ],
+    "build_by_default": true,
+    "target_sources": [
+      {
+        "language": "cpp",
+        "machine": "host",
+        "compiler": [
+          "x86_64-w64-mingw32-g++"
+        ],
+        "parameters": [
+          "-I/private/tmp/fgmetal-dxvk-macos-build-unmodified/src/spirv/libspirv.a.p",
+          "-I/private/tmp/fgmetal-dxvk-macos-build-unmodified/src/spirv",
+          "-I/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/spirv",
+          "-I/private/tmp/fgmetal-dxvk-macos-audit-20261004/include",
+          "-I/private/tmp/fgmetal-dxvk-macos-audit-20261004/include/vulkan/include",
+          "-I/private/tmp/fgmetal-dxvk-macos-audit-20261004/include/spirv/include",
+          "-fdiagnostics-color=always",
+          "-D_GLIBCXX_ASSERTIONS=1",
+          "-D_FILE_OFFSET_BITS=64",
+          "-Wall",
+          "-Winvalid-pch",
+          "-Wextra",
+          "-std=c++17",
+          "-O3",
+          "-msse",
+          "-msse2",
+          "-msse3",
+          "-mfpmath=sse",
+          "-Wimplicit-fallthrough",
+          "-Wno-missing-field-initializers",
+          "-Wno-unused-parameter",
+          "-Wno-misleading-indentation",
+          "-Wno-cast-function-type",
+          "-Wno-unused-const-variable",
+          "-Wno-missing-braces",
+          "-DNOMINMAX",
+          "-D_WIN32_WINNT=0xa00",
+          "-DDXVK_WSI_WIN32"
+        ],
+        "sources": [
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/spirv/spirv_code_buffer.cpp"
+        ],
+        "generated_sources": [],
+        "unity_sources": []
+      },
+      {
+        "linker": [
+          "x86_64-w64-mingw32-ar"
+        ],
+        "parameters": [
+          "csrDT"
+        ]
+      }
+    ],
+    "extra_files": [],
+    "subproject": null,
+    "dependencies": [],
+    "depends": [],
+    "installed": false
+  },
+  {
+    "name": "vkcommon",
+    "id": "67fefa6@@vkcommon@sta",
+    "type": "static library",
+    "defined_in": "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/vulkan/meson.build",
+    "filename": [
+      "/private/tmp/fgmetal-dxvk-macos-build-unmodified/src/vulkan/libvkcommon.a"
+    ],
+    "build_by_default": true,
+    "target_sources": [
+      {
+        "language": "cpp",
+        "machine": "host",
+        "compiler": [
+          "x86_64-w64-mingw32-g++"
+        ],
+        "parameters": [
+          "-I/private/tmp/fgmetal-dxvk-macos-build-unmodified/src/vulkan/libvkcommon.a.p",
+          "-I/private/tmp/fgmetal-dxvk-macos-build-unmodified/src/vulkan",
+          "-I/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/vulkan",
+          "-I/private/tmp/fgmetal-dxvk-macos-audit-20261004/include",
+          "-I/private/tmp/fgmetal-dxvk-macos-audit-20261004/include/vulkan/include",
+          "-I/private/tmp/fgmetal-dxvk-macos-audit-20261004/include/spirv/include",
+          "-fdiagnostics-color=always",
+          "-D_GLIBCXX_ASSERTIONS=1",
+          "-D_FILE_OFFSET_BITS=64",
+          "-Wall",
+          "-Winvalid-pch",
+          "-Wextra",
+          "-std=c++17",
+          "-O3",
+          "-msse",
+          "-msse2",
+          "-msse3",
+          "-mfpmath=sse",
+          "-Wimplicit-fallthrough",
+          "-Wno-missing-field-initializers",
+          "-Wno-unused-parameter",
+          "-Wno-misleading-indentation",
+          "-Wno-cast-function-type",
+          "-Wno-unused-const-variable",
+          "-Wno-missing-braces",
+          "-DNOMINMAX",
+          "-D_WIN32_WINNT=0xa00",
+          "-DDXVK_WSI_WIN32",
+          "-pthread"
+        ],
+        "sources": [
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/vulkan/vulkan_loader.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/vulkan/vulkan_names.cpp"
+        ],
+        "generated_sources": [],
+        "unity_sources": []
+      },
+      {
+        "linker": [
+          "x86_64-w64-mingw32-ar"
+        ],
+        "parameters": [
+          "csrDT"
+        ]
+      }
+    ],
+    "extra_files": [],
+    "subproject": null,
+    "dependencies": [
+      "threads"
+    ],
+    "depends": [],
+    "installed": false
+  },
+  {
+    "name": "dxvk",
+    "id": "1752c3e@@dxvk@sta",
+    "type": "static library",
+    "defined_in": "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxvk/meson.build",
+    "filename": [
+      "/private/tmp/fgmetal-dxvk-macos-build-unmodified/src/dxvk/libdxvk.a"
+    ],
+    "build_by_default": true,
+    "target_sources": [
+      {
+        "language": "cpp",
+        "machine": "host",
+        "compiler": [
+          "x86_64-w64-mingw32-g++"
+        ],
+        "parameters": [
+          "-I/private/tmp/fgmetal-dxvk-macos-build-unmodified/src/dxvk/libdxvk.a.p",
+          "-I/private/tmp/fgmetal-dxvk-macos-build-unmodified/src/dxvk",
+          "-I/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxvk",
+          "-I/private/tmp/fgmetal-dxvk-macos-audit-20261004/include",
+          "-I/private/tmp/fgmetal-dxvk-macos-audit-20261004/include/vulkan/include",
+          "-I/private/tmp/fgmetal-dxvk-macos-audit-20261004/include/spirv/include",
+          "-I/private/tmp/fgmetal-dxvk-macos-build-unmodified/subprojects/dxbc-spirv",
+          "-I/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/dxbc-spirv",
+          "-I/private/tmp/fgmetal-dxvk-macos-build-unmodified",
+          "-fdiagnostics-color=always",
+          "-D_GLIBCXX_ASSERTIONS=1",
+          "-D_FILE_OFFSET_BITS=64",
+          "-Wall",
+          "-Winvalid-pch",
+          "-Wextra",
+          "-std=c++17",
+          "-O3",
+          "-msse",
+          "-msse2",
+          "-msse3",
+          "-mfpmath=sse",
+          "-Wimplicit-fallthrough",
+          "-Wno-missing-field-initializers",
+          "-Wno-unused-parameter",
+          "-Wno-misleading-indentation",
+          "-Wno-cast-function-type",
+          "-Wno-unused-const-variable",
+          "-Wno-missing-braces",
+          "-DNOMINMAX",
+          "-D_WIN32_WINNT=0xa00",
+          "-DDXVK_WSI_WIN32",
+          "-pthread"
+        ],
+        "sources": [
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxvk/dxvk_access.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxvk/dxvk_adapter.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxvk/dxvk_allocator.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxvk/dxvk_barrier.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxvk/dxvk_buffer.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxvk/dxvk_cmdlist.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxvk/dxvk_compute.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxvk/dxvk_constant_state.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxvk/dxvk_context.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxvk/dxvk_cs.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxvk/dxvk_descriptor_heap.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxvk/dxvk_descriptor_info.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxvk/dxvk_descriptor_pool.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxvk/dxvk_descriptor_worker.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxvk/dxvk_device.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxvk/dxvk_device_filter.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxvk/dxvk_device_info.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxvk/dxvk_fence.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxvk/dxvk_format.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxvk/dxvk_framebuffer.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxvk/dxvk_gpu_event.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxvk/dxvk_gpu_query.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxvk/dxvk_graphics.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxvk/dxvk_hang.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxvk/dxvk_image.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxvk/dxvk_implicit_resolve.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxvk/dxvk_instance.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxvk/dxvk_latency_builtin.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxvk/dxvk_latency_reflex.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxvk/dxvk_memory.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxvk/dxvk_meta_blit.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxvk/dxvk_meta_clear.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxvk/dxvk_meta_copy.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxvk/dxvk_meta_mipgen.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxvk/dxvk_meta_resolve.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxvk/dxvk_options.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxvk/dxvk_pipelayout.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxvk/dxvk_pipemanager.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxvk/dxvk_platform_exts.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxvk/dxvk_presenter.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxvk/dxvk_queue.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxvk/dxvk_sampler.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxvk/dxvk_shader.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxvk/dxvk_shader_builtin.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxvk/dxvk_shader_cache.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxvk/dxvk_shader_io.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxvk/dxvk_shader_ir.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxvk/dxvk_shader_key.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxvk/dxvk_shader_spirv.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxvk/dxvk_signal.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxvk/dxvk_sparse.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxvk/dxvk_staging.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxvk/dxvk_stats.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxvk/dxvk_swapchain_blitter.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxvk/dxvk_unbound.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxvk/dxvk_util.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxvk/hud/dxvk_hud.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxvk/hud/dxvk_hud_font.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxvk/hud/dxvk_hud_item.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxvk/hud/dxvk_hud_renderer.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxvk/dxvk_openvr.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxvk/dxvk_openxr.cpp"
+        ],
+        "generated_sources": [],
+        "unity_sources": []
+      },
+      {
+        "linker": [
+          "x86_64-w64-mingw32-ar"
+        ],
+        "parameters": [
+          "csrDT"
+        ]
+      }
+    ],
+    "extra_files": [],
+    "subproject": null,
+    "dependencies": [
+      "threads"
+    ],
+    "depends": [],
+    "installed": false
+  },
+  {
+    "name": "dxgi",
+    "id": "cde8a16@@dxgi@sha",
+    "type": "shared library",
+    "defined_in": "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxgi/meson.build",
+    "filename": [
+      "/private/tmp/fgmetal-dxvk-macos-build-unmodified/src/dxgi/dxgi.dll"
+    ],
+    "build_by_default": true,
+    "target_sources": [
+      {
+        "language": "cpp",
+        "machine": "host",
+        "compiler": [
+          "x86_64-w64-mingw32-g++"
+        ],
+        "parameters": [
+          "-I/private/tmp/fgmetal-dxvk-macos-build-unmodified/src/dxgi/dxgi.dll.p",
+          "-I/private/tmp/fgmetal-dxvk-macos-build-unmodified/src/dxgi",
+          "-I/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxgi",
+          "-I/private/tmp/fgmetal-dxvk-macos-audit-20261004/include",
+          "-I/private/tmp/fgmetal-dxvk-macos-audit-20261004/include/vulkan/include",
+          "-I/private/tmp/fgmetal-dxvk-macos-audit-20261004/include/spirv/include",
+          "-fdiagnostics-color=always",
+          "-D_GLIBCXX_ASSERTIONS=1",
+          "-D_FILE_OFFSET_BITS=64",
+          "-Wall",
+          "-Winvalid-pch",
+          "-Wextra",
+          "-std=c++17",
+          "-O3",
+          "-msse",
+          "-msse2",
+          "-msse3",
+          "-mfpmath=sse",
+          "-Wimplicit-fallthrough",
+          "-Wno-missing-field-initializers",
+          "-Wno-unused-parameter",
+          "-Wno-misleading-indentation",
+          "-Wno-cast-function-type",
+          "-Wno-unused-const-variable",
+          "-Wno-missing-braces",
+          "-DNOMINMAX",
+          "-D_WIN32_WINNT=0xa00",
+          "-DDXVK_WSI_WIN32"
+        ],
+        "sources": [
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxgi/dxgi_adapter.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxgi/dxgi_enums.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxgi/dxgi_factory.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxgi/dxgi_format.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxgi/dxgi_main.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxgi/dxgi_monitor.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxgi/dxgi_options.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxgi/dxgi_output.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxgi/dxgi_surface.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxgi/dxgi_swapchain.cpp"
+        ],
+        "generated_sources": [],
+        "unity_sources": []
+      },
+      {
+        "linker": [
+          "x86_64-w64-mingw32-g++"
+        ],
+        "parameters": [
+          "-Wl,--allow-shlib-undefined",
+          "-Wl,-O1",
+          "-shared",
+          "../fgmetal-dxvk-macos-audit-20261004/src/dxgi/dxgi.def",
+          "-Wl,--start-group",
+          "-Wl,--start-group",
+          "-Wl,--out-implib=src/dxgi/dxgi.dll.a",
+          "-static",
+          "-static-libgcc",
+          "-static-libstdc++",
+          "-Wl,--file-alignment=4096",
+          "src/dxvk/libdxvk.a",
+          "src/util/libutil.a",
+          "src/spirv/libspirv.a",
+          "src/wsi/libwsi.a",
+          "subprojects/libdisplay-info/libdisplay-info.a",
+          "subprojects/dxbc-spirv/libdxbc_spv.a",
+          "src/vulkan/libvkcommon.a",
+          "-lversion",
+          "-pthread",
+          "-lsetupapi",
+          "-lm",
+          "-Wl,--subsystem,console",
+          "-lkernel32",
+          "-luser32",
+          "-lgdi32",
+          "-lwinspool",
+          "-lshell32",
+          "-lole32",
+          "-loleaut32",
+          "-luuid",
+          "-lcomdlg32",
+          "-ladvapi32",
+          "-Wl,--end-group",
+          "-Wl,--end-group"
+        ]
+      }
+    ],
+    "extra_files": [],
+    "subproject": null,
+    "dependencies": [
+      "version"
+    ],
+    "depends": [],
+    "vs_module_defs": "src/dxgi/dxgi.def",
+    "win_subsystem": "console",
+    "installed": true,
+    "install_filename": [
+      "/tmp/fgmetal-dxvk-macos-stage-unmodified/bin/dxgi.dll"
+    ]
+  },
+  {
+    "name": "d3d11",
+    "id": "bca5607@@d3d11@sha",
+    "type": "shared library",
+    "defined_in": "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d11/meson.build",
+    "filename": [
+      "/private/tmp/fgmetal-dxvk-macos-build-unmodified/src/d3d11/d3d11.dll"
+    ],
+    "build_by_default": true,
+    "target_sources": [
+      {
+        "language": "cpp",
+        "machine": "host",
+        "compiler": [
+          "x86_64-w64-mingw32-g++"
+        ],
+        "parameters": [
+          "-I/private/tmp/fgmetal-dxvk-macos-build-unmodified/src/d3d11/d3d11.dll.p",
+          "-I/private/tmp/fgmetal-dxvk-macos-build-unmodified/src/d3d11",
+          "-I/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d11",
+          "-I/private/tmp/fgmetal-dxvk-macos-audit-20261004/include",
+          "-I/private/tmp/fgmetal-dxvk-macos-audit-20261004/include/vulkan/include",
+          "-I/private/tmp/fgmetal-dxvk-macos-audit-20261004/include/spirv/include",
+          "-I/private/tmp/fgmetal-dxvk-macos-build-unmodified/subprojects/dxbc-spirv",
+          "-I/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/dxbc-spirv",
+          "-fdiagnostics-color=always",
+          "-D_GLIBCXX_ASSERTIONS=1",
+          "-D_FILE_OFFSET_BITS=64",
+          "-Wall",
+          "-Winvalid-pch",
+          "-Wextra",
+          "-std=c++17",
+          "-O3",
+          "-msse",
+          "-msse2",
+          "-msse3",
+          "-mfpmath=sse",
+          "-Wimplicit-fallthrough",
+          "-Wno-missing-field-initializers",
+          "-Wno-unused-parameter",
+          "-Wno-misleading-indentation",
+          "-Wno-cast-function-type",
+          "-Wno-unused-const-variable",
+          "-Wno-missing-braces",
+          "-DNOMINMAX",
+          "-D_WIN32_WINNT=0xa00",
+          "-DDXVK_WSI_WIN32"
+        ],
+        "sources": [
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/dxgi/dxgi_format.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d11/d3d11_annotation.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d11/d3d11_blend.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d11/d3d11_buffer.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d11/d3d11_class_linkage.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d11/d3d11_cmdlist.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d11/d3d11_context.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d11/d3d11_context_def.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d11/d3d11_context_ext.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d11/d3d11_context_imm.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d11/d3d11_cuda.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d11/d3d11_depth_stencil.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d11/d3d11_device.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d11/d3d11_enums.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d11/d3d11_features.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d11/d3d11_fence.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d11/d3d11_gdi.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d11/d3d11_initializer.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d11/d3d11_input_layout.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d11/d3d11_interop.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d11/d3d11_main.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d11/d3d11_on_12.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d11/d3d11_options.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d11/d3d11_query.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d11/d3d11_rasterizer.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d11/d3d11_resource.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d11/d3d11_sampler.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d11/d3d11_shader.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d11/d3d11_state.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d11/d3d11_state_object.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d11/d3d11_swapchain.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d11/d3d11_texture.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d11/d3d11_util.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d11/d3d11_video.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d11/d3d11_view_dsv.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d11/d3d11_view_rtv.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d11/d3d11_view_srv.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d11/d3d11_view_uav.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d10/d3d10_blend.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d10/d3d10_buffer.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d10/d3d10_depth_stencil.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d10/d3d10_device.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d10/d3d10_input_layout.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d10/d3d10_multithread.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d10/d3d10_query.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d10/d3d10_rasterizer.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d10/d3d10_sampler.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d10/d3d10_texture.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d10/d3d10_util.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d10/d3d10_view_dsv.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d10/d3d10_view_rtv.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d10/d3d10_view_srv.cpp"
+        ],
+        "generated_sources": [],
+        "unity_sources": []
+      },
+      {
+        "linker": [
+          "x86_64-w64-mingw32-g++"
+        ],
+        "parameters": [
+          "-Wl,--allow-shlib-undefined",
+          "-Wl,-O1",
+          "-shared",
+          "../fgmetal-dxvk-macos-audit-20261004/src/d3d11/d3d11.def",
+          "-Wl,--start-group",
+          "-Wl,--start-group",
+          "-Wl,--out-implib=src/d3d11/d3d11.dll.a",
+          "-static",
+          "-static-libgcc",
+          "-static-libstdc++",
+          "-Wl,--file-alignment=4096",
+          "src/dxvk/libdxvk.a",
+          "src/util/libutil.a",
+          "src/spirv/libspirv.a",
+          "src/wsi/libwsi.a",
+          "subprojects/libdisplay-info/libdisplay-info.a",
+          "subprojects/dxbc-spirv/libdxbc_spv.a",
+          "src/vulkan/libvkcommon.a",
+          "-lgdi32",
+          "-ldxgi",
+          "-pthread",
+          "-lsetupapi",
+          "-lm",
+          "-Wl,--subsystem,console",
+          "-lkernel32",
+          "-luser32",
+          "-lwinspool",
+          "-lshell32",
+          "-lole32",
+          "-loleaut32",
+          "-luuid",
+          "-lcomdlg32",
+          "-ladvapi32",
+          "-Wl,--end-group",
+          "-Wl,--end-group"
+        ]
+      }
+    ],
+    "extra_files": [],
+    "subproject": null,
+    "dependencies": [
+      "gdi32",
+      "dxgi"
+    ],
+    "depends": [],
+    "vs_module_defs": "src/d3d11/d3d11.def",
+    "win_subsystem": "console",
+    "installed": true,
+    "install_filename": [
+      "/tmp/fgmetal-dxvk-macos-stage-unmodified/bin/d3d11.dll"
+    ]
+  },
+  {
+    "name": "d3d10core",
+    "id": "c74346f@@d3d10core@sha",
+    "type": "shared library",
+    "defined_in": "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d10/meson.build",
+    "filename": [
+      "/private/tmp/fgmetal-dxvk-macos-build-unmodified/src/d3d10/d3d10core.dll"
+    ],
+    "build_by_default": true,
+    "target_sources": [
+      {
+        "language": "cpp",
+        "machine": "host",
+        "compiler": [
+          "x86_64-w64-mingw32-g++"
+        ],
+        "parameters": [
+          "-I/private/tmp/fgmetal-dxvk-macos-build-unmodified/src/d3d10/d3d10core.dll.p",
+          "-I/private/tmp/fgmetal-dxvk-macos-build-unmodified/src/d3d10",
+          "-I/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d10",
+          "-I/private/tmp/fgmetal-dxvk-macos-audit-20261004/include",
+          "-I/private/tmp/fgmetal-dxvk-macos-audit-20261004/include/vulkan/include",
+          "-I/private/tmp/fgmetal-dxvk-macos-audit-20261004/include/spirv/include",
+          "-fdiagnostics-color=always",
+          "-D_GLIBCXX_ASSERTIONS=1",
+          "-D_FILE_OFFSET_BITS=64",
+          "-Wall",
+          "-Winvalid-pch",
+          "-Wextra",
+          "-std=c++17",
+          "-O3",
+          "-msse",
+          "-msse2",
+          "-msse3",
+          "-mfpmath=sse",
+          "-Wimplicit-fallthrough",
+          "-Wno-missing-field-initializers",
+          "-Wno-unused-parameter",
+          "-Wno-misleading-indentation",
+          "-Wno-cast-function-type",
+          "-Wno-unused-const-variable",
+          "-Wno-missing-braces",
+          "-DNOMINMAX",
+          "-D_WIN32_WINNT=0xa00",
+          "-DDXVK_WSI_WIN32"
+        ],
+        "sources": [
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d10/d3d10_core.cpp"
+        ],
+        "generated_sources": [],
+        "unity_sources": []
+      },
+      {
+        "linker": [
+          "x86_64-w64-mingw32-g++"
+        ],
+        "parameters": [
+          "-Wl,--allow-shlib-undefined",
+          "-Wl,-O1",
+          "-shared",
+          "../fgmetal-dxvk-macos-audit-20261004/src/d3d10/d3d10core.def",
+          "-Wl,--start-group",
+          "-Wl,--start-group",
+          "-Wl,--out-implib=src/d3d10/d3d10core.dll.a",
+          "-static",
+          "-static-libgcc",
+          "-static-libstdc++",
+          "-Wl,--file-alignment=4096",
+          "-ld3d11",
+          "-Wl,--subsystem,console",
+          "-lkernel32",
+          "-luser32",
+          "-lgdi32",
+          "-lwinspool",
+          "-lshell32",
+          "-lole32",
+          "-loleaut32",
+          "-luuid",
+          "-lcomdlg32",
+          "-ladvapi32",
+          "-Wl,--end-group",
+          "-Wl,--end-group"
+        ]
+      }
+    ],
+    "extra_files": [],
+    "subproject": null,
+    "dependencies": [
+      "d3d11"
+    ],
+    "depends": [],
+    "vs_module_defs": "src/d3d10/d3d10core.def",
+    "win_subsystem": "console",
+    "installed": true,
+    "install_filename": [
+      "/tmp/fgmetal-dxvk-macos-stage-unmodified/bin/d3d10core.dll"
+    ]
+  },
+  {
+    "name": "d3d9",
+    "id": "ecc23b3@@d3d9@sha",
+    "type": "shared library",
+    "defined_in": "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d9/meson.build",
+    "filename": [
+      "/private/tmp/fgmetal-dxvk-macos-build-unmodified/src/d3d9/d3d9.dll"
+    ],
+    "build_by_default": true,
+    "target_sources": [
+      {
+        "language": "cpp",
+        "machine": "host",
+        "compiler": [
+          "x86_64-w64-mingw32-g++"
+        ],
+        "parameters": [
+          "-I/private/tmp/fgmetal-dxvk-macos-build-unmodified/src/d3d9/d3d9.dll.p",
+          "-I/private/tmp/fgmetal-dxvk-macos-build-unmodified/src/d3d9",
+          "-I/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d9",
+          "-I/private/tmp/fgmetal-dxvk-macos-audit-20261004/include",
+          "-I/private/tmp/fgmetal-dxvk-macos-audit-20261004/include/vulkan/include",
+          "-I/private/tmp/fgmetal-dxvk-macos-audit-20261004/include/spirv/include",
+          "-I/private/tmp/fgmetal-dxvk-macos-build-unmodified/subprojects/dxbc-spirv",
+          "-I/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/dxbc-spirv",
+          "-fdiagnostics-color=always",
+          "-D_GLIBCXX_ASSERTIONS=1",
+          "-D_FILE_OFFSET_BITS=64",
+          "-Wall",
+          "-Winvalid-pch",
+          "-Wextra",
+          "-std=c++17",
+          "-O3",
+          "-msse",
+          "-msse2",
+          "-msse3",
+          "-mfpmath=sse",
+          "-Wimplicit-fallthrough",
+          "-Wno-missing-field-initializers",
+          "-Wno-unused-parameter",
+          "-Wno-misleading-indentation",
+          "-Wno-cast-function-type",
+          "-Wno-unused-const-variable",
+          "-Wno-missing-braces",
+          "-DNOMINMAX",
+          "-D_WIN32_WINNT=0xa00",
+          "-DDXVK_WSI_WIN32"
+        ],
+        "sources": [
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d9/d3d9_main.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d9/d3d9_interface.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d9/d3d9_adapter.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d9/d3d9_monitor.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d9/d3d9_device.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d9/d3d9_state.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d9/d3d9_cursor.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d9/d3d9_swapchain.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d9/d3d9_format.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d9/d3d9_common_texture.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d9/d3d9_constant_buffer.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d9/d3d9_constant_copy.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d9/d3d9_texture.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d9/d3d9_surface.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d9/d3d9_volume.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d9/d3d9_common_buffer.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d9/d3d9_buffer.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d9/d3d9_shader.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d9/d3d9_vertex_declaration.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d9/d3d9_query.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d9/d3d9_shader_validator.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d9/d3d9_options.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d9/d3d9_stateblock.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d9/d3d9_util.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d9/d3d9_initializer.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d9/d3d9_fixed_function.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d9/d3d9_names.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d9/d3d9_swvp_emu.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d9/d3d9_format_helpers.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d9/d3d9_hud.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d9/d3d9_annotation.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d9/d3d9_window.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d9/d3d9_interop.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d9/d3d9_on_12.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d9/d3d9_bridge.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d9/d3d9_shader_analysis.cpp"
+        ],
+        "generated_sources": [],
+        "unity_sources": []
+      },
+      {
+        "linker": [
+          "x86_64-w64-mingw32-g++"
+        ],
+        "parameters": [
+          "-Wl,--allow-shlib-undefined",
+          "-Wl,-O1",
+          "-shared",
+          "../fgmetal-dxvk-macos-audit-20261004/src/d3d9/d3d9.def",
+          "-Wl,--start-group",
+          "-Wl,--start-group",
+          "-Wl,--out-implib=src/d3d9/d3d9.dll.a",
+          "-static",
+          "-static-libgcc",
+          "-static-libstdc++",
+          "-Wl,--file-alignment=4096",
+          "subprojects/dxbc-spirv/libdxbc_spv.a",
+          "src/dxvk/libdxvk.a",
+          "src/util/libutil.a",
+          "src/spirv/libspirv.a",
+          "src/wsi/libwsi.a",
+          "subprojects/libdisplay-info/libdisplay-info.a",
+          "src/vulkan/libvkcommon.a",
+          "-pthread",
+          "-lsetupapi",
+          "-lm",
+          "-Wl,--subsystem,console",
+          "-lkernel32",
+          "-luser32",
+          "-lgdi32",
+          "-lwinspool",
+          "-lshell32",
+          "-lole32",
+          "-loleaut32",
+          "-luuid",
+          "-lcomdlg32",
+          "-ladvapi32",
+          "-Wl,--end-group",
+          "-Wl,--end-group"
+        ]
+      }
+    ],
+    "extra_files": [],
+    "subproject": null,
+    "dependencies": [],
+    "depends": [],
+    "vs_module_defs": "src/d3d9/d3d9.def",
+    "win_subsystem": "console",
+    "installed": true,
+    "install_filename": [
+      "/tmp/fgmetal-dxvk-macos-stage-unmodified/bin/d3d9.dll"
+    ]
+  },
+  {
+    "name": "d3d8",
+    "id": "7387c47@@d3d8@sha",
+    "type": "shared library",
+    "defined_in": "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d8/meson.build",
+    "filename": [
+      "/private/tmp/fgmetal-dxvk-macos-build-unmodified/src/d3d8/d3d8.dll"
+    ],
+    "build_by_default": true,
+    "target_sources": [
+      {
+        "language": "cpp",
+        "machine": "host",
+        "compiler": [
+          "x86_64-w64-mingw32-g++"
+        ],
+        "parameters": [
+          "-I/private/tmp/fgmetal-dxvk-macos-build-unmodified/src/d3d8/d3d8.dll.p",
+          "-I/private/tmp/fgmetal-dxvk-macos-build-unmodified/src/d3d8",
+          "-I/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d8",
+          "-I/private/tmp/fgmetal-dxvk-macos-audit-20261004/include",
+          "-I/private/tmp/fgmetal-dxvk-macos-audit-20261004/include/vulkan/include",
+          "-I/private/tmp/fgmetal-dxvk-macos-audit-20261004/include/spirv/include",
+          "-I/private/tmp/fgmetal-dxvk-macos-build-unmodified/subprojects/dxbc-spirv",
+          "-I/private/tmp/fgmetal-dxvk-macos-audit-20261004/subprojects/dxbc-spirv",
+          "-fdiagnostics-color=always",
+          "-D_GLIBCXX_ASSERTIONS=1",
+          "-D_FILE_OFFSET_BITS=64",
+          "-Wall",
+          "-Winvalid-pch",
+          "-Wextra",
+          "-std=c++17",
+          "-O3",
+          "-msse",
+          "-msse2",
+          "-msse3",
+          "-mfpmath=sse",
+          "-Wimplicit-fallthrough",
+          "-Wno-missing-field-initializers",
+          "-Wno-unused-parameter",
+          "-Wno-misleading-indentation",
+          "-Wno-cast-function-type",
+          "-Wno-unused-const-variable",
+          "-Wno-missing-braces",
+          "-DNOMINMAX",
+          "-D_WIN32_WINNT=0xa00",
+          "-DDXVK_WSI_WIN32"
+        ],
+        "sources": [
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d8/d3d8_buffer.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d8/d3d8_device.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d8/d3d8_interface.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d8/d3d8_main.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d8/d3d8_options.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d8/d3d8_shader.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d8/d3d8_state_block.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d8/d3d8_surface.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d8/d3d8_swapchain.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d8/d3d8_texture.cpp",
+          "/private/tmp/fgmetal-dxvk-macos-audit-20261004/src/d3d8/d3d8_volume.cpp"
+        ],
+        "generated_sources": [],
+        "unity_sources": []
+      },
+      {
+        "linker": [
+          "x86_64-w64-mingw32-g++"
+        ],
+        "parameters": [
+          "-Wl,--allow-shlib-undefined",
+          "-Wl,-O1",
+          "-shared",
+          "../fgmetal-dxvk-macos-audit-20261004/src/d3d8/d3d8.def",
+          "-Wl,--start-group",
+          "-Wl,--start-group",
+          "-Wl,--out-implib=src/d3d8/d3d8.dll.a",
+          "-static",
+          "-static-libgcc",
+          "-static-libstdc++",
+          "-Wl,--file-alignment=4096",
+          "src/util/libutil.a",
+          "subprojects/dxbc-spirv/libdxbc_spv.a",
+          "src/dxvk/libdxvk.a",
+          "src/spirv/libspirv.a",
+          "src/wsi/libwsi.a",
+          "subprojects/libdisplay-info/libdisplay-info.a",
+          "src/vulkan/libvkcommon.a",
+          "-ld3d9",
+          "-pthread",
+          "-lsetupapi",
+          "-lm",
+          "-Wl,--subsystem,console",
+          "-lkernel32",
+          "-luser32",
+          "-lgdi32",
+          "-lwinspool",
+          "-lshell32",
+          "-lole32",
+          "-loleaut32",
+          "-luuid",
+          "-lcomdlg32",
+          "-ladvapi32",
+          "-Wl,--end-group",
+          "-Wl,--end-group"
+        ]
+      }
+    ],
+    "extra_files": [],
+    "subproject": null,
+    "dependencies": [
+      "d3d9"
+    ],
+    "depends": [],
+    "vs_module_defs": "src/d3d8/d3d8.def",
+    "win_subsystem": "console",
+    "installed": true,
+    "install_filename": [
+      "/tmp/fgmetal-dxvk-macos-stage-unmodified/bin/d3d8.dll"
+    ]
+  }
+]

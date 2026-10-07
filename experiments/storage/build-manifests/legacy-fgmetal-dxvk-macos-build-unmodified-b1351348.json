@@ -1,0 +1,3433 @@
+{
+  "adopted_existing": true,
+  "artifacts": [
+    {
+      "artifact_manifest_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/005309bd6a62e5bd80f497620f1c318fcae0490e5627467881dc8a39684ca33c/manifest.json",
+      "artifact_name": "sanity_check_for_c.exe",
+      "canonical_artifact_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/005309bd6a62e5bd80f497620f1c318fcae0490e5627467881dc8a39684ca33c/sanity_check_for_c.exe",
+      "sha256": "005309bd6a62e5bd80f497620f1c318fcae0490e5627467881dc8a39684ca33c",
+      "size_bytes": 16856,
+      "source_build_hard_link_count": 1,
+      "source_build_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/meson-private/sanity_check_for_c.exe"
+    },
+    {
+      "artifact_manifest_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/04f6f8681597c83af53ddaf095bbce8ae7a44bc7770cda9234251556a519d937/manifest.json",
+      "artifact_name": "dxgi.dll.a",
+      "canonical_artifact_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/04f6f8681597c83af53ddaf095bbce8ae7a44bc7770cda9234251556a519d937/dxgi.dll.a",
+      "sha256": "04f6f8681597c83af53ddaf095bbce8ae7a44bc7770cda9234251556a519d937",
+      "size_bytes": 4244,
+      "source_build_hard_link_count": 1,
+      "source_build_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/dxgi/dxgi.dll.a"
+    },
+    {
+      "artifact_manifest_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/17cbe8e84906ce9657493b1301e712cfc8123413034666fd9387dfe1bbf5b33c/manifest.json",
+      "artifact_name": "dxgi.dll",
+      "canonical_artifact_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/17cbe8e84906ce9657493b1301e712cfc8123413034666fd9387dfe1bbf5b33c/dxgi.dll",
+      "reused_canonical_artifact": true,
+      "sha256": "17cbe8e84906ce9657493b1301e712cfc8123413034666fd9387dfe1bbf5b33c",
+      "size_bytes": 19113822,
+      "source_build_hard_link_count": 0,
+      "source_build_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/dxgi/dxgi.dll",
+      "source_symlink_target": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/17cbe8e84906ce9657493b1301e712cfc8123413034666fd9387dfe1bbf5b33c/dxgi.dll"
+    },
+    {
+      "artifact_manifest_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/207e0fca12a454762d54726d58d82e8646330fabf10619214670bed3bb953018/manifest.json",
+      "artifact_name": "libwsi.a",
+      "canonical_artifact_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/207e0fca12a454762d54726d58d82e8646330fabf10619214670bed3bb953018/libwsi.a",
+      "sha256": "207e0fca12a454762d54726d58d82e8646330fabf10619214670bed3bb953018",
+      "size_bytes": 7038,
+      "source_build_hard_link_count": 1,
+      "source_build_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/wsi/libwsi.a"
+    },
+    {
+      "artifact_manifest_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/2209bff94dfb4bcc78a26fead4a4f7db96fde2aaacfe2f498b36e2dd531ae9df/manifest.json",
+      "artifact_name": "libdxvk.a",
+      "canonical_artifact_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/2209bff94dfb4bcc78a26fead4a4f7db96fde2aaacfe2f498b36e2dd531ae9df/libdxvk.a",
+      "sha256": "2209bff94dfb4bcc78a26fead4a4f7db96fde2aaacfe2f498b36e2dd531ae9df",
+      "size_bytes": 213310,
+      "source_build_hard_link_count": 1,
+      "source_build_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/dxvk/libdxvk.a"
+    },
+    {
+      "artifact_manifest_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/2c62068ebb6ba39c5fc2d5ba298edc23b531fbb11e58cd8b99ba8a64c128e771/manifest.json",
+      "artifact_name": "sanity_check_for_c_cross.exe",
+      "canonical_artifact_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/2c62068ebb6ba39c5fc2d5ba298edc23b531fbb11e58cd8b99ba8a64c128e771/sanity_check_for_c_cross.exe",
+      "sha256": "2c62068ebb6ba39c5fc2d5ba298edc23b531fbb11e58cd8b99ba8a64c128e771",
+      "size_bytes": 741,
+      "source_build_hard_link_count": 1,
+      "source_build_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/meson-private/sanity_check_for_c_cross.exe"
+    },
+    {
+      "artifact_manifest_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/2dbaca003ee26e550f45948da2456fda8c32752aa20597317b335119803fe77c/manifest.json",
+      "artifact_name": "libdxbc_spv.a",
+      "canonical_artifact_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/2dbaca003ee26e550f45948da2456fda8c32752aa20597317b335119803fe77c/libdxbc_spv.a",
+      "sha256": "2dbaca003ee26e550f45948da2456fda8c32752aa20597317b335119803fe77c",
+      "size_bytes": 162692,
+      "source_build_hard_link_count": 1,
+      "source_build_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/subprojects/dxbc-spirv/libdxbc_spv.a"
+    },
+    {
+      "artifact_manifest_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/31ad835c9886af99a089f764ba636e3912f117283acd6422d77fe572c9855a1b/manifest.json",
+      "artifact_name": "libvkcommon.a",
+      "canonical_artifact_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/31ad835c9886af99a089f764ba636e3912f117283acd6422d77fe572c9855a1b/libvkcommon.a",
+      "sha256": "31ad835c9886af99a089f764ba636e3912f117283acd6422d77fe572c9855a1b",
+      "size_bytes": 2738,
+      "source_build_hard_link_count": 1,
+      "source_build_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/vulkan/libvkcommon.a"
+    },
+    {
+      "artifact_manifest_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/46fc036c352a875583ea6b34aa73b2a28f04db944a085dd8dca97d40d1515fea/manifest.json",
+      "artifact_name": "libdisplay-info.a",
+      "canonical_artifact_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/46fc036c352a875583ea6b34aa73b2a28f04db944a085dd8dca97d40d1515fea/libdisplay-info.a",
+      "sha256": "46fc036c352a875583ea6b34aa73b2a28f04db944a085dd8dca97d40d1515fea",
+      "size_bytes": 3220,
+      "source_build_hard_link_count": 1,
+      "source_build_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/subprojects/libdisplay-info/libdisplay-info.a"
+    },
+    {
+      "artifact_manifest_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/6940b883fb4bc1b744fb7ca3aa6a486303eaf180c9fe85c03ed7cb175057bf28/manifest.json",
+      "artifact_name": "d3d11.dll",
+      "canonical_artifact_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/6940b883fb4bc1b744fb7ca3aa6a486303eaf180c9fe85c03ed7cb175057bf28/d3d11.dll",
+      "reused_canonical_artifact": true,
+      "sha256": "6940b883fb4bc1b744fb7ca3aa6a486303eaf180c9fe85c03ed7cb175057bf28",
+      "size_bytes": 23051278,
+      "source_build_hard_link_count": 0,
+      "source_build_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/d3d11/d3d11.dll",
+      "source_symlink_target": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/6940b883fb4bc1b744fb7ca3aa6a486303eaf180c9fe85c03ed7cb175057bf28/d3d11.dll"
+    },
+    {
+      "artifact_manifest_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/8b9f2576e110837259a11b53fe119cc7860323d67920e216012c0738193a0381/manifest.json",
+      "artifact_name": "sanity_check_for_cpp_cross.exe",
+      "canonical_artifact_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/8b9f2576e110837259a11b53fe119cc7860323d67920e216012c0738193a0381/sanity_check_for_cpp_cross.exe",
+      "sha256": "8b9f2576e110837259a11b53fe119cc7860323d67920e216012c0738193a0381",
+      "size_bytes": 745,
+      "source_build_hard_link_count": 1,
+      "source_build_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/meson-private/sanity_check_for_cpp_cross.exe"
+    },
+    {
+      "artifact_manifest_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/985f86bf806b951ae960443143711353f3eec9b8c15bc2f7a98942ff3855a143/manifest.json",
+      "artifact_name": "libutil.a",
+      "canonical_artifact_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/985f86bf806b951ae960443143711353f3eec9b8c15bc2f7a98942ff3855a143/libutil.a",
+      "sha256": "985f86bf806b951ae960443143711353f3eec9b8c15bc2f7a98942ff3855a143",
+      "size_bytes": 36000,
+      "source_build_hard_link_count": 1,
+      "source_build_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/util/libutil.a"
+    },
+    {
+      "artifact_manifest_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/b9f9c10bdaf27f297ace3280f584d19444081e393da285b698f2a4a0f444cee5/manifest.json",
+      "artifact_name": "libspirv.a",
+      "canonical_artifact_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/b9f9c10bdaf27f297ace3280f584d19444081e393da285b698f2a4a0f444cee5/libspirv.a",
+      "sha256": "b9f9c10bdaf27f297ace3280f584d19444081e393da285b698f2a4a0f444cee5",
+      "size_bytes": 1338,
+      "source_build_hard_link_count": 1,
+      "source_build_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/spirv/libspirv.a"
+    },
+    {
+      "artifact_manifest_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/c4efc3665996df60d1fcddc8f3a539dfaf63c010cca8e4022db6695aa4e86eec/manifest.json",
+      "artifact_name": "d3d11.dll.a",
+      "canonical_artifact_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/c4efc3665996df60d1fcddc8f3a539dfaf63c010cca8e4022db6695aa4e86eec/d3d11.dll.a",
+      "sha256": "c4efc3665996df60d1fcddc8f3a539dfaf63c010cca8e4022db6695aa4e86eec",
+      "size_bytes": 3590,
+      "source_build_hard_link_count": 1,
+      "source_build_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/d3d11/d3d11.dll.a"
+    },
+    {
+      "artifact_manifest_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/d17316cb4ec47e1003cadbd6a986cde0c1fdcb0f5ae625c0daecbdca119d1301/manifest.json",
+      "artifact_name": "sanity_check_for_cpp.exe",
+      "canonical_artifact_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/d17316cb4ec47e1003cadbd6a986cde0c1fdcb0f5ae625c0daecbdca119d1301/sanity_check_for_cpp.exe",
+      "sha256": "d17316cb4ec47e1003cadbd6a986cde0c1fdcb0f5ae625c0daecbdca119d1301",
+      "size_bytes": 16856,
+      "source_build_hard_link_count": 1,
+      "source_build_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/meson-private/sanity_check_for_cpp.exe"
+    }
+  ],
+  "build_id": "legacy-fgmetal-dxvk-macos-build-unmodified-b1351348",
+  "build_identity": {
+    "build_log_sha256": null,
+    "build_log_status": "no stdout build transcript present; configure log and Ninja execution log retained separately",
+    "build_ninja_evidence": {
+      "mode": "0o644",
+      "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/configuration/build.ninja",
+      "sha256": "69d5c36ccd17bc8c2ade721a69863551df06df383a4678d87adf7dc69ffcdeab",
+      "size_bytes": 456950,
+      "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/build.ninja"
+    },
+    "build_symlink_identity": [
+      {
+        "build_relative_path": "src/d3d11/d3d11.dll",
+        "target": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/6940b883fb4bc1b744fb7ca3aa6a486303eaf180c9fe85c03ed7cb175057bf28/d3d11.dll",
+        "target_sha256": "38d364df695747d010d60d3d5db64944e1909cdd0a567a6c4c82856d81eb96da"
+      },
+      {
+        "build_relative_path": "src/dxgi/dxgi.dll",
+        "target": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/17cbe8e84906ce9657493b1301e712cfc8123413034666fd9387dfe1bbf5b33c/dxgi.dll",
+        "target_sha256": "9d1b8034337b36fe4945dd94398942dcb9676100bd35d07fbe3f7dcb56e1f287"
+      }
+    ],
+    "build_system": "meson",
+    "build_type": "release",
+    "compiler_evidence": {
+      "mode": "0o644",
+      "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/configuration/meson-compilers.json",
+      "sha256": "7f37baa2a8232735a184d8999ba5c4969a5839d588c32affa80fd3bfeab26f12",
+      "size_bytes": 1915,
+      "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/meson-info/intro-compilers.json"
+    },
+    "compiler_identity": {
+      "build": {
+        "c": {
+          "default_suffix": "c",
+          "exelist": [
+            "cc"
+          ],
+          "file_suffixes": [
+            "c"
+          ],
+          "full_version": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "id": "clang",
+          "linker_exelist": [
+            "cc"
+          ],
+          "linker_id": "ld64",
+          "version": "21.0.0"
+        },
+        "cpp": {
+          "default_suffix": "cpp",
+          "exelist": [
+            "c++"
+          ],
+          "file_suffixes": [
+            "cpp",
+            "cppm",
+            "cc",
+            "cp",
+            "cxx",
+            "c++",
+            "hh",
+            "hp",
+            "hpp",
+            "ipp",
+            "hxx",
+            "h++",
+            "ino",
+            "ixx",
+            "CPP",
+            "C",
+            "HPP",
+            "H"
+          ],
+          "full_version": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "id": "clang",
+          "linker_exelist": [
+            "c++"
+          ],
+          "linker_id": "ld64",
+          "version": "21.0.0"
+        }
+      },
+      "host": {
+        "c": {
+          "default_suffix": "c",
+          "exelist": [
+            "x86_64-w64-mingw32-gcc"
+          ],
+          "file_suffixes": [
+            "c"
+          ],
+          "full_version": "x86_64-w64-mingw32-gcc (GCC) 16.2.0",
+          "id": "gcc",
+          "linker_exelist": [
+            "x86_64-w64-mingw32-gcc"
+          ],
+          "linker_id": "ld.bfd",
+          "version": "16.2.0"
+        },
+        "cpp": {
+          "default_suffix": "cpp",
+          "exelist": [
+            "x86_64-w64-mingw32-g++"
+          ],
+          "file_suffixes": [
+            "cpp",
+            "cppm",
+            "cc",
+            "cp",
+            "cxx",
+            "c++",
+            "hh",
+            "hp",
+            "hpp",
+            "ipp",
+            "hxx",
+            "h++",
+            "ino",
+            "ixx",
+            "CPP",
+            "C",
+            "HPP",
+            "H"
+          ],
+          "full_version": "x86_64-w64-mingw32-g++ (GCC) 16.2.0",
+          "id": "gcc",
+          "linker_exelist": [
+            "x86_64-w64-mingw32-g++"
+          ],
+          "linker_id": "ld.bfd",
+          "version": "16.2.0"
+        }
+      }
+    },
+    "compiler_identity_sha256": "7f37baa2a8232735a184d8999ba5c4969a5839d588c32affa80fd3bfeab26f12",
+    "compiler_versions": {
+      "build": {
+        "c": "21.0.0",
+        "cpp": "21.0.0"
+      },
+      "host": {
+        "c": "16.2.0",
+        "cpp": "16.2.0"
+      }
+    },
+    "config_key_sha256": "47e9ed2b82bac318280abd87699a5cf54d1fe93ab7890b206a7dd763b48e2b1a",
+    "configuration_build_ninja_evidence": {
+      "mode": "0o644",
+      "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/configuration/build.ninja",
+      "sha256": "69d5c36ccd17bc8c2ade721a69863551df06df383a4678d87adf7dc69ffcdeab",
+      "size_bytes": 456950,
+      "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/build.ninja"
+    },
+    "cross_file": {
+      "status": "absent"
+    },
+    "dependency_state": {
+      "intro_dependencies_sha256": "9f632f7d6127c58acfffd039f367db9e15eb8918a5174c127a23aa695de02774",
+      "status": "captured"
+    },
+    "generated_shader_identity": [
+      {
+        "build_relative_path": "src/d3d11/d3d11.dll.p/d3d11_composition_frag.h",
+        "mode": "0o644",
+        "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/generated-shaders/src/d3d11/d3d11.dll.p/d3d11_composition_frag.h",
+        "sha256": "856c04195264562b49e0fb099d2c49ea7c4ce0eeb80f73fe478c7462e819ce97",
+        "size_bytes": 1942,
+        "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/d3d11/d3d11.dll.p/d3d11_composition_frag.h"
+      },
+      {
+        "build_relative_path": "src/d3d11/d3d11.dll.p/d3d11_composition_vert.h",
+        "mode": "0o644",
+        "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/generated-shaders/src/d3d11/d3d11.dll.p/d3d11_composition_vert.h",
+        "sha256": "7f27a67773cfcc8f2698d00aac76a178d808000599c17fcda06e8b133ddcbf96",
+        "size_bytes": 6060,
+        "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/d3d11/d3d11.dll.p/d3d11_composition_vert.h"
+      },
+      {
+        "build_relative_path": "src/d3d11/d3d11.dll.p/d3d11_video_blit_frag.h",
+        "mode": "0o644",
+        "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/generated-shaders/src/d3d11/d3d11.dll.p/d3d11_video_blit_frag.h",
+        "sha256": "d8a5a8e9e8b3dc87630b6f8056e25515dc4462f85f35e1e0d94a727165431692",
+        "size_bytes": 19717,
+        "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/d3d11/d3d11.dll.p/d3d11_video_blit_frag.h"
+      },
+      {
+        "build_relative_path": "src/d3d11/d3d11.dll.p/d3d11_video_blit_vert.h",
+        "mode": "0o644",
+        "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/generated-shaders/src/d3d11/d3d11.dll.p/d3d11_video_blit_vert.h",
+        "sha256": "f45874b44614979e01e7d89393d66d3f2353e19c7c40ad5a45dd3e0662aa24f2",
+        "size_bytes": 3607,
+        "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/d3d11/d3d11.dll.p/d3d11_video_blit_vert.h"
+      },
+      {
+        "build_relative_path": "src/dxvk/libdxvk.a.p/dxvk_cursor_frag.h",
+        "mode": "0o644",
+        "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/generated-shaders/src/dxvk/libdxvk.a.p/dxvk_cursor_frag.h",
+        "sha256": "826997f26cac0d6ed2b4c896a2edba19e53bcc1c4070a96716291edae3e44d31",
+        "size_bytes": 16685,
+        "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/dxvk/libdxvk.a.p/dxvk_cursor_frag.h"
+      },
+      {
+        "build_relative_path": "src/dxvk/libdxvk.a.p/dxvk_cursor_vert.h",
+        "mode": "0o644",
+        "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/generated-shaders/src/dxvk/libdxvk.a.p/dxvk_cursor_vert.h",
+        "sha256": "444e40aca1f41d89929b2819b30eebefa28592c060110a5e06d5d78c7f33ed3e",
+        "size_bytes": 5492,
+        "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/dxvk/libdxvk.a.p/dxvk_cursor_vert.h"
+      },
+      {
+        "build_relative_path": "src/dxvk/libdxvk.a.p/dxvk_dummy_frag.h",
+        "mode": "0o644",
+        "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/generated-shaders/src/dxvk/libdxvk.a.p/dxvk_dummy_frag.h",
+        "sha256": "bbd20630cdbefe605153d2aeb9c10c89e8e2e40a2d6703f9d340780f64386d81",
+        "size_bytes": 574,
+        "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/dxvk/libdxvk.a.p/dxvk_dummy_frag.h"
+      },
+      {
+        "build_relative_path": "src/dxvk/libdxvk.a.p/dxvk_mipgen.h",
+        "mode": "0o644",
+        "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/generated-shaders/src/dxvk/libdxvk.a.p/dxvk_mipgen.h",
+        "sha256": "45048be42d49d9ce97033547100732157030fcfe2ceff61b35925217573c6f82",
+        "size_bytes": 192709,
+        "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/dxvk/libdxvk.a.p/dxvk_mipgen.h"
+      },
+      {
+        "build_relative_path": "src/dxvk/libdxvk.a.p/dxvk_present_frag.h",
+        "mode": "0o644",
+        "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/generated-shaders/src/dxvk/libdxvk.a.p/dxvk_present_frag.h",
+        "sha256": "1134ce36ef0f1b041b54048e6e1ea1f5ac3e9a45fa0c8dc58e1399996ef665cb",
+        "size_bytes": 44103,
+        "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/dxvk/libdxvk.a.p/dxvk_present_frag.h"
+      },
+      {
+        "build_relative_path": "src/dxvk/libdxvk.a.p/dxvk_present_frag_blit.h",
+        "mode": "0o644",
+        "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/generated-shaders/src/dxvk/libdxvk.a.p/dxvk_present_frag_blit.h",
+        "sha256": "f8bc0da8e8b0ca51fc09f4694d46e9c267a9647df45531900895746d30ee2a92",
+        "size_bytes": 50160,
+        "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/dxvk/libdxvk.a.p/dxvk_present_frag_blit.h"
+      },
+      {
+        "build_relative_path": "src/dxvk/libdxvk.a.p/dxvk_present_frag_ms.h",
+        "mode": "0o644",
+        "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/generated-shaders/src/dxvk/libdxvk.a.p/dxvk_present_frag_ms.h",
+        "sha256": "1bf6841460aef8ddd6e5650f5583239d36d8baf801ee4193e86bbd784d927003",
+        "size_bytes": 45590,
+        "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/dxvk/libdxvk.a.p/dxvk_present_frag_ms.h"
+      },
+      {
+        "build_relative_path": "src/dxvk/libdxvk.a.p/dxvk_present_frag_ms_blit.h",
+        "mode": "0o644",
+        "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/generated-shaders/src/dxvk/libdxvk.a.p/dxvk_present_frag_ms_blit.h",
+        "sha256": "773ce5007fa6b84452cb612838ec7faf746e2d8ee4582eb9e109038ca107e637",
+        "size_bytes": 50354,
+        "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/dxvk/libdxvk.a.p/dxvk_present_frag_ms_blit.h"
+      },
+      {
+        "build_relative_path": "src/dxvk/libdxvk.a.p/dxvk_present_vert.h",
+        "mode": "0o644",
+        "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/generated-shaders/src/dxvk/libdxvk.a.p/dxvk_present_vert.h",
+        "sha256": "85348880cd0b43a23f5d27214b0fef7a4e11960b9f229827d92b05f12697880d",
+        "size_bytes": 3592,
+        "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/dxvk/libdxvk.a.p/dxvk_present_vert.h"
+      },
+      {
+        "build_relative_path": "src/dxvk/libdxvk.a.p/hud_chunk_frag_background.h",
+        "mode": "0o644",
+        "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/generated-shaders/src/dxvk/libdxvk.a.p/hud_chunk_frag_background.h",
+        "sha256": "db22744a5b083a8c2e55fd60a5d4ae4f5f617adb1f769b10090dcdc14a138ef2",
+        "size_bytes": 17932,
+        "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/dxvk/libdxvk.a.p/hud_chunk_frag_background.h"
+      },
+      {
+        "build_relative_path": "src/dxvk/libdxvk.a.p/hud_chunk_frag_visualize.h",
+        "mode": "0o644",
+        "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/generated-shaders/src/dxvk/libdxvk.a.p/hud_chunk_frag_visualize.h",
+        "sha256": "d8adbcadd20457c073ded6e5a26fd5b747292cbf530d7959f0588a22b41585f0",
+        "size_bytes": 26200,
+        "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/dxvk/libdxvk.a.p/hud_chunk_frag_visualize.h"
+      },
+      {
+        "build_relative_path": "src/dxvk/libdxvk.a.p/hud_chunk_vert_background.h",
+        "mode": "0o644",
+        "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/generated-shaders/src/dxvk/libdxvk.a.p/hud_chunk_vert_background.h",
+        "sha256": "4c38c6e40af75d0743073b61f64328d87011124c6193fac5322ca0d482eb7e33",
+        "size_bytes": 10833,
+        "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/dxvk/libdxvk.a.p/hud_chunk_vert_background.h"
+      },
+      {
+        "build_relative_path": "src/dxvk/libdxvk.a.p/hud_chunk_vert_visualize.h",
+        "mode": "0o644",
+        "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/generated-shaders/src/dxvk/libdxvk.a.p/hud_chunk_vert_visualize.h",
+        "sha256": "706654091014b5f834257dfb9fcbac3603c8be3d451c35bfabcc647704c88078",
+        "size_bytes": 12125,
+        "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/dxvk/libdxvk.a.p/hud_chunk_vert_visualize.h"
+      },
+      {
+        "build_relative_path": "src/dxvk/libdxvk.a.p/hud_frame_time_eval.h",
+        "mode": "0o644",
+        "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/generated-shaders/src/dxvk/libdxvk.a.p/hud_frame_time_eval.h",
+        "sha256": "7d494d8f176cf7a59fe4763c38b08dc3ef03e93fe858c7c39450c5f84ca1ea1e",
+        "size_bytes": 29885,
+        "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/dxvk/libdxvk.a.p/hud_frame_time_eval.h"
+      },
+      {
+        "build_relative_path": "src/dxvk/libdxvk.a.p/hud_graph_frag.h",
+        "mode": "0o644",
+        "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/generated-shaders/src/dxvk/libdxvk.a.p/hud_graph_frag.h",
+        "sha256": "04ad79259a675badb33120375165c86cc6b1e146a112bb5c2f6a1c3f8e6d6485",
+        "size_bytes": 28844,
+        "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/dxvk/libdxvk.a.p/hud_graph_frag.h"
+      },
+      {
+        "build_relative_path": "src/dxvk/libdxvk.a.p/hud_graph_vert.h",
+        "mode": "0o644",
+        "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/generated-shaders/src/dxvk/libdxvk.a.p/hud_graph_vert.h",
+        "sha256": "bab40cc859f1451fbffe900ea7f0f9589df3104016030002179c8b589bf2930a",
+        "size_bytes": 9033,
+        "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/dxvk/libdxvk.a.p/hud_graph_vert.h"
+      },
+      {
+        "build_relative_path": "src/dxvk/libdxvk.a.p/hud_text_frag.h",
+        "mode": "0o644",
+        "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/generated-shaders/src/dxvk/libdxvk.a.p/hud_text_frag.h",
+        "sha256": "a1b91b7cf157e11791b400257f41fab2e5e66b6e29f2ff73f2fbe513b39aa801",
+        "size_bytes": 21204,
+        "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/dxvk/libdxvk.a.p/hud_text_frag.h"
+      },
+      {
+        "build_relative_path": "src/dxvk/libdxvk.a.p/hud_text_vert.h",
+        "mode": "0o644",
+        "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/generated-shaders/src/dxvk/libdxvk.a.p/hud_text_vert.h",
+        "sha256": "5b0d8398397e5b591d5986b62662cdb5affd1e662ff4953231fce9079a31fc93",
+        "size_bytes": 17650,
+        "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/dxvk/libdxvk.a.p/hud_text_vert.h"
+      },
+      {
+        "build_relative_path": "src/d3d9/d3d9.dll.p/d3d9_convert_a2w10v10u10.h",
+        "mode": "0o644",
+        "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/generated-shaders/src/d3d9/d3d9.dll.p/d3d9_convert_a2w10v10u10.h",
+        "sha256": "6ce0378e7f4dfe6c3ae427202d92cdc6831e220cfc0a9b150c2fed61bbf1420e",
+        "size_bytes": 11620,
+        "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/d3d9/d3d9.dll.p/d3d9_convert_a2w10v10u10.h"
+      },
+      {
+        "build_relative_path": "src/d3d9/d3d9.dll.p/d3d9_convert_l6v5u5.h",
+        "mode": "0o644",
+        "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/generated-shaders/src/d3d9/d3d9.dll.p/d3d9_convert_l6v5u5.h",
+        "sha256": "f1103de7b20fe861633795ff2f2232e6a75c4ae1d3136558b61ba29f25789d81",
+        "size_bytes": 10939,
+        "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/d3d9/d3d9.dll.p/d3d9_convert_l6v5u5.h"
+      },
+      {
+        "build_relative_path": "src/d3d9/d3d9.dll.p/d3d9_convert_nv12.h",
+        "mode": "0o644",
+        "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/generated-shaders/src/d3d9/d3d9.dll.p/d3d9_convert_nv12.h",
+        "sha256": "90c02a987f845574d06bf0d9b70aa62a9013549aa680bd7c50e4448d8dd668f1",
+        "size_bytes": 14943,
+        "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/d3d9/d3d9.dll.p/d3d9_convert_nv12.h"
+      },
+      {
+        "build_relative_path": "src/d3d9/d3d9.dll.p/d3d9_convert_w11v11u10.h",
+        "mode": "0o644",
+        "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/generated-shaders/src/d3d9/d3d9.dll.p/d3d9_convert_w11v11u10.h",
+        "sha256": "5b7645ca83dad04d663238bcc5d350ebb002e81f39d0211c3131633f5e463cbb",
+        "size_bytes": 10064,
+        "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/d3d9/d3d9.dll.p/d3d9_convert_w11v11u10.h"
+      },
+      {
+        "build_relative_path": "src/d3d9/d3d9.dll.p/d3d9_convert_x8l8v8u8.h",
+        "mode": "0o644",
+        "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/generated-shaders/src/d3d9/d3d9.dll.p/d3d9_convert_x8l8v8u8.h",
+        "sha256": "9efaab55074dc3b9ba31325a911ba6079bf6b92d752dedfbb531c63f6dd72b49",
+        "size_bytes": 10897,
+        "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/d3d9/d3d9.dll.p/d3d9_convert_x8l8v8u8.h"
+      },
+      {
+        "build_relative_path": "src/d3d9/d3d9.dll.p/d3d9_convert_yuy2_uyvy.h",
+        "mode": "0o644",
+        "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/generated-shaders/src/d3d9/d3d9.dll.p/d3d9_convert_yuy2_uyvy.h",
+        "sha256": "8a4c244a5c76fe4dcbdc2528da9e7cf4e08e5f3037f946f4d3a03b6b205fef38",
+        "size_bytes": 12213,
+        "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/d3d9/d3d9.dll.p/d3d9_convert_yuy2_uyvy.h"
+      },
+      {
+        "build_relative_path": "src/d3d9/d3d9.dll.p/d3d9_convert_yv12.h",
+        "mode": "0o644",
+        "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/generated-shaders/src/d3d9/d3d9.dll.p/d3d9_convert_yv12.h",
+        "sha256": "cb21d80d7b8c0c533cee9a26978c19f3a845f2018ad9140a825c46c9239a9853",
+        "size_bytes": 12513,
+        "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/d3d9/d3d9.dll.p/d3d9_convert_yv12.h"
+      },
+      {
+        "build_relative_path": "src/d3d9/d3d9.dll.p/d3d9_fixed_function_frag.h",
+        "mode": "0o644",
+        "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/generated-shaders/src/d3d9/d3d9.dll.p/d3d9_fixed_function_frag.h",
+        "sha256": "54b982c3d54a13e6e1b27499b6f06a34f619d1ad35ca03799eb490e9a1233bff",
+        "size_bytes": 105771,
+        "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/d3d9/d3d9.dll.p/d3d9_fixed_function_frag.h"
+      },
+      {
+        "build_relative_path": "src/d3d9/d3d9.dll.p/d3d9_fixed_function_frag_sample.h",
+        "mode": "0o644",
+        "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/generated-shaders/src/d3d9/d3d9.dll.p/d3d9_fixed_function_frag_sample.h",
+        "sha256": "be3146f39bf5730d75729563c2e28af2f55fd78106cf83a2e5c3ce418892ee45",
+        "size_bytes": 106206,
+        "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/d3d9/d3d9.dll.p/d3d9_fixed_function_frag_sample.h"
+      },
+      {
+        "build_relative_path": "src/d3d9/d3d9.dll.p/d3d9_fixed_function_vert.h",
+        "mode": "0o644",
+        "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/generated-shaders/src/d3d9/d3d9.dll.p/d3d9_fixed_function_vert.h",
+        "sha256": "66d3e4efd10057416a763e402f1ab58b9580f1f771ae628323a1eb7a929a97da",
+        "size_bytes": 122162,
+        "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/d3d9/d3d9.dll.p/d3d9_fixed_function_vert.h"
+      }
+    ],
+    "intro-buildsystem_files_json_evidence": {
+      "mode": "0o644",
+      "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/configuration/meson-intro-buildsystem_files.json",
+      "sha256": "5012691a9dba42f270432d9571c88733c788e950ca1fdb394940c3cd3c52eae7",
+      "size_bytes": 1276,
+      "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/meson-info/intro-buildsystem_files.json"
+    },
+    "intro-dependencies_json_evidence": {
+      "mode": "0o644",
+      "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/configuration/meson-intro-dependencies.json",
+      "sha256": "9f632f7d6127c58acfffd039f367db9e15eb8918a5174c127a23aa695de02774",
+      "size_bytes": 337,
+      "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/meson-info/intro-dependencies.json"
+    },
+    "intro-targets_json_evidence": {
+      "mode": "0o644",
+      "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/configuration/meson-intro-targets.json",
+      "sha256": "6f1e685886bc128a40d4cc81b4d38f68bb9f1c9a20fa084bc30aaef8467dc536",
+      "size_bytes": 58211,
+      "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/meson-info/intro-targets.json"
+    },
+    "intro-tests_json_evidence": {
+      "mode": "0o644",
+      "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/configuration/meson-intro-tests.json",
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "size_bytes": 2,
+      "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/meson-info/intro-tests.json"
+    },
+    "linker_identity": [
+      "-----------",
+      "`c++ -Wl,--version` -> 1",
+      "`c++ -Wl,-v` -> 1",
+      "`cc -Wl,--version` -> 1",
+      "`cc -Wl,-v` -> 1",
+      "`x86_64-w64-mingw32-g++ -Wl,--version` -> 0",
+      "`x86_64-w64-mingw32-gcc -Wl,--version` -> 0",
+      "c++ ld64 27037.1",
+      "cc ld64 27037.1",
+      "x86_64-w64-mingw32-g++ ld.bfd 2.47.20260726",
+      "x86_64-w64-mingw32-gcc ld.bfd 2.47.20260726"
+    ],
+    "logs_ninja-log_txt_evidence": {
+      "mode": "0o644",
+      "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/logs/ninja-log.txt",
+      "sha256": "5c6dab834d301c692b6c12c4f7e924d7c40e3546fce50ca2510b54674d637df3",
+      "size_bytes": 28624,
+      "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/.ninja_log"
+    },
+    "meson_command_line": "[options]\nbuildtype = release\nprefix = /tmp/fgmetal-dxvk-macos-stage-unmodified\n\n[properties]\ncross_file = ['/private/tmp/fgmetal-dxvk-macos-audit-20261004/build-win64.txt']\n\n",
+    "meson_command_line_evidence": {
+      "mode": "0o644",
+      "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/configuration/meson-cmd-line.txt",
+      "sha256": "90136fc2ebb3b1e3235069145dc0732ef2857499f7f0e3efb0c490dd2425584d",
+      "size_bytes": 175,
+      "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/meson-private/cmd_line.txt"
+    },
+    "meson_command_line_sha256": "90136fc2ebb3b1e3235069145dc0732ef2857499f7f0e3efb0c490dd2425584d",
+    "meson_configuration_sha256": "d01759a3bb6706bafe9a4da3da898a6af9003f42951161b3ca5a556a171bbba4",
+    "meson_log_evidence": {
+      "mode": "0o644",
+      "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/logs/meson-log.txt",
+      "sha256": "6a998dfac1ecffda78fef849f82ecb72b9c0ad689b13745a6911d9ac2ee73080",
+      "size_bytes": 49937,
+      "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/meson-logs/meson-log.txt"
+    },
+    "meson_log_sha256": "6a998dfac1ecffda78fef849f82ecb72b9c0ad689b13745a6911d9ac2ee73080",
+    "meson_options": [
+      {
+        "choices": [
+          "enabled",
+          "disabled",
+          "auto"
+        ],
+        "description": "Override value of all 'auto' features",
+        "machine": "any",
+        "name": "auto_features",
+        "section": "core",
+        "type": "combo",
+        "value": "auto"
+      },
+      {
+        "choices": [
+          "ninja",
+          "vs",
+          "vs2010",
+          "vs2012",
+          "vs2013",
+          "vs2015",
+          "vs2017",
+          "vs2019",
+          "vs2022",
+          "vs2026",
+          "xcode",
+          "none"
+        ],
+        "description": "Backend to use",
+        "machine": "any",
+        "name": "backend",
+        "section": "core",
+        "type": "combo",
+        "value": "ninja"
+      },
+      {
+        "choices": [
+          "vs2022",
+          "vs2026"
+        ],
+        "description": "Setup multiple buildtype-suffixed ninja-backend build directories, and a [builddir]_vs containing a Visual Studio meta-backend with multiple configurations that calls into them",
+        "machine": "any",
+        "name": "genvslite",
+        "section": "core",
+        "type": "combo",
+        "value": "vs2022"
+      },
+      {
+        "choices": [
+          "plain",
+          "debug",
+          "debugoptimized",
+          "release",
+          "minsize",
+          "custom"
+        ],
+        "description": "Build type to use",
+        "machine": "any",
+        "name": "buildtype",
+        "section": "core",
+        "type": "combo",
+        "value": "release"
+      },
+      {
+        "description": "Enable debug symbols and other information",
+        "machine": "any",
+        "name": "debug",
+        "section": "core",
+        "type": "boolean",
+        "value": false
+      },
+      {
+        "choices": [
+          "shared",
+          "static",
+          "both"
+        ],
+        "description": "Default library type",
+        "machine": "any",
+        "name": "default_library",
+        "section": "core",
+        "type": "combo",
+        "value": "shared"
+      },
+      {
+        "choices": [
+          "shared",
+          "static",
+          "auto"
+        ],
+        "description": "Default library type for both_libraries",
+        "machine": "any",
+        "name": "default_both_libraries",
+        "section": "core",
+        "type": "combo",
+        "value": "shared"
+      },
+      {
+        "description": "Default umask to apply on permissions of installed files",
+        "machine": "any",
+        "name": "install_umask",
+        "section": "core",
+        "type": "integer",
+        "value": 18
+      },
+      {
+        "choices": [
+          "mirror",
+          "flat"
+        ],
+        "description": "Build directory layout",
+        "machine": "any",
+        "name": "layout",
+        "section": "core",
+        "type": "combo",
+        "value": "mirror"
+      },
+      {
+        "choices": [
+          "plain",
+          "0",
+          "g",
+          "1",
+          "2",
+          "3",
+          "s"
+        ],
+        "description": "Optimization level",
+        "machine": "any",
+        "name": "optimization",
+        "section": "core",
+        "type": "combo",
+        "value": "3"
+      },
+      {
+        "description": "Whether to try static linking before shared linking",
+        "machine": "any",
+        "name": "prefer_static",
+        "section": "core",
+        "type": "boolean",
+        "value": false
+      },
+      {
+        "description": "Strip targets on install",
+        "machine": "any",
+        "name": "strip",
+        "section": "core",
+        "type": "boolean",
+        "value": false
+      },
+      {
+        "choices": [
+          "on",
+          "off",
+          "subprojects"
+        ],
+        "description": "Unity build",
+        "machine": "any",
+        "name": "unity",
+        "section": "core",
+        "type": "combo",
+        "value": "off"
+      },
+      {
+        "description": "Unity block size",
+        "machine": "any",
+        "name": "unity_size",
+        "section": "core",
+        "type": "integer",
+        "value": 4
+      },
+      {
+        "choices": [
+          "0",
+          "1",
+          "2",
+          "3",
+          "everything"
+        ],
+        "description": "Compiler warning level to use",
+        "machine": "any",
+        "name": "warning_level",
+        "section": "core",
+        "type": "combo",
+        "value": "2"
+      },
+      {
+        "description": "Treat warnings as errors",
+        "machine": "any",
+        "name": "werror",
+        "section": "core",
+        "type": "boolean",
+        "value": false
+      },
+      {
+        "choices": [
+          "default",
+          "nofallback",
+          "nodownload",
+          "forcefallback",
+          "nopromote"
+        ],
+        "description": "Wrap mode",
+        "machine": "any",
+        "name": "wrap_mode",
+        "section": "core",
+        "type": "combo",
+        "value": "default"
+      },
+      {
+        "description": "Force fallback for those subprojects",
+        "machine": "any",
+        "name": "force_fallback_for",
+        "section": "core",
+        "type": "array",
+        "value": []
+      },
+      {
+        "description": "Activate Visual Studio environment",
+        "machine": "any",
+        "name": "vsenv",
+        "section": "core",
+        "type": "boolean",
+        "value": false
+      },
+      {
+        "description": "Use OMF format on OS/2",
+        "machine": "any",
+        "name": "os2_emxomf",
+        "section": "core",
+        "type": "boolean",
+        "value": false
+      },
+      {
+        "description": "Generate pkgconfig files as relocatable",
+        "machine": "any",
+        "name": "pkgconfig.relocatable",
+        "section": "core",
+        "type": "boolean",
+        "value": false
+      },
+      {
+        "description": "Whether to compile bytecode",
+        "machine": "any",
+        "name": "python.bytecompile",
+        "section": "core",
+        "type": "integer",
+        "value": 0
+      },
+      {
+        "choices": [
+          "auto",
+          "prefix",
+          "system",
+          "venv"
+        ],
+        "description": "Which python environment to install to",
+        "machine": "any",
+        "name": "python.install_env",
+        "section": "core",
+        "type": "combo",
+        "value": "prefix"
+      },
+      {
+        "description": "Directory for site-specific, platform-specific files.",
+        "machine": "any",
+        "name": "python.platlibdir",
+        "section": "core",
+        "type": "string",
+        "value": ""
+      },
+      {
+        "description": "Directory for site-specific, non-platform-specific files.",
+        "machine": "any",
+        "name": "python.purelibdir",
+        "section": "core",
+        "type": "string",
+        "value": ""
+      },
+      {
+        "description": "Whether to allow use of the Python Limited API",
+        "machine": "any",
+        "name": "python.allow_limited_api",
+        "section": "core",
+        "type": "boolean",
+        "value": true
+      },
+      {
+        "description": "Config file containing the build details for the target Python installation.",
+        "machine": "any",
+        "name": "python.build_config",
+        "section": "core",
+        "type": "string",
+        "value": ""
+      },
+      {
+        "description": "List of additional paths for pkg-config to search",
+        "machine": "build",
+        "name": "build.pkg_config_path",
+        "section": "core",
+        "type": "array",
+        "value": []
+      },
+      {
+        "description": "List of additional prefixes for cmake to search",
+        "machine": "build",
+        "name": "build.cmake_prefix_path",
+        "section": "core",
+        "type": "array",
+        "value": []
+      },
+      {
+        "description": "List of additional paths for pkg-config to search",
+        "machine": "host",
+        "name": "pkg_config_path",
+        "section": "core",
+        "type": "array",
+        "value": []
+      },
+      {
+        "description": "List of additional prefixes for cmake to search",
+        "machine": "host",
+        "name": "cmake_prefix_path",
+        "section": "core",
+        "type": "array",
+        "value": []
+      },
+      {
+        "description": "Maximum number of linker processes to run or 0 for no limit",
+        "machine": "any",
+        "name": "backend_max_links",
+        "section": "backend",
+        "type": "integer",
+        "value": 0
+      },
+      {
+        "description": "Use precompiled headers",
+        "machine": "any",
+        "name": "b_pch",
+        "section": "base",
+        "type": "boolean",
+        "value": true
+      },
+      {
+        "description": "Use link time optimization",
+        "machine": "any",
+        "name": "b_lto",
+        "section": "base",
+        "type": "boolean",
+        "value": false
+      },
+      {
+        "choices": [
+          "off",
+          "generate",
+          "use"
+        ],
+        "description": "Use profile guided optimization",
+        "machine": "any",
+        "name": "b_pgo",
+        "section": "base",
+        "type": "combo",
+        "value": "off"
+      },
+      {
+        "description": "Build executables as position independent",
+        "machine": "any",
+        "name": "b_pie",
+        "section": "base",
+        "type": "boolean",
+        "value": false
+      },
+      {
+        "description": "Use LLVM ThinLTO caching for faster incremental builds",
+        "machine": "any",
+        "name": "b_thinlto_cache",
+        "section": "base",
+        "type": "boolean",
+        "value": false
+      },
+      {
+        "description": "Build static libraries as position independent",
+        "machine": "any",
+        "name": "b_staticpic",
+        "section": "base",
+        "type": "boolean",
+        "value": true
+      },
+      {
+        "description": "Code sanitizer to use",
+        "machine": "any",
+        "name": "b_sanitize",
+        "section": "base",
+        "type": "array",
+        "value": []
+      },
+      {
+        "choices": [
+          "true",
+          "false",
+          "if-release"
+        ],
+        "description": "Disable asserts",
+        "machine": "any",
+        "name": "b_ndebug",
+        "section": "base",
+        "type": "combo",
+        "value": "false"
+      },
+      {
+        "description": "Directory to store ThinLTO cache objects",
+        "machine": "any",
+        "name": "b_thinlto_cache_dir",
+        "section": "base",
+        "type": "string",
+        "value": ""
+      },
+      {
+        "description": "Enable coverage tracking.",
+        "machine": "any",
+        "name": "b_coverage",
+        "section": "base",
+        "type": "boolean",
+        "value": false
+      },
+      {
+        "description": "Use multiple threads for Link Time Optimization",
+        "machine": "any",
+        "name": "b_lto_threads",
+        "section": "base",
+        "type": "integer",
+        "value": 0
+      },
+      {
+        "choices": [
+          "auto",
+          "always",
+          "never"
+        ],
+        "description": "Use colored output",
+        "machine": "any",
+        "name": "b_colorout",
+        "section": "base",
+        "type": "combo",
+        "value": "always"
+      },
+      {
+        "choices": [
+          "default",
+          "thin"
+        ],
+        "description": "Select between different LTO modes.",
+        "machine": "any",
+        "name": "b_lto_mode",
+        "section": "base",
+        "type": "combo",
+        "value": "default"
+      },
+      {
+        "description": "Use -Wl,--as-needed when linking",
+        "machine": "any",
+        "name": "b_asneeded",
+        "section": "base",
+        "type": "boolean",
+        "value": true
+      },
+      {
+        "description": "Use -Wl,--no-undefined when linking",
+        "machine": "any",
+        "name": "b_lundef",
+        "section": "base",
+        "type": "boolean",
+        "value": true
+      },
+      {
+        "description": "Generate and embed bitcode (only macOS/iOS/tvOS)",
+        "machine": "any",
+        "name": "b_bitcode",
+        "section": "base",
+        "type": "boolean",
+        "value": false
+      },
+      {
+        "description": "Extra arguments passed to the c compiler",
+        "machine": "build",
+        "name": "build.c_args",
+        "section": "compiler",
+        "type": "array",
+        "value": []
+      },
+      {
+        "description": "Extra arguments passed to the c linker",
+        "machine": "build",
+        "name": "build.c_link_args",
+        "section": "compiler",
+        "type": "array",
+        "value": []
+      },
+      {
+        "choices": [
+          "none",
+          "c89",
+          "c99",
+          "c11",
+          "c17",
+          "c18",
+          "c2x",
+          "c23",
+          "c2y",
+          "gnu89",
+          "gnu99",
+          "gnu11",
+          "gnu17",
+          "gnu18",
+          "gnu2x",
+          "gnu23",
+          "gnu2y"
+        ],
+        "description": "c language standard to use",
+        "machine": "build",
+        "name": "build.c_std",
+        "section": "compiler",
+        "type": "combo",
+        "value": "none"
+      },
+      {
+        "description": "Extra arguments passed to the cpp compiler",
+        "machine": "build",
+        "name": "build.cpp_args",
+        "section": "compiler",
+        "type": "array",
+        "value": []
+      },
+      {
+        "description": "Extra arguments passed to the cpp linker",
+        "machine": "build",
+        "name": "build.cpp_link_args",
+        "section": "compiler",
+        "type": "array",
+        "value": []
+      },
+      {
+        "choices": [
+          "none",
+          "c++98",
+          "c++03",
+          "c++11",
+          "c++14",
+          "c++17",
+          "c++1z",
+          "c++2a",
+          "c++20",
+          "c++23",
+          "c++26",
+          "gnu++98",
+          "gnu++03",
+          "gnu++11",
+          "gnu++14",
+          "gnu++17",
+          "gnu++1z",
+          "gnu++2a",
+          "gnu++20",
+          "gnu++23",
+          "gnu++26"
+        ],
+        "description": "cpp language standard to use",
+        "machine": "build",
+        "name": "build.cpp_std",
+        "section": "compiler",
+        "type": "combo",
+        "value": "none"
+      },
+      {
+        "choices": [
+          "none",
+          "default",
+          "a",
+          "s",
+          "sc"
+        ],
+        "description": "C++ exception handling type.",
+        "machine": "build",
+        "name": "build.cpp_eh",
+        "section": "compiler",
+        "type": "combo",
+        "value": "default"
+      },
+      {
+        "description": "Enable RTTI",
+        "machine": "build",
+        "name": "build.cpp_rtti",
+        "section": "compiler",
+        "type": "boolean",
+        "value": true
+      },
+      {
+        "description": "STL debug mode",
+        "machine": "build",
+        "name": "build.cpp_debugstl",
+        "section": "compiler",
+        "type": "boolean",
+        "value": false
+      },
+      {
+        "description": "Extra arguments passed to the c compiler",
+        "machine": "host",
+        "name": "c_args",
+        "section": "compiler",
+        "type": "array",
+        "value": []
+      },
+      {
+        "description": "Extra arguments passed to the c linker",
+        "machine": "host",
+        "name": "c_link_args",
+        "section": "compiler",
+        "type": "array",
+        "value": []
+      },
+      {
+        "choices": [
+          "none",
+          "c89",
+          "c99",
+          "c11",
+          "c17",
+          "c18",
+          "c2x",
+          "c23",
+          "c2y",
+          "gnu89",
+          "gnu99",
+          "gnu11",
+          "gnu17",
+          "gnu18",
+          "gnu2x",
+          "gnu23",
+          "gnu2y"
+        ],
+        "description": "c language standard to use",
+        "machine": "host",
+        "name": "c_std",
+        "section": "compiler",
+        "type": "combo",
+        "value": "none"
+      },
+      {
+        "description": "Standard Windows libraries to link against",
+        "machine": "host",
+        "name": "c_winlibs",
+        "section": "compiler",
+        "type": "array",
+        "value": [
+          "-lkernel32",
+          "-luser32",
+          "-lgdi32",
+          "-lwinspool",
+          "-lshell32",
+          "-lole32",
+          "-loleaut32",
+          "-luuid",
+          "-lcomdlg32",
+          "-ladvapi32"
+        ]
+      },
+      {
+        "description": "Extra arguments passed to the cpp compiler",
+        "machine": "host",
+        "name": "cpp_args",
+        "section": "compiler",
+        "type": "array",
+        "value": []
+      },
+      {
+        "description": "Extra arguments passed to the cpp linker",
+        "machine": "host",
+        "name": "cpp_link_args",
+        "section": "compiler",
+        "type": "array",
+        "value": []
+      },
+      {
+        "choices": [
+          "none",
+          "c++98",
+          "c++03",
+          "c++11",
+          "c++14",
+          "c++17",
+          "c++1z",
+          "c++2a",
+          "c++20",
+          "c++23",
+          "c++26",
+          "gnu++98",
+          "gnu++03",
+          "gnu++11",
+          "gnu++14",
+          "gnu++17",
+          "gnu++1z",
+          "gnu++2a",
+          "gnu++20",
+          "gnu++23",
+          "gnu++26"
+        ],
+        "description": "cpp language standard to use",
+        "machine": "host",
+        "name": "cpp_std",
+        "section": "compiler",
+        "type": "combo",
+        "value": "c++17"
+      },
+      {
+        "choices": [
+          "none",
+          "default",
+          "a",
+          "s",
+          "sc"
+        ],
+        "description": "C++ exception handling type.",
+        "machine": "host",
+        "name": "cpp_eh",
+        "section": "compiler",
+        "type": "combo",
+        "value": "default"
+      },
+      {
+        "description": "Enable RTTI",
+        "machine": "host",
+        "name": "cpp_rtti",
+        "section": "compiler",
+        "type": "boolean",
+        "value": true
+      },
+      {
+        "description": "STL debug mode",
+        "machine": "host",
+        "name": "cpp_debugstl",
+        "section": "compiler",
+        "type": "boolean",
+        "value": false
+      },
+      {
+        "description": "Standard Win libraries to link against",
+        "machine": "host",
+        "name": "cpp_winlibs",
+        "section": "compiler",
+        "type": "array",
+        "value": [
+          "-lkernel32",
+          "-luser32",
+          "-lgdi32",
+          "-lwinspool",
+          "-lshell32",
+          "-lole32",
+          "-loleaut32",
+          "-luuid",
+          "-lcomdlg32",
+          "-ladvapi32"
+        ]
+      },
+      {
+        "choices": [
+          "false",
+          "true"
+        ],
+        "description": "Use #import std.",
+        "machine": "host",
+        "name": "cpp_importstd",
+        "section": "compiler",
+        "type": "combo",
+        "value": "false"
+      },
+      {
+        "description": "Installation prefix",
+        "machine": "any",
+        "name": "prefix",
+        "section": "directory",
+        "type": "string",
+        "value": "/tmp/fgmetal-dxvk-macos-stage-unmodified"
+      },
+      {
+        "description": "Executable directory",
+        "machine": "any",
+        "name": "bindir",
+        "section": "directory",
+        "type": "string",
+        "value": "bin"
+      },
+      {
+        "description": "Data file directory",
+        "machine": "any",
+        "name": "datadir",
+        "section": "directory",
+        "type": "string",
+        "value": "share"
+      },
+      {
+        "description": "Header file directory",
+        "machine": "any",
+        "name": "includedir",
+        "section": "directory",
+        "type": "string",
+        "value": "include"
+      },
+      {
+        "description": "Info page directory",
+        "machine": "any",
+        "name": "infodir",
+        "section": "directory",
+        "type": "string",
+        "value": "share/info"
+      },
+      {
+        "description": "Library directory",
+        "machine": "any",
+        "name": "libdir",
+        "section": "directory",
+        "type": "string",
+        "value": "lib"
+      },
+      {
+        "description": "Licenses directory",
+        "machine": "any",
+        "name": "licensedir",
+        "section": "directory",
+        "type": "string",
+        "value": ""
+      },
+      {
+        "description": "Library executable directory",
+        "machine": "any",
+        "name": "libexecdir",
+        "section": "directory",
+        "type": "string",
+        "value": "libexec"
+      },
+      {
+        "description": "Locale data directory",
+        "machine": "any",
+        "name": "localedir",
+        "section": "directory",
+        "type": "string",
+        "value": "share/locale"
+      },
+      {
+        "description": "Localstate data directory",
+        "machine": "any",
+        "name": "localstatedir",
+        "section": "directory",
+        "type": "string",
+        "value": "var"
+      },
+      {
+        "description": "Manual page directory",
+        "machine": "any",
+        "name": "mandir",
+        "section": "directory",
+        "type": "string",
+        "value": "share/man"
+      },
+      {
+        "description": "System executable directory",
+        "machine": "any",
+        "name": "sbindir",
+        "section": "directory",
+        "type": "string",
+        "value": "sbin"
+      },
+      {
+        "description": "Architecture-independent data directory",
+        "machine": "any",
+        "name": "sharedstatedir",
+        "section": "directory",
+        "type": "string",
+        "value": "com"
+      },
+      {
+        "description": "Sysconf data directory",
+        "machine": "any",
+        "name": "sysconfdir",
+        "section": "directory",
+        "type": "string",
+        "value": "etc"
+      },
+      {
+        "description": "Build DXGI",
+        "machine": "any",
+        "name": "enable_dxgi",
+        "section": "user",
+        "type": "boolean",
+        "value": true
+      },
+      {
+        "description": "Build D3D8",
+        "machine": "any",
+        "name": "enable_d3d8",
+        "section": "user",
+        "type": "boolean",
+        "value": true
+      },
+      {
+        "description": "Build D3D9",
+        "machine": "any",
+        "name": "enable_d3d9",
+        "section": "user",
+        "type": "boolean",
+        "value": true
+      },
+      {
+        "description": "Build D3D10",
+        "machine": "any",
+        "name": "enable_d3d10",
+        "section": "user",
+        "type": "boolean",
+        "value": true
+      },
+      {
+        "description": "Build D3D11",
+        "machine": "any",
+        "name": "enable_d3d11",
+        "section": "user",
+        "type": "boolean",
+        "value": true
+      },
+      {
+        "description": "build_id",
+        "machine": "any",
+        "name": "build_id",
+        "section": "user",
+        "type": "boolean",
+        "value": false
+      },
+      {
+        "choices": [
+          "enabled",
+          "disabled",
+          "auto"
+        ],
+        "description": "Enable GLFW WSI for DXVK Native",
+        "machine": "any",
+        "name": "native_glfw",
+        "section": "user",
+        "type": "combo",
+        "value": "auto"
+      },
+      {
+        "choices": [
+          "enabled",
+          "disabled",
+          "auto"
+        ],
+        "description": "Enable SDL2 WSI for DXVK Native",
+        "machine": "any",
+        "name": "native_sdl2",
+        "section": "user",
+        "type": "combo",
+        "value": "auto"
+      },
+      {
+        "choices": [
+          "enabled",
+          "disabled",
+          "auto"
+        ],
+        "description": "Enable SDL3 WSI for DXVK Native",
+        "machine": "any",
+        "name": "native_sdl3",
+        "section": "user",
+        "type": "combo",
+        "value": "auto"
+      },
+      {
+        "description": "Build with Shader Model 3 support",
+        "machine": "any",
+        "name": "dxbc-spirv:enable_sm3",
+        "section": "user",
+        "type": "boolean",
+        "value": true
+      },
+      {
+        "description": "Build with Shader Model 5 support",
+        "machine": "any",
+        "name": "dxbc-spirv:enable_sm5",
+        "section": "user",
+        "type": "boolean",
+        "value": true
+      },
+      {
+        "description": "Build with SPIR-V backend",
+        "machine": "any",
+        "name": "dxbc-spirv:enable_spirv",
+        "section": "user",
+        "type": "boolean",
+        "value": true
+      },
+      {
+        "description": "Build tests",
+        "machine": "any",
+        "name": "dxbc-spirv:enable_tests",
+        "section": "user",
+        "type": "boolean",
+        "value": false
+      },
+      {
+        "description": "Build utility programs",
+        "machine": "any",
+        "name": "dxbc-spirv:enable_tools",
+        "section": "user",
+        "type": "boolean",
+        "value": false
+      },
+      {
+        "description": "Whether to print the logs from failing tests",
+        "machine": "any",
+        "name": "errorlogs",
+        "section": "test",
+        "type": "boolean",
+        "value": true
+      },
+      {
+        "description": "Split stdout and stderr in test logs",
+        "machine": "any",
+        "name": "stdsplit",
+        "section": "test",
+        "type": "boolean",
+        "value": true
+      }
+    ],
+    "meson_options_evidence": {
+      "mode": "0o644",
+      "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/configuration/meson-build-options.json",
+      "sha256": "2e851851ade76a5792db05c21641b09b3e03d994a053a38e0990758417a337bc",
+      "size_bytes": 21213,
+      "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/meson-info/intro-buildoptions.json"
+    },
+    "meson_options_sha256": "2e851851ade76a5792db05c21641b09b3e03d994a053a38e0990758417a337bc",
+    "ninja_execution_log_status": "captured",
+    "ninja_log_evidence": {
+      "mode": "0o644",
+      "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/logs/ninja-log.txt",
+      "sha256": "5c6dab834d301c692b6c12c4f7e924d7c40e3546fce50ca2510b54674d637df3",
+      "size_bytes": 28624,
+      "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/.ninja_log"
+    },
+    "ninja_log_sha256": "5c6dab834d301c692b6c12c4f7e924d7c40e3546fce50ca2510b54674d637df3",
+    "patch_set": {
+      "capture_scope": "artifactization-time snapshot",
+      "patch_set_sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+      "staged_patch_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "submodule_status_sha256": "3e5d79316faafcb0eaf4c0a05fb6f98733ce93c79af92c7ea7b6b0ee21cad56e",
+      "unstaged_patch_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "untracked_files_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "product_tree_manifests": [],
+    "source_identity": {
+      "capture_scope": "artifactization-time snapshot",
+      "content_tree_sha256": "2b441427514b273c1a0b9523aa94befca57c6b9dcb73abcfcb7b3ee5c3b796cf",
+      "file_count": 1245,
+      "git_commit": "8d348236e14a3db25ffbe528a83010b3dd69a3ef",
+      "git_tree": "fdc9bece86eef6c1ed0cfc2bfe0ec85d9b9a99e5",
+      "patch_set_sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+      "path": "/private/tmp/fgmetal-dxvk-macos-audit-20261004",
+      "staged_patch_bytes": 0,
+      "staged_patch_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status_porcelain_v2_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "submodule_status": " 9df86f2341616ef1888ae59919feaa6d4fad693d include/native/directx (heads/main)\n 04f10f650d514df88b76d25e83db360142c7b174 include/spirv (1.5.4.raytracing.fixed-461-g04f10f6)\n 8864cdc896bbc2a9b6eb36b3218fc9ef57908d77 include/vulkan (v1.4.350)\n bf14419e5fa7eacb817b7b632f03cb61d61bbad7 subprojects/dxbc-spirv (remotes/origin/sm3-z-fog-22-gbf14419)\n c8ad050fcb29e42a2f57d9f59e97488f465c436d subprojects/dxbc-spirv/submodules/spirv_headers (1.5.4.raytracing.fixed-435-gc8ad050)\n 275e6459c7ab1ddd4b125f28d0440716e4888078 subprojects/libdisplay-info (heads/windows)\n",
+      "submodule_status_sha256": "3e5d79316faafcb0eaf4c0a05fb6f98733ce93c79af92c7ea7b6b0ee21cad56e",
+      "unstaged_patch_bytes": 0,
+      "unstaged_patch_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "untracked_files": [],
+      "untracked_files_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    }
+  },
+  "build_log_sha256": null,
+  "build_log_status": "no stdout build transcript present; configure log and Ninja execution log retained separately",
+  "build_manifest_id": "4e761353dcbfaaf9b676465d66f35a4d4070cf0b0ef2481971d80fa4c17f580f",
+  "build_type": "release",
+  "canonical_artifact_root": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256",
+  "captured_config_key_sha256": "47e9ed2b82bac318280abd87699a5cf54d1fe93ab7890b206a7dd763b48e2b1a",
+  "compiler_identity": {
+    "build": {
+      "c": {
+        "default_suffix": "c",
+        "exelist": [
+          "cc"
+        ],
+        "file_suffixes": [
+          "c"
+        ],
+        "full_version": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+        "id": "clang",
+        "linker_exelist": [
+          "cc"
+        ],
+        "linker_id": "ld64",
+        "version": "21.0.0"
+      },
+      "cpp": {
+        "default_suffix": "cpp",
+        "exelist": [
+          "c++"
+        ],
+        "file_suffixes": [
+          "cpp",
+          "cppm",
+          "cc",
+          "cp",
+          "cxx",
+          "c++",
+          "hh",
+          "hp",
+          "hpp",
+          "ipp",
+          "hxx",
+          "h++",
+          "ino",
+          "ixx",
+          "CPP",
+          "C",
+          "HPP",
+          "H"
+        ],
+        "full_version": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+        "id": "clang",
+        "linker_exelist": [
+          "c++"
+        ],
+        "linker_id": "ld64",
+        "version": "21.0.0"
+      }
+    },
+    "host": {
+      "c": {
+        "default_suffix": "c",
+        "exelist": [
+          "x86_64-w64-mingw32-gcc"
+        ],
+        "file_suffixes": [
+          "c"
+        ],
+        "full_version": "x86_64-w64-mingw32-gcc (GCC) 16.2.0",
+        "id": "gcc",
+        "linker_exelist": [
+          "x86_64-w64-mingw32-gcc"
+        ],
+        "linker_id": "ld.bfd",
+        "version": "16.2.0"
+      },
+      "cpp": {
+        "default_suffix": "cpp",
+        "exelist": [
+          "x86_64-w64-mingw32-g++"
+        ],
+        "file_suffixes": [
+          "cpp",
+          "cppm",
+          "cc",
+          "cp",
+          "cxx",
+          "c++",
+          "hh",
+          "hp",
+          "hpp",
+          "ipp",
+          "hxx",
+          "h++",
+          "ino",
+          "ixx",
+          "CPP",
+          "C",
+          "HPP",
+          "H"
+        ],
+        "full_version": "x86_64-w64-mingw32-g++ (GCC) 16.2.0",
+        "id": "gcc",
+        "linker_exelist": [
+          "x86_64-w64-mingw32-g++"
+        ],
+        "linker_id": "ld.bfd",
+        "version": "16.2.0"
+      }
+    }
+  },
+  "compiler_identity_sha256": "7f37baa2a8232735a184d8999ba5c4969a5839d588c32affa80fd3bfeab26f12",
+  "compiler_versions": {
+    "build": {
+      "c": "21.0.0",
+      "cpp": "21.0.0"
+    },
+    "host": {
+      "c": "16.2.0",
+      "cpp": "16.2.0"
+    }
+  },
+  "completed_at_unix": 1791335046.856066,
+  "config_key_sha256": "47e9ed2b82bac318280abd87699a5cf54d1fe93ab7890b206a7dd763b48e2b1a",
+  "configuration_key_provenance": "artifactization-time retrospective",
+  "cross_file": {
+    "status": "absent"
+  },
+  "dependency_state": {
+    "intro_dependencies_sha256": "9f632f7d6127c58acfffd039f367db9e15eb8918a5174c127a23aa695de02774",
+    "status": "captured"
+  },
+  "estimated_bytes": 20869120,
+  "evidence_files": [
+    {
+      "mode": "0o600",
+      "path": "logs/meson-log.txt",
+      "sha256": "6a998dfac1ecffda78fef849f82ecb72b9c0ad689b13745a6911d9ac2ee73080",
+      "size_bytes": 49937
+    },
+    {
+      "mode": "0o600",
+      "path": "logs/ninja-log.txt",
+      "sha256": "5c6dab834d301c692b6c12c4f7e924d7c40e3546fce50ca2510b54674d637df3",
+      "size_bytes": 28624
+    },
+    {
+      "mode": "0o600",
+      "path": "generated-shaders/src/dxvk/libdxvk.a.p/dxvk_cursor_frag.h",
+      "sha256": "826997f26cac0d6ed2b4c896a2edba19e53bcc1c4070a96716291edae3e44d31",
+      "size_bytes": 16685
+    },
+    {
+      "mode": "0o600",
+      "path": "generated-shaders/src/dxvk/libdxvk.a.p/dxvk_cursor_vert.h",
+      "sha256": "444e40aca1f41d89929b2819b30eebefa28592c060110a5e06d5d78c7f33ed3e",
+      "size_bytes": 5492
+    },
+    {
+      "mode": "0o600",
+      "path": "generated-shaders/src/dxvk/libdxvk.a.p/dxvk_dummy_frag.h",
+      "sha256": "bbd20630cdbefe605153d2aeb9c10c89e8e2e40a2d6703f9d340780f64386d81",
+      "size_bytes": 574
+    },
+    {
+      "mode": "0o600",
+      "path": "generated-shaders/src/dxvk/libdxvk.a.p/dxvk_mipgen.h",
+      "sha256": "45048be42d49d9ce97033547100732157030fcfe2ceff61b35925217573c6f82",
+      "size_bytes": 192709
+    },
+    {
+      "mode": "0o600",
+      "path": "generated-shaders/src/dxvk/libdxvk.a.p/dxvk_present_frag.h",
+      "sha256": "1134ce36ef0f1b041b54048e6e1ea1f5ac3e9a45fa0c8dc58e1399996ef665cb",
+      "size_bytes": 44103
+    },
+    {
+      "mode": "0o600",
+      "path": "generated-shaders/src/dxvk/libdxvk.a.p/dxvk_present_frag_blit.h",
+      "sha256": "f8bc0da8e8b0ca51fc09f4694d46e9c267a9647df45531900895746d30ee2a92",
+      "size_bytes": 50160
+    },
+    {
+      "mode": "0o600",
+      "path": "generated-shaders/src/dxvk/libdxvk.a.p/dxvk_present_frag_ms.h",
+      "sha256": "1bf6841460aef8ddd6e5650f5583239d36d8baf801ee4193e86bbd784d927003",
+      "size_bytes": 45590
+    },
+    {
+      "mode": "0o600",
+      "path": "generated-shaders/src/dxvk/libdxvk.a.p/dxvk_present_frag_ms_blit.h",
+      "sha256": "773ce5007fa6b84452cb612838ec7faf746e2d8ee4582eb9e109038ca107e637",
+      "size_bytes": 50354
+    },
+    {
+      "mode": "0o600",
+      "path": "generated-shaders/src/dxvk/libdxvk.a.p/dxvk_present_vert.h",
+      "sha256": "85348880cd0b43a23f5d27214b0fef7a4e11960b9f229827d92b05f12697880d",
+      "size_bytes": 3592
+    },
+    {
+      "mode": "0o600",
+      "path": "generated-shaders/src/dxvk/libdxvk.a.p/hud_chunk_frag_background.h",
+      "sha256": "db22744a5b083a8c2e55fd60a5d4ae4f5f617adb1f769b10090dcdc14a138ef2",
+      "size_bytes": 17932
+    },
+    {
+      "mode": "0o600",
+      "path": "generated-shaders/src/dxvk/libdxvk.a.p/hud_chunk_frag_visualize.h",
+      "sha256": "d8adbcadd20457c073ded6e5a26fd5b747292cbf530d7959f0588a22b41585f0",
+      "size_bytes": 26200
+    },
+    {
+      "mode": "0o600",
+      "path": "generated-shaders/src/dxvk/libdxvk.a.p/hud_chunk_vert_background.h",
+      "sha256": "4c38c6e40af75d0743073b61f64328d87011124c6193fac5322ca0d482eb7e33",
+      "size_bytes": 10833
+    },
+    {
+      "mode": "0o600",
+      "path": "generated-shaders/src/dxvk/libdxvk.a.p/hud_chunk_vert_visualize.h",
+      "sha256": "706654091014b5f834257dfb9fcbac3603c8be3d451c35bfabcc647704c88078",
+      "size_bytes": 12125
+    },
+    {
+      "mode": "0o600",
+      "path": "generated-shaders/src/dxvk/libdxvk.a.p/hud_frame_time_eval.h",
+      "sha256": "7d494d8f176cf7a59fe4763c38b08dc3ef03e93fe858c7c39450c5f84ca1ea1e",
+      "size_bytes": 29885
+    },
+    {
+      "mode": "0o600",
+      "path": "generated-shaders/src/dxvk/libdxvk.a.p/hud_graph_frag.h",
+      "sha256": "04ad79259a675badb33120375165c86cc6b1e146a112bb5c2f6a1c3f8e6d6485",
+      "size_bytes": 28844
+    },
+    {
+      "mode": "0o600",
+      "path": "generated-shaders/src/dxvk/libdxvk.a.p/hud_graph_vert.h",
+      "sha256": "bab40cc859f1451fbffe900ea7f0f9589df3104016030002179c8b589bf2930a",
+      "size_bytes": 9033
+    },
+    {
+      "mode": "0o600",
+      "path": "generated-shaders/src/dxvk/libdxvk.a.p/hud_text_frag.h",
+      "sha256": "a1b91b7cf157e11791b400257f41fab2e5e66b6e29f2ff73f2fbe513b39aa801",
+      "size_bytes": 21204
+    },
+    {
+      "mode": "0o600",
+      "path": "generated-shaders/src/dxvk/libdxvk.a.p/hud_text_vert.h",
+      "sha256": "5b0d8398397e5b591d5986b62662cdb5affd1e662ff4953231fce9079a31fc93",
+      "size_bytes": 17650
+    },
+    {
+      "mode": "0o600",
+      "path": "generated-shaders/src/d3d9/d3d9.dll.p/d3d9_convert_a2w10v10u10.h",
+      "sha256": "6ce0378e7f4dfe6c3ae427202d92cdc6831e220cfc0a9b150c2fed61bbf1420e",
+      "size_bytes": 11620
+    },
+    {
+      "mode": "0o600",
+      "path": "generated-shaders/src/d3d9/d3d9.dll.p/d3d9_convert_l6v5u5.h",
+      "sha256": "f1103de7b20fe861633795ff2f2232e6a75c4ae1d3136558b61ba29f25789d81",
+      "size_bytes": 10939
+    },
+    {
+      "mode": "0o600",
+      "path": "generated-shaders/src/d3d9/d3d9.dll.p/d3d9_convert_nv12.h",
+      "sha256": "90c02a987f845574d06bf0d9b70aa62a9013549aa680bd7c50e4448d8dd668f1",
+      "size_bytes": 14943
+    },
+    {
+      "mode": "0o600",
+      "path": "generated-shaders/src/d3d9/d3d9.dll.p/d3d9_convert_w11v11u10.h",
+      "sha256": "5b7645ca83dad04d663238bcc5d350ebb002e81f39d0211c3131633f5e463cbb",
+      "size_bytes": 10064
+    },
+    {
+      "mode": "0o600",
+      "path": "generated-shaders/src/d3d9/d3d9.dll.p/d3d9_convert_x8l8v8u8.h",
+      "sha256": "9efaab55074dc3b9ba31325a911ba6079bf6b92d752dedfbb531c63f6dd72b49",
+      "size_bytes": 10897
+    },
+    {
+      "mode": "0o600",
+      "path": "generated-shaders/src/d3d9/d3d9.dll.p/d3d9_convert_yuy2_uyvy.h",
+      "sha256": "8a4c244a5c76fe4dcbdc2528da9e7cf4e08e5f3037f946f4d3a03b6b205fef38",
+      "size_bytes": 12213
+    },
+    {
+      "mode": "0o600",
+      "path": "generated-shaders/src/d3d9/d3d9.dll.p/d3d9_convert_yv12.h",
+      "sha256": "cb21d80d7b8c0c533cee9a26978c19f3a845f2018ad9140a825c46c9239a9853",
+      "size_bytes": 12513
+    },
+    {
+      "mode": "0o600",
+      "path": "generated-shaders/src/d3d9/d3d9.dll.p/d3d9_fixed_function_frag.h",
+      "sha256": "54b982c3d54a13e6e1b27499b6f06a34f619d1ad35ca03799eb490e9a1233bff",
+      "size_bytes": 105771
+    },
+    {
+      "mode": "0o600",
+      "path": "generated-shaders/src/d3d9/d3d9.dll.p/d3d9_fixed_function_frag_sample.h",
+      "sha256": "be3146f39bf5730d75729563c2e28af2f55fd78106cf83a2e5c3ce418892ee45",
+      "size_bytes": 106206
+    },
+    {
+      "mode": "0o600",
+      "path": "generated-shaders/src/d3d9/d3d9.dll.p/d3d9_fixed_function_vert.h",
+      "sha256": "66d3e4efd10057416a763e402f1ab58b9580f1f771ae628323a1eb7a929a97da",
+      "size_bytes": 122162
+    },
+    {
+      "mode": "0o600",
+      "path": "generated-shaders/src/d3d11/d3d11.dll.p/d3d11_composition_frag.h",
+      "sha256": "856c04195264562b49e0fb099d2c49ea7c4ce0eeb80f73fe478c7462e819ce97",
+      "size_bytes": 1942
+    },
+    {
+      "mode": "0o600",
+      "path": "generated-shaders/src/d3d11/d3d11.dll.p/d3d11_composition_vert.h",
+      "sha256": "7f27a67773cfcc8f2698d00aac76a178d808000599c17fcda06e8b133ddcbf96",
+      "size_bytes": 6060
+    },
+    {
+      "mode": "0o600",
+      "path": "generated-shaders/src/d3d11/d3d11.dll.p/d3d11_video_blit_frag.h",
+      "sha256": "d8a5a8e9e8b3dc87630b6f8056e25515dc4462f85f35e1e0d94a727165431692",
+      "size_bytes": 19717
+    },
+    {
+      "mode": "0o600",
+      "path": "generated-shaders/src/d3d11/d3d11.dll.p/d3d11_video_blit_vert.h",
+      "sha256": "f45874b44614979e01e7d89393d66d3f2353e19c7c40ad5a45dd3e0662aa24f2",
+      "size_bytes": 3607
+    },
+    {
+      "mode": "0o600",
+      "path": "configuration/build.ninja",
+      "sha256": "69d5c36ccd17bc8c2ade721a69863551df06df383a4678d87adf7dc69ffcdeab",
+      "size_bytes": 456950
+    },
+    {
+      "mode": "0o600",
+      "path": "configuration/meson-build-options.json",
+      "sha256": "2e851851ade76a5792db05c21641b09b3e03d994a053a38e0990758417a337bc",
+      "size_bytes": 21213
+    },
+    {
+      "mode": "0o600",
+      "path": "configuration/meson-cmd-line.txt",
+      "sha256": "90136fc2ebb3b1e3235069145dc0732ef2857499f7f0e3efb0c490dd2425584d",
+      "size_bytes": 175
+    },
+    {
+      "mode": "0o600",
+      "path": "configuration/meson-compilers.json",
+      "sha256": "7f37baa2a8232735a184d8999ba5c4969a5839d588c32affa80fd3bfeab26f12",
+      "size_bytes": 1915
+    },
+    {
+      "mode": "0o600",
+      "path": "configuration/meson-intro-buildsystem_files.json",
+      "sha256": "5012691a9dba42f270432d9571c88733c788e950ca1fdb394940c3cd3c52eae7",
+      "size_bytes": 1276
+    },
+    {
+      "mode": "0o600",
+      "path": "configuration/meson-intro-dependencies.json",
+      "sha256": "9f632f7d6127c58acfffd039f367db9e15eb8918a5174c127a23aa695de02774",
+      "size_bytes": 337
+    },
+    {
+      "mode": "0o600",
+      "path": "configuration/meson-intro-targets.json",
+      "sha256": "6f1e685886bc128a40d4cc81b4d38f68bb9f1c9a20fa084bc30aaef8467dc536",
+      "size_bytes": 58211
+    },
+    {
+      "mode": "0o600",
+      "path": "configuration/meson-intro-tests.json",
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "size_bytes": 2
+    }
+  ],
+  "evidence_index_sha256": "1aa0437cf250a8449ad33dbf447d6d3dac1b94ad9078771cb36b87e532558173",
+  "evidence_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence",
+  "generated_shader_identity": [
+    {
+      "build_relative_path": "src/d3d11/d3d11.dll.p/d3d11_composition_frag.h",
+      "mode": "0o644",
+      "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/generated-shaders/src/d3d11/d3d11.dll.p/d3d11_composition_frag.h",
+      "sha256": "856c04195264562b49e0fb099d2c49ea7c4ce0eeb80f73fe478c7462e819ce97",
+      "size_bytes": 1942,
+      "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/d3d11/d3d11.dll.p/d3d11_composition_frag.h"
+    },
+    {
+      "build_relative_path": "src/d3d11/d3d11.dll.p/d3d11_composition_vert.h",
+      "mode": "0o644",
+      "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/generated-shaders/src/d3d11/d3d11.dll.p/d3d11_composition_vert.h",
+      "sha256": "7f27a67773cfcc8f2698d00aac76a178d808000599c17fcda06e8b133ddcbf96",
+      "size_bytes": 6060,
+      "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/d3d11/d3d11.dll.p/d3d11_composition_vert.h"
+    },
+    {
+      "build_relative_path": "src/d3d11/d3d11.dll.p/d3d11_video_blit_frag.h",
+      "mode": "0o644",
+      "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/generated-shaders/src/d3d11/d3d11.dll.p/d3d11_video_blit_frag.h",
+      "sha256": "d8a5a8e9e8b3dc87630b6f8056e25515dc4462f85f35e1e0d94a727165431692",
+      "size_bytes": 19717,
+      "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/d3d11/d3d11.dll.p/d3d11_video_blit_frag.h"
+    },
+    {
+      "build_relative_path": "src/d3d11/d3d11.dll.p/d3d11_video_blit_vert.h",
+      "mode": "0o644",
+      "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/generated-shaders/src/d3d11/d3d11.dll.p/d3d11_video_blit_vert.h",
+      "sha256": "f45874b44614979e01e7d89393d66d3f2353e19c7c40ad5a45dd3e0662aa24f2",
+      "size_bytes": 3607,
+      "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/d3d11/d3d11.dll.p/d3d11_video_blit_vert.h"
+    },
+    {
+      "build_relative_path": "src/dxvk/libdxvk.a.p/dxvk_cursor_frag.h",
+      "mode": "0o644",
+      "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/generated-shaders/src/dxvk/libdxvk.a.p/dxvk_cursor_frag.h",
+      "sha256": "826997f26cac0d6ed2b4c896a2edba19e53bcc1c4070a96716291edae3e44d31",
+      "size_bytes": 16685,
+      "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/dxvk/libdxvk.a.p/dxvk_cursor_frag.h"
+    },
+    {
+      "build_relative_path": "src/dxvk/libdxvk.a.p/dxvk_cursor_vert.h",
+      "mode": "0o644",
+      "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/generated-shaders/src/dxvk/libdxvk.a.p/dxvk_cursor_vert.h",
+      "sha256": "444e40aca1f41d89929b2819b30eebefa28592c060110a5e06d5d78c7f33ed3e",
+      "size_bytes": 5492,
+      "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/dxvk/libdxvk.a.p/dxvk_cursor_vert.h"
+    },
+    {
+      "build_relative_path": "src/dxvk/libdxvk.a.p/dxvk_dummy_frag.h",
+      "mode": "0o644",
+      "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/generated-shaders/src/dxvk/libdxvk.a.p/dxvk_dummy_frag.h",
+      "sha256": "bbd20630cdbefe605153d2aeb9c10c89e8e2e40a2d6703f9d340780f64386d81",
+      "size_bytes": 574,
+      "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/dxvk/libdxvk.a.p/dxvk_dummy_frag.h"
+    },
+    {
+      "build_relative_path": "src/dxvk/libdxvk.a.p/dxvk_mipgen.h",
+      "mode": "0o644",
+      "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/generated-shaders/src/dxvk/libdxvk.a.p/dxvk_mipgen.h",
+      "sha256": "45048be42d49d9ce97033547100732157030fcfe2ceff61b35925217573c6f82",
+      "size_bytes": 192709,
+      "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/dxvk/libdxvk.a.p/dxvk_mipgen.h"
+    },
+    {
+      "build_relative_path": "src/dxvk/libdxvk.a.p/dxvk_present_frag.h",
+      "mode": "0o644",
+      "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/generated-shaders/src/dxvk/libdxvk.a.p/dxvk_present_frag.h",
+      "sha256": "1134ce36ef0f1b041b54048e6e1ea1f5ac3e9a45fa0c8dc58e1399996ef665cb",
+      "size_bytes": 44103,
+      "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/dxvk/libdxvk.a.p/dxvk_present_frag.h"
+    },
+    {
+      "build_relative_path": "src/dxvk/libdxvk.a.p/dxvk_present_frag_blit.h",
+      "mode": "0o644",
+      "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/generated-shaders/src/dxvk/libdxvk.a.p/dxvk_present_frag_blit.h",
+      "sha256": "f8bc0da8e8b0ca51fc09f4694d46e9c267a9647df45531900895746d30ee2a92",
+      "size_bytes": 50160,
+      "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/dxvk/libdxvk.a.p/dxvk_present_frag_blit.h"
+    },
+    {
+      "build_relative_path": "src/dxvk/libdxvk.a.p/dxvk_present_frag_ms.h",
+      "mode": "0o644",
+      "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/generated-shaders/src/dxvk/libdxvk.a.p/dxvk_present_frag_ms.h",
+      "sha256": "1bf6841460aef8ddd6e5650f5583239d36d8baf801ee4193e86bbd784d927003",
+      "size_bytes": 45590,
+      "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/dxvk/libdxvk.a.p/dxvk_present_frag_ms.h"
+    },
+    {
+      "build_relative_path": "src/dxvk/libdxvk.a.p/dxvk_present_frag_ms_blit.h",
+      "mode": "0o644",
+      "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/generated-shaders/src/dxvk/libdxvk.a.p/dxvk_present_frag_ms_blit.h",
+      "sha256": "773ce5007fa6b84452cb612838ec7faf746e2d8ee4582eb9e109038ca107e637",
+      "size_bytes": 50354,
+      "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/dxvk/libdxvk.a.p/dxvk_present_frag_ms_blit.h"
+    },
+    {
+      "build_relative_path": "src/dxvk/libdxvk.a.p/dxvk_present_vert.h",
+      "mode": "0o644",
+      "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/generated-shaders/src/dxvk/libdxvk.a.p/dxvk_present_vert.h",
+      "sha256": "85348880cd0b43a23f5d27214b0fef7a4e11960b9f229827d92b05f12697880d",
+      "size_bytes": 3592,
+      "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/dxvk/libdxvk.a.p/dxvk_present_vert.h"
+    },
+    {
+      "build_relative_path": "src/dxvk/libdxvk.a.p/hud_chunk_frag_background.h",
+      "mode": "0o644",
+      "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/generated-shaders/src/dxvk/libdxvk.a.p/hud_chunk_frag_background.h",
+      "sha256": "db22744a5b083a8c2e55fd60a5d4ae4f5f617adb1f769b10090dcdc14a138ef2",
+      "size_bytes": 17932,
+      "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/dxvk/libdxvk.a.p/hud_chunk_frag_background.h"
+    },
+    {
+      "build_relative_path": "src/dxvk/libdxvk.a.p/hud_chunk_frag_visualize.h",
+      "mode": "0o644",
+      "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/generated-shaders/src/dxvk/libdxvk.a.p/hud_chunk_frag_visualize.h",
+      "sha256": "d8adbcadd20457c073ded6e5a26fd5b747292cbf530d7959f0588a22b41585f0",
+      "size_bytes": 26200,
+      "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/dxvk/libdxvk.a.p/hud_chunk_frag_visualize.h"
+    },
+    {
+      "build_relative_path": "src/dxvk/libdxvk.a.p/hud_chunk_vert_background.h",
+      "mode": "0o644",
+      "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/generated-shaders/src/dxvk/libdxvk.a.p/hud_chunk_vert_background.h",
+      "sha256": "4c38c6e40af75d0743073b61f64328d87011124c6193fac5322ca0d482eb7e33",
+      "size_bytes": 10833,
+      "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/dxvk/libdxvk.a.p/hud_chunk_vert_background.h"
+    },
+    {
+      "build_relative_path": "src/dxvk/libdxvk.a.p/hud_chunk_vert_visualize.h",
+      "mode": "0o644",
+      "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/generated-shaders/src/dxvk/libdxvk.a.p/hud_chunk_vert_visualize.h",
+      "sha256": "706654091014b5f834257dfb9fcbac3603c8be3d451c35bfabcc647704c88078",
+      "size_bytes": 12125,
+      "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/dxvk/libdxvk.a.p/hud_chunk_vert_visualize.h"
+    },
+    {
+      "build_relative_path": "src/dxvk/libdxvk.a.p/hud_frame_time_eval.h",
+      "mode": "0o644",
+      "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/generated-shaders/src/dxvk/libdxvk.a.p/hud_frame_time_eval.h",
+      "sha256": "7d494d8f176cf7a59fe4763c38b08dc3ef03e93fe858c7c39450c5f84ca1ea1e",
+      "size_bytes": 29885,
+      "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/dxvk/libdxvk.a.p/hud_frame_time_eval.h"
+    },
+    {
+      "build_relative_path": "src/dxvk/libdxvk.a.p/hud_graph_frag.h",
+      "mode": "0o644",
+      "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/generated-shaders/src/dxvk/libdxvk.a.p/hud_graph_frag.h",
+      "sha256": "04ad79259a675badb33120375165c86cc6b1e146a112bb5c2f6a1c3f8e6d6485",
+      "size_bytes": 28844,
+      "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/dxvk/libdxvk.a.p/hud_graph_frag.h"
+    },
+    {
+      "build_relative_path": "src/dxvk/libdxvk.a.p/hud_graph_vert.h",
+      "mode": "0o644",
+      "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/generated-shaders/src/dxvk/libdxvk.a.p/hud_graph_vert.h",
+      "sha256": "bab40cc859f1451fbffe900ea7f0f9589df3104016030002179c8b589bf2930a",
+      "size_bytes": 9033,
+      "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/dxvk/libdxvk.a.p/hud_graph_vert.h"
+    },
+    {
+      "build_relative_path": "src/dxvk/libdxvk.a.p/hud_text_frag.h",
+      "mode": "0o644",
+      "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/generated-shaders/src/dxvk/libdxvk.a.p/hud_text_frag.h",
+      "sha256": "a1b91b7cf157e11791b400257f41fab2e5e66b6e29f2ff73f2fbe513b39aa801",
+      "size_bytes": 21204,
+      "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/dxvk/libdxvk.a.p/hud_text_frag.h"
+    },
+    {
+      "build_relative_path": "src/dxvk/libdxvk.a.p/hud_text_vert.h",
+      "mode": "0o644",
+      "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/generated-shaders/src/dxvk/libdxvk.a.p/hud_text_vert.h",
+      "sha256": "5b0d8398397e5b591d5986b62662cdb5affd1e662ff4953231fce9079a31fc93",
+      "size_bytes": 17650,
+      "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/dxvk/libdxvk.a.p/hud_text_vert.h"
+    },
+    {
+      "build_relative_path": "src/d3d9/d3d9.dll.p/d3d9_convert_a2w10v10u10.h",
+      "mode": "0o644",
+      "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/generated-shaders/src/d3d9/d3d9.dll.p/d3d9_convert_a2w10v10u10.h",
+      "sha256": "6ce0378e7f4dfe6c3ae427202d92cdc6831e220cfc0a9b150c2fed61bbf1420e",
+      "size_bytes": 11620,
+      "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/d3d9/d3d9.dll.p/d3d9_convert_a2w10v10u10.h"
+    },
+    {
+      "build_relative_path": "src/d3d9/d3d9.dll.p/d3d9_convert_l6v5u5.h",
+      "mode": "0o644",
+      "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/generated-shaders/src/d3d9/d3d9.dll.p/d3d9_convert_l6v5u5.h",
+      "sha256": "f1103de7b20fe861633795ff2f2232e6a75c4ae1d3136558b61ba29f25789d81",
+      "size_bytes": 10939,
+      "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/d3d9/d3d9.dll.p/d3d9_convert_l6v5u5.h"
+    },
+    {
+      "build_relative_path": "src/d3d9/d3d9.dll.p/d3d9_convert_nv12.h",
+      "mode": "0o644",
+      "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/generated-shaders/src/d3d9/d3d9.dll.p/d3d9_convert_nv12.h",
+      "sha256": "90c02a987f845574d06bf0d9b70aa62a9013549aa680bd7c50e4448d8dd668f1",
+      "size_bytes": 14943,
+      "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/d3d9/d3d9.dll.p/d3d9_convert_nv12.h"
+    },
+    {
+      "build_relative_path": "src/d3d9/d3d9.dll.p/d3d9_convert_w11v11u10.h",
+      "mode": "0o644",
+      "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/generated-shaders/src/d3d9/d3d9.dll.p/d3d9_convert_w11v11u10.h",
+      "sha256": "5b7645ca83dad04d663238bcc5d350ebb002e81f39d0211c3131633f5e463cbb",
+      "size_bytes": 10064,
+      "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/d3d9/d3d9.dll.p/d3d9_convert_w11v11u10.h"
+    },
+    {
+      "build_relative_path": "src/d3d9/d3d9.dll.p/d3d9_convert_x8l8v8u8.h",
+      "mode": "0o644",
+      "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/generated-shaders/src/d3d9/d3d9.dll.p/d3d9_convert_x8l8v8u8.h",
+      "sha256": "9efaab55074dc3b9ba31325a911ba6079bf6b92d752dedfbb531c63f6dd72b49",
+      "size_bytes": 10897,
+      "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/d3d9/d3d9.dll.p/d3d9_convert_x8l8v8u8.h"
+    },
+    {
+      "build_relative_path": "src/d3d9/d3d9.dll.p/d3d9_convert_yuy2_uyvy.h",
+      "mode": "0o644",
+      "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/generated-shaders/src/d3d9/d3d9.dll.p/d3d9_convert_yuy2_uyvy.h",
+      "sha256": "8a4c244a5c76fe4dcbdc2528da9e7cf4e08e5f3037f946f4d3a03b6b205fef38",
+      "size_bytes": 12213,
+      "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/d3d9/d3d9.dll.p/d3d9_convert_yuy2_uyvy.h"
+    },
+    {
+      "build_relative_path": "src/d3d9/d3d9.dll.p/d3d9_convert_yv12.h",
+      "mode": "0o644",
+      "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/generated-shaders/src/d3d9/d3d9.dll.p/d3d9_convert_yv12.h",
+      "sha256": "cb21d80d7b8c0c533cee9a26978c19f3a845f2018ad9140a825c46c9239a9853",
+      "size_bytes": 12513,
+      "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/d3d9/d3d9.dll.p/d3d9_convert_yv12.h"
+    },
+    {
+      "build_relative_path": "src/d3d9/d3d9.dll.p/d3d9_fixed_function_frag.h",
+      "mode": "0o644",
+      "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/generated-shaders/src/d3d9/d3d9.dll.p/d3d9_fixed_function_frag.h",
+      "sha256": "54b982c3d54a13e6e1b27499b6f06a34f619d1ad35ca03799eb490e9a1233bff",
+      "size_bytes": 105771,
+      "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/d3d9/d3d9.dll.p/d3d9_fixed_function_frag.h"
+    },
+    {
+      "build_relative_path": "src/d3d9/d3d9.dll.p/d3d9_fixed_function_frag_sample.h",
+      "mode": "0o644",
+      "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/generated-shaders/src/d3d9/d3d9.dll.p/d3d9_fixed_function_frag_sample.h",
+      "sha256": "be3146f39bf5730d75729563c2e28af2f55fd78106cf83a2e5c3ce418892ee45",
+      "size_bytes": 106206,
+      "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/d3d9/d3d9.dll.p/d3d9_fixed_function_frag_sample.h"
+    },
+    {
+      "build_relative_path": "src/d3d9/d3d9.dll.p/d3d9_fixed_function_vert.h",
+      "mode": "0o644",
+      "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348.evidence/generated-shaders/src/d3d9/d3d9.dll.p/d3d9_fixed_function_vert.h",
+      "sha256": "66d3e4efd10057416a763e402f1ab58b9580f1f771ae628323a1eb7a929a97da",
+      "size_bytes": 122162,
+      "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-dxvk-macos-build-unmodified-b1351348/src/d3d9/d3d9.dll.p/d3d9_fixed_function_vert.h"
+    }
+  ],
+  "kind": "dxvk",
+  "linker_identity": [
+    "-----------",
+    "`c++ -Wl,--version` -> 1",
+    "`c++ -Wl,-v` -> 1",
+    "`cc -Wl,--version` -> 1",
+    "`cc -Wl,-v` -> 1",
+    "`x86_64-w64-mingw32-g++ -Wl,--version` -> 0",
+    "`x86_64-w64-mingw32-gcc -Wl,--version` -> 0",
+    "c++ ld64 27037.1",
+    "cc ld64 27037.1",
+    "x86_64-w64-mingw32-g++ ld.bfd 2.47.20260726",
+    "x86_64-w64-mingw32-gcc ld.bfd 2.47.20260726"
+  ],
+  "manifest_sha256": "3d9c8f0cd10c11d3a0236c09cf2bd6fbf6dc7a2349cbbc9127b338ea8ca7d953",
+  "meson_configuration_sha256": "d01759a3bb6706bafe9a4da3da898a6af9003f42951161b3ca5a556a171bbba4",
+  "meson_options": [
+    {
+      "choices": [
+        "enabled",
+        "disabled",
+        "auto"
+      ],
+      "description": "Override value of all 'auto' features",
+      "machine": "any",
+      "name": "auto_features",
+      "section": "core",
+      "type": "combo",
+      "value": "auto"
+    },
+    {
+      "choices": [
+        "ninja",
+        "vs",
+        "vs2010",
+        "vs2012",
+        "vs2013",
+        "vs2015",
+        "vs2017",
+        "vs2019",
+        "vs2022",
+        "vs2026",
+        "xcode",
+        "none"
+      ],
+      "description": "Backend to use",
+      "machine": "any",
+      "name": "backend",
+      "section": "core",
+      "type": "combo",
+      "value": "ninja"
+    },
+    {
+      "choices": [
+        "vs2022",
+        "vs2026"
+      ],
+      "description": "Setup multiple buildtype-suffixed ninja-backend build directories, and a [builddir]_vs containing a Visual Studio meta-backend with multiple configurations that calls into them",
+      "machine": "any",
+      "name": "genvslite",
+      "section": "core",
+      "type": "combo",
+      "value": "vs2022"
+    },
+    {
+      "choices": [
+        "plain",
+        "debug",
+        "debugoptimized",
+        "release",
+        "minsize",
+        "custom"
+      ],
+      "description": "Build type to use",
+      "machine": "any",
+      "name": "buildtype",
+      "section": "core",
+      "type": "combo",
+      "value": "release"
+    },
+    {
+      "description": "Enable debug symbols and other information",
+      "machine": "any",
+      "name": "debug",
+      "section": "core",
+      "type": "boolean",
+      "value": false
+    },
+    {
+      "choices": [
+        "shared",
+        "static",
+        "both"
+      ],
+      "description": "Default library type",
+      "machine": "any",
+      "name": "default_library",
+      "section": "core",
+      "type": "combo",
+      "value": "shared"
+    },
+    {
+      "choices": [
+        "shared",
+        "static",
+        "auto"
+      ],
+      "description": "Default library type for both_libraries",
+      "machine": "any",
+      "name": "default_both_libraries",
+      "section": "core",
+      "type": "combo",
+      "value": "shared"
+    },
+    {
+      "description": "Default umask to apply on permissions of installed files",
+      "machine": "any",
+      "name": "install_umask",
+      "section": "core",
+      "type": "integer",
+      "value": 18
+    },
+    {
+      "choices": [
+        "mirror",
+        "flat"
+      ],
+      "description": "Build directory layout",
+      "machine": "any",
+      "name": "layout",
+      "section": "core",
+      "type": "combo",
+      "value": "mirror"
+    },
+    {
+      "choices": [
+        "plain",
+        "0",
+        "g",
+        "1",
+        "2",
+        "3",
+        "s"
+      ],
+      "description": "Optimization level",
+      "machine": "any",
+      "name": "optimization",
+      "section": "core",
+      "type": "combo",
+      "value": "3"
+    },
+    {
+      "description": "Whether to try static linking before shared linking",
+      "machine": "any",
+      "name": "prefer_static",
+      "section": "core",
+      "type": "boolean",
+      "value": false
+    },
+    {
+      "description": "Strip targets on install",
+      "machine": "any",
+      "name": "strip",
+      "section": "core",
+      "type": "boolean",
+      "value": false
+    },
+    {
+      "choices": [
+        "on",
+        "off",
+        "subprojects"
+      ],
+      "description": "Unity build",
+      "machine": "any",
+      "name": "unity",
+      "section": "core",
+      "type": "combo",
+      "value": "off"
+    },
+    {
+      "description": "Unity block size",
+      "machine": "any",
+      "name": "unity_size",
+      "section": "core",
+      "type": "integer",
+      "value": 4
+    },
+    {
+      "choices": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "everything"
+      ],
+      "description": "Compiler warning level to use",
+      "machine": "any",
+      "name": "warning_level",
+      "section": "core",
+      "type": "combo",
+      "value": "2"
+    },
+    {
+      "description": "Treat warnings as errors",
+      "machine": "any",
+      "name": "werror",
+      "section": "core",
+      "type": "boolean",
+      "value": false
+    },
+    {
+      "choices": [
+        "default",
+        "nofallback",
+        "nodownload",
+        "forcefallback",
+        "nopromote"
+      ],
+      "description": "Wrap mode",
+      "machine": "any",
+      "name": "wrap_mode",
+      "section": "core",
+      "type": "combo",
+      "value": "default"
+    },
+    {
+      "description": "Force fallback for those subprojects",
+      "machine": "any",
+      "name": "force_fallback_for",
+      "section": "core",
+      "type": "array",
+      "value": []
+    },
+    {
+      "description": "Activate Visual Studio environment",
+      "machine": "any",
+      "name": "vsenv",
+      "section": "core",
+      "type": "boolean",
+      "value": false
+    },
+    {
+      "description": "Use OMF format on OS/2",
+      "machine": "any",
+      "name": "os2_emxomf",
+      "section": "core",
+      "type": "boolean",
+      "value": false
+    },
+    {
+      "description": "Generate pkgconfig files as relocatable",
+      "machine": "any",
+      "name": "pkgconfig.relocatable",
+      "section": "core",
+      "type": "boolean",
+      "value": false
+    },
+    {
+      "description": "Whether to compile bytecode",
+      "machine": "any",
+      "name": "python.bytecompile",
+      "section": "core",
+      "type": "integer",
+      "value": 0
+    },
+    {
+      "choices": [
+        "auto",
+        "prefix",
+        "system",
+        "venv"
+      ],
+      "description": "Which python environment to install to",
+      "machine": "any",
+      "name": "python.install_env",
+      "section": "core",
+      "type": "combo",
+      "value": "prefix"
+    },
+    {
+      "description": "Directory for site-specific, platform-specific files.",
+      "machine": "any",
+      "name": "python.platlibdir",
+      "section": "core",
+      "type": "string",
+      "value": ""
+    },
+    {
+      "description": "Directory for site-specific, non-platform-specific files.",
+      "machine": "any",
+      "name": "python.purelibdir",
+      "section": "core",
+      "type": "string",
+      "value": ""
+    },
+    {
+      "description": "Whether to allow use of the Python Limited API",
+      "machine": "any",
+      "name": "python.allow_limited_api",
+      "section": "core",
+      "type": "boolean",
+      "value": true
+    },
+    {
+      "description": "Config file containing the build details for the target Python installation.",
+      "machine": "any",
+      "name": "python.build_config",
+      "section": "core",
+      "type": "string",
+      "value": ""
+    },
+    {
+      "description": "List of additional paths for pkg-config to search",
+      "machine": "build",
+      "name": "build.pkg_config_path",
+      "section": "core",
+      "type": "array",
+      "value": []
+    },
+    {
+      "description": "List of additional prefixes for cmake to search",
+      "machine": "build",
+      "name": "build.cmake_prefix_path",
+      "section": "core",
+      "type": "array",
+      "value": []
+    },
+    {
+      "description": "List of additional paths for pkg-config to search",
+      "machine": "host",
+      "name": "pkg_config_path",
+      "section": "core",
+      "type": "array",
+      "value": []
+    },
+    {
+      "description": "List of additional prefixes for cmake to search",
+      "machine": "host",
+      "name": "cmake_prefix_path",
+      "section": "core",
+      "type": "array",
+      "value": []
+    },
+    {
+      "description": "Maximum number of linker processes to run or 0 for no limit",
+      "machine": "any",
+      "name": "backend_max_links",
+      "section": "backend",
+      "type": "integer",
+      "value": 0
+    },
+    {
+      "description": "Use precompiled headers",
+      "machine": "any",
+      "name": "b_pch",
+      "section": "base",
+      "type": "boolean",
+      "value": true
+    },
+    {
+      "description": "Use link time optimization",
+      "machine": "any",
+      "name": "b_lto",
+      "section": "base",
+      "type": "boolean",
+      "value": false
+    },
+    {
+      "choices": [
+        "off",
+        "generate",
+        "use"
+      ],
+      "description": "Use profile guided optimization",
+      "machine": "any",
+      "name": "b_pgo",
+      "section": "base",
+      "type": "combo",
+      "value": "off"
+    },
+    {
+      "description": "Build executables as position independent",
+      "machine": "any",
+      "name": "b_pie",
+      "section": "base",
+      "type": "boolean",
+      "value": false
+    },
+    {
+      "description": "Use LLVM ThinLTO caching for faster incremental builds",
+      "machine": "any",
+      "name": "b_thinlto_cache",
+      "section": "base",
+      "type": "boolean",
+      "value": false
+    },
+    {
+      "description": "Build static libraries as position independent",
+      "machine": "any",
+      "name": "b_staticpic",
+      "section": "base",
+      "type": "boolean",
+      "value": true
+    },
+    {
+      "description": "Code sanitizer to use",
+      "machine": "any",
+      "name": "b_sanitize",
+      "section": "base",
+      "type": "array",
+      "value": []
+    },
+    {
+      "choices": [
+        "true",
+        "false",
+        "if-release"
+      ],
+      "description": "Disable asserts",
+      "machine": "any",
+      "name": "b_ndebug",
+      "section": "base",
+      "type": "combo",
+      "value": "false"
+    },
+    {
+      "description": "Directory to store ThinLTO cache objects",
+      "machine": "any",
+      "name": "b_thinlto_cache_dir",
+      "section": "base",
+      "type": "string",
+      "value": ""
+    },
+    {
+      "description": "Enable coverage tracking.",
+      "machine": "any",
+      "name": "b_coverage",
+      "section": "base",
+      "type": "boolean",
+      "value": false
+    },
+    {
+      "description": "Use multiple threads for Link Time Optimization",
+      "machine": "any",
+      "name": "b_lto_threads",
+      "section": "base",
+      "type": "integer",
+      "value": 0
+    },
+    {
+      "choices": [
+        "auto",
+        "always",
+        "never"
+      ],
+      "description": "Use colored output",
+      "machine": "any",
+      "name": "b_colorout",
+      "section": "base",
+      "type": "combo",
+      "value": "always"
+    },
+    {
+      "choices": [
+        "default",
+        "thin"
+      ],
+      "description": "Select between different LTO modes.",
+      "machine": "any",
+      "name": "b_lto_mode",
+      "section": "base",
+      "type": "combo",
+      "value": "default"
+    },
+    {
+      "description": "Use -Wl,--as-needed when linking",
+      "machine": "any",
+      "name": "b_asneeded",
+      "section": "base",
+      "type": "boolean",
+      "value": true
+    },
+    {
+      "description": "Use -Wl,--no-undefined when linking",
+      "machine": "any",
+      "name": "b_lundef",
+      "section": "base",
+      "type": "boolean",
+      "value": true
+    },
+    {
+      "description": "Generate and embed bitcode (only macOS/iOS/tvOS)",
+      "machine": "any",
+      "name": "b_bitcode",
+      "section": "base",
+      "type": "boolean",
+      "value": false
+    },
+    {
+      "description": "Extra arguments passed to the c compiler",
+      "machine": "build",
+      "name": "build.c_args",
+      "section": "compiler",
+      "type": "array",
+      "value": []
+    },
+    {
+      "description": "Extra arguments passed to the c linker",
+      "machine": "build",
+      "name": "build.c_link_args",
+      "section": "compiler",
+      "type": "array",
+      "value": []
+    },
+    {
+      "choices": [
+        "none",
+        "c89",
+        "c99",
+        "c11",
+        "c17",
+        "c18",
+        "c2x",
+        "c23",
+        "c2y",
+        "gnu89",
+        "gnu99",
+        "gnu11",
+        "gnu17",
+        "gnu18",
+        "gnu2x",
+        "gnu23",
+        "gnu2y"
+      ],
+      "description": "c language standard to use",
+      "machine": "build",
+      "name": "build.c_std",
+      "section": "compiler",
+      "type": "combo",
+      "value": "none"
+    },
+    {
+      "description": "Extra arguments passed to the cpp compiler",
+      "machine": "build",
+      "name": "build.cpp_args",
+      "section": "compiler",
+      "type": "array",
+      "value": []
+    },
+    {
+      "description": "Extra arguments passed to the cpp linker",
+      "machine": "build",
+      "name": "build.cpp_link_args",
+      "section": "compiler",
+      "type": "array",
+      "value": []
+    },
+    {
+      "choices": [
+        "none",
+        "c++98",
+        "c++03",
+        "c++11",
+        "c++14",
+        "c++17",
+        "c++1z",
+        "c++2a",
+        "c++20",
+        "c++23",
+        "c++26",
+        "gnu++98",
+        "gnu++03",
+        "gnu++11",
+        "gnu++14",
+        "gnu++17",
+        "gnu++1z",
+        "gnu++2a",
+        "gnu++20",
+        "gnu++23",
+        "gnu++26"
+      ],
+      "description": "cpp language standard to use",
+      "machine": "build",
+      "name": "build.cpp_std",
+      "section": "compiler",
+      "type": "combo",
+      "value": "none"
+    },
+    {
+      "choices": [
+        "none",
+        "default",
+        "a",
+        "s",
+        "sc"
+      ],
+      "description": "C++ exception handling type.",
+      "machine": "build",
+      "name": "build.cpp_eh",
+      "section": "compiler",
+      "type": "combo",
+      "value": "default"
+    },
+    {
+      "description": "Enable RTTI",
+      "machine": "build",
+      "name": "build.cpp_rtti",
+      "section": "compiler",
+      "type": "boolean",
+      "value": true
+    },
+    {
+      "description": "STL debug mode",
+      "machine": "build",
+      "name": "build.cpp_debugstl",
+      "section": "compiler",
+      "type": "boolean",
+      "value": false
+    },
+    {
+      "description": "Extra arguments passed to the c compiler",
+      "machine": "host",
+      "name": "c_args",
+      "section": "compiler",
+      "type": "array",
+      "value": []
+    },
+    {
+      "description": "Extra arguments passed to the c linker",
+      "machine": "host",
+      "name": "c_link_args",
+      "section": "compiler",
+      "type": "array",
+      "value": []
+    },
+    {
+      "choices": [
+        "none",
+        "c89",
+        "c99",
+        "c11",
+        "c17",
+        "c18",
+        "c2x",
+        "c23",
+        "c2y",
+        "gnu89",
+        "gnu99",
+        "gnu11",
+        "gnu17",
+        "gnu18",
+        "gnu2x",
+        "gnu23",
+        "gnu2y"
+      ],
+      "description": "c language standard to use",
+      "machine": "host",
+      "name": "c_std",
+      "section": "compiler",
+      "type": "combo",
+      "value": "none"
+    },
+    {
+      "description": "Standard Windows libraries to link against",
+      "machine": "host",
+      "name": "c_winlibs",
+      "section": "compiler",
+      "type": "array",
+      "value": [
+        "-lkernel32",
+        "-luser32",
+        "-lgdi32",
+        "-lwinspool",
+        "-lshell32",
+        "-lole32",
+        "-loleaut32",
+        "-luuid",
+        "-lcomdlg32",
+        "-ladvapi32"
+      ]
+    },
+    {
+      "description": "Extra arguments passed to the cpp compiler",
+      "machine": "host",
+      "name": "cpp_args",
+      "section": "compiler",
+      "type": "array",
+      "value": []
+    },
+    {
+      "description": "Extra arguments passed to the cpp linker",
+      "machine": "host",
+      "name": "cpp_link_args",
+      "section": "compiler",
+      "type": "array",
+      "value": []
+    },
+    {
+      "choices": [
+        "none",
+        "c++98",
+        "c++03",
+        "c++11",
+        "c++14",
+        "c++17",
+        "c++1z",
+        "c++2a",
+        "c++20",
+        "c++23",
+        "c++26",
+        "gnu++98",
+        "gnu++03",
+        "gnu++11",
+        "gnu++14",
+        "gnu++17",
+        "gnu++1z",
+        "gnu++2a",
+        "gnu++20",
+        "gnu++23",
+        "gnu++26"
+      ],
+      "description": "cpp language standard to use",
+      "machine": "host",
+      "name": "cpp_std",
+      "section": "compiler",
+      "type": "combo",
+      "value": "c++17"
+    },
+    {
+      "choices": [
+        "none",
+        "default",
+        "a",
+        "s",
+        "sc"
+      ],
+      "description": "C++ exception handling type.",
+      "machine": "host",
+      "name": "cpp_eh",
+      "section": "compiler",
+      "type": "combo",
+      "value": "default"
+    },
+    {
+      "description": "Enable RTTI",
+      "machine": "host",
+      "name": "cpp_rtti",
+      "section": "compiler",
+      "type": "boolean",
+      "value": true
+    },
+    {
+      "description": "STL debug mode",
+      "machine": "host",
+      "name": "cpp_debugstl",
+      "section": "compiler",
+      "type": "boolean",
+      "value": false
+    },
+    {
+      "description": "Standard Win libraries to link against",
+      "machine": "host",
+      "name": "cpp_winlibs",
+      "section": "compiler",
+      "type": "array",
+      "value": [
+        "-lkernel32",
+        "-luser32",
+        "-lgdi32",
+        "-lwinspool",
+        "-lshell32",
+        "-lole32",
+        "-loleaut32",
+        "-luuid",
+        "-lcomdlg32",
+        "-ladvapi32"
+      ]
+    },
+    {
+      "choices": [
+        "false",
+        "true"
+      ],
+      "description": "Use #import std.",
+      "machine": "host",
+      "name": "cpp_importstd",
+      "section": "compiler",
+      "type": "combo",
+      "value": "false"
+    },
+    {
+      "description": "Installation prefix",
+      "machine": "any",
+      "name": "prefix",
+      "section": "directory",
+      "type": "string",
+      "value": "/tmp/fgmetal-dxvk-macos-stage-unmodified"
+    },
+    {
+      "description": "Executable directory",
+      "machine": "any",
+      "name": "bindir",
+      "section": "directory",
+      "type": "string",
+      "value": "bin"
+    },
+    {
+      "description": "Data file directory",
+      "machine": "any",
+      "name": "datadir",
+      "section": "directory",
+      "type": "string",
+      "value": "share"
+    },
+    {
+      "description": "Header file directory",
+      "machine": "any",
+      "name": "includedir",
+      "section": "directory",
+      "type": "string",
+      "value": "include"
+    },
+    {
+      "description": "Info page directory",
+      "machine": "any",
+      "name": "infodir",
+      "section": "directory",
+      "type": "string",
+      "value": "share/info"
+    },
+    {
+      "description": "Library directory",
+      "machine": "any",
+      "name": "libdir",
+      "section": "directory",
+      "type": "string",
+      "value": "lib"
+    },
+    {
+      "description": "Licenses directory",
+      "machine": "any",
+      "name": "licensedir",
+      "section": "directory",
+      "type": "string",
+      "value": ""
+    },
+    {
+      "description": "Library executable directory",
+      "machine": "any",
+      "name": "libexecdir",
+      "section": "directory",
+      "type": "string",
+      "value": "libexec"
+    },
+    {
+      "description": "Locale data directory",
+      "machine": "any",
+      "name": "localedir",
+      "section": "directory",
+      "type": "string",
+      "value": "share/locale"
+    },
+    {
+      "description": "Localstate data directory",
+      "machine": "any",
+      "name": "localstatedir",
+      "section": "directory",
+      "type": "string",
+      "value": "var"
+    },
+    {
+      "description": "Manual page directory",
+      "machine": "any",
+      "name": "mandir",
+      "section": "directory",
+      "type": "string",
+      "value": "share/man"
+    },
+    {
+      "description": "System executable directory",
+      "machine": "any",
+      "name": "sbindir",
+      "section": "directory",
+      "type": "string",
+      "value": "sbin"
+    },
+    {
+      "description": "Architecture-independent data directory",
+      "machine": "any",
+      "name": "sharedstatedir",
+      "section": "directory",
+      "type": "string",
+      "value": "com"
+    },
+    {
+      "description": "Sysconf data directory",
+      "machine": "any",
+      "name": "sysconfdir",
+      "section": "directory",
+      "type": "string",
+      "value": "etc"
+    },
+    {
+      "description": "Build DXGI",
+      "machine": "any",
+      "name": "enable_dxgi",
+      "section": "user",
+      "type": "boolean",
+      "value": true
+    },
+    {
+      "description": "Build D3D8",
+      "machine": "any",
+      "name": "enable_d3d8",
+      "section": "user",
+      "type": "boolean",
+      "value": true
+    },
+    {
+      "description": "Build D3D9",
+      "machine": "any",
+      "name": "enable_d3d9",
+      "section": "user",
+      "type": "boolean",
+      "value": true
+    },
+    {
+      "description": "Build D3D10",
+      "machine": "any",
+      "name": "enable_d3d10",
+      "section": "user",
+      "type": "boolean",
+      "value": true
+    },
+    {
+      "description": "Build D3D11",
+      "machine": "any",
+      "name": "enable_d3d11",
+      "section": "user",
+      "type": "boolean",
+      "value": true
+    },
+    {
+      "description": "build_id",
+      "machine": "any",
+      "name": "build_id",
+      "section": "user",
+      "type": "boolean",
+      "value": false
+    },
+    {
+      "choices": [
+        "enabled",
+        "disabled",
+        "auto"
+      ],
+      "description": "Enable GLFW WSI for DXVK Native",
+      "machine": "any",
+      "name": "native_glfw",
+      "section": "user",
+      "type": "combo",
+      "value": "auto"
+    },
+    {
+      "choices": [
+        "enabled",
+        "disabled",
+        "auto"
+      ],
+      "description": "Enable SDL2 WSI for DXVK Native",
+      "machine": "any",
+      "name": "native_sdl2",
+      "section": "user",
+      "type": "combo",
+      "value": "auto"
+    },
+    {
+      "choices": [
+        "enabled",
+        "disabled",
+        "auto"
+      ],
+      "description": "Enable SDL3 WSI for DXVK Native",
+      "machine": "any",
+      "name": "native_sdl3",
+      "section": "user",
+      "type": "combo",
+      "value": "auto"
+    },
+    {
+      "description": "Build with Shader Model 3 support",
+      "machine": "any",
+      "name": "dxbc-spirv:enable_sm3",
+      "section": "user",
+      "type": "boolean",
+      "value": true
+    },
+    {
+      "description": "Build with Shader Model 5 support",
+      "machine": "any",
+      "name": "dxbc-spirv:enable_sm5",
+      "section": "user",
+      "type": "boolean",
+      "value": true
+    },
+    {
+      "description": "Build with SPIR-V backend",
+      "machine": "any",
+      "name": "dxbc-spirv:enable_spirv",
+      "section": "user",
+      "type": "boolean",
+      "value": true
+    },
+    {
+      "description": "Build tests",
+      "machine": "any",
+      "name": "dxbc-spirv:enable_tests",
+      "section": "user",
+      "type": "boolean",
+      "value": false
+    },
+    {
+      "description": "Build utility programs",
+      "machine": "any",
+      "name": "dxbc-spirv:enable_tools",
+      "section": "user",
+      "type": "boolean",
+      "value": false
+    },
+    {
+      "description": "Whether to print the logs from failing tests",
+      "machine": "any",
+      "name": "errorlogs",
+      "section": "test",
+      "type": "boolean",
+      "value": true
+    },
+    {
+      "description": "Split stdout and stderr in test logs",
+      "machine": "any",
+      "name": "stdsplit",
+      "section": "test",
+      "type": "boolean",
+      "value": true
+    }
+  ],
+  "ninja_log_sha256": "5c6dab834d301c692b6c12c4f7e924d7c40e3546fce50ca2510b54674d637df3",
+  "owner_experiment": "step11a-dxvk-unmodified",
+  "patch_hashes": {
+    "patch_set_sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+    "staged_patch_bytes": 0,
+    "staged_patch_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "unstaged_patch_bytes": 0,
+    "unstaged_patch_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "preserve_debug_expires_at_unix": null,
+  "preserve_debug_reason": null,
+  "provenance_scope": "artifactization-time observation; historical build-time input not asserted",
+  "purpose": "Retrospective artifactization and synchronous retirement of completed unmodified DXVK Meson root",
+  "requested_config_key_sha256": null,
+  "schema_version": 3,
+  "source_identity": {
+    "capture_scope": "artifactization-time snapshot",
+    "content_tree_sha256": "2b441427514b273c1a0b9523aa94befca57c6b9dcb73abcfcb7b3ee5c3b796cf",
+    "file_count": 1245,
+    "git_commit": "8d348236e14a3db25ffbe528a83010b3dd69a3ef",
+    "git_tree": "fdc9bece86eef6c1ed0cfc2bfe0ec85d9b9a99e5",
+    "patch_set_sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+    "path": "/private/tmp/fgmetal-dxvk-macos-audit-20261004",
+    "staged_patch_bytes": 0,
+    "staged_patch_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "status_porcelain_v2_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "submodule_status": " 9df86f2341616ef1888ae59919feaa6d4fad693d include/native/directx (heads/main)\n 04f10f650d514df88b76d25e83db360142c7b174 include/spirv (1.5.4.raytracing.fixed-461-g04f10f6)\n 8864cdc896bbc2a9b6eb36b3218fc9ef57908d77 include/vulkan (v1.4.350)\n bf14419e5fa7eacb817b7b632f03cb61d61bbad7 subprojects/dxbc-spirv (remotes/origin/sm3-z-fog-22-gbf14419)\n c8ad050fcb29e42a2f57d9f59e97488f465c436d subprojects/dxbc-spirv/submodules/spirv_headers (1.5.4.raytracing.fixed-435-gc8ad050)\n 275e6459c7ab1ddd4b125f28d0440716e4888078 subprojects/libdisplay-info (heads/windows)\n",
+    "submodule_status_sha256": "3e5d79316faafcb0eaf4c0a05fb6f98733ce93c79af92c7ea7b6b0ee21cad56e",
+    "unstaged_patch_bytes": 0,
+    "unstaged_patch_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "untracked_files": [],
+    "untracked_files_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+  },
+  "source_tree_hash_at_lease": "unknown-at-build-time"
+}

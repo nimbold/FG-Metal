@@ -1,0 +1,16 @@
+{
+  "canonical_artifact_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/2c90d3fc3f364a13d003c2dfe1a08ccdffe5bca9a9d6cde8408b65d6a5450f88/dxgi.dll",
+  "completed_at_unix": 1791344873.7051,
+  "isolated_inode": 93189227,
+  "isolated_link_count": 1,
+  "lease_hmac_sha256": "c7cd82a46a530b75b0946b985e5540e13f34e95d48b5cfa80f70f6ba3429b102",
+  "prepared_at_unix": 1791344873.609725,
+  "previous_inode": 92938000,
+  "previous_link_count": 5,
+  "reason": "Step 11D.3 Gate 0 isolates schema-v1 CAS payloads from mutable build-tree hardlink aliases",
+  "receipt_type": "LEGACY_CAS_HARDLINK_ISOLATION",
+  "result": "DETACHED_WITH_HASH_PRESERVED",
+  "schema_version": 1,
+  "sha256": "2c90d3fc3f364a13d003c2dfe1a08ccdffe5bca9a9d6cde8408b65d6a5450f88",
+  "size_bytes": 223019236
+}

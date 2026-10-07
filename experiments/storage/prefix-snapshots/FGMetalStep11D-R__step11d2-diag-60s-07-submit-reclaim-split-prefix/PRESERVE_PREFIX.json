@@ -1,0 +1,8 @@
+{
+  "PRESERVE_PREFIX": true,
+  "experiment_id": "step11d2-diag-60s-07-submit-reclaim-split",
+  "reason": "Unique matched-stall failure reproduction for the 11D.2 source-ready queue-submit block.",
+  "creation_time_unix": 1791304557.4374857,
+  "estimated_size_bytes": 2303553536,
+  "snapshot_manifest": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/prefix-snapshots/FGMetalStep11D-R__step11d2-diag-60s-07-submit-reclaim-split-prefix/manifest.json"
+}

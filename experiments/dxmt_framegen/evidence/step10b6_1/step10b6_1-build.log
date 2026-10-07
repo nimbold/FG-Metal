@@ -1,0 +1,39 @@
+ninja: Entering directory `/private/tmp/fg-metal-step10b6_1-build'
+[1/17] Generating src/winemetal/postprocess_lib with a custom command
+[2/17] Generating version.h with a custom command
+[3/15] Generating symbol file src/winemetal/winemetal.dll.p/winemetal.dll.symbols
+[4/15] Linking target src/dxgi/dxgi.dll
+[5/15] Generating src/dxgi/postprocess_libdxgi with a custom command
+[6/15] Generating symbol file src/dxgi/dxgi.dll.p/dxgi.dll.symbols
+[7/15] Compiling C object src/winemetal/unix/winemetal.so.p/winemetal_unix.c.o
+../fg-metal-step10b6_1-downstream/src/winemetal/unix/winemetal_unix.c:1300:34: warning: 'didModifyRange:' is deprecated: first deprecated in macOS 27.0 - Managed storage has no effect on Apple Silicon, use Shared storage instead [-Wdeprecated-declarations]
+ 1300 |   [(id<MTLBuffer>)params->handle didModifyRange:NSMakeRange(params->arg, params->ret)];
+      |                                  ^
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/Metal.framework/Headers/MTLBuffer.h:60:1: note: 'didModifyRange:' has been explicitly marked deprecated here
+   60 | - (void)didModifyRange:(NSRange)range API_DEPRECATED("Managed storage has no effect on Apple Silicon, use Shared storage instead", macos(10.11, 27.0), macCatalyst(13.0, 27.0)) API_UNAVAILABLE(ios);
+      | ^
+../fg-metal-step10b6_1-downstream/src/winemetal/unix/winemetal_unix.c:2752:54: warning: 'MTLStorageModeManaged' is deprecated: first deprecated in macOS 27.0 - Managed storage has no effect on Apple Silicon, use Shared storage instead [-Wdeprecated-declarations]
+ 2752 |   if ([(id<MTLBuffer>)params->buffer storageMode] == MTLStorageModeManaged)
+      |                                                      ^
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/Metal.framework/Headers/MTLResource.h:85:5: note: 'MTLStorageModeManaged' has been explicitly marked deprecated here
+   85 |     MTLStorageModeManaged API_DEPRECATED("Managed storage has no effect on Apple Silicon, use Shared storage instead", macos(10.11, 27.0), macCatalyst(13.0, 27.0)) API_UNAVAILABLE(ios) = 1,
+      |     ^
+../fg-metal-step10b6_1-downstream/src/winemetal/unix/winemetal_unix.c:2753:36: warning: 'didModifyRange:' is deprecated: first deprecated in macOS 27.0 - Managed storage has no effect on Apple Silicon, use Shared storage instead [-Wdeprecated-declarations]
+ 2753 |     [(id<MTLBuffer>)params->buffer didModifyRange:NSMakeRange(params->offset, params->length)];
+      |                                    ^
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/Metal.framework/Headers/MTLBuffer.h:60:1: note: 'didModifyRange:' has been explicitly marked deprecated here
+   60 | - (void)didModifyRange:(NSRange)range API_DEPRECATED("Managed storage has no effect on Apple Silicon, use Shared storage instead", macos(10.11, 27.0), macCatalyst(13.0, 27.0)) API_UNAVAILABLE(ios);
+      | ^
+3 warnings generated.
+[8/15] Compiling Objective-C++ object src/winemetal/unix/winemetal.so.p/dxmt_framegen_bridge.mm.o
+[9/15] Linking target src/winemetal/unix/winemetal.so
+ld: warning: ignoring duplicate libraries: '-lc++'
+ld: warning: reexported library with install name '@rpath/libunwind.1.dylib' found at '/private/tmp/dxmt-fb451568-evidence.opkf8x/clang+llvm-15.0.7-x86_64-apple-darwin21.0/lib/libunwind.1.0.dylib' couldn't be matched with any parent library and will be linked directly
+[10/15] Compiling C++ object src/d3d11/d3d11.dll.p/d3d11_swapchain.cpp.obj
+[11/15] Linking target src/d3d11/d3d11.dll
+[12/15] Generating src/d3d11/postprocess_libd3d11 with a custom command
+[13/15] Generating symbol file src/d3d11/d3d11.dll.p/d3d11.dll.symbols
+[14/15] Linking target src/d3d10/d3d10core.dll
+[15/15] Generating src/d3d10/postprocess_libd3d10core with a custom command
+INFO: autodetecting backend as ninja
+INFO: calculating backend command to run: /opt/homebrew/bin/ninja -C /private/tmp/fg-metal-step10b6_1-build -j 6

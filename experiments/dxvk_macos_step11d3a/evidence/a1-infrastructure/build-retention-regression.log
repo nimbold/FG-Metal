@@ -1,0 +1,6 @@
+test_failed_build_closes_supervisor_log_before_liveness_check (test_build_retention.BuildRetentionTests.test_failed_build_closes_supervisor_log_before_liveness_check) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 0.369s
+
+OK

@@ -1,0 +1,127 @@
+[
+  {
+    "path": "/tmp/fgmetal-dxvk-macos-audit-run/app/d3d11.dll",
+    "sha256": "6940b883fb4bc1b744fb7ca3aa6a486303eaf180c9fe85c03ed7cb175057bf28",
+    "matches_before": true
+  },
+  {
+    "path": "/tmp/fgmetal-dxvk-macos-audit-run/app/dxgi.dll",
+    "sha256": "17cbe8e84906ce9657493b1301e712cfc8123413034666fd9387dfe1bbf5b33c",
+    "matches_before": true
+  },
+  {
+    "path": "/tmp/fgmetal-dxvk-macos-audit-run/runtime/wine/etc/etc/vulkan/icd.d/MoltenVK_icd.json",
+    "sha256": "61d212ba97b02155cd8a16ef3e1be0ef7bf7a8c93e9f20c30506550f69a673ae",
+    "matches_before": true
+  },
+  {
+    "path": "/tmp/fgmetal-dxvk-macos-audit-run/runtime/wine/etc/etc/vulkan/icd.d/MoltenVK_x86_64_icd.json",
+    "sha256": "7ce881b47fd3adbc29855703c147566e7ffebf514bf7191e6f7903b4eb433af8",
+    "matches_before": true
+  },
+  {
+    "path": "/tmp/fgmetal-dxvk-macos-audit-run/runtime/wine/etc/vulkan/icd.d/MoltenVK_icd.json",
+    "sha256": "0dcbf7707cc0a347d0ba2941e835e5e92709919370a1bb0fc252e8dc4d95d322",
+    "matches_before": true
+  },
+  {
+    "path": "/tmp/fgmetal-dxvk-macos-audit-run/runtime/wine/etc/vulkan/icd.d/MoltenVK_x86_64_icd.json",
+    "sha256": "0dcbf7707cc0a347d0ba2941e835e5e92709919370a1bb0fc252e8dc4d95d322",
+    "matches_before": true
+  },
+  {
+    "path": "/tmp/fgmetal-dxvk-macos-audit-run/runtime/wine/lib/moltenvk-vkmt/MoltenVK_icd.json",
+    "sha256": "578ff08cd0d8734619357541771a5abc9c3470ca300030219a971a9e9dbbe466",
+    "matches_before": true
+  },
+  {
+    "path": "/tmp/fgmetal-dxvk-macos-audit-run/runtime/wine/lib/moltenvk-vkmt/libMoltenVK.1.dylib",
+    "sha256": "8249d81ebf2d46f82b16ca166c2e5cca5d76d91d0a412cd6d3db1aaa6e8430bf",
+    "matches_before": true
+  },
+  {
+    "path": "/tmp/fgmetal-dxvk-macos-audit-run/runtime/wine/lib/moltenvk-vkmt/libMoltenVK.dylib",
+    "sha256": "8249d81ebf2d46f82b16ca166c2e5cca5d76d91d0a412cd6d3db1aaa6e8430bf",
+    "matches_before": true
+  },
+  {
+    "path": "/tmp/fgmetal-dxvk-macos-audit-run/runtime/wine/lib/wine/i386-windows/libvulkan-1.a",
+    "sha256": "09bacee7946a120dd88b4d2842a3ee1601be711d0e53f49761fde1fb5e818441",
+    "matches_before": true
+  },
+  {
+    "path": "/tmp/fgmetal-dxvk-macos-audit-run/runtime/wine/lib/wine/i386-windows/libwinevulkan.a",
+    "sha256": "3a1f042e50af6914ce0bbaa9c48166ac3763f3092e8dde61cb9603c6dab5582e",
+    "matches_before": true
+  },
+  {
+    "path": "/tmp/fgmetal-dxvk-macos-audit-run/runtime/wine/lib/wine/i386-windows/vulkan-1.dll",
+    "sha256": "3ea478e64343ed524637933c37db4afaf50bd97b0fc0c313ecacac9d30659c81",
+    "matches_before": true
+  },
+  {
+    "path": "/tmp/fgmetal-dxvk-macos-audit-run/runtime/wine/lib/wine/i386-windows/winevulkan.dll",
+    "sha256": "8e29a9e7ee67084fc5c1c8a7fd05d0f748ac70411b5c91267b117599c5a41f91",
+    "matches_before": true
+  },
+  {
+    "path": "/tmp/fgmetal-dxvk-macos-audit-run/runtime/wine/lib/wine/i386-windows/winevulkan.dll.115",
+    "sha256": "863b26e6ee59c51b02cdade45f18f36917753bd65ed0f53d643864c067d1c991",
+    "matches_before": true
+  },
+  {
+    "path": "/tmp/fgmetal-dxvk-macos-audit-run/runtime/wine/lib/wine/x86_64-unix/libMoltenVK.1.dylib",
+    "sha256": "8249d81ebf2d46f82b16ca166c2e5cca5d76d91d0a412cd6d3db1aaa6e8430bf",
+    "matches_before": true
+  },
+  {
+    "path": "/tmp/fgmetal-dxvk-macos-audit-run/runtime/wine/lib/wine/x86_64-unix/libMoltenVK.dylib",
+    "sha256": "8249d81ebf2d46f82b16ca166c2e5cca5d76d91d0a412cd6d3db1aaa6e8430bf",
+    "matches_before": true
+  },
+  {
+    "path": "/tmp/fgmetal-dxvk-macos-audit-run/runtime/wine/lib/wine/x86_64-unix/libvulkan.1.dylib",
+    "sha256": "1d57a14b4a0d380420ab566884018fd83ba57381aa44e464f79472a77273b6bc",
+    "matches_before": true
+  },
+  {
+    "path": "/tmp/fgmetal-dxvk-macos-audit-run/runtime/wine/lib/wine/x86_64-unix/libvulkan.dylib",
+    "sha256": "1d57a14b4a0d380420ab566884018fd83ba57381aa44e464f79472a77273b6bc",
+    "matches_before": true
+  },
+  {
+    "path": "/tmp/fgmetal-dxvk-macos-audit-run/runtime/wine/lib/wine/x86_64-unix/winevulkan.so",
+    "sha256": "3e70ba096e6a3027f2276976535ac39e47022fdf7e6e54ddec6556cbfd82baef",
+    "matches_before": true
+  },
+  {
+    "path": "/tmp/fgmetal-dxvk-macos-audit-run/runtime/wine/lib/wine/x86_64-unix/winevulkan.so.115",
+    "sha256": "ba1de7a757185c6e7bd8e3046d540b98707a732b8fb56a9df64df757b01b58d5",
+    "matches_before": true
+  },
+  {
+    "path": "/tmp/fgmetal-dxvk-macos-audit-run/runtime/wine/lib/wine/x86_64-windows/libvulkan-1.a",
+    "sha256": "535d7cfc9fd3e9c27d1d3fb46fded8797cd1109795d9a196441a02929d31c1f8",
+    "matches_before": true
+  },
+  {
+    "path": "/tmp/fgmetal-dxvk-macos-audit-run/runtime/wine/lib/wine/x86_64-windows/libwinevulkan.a",
+    "sha256": "6ea4dee922b4dfb0bd40e511d01c1f46ca935eb9c52bb8e248d68155c2f2e3f4",
+    "matches_before": true
+  },
+  {
+    "path": "/tmp/fgmetal-dxvk-macos-audit-run/runtime/wine/lib/wine/x86_64-windows/vulkan-1.dll",
+    "sha256": "db3c3f61b62f0836cafb0611da530d707821598a0c7c5d2acd7344cb43001a6e",
+    "matches_before": true
+  },
+  {
+    "path": "/tmp/fgmetal-dxvk-macos-audit-run/runtime/wine/lib/wine/x86_64-windows/winevulkan.dll",
+    "sha256": "540fd49c262987861c76e40db3a88ef97b729f7093f75578f559b255e94bbb2f",
+    "matches_before": true
+  },
+  {
+    "path": "/tmp/fgmetal-dxvk-macos-audit-run/runtime/wine/lib/wine/x86_64-windows/winevulkan.dll.115",
+    "sha256": "0fe2290886567e3f2f689102d2329be2c99eb7aa2d182bde4e052855f50241d4",
+    "matches_before": true
+  }
+]

@@ -1,0 +1,2 @@
+native_control_started mode=source30-60 pid=54656 seconds=28 windowed=1
+native_control_result mode=source30-60 callbacks=1678 positive_presented_time=1677 zero_presented_time=1 incomplete_gpu=0 incomplete_presented_handler=0 pending_gpu=0 pending_presented=0 csv=/private/tmp/step10b6-native/native-source30-to60/native-timing.csv config=/private/tmp/step10b6-native/native-source30-to60/native-config.txt

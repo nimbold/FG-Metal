@@ -1,0 +1,104 @@
+{
+  "host": {
+    "c": {
+      "id": "gcc",
+      "exelist": [
+        "x86_64-w64-mingw32-gcc"
+      ],
+      "linker_exelist": [
+        "x86_64-w64-mingw32-gcc"
+      ],
+      "file_suffixes": [
+        "c"
+      ],
+      "default_suffix": "c",
+      "version": "16.2.0",
+      "full_version": "x86_64-w64-mingw32-gcc (GCC) 16.2.0",
+      "linker_id": "ld.bfd"
+    },
+    "cpp": {
+      "id": "gcc",
+      "exelist": [
+        "x86_64-w64-mingw32-g++"
+      ],
+      "linker_exelist": [
+        "x86_64-w64-mingw32-g++"
+      ],
+      "file_suffixes": [
+        "cpp",
+        "cppm",
+        "cc",
+        "cp",
+        "cxx",
+        "c++",
+        "hh",
+        "hp",
+        "hpp",
+        "ipp",
+        "hxx",
+        "h++",
+        "ino",
+        "ixx",
+        "CPP",
+        "C",
+        "HPP",
+        "H"
+      ],
+      "default_suffix": "cpp",
+      "version": "16.2.0",
+      "full_version": "x86_64-w64-mingw32-g++ (GCC) 16.2.0",
+      "linker_id": "ld.bfd"
+    }
+  },
+  "build": {
+    "c": {
+      "id": "clang",
+      "exelist": [
+        "cc"
+      ],
+      "linker_exelist": [
+        "cc"
+      ],
+      "file_suffixes": [
+        "c"
+      ],
+      "default_suffix": "c",
+      "version": "21.0.0",
+      "full_version": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+      "linker_id": "ld64"
+    },
+    "cpp": {
+      "id": "clang",
+      "exelist": [
+        "c++"
+      ],
+      "linker_exelist": [
+        "c++"
+      ],
+      "file_suffixes": [
+        "cpp",
+        "cppm",
+        "cc",
+        "cp",
+        "cxx",
+        "c++",
+        "hh",
+        "hp",
+        "hpp",
+        "ipp",
+        "hxx",
+        "h++",
+        "ino",
+        "ixx",
+        "CPP",
+        "C",
+        "HPP",
+        "H"
+      ],
+      "default_suffix": "cpp",
+      "version": "21.0.0",
+      "full_version": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+      "linker_id": "ld64"
+    }
+  }
+}

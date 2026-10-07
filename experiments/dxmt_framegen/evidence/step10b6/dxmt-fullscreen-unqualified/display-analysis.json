@@ -1,0 +1,76 @@
+{
+  "application_surface_ids": [
+    54,
+    58,
+    83
+  ],
+  "ca_present_request": {
+    "count": 623,
+    "gap_rate_hz": 29.99364401217805,
+    "span_seconds": 20.737726958
+  },
+  "ca_presented_handler": {
+    "count": 622,
+    "gap_rate_hz": 29.999914794444898,
+    "span_seconds": 20.700058792
+  },
+  "display_surface_intervals": {
+    "adjacent_start_gap_ms": {
+      "max": 149.99825,
+      "n": 620,
+      "p50": 33.332958,
+      "p95": 33.333,
+      "p99": 33.333
+    },
+    "adjacent_start_gap_rate_hz": 30.00034990327458,
+    "count": 621,
+    "cpu_to_display_latency_ms": {
+      "max": 50.762333,
+      "n": 621,
+      "p50": 24.676042,
+      "p95": 25.434875,
+      "p99": 41.632090999999996
+    },
+    "direct_to_display": {
+      "Yes": 621
+    },
+    "direct_to_display_failure_reason": {
+      "(empty)": 621
+    },
+    "duration_ms": {
+      "max": 149.99825,
+      "n": 621,
+      "p50": 33.332958,
+      "p95": 33.333,
+      "p99": 33.333
+    },
+    "frame_label_count": 621,
+    "frame_label_step": {
+      "1": 620
+    },
+    "frame_label_step_stats": {
+      "max": 1.0,
+      "n": 620,
+      "p50": 1.0,
+      "p95": 1.0,
+      "p99": 1.0
+    },
+    "row_rate_hz": 30.048737564408892,
+    "span_seconds": 20.666425625
+  },
+  "dxmt_present_call_alignment": null,
+  "native_callback_alignment": null,
+  "process_name": "wine",
+  "quantile_method": "linear interpolation at rank (n - 1) * p",
+  "surface_display_names": [
+    "Built-In Display 1"
+  ],
+  "trace_duration_seconds": 21.018038,
+  "vsync_by_surface_display_in_surface_window": {
+    "Built-In Display 1": {
+      "count": 1240,
+      "gap_rate_hz": 59.952312145414844,
+      "span_seconds": 20.666425625
+    }
+  }
+}

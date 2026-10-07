@@ -1,0 +1,72 @@
+{
+  "adopted_at_unix": 1791335655.979112,
+  "adopted_existing": true,
+  "allowed_external_symlink_roots": [],
+  "approved_parent": "/Users/nima/Library/Caches/FGMetal/builds",
+  "approved_parent_identity": {
+    "device": 16777230,
+    "filesystem_id": 16777230,
+    "inode": 93094313,
+    "mode": 448,
+    "owner_uid": 501,
+    "sticky": false
+  },
+  "build_device": 16777230,
+  "build_filesystem_id": 16777230,
+  "build_id": "legacy-fgmetal-wine-11.17-vkmetal-build-1f78b9f3",
+  "build_inode": 92256801,
+  "cleanup_attempted": true,
+  "cleanup_free_before_bytes": 80123400192,
+  "cleanup_receipt_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-cleanup-receipts/legacy-fgmetal-wine-11.17-vkmetal-build-1f78b9f3.json",
+  "created_at_unix": 1791335655.978208,
+  "estimated_bytes": 32768,
+  "expected_bytes": 31613,
+  "failed_at_unix": 1791335656.0397482,
+  "failed_command": [
+    "legacy-root-reconciliation"
+  ],
+  "failure_evidence_files": [
+    {
+      "mode": "0o600",
+      "path": "failure-manifest.json",
+      "sha256": "4f1d53256299c8f3f16620174079cc23a7c9b74fb724a227a6be5ae4292e3118",
+      "size_bytes": 891
+    },
+    {
+      "mode": "0o600",
+      "path": "configuration/config.log",
+      "sha256": "d0bd395cd3705558e669c5823daec5c3c92b3fde7cbfa4ab6f21f9846d7320d8",
+      "size_bytes": 31613
+    }
+  ],
+  "failure_evidence_index_sha256": "edf9746af04c51648e54080375f64dbbcbafb57359839b31b077064cceedaf58",
+  "failure_evidence_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-wine-11.17-vkmetal-build-1f78b9f3.failure/failure-manifest.json",
+  "failure_evidence_root": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-wine-11.17-vkmetal-build-1f78b9f3.failure",
+  "failure_evidence_sha256": "4f1d53256299c8f3f16620174079cc23a7c9b74fb724a227a6be5ae4292e3118",
+  "failure_reason": "Wine configure-only attempt failed; retain config.log and retire the scratch root",
+  "kind": "wine",
+  "last_heartbeat_unix": 1791335655.978208,
+  "lease_hmac_sha256": "d2867ec97118c0b75df8324b8d809553d40b0167356b489f57a2a3273e324a35",
+  "legacy_source_path": "/private/tmp/fgmetal-wine-11.17-vkmetal-build",
+  "owner_experiment": "dxvk_macos_step11dR",
+  "owner_pid": null,
+  "path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-wine-11.17-vkmetal-build-1f78b9f3",
+  "preserve_debug_expires_at_unix": null,
+  "preserve_debug_reason": null,
+  "purpose": "Wine configure-only attempt failed; retain config.log and retire the scratch root",
+  "quarantine_name": ".retiring-legacy-fgmetal-wine-11.17-vkmetal-build-1f78b9f3-9cb038c3586c48e0b9fa5a9e09828161",
+  "retired_at_unix": 1791335656.1626859,
+  "retirement_from_state": "FAILED",
+  "retirement_reason": "legacy-scratch-evidence-captured",
+  "retirement_started_unix": 1791335656.0414798,
+  "retirement_tree_stats": {
+    "allocated_unique_inode_bytes": 32768,
+    "best_recoverable_bytes_estimate": 32768,
+    "file_count": 1,
+    "logical_bytes": 31613
+  },
+  "return_code": null,
+  "schema_version": 1,
+  "source_tree_hash": "unknown-at-build-time",
+  "state": "COMPLETED"
+}

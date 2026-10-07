@@ -4,9 +4,11 @@ Framegen is an experimental renderer-independent frame-generation library. Its p
 
 > **Status: experimental; not a drop-in game mod or overlay.** The C ABI is a draft, and there is no supported adapter for an unmodified game.
 
-> **Current renderer-feasibility status: DXMT Step 10B.5 failed the display gate; RIFE is not cleared.** Callback, submission, and GPU-completion rates stayed near 60 Hz, but independent motion probes showed only 8.0–8.6 consecutive Wine-attributed displayed-surface gaps per second during 60 Hz VSync, with median surface holds near 65 ms. Surface-update coalescing is inferred from those traces; drawable-level attribution and physical scanout remain unverified. See the [Step 10B.5 report](experiments/dxmt_framegen/evidence/step10b5/report.md) and its [retained evidence](experiments/dxmt_framegen/evidence/step10b5/).
+> **Current renderer-feasibility status (2026-10-08): Step 10B.6.1 — STOP the current DXMT CAMetalDisplayLink Framegen architecture; RIFE is not cleared.** Matched windowed and fullscreen F runs preserved accepted-source safety but failed presentation health. A public contentsScale-only probe improved the short trace, then failed the fresh 60-second validation. Native calibration confirms Display surface rows are not FPS or drawable IDs; physical scanout remains unverified. See the [Step 10B.6.1 report](experiments/dxmt_framegen/evidence/step10b6_1/report.md).
 
 > **DXVK-MacOS Step 11C: PARTIAL PASS; Step 11D is not cleared.** A rebuilt matched 20-second, 15 Hz run preserved measured DXGI accounting while issuing 42 extra WSI presents for 301 application Presents. The user directly confirmed brief magenta and cyan flashes in the post-audit candidate; the newest matched build has a separate API run. The scheduler remains far below doubled cadence, and fullscreen, recreation, failure, and pending-work shutdown checks remain unverified. See the [Step 11C report](experiments/dxvk_macos_step11c/REPORT.md).
+
+> **Step 11D.3-A: CASE A3 — INCONCLUSIVE.** The primary native control architecture is x86_64 to match the translated STEP 11D.2 MoltenVK process. Architecture, trace publication, and correlation checks are in place, but the fresh leased Xcode build did not produce a MoltenVK dylib or native executable. Xcode failed while loading the project under the confined build environment. No native loader probe, 30-second graphics smoke, or five-minute baseline ran. See the [Step 11D.3-A1 report](experiments/dxvk_macos_step11d3a/STEP-11D3-A1-REPORT.md). Step 11D.3-B has not started.
 
 ## What works today
 
@@ -16,8 +18,9 @@ Framegen is an experimental renderer-independent frame-generation library. Its p
 | Metal backend | Practical-RIFE v4.26 GPU inference and a standalone macOS preview host. Model weights are prepared separately and are not checked in. |
 | Quality and pacing | Optional HUD/temporal controls and a model-independent pacing scheduler; results are synthetic and do not establish in-game quality or display pacing. |
 | GPTK / D3DMetal | Cooperative D3D12 tests passed on Highball GPTK 4. Transparent DXGI attachment reached **PARTIAL PASS** on a controlled app; same-chain generated presents break common application buffer progression. It is not a product adapter. |
-| DXMT | Latest gate, Step 10B.5: **FAIL — RIFE NOT CLEARED.** In source-only and F-equivalent runs, per-Present color-motion probes showed about 8.0–8.6 consecutive Wine-attributed displayed-surface gaps/s and ~65 ms median holds while VSync remained 60.001 Hz. Callback, submission, GPU completion, and accepted-source safety passed their qualified checks, but Display rows could not be mapped to individual drawable attempts and physical scanout was not established. The Step 10B.4 result remains historical evidence; see its [report](docs/feasibility/dxmt-framegen-step10b4.md), plus the latest [Step 10B.5 report](experiments/dxmt_framegen/evidence/step10b5/report.md) and [retained evidence](experiments/dxmt_framegen/evidence/step10b5/). No RIFE or Highball change is part of either result. |
+| DXMT | Step 10B.6.1: **WINDOWED FAIL / NOT CLEARED; FULLSCREEN FAIL; RIFE NOT CLEARED; architecture STOP.** Qualified matched runs passed source safety but retained abnormal Display durations and all Direct-to-Display No. Two public-property probes did not establish a durable fullscreen lane. Return to renderer-strategy selection; see the [report and evidence](experiments/dxmt_framegen/evidence/step10b6_1/report.md). |
 | DXVK-MacOS | Step 11C: **PARTIAL PASS.** Separate AppFrameId/WSI/internal identity and measured DXGI accounting invariants pass in a matched low-rate windowed run; the user confirmed brief magenta and cyan flashes. The scheduler misses doubled cadence. Fullscreen/recreation/failure/pending-work shutdown checks remain unverified. See the [report and evidence](experiments/dxvk_macos_step11c/REPORT.md). |
+| Native MoltenVK control | Step 11D.3-A: **A3 / INCONCLUSIVE.** The build lifecycle is leased and Gate 0 is current, but Xcode project loading failed under the build sandbox before compilation. No native runtime or graphics result exists. See the [A1 infrastructure report](experiments/dxvk_macos_step11d3a/STEP-11D3-A1-REPORT.md). |
 
 See [the current decisions](DECISIONS.md), [work status](TASKS.md), and the [Step 8D.1 feasibility report](docs/feasibility/dxgi-d3d12-gptk4-step8d1.md) for evidence and limits.
 
@@ -30,6 +33,22 @@ See [the current decisions](DECISIONS.md), [work status](TASKS.md), and the [Ste
 - A synthetic motion corpus, benchmark tools, and strict visual-quality comparisons.
 
 The benchmark fixtures do not contain copyrighted game footage. Synthetic results are not substitutes for licensed game captures or real-game validation.
+
+## Roadmap
+
+The roadmap follows evidence and public interface availability. A completed feasibility experiment is not a supported renderer integration.
+
+- [x] Build the renderer-independent GPU texture contract, Metal placeholder backend, preview host, and synthetic test harness.
+- [x] Add offline image/temporal metrics and a model-independent presentation scheduler; keep quality claims limited to synthetic evidence.
+- [x] Complete cooperative GPTK/D3DMetal and public DXGI experiments with their current limits recorded.
+- [x] Record the current DXMT and DXVK-MacOS feasibility results, including unresolved native-baseline blockers.
+- [ ] Select a renderer strategy only after the unresolved presentation and public resource-access questions have an evidence-backed answer.
+- [ ] Stabilize the C ABI, device/format contract, synchronization rules, and adapter boundary through independent consumers.
+- [ ] Expand evaluation using material with documented rights; benchmark quality and pacing on supported hardware.
+- [ ] Select and validate an inference backend only after quality, latency, licensing, and redistribution review.
+- [ ] Validate any chosen adapter through lifecycle/failure coverage, a sustained soak, and clean-machine packaging before describing it as supported.
+
+See the detailed [roadmap](ROADMAP.md), current [tasks](TASKS.md), and [decisions](DECISIONS.md). Step 11D.3-B and RIFE implementation remain gated; this README does not authorize either.
 
 ## Build and test
 

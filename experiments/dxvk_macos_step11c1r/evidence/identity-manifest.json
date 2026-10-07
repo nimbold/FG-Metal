@@ -1,0 +1,27 @@
+{
+  "frozen_inputs": {
+    "dxvk_base": "8d348236e14a3db25ffbe528a83010b3dd69a3ef",
+    "step11b1_patch_sha256": "4f4973000dce0783d05e11b7acae0efdff2d6bfe898bf49305408d72280e758",
+    "step11c_patch_sha256": "4df3af55c9491a44d5e8cec79d458bf7cecc18d71b61312b19e80b461023d352",
+    "moltenvk_version": "1.4.2",
+    "moltenvk_commit": "db66022459ffb663aa2b50f6b018bc2e124f5edf",
+    "wine": "MetalSharp 0.70 bundled Wine 11.17",
+    "wine_launcher_sha256": "946a7032484d02981182d59f82edda03f40f38c510e0208d48482c0830ef20e9",
+    "dxbc_spirv_pin": "bf14419e5fa7eacb817b7b632f03cb61d61bbad7"
+  },
+  "reconstructed_candidate": {
+    "candidate_reconstruction_commit": "b4dbfad2e58d30a91c6513e899ff941f016de625",
+    "bc_reconstructed_patch_sha256": "9f6aa65b3a7fed0b16ed9b2fa50b8361d7ac89c00f52629ccf819867360b0ea2",
+    "d1_patch_sha256": "a8a9d41b562ae79eae9ee82e3aa1da97562c28a6e6f0c08c7419687d2730b46b",
+    "d4_patch_sha256": "07b460c16b6c7ae670658be2ed24071e4127835543ac4983ae96dcac5170d7b8",
+    "d11_sha256": "5f41dc59a12b492530781daf85c2be35c7cabb4cc88e4384b61353b7d75b6956",
+    "dxgi_sha256": "0319f3ddca7d1a6cd18aaa528df1ac95380d72b8d68002848b7a524282d340c2",
+    "moltenvk_loader_override_sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f"
+  },
+  "status": {
+    "gate_a": "D3D11 runtime evidence passes; overall Gate A blocked by D3D9 build/runtime unverified",
+    "gate_b": "not started",
+    "gate_c": "not started",
+    "step11d": "blocked"
+  }
+}

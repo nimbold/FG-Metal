@@ -1,0 +1,78 @@
+{
+  "async_failure_jobs": [],
+  "captured_interop_jobs": 8962,
+  "consumer_attempts": 8858,
+  "consumer_wsi_retirements_missing_or_multiple": [],
+  "event_counts": {
+    "captured": 8962,
+    "committed": 8962,
+    "consumer_attempt": 8858,
+    "consumer_claimed": 8680,
+    "dropped": 39,
+    "internal_opportunity_drop": 280,
+    "output_ready": 8701,
+    "retired": 8961,
+    "terminal": 8962,
+    "wsi_retirement": 8858,
+    "wsi_submit": 8680
+  },
+  "internal_opportunity_drop_reason_counts": {
+    "lease-validation-before-submit": 157,
+    "queue-full": 45,
+    "source-or-swapchain-conflict-before-submit": 21,
+    "source-pending": 51,
+    "source-queue-nonempty": 6
+  },
+  "interop_jobs_missing_job_retired": [
+    8962
+  ],
+  "issues": [
+    {
+      "InteropJobId": 8962,
+      "code": "interop-retirement-field-mismatch",
+      "message": "CSV retired flag does not match the job-retired event count"
+    },
+    {
+      "InteropJobId": 8962,
+      "code": "interop-job-not-retired",
+      "message": "captured job has no job-retired marker (distinct from WSI retirement)"
+    },
+    {
+      "code": "slot-owned-at-log-end",
+      "message": "generation/slot (2, 1) still has job 8962 as its last logged owner"
+    }
+  ],
+  "max_concurrent_owned_slots_by_generation": {
+    "2": 2
+  },
+  "pre_capture_drop_classes": {
+    "NO_FREE_HISTORY": 39
+  },
+  "row_count": 8962,
+  "run_dir": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/cadence-repeatability-r5-20261006/B3",
+  "scope_note": "This audits captured InteropJobId lifecycles and logged internal-WSI opportunities. It does not replace deterministic shutdown-state hooks or generation-invalidation tests.",
+  "slot_ids_by_generation": {
+    "2": [
+      1,
+      2
+    ]
+  },
+  "slots_owned_at_log_end": {
+    "generation=2 slot=1 history=6 output=7": 8962
+  },
+  "source_identity": {
+    "dll_sha256_match_frozen_r5": true,
+    "failure_injection": null,
+    "native_provider_build_id": "status-v3-current-20261006",
+    "source_build_id": "current-r5-build-A-20261006"
+  },
+  "status": "FAIL",
+  "successful_consumer_submits": 8680,
+  "terminal_classes": {
+    "DEADLINE_EXPIRED": 2,
+    "PRESENTED": 8680,
+    "SCHEDULER_QUEUE_FULL": 45,
+    "SOURCE_PRIORITY": 78,
+    "WSI_FAILURE": 157
+  }
+}

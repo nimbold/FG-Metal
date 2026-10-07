@@ -1,0 +1,167 @@
+{
+  "baseline-30s": {
+    "result": {
+      "exit_status": 0,
+      "wall_seconds": 41.12168958398979,
+      "duration": 30,
+      "enhanced": false,
+      "waitable": false,
+      "lifecycle": false,
+      "dll_hashes": {
+        "d3d11.dll": "6940b883fb4bc1b744fb7ca3aa6a486303eaf180c9fe85c03ed7cb175057bf28",
+        "dxgi.dll": "17cbe8e84906ce9657493b1301e712cfc8123413034666fd9387dfe1bbf5b33c"
+      }
+    },
+    "present_rows": 901,
+    "hresults": {
+      "0x00000000": 901
+    },
+    "color_ids": [
+      "0",
+      "1",
+      "2",
+      "3"
+    ],
+    "visible_rows": 901,
+    "foreground_rows": 901,
+    "iconic_rows": 0,
+    "last_elapsed_us": 30001337,
+    "renderer_failure_patterns": []
+  },
+  "baseline-30s-hud": {
+    "result": {
+      "exit_status": 0,
+      "wall_seconds": 30.464191042003222,
+      "duration": 30,
+      "enhanced": false,
+      "waitable": false,
+      "lifecycle": false,
+      "dll_hashes": {
+        "d3d11.dll": "6940b883fb4bc1b744fb7ca3aa6a486303eaf180c9fe85c03ed7cb175057bf28",
+        "dxgi.dll": "17cbe8e84906ce9657493b1301e712cfc8123413034666fd9387dfe1bbf5b33c"
+      }
+    },
+    "present_rows": 901,
+    "hresults": {
+      "0x00000000": 901
+    },
+    "color_ids": [
+      "0",
+      "1",
+      "2",
+      "3"
+    ],
+    "visible_rows": 901,
+    "foreground_rows": 901,
+    "iconic_rows": 0,
+    "last_elapsed_us": 30003763,
+    "renderer_failure_patterns": []
+  },
+  "baseline-60s": {
+    "result": {
+      "exit_status": 0,
+      "wall_seconds": 62.816298666992225,
+      "duration": 60,
+      "enhanced": false,
+      "waitable": false,
+      "lifecycle": false,
+      "dll_hashes": {
+        "d3d11.dll": "6940b883fb4bc1b744fb7ca3aa6a486303eaf180c9fe85c03ed7cb175057bf28",
+        "dxgi.dll": "17cbe8e84906ce9657493b1301e712cfc8123413034666fd9387dfe1bbf5b33c"
+      }
+    },
+    "present_rows": 1800,
+    "hresults": {
+      "0x00000000": 1800
+    },
+    "color_ids": [
+      "0",
+      "1",
+      "2",
+      "3"
+    ],
+    "visible_rows": 1800,
+    "foreground_rows": 1800,
+    "iconic_rows": 0,
+    "last_elapsed_us": 59967314,
+    "renderer_failure_patterns": []
+  },
+  "lifecycle-65s": {
+    "result": {
+      "exit_status": 0,
+      "wall_seconds": 65.63308412500191,
+      "duration": 65,
+      "enhanced": false,
+      "waitable": false,
+      "lifecycle": true,
+      "dll_hashes": {
+        "d3d11.dll": "6940b883fb4bc1b744fb7ca3aa6a486303eaf180c9fe85c03ed7cb175057bf28",
+        "dxgi.dll": "17cbe8e84906ce9657493b1301e712cfc8123413034666fd9387dfe1bbf5b33c"
+      }
+    },
+    "present_rows": 1951,
+    "hresults": {
+      "0x00000000": 1921,
+      "0x087a0001": 30
+    },
+    "color_ids": [
+      "0",
+      "1",
+      "2",
+      "3"
+    ],
+    "visible_rows": 1951,
+    "foreground_rows": 1484,
+    "iconic_rows": 30,
+    "last_elapsed_us": 65001740,
+    "renderer_failure_patterns": []
+  },
+  "waitable-debug-30s": {
+    "result": {
+      "exit_status": 0,
+      "wall_seconds": 32.95130016701296,
+      "duration": 30,
+      "enhanced": true,
+      "waitable": true,
+      "lifecycle": false,
+      "dll_hashes": {
+        "d3d11.dll": "6940b883fb4bc1b744fb7ca3aa6a486303eaf180c9fe85c03ed7cb175057bf28",
+        "dxgi.dll": "17cbe8e84906ce9657493b1301e712cfc8123413034666fd9387dfe1bbf5b33c"
+      }
+    },
+    "present_rows": 901,
+    "hresults": {
+      "0x00000000": 901
+    },
+    "color_ids": [
+      "0",
+      "1",
+      "2",
+      "3"
+    ],
+    "visible_rows": 901,
+    "foreground_rows": 901,
+    "iconic_rows": 0,
+    "last_elapsed_us": 30003406,
+    "renderer_failure_patterns": [],
+    "semantics": {
+      "rows": 901,
+      "last_app_count": "901",
+      "last_stats_app_count": "900",
+      "count_equals_seq_rows": 901,
+      "wait_results": {
+        "0": 900,
+        "258": 1
+      },
+      "device_removed": [
+        "00000000"
+      ],
+      "buffer_identities": [
+        "00000000008c93b0"
+      ],
+      "backbuffer_indices": [
+        "0"
+      ]
+    }
+  }
+}

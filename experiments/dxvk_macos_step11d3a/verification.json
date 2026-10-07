@@ -1,0 +1,46 @@
+{
+  "architecture_review_status": "x86_64 translated primary control selected; independent review pending",
+  "experimental_binary_build": false,
+  "git_diff_check": {
+    "command": "git diff --check",
+    "exit_code": 0,
+    "scope": "tracked working-tree changes; new preparation-file whitespace separately inspected"
+  },
+  "moltenvk_compile_verified": false,
+  "moltenvk_patch_apply_check": {
+    "command": "git -C /private/tmp/fgmetal-step11b/MoltenVK apply --check --whitespace=error /Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11d3a/moltenvk-instrumentation.patch",
+    "diagnostics": "",
+    "exit_code": 0,
+    "patch_sha256": "8e5ca0f3d20a4ee3d0684297cbb299d27d61c882cbf13fc1564fecb90af42638"
+  },
+  "native_graphics_run": false,
+  "native_run_lease_verified": false,
+  "native_source_continuous_time_labels": false,
+  "native_source_prohibited_layer_assignments_found": false,
+  "native_source_sha256": "151a80a8a1cfe6e9ecee454db8617fc9ed6d8c95de4996f3c76b45a4b1b8546e",
+  "native_syntax_check": {
+    "architecture_target": "x86_64",
+    "command": [
+      "xcrun",
+      "clang++",
+      "-target",
+      "x86_64-apple-macos12.0",
+      "-std=c++17",
+      "-fobjc-arc",
+      "-fno-modules",
+      "-fsyntax-only",
+      "-I",
+      "/private/tmp/fgmetal-step11b/MoltenVK/External/Vulkan-Headers/include",
+      "experiments/dxvk_macos_step11d3a/native_control.mm"
+    ],
+    "cwd": "/Users/nima/Documents/Code/FG-Metal",
+    "diagnostics": "",
+    "exit_code": 0,
+    "object_or_executable_generated": false,
+    "scope": "syntax only; real leased compile/link remains required"
+  },
+  "preparation_file_trailing_whitespace": [],
+  "pristine_moltenvk_git_status": "",
+  "real_build_contract_verified": false,
+  "trace_validator_tests": 23
+}

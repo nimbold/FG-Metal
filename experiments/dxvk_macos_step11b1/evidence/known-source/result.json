@@ -1,0 +1,25 @@
+{
+  "name": "known-source",
+  "exit_status": 0,
+  "wall_seconds": 60.933399832982104,
+  "visual": "VISIBLE GREEN",
+  "environment": {
+    "WINEPREFIX": "/tmp/fgmetal-step11b1/prefix-known-source",
+    "WINEDLLOVERRIDES": "d3d11,dxgi=n,b",
+    "WINEDEBUG": "+loaddll",
+    "DXVK_LOG_LEVEL": "info",
+    "DXVK_LOG_PATH": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11b1/evidence/known-source",
+    "DXVK_HUD": "",
+    "DYLD_PRINT_LIBRARIES": "1",
+    "FG_AUDIT_ENABLE": "1",
+    "FG_AUDIT_RUN_SECONDS": "60",
+    "FG_AUDIT_SKIP_RESIZE": "1",
+    "FG_AB_BGRA": "0",
+    "FG_STEP11B1_KNOWN_SOURCE": "1"
+  },
+  "hashes": {
+    "format-ab.exe": "4419ad8d46e2d96df93a4bf8d7d8e0cb4fee853282414fdbc28fe5f4d210e973",
+    "d3d11.dll": "573e9a40a01df7e96a7a917e1fd48557a1a592f9f2b503e701279b0edc0b5825",
+    "dxgi.dll": "17cbe8e84906ce9657493b1301e712cfc8123413034666fd9387dfe1bbf5b33c"
+  }
+}

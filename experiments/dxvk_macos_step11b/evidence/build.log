@@ -1,0 +1,3 @@
+set -o pipefail && /usr/bin/xcodebuild build -project "MoltenVKPackaging.xcodeproj" -scheme "MoltenVK Package (macOS only)" -destination "generic/platform=macOS" GCC_PREPROCESSOR_DEFINITIONS='${inherited} ' -quiet
+/tmp/fgmetal-step11b/MoltenVK/MoltenVK/MoltenVK.xcodeproj: warning: tasks in 'Copy Headers' are delayed by unsandboxed script phases; set ENABLE_USER_SCRIPT_SANDBOXING=YES to enable sandboxing (in target 'MoltenVK-macOS-static' from project 'MoltenVK')
+note: Run script build phase 'Package MoltenVK' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'MoltenVK-macOS' from project 'MoltenVKPackaging')

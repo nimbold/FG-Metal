@@ -1,0 +1,231 @@
+{
+  "scope": "only task-owned fresh disposable Step11B1 prefixes",
+  "registry_snapshots": [
+    {
+      "prefix": "prefix-bgra8",
+      "registry": "system.reg",
+      "sha256": "545285b7b2dc7e2286a44fa4b757fa74f06b7e33da6931781e8e4fff382d4fa6"
+    },
+    {
+      "prefix": "prefix-bgra8",
+      "registry": "user.reg",
+      "sha256": "38ad152198903165403b86e566ca0a6629e3b8fa594fd4303cbcc741189fdab3"
+    },
+    {
+      "prefix": "prefix-bgra8",
+      "registry": "userdef.reg",
+      "sha256": "bbcf861a070b3da2e5ef67dabf988885b88ffc7a4ed976b13209df4c5d9a3684"
+    },
+    {
+      "prefix": "prefix-constant-blitter",
+      "registry": "system.reg",
+      "sha256": "669ae075a74d72ff13585ce626fd22ea4fcf8e688f7e46aa0f4d3384b061e74f"
+    },
+    {
+      "prefix": "prefix-constant-blitter",
+      "registry": "user.reg",
+      "sha256": "99d0afc5dee9af470b1acb73807a98674dc99f2c2595d85233c5ce505678ed2f"
+    },
+    {
+      "prefix": "prefix-constant-blitter",
+      "registry": "userdef.reg",
+      "sha256": "40713b858cba24790355875a5d6d3120c8cb1c4d17b443ec38edc5b5738c38e0"
+    },
+    {
+      "prefix": "prefix-direct-wsi",
+      "registry": "system.reg",
+      "sha256": "c29b32f562200d22fb74c5cf0093c739305849296ebf3ba957cf1fcb4bc74595"
+    },
+    {
+      "prefix": "prefix-direct-wsi",
+      "registry": "user.reg",
+      "sha256": "a58a041c7ba69622a61fa4491b5fe966774ec14de1f21aecedc0acf418169cb6"
+    },
+    {
+      "prefix": "prefix-direct-wsi",
+      "registry": "userdef.reg",
+      "sha256": "e0cdf67ca1798d5862eb5897b880a276d44b8f67bbbafafd53ca7ddb75ea2e9c"
+    },
+    {
+      "prefix": "prefix-final-original-30s",
+      "registry": "system.reg",
+      "sha256": "28404360d695469a972aafd8a9c04a111309ae5b9e6298c4ac5e034a7b3cf591"
+    },
+    {
+      "prefix": "prefix-final-original-30s",
+      "registry": "user.reg",
+      "sha256": "9a5aa44494cfc0be455215c1f72aba15f26785500a183471858861fdae79e9fa"
+    },
+    {
+      "prefix": "prefix-final-original-30s",
+      "registry": "userdef.reg",
+      "sha256": "80d84c0a60d5de898f04f4dd1bd77782108c5c9545ef5b95aa979ab436c24e96"
+    },
+    {
+      "prefix": "prefix-final-original-60s",
+      "registry": "system.reg",
+      "sha256": "15b2421c6aaca16bd441da22d7a8385831efcd75be38feca2d6ce88127f75071"
+    },
+    {
+      "prefix": "prefix-final-original-60s",
+      "registry": "user.reg",
+      "sha256": "de35bdfe0a9127dbed75abd652378b4c3b21b7c1d0a3f7133b88342faa9c08d1"
+    },
+    {
+      "prefix": "prefix-final-original-60s",
+      "registry": "userdef.reg",
+      "sha256": "9d6cb4fa1d60fc5743c8b1d63ba0024c1e2a099af35afab90626d109c81eba0a"
+    },
+    {
+      "prefix": "prefix-known-source",
+      "registry": "system.reg",
+      "sha256": "cc3d820fe247d08bd746e73360f33c923b881c69bfcf3f5593d9309e2a6fa9df"
+    },
+    {
+      "prefix": "prefix-known-source",
+      "registry": "user.reg",
+      "sha256": "eed501a971d4a0fec613600d154e1e65c54f3e3c35ea27d1689d7775d6ae17cb"
+    },
+    {
+      "prefix": "prefix-known-source",
+      "registry": "userdef.reg",
+      "sha256": "52a10f2a66180c2b8b3bb1cf6fed7fd38c1da57c1522a596f65f5956becdc058"
+    },
+    {
+      "prefix": "prefix-repository-smoke",
+      "registry": "system.reg",
+      "sha256": "e2115050cb0d040eacf69fb403eb9b2062bf1b6cc519867e4ae6b2edfed17b8a"
+    },
+    {
+      "prefix": "prefix-repository-smoke",
+      "registry": "user.reg",
+      "sha256": "350ee56bf674f67fb61aec99f475b6f43d1bbc3b2734aa065639050cb936290d"
+    },
+    {
+      "prefix": "prefix-repository-smoke",
+      "registry": "userdef.reg",
+      "sha256": "e85dd3c2e6e707b27e40ea3efe865424ec6958ad2a68a50775a51cc68a0405b9"
+    },
+    {
+      "prefix": "prefix-rgba8",
+      "registry": "system.reg",
+      "sha256": "b5121786967352f3d2c81a0719b6f5e6280ec2529752e1778543d6ef9c04cba6"
+    },
+    {
+      "prefix": "prefix-rgba8",
+      "registry": "user.reg",
+      "sha256": "f5f132cc71dfe1ed478f39ed461e3dbef9122c76195a025d92524dc3ecb176f7"
+    },
+    {
+      "prefix": "prefix-rgba8",
+      "registry": "userdef.reg",
+      "sha256": "a3e5615b8923fac3e86225d481ebb3e27f1793297d9ce3030144bfbddbf3a6b1"
+    },
+    {
+      "prefix": "prefix-source-after",
+      "registry": "system.reg",
+      "sha256": "29f86de42785c49d3bbb9eddceb7405b614067daacce810e22d704f6e99dc4e1"
+    },
+    {
+      "prefix": "prefix-source-after",
+      "registry": "user.reg",
+      "sha256": "787a6ebcfae751b24fa90bf025d1306b51104e5379f65c219ddcfbe562500d17"
+    },
+    {
+      "prefix": "prefix-source-after",
+      "registry": "userdef.reg",
+      "sha256": "bda38b6cea9ea73ab3f12d47df18a6b7e3cde33aea30648551ed4ef29f662f8d"
+    },
+    {
+      "prefix": "prefix-source-before",
+      "registry": "system.reg",
+      "sha256": "a9e2df7d1af2010e7a2e61ca9ee0cc608b14185db7c66b46c1312f539f61f43a"
+    },
+    {
+      "prefix": "prefix-source-before",
+      "registry": "user.reg",
+      "sha256": "9d93e6fc86bde4c6e811278f32c2034f05491c1fa7acd7547a877a263e1b3666"
+    },
+    {
+      "prefix": "prefix-source-before",
+      "registry": "userdef.reg",
+      "sha256": "fd24e57002b565c45273c00e4806da98ff11c7f0f649edf949f6384fd35718a8"
+    },
+    {
+      "prefix": "prefix-final-bgra8-60s",
+      "registry": "system.reg",
+      "sha256": "48ca6eef677a6d65103fa600368867accf0dd196471084e16157b35bf0981a23"
+    },
+    {
+      "prefix": "prefix-final-bgra8-60s",
+      "registry": "user.reg",
+      "sha256": "bc220e5222fca7cefd87d8f561274631bd67ea2a5a10c5f907a6e3d06955553b"
+    },
+    {
+      "prefix": "prefix-final-bgra8-60s",
+      "registry": "userdef.reg",
+      "sha256": "be3de46f954ed8cea3f588f65bb2223f420fe137c7e14f2ad5d4a3647ce527c0"
+    },
+    {
+      "prefix": "prefix-final-lifecycle-65s",
+      "registry": "system.reg",
+      "sha256": "21783172452e2fce82cfb7dca02f58ae8426db2fca3e269308b51f958a8733d3"
+    },
+    {
+      "prefix": "prefix-final-lifecycle-65s",
+      "registry": "user.reg",
+      "sha256": "023cfd69cb0ab148fa3e08a57899c5f42a788d0baac84ac39ca20fed3ff7386e"
+    },
+    {
+      "prefix": "prefix-final-lifecycle-65s",
+      "registry": "userdef.reg",
+      "sha256": "2e3391f09084ea6321be5b5f7fb10d59dfafcca0de8b2af5104854434a4d2759"
+    },
+    {
+      "prefix": "prefix-final-repository-smoke",
+      "registry": "system.reg",
+      "sha256": "28fba0f2060a1787dedec6fe338c43a452109f6d117d63147d2d93053c1e4623"
+    },
+    {
+      "prefix": "prefix-final-repository-smoke",
+      "registry": "user.reg",
+      "sha256": "9d2bdd9a8477c2101798d28c27658c4626813ebaec7773e10067a8d0391858f2"
+    },
+    {
+      "prefix": "prefix-final-repository-smoke",
+      "registry": "userdef.reg",
+      "sha256": "b5cb09ed57d42d33b3295e7b1232026118c82d7d3474dd1934ee4f2df063c47c"
+    },
+    {
+      "prefix": "prefix-final-waitable-30s",
+      "registry": "system.reg",
+      "sha256": "db3777432cedb88da9f0fcc19dedc30b02d7e2e29fb8c68900f471923cf232c5"
+    },
+    {
+      "prefix": "prefix-final-waitable-30s",
+      "registry": "user.reg",
+      "sha256": "7a30bd286e78e1a59dd4f76f60d3d6cc955b6542185840d5da44b4d2c4759af2"
+    },
+    {
+      "prefix": "prefix-final-waitable-30s",
+      "registry": "userdef.reg",
+      "sha256": "ee961457aa8b5cf92ead9535f80bbff729315102969944b25a0d71fb8df9798e"
+    },
+    {
+      "prefix": "prefix-rgba8-clean-replay",
+      "registry": "system.reg",
+      "sha256": "f37621642e60bef16bf6960935f998215068690b357ecd3541dfe8e4e764ae4c"
+    },
+    {
+      "prefix": "prefix-rgba8-clean-replay",
+      "registry": "user.reg",
+      "sha256": "44faea652c15d9300581e490e6b5d0fda249be8ec64d8bd65faba6049e3d4b13"
+    },
+    {
+      "prefix": "prefix-rgba8-clean-replay",
+      "registry": "userdef.reg",
+      "sha256": "8d0bb2228ec1e18d8ef9d67306be5eff65ce303b83d85115c8e63f8fa31003b8"
+    }
+  ],
+  "completion_cleanup": "All Step11B1 task-owned disposable prefixes removed after runtime completion; registry snapshots retained; original Step11A/B prefixes and frozen runtime preserved"
+}

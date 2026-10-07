@@ -1,0 +1,177 @@
+{
+  "adopted_existing": true,
+  "artifacts": [
+    {
+      "artifact_manifest_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/7a4d53fbf6e4730c93119759d521d91bbf5bfa419bde6df7d63d2ca7b0d500e3/manifest.json",
+      "artifact_name": "FGMetalBridge.dll",
+      "canonical_artifact_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/7a4d53fbf6e4730c93119759d521d91bbf5bfa419bde6df7d63d2ca7b0d500e3/FGMetalBridge.dll",
+      "sha256": "7a4d53fbf6e4730c93119759d521d91bbf5bfa419bde6df7d63d2ca7b0d500e3",
+      "size_bytes": 93867,
+      "source_build_hard_link_count": 1,
+      "source_build_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-step11d2-bridge-diagnostic-build-c-20261006-91603f7d/overlay/x86_64-windows/FGMetalBridge.dll"
+    },
+    {
+      "artifact_manifest_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/ecc9ce4c552f093a501ed1ac1186bbd086b2db4465830a07d119a6c4b49dd5d2/manifest.json",
+      "artifact_name": "fgmetalbridge.so",
+      "canonical_artifact_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/ecc9ce4c552f093a501ed1ac1186bbd086b2db4465830a07d119a6c4b49dd5d2/fgmetalbridge.so",
+      "sha256": "ecc9ce4c552f093a501ed1ac1186bbd086b2db4465830a07d119a6c4b49dd5d2",
+      "size_bytes": 23192,
+      "source_build_hard_link_count": 1,
+      "source_build_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-step11d2-bridge-diagnostic-build-c-20261006-91603f7d/overlay/x86_64-unix/fgmetalbridge.so"
+    }
+  ],
+  "build_id": "legacy-fgmetal-step11d2-bridge-diagnostic-build-c-20261006-91603f7d",
+  "build_identity": {
+    "build_log_status": "build transcript absent; retained runtime manifests bind the output hashes",
+    "build_system": "legacy-debug-preservation",
+    "build_type": "diagnostic; not a rebuild-reproducibility claim",
+    "compiler_identity": {
+      "status": "historical compiler command provenance is not asserted"
+    },
+    "config_key_sha256": null,
+    "dependency_state": {
+      "status": "historical dependency state is not asserted"
+    },
+    "generated_shader_identity": [],
+    "legacy_debug_artifact_hashes": {
+      "FGMetalBridge.dll": "7a4d53fbf6e4730c93119759d521d91bbf5bfa419bde6df7d63d2ca7b0d500e3",
+      "fgmetalbridge.so": "ecc9ce4c552f093a501ed1ac1186bbd086b2db4465830a07d119a6c4b49dd5d2"
+    },
+    "legacy_debug_context_evidence": [
+      {
+        "mode": "0o644",
+        "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-step11d2-bridge-diagnostic-build-c-20261006-91603f7d.evidence/provenance/00-manifest.json",
+        "sha256": "14d693b109a8280ed3d19d454f2be0d3b3e0b3754f4cbd9e6daf5c3907e5c688",
+        "size_bytes": 2691,
+        "source_path": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-60s-07-submit-reclaim-split/manifest.json"
+      },
+      {
+        "mode": "0o644",
+        "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-step11d2-bridge-diagnostic-build-c-20261006-91603f7d.evidence/provenance/01-result.json",
+        "sha256": "94a5568aaa9805ddc910c6e4fb9c7e96013d9148d28805ab110af38b2349e21f",
+        "size_bytes": 3152,
+        "source_path": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-60s-07-submit-reclaim-split/result.json"
+      },
+      {
+        "mode": "0o644",
+        "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-step11d2-bridge-diagnostic-build-c-20261006-91603f7d.evidence/provenance/02-STEP11D2_REPORT.md",
+        "sha256": "9b1796cf030fae18d199811e31266165f08d854091ea3f327502f06270b4c1b7",
+        "size_bytes": 11596,
+        "source_path": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/STEP11D2_REPORT.md"
+      }
+    ],
+    "legacy_debug_preservation": true,
+    "legacy_debug_symbols": [
+      {
+        "mode": "0o644",
+        "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-step11d2-bridge-diagnostic-build-c-20261006-91603f7d.evidence/debug-symbols/bridge_pe.o",
+        "sha256": "b980f3c0e779d7ce7987b1a73ef86689868ab76f9f02271c0f3ee71063240a44",
+        "size_bytes": 9411,
+        "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-step11d2-bridge-diagnostic-build-c-20261006-91603f7d/bridge_pe.o"
+      },
+      {
+        "mode": "0o644",
+        "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-step11d2-bridge-diagnostic-build-c-20261006-91603f7d.evidence/debug-symbols/bridge_unix.o",
+        "sha256": "1d7e5595fac50c7f390c2c2cd75996f4b5773dfe5fbad426b53dac5a1a2aa01f",
+        "size_bytes": 1896,
+        "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-step11d2-bridge-diagnostic-build-c-20261006-91603f7d/bridge_unix.o"
+      },
+      {
+        "mode": "0o644",
+        "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-step11d2-bridge-diagnostic-build-c-20261006-91603f7d.evidence/debug-symbols/metal_provider.o",
+        "sha256": "43255c8876904bf409440ddf8333f35ad9634b382208269522375b2c931ba587",
+        "size_bytes": 16392,
+        "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-step11d2-bridge-diagnostic-build-c-20261006-91603f7d/metal_provider.o"
+      }
+    ],
+    "linker_identity": {
+      "status": "historical linker command provenance is not asserted"
+    },
+    "patch_set": {
+      "status": "historical patch set is identified by retained run evidence only"
+    },
+    "source_identity": {
+      "status": "historical build-time source tree not captured in this build root"
+    }
+  },
+  "build_log_sha256": null,
+  "build_log_status": "build transcript absent; retained runtime manifests bind the output hashes",
+  "build_manifest_id": "66e8867390644bbfd7ad21322c5a0baa0135b4d399ecc2c775b480f5f0cf74a7",
+  "build_type": "diagnostic; not a rebuild-reproducibility claim",
+  "canonical_artifact_root": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256",
+  "captured_config_key_sha256": null,
+  "compiler_identity": {
+    "status": "historical compiler command provenance is not asserted"
+  },
+  "compiler_identity_sha256": null,
+  "compiler_versions": null,
+  "completed_at_unix": 1791335599.947312,
+  "config_key_sha256": null,
+  "configuration_key_provenance": "legacy-debug-preservation-only",
+  "cross_file": null,
+  "dependency_state": {
+    "status": "historical dependency state is not asserted"
+  },
+  "estimated_bytes": 155648,
+  "evidence_files": [
+    {
+      "mode": "0o600",
+      "path": "provenance/00-manifest.json",
+      "sha256": "14d693b109a8280ed3d19d454f2be0d3b3e0b3754f4cbd9e6daf5c3907e5c688",
+      "size_bytes": 2691
+    },
+    {
+      "mode": "0o600",
+      "path": "provenance/01-result.json",
+      "sha256": "94a5568aaa9805ddc910c6e4fb9c7e96013d9148d28805ab110af38b2349e21f",
+      "size_bytes": 3152
+    },
+    {
+      "mode": "0o600",
+      "path": "provenance/02-STEP11D2_REPORT.md",
+      "sha256": "9b1796cf030fae18d199811e31266165f08d854091ea3f327502f06270b4c1b7",
+      "size_bytes": 11596
+    },
+    {
+      "mode": "0o600",
+      "path": "debug-symbols/bridge_pe.o",
+      "sha256": "b980f3c0e779d7ce7987b1a73ef86689868ab76f9f02271c0f3ee71063240a44",
+      "size_bytes": 9411
+    },
+    {
+      "mode": "0o600",
+      "path": "debug-symbols/bridge_unix.o",
+      "sha256": "1d7e5595fac50c7f390c2c2cd75996f4b5773dfe5fbad426b53dac5a1a2aa01f",
+      "size_bytes": 1896
+    },
+    {
+      "mode": "0o600",
+      "path": "debug-symbols/metal_provider.o",
+      "sha256": "43255c8876904bf409440ddf8333f35ad9634b382208269522375b2c931ba587",
+      "size_bytes": 16392
+    }
+  ],
+  "evidence_index_sha256": "e36fe61f0d58d4bfb548cf8af4d48dbe12b26e894e88ae2c59821c2dcd08ec6e",
+  "evidence_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-step11d2-bridge-diagnostic-build-c-20261006-91603f7d.evidence",
+  "generated_shader_identity": [],
+  "kind": "reference",
+  "linker_identity": {
+    "status": "historical linker command provenance is not asserted"
+  },
+  "manifest_sha256": "05e67f4369768de96ee474258463bd6cab6e5835f3f9b75d5396b1f363b1c27b",
+  "meson_configuration_sha256": null,
+  "meson_options": null,
+  "ninja_log_sha256": null,
+  "owner_experiment": "dxvk_macos_step11dR",
+  "patch_hashes": {},
+  "preserve_debug_expires_at_unix": 1791940191.9149709,
+  "preserve_debug_reason": "The retained Step 11D.2 diagnostic runner consumes these exact bridge overlay binaries; keep this one small build tree through the seven-day evidence review window, then artifactize required symbols and retire it.",
+  "provenance_scope": "artifactization-time observation; historical build-time input not asserted",
+  "purpose": "retain the exact Step 11D.2 bridge diagnostic overlay for reproducing its captured runs",
+  "requested_config_key_sha256": null,
+  "schema_version": 3,
+  "source_identity": {
+    "status": "historical build-time source tree not captured in this build root"
+  },
+  "source_tree_hash_at_lease": "unknown-at-build-time"
+}

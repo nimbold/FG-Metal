@@ -1,0 +1,17 @@
+{
+  "exit_status": 0,
+  "wall_seconds": 0.644,
+  "descriptor_worker_test_forced": true,
+  "test_prefix": "descDetachf77ab16b77",
+  "active_stage_reached": true,
+  "worker_started_handshake_passed": true,
+  "descriptor_worker_detach_marker_asserted": true,
+  "normal_device_shutdown_logs": 0,
+  "loaded_pinned_mvk": true,
+  "sha256": {
+    "d3d11_worker_detach.exe": "edd9f40739824fe39cfda9ec4c667238387d24904da36c729883d3263c80754d",
+    "adapter_worker_detach_probe.dll": "faa546ea3d2c06caa20c8128b7ddad4ef287c0247b49f6ef55c0e1ea79dcb43a",
+    "d3d11.dll": "5f41dc59a12b492530781daf85c2be35c7cabb4cc88e4384b61353b7d75b6956",
+    "dxgi.dll": "0319f3ddca7d1a6cd18aaa528df1ac95380d72b8d68002848b7a524282d340c2"
+  }
+}

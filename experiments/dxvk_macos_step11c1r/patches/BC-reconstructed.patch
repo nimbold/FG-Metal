@@ -1,0 +1,2963 @@
+diff --git a/src/d3d11/d3d11_context.h b/src/d3d11/d3d11_context.h
+index 666ae13..97014ce 100644
+--- a/src/d3d11/d3d11_context.h
++++ b/src/d3d11/d3d11_context.h
+@@ -1207,8 +1207,9 @@ namespace dxvk {
+       }
+ 
+       if (unlikely(!m_csChunk->push(command))) {
++        auto nextChunk = AllocCsChunk();
+         GetTypedContext()->EmitCsChunk(std::move(m_csChunk));
+-        m_csChunk = AllocCsChunk();
++        m_csChunk = std::move(nextChunk);
+ 
+         if constexpr (!IsDeferred && AllowFlush)
+           GetTypedContext()->ConsiderFlush(GpuFlushType::ImplicitWeakHint);
+@@ -1223,8 +1224,9 @@ namespace dxvk {
+       m_csData = m_csChunk->pushCmd<M, Cmd>(command, count);
+ 
+       if (unlikely(!m_csData)) {
++        auto nextChunk = AllocCsChunk();
+         GetTypedContext()->EmitCsChunk(std::move(m_csChunk));
+-        m_csChunk = AllocCsChunk();
++        m_csChunk = std::move(nextChunk);
+ 
+         if constexpr (!IsDeferred && AllowFlush)
+           GetTypedContext()->ConsiderFlush(GpuFlushType::ImplicitWeakHint);
+@@ -1240,8 +1242,9 @@ namespace dxvk {
+         m_csData = nullptr;
+         m_csDataType = D3D11CmdType::None;
+ 
++        auto nextChunk = AllocCsChunk();
+         GetTypedContext()->EmitCsChunk(std::move(m_csChunk));
+-        m_csChunk = AllocCsChunk();
++        m_csChunk = std::move(nextChunk);
+       }
+     }
+ 
+diff --git a/src/d3d11/d3d11_swapchain.cpp b/src/d3d11/d3d11_swapchain.cpp
+index 213fb0a..f64c1c6 100644
+--- a/src/d3d11/d3d11_swapchain.cpp
++++ b/src/d3d11/d3d11_swapchain.cpp
+@@ -6,6 +6,11 @@
+ #include "../dxvk/dxvk_shader_spirv.h"
+ 
+ #include "../util/util_win32_compat.h"
++#include "../util/util_env.h"
++
++#include <atomic>
++#include <chrono>
++#include <memory>
+ 
+ #include <d3d11_composition_vert.h>
+ #include <d3d11_composition_frag.h>
+@@ -257,6 +262,12 @@ namespace dxvk {
+           UINT                      SyncInterval,
+           UINT                      PresentFlags,
+     const DXGI_PRESENT_PARAMETERS*  pPresentParameters) {
++    static const bool tracePresent =
++      env::getEnvVar("DXVK_INTERNAL_WSI_TRACE") == "1";
++    dxvk::high_resolution_clock::time_point presentStart = { };
++    if (tracePresent)
++      presentStart = dxvk::high_resolution_clock::now();
++    const uint64_t appFrameId = m_frameId + 1u;
+     HRESULT hr = S_OK;
+ 
+     if (m_device->getDeviceStatus() != VK_SUCCESS)
+@@ -280,6 +291,15 @@ namespace dxvk {
+     } catch (const DxvkError& e) {
+       Logger::err(e.message());
+       hr = E_FAIL;
++    } catch (const std::bad_alloc&) {
++      Logger::err("D3D11: Present failed from host memory exhaustion");
++      hr = E_OUTOFMEMORY;
++    } catch (const std::exception&) {
++      Logger::err("D3D11: Present failed with a standard exception");
++      hr = E_FAIL;
++    } catch (...) {
++      Logger::err("D3D11: Present failed with an unknown exception");
++      hr = E_FAIL;
+     }
+ 
+     // Ensure to synchronize and release the frame latency semaphore
+@@ -299,6 +319,13 @@ namespace dxvk {
+     if (m_latencyHud)
+       m_latencyHud->accumulateStats(latencyStats);
+ 
++    if (tracePresent) {
++      auto elapsed = dxvk::high_resolution_clock::now() - presentStart;
++      auto elapsedUs = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
++      Logger::info(str::format("InternalWSI: source-present app=", appFrameId,
++        " duration-us=", elapsedUs, " hr=", str::format("0x", std::hex, uint32_t(hr))));
++    }
++
+     return hr;
+   }
+ 
+@@ -420,17 +447,101 @@ namespace dxvk {
+ 
+     m_presenter->setSyncInterval(SyncInterval);
+ 
++    bool incrementalPresent = UseIncrementalPresent(pPresentParameters);
++    bool sequential = m_desc.SwapEffect == DXGI_SWAP_EFFECT_SEQUENTIAL ||
++                      m_desc.SwapEffect == DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
++
++    // Validate this before acquiring a WSI image. Returning after acquire
++    // would strand the presenter's active source lease and block future use.
++    if (incrementalPresent && !sequential) {
++      Logger::err("D3D11: Incremental present only supported with sequential present modes.");
++      return DXGI_ERROR_INVALID_CALL;
++    }
++
+     // Presentation semaphores and WSI swap chain image
+-    if (m_latency)
++    struct SourceLeaseState {
++      Rc<DxvkDevice> device;
++      Rc<Presenter> presenter;
++      Rc<DxvkLatencyTracker> latency;
++      AppFrameId appFrameId;
++      std::atomic_bool acquired = { false };
++      std::atomic_bool timingsStarted = { false };
++      std::atomic_bool submissionMayBeQueued = { false };
++      std::atomic_bool presentAdmitted = { false };
++      std::atomic_bool appFrameCommitted = { false };
++      std::atomic_bool resolved = { false };
++      std::atomic<VkResult> deferredError = { VK_SUCCESS };
++
++      ~SourceLeaseState() noexcept {
++        if (!resolved.load()) {
++          bool safeToRetire = true;
++
++          // flushCommandList can enqueue the command list and then fail while
++          // starting the next recording context. Do not invalidate the WSI
++          // lease until any command that could consume its acquire semaphore
++          // has left the submission and GPU queues.
++          if (submissionMayBeQueued.load() && device) {
++            try {
++              device->waitForIdle();
++            } catch (...) {
++              safeToRetire = false;
++              try { Logger::err("D3D11: could not drain source submission before lease cleanup"); } catch (...) { }
++            }
++          }
++
++          if (appFrameCommitted.load() && presenter) {
++            try {
++              presenter->signalFailedSourceFrame(
++                appFrameId, deferredError.load(), latency);
++            } catch (...) {
++            }
++          }
++          if (safeToRetire && acquired.load() && presenter) {
++            try { presenter->cancelSourceImageLease(); } catch (...) { }
++          }
++          if (timingsStarted.load() && latency) {
++            try { latency->discardTimings(); } catch (...) { }
++          }
++          if (device) {
++            try { device->reportSubmissionError(deferredError.load()); } catch (...) { }
++          }
++        }
++      }
++    };
++
++    // Allocate the owner before acquiring WSI state. Once acquire succeeds,
++    // this guard is already present to retire the source lease on every exit.
++    auto sourceLease = std::make_shared<SourceLeaseState>();
++    sourceLease->device = m_device;
++    sourceLease->presenter = m_presenter;
++    sourceLease->latency = m_latency;
++
++    // Prepare the backbuffer rotation before WSI acquire. Recording this
++    // operation in the source callback below keeps every fallible setup step
++    // between acquire and CS dispatch under the lease guard.
++    small_vector<Rc<DxvkImage>, 4u> rotateImages;
++    if (m_backBuffers.size() > 1u) {
++      for (uint32_t i = 0; i < m_backBuffers.size(); i++)
++        rotateImages.push_back(GetCommonTexture(m_backBuffers[i].ptr())->GetImage());
++    }
++
++    if (m_latency) {
+       m_latency->notifyCpuPresentBegin(m_frameId + 1u);
++      sourceLease->timingsStarted.store(true);
++    }
+ 
+     PresenterSync sync;
+     Rc<DxvkImage> backBuffer;
+ 
+     VkResult status = m_presenter->acquireNextImage(sync, backBuffer);
+ 
+-    if (status != VK_SUCCESS && m_latency)
++    if (status == VK_SUCCESS || status == VK_SUBOPTIMAL_KHR)
++      sourceLease->acquired.store(true);
++
++    if (status != VK_SUCCESS && m_latency) {
+       m_latency->discardTimings();
++      sourceLease->timingsStarted.store(false);
++    }
+ 
+     if (status < 0)
+       return E_FAIL;
+@@ -443,18 +554,6 @@ namespace dxvk {
+     VkRect2D srcRect = ComputeSrcPresentRect();
+     VkRect2D dstRect = ComputeDstPresentRect(dstSize, srcRect.extent);
+ 
+-    // Incremental presentation is only supported with flip model presentation
+-    // on native, not 100% sure about the exact validation here.
+-    bool incrementalPresent = UseIncrementalPresent(pPresentParameters);
+-
+-    bool sequential = m_desc.SwapEffect == DXGI_SWAP_EFFECT_SEQUENTIAL ||
+-                      m_desc.SwapEffect == DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
+-
+-    if (incrementalPresent && !sequential) {
+-      Logger::err("D3D11: Incremental present only supported with sequential present modes.");
+-      return DXGI_ERROR_INVALID_CALL;
+-    }
+-
+     DirtyRectList dirtyRects;
+ 
+     if (incrementalPresent) {
+@@ -477,7 +576,8 @@ namespace dxvk {
+       m_compositionScroll = nullptr;
+     }
+ 
+-    m_frameId += 1;
++    const uint64_t appFrameId = m_frameId + 1u;
++    sourceLease->appFrameId = AppFrameId { appFrameId };
+ 
+     // Present from CS thread so that we don't
+     // have to synchronize with it first.
+@@ -500,39 +600,91 @@ namespace dxvk {
+       cPresenter      = m_presenter,
+       cLatency        = m_latency,
+       cColorSpace     = m_colorSpace,
+-      cFrameId        = m_frameId,
++      cProofEnabled   = m_device->isInternalWsiProofEnabled(),
++      cFrameId        = appFrameId,
++      cSourceLease    = sourceLease,
+       cDirtyRects     = std::move(dirtyRects),
++      cRotateImages   = std::move(rotateImages),
+       cClearColor     = m_clearColor,
+       cSrcRect        = srcRect,
+       cDstRect        = dstRect
+     ] (DxvkContext* ctx) {
+-      // Update back buffer color space as necessary
+-      if (cSwapImage->image()->info().colorSpace != cColorSpace) {
+-        DxvkImageUsageInfo usage = { };
+-        usage.colorSpace = cColorSpace;
++      try {
++        // Update back buffer color space as necessary
++        if (cSwapImage->image()->info().colorSpace != cColorSpace) {
++          DxvkImageUsageInfo usage = { };
++          usage.colorSpace = cColorSpace;
+ 
+-        ctx->ensureImageCompatibility(cSwapImage->image(), usage);
+-      }
++          ctx->ensureImageCompatibility(cSwapImage->image(), usage);
++        }
+ 
+-      // Blit the D3D back buffer onto the actual Vulkan
+-      // swap chain and render the HUD if we have one.
+-      auto contextObjects = ctx->beginExternalRendering();
++        // Blit the D3D back buffer onto the actual Vulkan
++        // swap chain and render the HUD if we have one.
++        auto contextObjects = ctx->beginExternalRendering();
++
++        cBlitter->present(contextObjects, cClearColor,
++          cBackBuffer, cDstRect, cSwapImage, cSrcRect);
++
++        // Submit current command list and present
++        ctx->synchronizeWsi(cSync);
++        cSourceLease->submissionMayBeQueued.store(true);
++        // Keep the source path asynchronous in proof mode too. Queue ordering
++        // guarantees this submission precedes its present; the submit worker
++        // owns asynchronous failure handling without a stack-backed status
++        // pointer or an extra source-Present stall.
++        ctx->flushCommandList(nullptr, nullptr);
++
++        VkResult presentStatus = cDevice->presentImage(cPresenter, cLatency,
++          AppFrameId { cFrameId }, cDirtyRects.size(), cDirtyRects.data(), nullptr, cProofEnabled);
++        cSourceLease->presentAdmitted.store(presentStatus == VK_SUCCESS);
++        cSourceLease->resolved.store(true);
++
++        if (presentStatus != VK_SUCCESS) {
++          Logger::err("D3D11: source present queue admission failed; device status was recorded");
++          return;
++        }
+ 
+-      cBlitter->present(contextObjects, cClearColor,
+-        cBackBuffer, cDstRect, cSwapImage, cSrcRect);
++        if (cRotateImages.size() > 1u) {
++          auto allocation = cRotateImages[0]->storage();
+ 
+-      // Submit current command list and present
+-      ctx->synchronizeWsi(cSync);
+-      ctx->flushCommandList(nullptr, nullptr);
++          for (size_t i = 0u; i + 1 < cRotateImages.size(); i++) {
++            ctx->invalidateImage(cRotateImages[i], cRotateImages[i + 1]->storage(),
++              cRotateImages[i + 1]->info().layout);
++          }
+ 
+-      cDevice->presentImage(cPresenter, cLatency, cFrameId,
+-        cDirtyRects.size(), cDirtyRects.data(), nullptr);
++          ctx->invalidateImage(cRotateImages[cRotateImages.size() - 1u],
++            std::move(allocation), cRotateImages[0]->info().layout);
++        }
++      } catch (const std::bad_alloc&) {
++        if (cSourceLease->presentAdmitted.load())
++          cDevice->waitForIdle();
++        if (cSourceLease->resolved.load())
++          cDevice->reportSubmissionError(VK_ERROR_OUT_OF_HOST_MEMORY);
++        else
++          cSourceLease->deferredError.store(VK_ERROR_OUT_OF_HOST_MEMORY);
++        Logger::err("D3D11: source presentation failed from host memory exhaustion");
++      } catch (const std::exception&) {
++        if (cSourceLease->presentAdmitted.load())
++          cDevice->waitForIdle();
++        if (cSourceLease->resolved.load())
++          cDevice->reportSubmissionError(VK_ERROR_UNKNOWN);
++        else
++          cSourceLease->deferredError.store(VK_ERROR_UNKNOWN);
++        Logger::err("D3D11: source presentation failed with a standard exception");
++      } catch (...) {
++        if (cSourceLease->presentAdmitted.load())
++          cDevice->waitForIdle();
++        if (cSourceLease->resolved.load())
++          cDevice->reportSubmissionError(VK_ERROR_UNKNOWN);
++        else
++          cSourceLease->deferredError.store(VK_ERROR_UNKNOWN);
++        Logger::err("D3D11: source presentation failed with an unknown exception");
++      }
+     });
+ 
+-    if (m_backBuffers.size() > 1u)
+-      RotateBackBuffers(immediateContext);
+-
+     immediateContext->FlushCsChunk();
++    m_frameId = appFrameId;
++    sourceLease->appFrameCommitted.store(true);
+ 
+     if (m_latency) {
+       m_latency->notifyCpuPresentEnd(m_frameId);
+@@ -549,30 +701,6 @@ namespace dxvk {
+ 
+     return S_OK;
+   }
+-
+-
+-  void D3D11SwapChain::RotateBackBuffers(D3D11ImmediateContext* ctx) {
+-    small_vector<Rc<DxvkImage>, 4> images;
+-
+-    for (uint32_t i = 0; i < m_backBuffers.size(); i++)
+-      images.push_back(GetCommonTexture(m_backBuffers[i].ptr())->GetImage());
+-
+-    ctx->EmitCs([
+-      cImages = std::move(images)
+-    ] (DxvkContext* ctx) {
+-      auto allocation = cImages[0]->storage();
+-
+-      for (size_t i = 0u; i + 1 < cImages.size(); i++) {
+-        ctx->invalidateImage(cImages[i], cImages[i + 1]->storage(),
+-          cImages[i + 1]->info().layout);
+-      }
+-
+-      ctx->invalidateImage(cImages[cImages.size() - 1u],
+-        std::move(allocation), cImages[0]->info().layout);
+-    });
+-  }
+-
+-
+   void D3D11SwapChain::CreateFrameLatencyEvent() {
+     m_frameLatencySignal = new sync::CallbackFence(m_frameId);
+ 
+diff --git a/src/d3d11/d3d11_swapchain.h b/src/d3d11/d3d11_swapchain.h
+index 13bc196..e530fb9 100644
+--- a/src/d3d11/d3d11_swapchain.h
++++ b/src/d3d11/d3d11_swapchain.h
+@@ -153,8 +153,6 @@ namespace dxvk {
+             UINT                      SyncInterval,
+       const DXGI_PRESENT_PARAMETERS*  pPresentParameters);
+ 
+-    void RotateBackBuffers(D3D11ImmediateContext* ctx);
+-
+     void CreateFrameLatencyEvent();
+ 
+     void CreatePresenter();
+diff --git a/src/d3d9/d3d9_swapchain.cpp b/src/d3d9/d3d9_swapchain.cpp
+index d672f11..5cda01d 100644
+--- a/src/d3d9/d3d9_swapchain.cpp
++++ b/src/d3d9/d3d9_swapchain.cpp
+@@ -5,6 +5,9 @@
+ #include "d3d9_hud.h"
+ #include "d3d9_window.h"
+ 
++#include <atomic>
++#include <memory>
++
+ namespace dxvk {
+ 
+   static uint16_t MapGammaControlPoint(float x) {
+@@ -857,8 +860,63 @@ namespace dxvk {
+     PresenterSync sync = { };
+     Rc<DxvkImage> backBuffer;
+ 
++    struct SourceLeaseState {
++      Rc<DxvkDevice> device;
++      Rc<Presenter> presenter;
++      Rc<DxvkLatencyTracker> latency;
++      AppFrameId appFrameId;
++      std::atomic_bool acquired = { false };
++      std::atomic_bool submissionMayBeQueued = { false };
++      std::atomic_bool resolved = { false };
++      std::atomic<VkResult> deferredError = { VK_SUCCESS };
++
++      void fail(VkResult error) noexcept {
++        if (resolved.exchange(true))
++          return;
++
++        deferredError.store(error);
++        bool safeToRetire = true;
++        if (submissionMayBeQueued.load() && device) {
++          try {
++            device->waitForIdle();
++          } catch (...) {
++            safeToRetire = false;
++            try { Logger::err("D3D9: could not drain source submission before lease cleanup"); } catch (...) { }
++          }
++        }
++
++        if (appFrameId.value && presenter) {
++          try { presenter->signalFailedSourceFrame(appFrameId, error, latency); } catch (...) { }
++        }
++        if (safeToRetire && acquired.load() && presenter) {
++          try { presenter->cancelSourceImageLease(); } catch (...) { }
++        }
++        if (latency) {
++          try { latency->discardTimings(); } catch (...) { }
++        }
++        if (device && deferredError.load() != VK_SUCCESS) {
++          try { device->reportSubmissionError(deferredError.load()); } catch (...) { }
++        }
++      }
++
++      ~SourceLeaseState() noexcept {
++        if (!resolved.load())
++          fail(deferredError.load() == VK_SUCCESS
++            ? VK_ERROR_UNKNOWN : deferredError.load());
++      }
++    };
++
++    // Allocate cleanup ownership before the acquire can create a WSI lease.
++    auto sourceLease = std::make_shared<SourceLeaseState>();
++    sourceLease->device = m_device;
++    sourceLease->presenter = m_wctx->presenter;
++    sourceLease->latency = m_latencyTracker;
++
+     status = m_wctx->presenter->acquireNextImage(sync, backBuffer);
+ 
++    if (status == VK_SUCCESS || status == VK_SUBOPTIMAL_KHR)
++      sourceLease->acquired.store(true);
++
+     if (status >= 0 && status != VK_NOT_READY) {
+       VkRect2D srcRect = {
+         {  int32_t(m_srcRect.left),                    int32_t(m_srcRect.top)                    },
+@@ -870,6 +928,7 @@ namespace dxvk {
+ 
+       // Bump frame ID
+       m_wctx->frameId += 1;
++      sourceLease->appFrameId = AppFrameId { m_wctx->frameId };
+ 
+       // Present from CS thread so that we don't
+       // have to synchronize with it first.
+@@ -894,8 +953,10 @@ namespace dxvk {
+         cDstRect        = dstRect,
+         cSync           = sync,
+         cFrameId        = m_wctx->frameId,
+-        cLatency        = m_latencyTracker
++        cLatency        = m_latencyTracker,
++        cSourceLease    = sourceLease
+       ] (DxvkContext* ctx) {
++        try {
+         // Update back buffer color space as necessary
+         if (cSrcView->image()->info().colorSpace != cColorSpace) {
+           DxvkImageUsageInfo usage = { };
+@@ -912,9 +973,25 @@ namespace dxvk {
+ 
+         // Submit command list and present
+         ctx->synchronizeWsi(cSync);
++        cSourceLease->submissionMayBeQueued.store(true);
+         ctx->flushCommandList(nullptr, nullptr);
+ 
+-        cDevice->presentImage(cPresenter, cLatency, cFrameId, 0, nullptr, nullptr);
++        VkResult presentStatus = cDevice->presentImage(cPresenter, cLatency,
++          AppFrameId { cFrameId }, 0, nullptr, nullptr);
++        cSourceLease->resolved.store(true);
++
++        if (presentStatus != VK_SUCCESS)
++          Logger::err("D3D9: source present queue admission failed; device status was recorded");
++        } catch (const std::bad_alloc&) {
++          cSourceLease->fail(VK_ERROR_OUT_OF_HOST_MEMORY);
++          Logger::err("D3D9: source presentation failed from host memory exhaustion");
++        } catch (const std::exception&) {
++          cSourceLease->fail(VK_ERROR_UNKNOWN);
++          Logger::err("D3D9: source presentation failed with a standard exception");
++        } catch (...) {
++          cSourceLease->fail(VK_ERROR_UNKNOWN);
++          Logger::err("D3D9: source presentation failed with an unknown exception");
++        }
+       });
+ 
+       m_parent->FlushCsChunk();
+diff --git a/src/dxvk/dxvk_context.cpp b/src/dxvk/dxvk_context.cpp
+index 7220b7b..c52d625 100644
+--- a/src/dxvk/dxvk_context.cpp
++++ b/src/dxvk/dxvk_context.cpp
+@@ -204,6 +204,9 @@ namespace dxvk {
+ 
+ 
+   Rc<DxvkCommandList> DxvkContext::beginExternalRendering() {
++    // Materialize deferred clears and restore shader-readable layouts before
++    // external consumers bypass the context's normal resource preparation.
++    endCurrentPass(false);
+     // Flush and invalidate everything
+     endCurrentCommands();
+     beginCurrentCommands();
+diff --git a/src/dxvk/dxvk_device.cpp b/src/dxvk/dxvk_device.cpp
+index 0221825..97de471 100644
+--- a/src/dxvk/dxvk_device.cpp
++++ b/src/dxvk/dxvk_device.cpp
+@@ -601,28 +601,55 @@ namespace dxvk {
+   }
+ 
+ 
+-  void DxvkDevice::presentImage(
++  VkResult DxvkDevice::presentImage(
+     const Rc<Presenter>&            presenter,
+     const Rc<DxvkLatencyTracker>&   tracker,
+-          uint64_t                  frameId,
++          AppFrameId                frameId,
+           uint32_t                  rectCount,
+     const VkRectLayerKHR*           rects,
+-          DxvkSubmitStatus*         status) {
+-    DxvkPresentInfo presentInfo = { };
+-    presentInfo.presenter = presenter;
+-    presentInfo.frameId = frameId;
+-
+-    for (uint32_t i = 0u; i < rectCount; i++)
+-      presentInfo.rects.push_back(rects[i]);
++          DxvkSubmitStatus*         status,
++          bool                      allowInternalProof) {
++    VkResult result = VK_SUCCESS;
++
++    try {
++      DxvkPresentInfo presentInfo = { };
++      presentInfo.presenter = presenter;
++      presentInfo.identity.origin = DxvkPresentOrigin::ApplicationSource;
++      presentInfo.identity.appFrameId = frameId;
++      presentInfo.allowInternalProof = allowInternalProof;
++
++      for (uint32_t i = 0u; i < rectCount; i++)
++        presentInfo.rects.push_back(rects[i]);
++
++      DxvkLatencyInfo latencyInfo;
++      latencyInfo.tracker = tracker;
++      latencyInfo.frameId = frameId.value;
++
++      result = m_submissionQueue.present(presentInfo, latencyInfo, status);
++    } catch (const std::bad_alloc&) {
++      result = VK_ERROR_OUT_OF_HOST_MEMORY;
++    } catch (...) {
++      result = VK_ERROR_UNKNOWN;
++    }
+ 
+-    DxvkLatencyInfo latencyInfo;
+-    latencyInfo.tracker = tracker;
+-    latencyInfo.frameId = frameId;
++    if (result != VK_SUCCESS) {
++      // The caller may already have queued the command list that consumes
++      // this acquire semaphore. Retire that GPU work before invalidating the
++      // WSI lease so swapchain recreation cannot destroy an in-use semaphore.
++      waitForIdle();
++      presenter->signalFailedSourceFrame(frameId, result, tracker);
++      presenter->cancelSourceImageLease();
++      m_submissionQueue.reportError(result);
++      try {
++        Logger::err("DxvkDevice: failed to queue source present; draining before lease retirement");
++      } catch (...) {
++      }
++      return result;
++    }
+ 
+-    m_submissionQueue.present(presentInfo, latencyInfo, status);
+-    
+     std::lock_guard<sync::Spinlock> statLock(m_statLock);
+     m_statCounters.addCtr(DxvkStatCounter::QueuePresentCount, 1);
++    return VK_SUCCESS;
+   }
+ 
+ 
+@@ -692,6 +719,21 @@ namespace dxvk {
+   
+   
+   void DxvkDevice::waitForIdle() {
++    // Queue workers cannot wait for their own queue bookkeeping to become
++    // empty. They can still drain Vulkan work under the queue's external
++    // synchronization lock; any queued work that owns the object being
++    // destroyed would itself retain that object's reference and prevent this
++    // path from running.
++    if (m_submissionQueue.isWorkerThread()) {
++      m_submissionQueue.lockDeviceQueue();
++      VkResult status = m_vkd->vkDeviceWaitIdle(m_vkd->device());
++      m_submissionQueue.unlockDeviceQueue();
++
++      if (status != VK_SUCCESS)
++        Logger::err("DxvkDevice: waitForIdle from queue worker failed");
++      return;
++    }
++
+     m_submissionQueue.waitForIdle();
+     m_submissionQueue.lockDeviceQueue();
+ 
+diff --git a/src/dxvk/dxvk_device.h b/src/dxvk/dxvk_device.h
+index 7fb070d..b10741c 100644
+--- a/src/dxvk/dxvk_device.h
++++ b/src/dxvk/dxvk_device.h
+@@ -654,13 +654,27 @@ namespace dxvk {
+      * \param [in] rects Dirty rectangles
+      * \param [out] status Present status
+      */
+-    void presentImage(
++    VkResult presentImage(
+       const Rc<Presenter>&            presenter,
+       const Rc<DxvkLatencyTracker>&   tracker,
+-            uint64_t                  frameId,
++            AppFrameId                frameId,
+             uint32_t                  rectCount,
+       const VkRectLayerKHR*           rects,
+-            DxvkSubmitStatus*         status);
++          DxvkSubmitStatus*         status,
++          bool                      allowInternalProof = false);
++
++    /**
++     * \brief Records a failure while constructing or queuing present work
++     *
++     * Makes asynchronous failures visible through getDeviceStatus.
++     */
++    void reportSubmissionError(VkResult error) {
++      m_submissionQueue.reportError(error);
++    }
++
++    bool isInternalWsiProofEnabled() const {
++      return m_submissionQueue.internalProofEnabled();
++    }
+     
+     /**
+      * \brief Submits a command list
+diff --git a/src/dxvk/dxvk_presenter.cpp b/src/dxvk/dxvk_presenter.cpp
+index 643f7c5..da40f03 100644
+--- a/src/dxvk/dxvk_presenter.cpp
++++ b/src/dxvk/dxvk_presenter.cpp
+@@ -1,4 +1,5 @@
+ #include <algorithm>
++#include <memory>
+ 
+ #include "dxvk_device.h"
+ #include "dxvk_presenter.h"
+@@ -59,7 +60,9 @@ namespace dxvk {
+     destroyLatencySemaphore();
+ 
+     if (m_frameThread.joinable()) {
+-      pushFrame(PresenterFrame());
++      PresenterFrame shutdownFrame = { };
++      shutdownFrame.shutdown = true;
++      pushFrame(shutdownFrame);
+       m_frameThread.join();
+     }
+   }
+@@ -68,6 +71,9 @@ namespace dxvk {
+   VkResult Presenter::checkSwapChainStatus() {
+     std::lock_guard lock(m_surfaceMutex);
+ 
++    if (m_destroyingResources)
++      return VK_ERROR_SURFACE_LOST_KHR;
++
+     if (!m_swapchain)
+       return recreateSwapChain();
+ 
+@@ -76,6 +82,7 @@ namespace dxvk {
+ 
+ 
+   VkResult Presenter::acquireNextImage(PresenterSync& sync, Rc<DxvkImage>& image) {
++    m_sourceAcquireIntent.store(true);
+     std::unique_lock lock(m_surfaceMutex);
+ 
+     // Don't acquire more than one image at a time
+@@ -83,11 +90,13 @@ namespace dxvk {
+ 
+     m_surfaceCond.wait(lock, [this, &status] {
+       status = m_device->getDeviceStatus();
+-      return !m_presentPending || status < 0;
++      return !m_presentPending || status < 0 || m_destroyingResources;
+     });
+ 
+-    if (status < 0)
+-      return status;
++    if (status < 0 || m_destroyingResources) {
++      m_sourceAcquireIntent.store(false);
++      return status < 0 ? status : VK_ERROR_SURFACE_LOST_KHR;
++    }
+ 
+     // Ensure that the swap chain gets recreated if it is dirty
+     bool hasSwapchain = m_swapchain != VK_NULL_HANDLE;
+@@ -119,8 +128,10 @@ namespace dxvk {
+       if (vr == VK_NOT_READY && hasSwapchain)
+         Logger::info("Presenter: Surface does not allow swapchain creation.");
+ 
+-      if (vr != VK_SUCCESS)
++      if (vr != VK_SUCCESS) {
++        m_sourceAcquireIntent.store(false);
+         return softError(vr);
++      }
+ 
+       PresenterSync sync = m_semaphores.at(m_frameIndex);
+ 
+@@ -128,8 +139,11 @@ namespace dxvk {
+         m_swapchain, std::numeric_limits<uint64_t>::max(),
+         sync.acquire, VK_NULL_HANDLE, &m_imageIndex);
+ 
+-      if (m_acquireStatus < 0) {
++      if (m_acquireStatus != VK_SUCCESS && m_acquireStatus != VK_SUBOPTIMAL_KHR) {
+         Logger::info(str::format("Presenter: Got ", m_acquireStatus, " from fresh swapchain"));
++        m_sourceAcquireIntent.store(false);
++        if (m_acquireStatus == VK_TIMEOUT)
++          return VK_NOT_READY;
+         return softError(m_acquireStatus);
+       }
+     }
+@@ -163,27 +177,319 @@ namespace dxvk {
+     sync = m_semaphores.at(m_frameIndex);
+     image = m_images.at(m_imageIndex);
+ 
++    m_activeOrigin = DxvkPresentOrigin::ApplicationSource;
++    m_activeImageIndex = m_imageIndex;
++    m_activeAcquireSerial = m_nextAcquireSerial++;
++    m_activeImageGeneration = m_swapchainGeneration.load();
++    m_activeImageLease = true;
+     m_presentPending = true;
++    m_sourceFramePending.store(true);
++    m_sourceAcquireIntent.store(false);
+     return m_acquireStatus;
+   }
+ 
+ 
++  VkResult Presenter::tryAcquireInternalImage(
++          uint64_t        expectedGeneration,
++          PresenterSync&  sync,
++          Rc<DxvkImage>&  image,
++    const char**          dropReason) {
++    // The submission owner must never wait behind an application acquire.
++    if (m_destroyingResources || m_sourceAcquireIntent.load() || m_sourceFramePending.load()) {
++      if (dropReason)
++        *dropReason = m_destroyingResources ? "presenter-destroying" : "source-pending";
++      return VK_NOT_READY;
++    }
++
++    std::unique_lock lock(m_surfaceMutex, std::try_to_lock);
++
++    if (!lock.owns_lock()) {
++      if (dropReason)
++        *dropReason = "presenter-busy";
++      return VK_NOT_READY;
++    }
++
++    if (m_destroyingResources || m_sourceAcquireIntent.load() || m_sourceFramePending.load()) {
++      if (dropReason)
++        *dropReason = m_destroyingResources ? "presenter-destroying" : "source-pending";
++      return VK_NOT_READY;
++    }
++
++    if (m_presentPending || m_activeImageLease) {
++      if (dropReason)
++        *dropReason = "present-pending";
++      return VK_NOT_READY;
++    }
++
++    // The cached image belongs to the current swapchain epoch. Do not claim
++    // it for optional output after a settings/window change has made that
++    // swapchain or surface pending recreation. The source acquire path owns
++    // recreation and will establish a fresh cached image in the new epoch.
++    if (m_dirtySurface || m_dirtySwapchain) {
++      if (dropReason)
++        *dropReason = "surface-or-swapchain-dirty";
++      return VK_NOT_READY;
++    }
++
++    if (!m_swapchain) {
++      if (dropReason)
++        *dropReason = "no-swapchain";
++      return VK_NOT_READY;
++    }
++
++    if (m_swapchainGeneration.load() != expectedGeneration) {
++      if (dropReason)
++        *dropReason = "generation-changed";
++      return VK_NOT_READY;
++    }
++
++    if (m_acquireStatus != VK_SUCCESS) {
++      if (dropReason)
++        *dropReason = "image-unavailable";
++      return VK_NOT_READY;
++    }
++
++    m_activeOrigin = DxvkPresentOrigin::InternalOutput;
++    m_activeImageIndex = m_imageIndex;
++    m_activeAcquireSerial = m_nextAcquireSerial++;
++    m_activeImageGeneration = m_swapchainGeneration.load();
++    m_activeImageLease = true;
++    m_presentPending = true;
++
++    sync = m_semaphores.at(m_frameIndex);
++    image = m_images.at(m_imageIndex);
++    return VK_SUCCESS;
++  }
++
++
++  void Presenter::releaseInternalImageLeaseBeforeSubmit() {
++    std::lock_guard lock(m_surfaceMutex);
++
++    if (!m_activeImageLease || m_activeOrigin != DxvkPresentOrigin::InternalOutput)
++      return;
++
++    const bool canReturnCachedImage = m_swapchain != VK_NULL_HANDLE
++      && m_activeImageGeneration == m_swapchainGeneration.load()
++      && m_acquireStatus == VK_SUCCESS
++      && !m_dirtySurface
++      && !m_dirtySwapchain;
++
++    if (canReturnCachedImage) {
++      try {
++        Logger::info(str::format(
++          "InternalWSI: released pre-submit image lease acquire=",
++          m_activeAcquireSerial, " image=", m_activeImageIndex,
++          " generation=", m_activeImageGeneration,
++          " cached-acquire=preserved"));
++      } catch (...) {
++      }
++    } else {
++      try {
++        Logger::warn(str::format(
++          "InternalWSI: retiring unusable pre-submit image lease acquire=",
++          m_activeAcquireSerial, " image=", m_activeImageIndex,
++          " generation=", m_activeImageGeneration,
++          " current-generation=", m_swapchainGeneration.load(),
++          " dirty-surface=", m_dirtySurface,
++          " dirty-swapchain=", m_dirtySwapchain,
++          " acquire-status=", m_acquireStatus));
++      } catch (...) {
++      }
++      m_dirtySwapchain = true;
++      m_acquireStatus = VK_NOT_READY;
++    }
++
++    // No queue submission consumed the acquire semaphore or touched the
++    // WSI image. Keep a still-valid cached acquisition available to the next
++    // application source present; retire only an invalidated swapchain epoch.
++    m_activeImageLease = false;
++    m_activeImageIndex = UINT32_MAX;
++    m_activeImageGeneration = 0u;
++    m_presentPending = false;
++    m_surfaceCond.notify_all();
++  }
++
++
++  void Presenter::cancelInternalImageLease() {
++    std::lock_guard lock(m_surfaceMutex);
++
++    if (!m_activeImageLease || m_activeOrigin != DxvkPresentOrigin::InternalOutput)
++      return;
++
++    try {
++      Logger::warn(str::format(
++        "InternalWSI: dropping acquired image ", m_activeImageIndex,
++        " after internal submission failure; recreating swapchain"));
++    } catch (...) {
++    }
++
++    // The acquire semaphore may not have been consumed by a failed submit.
++    // Retire the epoch from the next application acquire, never here on the
++    // submission worker.
++    m_dirtySwapchain = true;
++    m_acquireStatus = VK_NOT_READY;
++    m_activeImageLease = false;
++    m_activeImageIndex = UINT32_MAX;
++    m_activeImageGeneration = 0u;
++    m_presentPending = false;
++    m_surfaceCond.notify_all();
++  }
++
++
++  void Presenter::cancelSourceImageLease() {
++    std::lock_guard lock(m_surfaceMutex);
++
++    if (!m_activeImageLease || m_activeOrigin != DxvkPresentOrigin::ApplicationSource)
++      return;
++
++    try {
++      Logger::warn(str::format(
++        "Presenter: cancelling acquired source image ", m_activeImageIndex,
++        " after source present was not queued; recreating swapchain"));
++    } catch (...) {
++    }
++
++    // A successful acquire must be presented or its swapchain retired. The
++    // acquire semaphore was not consumed by a source submission on this
++    // path, so make the epoch dirty and let the next source acquire recreate.
++    m_dirtySwapchain = true;
++    m_acquireStatus = VK_NOT_READY;
++    m_activeImageLease = false;
++    m_activeImageIndex = UINT32_MAX;
++    m_activeImageGeneration = 0u;
++    m_presentPending = false;
++    m_sourceFramePending.store(false);
++    m_surfaceCond.notify_all();
++  }
++
++
++  bool Presenter::validateInternalImageLease(
++          InternalPresentId internalPresentId,
++          uint64_t          expectedGeneration) {
++    std::lock_guard lock(m_surfaceMutex);
++
++    bool valid = internalPresentId.value != 0u
++      && m_activeImageLease
++      && m_activeOrigin == DxvkPresentOrigin::InternalOutput
++      && m_activeImageIndex == m_imageIndex
++      && m_activeImageGeneration == expectedGeneration
++      && m_swapchainGeneration.load() == expectedGeneration
++      && !m_dirtySurface
++      && !m_dirtySwapchain
++      && !m_destroyingResources
++      && !m_sourceAcquireIntent.load()
++      && !m_sourceFramePending.load();
++
++    if (!valid) {
++      Logger::warn(str::format(
++        "InternalWSI: lease validation failed before submit internal=",
++        internalPresentId.value, " acquire=", m_activeAcquireSerial,
++        " image=", m_activeImageIndex, " generation=", m_activeImageGeneration,
++        " expected=", expectedGeneration, " current=", m_swapchainGeneration.load(),
++        " dirty-surface=", m_dirtySurface, " dirty-swapchain=", m_dirtySwapchain,
++        " source-acquire-intent=", m_sourceAcquireIntent.load(),
++        " source-frame-pending=", m_sourceFramePending.load()));
++    }
++
++    return valid;
++  }
++
++
++  void Presenter::retireFailedInternalImageLease(
++    const DxvkPresentIdentity& identity,
++          VkResult             result) {
++    bool releasedOwnLease = false;
++
++    { std::lock_guard lock(m_surfaceMutex);
++      if (identity.origin == DxvkPresentOrigin::InternalOutput
++       && m_activeImageLease
++       && m_activeOrigin == DxvkPresentOrigin::InternalOutput
++       && m_activeImageIndex == m_imageIndex
++       && m_activeImageGeneration == m_swapchainGeneration.load()) {
++        m_dirtySwapchain = true;
++        m_acquireStatus = VK_NOT_READY;
++        m_activeImageLease = false;
++        m_activeImageIndex = UINT32_MAX;
++        m_activeImageGeneration = 0u;
++        m_presentPending = false;
++        m_surfaceCond.notify_all();
++        releasedOwnLease = true;
++      }
++    }
++
++    if (!releasedOwnLease) {
++      Logger::err(str::format(
++        "InternalWSI: failed-present retirement did not own active lease wsi=",
++        identity.wsiPresentId.value, " internal=",
++        identity.internalPresentId ? identity.internalPresentId->value : 0u));
++    }
++
++    if (identity.internalPresentId) {
++      signalInternalPresentComplete(
++        identity.wsiPresentId, *identity.internalPresentId, result);
++    }
++
++    Logger::info(str::format(
++      "InternalWSI: terminal outcome=failed-after-submit wsi=",
++      identity.wsiPresentId.value, " lease-released-after-gpu-retirement=",
++      releasedOwnLease));
++  }
++
++
+   VkResult Presenter::presentImage(
+-          uint64_t                frameId,
++          DxvkPresentIdentity&   identity,
+     const Rc<DxvkLatencyTracker>& tracker,
+           uint32_t                rectCount,
+     const VkRectLayerKHR*         rects) {
++    std::unique_lock<dxvk::mutex> internalSurfaceLock(m_surfaceMutex, std::defer_lock);
++    if (identity.origin == DxvkPresentOrigin::InternalOutput)
++      internalSurfaceLock.lock();
++
++    bool validIdentity = identity.wsiPresentId.value == 0u
++      && ((identity.origin == DxvkPresentOrigin::ApplicationSource
++        && identity.appFrameId.has_value() && !identity.internalPresentId.has_value())
++       || (identity.origin == DxvkPresentOrigin::InternalOutput
++        && !identity.appFrameId.has_value() && identity.internalPresentId.has_value()));
++    bool validLease = m_activeImageLease
++      && m_activeOrigin == identity.origin
++      && m_activeImageIndex == m_imageIndex
++      && m_activeImageGeneration == m_swapchainGeneration.load()
++      && (identity.origin != DxvkPresentOrigin::InternalOutput
++        || (!m_dirtySurface && !m_dirtySwapchain && !m_destroyingResources
++         && !m_sourceAcquireIntent.load() && !m_sourceFramePending.load()));
++
++    if (!validIdentity || !validLease) {
++      Logger::err(str::format(
++        "Presenter: rejected invalid WSI lease identity: origin=", uint32_t(identity.origin),
++        " wsi=", identity.wsiPresentId.value,
++        " app=", identity.appFrameId ? identity.appFrameId->value : 0u,
++        " internal=", identity.internalPresentId ? identity.internalPresentId->value : 0u,
++        " acquired=", m_activeImageIndex, " current=", m_imageIndex));
++
++      Logger::info(str::format(
++        "WSI: terminal outcome=failed-validation origin=",
++        identity.origin == DxvkPresentOrigin::ApplicationSource
++          ? "APPLICATION_SOURCE" : "INTERNAL_OUTPUT",
++        " wsi=", identity.wsiPresentId.value,
++        " lease-retirement=queue-owner"));
++      return VK_ERROR_VALIDATION_FAILED_EXT;
++    }
++
+     PresenterSync& currSync = m_semaphores.at(m_frameIndex);
+ 
+     uint64_t frameDeadline = 0u;
++    // The caller is the serialized WSI owner. Keep a placeholder for the
++    // optional present-ID pNext chain, then allocate the identity only after
++    // all renderer-side rejection checks pass and immediately before WSI.
++    uint64_t wsiPresentId = nextWsiPresentId();
+ 
+     VkPresentIdKHR presentId = { VK_STRUCTURE_TYPE_PRESENT_ID_KHR };
+     presentId.swapchainCount = 1;
+-    presentId.pPresentIds   = &frameId;
++    presentId.pPresentIds   = &wsiPresentId;
+ 
+     VkPresentId2KHR presentId2 = { VK_STRUCTURE_TYPE_PRESENT_ID_2_KHR };
+     presentId2.swapchainCount = 1;
+-    presentId2.pPresentIds  = &frameId;
++    presentId2.pPresentIds  = &wsiPresentId;
+ 
+     VkSwapchainPresentFenceInfoKHR fenceInfo = { VK_STRUCTURE_TYPE_SWAPCHAIN_PRESENT_FENCE_INFO_KHR };
+     fenceInfo.swapchainCount = 1;
+@@ -219,7 +525,7 @@ namespace dxvk {
+         timingInfo.targetTime = m_timingMode.frameIntervalNs;
+         timingInfo.targetTimeDomainPresentStage = m_timingMode.presentStage;
+       } else if (m_timingMode.absoluteTiming && m_timingMode.referenceFrameId) {
+-        timingInfo.targetTime = m_timingMode.referenceTime + (frameId - m_timingMode.referenceFrameId) * m_timingMode.frameIntervalNs;
++        timingInfo.targetTime = m_timingMode.referenceTime + (wsiPresentId - m_timingMode.referenceFrameId) * m_timingMode.frameIntervalNs;
+         timingInfo.targetTimeDomainPresentStage = m_timingMode.presentStage;
+ 
+         if (m_timingDisplayInfo && !m_timingDisplayInfo->isVariableRefresh)
+@@ -244,7 +550,7 @@ namespace dxvk {
+     info.pSwapchains        = &m_swapchain;
+     info.pImageIndices      = &m_imageIndex;
+ 
+-    if (frameId && m_hasPresentId) {
++    if (m_hasPresentId) {
+       if (m_device->features().khrPresentId2.presentId2)
+         presentId2.pNext = const_cast<void*>(std::exchange(info.pNext, &presentId2));
+       else
+@@ -262,9 +568,119 @@ namespace dxvk {
+     if (m_hasIncrementalPresent && !m_presentRepaint && m_acquireStatus == VK_SUCCESS && rectCount)
+       regionInfo.pNext = const_cast<void*>(std::exchange(info.pNext, &regionInfo));
+ 
++    // The source acquire intent is published before the application blocks
++    // on the surface mutex. Recheck immediately before handing the cached
++    // image to WSI so a source request that arrived while recording the
++    // internal clear can retire it after GPU completion instead.
++    if (identity.origin == DxvkPresentOrigin::InternalOutput
++     && (m_sourceAcquireIntent.load() || m_sourceFramePending.load())) {
++      Logger::info(str::format(
++        "InternalWSI: dropped opportunity internal=",
++        identity.internalPresentId->value,
++        " reason=source-pending-before-wsi-present"));
++      return VK_ERROR_VALIDATION_FAILED_EXT;
++    }
++
++    // Allocate every potentially throwing record before consuming a WSI ID
++    // or dispatching vkQueuePresentKHR. The submission owner can then safely
++    // retire a failed pre-dispatch lease after its GPU watermark completes.
++    if (identity.appFrameId) {
++      try {
++        std::lock_guard timingLock(m_timingMutex);
++        m_appFrameByWsiId[wsiPresentId] = identity.appFrameId->value;
++
++        while (m_appFrameByWsiId.size() > MaxFrameQueueSize * 4u)
++          m_appFrameByWsiId.erase(m_appFrameByWsiId.begin());
++      } catch (...) {
++        // Timing correlation is diagnostic feedback. Keep the source WSI
++        // present viable if its optional bookkeeping runs out of memory.
++      }
++    }
++
++    std::string presentLog;
++    try {
++      presentLog = str::format(
++        "WSI: present origin=", identity.origin == DxvkPresentOrigin::ApplicationSource
++          ? "APPLICATION_SOURCE" : "INTERNAL_OUTPUT",
++        " wsi=", wsiPresentId,
++        " app=", identity.appFrameId ? identity.appFrameId->value : 0u,
++        " internal=", identity.internalPresentId ? identity.internalPresentId->value : 0u,
++        " acquire=", m_activeAcquireSerial,
++        " image=", m_activeImageIndex,
++        " generation=", m_activeImageGeneration);
++    } catch (...) {
++      // Diagnostics must not prevent the WSI call after its ID is committed.
++    }
++
++    if (!presentLog.empty()) {
++      try {
++        Logger::info(std::move(presentLog));
++      } catch (...) {
++      }
++    }
++
++    identity.wsiPresentId = allocateWsiPresentId();
++    wsiPresentId = identity.wsiPresentId.value;
++
+     VkResult status = m_vkd->vkQueuePresentKHR(
+       m_device->queues().graphics.queueHandle, &info);
+ 
++    bool leaseRetired = false;
++    auto retireLease = [&](bool forceSwapchainRecreation) {
++      if (status != VK_SUCCESS || forceSwapchainRecreation) {
++        m_dirtySwapchain = true;
++        if (forceSwapchainRecreation)
++          m_acquireStatus = VK_NOT_READY;
++      }
++
++      m_presentPending = false;
++      m_presentRepaint = false;
++      m_activeImageLease = false;
++      m_activeImageIndex = UINT32_MAX;
++      m_activeImageGeneration = 0u;
++      if (identity.origin == DxvkPresentOrigin::ApplicationSource)
++        m_sourceFramePending.store(false);
++
++      leaseRetired = true;
++      m_surfaceCond.notify_all();
++    };
++
++    int leaseGuardToken = 0;
++    auto retireLeaseOnException = [&](int*) noexcept {
++      if (leaseRetired)
++        return;
++
++      try {
++        if (internalSurfaceLock.owns_lock()) {
++          retireLease(true);
++        } else {
++          std::lock_guard lock(m_surfaceMutex);
++          retireLease(true);
++        }
++      } catch (...) {
++      }
++    };
++    std::unique_ptr<int, decltype(retireLeaseOnException)> leaseGuard(
++      &leaseGuardToken, retireLeaseOnException);
++
++    // Maintenance1 presentation fences are intentionally left unsignaled for
++    // host/device OOM. Drain submitted GPU work here, while the caller still
++    // owns the Vulkan queue lock, so swapchain recreation cannot destroy the
++    // binary semaphore that the source command list was signaling.
++    if (status == VK_ERROR_OUT_OF_HOST_MEMORY
++     || status == VK_ERROR_OUT_OF_DEVICE_MEMORY) {
++      VkResult idleStatus = m_vkd->vkDeviceWaitIdle(m_vkd->device());
++      if (idleStatus != VK_SUCCESS) {
++        try {
++          Logger::err(str::format(
++            "Presenter: device drain after failed present returned ", idleStatus));
++        } catch (...) {
++        }
++        if (idleStatus == VK_ERROR_DEVICE_LOST)
++          status = idleStatus;
++      }
++    }
++
+     // Treat a QUEUE_FULL error as a hint to recreate the swapchain with
+     // a larger queue size. This could probably be done more robustly,
+     // but since we have latency constraints in the frontend APIs, we
+@@ -294,62 +710,152 @@ namespace dxvk {
+ 
+     // Add frame to waiter queue with current properties
+     PresenterFrame frame;
+-    frame.frameId = frameId;
++    frame.origin = identity.origin;
++    frame.wsiPresentId = identity.wsiPresentId;
++    frame.appFrameId = identity.appFrameId;
++    frame.internalPresentId = identity.internalPresentId;
++    frame.acquireSerial = m_activeAcquireSerial;
++    frame.generation = m_activeImageGeneration;
+     frame.tracker = tracker;
+     frame.mode = m_presentMode;
+     frame.result = status;
+     frame.targetTime = frameDeadline ? timingInfo.targetTime : 0u;
+     frame.deadline = frameDeadline;
+     frame.isTimed = bool(timingInfo.targetTime);
+-    frame.doWait = waitForPresent;
++    // Only source presentation retirement feeds application latency
++    // completion. Internal WSI frames must not occupy the frame worker while
++    // waiting for display completion and delay later DXGI-facing signals.
++    frame.doWait = waitForPresent
++                && identity.origin == DxvkPresentOrigin::ApplicationSource;
+ 
+     pushFrame(frame);
+ 
+-    // On a successful present, try to acquire next image already, in
+-    // order to hide potential delays from the application thread.
++    // On a source present, pre-acquire using the established blocking path.
++    // An internal output may only make a non-blocking pre-acquire attempt; if
++    // that fails, the next source acquire performs the ordinary blocking
++    // acquire itself.
+     if (status == VK_SUCCESS) {
+       PresenterSync& nextSync = m_semaphores.at(m_frameIndex);
+-      waitForSwapchainFence(nextSync);
+ 
+-      m_acquireStatus = m_vkd->vkAcquireNextImageKHR(m_vkd->device(),
+-        m_swapchain, std::numeric_limits<uint64_t>::max(),
+-        nextSync.acquire, VK_NULL_HANDLE, &m_imageIndex);
++      if (identity.origin == DxvkPresentOrigin::InternalOutput
++       && nextSync.fenceSignaled) {
++        m_acquireStatus = VK_NOT_READY;
++      } else {
++        waitForSwapchainFence(nextSync);
++
++        uint64_t timeout = identity.origin == DxvkPresentOrigin::ApplicationSource
++          ? std::numeric_limits<uint64_t>::max()
++          : 0u;
++
++        m_acquireStatus = m_vkd->vkAcquireNextImageKHR(m_vkd->device(),
++          m_swapchain, timeout,
++          nextSync.acquire, VK_NULL_HANDLE, &m_imageIndex);
++
++        if (identity.origin == DxvkPresentOrigin::InternalOutput
++         && (m_acquireStatus == VK_TIMEOUT || m_acquireStatus == VK_NOT_READY))
++          m_acquireStatus = VK_NOT_READY;
++      }
+     }
+ 
+     // Recreate the swapchain on the next acquire, even if we get suboptimal.
+     // There is no guarantee that suboptimal state is returned by both functions.
+-    std::lock_guard lock(m_surfaceMutex);
++    if (internalSurfaceLock.owns_lock()) {
++      retireLease(false);
++      internalSurfaceLock.unlock();
++    } else {
++      std::lock_guard lock(m_surfaceMutex);
++      retireLease(false);
++    }
+ 
+     if (status != VK_SUCCESS) {
+-      Logger::info(str::format("Presenter: Got ", status, ", recreating swapchain"));
+-
+-      m_dirtySwapchain = true;
++      try {
++        Logger::info(str::format("Presenter: Got ", status, ", recreating swapchain"));
++      } catch (...) {
++      }
+     }
+ 
+-    m_presentPending = false;
+-    m_presentRepaint = false;
+-
+-    m_surfaceCond.notify_one();
+     return status;
+   }
+ 
+ 
+   void Presenter::signalFrame(
+-          uint64_t                frameId,
++          AppFrameId              frameId,
+     const Rc<DxvkLatencyTracker>& tracker) {
+-    if (m_signal == nullptr || !frameId)
++    if (m_signal == nullptr || !frameId.value)
+       return;
+ 
+     bool canSignal = false;
+ 
+     { std::unique_lock lock(m_frameMutex);
+ 
+-      m_lastSignaled = frameId;
+-      canSignal = m_lastCompleted >= frameId;
++      m_lastSignaled = std::max(m_lastSignaled, frameId.value);
++      canSignal = m_lastCompleted >= frameId.value;
++    }
++
++    if (canSignal) {
++      m_signal->signal(frameId.value);
++      try {
++        Logger::info(str::format(
++          "WSI: app-frame-latency-signal app=", frameId.value,
++          " via=source-submit-completion"));
++      } catch (...) {
++      }
++    }
++
++    try {
++      Logger::info(str::format("WSI: app-completion app=", frameId.value,
++        " app-signal=", canSignal ? "signaled" : "deferred"));
++    } catch (...) {
+     }
++  }
++
+ 
+-    if (canSignal)
+-      m_signal->signal(frameId);
++  void Presenter::signalFailedSourceFrame(
++          AppFrameId              frameId,
++          VkResult                result,
++    const Rc<DxvkLatencyTracker>& tracker) {
++    if (!frameId.value)
++      return;
++
++    if (tracker)
++      tracker->discardTimings();
++
++    PresenterFrame frame = { };
++    frame.origin = DxvkPresentOrigin::ApplicationSource;
++    frame.appFrameId = frameId;
++    frame.result = result < 0 ? result : VK_ERROR_UNKNOWN;
++    frame.failedBeforeWsi = true;
++    pushFrame(frame);
++
++    signalFrame(frameId, nullptr);
++
++    try {
++      Logger::info(str::format("WSI: source-terminal app=", frameId.value,
++        " outcome=failed-before-wsi status=", frame.result,
++        " timing-feedback=unchanged"));
++    } catch (...) {
++    }
++  }
++
++
++  void Presenter::signalInternalPresentComplete(
++          WsiPresentId      wsiPresentId,
++          InternalPresentId internalPresentId,
++          VkResult          result) {
++    { std::lock_guard lock(m_frameMutex);
++      m_lastInternalCompleted = std::max(m_lastInternalCompleted, internalPresentId.value);
++    }
++
++    Logger::info(str::format(
++      "InternalWSI: retirement outcome=",
++      result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR
++        ? "presented"
++        : result == VK_NOT_READY || result == VK_TIMEOUT
++          ? "dropped" : "failed",
++      " wsi=", wsiPresentId.value,
++      " internal=", internalPresentId.value,
++      " status=", result,
++      " app-signals=unchanged actual-display-timing=separate"));
+   }
+ 
+ 
+@@ -389,12 +895,29 @@ namespace dxvk {
+ 
+   void Presenter::destroyResources() {
+     std::unique_lock lock(m_surfaceMutex);
++    m_destroyingResources = true;
++    m_surfaceCond.notify_all();
+ 
+     m_surfaceCond.wait(lock, [this] {
+-      VkResult status = m_device->getDeviceStatus();
+-      return !m_presentPending || status < 0;
++      return !m_presentPending && !m_activeImageLease;
+     });
+ 
++    lock.unlock();
++
++    // Drain queue references before releasing frontend ownership so a
++    // Presenter or its Device cannot be destroyed by a queue worker.
++    m_device->waitForIdle();
++
++    // The frame worker uses bounded present-wait slices and observes
++    // m_destroyingResources, allowing teardown to finish on occluded WSI.
++    { std::unique_lock frameLock(m_frameMutex);
++      m_frameDrain.wait(frameLock, [this] {
++        return m_frameQueuePushId == m_frameQueuePopId;
++      });
++    }
++
++    lock.lock();
++
+     destroySwapchain();
+     destroySurface();
+   }
+@@ -586,6 +1109,12 @@ namespace dxvk {
+   }
+ 
+ 
++  PresenterTimingFeedback Presenter::queryWsiPresentTiming() {
++    std::lock_guard lock(m_timingMutex);
++    return m_wsiTimingFeedback;
++  }
++
++
+   VkResult Presenter::recreateSwapChain() {
+     VkResult vr;
+ 
+@@ -879,6 +1408,9 @@ namespace dxvk {
+       Logger::err(str::format("Presenter: Failed to create Vulkan swapchain: ", status));
+       return status;
+     }
++
++    uint64_t generation = m_swapchainGeneration.fetch_add(1u) + 1u;
++    Logger::info(str::format("Presenter: Created swapchain generation ", generation));
+     
+     // Import actual swap chain images
+     std::vector<VkImage> images;
+@@ -1555,16 +2087,23 @@ namespace dxvk {
+   }
+ 
+ 
+-  bool Presenter::updatePresentTiming(uint64_t frameId) {
++  bool Presenter::updatePresentTiming(const PresenterFrame& frame) {
+     // Need to access both timing stuff and the frame queue here
+     std::lock_guard lock(m_timingMutex);
+ 
+-    PresenterTimingFeedback feedback = {};
+-    feedback.frameId = frameId;
+-    feedback.presentTime = dxvk::high_resolution_clock::get_counter();
++    PresenterTimingFeedback wsiFeedback = {};
++    wsiFeedback.frameId = frame.wsiPresentId.value;
++    wsiFeedback.presentTime = dxvk::high_resolution_clock::get_counter();
++
++    std::optional<PresenterTimingFeedback> appFeedback;
++    if (frame.origin == DxvkPresentOrigin::ApplicationSource && frame.appFrameId) {
++      appFeedback = PresenterTimingFeedback { };
++      appFeedback->frameId = frame.appFrameId->value;
++      appFeedback->presentTime = wsiFeedback.presentTime;
++    }
+ 
+     if (!m_timingMode.presentStage) {
+-      commitTimingFeedback(feedback);
++      commitTimingFeedback(wsiFeedback, appFeedback);
+       return false;
+     }
+ 
+@@ -1593,7 +2132,7 @@ namespace dxvk {
+ 
+     if (status) {
+       Logger::warn(str::format("Presenter: Failed to query past present timings: ", status));
+-      commitTimingFeedback(feedback);
++      commitTimingFeedback(wsiFeedback, appFeedback);
+       return false;
+     }
+ 
+@@ -1645,10 +2184,27 @@ namespace dxvk {
+         m_timingMode.lastFrameTimeLocal = reportTimeLocal;
+         m_timingMode.lastFrameTimeQpc = reportTimeQpc;
+ 
++        wsiFeedback.frameId = report.presentId;
++        if (reportTimeQpc) {
++          wsiFeedback.presentTime = reportTimeQpc;
++          wsiFeedback.isDisplayTiming = true;
++        }
++
++        auto appFrame = m_appFrameByWsiId.find(report.presentId);
++        if (appFrame != m_appFrameByWsiId.end() && reportTimeQpc) {
++          PresenterTimingFeedback reportedAppFeedback = { };
++          reportedAppFeedback.frameId = appFrame->second;
++          reportedAppFeedback.presentTime = reportTimeQpc;
++          reportedAppFeedback.isDisplayTiming = true;
++
++          if (!appFeedback || reportedAppFeedback.frameId > appFeedback->frameId)
++            appFeedback = reportedAppFeedback;
++        }
++
+         // Implicitly handles the case where deadline is 0, i.e. no
+         // absolute timing was used to control the actual presentation.
+         for (const auto& frame : m_frameQueue) {
+-          if (frame.frameId == report.presentId)
++          if (frame.wsiPresentId.value == report.presentId)
+             hasMissedDeadline = reportTimeLocal > frame.deadline;
+         }
+       }
+@@ -1662,23 +2218,24 @@ namespace dxvk {
+     // We can't give meaningful feedback w/o QPC timing currently.
+     // TODO figure out correct time domain for dxvk-native if we're
+     // reslly interested, otherwise just ignore the problem.
+-    if (hasQpcDomain()) {
+-      feedback.frameId = m_timingMode.lastFrameId;
+-      feedback.presentTime = m_timingMode.lastFrameTimeQpc;
++    if (hasQpcDomain() && m_timingMode.lastFrameTimeQpc) {
++      wsiFeedback.frameId = m_timingMode.lastFrameId;
++      wsiFeedback.presentTime = m_timingMode.lastFrameTimeQpc;
+     }
+ 
+-    commitTimingFeedback(feedback);
++    commitTimingFeedback(wsiFeedback, appFeedback);
+     return true;
+   }
+ 
+ 
+   void Presenter::commitTimingFeedback(
+-    const PresenterTimingFeedback&  feedback) {
+-    // Only commit present timing if the new frame ID is larger than the
+-    // previous frame ID, in order to avoid reverting the counter in case
+-    // the application spins on present statistics.
+-    if (feedback.frameId > m_timingFeedback.frameId)
+-      m_timingFeedback = feedback;
++    const PresenterTimingFeedback&                 wsiFeedback,
++    const std::optional<PresenterTimingFeedback>& appFeedback) {
++    if (wsiFeedback.frameId > m_wsiTimingFeedback.frameId)
++      m_wsiTimingFeedback = wsiFeedback;
++
++    if (appFeedback && appFeedback->frameId > m_timingFeedback.frameId)
++      m_timingFeedback = *appFeedback;
+   }
+ 
+ 
+@@ -1872,6 +2429,17 @@ namespace dxvk {
+ 
+ 
+   void Presenter::destroySwapchain() {
++    // Swapchain recreation must retire present-wait records even when an
++    // occluded surface never reports display completion. The frame worker
++    // observes this flag after each bounded wait slice.
++    m_swapchainChanging.store(true);
++    int swapchainChangeGuardToken = 0;
++    auto clearSwapchainChanging = [this](int*) noexcept {
++      m_swapchainChanging.store(false);
++    };
++    std::unique_ptr<int, decltype(clearSwapchainChanging)> swapchainChangeGuard(
++      &swapchainChangeGuardToken, clearSwapchainChanging);
++
+     // Without present fence support, waiting for the queue or device to go idle
+     // is the only way to properly synchronize swapchain teardown. Care must be
+     // taken not to call this method while the submission queue is locked.
+@@ -1904,10 +2472,16 @@ namespace dxvk {
+     m_dynamicModes.clear();
+ 
+     m_swapchain = VK_NULL_HANDLE;
++    m_swapchainGeneration.fetch_add(1u);
+     m_acquireStatus = VK_NOT_READY;
+ 
+     m_presentPending = false;
+     m_presentRepaint = false;
++    m_activeImageLease = false;
++    m_activeImageIndex = UINT32_MAX;
++    m_activeImageGeneration = 0u;
++    m_sourceFramePending.store(false);
++    m_sourceAcquireIntent.store(false);
+ 
+     m_hdrMetadataDirty = true;
+ 
+@@ -1946,11 +2520,19 @@ namespace dxvk {
+     VkResult vr = m_vkd->vkWaitForFences(m_vkd->device(),
+       1, &sync.fence, VK_TRUE, ~0ull);
+ 
+-    if (vr)
+-      Logger::err(str::format("Presenter: Failed to wait for WSI fence: ", vr));
++    if (vr) {
++      try {
++        Logger::err(str::format("Presenter: Failed to wait for WSI fence: ", vr));
++      } catch (...) {
++      }
++    }
+ 
+-    if ((vr = m_vkd->vkResetFences(m_vkd->device(), 1, &sync.fence)))
+-      Logger::err(str::format("Presenter: Failed to reset WSI fence: ", vr));
++    if ((vr = m_vkd->vkResetFences(m_vkd->device(), 1, &sync.fence))) {
++      try {
++        Logger::err(str::format("Presenter: Failed to reset WSI fence: ", vr));
++      } catch (...) {
++      }
++    }
+ 
+     sync.fenceSignaled = VK_FALSE;
+   }
+@@ -1986,50 +2568,102 @@ namespace dxvk {
+           return m_frameQueuePushId > m_frameQueuePopId;
+         });
+ 
+-        // Use a frame ID of 0 as an exit condition
+         frame = m_frameQueue[m_frameQueuePopId % m_frameQueue.size()];
+ 
+-        if (!frame.frameId) {
++        if (frame.shutdown) {
+           m_frameQueuePopId += 1u;
+           return;
+         }
+       }
+ 
++      // A source frame that failed before WSI dispatch retires its
++      // application completion ID, but has no Vulkan present or timing data.
++      if (frame.failedBeforeWsi) {
++        bool canSignal = false;
++
++        { std::unique_lock lock(m_frameMutex);
++          m_frameQueuePopId += 1u;
++          m_frameDrain.notify_one();
++          m_lastCompleted = std::max(m_lastCompleted, frame.appFrameId->value);
++          canSignal = m_lastSignaled >= frame.appFrameId->value;
++        }
++
++        if (canSignal && m_signal) {
++          m_signal->signal(frame.appFrameId->value);
++          Logger::info(str::format(
++            "WSI: app-frame-latency-signal app=", frame.appFrameId->value,
++            " via=failed-source-completion"));
++        }
++
++        continue;
++      }
++
+       // If the present operation has succeeded, actually wait for it to complete.
+       // Don't bother with it on MAILBOX / IMMEDIATE modes since doing so would
+       // restrict us to the display refresh rate on some platforms (XWayland).
+       if (frame.result >= 0 && frame.doWait) {
+         VkResult vr;
+-
+-        if (m_device->features().khrPresentWait2.presentWait2) {
+-          VkPresentWait2InfoKHR waitInfo = { VK_STRUCTURE_TYPE_PRESENT_WAIT_2_INFO_KHR };
+-          waitInfo.presentId = frame.frameId;
+-          waitInfo.timeout = std::numeric_limits<uint64_t>::max();
+-
+-          vr = m_vkd->vkWaitForPresent2KHR(m_vkd->device(), m_swapchain, &waitInfo);
+-        } else {
+-          vr = m_vkd->vkWaitForPresentKHR(m_vkd->device(),
+-            m_swapchain, frame.frameId, std::numeric_limits<uint64_t>::max());
++        constexpr uint64_t PresentWaitSliceNs = 50'000'000ull;
++
++        do {
++          if (m_device->features().khrPresentWait2.presentWait2) {
++            VkPresentWait2InfoKHR waitInfo = { VK_STRUCTURE_TYPE_PRESENT_WAIT_2_INFO_KHR };
++            waitInfo.presentId = frame.wsiPresentId.value;
++            waitInfo.timeout = PresentWaitSliceNs;
++
++            vr = m_vkd->vkWaitForPresent2KHR(m_vkd->device(), m_swapchain, &waitInfo);
++          } else {
++            vr = m_vkd->vkWaitForPresentKHR(m_vkd->device(),
++              m_swapchain, frame.wsiPresentId.value, PresentWaitSliceNs);
++          }
++
++          if (vr == VK_TIMEOUT
++           && (m_destroyingResources.load() || m_swapchainChanging.load())) {
++            frame.waitAbortedForSwapchainChange = true;
++            break;
++          }
++        } while (vr == VK_TIMEOUT);
++
++        if (vr < 0 && vr != VK_ERROR_OUT_OF_DATE_KHR && vr != VK_ERROR_SURFACE_LOST_KHR) {
++          try {
++            Logger::err(str::format("Presenter: vkWaitForPresentKHR failed: ", vr));
++          } catch (...) {
++          }
+         }
+-
+-        if (vr < 0 && vr != VK_ERROR_OUT_OF_DATE_KHR && vr != VK_ERROR_SURFACE_LOST_KHR)
+-          Logger::err(str::format("Presenter: vkWaitForPresentKHR failed: ", vr));
+       }
+ 
+       // Signal latency tracker right away to get more accurate
+       // measurements if the frame rate limiter is enabled.
+-      if (frame.tracker) {
+-        frame.tracker->notifyGpuPresentEnd(frame.frameId);
++      if (frame.tracker && frame.appFrameId) {
++        frame.tracker->notifyGpuPresentEnd(frame.appFrameId->value);
+         frame.tracker = nullptr;
+       }
+ 
++      if (frame.acquireSerial <= m_lastRetiredAcquireSerial) {
++        Logger::err(str::format("WSI: duplicate/out-of-order image retirement acquire=",
++          frame.acquireSerial, " last=", m_lastRetiredAcquireSerial));
++      } else {
++        m_lastRetiredAcquireSerial = frame.acquireSerial;
++      }
++
++      if (frame.generation != m_swapchainGeneration.load()) {
++        Logger::err(str::format("WSI: stale image retired wsi=", frame.wsiPresentId.value,
++          " frame-generation=", frame.generation,
++          " current-generation=", m_swapchainGeneration.load()));
++      }
++
+       // Apply FPS limiter here to align it as closely with scanout as we can,
+       // and delay signaling the frame latency event to emulate behaviour of a
+       // low refresh rate display as closely as we can.
+-      if (updatePresentTiming(frame.frameId) && frame.isTimed)
+-        waitUntilFrameTargetTime(frame);
+-      else
+-        m_fpsLimiter.delay();
++      bool timingUpdated = frame.waitAbortedForSwapchainChange
++        ? false : updatePresentTiming(frame);
++      if (frame.origin == DxvkPresentOrigin::ApplicationSource
++       && !frame.waitAbortedForSwapchainChange) {
++        if (timingUpdated && frame.isTimed)
++          waitUntilFrameTargetTime(frame);
++        else
++          m_fpsLimiter.delay();
++      }
+ 
+       // Wake up any thread that may be waiting for the queue to become empty
+       bool canSignal = false;
+@@ -2038,14 +2672,23 @@ namespace dxvk {
+         m_frameQueuePopId += 1u;
+         m_frameDrain.notify_one();
+ 
+-        m_lastCompleted = frame.frameId;
+-        canSignal = m_lastSignaled >= frame.frameId;
++        if (frame.origin == DxvkPresentOrigin::ApplicationSource && frame.appFrameId) {
++          m_lastCompleted = std::max(m_lastCompleted, frame.appFrameId->value);
++          canSignal = m_lastSignaled >= frame.appFrameId->value;
++        }
+       }
+ 
+       // Always signal even on error, since failures here
+       // are transparent to the front-end.
+-      if (canSignal)
+-        m_signal->signal(frame.frameId);
++      if (canSignal) {
++        m_signal->signal(frame.appFrameId->value);
++        Logger::info(str::format(
++          "WSI: app-frame-latency-signal app=", frame.appFrameId->value,
++          " via=source-present-retirement"));
++      }
++
++      if (frame.origin == DxvkPresentOrigin::InternalOutput && frame.internalPresentId)
++        signalInternalPresentComplete(frame.wsiPresentId, *frame.internalPresentId, frame.result);
+     }
+   }
+ 
+diff --git a/src/dxvk/dxvk_presenter.h b/src/dxvk/dxvk_presenter.h
+index d470c2d..8624da8 100644
+--- a/src/dxvk/dxvk_presenter.h
++++ b/src/dxvk/dxvk_presenter.h
+@@ -1,6 +1,9 @@
+ #pragma once
+ 
++#include <atomic>
++#include <cstdint>
+ #include <functional>
++#include <map>
+ #include <optional>
+ #include <queue>
+ #include <vector>
+@@ -52,11 +55,43 @@ namespace dxvk {
+     VkBool32 fenceSignaled = VK_FALSE;
+   };
+ 
++  /**
++   * \brief Identity domains for application and WSI presentation
++   */
++  struct AppFrameId {
++    uint64_t value = 0u;
++  };
++
++  struct WsiPresentId {
++    uint64_t value = 0u;
++  };
++
++  struct InternalPresentId {
++    uint64_t value = 0u;
++  };
++
++  enum class DxvkPresentOrigin : uint8_t {
++    ApplicationSource,
++    InternalOutput,
++  };
++
++  struct DxvkPresentIdentity {
++    DxvkPresentOrigin origin = DxvkPresentOrigin::ApplicationSource;
++    WsiPresentId wsiPresentId;
++    std::optional<AppFrameId> appFrameId;
++    std::optional<InternalPresentId> internalPresentId;
++  };
++
+   /**
+    * \brief Queued frame
+    */
+   struct PresenterFrame {
+-    uint64_t                frameId       = 0u;
++    DxvkPresentOrigin       origin        = DxvkPresentOrigin::ApplicationSource;
++    WsiPresentId            wsiPresentId;
++    std::optional<AppFrameId> appFrameId;
++    std::optional<InternalPresentId> internalPresentId;
++    uint64_t                acquireSerial = 0u;
++    uint64_t                generation    = 0u;
+     Rc<DxvkLatencyTracker>  tracker       = nullptr;
+     VkPresentModeKHR        mode          = VK_PRESENT_MODE_FIFO_KHR;
+     VkResult                result        = VK_NOT_READY;
+@@ -64,6 +99,9 @@ namespace dxvk {
+     uint64_t                deadline      = 0u;
+     bool                    isTimed       = false;
+     bool                    doWait        = false;
++    bool                    failedBeforeWsi = false;
++    bool                    waitAbortedForSwapchainChange = false;
++    bool                    shutdown      = false;
+   };
+ 
+   /**
+@@ -137,6 +175,7 @@ namespace dxvk {
+   struct PresenterTimingFeedback {
+     uint64_t frameId = 0u;
+     uint64_t presentTime = 0u;
++    bool isDisplayTiming = false;
+   };
+ 
+   /**
+@@ -187,6 +226,44 @@ namespace dxvk {
+     VkResult acquireNextImage(
+             PresenterSync&  sync,
+             Rc<DxvkImage>&  image);
++
++    /**
++     * \brief Tries to claim the presenter's pre-acquired image for internal output
++     *
++     * This path never waits or performs a blocking acquire. It succeeds only
++     * when the cached WSI image is available and no application source lease
++     * is active or pending.
++     */
++    VkResult tryAcquireInternalImage(
++            uint64_t        expectedGeneration,
++            PresenterSync&  sync,
++            Rc<DxvkImage>&  image,
++      const char**          dropReason);
++
++    bool validateInternalImageLease(
++            InternalPresentId internalPresentId,
++            uint64_t          expectedGeneration);
++
++    void retireFailedInternalImageLease(
++      const DxvkPresentIdentity& identity,
++            VkResult             result);
++
++    uint64_t getSwapchainGeneration() const {
++      return m_swapchainGeneration.load();
++    }
++
++    WsiPresentId allocateWsiPresentId() {
++      return WsiPresentId { m_nextWsiPresentId++ };
++    }
++
++    uint64_t nextWsiPresentId() const {
++      return m_nextWsiPresentId;
++    }
++
++    void releaseInternalImageLeaseBeforeSubmit();
++    void cancelInternalImageLease();
++
++    void cancelSourceImageLease();
+     
+     /**
+      * \brief Presents current image
+@@ -199,7 +276,7 @@ namespace dxvk {
+      * \returns Status of the operation
+      */
+     VkResult presentImage(
+-            uint64_t                frameId,
++            DxvkPresentIdentity&   identity,
+       const Rc<DxvkLatencyTracker>& tracker,
+             uint32_t                rectCount,
+       const VkRectLayerKHR*         rects);
+@@ -215,9 +292,19 @@ namespace dxvk {
+      * \param [in] tracker Latency tracker
+      */
+     void signalFrame(
+-            uint64_t                frameId,
++            AppFrameId              frameId,
++      const Rc<DxvkLatencyTracker>& tracker);
++
++    void signalFailedSourceFrame(
++            AppFrameId              frameId,
++            VkResult                result,
+       const Rc<DxvkLatencyTracker>& tracker);
+ 
++    void signalInternalPresentComplete(
++            WsiPresentId            wsiPresentId,
++            InternalPresentId       internalPresentId,
++            VkResult                result);
++
+     /**
+      * \brief Changes sync interval
+      *
+@@ -342,6 +429,8 @@ namespace dxvk {
+      */
+     PresenterTimingFeedback queryPresentTiming();
+ 
++    PresenterTimingFeedback queryWsiPresentTiming();
++
+   private:
+ 
+     Rc<DxvkDevice>              m_device;
+@@ -382,6 +471,20 @@ namespace dxvk {
+     uint32_t                    m_imageIndex = 0;
+     uint32_t                    m_frameIndex = 0;
+ 
++    std::atomic<uint64_t>       m_swapchainGeneration = { 0u };
++    uint64_t                    m_nextWsiPresentId = 1u;
++    uint64_t                    m_nextAcquireSerial = 1u;
++    uint64_t                    m_activeAcquireSerial = 0u;
++    uint64_t                    m_activeImageGeneration = 0u;
++    uint64_t                    m_lastRetiredAcquireSerial = 0u;
++    uint32_t                    m_activeImageIndex = UINT32_MAX;
++    DxvkPresentOrigin           m_activeOrigin = DxvkPresentOrigin::ApplicationSource;
++    bool                        m_activeImageLease = false;
++    std::atomic<bool>           m_destroyingResources = { false };
++    std::atomic<bool>           m_swapchainChanging = { false };
++    std::atomic<bool>           m_sourceAcquireIntent = { false };
++    std::atomic<bool>           m_sourceFramePending = { false };
++
+     VkResult                    m_acquireStatus = VK_NOT_READY;
+     bool                        m_presentPending = false;
+     bool                        m_presentRepaint = false;
+@@ -409,6 +512,7 @@ namespace dxvk {
+ 
+     uint64_t                    m_lastSignaled = 0u;
+     uint64_t                    m_lastCompleted = 0u;
++    uint64_t                    m_lastInternalCompleted = 0u;
+ 
+     alignas(CACHE_LINE_SIZE)
+     dxvk::mutex                             m_timingMutex;
+@@ -417,6 +521,8 @@ namespace dxvk {
+     std::optional<PresenterDisplayInfo>     m_timingDisplayInfo;
+     PresenterTimingInfo                     m_timingMode = { };
+     PresenterTimingFeedback                 m_timingFeedback = {};
++    PresenterTimingFeedback                 m_wsiTimingFeedback = {};
++    std::map<uint64_t, uint64_t>            m_appFrameByWsiId;
+     uint32_t                                m_timingQueueSize = FrameQueueSize;
+ 
+     double                      m_frameRateLimit = 0.0;
+@@ -480,10 +586,11 @@ namespace dxvk {
+ 
+     void recalibrateTimeDomains();
+ 
+-    bool updatePresentTiming(uint64_t frameId);
++    bool updatePresentTiming(const PresenterFrame& frame);
+ 
+     void commitTimingFeedback(
+-      const PresenterTimingFeedback&  feedback);
++      const PresenterTimingFeedback&  wsiFeedback,
++      const std::optional<PresenterTimingFeedback>& appFeedback);
+ 
+     void waitUntilFrameTargetTime(
+       const PresenterFrame&           frame);
+diff --git a/src/dxvk/dxvk_queue.cpp b/src/dxvk/dxvk_queue.cpp
+index e705ed9..41a530a 100644
+--- a/src/dxvk/dxvk_queue.cpp
++++ b/src/dxvk/dxvk_queue.cpp
+@@ -1,12 +1,46 @@
+ #include "dxvk_device.h"
+ #include "dxvk_queue.h"
++#include "dxvk_context.h"
++
++#include <memory>
++
++#include "../util/util_env.h"
+ 
+ namespace dxvk {
++
++  namespace {
++
++    class DxvkQueueCallbackGuard {
++    public:
++      explicit DxvkQueueCallbackGuard(const DxvkQueueCallback& callback)
++      : m_callback(callback) {
++        if (m_callback) {
++          m_callback(true);
++          m_active = true;
++        }
++      }
++
++      ~DxvkQueueCallbackGuard() {
++        if (m_active) {
++          try {
++            m_callback(false);
++          } catch (...) {
++          }
++        }
++      }
++
++    private:
++      const DxvkQueueCallback& m_callback;
++      bool m_active = false;
++    };
++
++  }
+   
+   DxvkSubmissionQueue::DxvkSubmissionQueue(DxvkDevice* device, const DxvkQueueCallback& callback)
+   : m_device        (device),
+     m_checkpoints   (device->getCheckpointBuffer()),
+     m_callback      (callback),
++    m_internalProofEnabled (env::getEnvVar("DXVK_INTERNAL_WSI_PROOF") == "1"),
+     m_submitThread  ([this] () { submitCmdLists(); }),
+     m_finishThread  ([this] () { finishCmdLists(); }) {
+     auto vk = m_device->vkd();
+@@ -23,6 +57,9 @@ namespace dxvk {
+       throw DxvkError(str::format("Failed to create timeline semaphores: ",
+         vrGraphics > vrTransfer ? vrGraphics : vrTransfer));
+     }
++
++    if (m_internalProofEnabled)
++      Logger::warn("InternalWSI: experimental synthetic output enabled; app-facing accounting remains source-only");
+   }
+   
+   
+@@ -31,6 +68,13 @@ namespace dxvk {
+ 
+     { std::unique_lock<dxvk::mutex> lock(m_mutex);
+       m_stopped.store(true);
++
++      while (!m_internalQueue.empty()) {
++        const auto& request = m_internalQueue.front();
++        Logger::info(str::format("InternalWSI: dropped opportunity=",
++          request.opportunityId, " reason=shutdown"));
++        m_internalQueue.pop();
++      }
+     }
+ 
+     m_appendCond.notify_all();
+@@ -51,7 +95,7 @@ namespace dxvk {
+     std::unique_lock<dxvk::mutex> lock(m_mutex);
+ 
+     m_finishCond.wait(lock, [this] {
+-      return m_submitQueue.size() + m_finishQueue.size() <= MaxNumQueuedCommandBuffers;
++      return applicationQueueLoad() <= MaxNumQueuedCommandBuffers;
+     });
+ 
+     DxvkSubmitEntry entry = { };
+@@ -64,12 +108,29 @@ namespace dxvk {
+   }
+ 
+ 
+-  void DxvkSubmissionQueue::present(
++  VkResult DxvkSubmissionQueue::present(
+           DxvkPresentInfo           presentInfo,
+           DxvkLatencyInfo           latencyInfo,
+           DxvkSubmitStatus*         status) {
+     std::unique_lock<dxvk::mutex> lock(m_mutex);
+ 
++    if (presentInfo.identity.origin != DxvkPresentOrigin::ApplicationSource
++     || !presentInfo.identity.appFrameId.has_value()
++     || presentInfo.identity.internalPresentId.has_value()) {
++      Logger::err("DxvkSubmissionQueue: rejected source present with invalid identity domain");
++      if (status)
++        status->result = VK_ERROR_VALIDATION_FAILED_EXT;
++      return VK_ERROR_VALIDATION_FAILED_EXT;
++    }
++
++    // A present is commonly paired with the command-list entry immediately
++    // before it. Permit that final paired entry while keeping a bound on
++    // source-only backlog. Internal completion records are excluded by
++    // applicationQueueLoad(), so optional output cannot consume this budget.
++    m_finishCond.wait(lock, [this] {
++      return applicationQueueLoad() <= MaxNumQueuedCommandBuffers + 1u;
++    });
++
+     DxvkSubmitEntry entry = { };
+     entry.status  = status;
+     entry.present = std::move(presentInfo);
+@@ -77,6 +138,7 @@ namespace dxvk {
+ 
+     m_submitQueue.push(std::move(entry));
+     m_appendCond.notify_all();
++    return VK_SUCCESS;
+   }
+ 
+ 
+@@ -94,6 +156,9 @@ namespace dxvk {
+     std::unique_lock<dxvk::mutex> lock(m_mutex);
+ 
+     m_submitCond.wait(lock, [this] {
++      // External queue users wait for application submissions. An optional
++      // internal request that has not claimed the Vulkan queue must not delay
++      // this application-facing synchronization point.
+       return m_submitQueue.empty();
+     });
+   }
+@@ -103,11 +168,14 @@ namespace dxvk {
+     std::unique_lock<dxvk::mutex> lock(m_mutex);
+ 
+     m_submitCond.wait(lock, [this] {
+-      return m_submitQueue.empty();
++      return m_submitQueue.empty()
++          && m_internalQueue.empty()
++          && !m_internalActive
++          && !m_submitActive;
+     });
+ 
+     m_finishCond.wait(lock, [this] {
+-      return m_finishQueue.empty();
++      return m_finishQueue.empty() && !m_finishActive;
+     });
+   }
+ 
+@@ -135,26 +203,91 @@ namespace dxvk {
+     uint64_t trackedPresentId = 0u;
+ 
+     while (!m_stopped.load()) {
++      // Keep frontend idle waits aware of a submit entry after it has left
++      // the queue but still owns local Presenter references. Locals declared
++      // after this guard are destroyed before the active count is released.
++      bool submitEntryActive = false;
++      int submitActivityGuardToken = 0;
++      auto releaseSubmitActivity = [this, &submitEntryActive](int*) noexcept {
++        if (!submitEntryActive)
++          return;
++
++        try {
++          std::lock_guard<dxvk::mutex> lock(m_mutex);
++          if (m_submitActive)
++            m_submitActive -= 1u;
++          submitEntryActive = false;
++          m_submitCond.notify_all();
++          m_finishCond.notify_all();
++        } catch (...) {
++        }
++      };
++      std::unique_ptr<int, decltype(releaseSubmitActivity)> submitActivityGuard(
++        &submitActivityGuardToken, releaseSubmitActivity);
++
+       DxvkSubmitEntry entry;
++      DxvkInternalPresentRequest internalRequest;
++      bool processInternal = false;
++      Rc<Presenter> failedSourcePresenter;
++      std::optional<AppFrameId> failedSourceFrame;
++      Rc<Presenter> lostSourcePresenter;
++      std::optional<AppFrameId> lostSourceFrame;
+ 
+       { std::unique_lock<dxvk::mutex> lock(m_mutex);
+ 
+-        m_appendCond.wait(lock, [this] {
+-          return m_stopped.load() || !m_submitQueue.empty();
+-        });
++        while (!m_stopped.load()) {
++          if (!m_submitQueue.empty()) {
++            entry = std::move(m_submitQueue.front());
++            m_submitActive += 1u;
++            submitEntryActive = true;
++            break;
++          }
++
++          if (!m_internalQueue.empty()) {
++            auto now = dxvk::high_resolution_clock::now();
++            auto next = m_internalQueue.front();
++
++            if (now >= next.deadline) {
++              Logger::info(str::format("InternalWSI: dropped request internal=",
++                next.opportunityId, " reason=deadline-expired"));
++              m_internalQueue.pop();
++              m_submitCond.notify_all();
++              continue;
++            }
++
++            if (now < next.target) {
++              m_appendCond.wait_until(lock, next.target, [this] {
++                return m_stopped.load() || !m_submitQueue.empty();
++              });
++              continue;
++            }
++
++            internalRequest = std::move(m_internalQueue.front());
++            m_internalQueue.pop();
++            m_internalActive += 1u;
++            processInternal = true;
++            break;
++          }
++
++          m_appendCond.wait(lock, [this] {
++            return m_stopped.load() || !m_submitQueue.empty() || !m_internalQueue.empty();
++          });
++        }
+ 
+         if (m_stopped.load())
+           return;
++      }
+ 
+-        entry = std::move(m_submitQueue.front());
++      if (processInternal) {
++        processInternalPresent(std::move(internalRequest));
++        m_device->m_objects.memoryManager().performTimedTasks();
++        continue;
+       }
+ 
+       // Submit command buffer to device
+-      if (m_lastError != VK_ERROR_DEVICE_LOST) {
++      if (m_lastError == VK_SUCCESS) {
+         std::lock_guard<dxvk::mutex> lock(m_mutexQueue);
+-
+-        if (m_callback)
+-          m_callback(true);
++        DxvkQueueCallbackGuard queueCallback(m_callback);
+ 
+         if (entry.submit.cmdList != nullptr) {
+           if (entry.latency.tracker) {
+@@ -164,16 +297,54 @@ namespace dxvk {
+               trackedSubmitId = entry.latency.frameId;
+           }
+ 
+-          entry.result = entry.submit.cmdList->submit(
+-            m_semaphores, m_timelines, trackedSubmitId);
++          try {
++            entry.result = entry.submit.cmdList->submit(
++              m_semaphores, m_timelines, trackedSubmitId);
++          } catch (const std::bad_alloc&) {
++            entry.result = VK_ERROR_OUT_OF_HOST_MEMORY;
++          } catch (...) {
++            entry.result = VK_ERROR_UNKNOWN;
++          }
++
+           entry.timelines = m_timelines;
++
++          // A failed command list may have submitted an earlier batch before
++          // a later batch failed. Drain the device while queue ownership is
++          // still serialized, before publishing failure or releasing WSI.
++          if (entry.result != VK_SUCCESS) {
++            auto vk = m_device->vkd();
++            VkResult idleStatus = vk->vkDeviceWaitIdle(vk->device());
++            if (idleStatus != VK_SUCCESS)
++              entry.result = idleStatus;
++            m_lastError = entry.result;
++          }
+         } else if (entry.present.presenter != nullptr) {
+           if (entry.latency.tracker)
+             entry.latency.tracker->notifyQueuePresentBegin(entry.latency.frameId);
+ 
+-          entry.result = entry.present.presenter->presentImage(
+-            entry.present.frameId, entry.latency.tracker,
+-            entry.present.rects.size(), entry.present.rects.data());
++          entry.timelines = m_timelines;
++          try {
++            entry.result = entry.present.presenter->presentImage(
++              entry.present.identity, entry.latency.tracker,
++              entry.present.rects.size(), entry.present.rects.data());
++          } catch (const std::bad_alloc&) {
++            entry.result = VK_ERROR_OUT_OF_HOST_MEMORY;
++          } catch (...) {
++            entry.result = VK_ERROR_UNKNOWN;
++          }
++
++          if (entry.result != VK_SUCCESS
++           && entry.present.identity.wsiPresentId.value == 0u) {
++            auto vk = m_device->vkd();
++            VkResult idleStatus = vk->vkDeviceWaitIdle(vk->device());
++            if (idleStatus != VK_SUCCESS)
++              entry.result = idleStatus;
++            m_lastError = entry.result;
++            if (entry.present.identity.origin == DxvkPresentOrigin::ApplicationSource)
++              failedSourcePresenter = entry.present.presenter;
++          } else if (entry.result == VK_ERROR_DEVICE_LOST) {
++            m_lastError = entry.result;
++          }
+ 
+           if (entry.latency.tracker) {
+             entry.latency.tracker->notifyQueuePresentEnd(
+@@ -184,14 +355,20 @@ namespace dxvk {
+           }
+         }
+ 
+-        if (m_callback)
+-          m_callback(false);
+       } else {
+-        // Don't submit anything after device loss
+-        // so that drivers get a chance to recover
+-        entry.result = VK_ERROR_DEVICE_LOST;
++        // A failed command submit leaves later source presents without a
++        // guaranteed signal of their acquire semaphore. The first queue
++        // error is terminal for this device's submission path.
++        entry.result = m_lastError.load();
+       }
+ 
++      if (entry.result != VK_SUCCESS
++       && entry.present.presenter != nullptr
++       && entry.present.identity.origin == DxvkPresentOrigin::ApplicationSource
++       && entry.present.identity.wsiPresentId.value == 0u
++       && !failedSourcePresenter)
++        failedSourcePresenter = entry.present.presenter;
++
+       if (entry.status)
+         entry.status->result = entry.result;
+ 
+@@ -201,28 +378,370 @@ namespace dxvk {
+       // On success, pass it on to the queue thread
+       { std::unique_lock<dxvk::mutex> lock(m_mutex);
+ 
+-        bool doForward = (entry.result == VK_SUCCESS) ||
+-          (entry.present.presenter != nullptr && entry.result != VK_ERROR_DEVICE_LOST);
++        Rc<Presenter> sourcePresenter = entry.present.presenter;
++        bool eligibleSource = sourcePresenter != nullptr
++          && entry.present.allowInternalProof
++          && entry.present.identity.origin == DxvkPresentOrigin::ApplicationSource
++          && entry.result == VK_SUCCESS;
++
++        bool presentWasDispatched = entry.present.presenter != nullptr
++          && entry.present.identity.wsiPresentId.value != 0u;
++        bool doForward = entry.result == VK_SUCCESS
++          || (presentWasDispatched && entry.result != VK_ERROR_DEVICE_LOST);
++
++        if (entry.present.presenter != nullptr
++         && entry.present.identity.origin == DxvkPresentOrigin::ApplicationSource
++         && entry.present.identity.appFrameId) {
++          if (entry.result != VK_SUCCESS && !presentWasDispatched) {
++            failedSourcePresenter = entry.present.presenter;
++            failedSourceFrame = entry.present.identity.appFrameId;
++          } else if (entry.result == VK_ERROR_DEVICE_LOST && presentWasDispatched) {
++            lostSourcePresenter = entry.present.presenter;
++            lostSourceFrame = entry.present.identity.appFrameId;
++          }
++        }
+ 
+         if (doForward) {
+-          m_finishQueue.push(std::move(entry));
++          const bool isInternalEntry = entry.present.presenter != nullptr
++            && entry.present.identity.origin == DxvkPresentOrigin::InternalOutput;
++          const bool queued = m_finishQueue.push(std::move(entry));
++          if (!queued) {
++            Logger::err("DxvkSubmissionQueue: completion queue capacity invariant violated");
++            m_lastError = VK_ERROR_UNKNOWN;
++          } else if (isInternalEntry) {
++            m_internalFinishEntries += 1u;
++          }
+         } else {
+           Logger::err(str::format("DxvkSubmissionQueue: Command submission failed: ", entry.result));
+-          m_lastError = entry.result;
++          if (!presentWasDispatched || entry.result == VK_ERROR_DEVICE_LOST)
++            m_lastError = entry.result;
+ 
+-          if (m_lastError != VK_ERROR_DEVICE_LOST)
+-            m_device->waitForIdle();
++          // Never wait for queue-wide idleness from the submit worker. The
++          // current entry is still part of the worker's own queue here.
++        }
++
++        if (m_internalProofEnabled && eligibleSource) {
++          auto now = dxvk::high_resolution_clock::now();
++          auto interval = std::chrono::duration_cast<dxvk::high_resolution_clock::duration>(
++            std::chrono::milliseconds(33));
++
++          if (m_lastSourcePresentTime.time_since_epoch().count()) {
++            auto observed = now - m_lastSourcePresentTime;
++            if (observed >= std::chrono::milliseconds(8)
++             && observed <= std::chrono::milliseconds(250))
++              interval = observed;
++          }
++
++          m_lastSourcePresentTime = now;
++
++          if (m_internalQueue.size() >= MaxPendingInternalPresents) {
++            Logger::info(str::format("InternalWSI: dropped opportunity=",
++              m_nextInternalOpportunityId++, " reason=queue-full"));
++          } else {
++            DxvkInternalPresentRequest request;
++            request.presenter = sourcePresenter;
++            request.opportunityId = m_nextInternalOpportunityId++;
++            request.generation = request.presenter->getSwapchainGeneration();
++            request.target = now + interval / 2;
++            request.deadline = now + interval - std::chrono::milliseconds(2);
++            try {
++              m_internalQueue.push(std::move(request));
++              m_appendCond.notify_all();
++            } catch (const std::bad_alloc&) {
++              try {
++                Logger::err(str::format("InternalWSI: dropped opportunity=",
++                  request.opportunityId, " reason=request-allocation-failed"));
++              } catch (...) {
++              }
++            }
++          }
+         }
+ 
+         m_submitQueue.pop();
+         m_submitCond.notify_all();
++        m_finishCond.notify_all();
++      }
++
++      // Presenter state has its own lock. Release the queue lock first so a
++      // source thread recreating the swapchain cannot form a lock cycle here.
++      if (failedSourcePresenter) {
++        if (failedSourceFrame)
++          failedSourcePresenter->signalFailedSourceFrame(
++            *failedSourceFrame, entry.result, entry.latency.tracker);
++        failedSourcePresenter->cancelSourceImageLease();
+       }
+ 
++      // A device-lost present already has a WSI retirement frame queued by
++      // Presenter::presentImage. Register its app completion without adding a
++      // second frame or publishing timing feedback.
++      if (lostSourcePresenter && lostSourceFrame)
++        lostSourcePresenter->signalFrame(*lostSourceFrame, entry.latency.tracker);
++
+       // Good time to invoke allocator tasks now since we
+       // expect this to get called somewhat periodically.
+       m_device->m_objects.memoryManager().performTimedTasks();
+     }
+   }
++
++
++  void DxvkSubmissionQueue::processInternalPresent(
++    DxvkInternalPresentRequest request) {
++    auto releaseActive = [this, &request](int*) {
++      // Release the request's strong Presenter reference before making the
++      // worker appear idle. Frontend teardown waits on m_internalActive while
++      // it still owns the Presenter, so the final release stays off-worker.
++      request.presenter = nullptr;
++      std::lock_guard<dxvk::mutex> lock(m_mutex);
++      if (m_internalActive)
++        m_internalActive -= 1u;
++      m_submitCond.notify_all();
++      m_finishCond.notify_all();
++    };
++    int activeGuardToken = 0;
++    std::unique_ptr<int, decltype(releaseActive)> activeGuard(
++      &activeGuardToken, releaseActive);
++
++    auto drop = [&](const char* reason) {
++      Logger::info(str::format("InternalWSI: dropped opportunity=",
++        request.opportunityId, " reason=", reason,
++        " generation=", request.generation));
++    };
++
++    auto now = dxvk::high_resolution_clock::now();
++    if (now >= request.deadline) {
++      drop("deadline-expired");
++      return;
++    }
++
++    if (m_lastError != VK_SUCCESS) {
++      drop("submission-queue-error");
++      return;
++    }
++
++    { std::lock_guard<dxvk::mutex> lock(m_mutex);
++      if (!m_submitQueue.empty()) {
++        drop("source-queue-nonempty");
++        return;
++      }
++
++      if (m_finishQueue.size() >= MaxNumQueuedCommandBuffers) {
++        drop("completion-queue-full");
++        return;
++      }
++    }
++
++    PresenterSync sync = { };
++    Rc<DxvkImage> image;
++    const char* acquireDropReason = nullptr;
++    VkResult status = request.presenter->tryAcquireInternalImage(
++      request.generation, sync, image, &acquireDropReason);
++
++    if (status != VK_SUCCESS) {
++      drop(acquireDropReason ? acquireDropReason : "image-unavailable");
++      return;
++    }
++
++    request.internalPresentId = InternalPresentId { m_nextInternalPresentId++ };
++
++    Rc<DxvkCommandList> commandList;
++    try {
++      auto context = m_device->createContext();
++      context->beginRecording(m_device->createCommandList());
++
++      commandList = context->beginExternalRendering();
++      context->synchronizeWsi(sync);
++      commandList->track(image, DxvkAccess::Write);
++
++      VkImageMemoryBarrier2 toTransfer = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2 };
++      toTransfer.srcStageMask = VK_PIPELINE_STAGE_2_NONE;
++      toTransfer.srcAccessMask = 0;
++      toTransfer.dstStageMask = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
++      toTransfer.dstAccessMask = VK_ACCESS_2_TRANSFER_WRITE_BIT;
++      toTransfer.oldLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
++      toTransfer.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
++      toTransfer.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
++      toTransfer.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
++      toTransfer.image = image->handle();
++      toTransfer.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
++      toTransfer.subresourceRange.baseMipLevel = 0u;
++      toTransfer.subresourceRange.levelCount = 1u;
++      toTransfer.subresourceRange.baseArrayLayer = 0u;
++      toTransfer.subresourceRange.layerCount = 1u;
++
++      VkDependencyInfo toTransferInfo = { VK_STRUCTURE_TYPE_DEPENDENCY_INFO };
++      toTransferInfo.imageMemoryBarrierCount = 1u;
++      toTransferInfo.pImageMemoryBarriers = &toTransfer;
++      commandList->cmdPipelineBarrier(DxvkCmdBuffer::ExecBuffer, &toTransferInfo);
++
++      VkClearColorValue color = { };
++      if (request.internalPresentId.value & 1u) {
++        color.float32[0] = 1.0f;
++        color.float32[2] = 1.0f;
++      } else {
++        color.float32[1] = 1.0f;
++        color.float32[2] = 1.0f;
++      }
++      color.float32[3] = 1.0f;
++
++      VkImageSubresourceRange range = { };
++      range.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
++      range.levelCount = 1u;
++      range.layerCount = 1u;
++
++      commandList->cmdClearColorImage(DxvkCmdBuffer::ExecBuffer,
++        image->handle(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
++        &color, 1u, &range);
++
++      VkImageMemoryBarrier2 toPresent = toTransfer;
++      toPresent.srcStageMask = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
++      toPresent.srcAccessMask = VK_ACCESS_2_TRANSFER_WRITE_BIT;
++      toPresent.dstStageMask = VK_PIPELINE_STAGE_2_NONE;
++      toPresent.dstAccessMask = 0;
++      toPresent.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
++      toPresent.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
++
++      VkDependencyInfo toPresentInfo = { VK_STRUCTURE_TYPE_DEPENDENCY_INFO };
++      toPresentInfo.imageMemoryBarrierCount = 1u;
++      toPresentInfo.pImageMemoryBarriers = &toPresent;
++      commandList->cmdPipelineBarrier(DxvkCmdBuffer::ExecBuffer, &toPresentInfo);
++
++      commandList = context->endRecording(nullptr);
++    } catch (const std::exception& e) {
++      request.presenter->releaseInternalImageLeaseBeforeSubmit();
++      request.presenter->signalInternalPresentComplete(
++        WsiPresentId { }, request.internalPresentId, VK_ERROR_INITIALIZATION_FAILED);
++      Logger::err(str::format("InternalWSI: command recording failed internal=",
++        request.internalPresentId.value, " error=", e.what()));
++      return;
++    } catch (...) {
++      request.presenter->releaseInternalImageLeaseBeforeSubmit();
++      request.presenter->signalInternalPresentComplete(
++        WsiPresentId { }, request.internalPresentId, VK_ERROR_INITIALIZATION_FAILED);
++      Logger::err(str::format("InternalWSI: command recording failed internal=",
++        request.internalPresentId.value, " with an unknown exception"));
++      return;
++    }
++
++    DxvkPresentIdentity identity = { };
++    identity.origin = DxvkPresentOrigin::InternalOutput;
++    identity.internalPresentId = request.internalPresentId;
++
++    if (!request.presenter->validateInternalImageLease(
++          request.internalPresentId, request.generation)) {
++      request.presenter->releaseInternalImageLeaseBeforeSubmit();
++      request.presenter->signalInternalPresentComplete(
++        WsiPresentId { }, request.internalPresentId, VK_ERROR_VALIDATION_FAILED_EXT);
++      drop("lease-validation-before-submit");
++      return;
++    }
++
++    DxvkSubmitEntry finishEntry = { };
++    finishEntry.submit.cmdList = commandList;
++    finishEntry.present.presenter = request.presenter;
++
++    VkResult presentStatus = VK_NOT_READY;
++    bool leaseRejectedBeforeSubmit = false;
++    bool deadlineExpiredBeforeSubmit = false;
++    bool submitAttempted = false;
++    {
++      std::lock_guard<dxvk::mutex> lock(m_mutexQueue);
++      DxvkQueueCallbackGuard queueCallback(m_callback);
++
++      // A source acquire may begin while the internal command list is being
++      // recorded. Give it priority again after acquiring the Vulkan queue
++      // lock and before consuming the cached image's acquire semaphore.
++      if (dxvk::high_resolution_clock::now() >= request.deadline) {
++        deadlineExpiredBeforeSubmit = true;
++      } else if (!request.presenter->validateInternalImageLease(
++            request.internalPresentId, request.generation)) {
++        leaseRejectedBeforeSubmit = true;
++      } else {
++        submitAttempted = true;
++        try {
++          status = commandList->submit(m_semaphores, m_timelines, 0u);
++        } catch (const std::bad_alloc&) {
++          status = VK_ERROR_OUT_OF_HOST_MEMORY;
++        } catch (...) {
++          status = VK_ERROR_UNKNOWN;
++        }
++        finishEntry.timelines = m_timelines;
++
++        if (status == VK_SUCCESS) {
++          try {
++            presentStatus = request.presenter->presentImage(identity, nullptr, 0u, nullptr);
++          } catch (const std::bad_alloc&) {
++            presentStatus = VK_ERROR_OUT_OF_HOST_MEMORY;
++          } catch (...) {
++            presentStatus = VK_ERROR_UNKNOWN;
++          }
++
++          if (identity.wsiPresentId.value == 0u && presentStatus != VK_SUCCESS)
++            finishEntry.retireInternalLeaseOnCompletion = true;
++          else if (presentStatus == VK_ERROR_DEVICE_LOST)
++            m_lastError = presentStatus;
++        }
++      }
++
++      if (submitAttempted && status != VK_SUCCESS) {
++        auto vk = m_device->vkd();
++        VkResult idleStatus = vk->vkDeviceWaitIdle(vk->device());
++        if (idleStatus != VK_SUCCESS)
++          status = idleStatus;
++        m_lastError = status;
++      }
++    }
++
++    if (deadlineExpiredBeforeSubmit) {
++      request.presenter->releaseInternalImageLeaseBeforeSubmit();
++      request.presenter->signalInternalPresentComplete(
++        WsiPresentId { }, request.internalPresentId, VK_NOT_READY);
++      drop("deadline-expired-before-submit");
++      return;
++    }
++
++    if (leaseRejectedBeforeSubmit) {
++      request.presenter->releaseInternalImageLeaseBeforeSubmit();
++      request.presenter->signalInternalPresentComplete(
++        WsiPresentId { }, request.internalPresentId, VK_NOT_READY);
++      drop("source-or-swapchain-conflict-before-submit");
++      return;
++    }
++
++    if (status != VK_SUCCESS) {
++      if (status == VK_ERROR_DEVICE_LOST)
++        m_lastError = status;
++      request.presenter->cancelInternalImageLease();
++      request.presenter->signalInternalPresentComplete(
++        WsiPresentId { }, request.internalPresentId, status);
++      Logger::err(str::format("InternalWSI: command submission failed internal=",
++        request.internalPresentId.value, " status=", status));
++      return;
++    }
++
++    finishEntry.result = presentStatus;
++    finishEntry.status = nullptr;
++    finishEntry.present.identity = identity;
++
++    { std::unique_lock<dxvk::mutex> lock(m_mutex);
++      const bool queued = m_finishQueue.push(std::move(finishEntry));
++      if (!queued) {
++        Logger::err("InternalWSI: completion queue capacity invariant violated");
++        m_lastError = VK_ERROR_UNKNOWN;
++        lock.unlock();
++        request.presenter->retireFailedInternalImageLease(identity, VK_ERROR_UNKNOWN);
++        return;
++      }
++      if (queued)
++        m_internalFinishEntries += 1u;
++      m_submitCond.notify_all();
++    }
++
++    Logger::info(str::format(
++      "InternalWSI: queued origin=INTERNAL_OUTPUT wsi=", identity.wsiPresentId.value,
++      " internal=", identity.internalPresentId->value,
++      " app=none pattern=", (identity.internalPresentId->value & 1u) ? "magenta" : "cyan",
++      " vkPresent=", presentStatus));
++  }
+   
+   
+   void DxvkSubmissionQueue::finishCmdLists() {
+@@ -231,6 +750,27 @@ namespace dxvk {
+     auto vk = m_device->vkd();
+ 
+     while (!m_stopped.load()) {
++      // Keep frontend idle waits blocked until the local completion entry
++      // and all of its Presenter/latency/resource references are destroyed.
++      bool finishEntryActive = false;
++      int finishActivityGuardToken = 0;
++      auto releaseFinishActivity = [this, &finishEntryActive](int*) noexcept {
++        if (!finishEntryActive)
++          return;
++
++        try {
++          std::lock_guard<dxvk::mutex> lock(m_mutex);
++          if (m_finishActive)
++            m_finishActive -= 1u;
++          finishEntryActive = false;
++          m_submitCond.notify_all();
++          m_finishCond.notify_all();
++        } catch (...) {
++        }
++      };
++      std::unique_ptr<int, decltype(releaseFinishActivity)> finishActivityGuard(
++        &finishActivityGuardToken, releaseFinishActivity);
++
+       std::unique_lock<dxvk::mutex> lock(m_mutex);
+ 
+       if (m_finishQueue.empty()) {
+@@ -248,6 +788,10 @@ namespace dxvk {
+         return;
+       
+       DxvkSubmitEntry entry = std::move(m_finishQueue.front());
++      m_finishActive += 1u;
++      finishEntryActive = true;
++      const bool internalEntry = entry.present.presenter != nullptr
++        && entry.present.identity.origin == DxvkPresentOrigin::InternalOutput;
+       lock.unlock();
+       
+       if (entry.submit.cmdList != nullptr) {
+@@ -276,15 +820,28 @@ namespace dxvk {
+ 
+         if (status != VK_SUCCESS) {
+           m_lastError = status;
++          // Waiting for the submission queue from its finish worker would
++          // wait on the current finish entry. Keep error recovery out of the
++          // worker-owned queue wait path.
++        }
+ 
+-          if (status != VK_ERROR_DEVICE_LOST)
+-            m_device->waitForIdle();
++        if (entry.retireInternalLeaseOnCompletion
++         && entry.present.presenter != nullptr) {
++          entry.present.presenter->retireFailedInternalImageLease(
++            entry.present.identity, entry.result);
+         }
++
++        if (internalEntry)
++          entry.present.presenter = nullptr;
+       } else if (entry.present.presenter != nullptr) {
+         // Signal the frame and then immediately destroy the reference.
+         // This is necessary since the front-end may want to explicitly
+         // destroy the presenter object. 
+-        entry.present.presenter->signalFrame(entry.present.frameId, entry.latency.tracker);
++        if (entry.present.identity.origin == DxvkPresentOrigin::ApplicationSource
++         && entry.present.identity.appFrameId) {
++          entry.present.presenter->signalFrame(
++            *entry.present.identity.appFrameId, entry.latency.tracker);
++        }
+         entry.present.presenter = nullptr;
+       }
+ 
+@@ -296,6 +853,8 @@ namespace dxvk {
+ 
+       lock.lock();
+       m_finishQueue.pop();
++      if (internalEntry && m_internalFinishEntries)
++        m_internalFinishEntries -= 1u;
+       m_finishCond.notify_all();
+       lock.unlock();
+ 
+@@ -303,6 +862,7 @@ namespace dxvk {
+       if (entry.submit.cmdList != nullptr) {
+         entry.submit.cmdList->reset();
+         m_device->recycleCommandList(entry.submit.cmdList);
++        entry.submit.cmdList = nullptr;
+       }
+     }
+   }
+diff --git a/src/dxvk/dxvk_queue.h b/src/dxvk/dxvk_queue.h
+index 5e05690..7490260 100644
+--- a/src/dxvk/dxvk_queue.h
++++ b/src/dxvk/dxvk_queue.h
+@@ -1,6 +1,8 @@
+ #pragma once
+ 
+ #include <condition_variable>
++#include <chrono>
++#include <array>
+ #include <mutex>
+ #include <queue>
+ 
+@@ -8,6 +10,7 @@
+ 
+ #include "dxvk_cmdlist.h"
+ #include "dxvk_latency.h"
++#include "dxvk_limits.h"
+ #include "dxvk_presenter.h"
+ 
+ namespace dxvk {
+@@ -45,11 +48,22 @@ namespace dxvk {
+    */
+   struct DxvkPresentInfo {
+     Rc<Presenter>       presenter;
+-    uint64_t            frameId;
++    DxvkPresentIdentity identity;
++    bool                allowInternalProof = false;
+     small_vector<VkRectLayerKHR, 4u> rects;
+   };
+ 
+ 
++  struct DxvkInternalPresentRequest {
++    Rc<Presenter> presenter;
++    InternalPresentId internalPresentId;
++    uint64_t opportunityId = 0u;
++    uint64_t generation = 0u;
++    dxvk::high_resolution_clock::time_point target;
++    dxvk::high_resolution_clock::time_point deadline;
++  };
++
++
+   /**
+    * \brief Latency info
+    *
+@@ -72,6 +86,59 @@ namespace dxvk {
+     DxvkPresentInfo     present;
+     DxvkLatencyInfo     latency;
+     DxvkTimelineSemaphoreValues timelines;
++    bool                retireInternalLeaseOnCompletion = false;
++  };
++
++
++  /**
++   * rief Preallocated queue for entries whose completion cannot be lost
++   *
++   * Source and internal WSI entries reach this queue only after Vulkan work
++   * has been submitted. A dynamic allocation failure at that point would
++   * strand the acquired image and its application completion path.
++   */
++  template<typename T, size_t Capacity>
++  class DxvkFixedQueue {
++  public:
++    bool push(T&& value) {
++      if (m_size == Capacity)
++        return false;
++
++      m_entries[(m_head + m_size) % Capacity] = std::move(value);
++      m_size += 1u;
++      return true;
++    }
++
++    T& front() {
++      return m_entries[m_head];
++    }
++
++    const T& front() const {
++      return m_entries[m_head];
++    }
++
++    void pop() {
++      m_entries[m_head] = T { };
++      m_head = (m_head + 1u) % Capacity;
++      m_size -= 1u;
++    }
++
++    size_t size() const {
++      return m_size;
++    }
++
++    bool empty() const {
++      return m_size == 0u;
++    }
++
++    bool full() const {
++      return m_size == Capacity;
++    }
++
++  private:
++    std::array<T, Capacity> m_entries = { };
++    size_t m_head = 0u;
++    size_t m_size = 0u;
+   };
+ 
+ 
+@@ -79,6 +146,7 @@ namespace dxvk {
+    * \brief Submission queue
+    */
+   class DxvkSubmissionQueue {
++    static constexpr size_t MaxPendingInternalPresents = 1u;
+ 
+   public:
+     
+@@ -110,6 +178,24 @@ namespace dxvk {
+     VkResult getLastError() const {
+       return m_lastError.load();
+     }
++
++    bool internalProofEnabled() const {
++      return m_internalProofEnabled;
++    }
++
++    /**
++     * \brief Records an asynchronous submission failure
++     *
++     * Used by callers that could not enqueue work after related GPU work
++     * was already submitted. The first failure remains authoritative.
++     */
++    void reportError(VkResult error) {
++      if (error == VK_SUCCESS)
++        return;
++
++      VkResult expected = VK_SUCCESS;
++      m_lastError.compare_exchange_strong(expected, error);
++    }
+     
+     /**
+      * \brief Submits a command list asynchronously
+@@ -136,7 +222,7 @@ namespace dxvk {
+      * \param [in] latencyInfo Latency tracker info
+      * \param [out] status Submission feedback
+      */
+-    void present(
++    VkResult present(
+             DxvkPresentInfo     presentInfo,
+             DxvkLatencyInfo     latencyInfo,
+             DxvkSubmitStatus*   status);
+@@ -176,6 +262,15 @@ namespace dxvk {
+      */
+     void waitForIdle();
+ 
++    /**
++     * \brief Checks whether the caller is one of this queue's workers
++     */
++    bool isWorkerThread() const {
++      auto threadId = this_thread::get_id();
++      return m_submitThread.get_id() == threadId
++          || m_finishThread.get_id() == threadId;
++    }
++
+     /**
+      * \brief Locks device queue
+      *
+@@ -207,6 +302,7 @@ namespace dxvk {
+     
+     std::atomic<bool>           m_stopped = { false };
+     std::atomic<uint64_t>       m_gpuIdle = { 0ull };
++    bool                        m_internalProofEnabled = false;
+ 
+     dxvk::mutex                 m_mutex;
+     dxvk::mutex                 m_mutexQueue;
+@@ -216,7 +312,20 @@ namespace dxvk {
+     dxvk::condition_variable    m_finishCond;
+ 
+     std::queue<DxvkSubmitEntry> m_submitQueue;
+-    std::queue<DxvkSubmitEntry> m_finishQueue;
++    // App admission is bounded independently from internal completions. At
++    // most 34 app entries plus 32 queued internal entries can coexist. The
++    // larger fixed ring ensures that a committed WSI present never depends
++    // on a later heap allocation.
++    DxvkFixedQueue<DxvkSubmitEntry, MaxNumQueuedCommandBuffers * 4u> m_finishQueue;
++    std::queue<DxvkInternalPresentRequest> m_internalQueue;
++    size_t                      m_internalFinishEntries = 0u;
++    size_t                      m_submitActive = 0u;
++    size_t                      m_finishActive = 0u;
++
++    uint64_t                    m_nextInternalPresentId = 1u;
++    uint64_t                    m_nextInternalOpportunityId = 1u;
++    dxvk::high_resolution_clock::time_point m_lastSourcePresentTime;
++    uint32_t                    m_internalActive = 0u;
+ 
+     dxvk::thread                m_submitThread;
+     dxvk::thread                m_finishThread;
+@@ -224,6 +333,15 @@ namespace dxvk {
+     void submitCmdLists();
+ 
+     void finishCmdLists();
++
++    void processInternalPresent(
++      DxvkInternalPresentRequest request);
++
++    // Called with m_mutex held. Internal completion entries do not consume
++    // the normal application queue admission budget.
++    size_t applicationQueueLoad() const {
++      return m_submitQueue.size() + m_finishQueue.size() - m_internalFinishEntries;
++    }
+     
+   };
+   

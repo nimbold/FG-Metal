@@ -1,0 +1,12 @@
+{
+  "executable": "d3d9_shutdown_stress.exe",
+  "exit_status": 0,
+  "wall_seconds": 10.378952917002607,
+  "internal_enabled": true,
+  "sha256": {
+    "d3d9_shutdown_stress.exe": "f5e5ff42bee04b66e2cfe526338da48a913d0dd2169551601b1ad54d4102c432",
+    "d3d9.dll": "48ef8e00be1e7f5db7148020e678b7794544be87aedc92f0b379d19417b310fb"
+  },
+  "runtime": "/Users/nima/Library/Caches/FGMetalStep11C1R/runtime-frozen/runtime/wine/bin/wine",
+  "icd": "/Users/nima/Library/Caches/FGMetalStep11C1R/moltenvk-1.4.2/MoltenVK/MoltenVK/dynamic/dylib/macOS/MoltenVK_icd.json"
+}

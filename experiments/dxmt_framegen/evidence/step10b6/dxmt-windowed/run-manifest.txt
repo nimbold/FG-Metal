@@ -1,0 +1,10 @@
+engine=/private/tmp/step10b6-windowed/engine
+prefix=/private/tmp/step10b6-windowed/prefix
+app=/private/tmp/step10b6-windowed/output/d3d11_clear_window.exe
+app_sha256=a9979b0521a5bf49c47cd7e027408dcadcd3e7f1cd3167cc1dd45b2a3b31bc49
+seconds=50
+generation=1
+static_texture=0
+lifecycle_test=0
+skip_resize_test=1
+failure_injection=none

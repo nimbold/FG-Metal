@@ -1,0 +1,20 @@
+command: python3 experiments/dxvk_macos_step11d3a/build_native_moltenvk.py
+experiment_id: step11d3a-native-mvk-build-20261007
+build_id: step11d3a-mvk-x86_64-20261007
+Gate 0 PRE admission: ALLOW; blockers=[]; expected_peak_new_bytes=4634217728
+BuildLease: reserved fresh x86_64 MoltenVK build root
+failure_stage: pristine source materialization identity/count check, before instrumentation patch application and before xcodebuild execution
+exception: NameError("name 'file_count' is not defined")
+source_location: experiments/dxvk_macos_step11d3a/build_native_moltenvk.py:270
+build_command_execution: NOT STARTED
+MoltenVK dylib output: NOT BUILT
+native control executable output: NOT BUILT
+BuildLease failure capture: PASS; failed-build evidence captured
+temporary build root: auto-retired and removed
+cleanup receipt: experiments/storage/build-cleanup-receipts/step11d3a-mvk-x86_64-20261007.json
+cleanup receipt result/state: REMOVED/REMOVED
+BuildLease final state: COMPLETED, return_code=-1, retirement_reason=failed-build-evidence-captured
+active, retained, preserved, failed/retiring, unknown build counts: all 0
+NativeRunLease: NOT STARTED
+Native loader probe: NOT STARTED
+graphics smoke/baselines: NOT STARTED

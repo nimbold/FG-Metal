@@ -25,7 +25,6 @@ d3d11 = Path("/tmp/fgmetal-step11c/build/src/d3d11/d3d11.dll")
 baseline_dxgi = root / "baseline-semantics-15s/dxgi.dll"
 prefix = Path(os.environ.get(
     "FG_STEP11C_PREFIX", f"/tmp/fgmetal-step11c/prefix-{name}"))
-prefix.mkdir(parents=True, exist_ok=True)
 
 for target, source in {
     exe.name: exe,
@@ -41,6 +40,8 @@ for key in list(env):
 
 env.update(
     WINEPREFIX=str(prefix),
+    WINELOADER=str(wine),
+    WINESERVER=str(wine.with_name("wineserver")),
     WINEDLLOVERRIDES="d3d11,dxgi=n,b",
     WINEDEBUG="+loaddll",
     DXVK_LOG_LEVEL="info",
@@ -57,6 +58,9 @@ env.update(
 if internal:
     env["DXVK_INTERNAL_WSI_PROOF"] = "1"
 
+preflight = Path(__file__).resolve().parents[3] / "experiments/storage/prefix_preflight.py"
+subprocess.run([sys.executable, str(preflight), str(prefix), str(Path(__file__).resolve())],
+               env=env, check=True)
 with (out / "prefix-init.log").open("w") as log:
     subprocess.run([str(wine), "wineboot", "-u"], env=env,
                    stdout=log, stderr=subprocess.STDOUT, timeout=60, check=True)

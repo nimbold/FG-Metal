@@ -1,0 +1,34 @@
+{
+  "run": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/cadence-repeatability-r5-20261006/A2",
+  "ledger": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/cadence-repeatability-r5-20261006/A2/synchronization-ledger.csv",
+  "rows": 7158,
+  "event_counts": {
+    "capture": 7158,
+    "commit": 7158,
+    "consumer_attempt": 4816,
+    "terminal": 7158,
+    "consumer_submit": 4678,
+    "wsi_submit": 4678,
+    "retired": 7158
+  },
+  "terminal_exactly_once": true,
+  "missing_or_multiple_terminal_job_ids": [],
+  "missing_capture_job_ids": [],
+  "jobs_with_committed_metal": 7158,
+  "jobs_with_consumer_attempt": 4816,
+  "jobs_with_consumer_done_wait_submitted": 4678,
+  "failed_metal_jobs_that_submitted_done_wait": [],
+  "jobs_with_wsi_present_attempt": 4678,
+  "jobs_with_successful_wsi_present": 4678,
+  "jobs_retired": 7158,
+  "terminal_states": {
+    "VULKAN_CONSUMED": 4678,
+    "internal-queue-full": 2263,
+    "source-pending": 60,
+    "lease-validation-before-submit": 125,
+    "source-or-swapchain-conflict-before-submit": 11,
+    "deadline-expired-before-submit": 2,
+    "source-queue-nonempty": 7,
+    "deadline-expired-before-claim": 12
+  }
+}

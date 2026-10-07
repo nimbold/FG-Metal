@@ -1,0 +1,669 @@
+{
+  "adopted_existing": true,
+  "artifacts": [
+    {
+      "artifact_manifest_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/0192dcdadc45b613bdf3bc6c5348c1e5828e10dc3b3ea1fd2734a28c285eb60e/manifest.json",
+      "artifact_name": "libMoltenVK.a",
+      "canonical_artifact_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/0192dcdadc45b613bdf3bc6c5348c1e5828e10dc3b3ea1fd2734a28c285eb60e/libMoltenVK.a",
+      "sha256": "0192dcdadc45b613bdf3bc6c5348c1e5828e10dc3b3ea1fd2734a28c285eb60e",
+      "size_bytes": 7585320,
+      "source_build_hard_link_count": 1,
+      "source_build_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd-17674774/Build/Intermediates.noindex/MoltenVK.build/Release/MoltenVK-macOS-static.build/Objects-normal/x86_64/Binary/libMoltenVK.a"
+    },
+    {
+      "artifact_manifest_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/0b59c97e1583c057af507519fab0832977821fdc3d1ff7d7747cb3da783a2114/manifest.json",
+      "artifact_name": "MoltenVK",
+      "canonical_artifact_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/0b59c97e1583c057af507519fab0832977821fdc3d1ff7d7747cb3da783a2114/MoltenVK",
+      "sha256": "0b59c97e1583c057af507519fab0832977821fdc3d1ff7d7747cb3da783a2114",
+      "size_bytes": 5564936,
+      "source_build_hard_link_count": 1,
+      "source_build_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd-17674774/Build/Intermediates.noindex/MoltenVK.build/Release/MoltenVK-macOS-dynamic.build/Objects-normal/x86_64/Binary/MoltenVK"
+    },
+    {
+      "artifact_manifest_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/12afb9158ddce092e6551aac55fda8ebe23e2a2644daa9eaeac8728ed8cfed8f/manifest.json",
+      "artifact_name": "libSPIRVCross.a",
+      "canonical_artifact_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/12afb9158ddce092e6551aac55fda8ebe23e2a2644daa9eaeac8728ed8cfed8f/libSPIRVCross.a",
+      "sha256": "12afb9158ddce092e6551aac55fda8ebe23e2a2644daa9eaeac8728ed8cfed8f",
+      "size_bytes": 10419904,
+      "source_build_hard_link_count": 1,
+      "source_build_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd-17674774/Build/Products/Release/libSPIRVCross.a"
+    },
+    {
+      "artifact_manifest_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/24476fd42e5178ba659907b2f8a1d8b059fe2f4a5fef02853d727f909655e162/manifest.json",
+      "artifact_name": "libMoltenVK.a",
+      "canonical_artifact_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/24476fd42e5178ba659907b2f8a1d8b059fe2f4a5fef02853d727f909655e162/libMoltenVK.a",
+      "sha256": "24476fd42e5178ba659907b2f8a1d8b059fe2f4a5fef02853d727f909655e162",
+      "size_bytes": 6996096,
+      "source_build_hard_link_count": 1,
+      "source_build_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd-17674774/Build/Intermediates.noindex/MoltenVK.build/Release/MoltenVK-macOS-static.build/Objects-normal/arm64/Binary/libMoltenVK.a"
+    },
+    {
+      "artifact_manifest_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/400d5d4a276a1f1286417dac21bd4ca968f0e7f6e011b98c9ba4d4c34ab792b1/manifest.json",
+      "artifact_name": "MoltenVK",
+      "canonical_artifact_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/400d5d4a276a1f1286417dac21bd4ca968f0e7f6e011b98c9ba4d4c34ab792b1/MoltenVK",
+      "sha256": "400d5d4a276a1f1286417dac21bd4ca968f0e7f6e011b98c9ba4d4c34ab792b1",
+      "size_bytes": 10949904,
+      "source_build_hard_link_count": 1,
+      "source_build_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd-17674774/Build/Products/Release/MoltenVK.framework/Versions/A/MoltenVK"
+    },
+    {
+      "artifact_manifest_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/43b3741bd4fe101535175ff3d56dc27a34b38259d01e502396e5d3aededbdb3c/manifest.json",
+      "artifact_name": "MoltenVKShaderConverter",
+      "canonical_artifact_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/43b3741bd4fe101535175ff3d56dc27a34b38259d01e502396e5d3aededbdb3c/MoltenVKShaderConverter",
+      "sha256": "43b3741bd4fe101535175ff3d56dc27a34b38259d01e502396e5d3aededbdb3c",
+      "size_bytes": 3674064,
+      "source_build_hard_link_count": 1,
+      "source_build_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd-17674774/Build/Intermediates.noindex/MoltenVKShaderConverter.build/Release/MoltenVKShaderConverter.build/Objects-normal/x86_64/Binary/MoltenVKShaderConverter"
+    },
+    {
+      "artifact_manifest_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/43bbbe47447386f84f6b436d66f2e23d94324e2af66855e8c13a64a96a7d3164/manifest.json",
+      "artifact_name": "MoltenVK",
+      "canonical_artifact_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/43bbbe47447386f84f6b436d66f2e23d94324e2af66855e8c13a64a96a7d3164/MoltenVK",
+      "sha256": "43bbbe47447386f84f6b436d66f2e23d94324e2af66855e8c13a64a96a7d3164",
+      "size_bytes": 5303168,
+      "source_build_hard_link_count": 1,
+      "source_build_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd-17674774/Build/Intermediates.noindex/MoltenVK.build/Release/MoltenVK-macOS-dynamic.build/Objects-normal/arm64/Binary/MoltenVK"
+    },
+    {
+      "artifact_manifest_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/4a3c773a8ccbaddec4675fd8d36a8c3603b66d9adbc2949258474f22ffc5cf6f/manifest.json",
+      "artifact_name": "libSPIRVTools.a",
+      "canonical_artifact_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/4a3c773a8ccbaddec4675fd8d36a8c3603b66d9adbc2949258474f22ffc5cf6f/libSPIRVTools.a",
+      "sha256": "4a3c773a8ccbaddec4675fd8d36a8c3603b66d9adbc2949258474f22ffc5cf6f",
+      "size_bytes": 31596664,
+      "source_build_hard_link_count": 1,
+      "source_build_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd-17674774/Build/Products/Release/libSPIRVTools.a"
+    },
+    {
+      "artifact_manifest_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/533494b0eef1871d79e6b1d9d5faa59c8417232f7d6ecf00c2850ac40247c6cf/manifest.json",
+      "artifact_name": "libMoltenVK.dylib",
+      "canonical_artifact_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/533494b0eef1871d79e6b1d9d5faa59c8417232f7d6ecf00c2850ac40247c6cf/libMoltenVK.dylib",
+      "sha256": "533494b0eef1871d79e6b1d9d5faa59c8417232f7d6ecf00c2850ac40247c6cf",
+      "size_bytes": 5564936,
+      "source_build_hard_link_count": 1,
+      "source_build_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd-17674774/Build/Intermediates.noindex/MoltenVK.build/Release/MoltenVK-macOS-dylib.build/Objects-normal/x86_64/Binary/libMoltenVK.dylib"
+    },
+    {
+      "artifact_manifest_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/91cc6eedca276d252e9fb4087282407e56a3cb3f840739176ac56f178c2219f8/manifest.json",
+      "artifact_name": "libMoltenVK.a",
+      "canonical_artifact_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/91cc6eedca276d252e9fb4087282407e56a3cb3f840739176ac56f178c2219f8/libMoltenVK.a",
+      "sha256": "91cc6eedca276d252e9fb4087282407e56a3cb3f840739176ac56f178c2219f8",
+      "size_bytes": 14581464,
+      "source_build_hard_link_count": 1,
+      "source_build_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd-17674774/Build/Products/Release/libMoltenVK.a"
+    },
+    {
+      "artifact_manifest_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/91cc6eedca276d252e9fb4087282407e56a3cb3f840739176ac56f178c2219f8/manifest.json",
+      "artifact_name": "libMoltenVK.a",
+      "canonical_artifact_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/91cc6eedca276d252e9fb4087282407e56a3cb3f840739176ac56f178c2219f8/libMoltenVK.a",
+      "sha256": "91cc6eedca276d252e9fb4087282407e56a3cb3f840739176ac56f178c2219f8",
+      "size_bytes": 14581464,
+      "source_build_hard_link_count": 1,
+      "source_build_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd-17674774/Build/Products/XCFrameworkStaging/Release/Platform/libMoltenVK.a"
+    },
+    {
+      "artifact_manifest_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/aa7dbe20932daea8722946e15838241bc5dd6a1d990dcbc98c1a7ad3c7036c4a/manifest.json",
+      "artifact_name": "MoltenVK",
+      "canonical_artifact_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/aa7dbe20932daea8722946e15838241bc5dd6a1d990dcbc98c1a7ad3c7036c4a/MoltenVK",
+      "sha256": "aa7dbe20932daea8722946e15838241bc5dd6a1d990dcbc98c1a7ad3c7036c4a",
+      "size_bytes": 10873728,
+      "source_build_hard_link_count": 1,
+      "source_build_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd-17674774/Build/Products/XCFrameworkStaging/Release/Platform/MoltenVK.framework/Versions/A/MoltenVK"
+    },
+    {
+      "artifact_manifest_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/be440874606959c6ef3a7d5f54d22632455672c74b387157b89900509d3580d9/manifest.json",
+      "artifact_name": "libMoltenVKShaderConverter.a",
+      "canonical_artifact_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/be440874606959c6ef3a7d5f54d22632455672c74b387157b89900509d3580d9/libMoltenVKShaderConverter.a",
+      "sha256": "be440874606959c6ef3a7d5f54d22632455672c74b387157b89900509d3580d9",
+      "size_bytes": 42264984,
+      "source_build_hard_link_count": 1,
+      "source_build_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd-17674774/Build/Products/Release/libMoltenVKShaderConverter.a"
+    },
+    {
+      "artifact_manifest_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/be440874606959c6ef3a7d5f54d22632455672c74b387157b89900509d3580d9/manifest.json",
+      "artifact_name": "libMoltenVKShaderConverter.a",
+      "canonical_artifact_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/be440874606959c6ef3a7d5f54d22632455672c74b387157b89900509d3580d9/libMoltenVKShaderConverter.a",
+      "sha256": "be440874606959c6ef3a7d5f54d22632455672c74b387157b89900509d3580d9",
+      "size_bytes": 42264984,
+      "source_build_hard_link_count": 1,
+      "source_build_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd-17674774/Build/Products/XCFrameworkStaging/Release/Platform/libMoltenVKShaderConverter.a"
+    },
+    {
+      "artifact_manifest_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/d145da484bbd5905d2ff6aa23dbfa8d0e86457433520ea4cc27866133a56e8d1/manifest.json",
+      "artifact_name": "libMoltenVKShaderConverter.a",
+      "canonical_artifact_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/d145da484bbd5905d2ff6aa23dbfa8d0e86457433520ea4cc27866133a56e8d1/libMoltenVKShaderConverter.a",
+      "sha256": "d145da484bbd5905d2ff6aa23dbfa8d0e86457433520ea4cc27866133a56e8d1",
+      "size_bytes": 20686840,
+      "source_build_hard_link_count": 1,
+      "source_build_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd-17674774/Build/Intermediates.noindex/MoltenVKShaderConverter.build/Release/MoltenVKShaderConverter-macOS.build/Objects-normal/arm64/Binary/libMoltenVKShaderConverter.a"
+    },
+    {
+      "artifact_manifest_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/df43b3a65b67efb06f673fc8f0e5cedf7f54276f5911f479c17050c04b1fd12e/manifest.json",
+      "artifact_name": "libvulkan.dylib",
+      "canonical_artifact_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/df43b3a65b67efb06f673fc8f0e5cedf7f54276f5911f479c17050c04b1fd12e/libvulkan.dylib",
+      "sha256": "df43b3a65b67efb06f673fc8f0e5cedf7f54276f5911f479c17050c04b1fd12e",
+      "size_bytes": 10949904,
+      "source_build_hard_link_count": 1,
+      "source_build_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd-17674774/Build/Products/Release/libMoltenVK.dylib"
+    },
+    {
+      "artifact_manifest_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/e2a1b88d05f4c109f88fccba55d44f813b23190deb1dfa83bb1967d28d6b79ec/manifest.json",
+      "artifact_name": "libMoltenVK.dylib",
+      "canonical_artifact_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/e2a1b88d05f4c109f88fccba55d44f813b23190deb1dfa83bb1967d28d6b79ec/libMoltenVK.dylib",
+      "sha256": "e2a1b88d05f4c109f88fccba55d44f813b23190deb1dfa83bb1967d28d6b79ec",
+      "size_bytes": 5303168,
+      "source_build_hard_link_count": 1,
+      "source_build_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd-17674774/Build/Intermediates.noindex/MoltenVK.build/Release/MoltenVK-macOS-dylib.build/Objects-normal/arm64/Binary/libMoltenVK.dylib"
+    },
+    {
+      "artifact_manifest_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/ea8db06d6c121bd0e8df00cf5089784260c4d0a67db15fdf2efd0a7ac107c90c/manifest.json",
+      "artifact_name": "MoltenVKShaderConverter",
+      "canonical_artifact_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/ea8db06d6c121bd0e8df00cf5089784260c4d0a67db15fdf2efd0a7ac107c90c/MoltenVKShaderConverter",
+      "sha256": "ea8db06d6c121bd0e8df00cf5089784260c4d0a67db15fdf2efd0a7ac107c90c",
+      "size_bytes": 7257024,
+      "source_build_hard_link_count": 1,
+      "source_build_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd-17674774/Build/Products/Release/MoltenVKShaderConverter"
+    },
+    {
+      "artifact_manifest_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/f1dde2b97e918a48ec4d1bd3c1ca73464fc2f6e17c4eaedf5cc2f6ad4516aa58/manifest.json",
+      "artifact_name": "libMoltenVKShaderConverter.a",
+      "canonical_artifact_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/f1dde2b97e918a48ec4d1bd3c1ca73464fc2f6e17c4eaedf5cc2f6ad4516aa58/libMoltenVKShaderConverter.a",
+      "sha256": "f1dde2b97e918a48ec4d1bd3c1ca73464fc2f6e17c4eaedf5cc2f6ad4516aa58",
+      "size_bytes": 21578096,
+      "source_build_hard_link_count": 1,
+      "source_build_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd-17674774/Build/Intermediates.noindex/MoltenVKShaderConverter.build/Release/MoltenVKShaderConverter-macOS.build/Objects-normal/x86_64/Binary/libMoltenVKShaderConverter.a"
+    },
+    {
+      "artifact_manifest_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/ff12ab5e94d2c4426311b843c6c19582903e7982e056adcc36092376e0acb453/manifest.json",
+      "artifact_name": "MoltenVKShaderConverter",
+      "canonical_artifact_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/ff12ab5e94d2c4426311b843c6c19582903e7982e056adcc36092376e0acb453/MoltenVKShaderConverter",
+      "sha256": "ff12ab5e94d2c4426311b843c6c19582903e7982e056adcc36092376e0acb453",
+      "size_bytes": 3513712,
+      "source_build_hard_link_count": 1,
+      "source_build_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd-17674774/Build/Intermediates.noindex/MoltenVKShaderConverter.build/Release/MoltenVKShaderConverter.build/Objects-normal/arm64/Binary/MoltenVKShaderConverter"
+    }
+  ],
+  "build_id": "legacy-MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd-17674774",
+  "build_identity": {
+    "build_log_sha256": null,
+    "build_log_status": "no stdout build transcript present; configure log and Ninja execution log retained separately",
+    "build_symlink_identity": [
+      {
+        "build_relative_path": "Build/Products/Release/MoltenVK.framework/MoltenVK",
+        "target": "Versions/Current/MoltenVK",
+        "target_sha256": "0816678c79c9b004472d2f7254a225a7d327d6ad206eede24b2fa0ea21dc4c4b"
+      },
+      {
+        "build_relative_path": "Build/Products/Release/MoltenVK.framework/Resources",
+        "target": "Versions/Current/Resources",
+        "target_sha256": "59991b51b8ee15b59f07ec45942957a4ce90494257766964f5df60b7c7998e42"
+      },
+      {
+        "build_relative_path": "Build/Products/Release/MoltenVK.framework/Versions/Current",
+        "target": "A",
+        "target_sha256": "559aead08264d5795d3909718cdd05abd49572e84fe55590eef31a88a08fdffd"
+      },
+      {
+        "build_relative_path": "Build/Products/XCFrameworkStaging/Release/Platform/MoltenVK.framework/MoltenVK",
+        "target": "Versions/Current/MoltenVK",
+        "target_sha256": "0816678c79c9b004472d2f7254a225a7d327d6ad206eede24b2fa0ea21dc4c4b"
+      },
+      {
+        "build_relative_path": "Build/Products/XCFrameworkStaging/Release/Platform/MoltenVK.framework/Resources",
+        "target": "Versions/Current/Resources",
+        "target_sha256": "59991b51b8ee15b59f07ec45942957a4ce90494257766964f5df60b7c7998e42"
+      },
+      {
+        "build_relative_path": "Build/Products/XCFrameworkStaging/Release/Platform/MoltenVK.framework/Versions/Current",
+        "target": "A",
+        "target_sha256": "559aead08264d5795d3909718cdd05abd49572e84fe55590eef31a88a08fdffd"
+      }
+    ],
+    "build_system": "xcode",
+    "build_type": "release",
+    "compiler_identity": null,
+    "config_key_sha256": "ba318869cfb17d85806e68539e045f5e901c4f5dc62c000b32129850b1babbdd",
+    "cross_file": null,
+    "dependency_state": {
+      "status": "captured",
+      "toolchain_sha256": "9f4a3eea21fff70558a754b7d538e4652399f6bdf74da0f645110099457edfb4",
+      "xcode_version_sha256": "c1dd7c9300cb3c119535994845c8ed1fec3e340e4dfb4c0365ac32d4dcc45c56"
+    },
+    "framework_resources": [
+      {
+        "mode": "0o644",
+        "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd-17674774.evidence/framework/Versions/A/Resources/Info.plist",
+        "sha256": "4850a29cc7fcf7d3f35ba7ce27581d299cba9eac440cb4265abcf3f535111d94",
+        "size_bytes": 1289,
+        "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd-17674774/Build/Products/Release/MoltenVK.framework/Versions/A/Resources/Info.plist"
+      },
+      {
+        "mode": "0o644",
+        "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd-17674774.evidence/framework/Versions/A/_CodeSignature/CodeResources",
+        "sha256": "b9e118469f1a2dddcaf8458727b5eb9d2eb4cacfbd4f268376d5dae9fd0357ee",
+        "size_bytes": 2442,
+        "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd-17674774/Build/Products/Release/MoltenVK.framework/Versions/A/_CodeSignature/CodeResources"
+      }
+    ],
+    "generated_shader_identity": [
+      {
+        "build_relative_path": "Build/Products/Release/mvkGitRevDerived.h",
+        "mode": "0o644",
+        "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd-17674774.evidence/generated-shaders/Build/Products/Release/mvkGitRevDerived.h",
+        "sha256": "e1f3f79ef261fa4189e4668e705a6db739df4d2db592bf559fc36b043c34d6f1",
+        "size_bytes": 108,
+        "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd-17674774/Build/Products/Release/mvkGitRevDerived.h"
+      },
+      {
+        "build_relative_path": "Build/Products/XCFrameworkStaging/Headers/MoltenVKShaderConverter/SPIRVConversion.h",
+        "mode": "0o644",
+        "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd-17674774.evidence/generated-shaders/Build/Products/XCFrameworkStaging/Headers/MoltenVKShaderConverter/SPIRVConversion.h",
+        "sha256": "ca891ce0b661f5ef31915a07ad0ac73eb137ff1fcbe9386f42dab0ddcdd6f760",
+        "size_bytes": 3362,
+        "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd-17674774/Build/Products/XCFrameworkStaging/Headers/MoltenVKShaderConverter/SPIRVConversion.h"
+      },
+      {
+        "build_relative_path": "Build/Products/XCFrameworkStaging/Headers/MoltenVKShaderConverter/SPIRVToMSLConverter.h",
+        "mode": "0o644",
+        "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd-17674774.evidence/generated-shaders/Build/Products/XCFrameworkStaging/Headers/MoltenVKShaderConverter/SPIRVToMSLConverter.h",
+        "sha256": "124e571b7327c76ca0e340fc786deb53f114361dee3a1ae6d98c3d657a2878dc",
+        "size_bytes": 13266,
+        "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd-17674774/Build/Products/XCFrameworkStaging/Headers/MoltenVKShaderConverter/SPIRVToMSLConverter.h"
+      }
+    ],
+    "linker_identity": null,
+    "meson_configuration_sha256": "151357d8a735be1eba5a5d7375d94abe6d4b2723de9afda750b7827a7a6a060a",
+    "meson_log_evidence": {
+      "mode": "0o644",
+      "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd-17674774.evidence/logs/meson-log.txt",
+      "sha256": "3f36728de3ea3247a98ad839c6617d1f81c90f617be3f8fc0cf2e0d9c736e264",
+      "size_bytes": 102269,
+      "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd-17674774/Logs/Build/E624C8C0-D1CA-4058-B205-06D25E16920B.xcactivitylog"
+    },
+    "meson_log_sha256": "3f36728de3ea3247a98ad839c6617d1f81c90f617be3f8fc0cf2e0d9c736e264",
+    "meson_options": null,
+    "ninja_log_sha256": null,
+    "patch_set": {
+      "capture_scope": "artifactization-time snapshot",
+      "patch_set_sha256": "96a296d224f285c67bee93c30f8a309157f0daa35dc5b87e410b78630a09cfc7",
+      "staged_patch_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "unstaged_patch_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "untracked_files_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "product_tree_manifests": [
+      {
+        "entry_count": 18,
+        "path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd-17674774.evidence/products/Release.product-tree.json",
+        "sha256": "11f2846a63cef2293107fb6cee81658fc0728bb82131c9b04f287d533f94b1c9",
+        "source_product_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd-17674774/Build/Products/Release",
+        "tree_sha256": "0012c86c7200d8888a2710bcf3420a0aff0583bc8e156e9b73490ca37aca0a41"
+      },
+      {
+        "entry_count": 24,
+        "path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd-17674774.evidence/products/XCFrameworkStaging.product-tree.json",
+        "sha256": "4d8036f182f1943a3aecfb25c2e2e9315b5922b3e053c43530490a8e8ac321b0",
+        "source_product_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd-17674774/Build/Products/XCFrameworkStaging",
+        "tree_sha256": "25963dd5ba43ed9a71f0d3e1e732cfd12baf19e1fb5ac908392e1b6f5a16dfe3"
+      }
+    ],
+    "source_identity": {
+      "capture_scope": "artifactization-time snapshot",
+      "content_tree_sha256": "2a51f319d33f6e554a2d5e073ac86a1968f35a5746d298d46f6614b6dcd3f3f5",
+      "file_count": 7631,
+      "git_commit": "db66022459ffb663aa2b50f6b018bc2e124f5edf",
+      "git_tree": "efebd918bbe772eead074100c0a18789ad39606d",
+      "patch_set_sha256": "96a296d224f285c67bee93c30f8a309157f0daa35dc5b87e410b78630a09cfc7",
+      "path": "/private/tmp/fgmetal-step11b/MoltenVK",
+      "staged_patch_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "unstaged_patch_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "untracked_files": [],
+      "untracked_files_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "untracked_path_list_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "xcode_activity_logs": [
+      {
+        "mode": "0o644",
+        "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd-17674774.evidence/logs/613E7811-407E-49E0-ACCB-C3C5051A29EB.xcactivitylog",
+        "sha256": "dca8d5b46f3acfee37fa1cd49027f99404c4eaab5ee1164dc132bfb74161fa4a",
+        "size_bytes": 476,
+        "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd-17674774/Logs/Build/613E7811-407E-49E0-ACCB-C3C5051A29EB.xcactivitylog"
+      },
+      {
+        "mode": "0o644",
+        "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd-17674774.evidence/logs/E624C8C0-D1CA-4058-B205-06D25E16920B.xcactivitylog",
+        "sha256": "3f36728de3ea3247a98ad839c6617d1f81c90f617be3f8fc0cf2e0d9c736e264",
+        "size_bytes": 102269,
+        "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd-17674774/Logs/Build/E624C8C0-D1CA-4058-B205-06D25E16920B.xcactivitylog"
+      }
+    ],
+    "xcode_build_requests": [
+      {
+        "action": "build",
+        "configuration_name": "Release",
+        "mode": "0o644",
+        "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd-17674774.evidence/configuration/b87f8dcd8a8afa40788e8463bc100d80.xcbuilddata/build-request.json",
+        "sha256": "a1e8a12ecda25df0ed6a42e46fbd5229cb88cc0ce11eac1d1d909cee673d1331",
+        "size_bytes": 2487,
+        "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd-17674774/Build/Intermediates.noindex/XCBuildData/b87f8dcd8a8afa40788e8463bc100d80.xcbuilddata/build-request.json"
+      }
+    ],
+    "xcode_configurations": [
+      "Release"
+    ],
+    "xcode_info_plist_evidence": {
+      "mode": "0o644",
+      "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd-17674774.evidence/configuration/Info.plist",
+      "sha256": "d01cbb6a5cc2fcd63a4bad53676eefb923952af24f90faa396b15cfcd4719378",
+      "size_bytes": 354,
+      "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd-17674774/Info.plist"
+    },
+    "xcode_info_plist_sha256": "d01cbb6a5cc2fcd63a4bad53676eefb923952af24f90faa396b15cfcd4719378",
+    "xcode_log_manifest": {
+      "mode": "0o644",
+      "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd-17674774.evidence/logs/LogStoreManifest.plist",
+      "sha256": "b69321462a59ec36db59983dddbc41f1397bb0dea464916b024bc41c7baf9100",
+      "size_bytes": 3269,
+      "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd-17674774/Logs/Build/LogStoreManifest.plist"
+    },
+    "xcode_project_evidence": {
+      "mode": "0o644",
+      "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd-17674774.evidence/configuration/project.pbxproj",
+      "sha256": "04f7db7e0147f7ce1e41bf270d73eda9714ecd741af9a74c24484716db31f91f",
+      "size_bytes": 35411,
+      "source_path": "/private/tmp/fgmetal-step11b/MoltenVK/MoltenVKPackaging.xcodeproj/project.pbxproj"
+    },
+    "xcode_project_path": "/private/tmp/fgmetal-step11b/MoltenVK/MoltenVKPackaging.xcodeproj",
+    "xcode_project_sha256": "04f7db7e0147f7ce1e41bf270d73eda9714ecd741af9a74c24484716db31f91f",
+    "xcode_source_root_path": "/private/tmp/fgmetal-step11b/MoltenVK",
+    "xcode_toolchain_identity": {
+      "clang": {
+        "command": [
+          "xcrun",
+          "clang",
+          "--version"
+        ],
+        "output": "Apple clang version 21.0.0 (clang-2100.3.34.2)\nTarget: arm64-apple-darwin27.0.0\nThread model: posix\nInstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin\n",
+        "returncode": 0
+      },
+      "clang_path": {
+        "command": [
+          "xcrun",
+          "--find",
+          "clang"
+        ],
+        "output": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang\n",
+        "returncode": 0
+      },
+      "linker": {
+        "command": [
+          "ld",
+          "-v"
+        ],
+        "output": "@(#)PROGRAM:ld PROJECT:ld-27037.1\nBUILD 21:17:51 Aug 25 2026\nconfigured to support archs: armv6 armv7 armv7s arm64 arm64e arm64_32 i386 x86_64 x86_64h armv6m armv7k armv7m armv7em armv8m.main armv8.1m.main\nLTO support using: LLVM version 21.0.0 (static support for 30, runtime is 30)\nTAPI support using: Apple TAPI version 21.0.0 (tapi-2100.3.8.1)\n",
+        "returncode": 0
+      },
+      "sdk_path": {
+        "command": [
+          "xcrun",
+          "--sdk",
+          "macosx",
+          "--show-sdk-path"
+        ],
+        "output": "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk\n",
+        "returncode": 0
+      },
+      "sdk_version": {
+        "command": [
+          "xcrun",
+          "--sdk",
+          "macosx",
+          "--show-sdk-version"
+        ],
+        "output": "27.0\n",
+        "returncode": 0
+      }
+    },
+    "xcode_version": "Xcode 27.0\nBuild version 27A266a",
+    "xcodebuild_version_command": [
+      "xcodebuild",
+      "-version"
+    ]
+  },
+  "build_log_sha256": null,
+  "build_log_status": "no stdout build transcript present; configure log and Ninja execution log retained separately",
+  "build_manifest_id": "071f9914f5d90b7c664a3abced564dbd16a8d99abc8a98490bbd07b7b7948db9",
+  "build_type": "release",
+  "canonical_artifact_root": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256",
+  "captured_config_key_sha256": "ba318869cfb17d85806e68539e045f5e901c4f5dc62c000b32129850b1babbdd",
+  "compiler_identity": null,
+  "compiler_identity_sha256": null,
+  "compiler_versions": null,
+  "completed_at_unix": 1791335121.26478,
+  "config_key_sha256": "ba318869cfb17d85806e68539e045f5e901c4f5dc62c000b32129850b1babbdd",
+  "configuration_key_provenance": "artifactization-time retrospective",
+  "cross_file": null,
+  "dependency_state": {
+    "status": "captured",
+    "toolchain_sha256": "9f4a3eea21fff70558a754b7d538e4652399f6bdf74da0f645110099457edfb4",
+    "xcode_version_sha256": "c1dd7c9300cb3c119535994845c8ed1fec3e340e4dfb4c0365ac32d4dcc45c56"
+  },
+  "estimated_bytes": 310652928,
+  "evidence_files": [
+    {
+      "mode": "0o600",
+      "path": "products/Release.product-tree.json",
+      "sha256": "11f2846a63cef2293107fb6cee81658fc0728bb82131c9b04f287d533f94b1c9",
+      "size_bytes": 5170
+    },
+    {
+      "mode": "0o600",
+      "path": "products/XCFrameworkStaging.product-tree.json",
+      "sha256": "4d8036f182f1943a3aecfb25c2e2e9315b5922b3e053c43530490a8e8ac321b0",
+      "size_bytes": 6976
+    },
+    {
+      "mode": "0o600",
+      "path": "products/XCFrameworkStaging/Release/Platform/MoltenVK.framework/Versions/A/Resources/Info.plist",
+      "sha256": "4850a29cc7fcf7d3f35ba7ce27581d299cba9eac440cb4265abcf3f535111d94",
+      "size_bytes": 1289
+    },
+    {
+      "mode": "0o600",
+      "path": "products/XCFrameworkStaging/Headers/MoltenVKShaderConverter/SPIRVConversion.h",
+      "sha256": "ca891ce0b661f5ef31915a07ad0ac73eb137ff1fcbe9386f42dab0ddcdd6f760",
+      "size_bytes": 3362
+    },
+    {
+      "mode": "0o600",
+      "path": "products/XCFrameworkStaging/Headers/MoltenVKShaderConverter/SPIRVToMSLConverter.h",
+      "sha256": "124e571b7327c76ca0e340fc786deb53f114361dee3a1ae6d98c3d657a2878dc",
+      "size_bytes": 13266
+    },
+    {
+      "mode": "0o600",
+      "path": "products/XCFrameworkStaging/Headers/MoltenVK/mvk_config.h",
+      "sha256": "af29d0b556f91c5435ab9dd7173d64d2133ff3bdc67f7cf3ce4398ac2c815e18",
+      "size_bytes": 1399
+    },
+    {
+      "mode": "0o600",
+      "path": "products/XCFrameworkStaging/Headers/MoltenVK/mvk_datatypes.h",
+      "sha256": "137fb8b9d39719ca013fc459fd873f924c93c28744fb9993acfba64250054fc7",
+      "size_bytes": 24851
+    },
+    {
+      "mode": "0o600",
+      "path": "products/XCFrameworkStaging/Headers/MoltenVK/mvk_deprecated_api.h",
+      "sha256": "ba263887ae74215a1bc562374e6af6a688fccd4ae3ad9e15ed6befc687038cb0",
+      "size_bytes": 25617
+    },
+    {
+      "mode": "0o600",
+      "path": "products/XCFrameworkStaging/Headers/MoltenVK/mvk_private_api.h",
+      "sha256": "eb0c20649a3f377723aa8d24ae2de7bf0931d1568d9d16ca152a89bbbf2faa9d",
+      "size_bytes": 32404
+    },
+    {
+      "mode": "0o600",
+      "path": "products/XCFrameworkStaging/Headers/MoltenVK/mvk_vulkan.h",
+      "sha256": "4559af38c2f9a02c68bf3acbabfc8002e745a6a6f77c5b88ee399de3dd3e4dd2",
+      "size_bytes": 1707
+    },
+    {
+      "mode": "0o600",
+      "path": "products/XCFrameworkStaging/Headers/MoltenVK/vk_mvk_moltenvk.h",
+      "sha256": "9e2a2f0ef6cd8404f6b06298be285cbd1f54a7208b3038ea555cad80e3256603",
+      "size_bytes": 1815
+    },
+    {
+      "mode": "0o600",
+      "path": "products/Release/mvkGitRevDerived.h",
+      "sha256": "e1f3f79ef261fa4189e4668e705a6db739df4d2db592bf559fc36b043c34d6f1",
+      "size_bytes": 108
+    },
+    {
+      "mode": "0o600",
+      "path": "products/Release/MoltenVK.framework/Versions/A/_CodeSignature/CodeResources",
+      "sha256": "b9e118469f1a2dddcaf8458727b5eb9d2eb4cacfbd4f268376d5dae9fd0357ee",
+      "size_bytes": 2442
+    },
+    {
+      "mode": "0o600",
+      "path": "products/Release/MoltenVK.framework/Versions/A/Resources/Info.plist",
+      "sha256": "4850a29cc7fcf7d3f35ba7ce27581d299cba9eac440cb4265abcf3f535111d94",
+      "size_bytes": 1289
+    },
+    {
+      "mode": "0o600",
+      "path": "logs/613E7811-407E-49E0-ACCB-C3C5051A29EB.xcactivitylog",
+      "sha256": "dca8d5b46f3acfee37fa1cd49027f99404c4eaab5ee1164dc132bfb74161fa4a",
+      "size_bytes": 476
+    },
+    {
+      "mode": "0o600",
+      "path": "logs/E624C8C0-D1CA-4058-B205-06D25E16920B.xcactivitylog",
+      "sha256": "3f36728de3ea3247a98ad839c6617d1f81c90f617be3f8fc0cf2e0d9c736e264",
+      "size_bytes": 102269
+    },
+    {
+      "mode": "0o600",
+      "path": "logs/LogStoreManifest.plist",
+      "sha256": "b69321462a59ec36db59983dddbc41f1397bb0dea464916b024bc41c7baf9100",
+      "size_bytes": 3269
+    },
+    {
+      "mode": "0o600",
+      "path": "logs/meson-log.txt",
+      "sha256": "3f36728de3ea3247a98ad839c6617d1f81c90f617be3f8fc0cf2e0d9c736e264",
+      "size_bytes": 102269
+    },
+    {
+      "mode": "0o600",
+      "path": "generated-shaders/Build/Products/XCFrameworkStaging/Headers/MoltenVKShaderConverter/SPIRVConversion.h",
+      "sha256": "ca891ce0b661f5ef31915a07ad0ac73eb137ff1fcbe9386f42dab0ddcdd6f760",
+      "size_bytes": 3362
+    },
+    {
+      "mode": "0o600",
+      "path": "generated-shaders/Build/Products/XCFrameworkStaging/Headers/MoltenVKShaderConverter/SPIRVToMSLConverter.h",
+      "sha256": "124e571b7327c76ca0e340fc786deb53f114361dee3a1ae6d98c3d657a2878dc",
+      "size_bytes": 13266
+    },
+    {
+      "mode": "0o600",
+      "path": "generated-shaders/Build/Products/Release/mvkGitRevDerived.h",
+      "sha256": "e1f3f79ef261fa4189e4668e705a6db739df4d2db592bf559fc36b043c34d6f1",
+      "size_bytes": 108
+    },
+    {
+      "mode": "0o600",
+      "path": "framework/Versions/A/_CodeSignature/CodeResources",
+      "sha256": "b9e118469f1a2dddcaf8458727b5eb9d2eb4cacfbd4f268376d5dae9fd0357ee",
+      "size_bytes": 2442
+    },
+    {
+      "mode": "0o600",
+      "path": "framework/Versions/A/Resources/Info.plist",
+      "sha256": "4850a29cc7fcf7d3f35ba7ce27581d299cba9eac440cb4265abcf3f535111d94",
+      "size_bytes": 1289
+    },
+    {
+      "mode": "0o600",
+      "path": "configuration/Info.plist",
+      "sha256": "d01cbb6a5cc2fcd63a4bad53676eefb923952af24f90faa396b15cfcd4719378",
+      "size_bytes": 354
+    },
+    {
+      "mode": "0o600",
+      "path": "configuration/project.pbxproj",
+      "sha256": "04f7db7e0147f7ce1e41bf270d73eda9714ecd741af9a74c24484716db31f91f",
+      "size_bytes": 35411
+    },
+    {
+      "mode": "0o600",
+      "path": "configuration/b87f8dcd8a8afa40788e8463bc100d80.xcbuilddata/build-request.json",
+      "sha256": "a1e8a12ecda25df0ed6a42e46fbd5229cb88cc0ce11eac1d1d909cee673d1331",
+      "size_bytes": 2487
+    }
+  ],
+  "evidence_index_sha256": "1313f1eedc2e385881d33fcef4a7aa35c23ec5f67d66d51862253b194f8a8806",
+  "evidence_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd-17674774.evidence",
+  "generated_shader_identity": [
+    {
+      "build_relative_path": "Build/Products/Release/mvkGitRevDerived.h",
+      "mode": "0o644",
+      "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd-17674774.evidence/generated-shaders/Build/Products/Release/mvkGitRevDerived.h",
+      "sha256": "e1f3f79ef261fa4189e4668e705a6db739df4d2db592bf559fc36b043c34d6f1",
+      "size_bytes": 108,
+      "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd-17674774/Build/Products/Release/mvkGitRevDerived.h"
+    },
+    {
+      "build_relative_path": "Build/Products/XCFrameworkStaging/Headers/MoltenVKShaderConverter/SPIRVConversion.h",
+      "mode": "0o644",
+      "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd-17674774.evidence/generated-shaders/Build/Products/XCFrameworkStaging/Headers/MoltenVKShaderConverter/SPIRVConversion.h",
+      "sha256": "ca891ce0b661f5ef31915a07ad0ac73eb137ff1fcbe9386f42dab0ddcdd6f760",
+      "size_bytes": 3362,
+      "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd-17674774/Build/Products/XCFrameworkStaging/Headers/MoltenVKShaderConverter/SPIRVConversion.h"
+    },
+    {
+      "build_relative_path": "Build/Products/XCFrameworkStaging/Headers/MoltenVKShaderConverter/SPIRVToMSLConverter.h",
+      "mode": "0o644",
+      "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd-17674774.evidence/generated-shaders/Build/Products/XCFrameworkStaging/Headers/MoltenVKShaderConverter/SPIRVToMSLConverter.h",
+      "sha256": "124e571b7327c76ca0e340fc786deb53f114361dee3a1ae6d98c3d657a2878dc",
+      "size_bytes": 13266,
+      "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd-17674774/Build/Products/XCFrameworkStaging/Headers/MoltenVKShaderConverter/SPIRVToMSLConverter.h"
+    }
+  ],
+  "kind": "moltenvk",
+  "linker_identity": null,
+  "manifest_sha256": "766bce1e9eb6167ffedee14571ce57138886a32751b935f1f464dd69c4382b19",
+  "meson_configuration_sha256": "151357d8a735be1eba5a5d7375d94abe6d4b2723de9afda750b7827a7a6a060a",
+  "meson_options": null,
+  "ninja_log_sha256": null,
+  "owner_experiment": "step11b-moltenvk-release",
+  "patch_hashes": {
+    "patch_set_sha256": "96a296d224f285c67bee93c30f8a309157f0daa35dc5b87e410b78630a09cfc7",
+    "staged_patch_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "unstaged_patch_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "preserve_debug_expires_at_unix": null,
+  "preserve_debug_reason": null,
+  "provenance_scope": "artifactization-time observation; historical build-time input not asserted",
+  "purpose": "Retrospective artifactization and synchronous retirement of completed Xcode Release MoltenVK DerivedData",
+  "requested_config_key_sha256": null,
+  "schema_version": 3,
+  "source_identity": {
+    "capture_scope": "artifactization-time snapshot",
+    "content_tree_sha256": "2a51f319d33f6e554a2d5e073ac86a1968f35a5746d298d46f6614b6dcd3f3f5",
+    "file_count": 7631,
+    "git_commit": "db66022459ffb663aa2b50f6b018bc2e124f5edf",
+    "git_tree": "efebd918bbe772eead074100c0a18789ad39606d",
+    "patch_set_sha256": "96a296d224f285c67bee93c30f8a309157f0daa35dc5b87e410b78630a09cfc7",
+    "path": "/private/tmp/fgmetal-step11b/MoltenVK",
+    "staged_patch_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "unstaged_patch_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "untracked_files": [],
+    "untracked_files_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "untracked_path_list_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "source_tree_hash_at_lease": "unknown-at-build-time"
+}

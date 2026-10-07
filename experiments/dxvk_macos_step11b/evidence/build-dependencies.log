@@ -1,0 +1,50 @@
+
+========== Retrieving MoltenVK dependencies into External ==========
+
+========== Cereal ==========
+
+cereal repo: https://github.com/USCiLab/cereal.git
+cereal revision: a56bad8bbb770ee266e930c95d37fff2a5be7fea
+HEAD is now at a56bad8 Fix `std::array<T,0>` (#848)
+
+========== Vulkan-Headers ==========
+
+Vulkan-Headers repo: https://github.com/KhronosGroup/Vulkan-Headers.git
+Vulkan-Headers revision: e3b1eec08173d6b825cd3ac88c885a63b621504a
+HEAD is now at e3b1eec Update for Vulkan-Docs 1.4.357
+
+========== SPIRV-Cross ==========
+
+SPIRV-Cross repo: https://github.com/KhronosGroup/SPIRV-Cross.git
+SPIRV-Cross revision: 6c09849fe88c48eaed08413aa022aaa136a3a057
+HEAD is now at 6c09849 Merge pull request #2647 from KhronosGroup/fix-2642
+
+========== SPIRV-Tools and SPIRV-Headers ==========
+
+SPIRV-Tools repo: https://github.com/KhronosGroup/SPIRV-Tools.git
+SPIRV-Tools revision: 0d6fd73ca73830ccab5fa1f00ed5ed40124e2c55
+HEAD is now at 0d6fd73 Fix build for LLVM's remove transitive includes (#6802)
+SPIRV-Tools/external/spirv-headers repo: https://github.com/KhronosGroup/SPIRV-Headers.git
+SPIRV-Tools/external/spirv-headers revision: 29981f65241605e08b0ede4cfeb999fe3b723c6a
+HEAD is now at 29981f6 Fix Int64ImageEXT capability prerequisite to Int64 (#611)
+
+========== Vulkan-Tools ==========
+
+Vulkan-Tools repo: https://github.com/KhronosGroup/Vulkan-Tools.git
+Vulkan-Tools revision: 8c66b352925cb771f793a4d3220b1321ae0febf1
+HEAD is now at 8c66b35 build: Update to header v1.4.357
+
+========== Volk ==========
+
+Volk repo: https://github.com/zeux/Volk.git
+Volk revision: 776893306c5d3b22b6185b5d4a258b81d94572bf
+HEAD is now at 7768933 Merge pull request #303 from zeux/update/357
+
+========== Started building dependency libraries at 09:29:41 PM ==========
+Please be patient on first build
+Building external libraries for platform macOS and destination macOS
+Completed building external libraries for macOS
+xcframework successfully written out to: /private/tmp/fgmetal-step11b/MoltenVK/External/build/Release/SPIRVCross.xcframework
+xcframework successfully written out to: /private/tmp/fgmetal-step11b/MoltenVK/External/build/Release/SPIRVTools.xcframework
+Removing Intermediates library at ./External/build//Intermediates
+========== Finished at 09:31:52 PM ==========

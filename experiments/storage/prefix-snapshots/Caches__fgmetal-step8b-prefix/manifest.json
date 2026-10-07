@@ -1,0 +1,2751 @@
+{
+  "binary_path_hashes_from_storage_inventory": [
+    {
+      "allocated_size_bytes": 29724672,
+      "hard_link_count": 1,
+      "logical_size_bytes": 29723942,
+      "mtime_epoch": 1790918676.2905672,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/mshtml.dll",
+      "sha256": "036e3a97dabe6877106a535b6c4d8c7f1259a35472024b85e699fd62fabe39bd"
+    },
+    {
+      "allocated_size_bytes": 25604096,
+      "hard_link_count": 1,
+      "logical_size_bytes": 25601090,
+      "mtime_epoch": 1790918676.923426,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/wined3d.dll",
+      "sha256": "db4a6aa67b509436224067d5355208f7794dece151cc50ab5a69d314dbc481de"
+    },
+    {
+      "allocated_size_bytes": 25042944,
+      "hard_link_count": 1,
+      "logical_size_bytes": 25039004,
+      "mtime_epoch": 1790918720.4005406,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/mshtml.dll",
+      "sha256": "bef1591fa124d03f32f7da51fe05c42de3d89cdbe9849a7e32625a4150f405d4"
+    },
+    {
+      "allocated_size_bytes": 21757952,
+      "hard_link_count": 1,
+      "logical_size_bytes": 21755882,
+      "mtime_epoch": 1790918720.902372,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/wined3d.dll",
+      "sha256": "b60873ec7b1821d94804a512679ef726aa91c2184bbd949d970c73d44dafe3a5"
+    },
+    {
+      "allocated_size_bytes": 15364096,
+      "hard_link_count": 1,
+      "logical_size_bytes": 15363410,
+      "mtime_epoch": 1790918676.6671138,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/shell32.dll",
+      "sha256": "50cb456d0560181dfdb8ab2f6027f5ddcdb701c51fe1b85c4f0a4b2b4069f0b5"
+    },
+    {
+      "allocated_size_bytes": 14487552,
+      "hard_link_count": 1,
+      "logical_size_bytes": 14484761,
+      "mtime_epoch": 1790918676.9346607,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/winedbg.exe",
+      "sha256": "f394dc329be8de95a0c7457775035d663d87b44646b7ca79765dfbd66e42428c"
+    },
+    {
+      "allocated_size_bytes": 14331904,
+      "hard_link_count": 1,
+      "logical_size_bytes": 14329413,
+      "mtime_epoch": 1790918675.5887516,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/winsxs/amd64_microsoft-windows-msxml30_31bf3856ad364e35_6.0.6000.16386_none_deadbeef/msxml3.dll",
+      "sha256": "9769fed8e5295716a6a923422eaadc66f7169fa3442983b8413cef4481aa41e0"
+    },
+    {
+      "allocated_size_bytes": 14331904,
+      "hard_link_count": 1,
+      "logical_size_bytes": 14329413,
+      "mtime_epoch": 1790918675.5658178,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/msxml3.dll",
+      "sha256": "9769fed8e5295716a6a923422eaadc66f7169fa3442983b8413cef4481aa41e0"
+    },
+    {
+      "allocated_size_bytes": 14032896,
+      "hard_link_count": 1,
+      "logical_size_bytes": 14032415,
+      "mtime_epoch": 1790918720.7147462,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/shell32.dll",
+      "sha256": "f38c26d70419aeb18679b7aa9e9ee23a5d69f8113477f1168b8add021445488b"
+    },
+    {
+      "allocated_size_bytes": 13119488,
+      "hard_link_count": 1,
+      "logical_size_bytes": 13119031,
+      "mtime_epoch": 1790918720.9125252,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/winedbg.exe",
+      "sha256": "e76210ddcbc5912592ec9430916ded2c91b3a78f9bf69bbb11ca973afcf57db4"
+    },
+    {
+      "allocated_size_bytes": 11309056,
+      "hard_link_count": 1,
+      "logical_size_bytes": 11305842,
+      "mtime_epoch": 1790918719.6983328,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/winsxs/x86_microsoft-windows-msxml30_31bf3856ad364e35_6.0.6000.16386_none_deadbeef/msxml3.dll",
+      "sha256": "5dc8d04ea39d69ffc3cc523a3c34fb49c428f16c787321303ba865529303c8a5"
+    },
+    {
+      "allocated_size_bytes": 11309056,
+      "hard_link_count": 1,
+      "logical_size_bytes": 11305842,
+      "mtime_epoch": 1790918719.6791918,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/msxml3.dll",
+      "sha256": "5dc8d04ea39d69ffc3cc523a3c34fb49c428f16c787321303ba865529303c8a5"
+    },
+    {
+      "allocated_size_bytes": 9191424,
+      "hard_link_count": 1,
+      "logical_size_bytes": 9191084,
+      "mtime_epoch": 1790918676.889382,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/windowscodecs.dll",
+      "sha256": "c9bb8c62ea6b138b498227912e1a0dfd7e59f30c6b8a7a2c9d93eb49e844bbe7"
+    },
+    {
+      "allocated_size_bytes": 7385088,
+      "hard_link_count": 1,
+      "logical_size_bytes": 7384278,
+      "mtime_epoch": 1790918676.1360464,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/kernelbase.dll",
+      "sha256": "bb076b2e379bd32bedafed396aa48792a1f84141f51c35c12595f972d0e3d02e"
+    },
+    {
+      "allocated_size_bytes": 7368704,
+      "hard_link_count": 1,
+      "logical_size_bytes": 7364610,
+      "mtime_epoch": 1790918720.8729792,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/windowscodecs.dll",
+      "sha256": "d76ce911ebdae0b252884c17794b6d2828a78d80fd0164ca8e56b860de16f238"
+    },
+    {
+      "allocated_size_bytes": 7135232,
+      "hard_link_count": 1,
+      "logical_size_bytes": 7135141,
+      "mtime_epoch": 1790918676.7480965,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/user32.dll",
+      "sha256": "c1bf905174fc3540aef677e0f79f670ee71cb812c19676915e3a3c86d4436e4b"
+    },
+    {
+      "allocated_size_bytes": 7081984,
+      "hard_link_count": 1,
+      "logical_size_bytes": 7078851,
+      "mtime_epoch": 1790918676.528649,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/opengl32.dll",
+      "sha256": "ac3bdc2476752ee560af11fa1d9b6fda705edf573dbfa7a4466c06b9a5eeb29f"
+    },
+    {
+      "allocated_size_bytes": 7004160,
+      "hard_link_count": 1,
+      "logical_size_bytes": 7002571,
+      "mtime_epoch": 1790918676.3340895,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/msi.dll",
+      "sha256": "ae0d0bf31f5d8cd608d8c568412d68183243c3712b4140249a05da5ab6cb9286"
+    },
+    {
+      "allocated_size_bytes": 6590464,
+      "hard_link_count": 1,
+      "logical_size_bytes": 6589252,
+      "mtime_epoch": 1790918677.1403272,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/winsxs/amd64_microsoft.windows.common-controls_6595b64144ccf1df_6.0.2600.2982_none_deadbeef/comctl32.dll",
+      "sha256": "0d778745454932776bcf95c3b93787fb49ba0336f99ab2d497b95b9c22e73ca6"
+    },
+    {
+      "allocated_size_bytes": 6590464,
+      "hard_link_count": 1,
+      "logical_size_bytes": 6589252,
+      "mtime_epoch": 1790918675.7455964,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/comctl32.dll",
+      "sha256": "0d778745454932776bcf95c3b93787fb49ba0336f99ab2d497b95b9c22e73ca6"
+    },
+    {
+      "allocated_size_bytes": 6242304,
+      "hard_link_count": 1,
+      "logical_size_bytes": 6240853,
+      "mtime_epoch": 1790918720.2550895,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/kernelbase.dll",
+      "sha256": "f2fc94127e0bd47c45a1475c40755a6a28fdd1b0d0b4bc7c0cfcf48ed0ea2338"
+    },
+    {
+      "allocated_size_bytes": 5914624,
+      "hard_link_count": 1,
+      "logical_size_bytes": 5912021,
+      "mtime_epoch": 1790918720.7931411,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/user32.dll",
+      "sha256": "59933aa86c651a800cc544097689d64292e57b4e658bc605b5bf8861abebd413"
+    },
+    {
+      "allocated_size_bytes": 5730304,
+      "hard_link_count": 1,
+      "logical_size_bytes": 5726283,
+      "mtime_epoch": 1790918675.786021,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/d2d1.dll",
+      "sha256": "5ec94cfe7fc0538e5d520705bdaf8e3379b810ed17ddfcbd9666d38ebbc7a42e"
+    },
+    {
+      "allocated_size_bytes": 5664768,
+      "hard_link_count": 1,
+      "logical_size_bytes": 5661581,
+      "mtime_epoch": 1790918720.443044,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/msi.dll",
+      "sha256": "dd74e2993a91266a701372326513c9ab2913d41e209208e92bad9fbc2809d517"
+    },
+    {
+      "allocated_size_bytes": 5586944,
+      "hard_link_count": 1,
+      "logical_size_bytes": 5583729,
+      "mtime_epoch": 1790918720.6131015,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/opengl32.dll",
+      "sha256": "1809787996dd1e9b81c67159619736d17601d424d33a747e49dc91b5ce076556"
+    },
+    {
+      "allocated_size_bytes": 5423104,
+      "hard_link_count": 1,
+      "logical_size_bytes": 5422024,
+      "mtime_epoch": 1790918721.0913122,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/winsxs/x86_microsoft.windows.common-controls_6595b64144ccf1df_6.0.2600.2982_none_deadbeef/comctl32.dll",
+      "sha256": "08c7ef13a3421fdb40cad977a24c81aa7a5094861a3b63109d6e4c5c2f637e40"
+    },
+    {
+      "allocated_size_bytes": 5423104,
+      "hard_link_count": 1,
+      "logical_size_bytes": 5422024,
+      "mtime_epoch": 1790918719.8284526,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/comctl32.dll",
+      "sha256": "08c7ef13a3421fdb40cad977a24c81aa7a5094861a3b63109d6e4c5c2f637e40"
+    },
+    {
+      "allocated_size_bytes": 5271552,
+      "hard_link_count": 1,
+      "logical_size_bytes": 5270264,
+      "mtime_epoch": 1790918676.423775,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/msvcr120.dll",
+      "sha256": "e217cc17e2c90ba273fabc3164ea0f0194d5d04e6a32bad75ecaefb5d591e175"
+    },
+    {
+      "allocated_size_bytes": 5193728,
+      "hard_link_count": 1,
+      "logical_size_bytes": 5193390,
+      "mtime_epoch": 1790918676.1273694,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/jscript.dll",
+      "sha256": "be3f35ff34b2e3cc2e1858027824f90801d47e2649c13c970fabf1a3d889aedb"
+    },
+    {
+      "allocated_size_bytes": 5058560,
+      "hard_link_count": 1,
+      "logical_size_bytes": 5056771,
+      "mtime_epoch": 1790918676.7205737,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/ucrtbase.dll",
+      "sha256": "bf41ebfc9ea8306a58ef683fdf99806af7bcfb0c8fc4c18137fbdaf8a8b5328a"
+    },
+    {
+      "allocated_size_bytes": 5021696,
+      "hard_link_count": 1,
+      "logical_size_bytes": 5018671,
+      "mtime_epoch": 1790918676.3826826,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/msvcp140.dll",
+      "sha256": "147446d67e1b9090042eebd568db83ff8b24407b42b765275ae6086fce9bed51"
+    },
+    {
+      "allocated_size_bytes": 4993024,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4991958,
+      "mtime_epoch": 1790918719.8767061,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/d2d1.dll",
+      "sha256": "6cac9cc57da61dbab7df343194e2df78eb78edb70485ab00e237d8ab68c8a5d7"
+    },
+    {
+      "allocated_size_bytes": 4927488,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4924294,
+      "mtime_epoch": 1790918677.1622238,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/winsxs/amd64_microsoft.vc90.crt_1fc8b3b9a1e18e3b_9.0.30729.6161_none_deadbeef/msvcp90.dll",
+      "sha256": "8f1ae60476f5b5390de3c1332f47251de69d1fabbcaa5e3f0a638b049c85dab5"
+    },
+    {
+      "allocated_size_bytes": 4927488,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4924294,
+      "mtime_epoch": 1790918676.4091246,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/msvcp90.dll",
+      "sha256": "8f1ae60476f5b5390de3c1332f47251de69d1fabbcaa5e3f0a638b049c85dab5"
+    },
+    {
+      "allocated_size_bytes": 4919296,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4918477,
+      "mtime_epoch": 1790918677.154838,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/winsxs/amd64_microsoft.vc80.crt_1fc8b3b9a1e18e3b_8.0.50727.9672_none_deadbeef/msvcp80.dll",
+      "sha256": "ef053346c0f72f7c0c13e702cb1947318e588ed53c531b5aa3f45a8d8f5e88e0"
+    },
+    {
+      "allocated_size_bytes": 4919296,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4918477,
+      "mtime_epoch": 1790918676.4052472,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/msvcp80.dll",
+      "sha256": "ef053346c0f72f7c0c13e702cb1947318e588ed53c531b5aa3f45a8d8f5e88e0"
+    },
+    {
+      "allocated_size_bytes": 4911104,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4908724,
+      "mtime_epoch": 1790918676.4192598,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/msvcr110.dll",
+      "sha256": "2f80bf98c03b09b8b16160c35c8af1805b468cd7b222b467fa6ba4eb8da60859"
+    },
+    {
+      "allocated_size_bytes": 4882432,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4881326,
+      "mtime_epoch": 1790918676.3723822,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/msvcp110.dll",
+      "sha256": "32f145e4bea06bd66fc62d9f990730fd8dcbe223106b73eca74855a4ecb154ce"
+    },
+    {
+      "allocated_size_bytes": 4878336,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4876595,
+      "mtime_epoch": 1790918676.3762953,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/msvcp120.dll",
+      "sha256": "fb54cdc217947f11cc7961338e39203e96c6d1c7bc2cddbaa91c90e2cbe108b0"
+    },
+    {
+      "allocated_size_bytes": 4874240,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4873443,
+      "mtime_epoch": 1790918676.3998775,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/msvcp71.dll",
+      "sha256": "113cc41feff4eab5c32b2518ab226aaeafc5c3ca279eacbff85564637d02b72b"
+    },
+    {
+      "allocated_size_bytes": 4857856,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4855778,
+      "mtime_epoch": 1790918676.3955805,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/msvcp70.dll",
+      "sha256": "699fc5fdb727ca8e476007f52d0ca85cb3dac85c0c576728a11c0a2e869dcf72"
+    },
+    {
+      "allocated_size_bytes": 4841472,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4841434,
+      "mtime_epoch": 1790918676.4154487,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/msvcr100.dll",
+      "sha256": "fca89d5c229f9668d8d20ff39aeb10a5a988959f2adb8d6b14bb7743e2f72c37"
+    },
+    {
+      "allocated_size_bytes": 4792320,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4789587,
+      "mtime_epoch": 1790918676.4950488,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/ole32.dll",
+      "sha256": "8bb3c5e77ba69b90a774b9b9677c4495fa993e3e60c0c66017d9d6f8ada1ed7e"
+    },
+    {
+      "allocated_size_bytes": 4775936,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4773600,
+      "mtime_epoch": 1790918676.3678563,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/msvcp100.dll",
+      "sha256": "130c5f9a8b7265e9f60280cdb58a28ff3455aff4c9baecff6340b464f5eae1a0"
+    },
+    {
+      "allocated_size_bytes": 4481024,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4479871,
+      "mtime_epoch": 1790918676.4819074,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/ntdll.dll",
+      "sha256": "5eb4260af877fc159149da7fb0718b76cde7f6cf99b73700e111b3e4bbc06c7a"
+    },
+    {
+      "allocated_size_bytes": 4415488,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4411529,
+      "mtime_epoch": 1790918675.904994,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/d3dx9_41.dll",
+      "sha256": "e3d3fef63e35ed967327fffc264b7a03d863a210b2e3df4335a598b0a8719813"
+    },
+    {
+      "allocated_size_bytes": 4415488,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4411529,
+      "mtime_epoch": 1790918675.9019153,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/d3dx9_40.dll",
+      "sha256": "83c942c9ba9688665f36992735bc2c205c3a6818ae9b0c1deb94d9b74bef5db8"
+    },
+    {
+      "allocated_size_bytes": 4415488,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4411529,
+      "mtime_epoch": 1790918675.8988516,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/d3dx9_39.dll",
+      "sha256": "fcb7040ddd13a30bb52a7005a1f5ad0008c8904169b3898b11beb3d91110a662"
+    },
+    {
+      "allocated_size_bytes": 4415488,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4411529,
+      "mtime_epoch": 1790918675.89607,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/d3dx9_38.dll",
+      "sha256": "de1b2026d36e341ee88691f04186298bb77e7ee5c97249a61ac70f4d99b3a076"
+    },
+    {
+      "allocated_size_bytes": 4415488,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4411529,
+      "mtime_epoch": 1790918675.8932297,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/d3dx9_37.dll",
+      "sha256": "79e2c930b28b881d65129c364a3cca109901ac71556b40e78d453c7a5a47c637"
+    },
+    {
+      "allocated_size_bytes": 4415488,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4411529,
+      "mtime_epoch": 1790918675.8901443,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/d3dx9_36.dll",
+      "sha256": "5cc90ac3f1a31623a06a7816ca149bd1830489f49f425b69eea8b0566d0b93bc"
+    },
+    {
+      "allocated_size_bytes": 4415488,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4411425,
+      "mtime_epoch": 1790918675.8873386,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/d3dx9_35.dll",
+      "sha256": "85f1316f2c99d6a342ffd1db2d38545dd646a126dca1d0be5f1357f75297ab79"
+    },
+    {
+      "allocated_size_bytes": 4415488,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4411425,
+      "mtime_epoch": 1790918675.8842328,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/d3dx9_34.dll",
+      "sha256": "97e60064a157552a1e81218455027e2b5f16498a8bd7ce9c966bcf21a11fdb7a"
+    },
+    {
+      "allocated_size_bytes": 4415488,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4411425,
+      "mtime_epoch": 1790918675.8813047,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/d3dx9_33.dll",
+      "sha256": "13f034b2155c7c69d311c4019711e62be3388f445b75068c114ada86e342b127"
+    },
+    {
+      "allocated_size_bytes": 4415488,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4411425,
+      "mtime_epoch": 1790918675.878253,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/d3dx9_32.dll",
+      "sha256": "84bd0381be6b912d2b5b4c68dc80c0ed9194e856bf38211e905aa24335a69310"
+    },
+    {
+      "allocated_size_bytes": 4411392,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4410871,
+      "mtime_epoch": 1790918675.9112403,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/d3dx9_43.dll",
+      "sha256": "318cfb22550134f37e20268af1a59092cf776e631641ad8079ca8076d63ccf13"
+    },
+    {
+      "allocated_size_bytes": 4411392,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4410871,
+      "mtime_epoch": 1790918675.9080858,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/d3dx9_42.dll",
+      "sha256": "685c40f97f1734b6ebb3e0c862421464d11e9a340730f45115b59319e07724a7"
+    },
+    {
+      "allocated_size_bytes": 4411392,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4411073,
+      "mtime_epoch": 1790918675.875389,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/d3dx9_31.dll",
+      "sha256": "7a85403e0f15be5ced973ca3aa2d5558436ef62ef032c2723341037b942de47f"
+    },
+    {
+      "allocated_size_bytes": 4411392,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4411236,
+      "mtime_epoch": 1790918675.8722584,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/d3dx9_30.dll",
+      "sha256": "6250262a8a2b8914f26aaf977d3c28ac653801f985034daa013e9b517193c551"
+    },
+    {
+      "allocated_size_bytes": 4411392,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4411236,
+      "mtime_epoch": 1790918675.869249,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/d3dx9_29.dll",
+      "sha256": "64148c090014ca6d1ca9730fd7e679bc9fbc86e6b558af736fa06c0375a13468"
+    },
+    {
+      "allocated_size_bytes": 4411392,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4411236,
+      "mtime_epoch": 1790918675.8662903,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/d3dx9_28.dll",
+      "sha256": "62c07ced33cd3439da7ef0f115e5f579ca8f1796bc4fa4a1d8506b1c50778a39"
+    },
+    {
+      "allocated_size_bytes": 4411392,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4410976,
+      "mtime_epoch": 1790918675.8634267,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/d3dx9_27.dll",
+      "sha256": "d9c4f97fb9ee5a1ee6a285af8c9336f0827b99eaac2f9196cf879ded6f4a83f8"
+    },
+    {
+      "allocated_size_bytes": 4411392,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4410703,
+      "mtime_epoch": 1790918675.860347,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/d3dx9_26.dll",
+      "sha256": "6f394e58e31b7f9f707caec08c0f7c31c65a92600f6839a66df2fcfc2aeee2fb"
+    },
+    {
+      "allocated_size_bytes": 4411392,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4409948,
+      "mtime_epoch": 1790918675.857055,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/d3dx9_25.dll",
+      "sha256": "ec59fa7569a5ae0b06db4ba45d5340dfb6e572e6ebcc1f61724a6c06af077616"
+    },
+    {
+      "allocated_size_bytes": 4411392,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4409647,
+      "mtime_epoch": 1790918675.8535688,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/d3dx9_24.dll",
+      "sha256": "c0741d3e25fbfde1b05d490988d68fc05e59ff05e6c10319d502b4af005f495c"
+    },
+    {
+      "allocated_size_bytes": 4354048,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4351215,
+      "mtime_epoch": 1790918677.159026,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/winsxs/amd64_microsoft.vc90.crt_1fc8b3b9a1e18e3b_9.0.30729.6161_none_deadbeef/msvcr90.dll",
+      "sha256": "8d4270cc8ad517dcbf9bc9989c9851616f97f989d7a1d570d7ac16c8571246aa"
+    },
+    {
+      "allocated_size_bytes": 4354048,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4352389,
+      "mtime_epoch": 1790918677.1514606,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/winsxs/amd64_microsoft.vc80.crt_1fc8b3b9a1e18e3b_8.0.50727.9672_none_deadbeef/msvcr80.dll",
+      "sha256": "47744e1285520dd419303ffa6104ca0cf616cd41de89340332b9d96c759f10fc"
+    },
+    {
+      "allocated_size_bytes": 4354048,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4351215,
+      "mtime_epoch": 1790918676.4395025,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/msvcr90.dll",
+      "sha256": "8d4270cc8ad517dcbf9bc9989c9851616f97f989d7a1d570d7ac16c8571246aa"
+    },
+    {
+      "allocated_size_bytes": 4354048,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4352389,
+      "mtime_epoch": 1790918676.4360447,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/msvcr80.dll",
+      "sha256": "47744e1285520dd419303ffa6104ca0cf616cd41de89340332b9d96c759f10fc"
+    },
+    {
+      "allocated_size_bytes": 4284416,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4282217,
+      "mtime_epoch": 1790918675.7678504,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/crypt32.dll",
+      "sha256": "1ff7461c03c8c65e1c080ad73ab611aa8677ef3a0d1605731a504e0b0a37042e"
+    },
+    {
+      "allocated_size_bytes": 4263936,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4261954,
+      "mtime_epoch": 1790918676.4408233,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/msvcrt.dll",
+      "sha256": "ce8022881c67da7dd251a6e5e677a4cd345bd5dfc29dccaf77d761c813349ef0"
+    },
+    {
+      "allocated_size_bytes": 4259840,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4259277,
+      "mtime_epoch": 1790918675.7939453,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/d3d11.dll",
+      "sha256": "35231fb84094ed0ed44519efc1fb2a9ef5bd9ebbcfce63bfadce11ea5a8e2907"
+    },
+    {
+      "allocated_size_bytes": 4177920,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4177676,
+      "mtime_epoch": 1790918720.2460253,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/jscript.dll",
+      "sha256": "ae12d1e76afa2b30b52025a6f5083f7067960c138d56613ffc9158a6419c4d5f"
+    },
+    {
+      "allocated_size_bytes": 4083712,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4080344,
+      "mtime_epoch": 1790918676.4473608,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/msvcrtd.dll",
+      "sha256": "97b1f3f198dae207a59516792d350a61b679fa80ae0a9cf1b8eba2bc3ba873a6"
+    },
+    {
+      "allocated_size_bytes": 4067328,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4066523,
+      "mtime_epoch": 1790918676.4332626,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/msvcr71.dll",
+      "sha256": "35b74a6dd6e8bc0075b62918c8edf8dbcff52c810b9c6caa99af9616d8782c93"
+    },
+    {
+      "allocated_size_bytes": 4063232,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4061934,
+      "mtime_epoch": 1790918676.4287481,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/msvcr70.dll",
+      "sha256": "86208f5026d7e8374a217b860c25eda31ba0335d5c0e00d4ab3195353d286f53"
+    },
+    {
+      "allocated_size_bytes": 4063232,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4062797,
+      "mtime_epoch": 1790918676.3911183,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/msvcp60.dll",
+      "sha256": "a4443bfb08ca6757ace1e92b50554ff9a82f9a0676dc97753908594305e97600"
+    },
+    {
+      "allocated_size_bytes": 4055040,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4052889,
+      "mtime_epoch": 1790918720.5138347,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/msvcr120.dll",
+      "sha256": "8b91b1375c8681b9e171501730c9c9a5270a1ff045a020e6a4d471558819c33e"
+    },
+    {
+      "allocated_size_bytes": 4055040,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4051758,
+      "mtime_epoch": 1790918675.7647989,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/crtdll.dll",
+      "sha256": "e34d96c548e606fd52fe20a75e257100bad58ce26e5a036356dab4ecdf39a970"
+    },
+    {
+      "allocated_size_bytes": 4018176,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4016775,
+      "mtime_epoch": 1790918676.5010164,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/oleaut32.dll",
+      "sha256": "886831496566c4c9e367bfae01ce47dbb5d046e49c33a110692675a323e973a4"
+    },
+    {
+      "allocated_size_bytes": 3932160,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3931963,
+      "mtime_epoch": 1790918676.0970986,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/ieframe.dll",
+      "sha256": "21b9ca48c2cc6513fc1d7384e404de20f713309d608aba9e1243f76528fbb0ee"
+    },
+    {
+      "allocated_size_bytes": 3883008,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3879474,
+      "mtime_epoch": 1790918720.7690253,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/ucrtbase.dll",
+      "sha256": "42cc45daeb9d28ec149ff3621dd3891556c842a5f71df6c254ffd41c1cb1eab6"
+    },
+    {
+      "allocated_size_bytes": 3833856,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3831815,
+      "mtime_epoch": 1790918720.588805,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/ole32.dll",
+      "sha256": "792a8e2c67fdd2f0deb6637b6cbff72f34a914fa62ad11323e484b633b077f51"
+    },
+    {
+      "allocated_size_bytes": 3780608,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3776940,
+      "mtime_epoch": 1790918676.5881863,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/quartz.dll",
+      "sha256": "2743197f58c96eaee96eeb994e04ae2f15c8532b8072ac3b4a11e01a7cab84de"
+    },
+    {
+      "allocated_size_bytes": 3731456,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3728220,
+      "mtime_epoch": 1790918720.5099123,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/msvcr110.dll",
+      "sha256": "06b49e0ef5fcb6433e1c36c841d9281b53d2d100a8262113bbbc54e8c0af9379"
+    },
+    {
+      "allocated_size_bytes": 3690496,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3688754,
+      "mtime_epoch": 1790918721.101951,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/winsxs/x86_microsoft.vc90.crt_1fc8b3b9a1e18e3b_9.0.30729.6161_none_deadbeef/msvcp90.dll",
+      "sha256": "6195af1d0f656c761c8df4ba98467fa619ea7c6ace2f2672508f67d41425426e"
+    },
+    {
+      "allocated_size_bytes": 3690496,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3688754,
+      "mtime_epoch": 1790918720.502709,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/msvcp90.dll",
+      "sha256": "6195af1d0f656c761c8df4ba98467fa619ea7c6ace2f2672508f67d41425426e"
+    },
+    {
+      "allocated_size_bytes": 3686400,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3685412,
+      "mtime_epoch": 1790918676.014158,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/dwrite.dll",
+      "sha256": "3a565a3a99d7c1aa829d72b5e3face36139b1ec8156c5cce295c9e2ac0c4eb00"
+    },
+    {
+      "allocated_size_bytes": 3682304,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3679006,
+      "mtime_epoch": 1790918721.098164,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/winsxs/x86_microsoft.vc80.crt_1fc8b3b9a1e18e3b_8.0.50727.9672_none_deadbeef/msvcp80.dll",
+      "sha256": "f3464ba1085260f0e2154b957b63d94e14d98eea2bfc55b090deb6ed33825077"
+    },
+    {
+      "allocated_size_bytes": 3682304,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3679006,
+      "mtime_epoch": 1790918720.5000498,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/msvcp80.dll",
+      "sha256": "f3464ba1085260f0e2154b957b63d94e14d98eea2bfc55b090deb6ed33825077"
+    },
+    {
+      "allocated_size_bytes": 3678208,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3678005,
+      "mtime_epoch": 1790918720.5072832,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/msvcr100.dll",
+      "sha256": "be0210d4c40f49f4295821a855cc3a9339897b03b7bff1f3c92f8f1e0fa99414"
+    },
+    {
+      "allocated_size_bytes": 3653632,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3651808,
+      "mtime_epoch": 1790918720.4825974,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/msvcp140.dll",
+      "sha256": "fb58f6d5a56e094c6ac05dc8cc85c9baac0544ebba784bf3aa309208566076f2"
+    },
+    {
+      "allocated_size_bytes": 3645440,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3645086,
+      "mtime_epoch": 1790918720.4928048,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/msvcp70.dll",
+      "sha256": "737dd3d2f33fa06bf5b78179b37bc1b258c8180a9eed433e0823f8b305817b8a"
+    },
+    {
+      "allocated_size_bytes": 3641344,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3638587,
+      "mtime_epoch": 1790918720.4968936,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/msvcp71.dll",
+      "sha256": "020902317858e952a7a92c836a1c1ce33b5c22bea870508d152c3d89076ef8d9"
+    },
+    {
+      "allocated_size_bytes": 3575808,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3572146,
+      "mtime_epoch": 1790918720.025168,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/d3dx9_41.dll",
+      "sha256": "9c13798ca10ca17db9323309d3dbce85cc0939fad7ffe1be7d96c400068de2f0"
+    },
+    {
+      "allocated_size_bytes": 3575808,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3572146,
+      "mtime_epoch": 1790918720.0199904,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/d3dx9_40.dll",
+      "sha256": "b09f920411706625af6269e4e4c630e9b1525a3cd85902b1ee58319b5a9228b5"
+    },
+    {
+      "allocated_size_bytes": 3575808,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3572146,
+      "mtime_epoch": 1790918720.0159123,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/d3dx9_39.dll",
+      "sha256": "b1fc5eb75fb94e597ea5d91c5546c8bbd1a94207b78600524f6d170880b6bf09"
+    },
+    {
+      "allocated_size_bytes": 3575808,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3572146,
+      "mtime_epoch": 1790918720.0111141,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/d3dx9_38.dll",
+      "sha256": "1215f82f34097d6c6834504473f53a9b0443ee6afa11ff97a758349966357d2c"
+    },
+    {
+      "allocated_size_bytes": 3575808,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3572146,
+      "mtime_epoch": 1790918720.006114,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/d3dx9_37.dll",
+      "sha256": "2e50addea0d4d8ca591d94d914df52fbd50e77d667e96a8d24409a93e0dfc1ce"
+    },
+    {
+      "allocated_size_bytes": 3575808,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3572146,
+      "mtime_epoch": 1790918720.0012732,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/d3dx9_36.dll",
+      "sha256": "679f93439ce9bacdb775375b042f57dd3da43a6547f6b7652bd0a2ce18b89976"
+    },
+    {
+      "allocated_size_bytes": 3575808,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3572042,
+      "mtime_epoch": 1790918719.996375,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/d3dx9_35.dll",
+      "sha256": "8c9b57534b02fafc74cd78d83105a08f22b1158b46f966e8ce4337c4b995af2d"
+    },
+    {
+      "allocated_size_bytes": 3575808,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3572042,
+      "mtime_epoch": 1790918719.9919896,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/d3dx9_34.dll",
+      "sha256": "ea5a2259d56ed98262b8105f8f1e16b75e1cce8ada2769de1a70a07ca16b973d"
+    },
+    {
+      "allocated_size_bytes": 3575808,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3572042,
+      "mtime_epoch": 1790918719.9871688,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/d3dx9_33.dll",
+      "sha256": "b4da32bf26ed9a62e2c0c69ef86ff503e36f5801f661615a84027ef15e27bee0"
+    },
+    {
+      "allocated_size_bytes": 3575808,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3572042,
+      "mtime_epoch": 1790918719.9809895,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/d3dx9_32.dll",
+      "sha256": "659003b858e9937daa4e5a84a37b3d976def4637cbc25cb1f8e802769e205bf3"
+    },
+    {
+      "allocated_size_bytes": 3575808,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3571853,
+      "mtime_epoch": 1790918719.9711182,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/d3dx9_30.dll",
+      "sha256": "9119d598d3662c74e2ea86854fb2c8686010fa357f345176b6f4cd60139bf235"
+    },
+    {
+      "allocated_size_bytes": 3575808,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3571853,
+      "mtime_epoch": 1790918719.9668593,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/d3dx9_29.dll",
+      "sha256": "1939f666bc0b61a51085ece2ba326a4a5fa4c1ef4d467a2cbfd8861d95fbb975"
+    },
+    {
+      "allocated_size_bytes": 3575808,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3571853,
+      "mtime_epoch": 1790918719.9626207,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/d3dx9_28.dll",
+      "sha256": "5a8ff06cd227361763487ed6c733568326267baa2414620caa06ee6f16d6ce37"
+    },
+    {
+      "allocated_size_bytes": 3571712,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3571483,
+      "mtime_epoch": 1790918720.035138,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/d3dx9_43.dll",
+      "sha256": "bfea2d9f163b4eeb94a66d17befaa0f4cdcbc9f0ce3b60eb62e63d3ccf2231ff"
+    },
+    {
+      "allocated_size_bytes": 3571712,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3571483,
+      "mtime_epoch": 1790918720.0308135,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/d3dx9_42.dll",
+      "sha256": "95b1a72b946425cae589684f5b3e4c46f280585489db50b6dd1e40b77c80379b"
+    },
+    {
+      "allocated_size_bytes": 3571712,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3571688,
+      "mtime_epoch": 1790918719.9762197,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/d3dx9_31.dll",
+      "sha256": "4eab28d15e84d6cc6388f7d625c33decf9a9b1b85631ba46e78acc53e3113f56"
+    },
+    {
+      "allocated_size_bytes": 3571712,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3571593,
+      "mtime_epoch": 1790918719.9573796,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/d3dx9_27.dll",
+      "sha256": "96f2c5e63b2acc7077f9e940683e86ef0cf80c4c5eeebb7fe27b97dff416e624"
+    },
+    {
+      "allocated_size_bytes": 3567616,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3567058,
+      "mtime_epoch": 1790918720.4725127,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/msvcp110.dll",
+      "sha256": "cb47cc6428ce463d3c5d8762d92b71547952e88b1836d049aa9ed9ada4f246b8"
+    },
+    {
+      "allocated_size_bytes": 3567616,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3567353,
+      "mtime_epoch": 1790918719.9516313,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/d3dx9_26.dll",
+      "sha256": "4a9aeb799c58c22b740873bd11dad54d7f6436910e28339a9b6a6c292898ef9e"
+    },
+    {
+      "allocated_size_bytes": 3567616,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3566742,
+      "mtime_epoch": 1790918719.9467719,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/d3dx9_25.dll",
+      "sha256": "f8b9011a5d496b2b293fe94db90c3d3a3f358b749d87490d5e7967b56323f9ae"
+    },
+    {
+      "allocated_size_bytes": 3567616,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3566438,
+      "mtime_epoch": 1790918719.9412475,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/d3dx9_24.dll",
+      "sha256": "00b7ede42a538f36508610a891b17d31ff57db4d23e7b0bd253ab3ef7f0355ea"
+    },
+    {
+      "allocated_size_bytes": 3567616,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3564195,
+      "mtime_epoch": 1790918676.9455323,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/winegstreamer.dll",
+      "sha256": "b8e398a8bd958f596e9479c62bf09c0c5a489ab2accccb622beb6c7ff1e1561d"
+    },
+    {
+      "allocated_size_bytes": 3563520,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3561963,
+      "mtime_epoch": 1790918720.476579,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/msvcp120.dll",
+      "sha256": "2bad6a957893844a41e655f6ea972c94a25b8486ffed46616bad3055d37767ad"
+    },
+    {
+      "allocated_size_bytes": 3530752,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3528433,
+      "mtime_epoch": 1790918719.886354,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/d3d11.dll",
+      "sha256": "e2613d8a07ccb6d1e0289192d669562627a84d4f0140587ca8512737e0738fdf"
+    },
+    {
+      "allocated_size_bytes": 3526656,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3524570,
+      "mtime_epoch": 1790918676.9930773,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/wldap32.dll",
+      "sha256": "7dd9a84e051b25a9b43fdc7ff9e2fcf8566135bafa45caae967c05ae07c066c7"
+    },
+    {
+      "allocated_size_bytes": 3514368,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3513088,
+      "mtime_epoch": 1790918675.9251776,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/ddraw.dll",
+      "sha256": "087a090f3a7b835edfd6149a1df10fb4267ce04f21ec7f3a4184386030be4c06"
+    },
+    {
+      "allocated_size_bytes": 3477504,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3475377,
+      "mtime_epoch": 1790918720.4701562,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/msvcp100.dll",
+      "sha256": "7c77bcc899d9788d1a5d50b326fb0a0a5a66f18440fd6b9ac36f089a0eb0e562"
+    },
+    {
+      "allocated_size_bytes": 3465216,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3463649,
+      "mtime_epoch": 1790918720.5680745,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/ntdll.dll",
+      "sha256": "49f0961e2edf6c5122600d7f1a13df4ccdc7fc6287182f02d1f75f455dbd7d99"
+    },
+    {
+      "allocated_size_bytes": 3387392,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3384972,
+      "mtime_epoch": 1790918676.6182408,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/rpcrt4.dll",
+      "sha256": "3638a10965da310d2b4d4ba10e8f12ddf7492e8cbe429992dc5dcbd68b08b341"
+    },
+    {
+      "allocated_size_bytes": 3379200,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3378269,
+      "mtime_epoch": 1790918677.1486518,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/winsxs/amd64_microsoft.windows.gdiplus_6595b64144ccf1df_1.1.7601.23038_none_deadbeef/gdiplus.dll",
+      "sha256": "9bce6df40a230b626d87e8c7e19a3915f0a6108e688c61cab1e588b9886fad32"
+    },
+    {
+      "allocated_size_bytes": 3379200,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3378269,
+      "mtime_epoch": 1790918677.1454182,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/winsxs/amd64_microsoft.windows.gdiplus_6595b64144ccf1df_1.0.6000.16386_none_deadbeef/gdiplus.dll",
+      "sha256": "9bce6df40a230b626d87e8c7e19a3915f0a6108e688c61cab1e588b9886fad32"
+    },
+    {
+      "allocated_size_bytes": 3379200,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3378269,
+      "mtime_epoch": 1790918676.0559852,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/gdiplus.dll",
+      "sha256": "9bce6df40a230b626d87e8c7e19a3915f0a6108e688c61cab1e588b9886fad32"
+    },
+    {
+      "allocated_size_bytes": 3371008,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3369562,
+      "mtime_epoch": 1790918719.8539772,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/crypt32.dll",
+      "sha256": "50167ea595241f041b83e5833e98ef75be2f8bca4bdf052e6f1210b7fb8ddefb"
+    },
+    {
+      "allocated_size_bytes": 3325952,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3325550,
+      "mtime_epoch": 1790918720.2058775,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/ieframe.dll",
+      "sha256": "2951e3ca488f90ab4d30b246cb84d3fee083110377462dd9c8c0d920b77064dd"
+    },
+    {
+      "allocated_size_bytes": 3309568,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3306410,
+      "mtime_epoch": 1790918676.189787,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/mf.dll",
+      "sha256": "8879f3e87aa19052c5574e7e125e1e8cb76df88385eef6f3b102785eb16bdc00"
+    },
+    {
+      "allocated_size_bytes": 3305472,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3304483,
+      "mtime_epoch": 1790918720.5959907,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/oleaut32.dll",
+      "sha256": "b79c0041d91e9624e71165e4fa29c0385c6a1f5bedc755a99e835ef2fd923477"
+    },
+    {
+      "allocated_size_bytes": 3293184,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3291763,
+      "mtime_epoch": 1790918721.1004453,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/winsxs/x86_microsoft.vc90.crt_1fc8b3b9a1e18e3b_9.0.30729.6161_none_deadbeef/msvcr90.dll",
+      "sha256": "bb1a36d7018986aa60d39bdf351281647ab9e681f6de3fa2b9eeec24720c8024"
+    },
+    {
+      "allocated_size_bytes": 3293184,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3292428,
+      "mtime_epoch": 1790918721.0964637,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/winsxs/x86_microsoft.vc80.crt_1fc8b3b9a1e18e3b_8.0.50727.9672_none_deadbeef/msvcr80.dll",
+      "sha256": "97e56a60a5443669805942e1af27379669cd6a84fe32ec874f8329af1df89ecd"
+    },
+    {
+      "allocated_size_bytes": 3293184,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3291763,
+      "mtime_epoch": 1790918720.5268066,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/msvcr90.dll",
+      "sha256": "bb1a36d7018986aa60d39bdf351281647ab9e681f6de3fa2b9eeec24720c8024"
+    },
+    {
+      "allocated_size_bytes": 3293184,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3292428,
+      "mtime_epoch": 1790918720.5240567,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/msvcr80.dll",
+      "sha256": "97e56a60a5443669805942e1af27379669cd6a84fe32ec874f8329af1df89ecd"
+    },
+    {
+      "allocated_size_bytes": 3289088,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3285927,
+      "mtime_epoch": 1790918676.6095073,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/riched20.dll",
+      "sha256": "cbebb002196d62444f8aad523f06ff1dbffb8b1e171f15a350cfb5b1610db8a2"
+    },
+    {
+      "allocated_size_bytes": 3276800,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3273818,
+      "mtime_epoch": 1790918676.7422452,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/urlmon.dll",
+      "sha256": "68a4477f2d3040d13e387176836147e257bd4fa5b8f22be87d40a68208c84a74"
+    },
+    {
+      "allocated_size_bytes": 3268608,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3264881,
+      "mtime_epoch": 1790918676.0533042,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/gdi32.dll",
+      "sha256": "5465b0d328a6cafebb870af8c30ce7dbb61255f1b6f336dfcc148cad9560b9dc"
+    },
+    {
+      "allocated_size_bytes": 3235840,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3233852,
+      "mtime_epoch": 1790918720.5279274,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/msvcrt.dll",
+      "sha256": "16de7433504ebcff9f0cba7281bdc690d4c08bfd343911f161c3bfe2083a4c2e"
+    },
+    {
+      "allocated_size_bytes": 3166208,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3163342,
+      "mtime_epoch": 1790918720.53398,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/msvcrtd.dll",
+      "sha256": "3badd228b3935c8eee4b3169451ce67a64358d0261d2d9449668d9c32a3e9319"
+    },
+    {
+      "allocated_size_bytes": 3162112,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3159399,
+      "mtime_epoch": 1790918720.521582,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/msvcr71.dll",
+      "sha256": "f081d1aba984f33e6b5d3c6f46f636ea80a5e27e60bf7288096f8ff6783ed9a6"
+    },
+    {
+      "allocated_size_bytes": 3162112,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3159393,
+      "mtime_epoch": 1790918720.517617,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/msvcr70.dll",
+      "sha256": "7bf376835dc72c9572a1f3e925b652bdfdd2eda648c53c9717c0d43049bf96eb"
+    },
+    {
+      "allocated_size_bytes": 3129344,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3129333,
+      "mtime_epoch": 1790918719.8525972,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/crtdll.dll",
+      "sha256": "8d2160d90bb654776dd7e4fff3af67df4f35827512a0178020986ecf4bfe1001"
+    },
+    {
+      "allocated_size_bytes": 3096576,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3095872,
+      "mtime_epoch": 1790918720.647797,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/quartz.dll",
+      "sha256": "bf2eff1fe4d003f25e5ca73ae0e4b44256ed01ba670e4d3eb3bddc4a21226256"
+    },
+    {
+      "allocated_size_bytes": 3022848,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3022746,
+      "mtime_epoch": 1790918720.4900656,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/msvcp60.dll",
+      "sha256": "eb51ae2776a7846e01546e43025042c9878337a6fcccd0499088e967b2a5264d"
+    },
+    {
+      "allocated_size_bytes": 2998272,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2995624,
+      "mtime_epoch": 1790918675.9202378,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/dbghelp.dll",
+      "sha256": "8041cd0abcfc3dcf777cb60941494b9f1af136e3993fdd48746f249082a58006"
+    },
+    {
+      "allocated_size_bytes": 2957312,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2956262,
+      "mtime_epoch": 1790918720.1345747,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/dwrite.dll",
+      "sha256": "7c18cfc52528fff0e1bdaf0956d70ba30474183a60da4fd814494d3c05a45561"
+    },
+    {
+      "allocated_size_bytes": 2932736,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2929381,
+      "mtime_epoch": 1790918675.74874,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/comdlg32.dll",
+      "sha256": "03c77e703e8e7b3cdd9e2dc56b10fb8cd010fd703ff2edd80cb5f077181dbe5a"
+    },
+    {
+      "allocated_size_bytes": 2920448,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2917871,
+      "mtime_epoch": 1790918720.9218838,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/winegstreamer.dll",
+      "sha256": "53f376ee2d8aedac88d8de49d4a2b79917631538e82bb0b753dc8cebac30c3b1"
+    },
+    {
+      "allocated_size_bytes": 2908160,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2905676,
+      "mtime_epoch": 1790918720.0508509,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/ddraw.dll",
+      "sha256": "11ec751b8c772f87dfdbf70760bed322cc7cdf8bc53729a066759fbf4c6e92c9"
+    },
+    {
+      "allocated_size_bytes": 2854912,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2850872,
+      "mtime_epoch": 1790918675.9727995,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/dmsynth.dll",
+      "sha256": "733347994f9d69586f5a4726274dd0c75258614bbbc79d5b376e0f227f922310"
+    },
+    {
+      "allocated_size_bytes": 2801664,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2799190,
+      "mtime_epoch": 1790918720.6715274,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/rpcrt4.dll",
+      "sha256": "6432dd54819290da8d8a66d092ffa8dac6ccd2e79cfbe97305d5c7515a895891"
+    },
+    {
+      "allocated_size_bytes": 2785280,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2782627,
+      "mtime_epoch": 1790918720.969135,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/wldap32.dll",
+      "sha256": "a87512498ccdfc916288cf0d2132aba7f39d6bd163d174cf2c12be366b802dae"
+    },
+    {
+      "allocated_size_bytes": 2752512,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2751262,
+      "mtime_epoch": 1790918676.203675,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/mfplat.dll",
+      "sha256": "37bfcbd4c0fe7d95e45257bc7a4cfc90128885ecb5a0feb2873c3237091adad3"
+    },
+    {
+      "allocated_size_bytes": 2727936,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2725777,
+      "mtime_epoch": 1790918721.0942974,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/winsxs/x86_microsoft.windows.gdiplus_6595b64144ccf1df_1.1.7601.23038_none_deadbeef/gdiplus.dll",
+      "sha256": "0def98f00c576bec6c6d45c03fe6c77b95690561ccde3a33154a8ec2ca0eb481"
+    },
+    {
+      "allocated_size_bytes": 2727936,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2725777,
+      "mtime_epoch": 1790918721.0925822,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/winsxs/x86_microsoft.windows.gdiplus_6595b64144ccf1df_1.0.6000.16386_none_deadbeef/gdiplus.dll",
+      "sha256": "0def98f00c576bec6c6d45c03fe6c77b95690561ccde3a33154a8ec2ca0eb481"
+    },
+    {
+      "allocated_size_bytes": 2727936,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2725777,
+      "mtime_epoch": 1790918720.1723585,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/gdiplus.dll",
+      "sha256": "0def98f00c576bec6c6d45c03fe6c77b95690561ccde3a33154a8ec2ca0eb481"
+    },
+    {
+      "allocated_size_bytes": 2691072,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2690406,
+      "mtime_epoch": 1790918720.6659443,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/riched20.dll",
+      "sha256": "d648d08e231216c97d2324932da258684b3dcb37374cf6287a9d193f8ea027d7"
+    },
+    {
+      "allocated_size_bytes": 2678784,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2675998,
+      "mtime_epoch": 1790918720.3104827,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/mf.dll",
+      "sha256": "9e892c3908475666ff7cfe8aa60063f338418a694a761e77ccadadf2d31162b5"
+    },
+    {
+      "allocated_size_bytes": 2662400,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2661543,
+      "mtime_epoch": 1790918720.7876632,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/urlmon.dll",
+      "sha256": "ae66a0b5f3e3a2d746ed0383a038629749563569a482440cb1e2609bf4836abb"
+    },
+    {
+      "allocated_size_bytes": 2609152,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2606510,
+      "mtime_epoch": 1790918720.16942,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/gdi32.dll",
+      "sha256": "6715e85d81a7efbc4302f6e4aedcc71913fc0056af31d6f8c7f9470c2d7ed7c5"
+    },
+    {
+      "allocated_size_bytes": 2609152,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2608156,
+      "mtime_epoch": 1790918676.6497164,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/setupapi.dll",
+      "sha256": "8e9da6dafa97be84f7c96ba0a6352898b4f5085d2397cb11a468f56633015188"
+    },
+    {
+      "allocated_size_bytes": 2600960,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2599635,
+      "mtime_epoch": 1790918675.8310118,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/d3drm.dll",
+      "sha256": "9b5fab32b1493d408e0182f4f5a04412e8e82027a94b942e784279743bb68e5f"
+    },
+    {
+      "allocated_size_bytes": 2596864,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2596071,
+      "mtime_epoch": 1790918719.8343115,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/comdlg32.dll",
+      "sha256": "a067a9e65937af400bf9cf9ba07fa5a24fb7a06d37d44358cd31614dd326bdbf"
+    },
+    {
+      "allocated_size_bytes": 2576384,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2574495,
+      "mtime_epoch": 1790918676.968884,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/wininet.dll",
+      "sha256": "c263beb187d8508260b5597d1f4805d1c8f46266d7712d92a21d0af3c566c6d4"
+    },
+    {
+      "allocated_size_bytes": 2527232,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2526604,
+      "mtime_epoch": 1790918677.0070662,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/wmphoto.dll",
+      "sha256": "5298948847d4fc4057cad1a197451c0c7a2a9cdd9948f43e621b98b438faaac8"
+    },
+    {
+      "allocated_size_bytes": 2469888,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2466007,
+      "mtime_epoch": 1790918720.044355,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/dbghelp.dll",
+      "sha256": "95c103bba155c9c4f715fa44abf9f8e5d32e9ed629bd39559c8073e4dbbac71e"
+    },
+    {
+      "allocated_size_bytes": 2433024,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2432108,
+      "mtime_epoch": 1790918676.133609,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/kernel32.dll",
+      "sha256": "049a4299449d2814f0c650995212de958ff69f7a418ea8ce10c3d88631156d2a"
+    },
+    {
+      "allocated_size_bytes": 2416640,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2414796,
+      "mtime_epoch": 1790918676.0301576,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/evr.dll",
+      "sha256": "14da41b67aa2ddeb0d54e16f2bb98fa6ec00557cda74476bc11fea7b16eacede"
+    },
+    {
+      "allocated_size_bytes": 2379776,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2378291,
+      "mtime_epoch": 1790918676.7560482,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/vbscript.dll",
+      "sha256": "fcf3524d30de8321c5d5831d5b166759e81a6a7b2ee04a91a595c7ab7dcf5160"
+    },
+    {
+      "allocated_size_bytes": 2334720,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2333151,
+      "mtime_epoch": 1790918676.237365,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/mscms.dll",
+      "sha256": "15ccd60db0e93a95f8c7c842bb8428a1eb74aba59371bf7e39d79dc5138dde59"
+    },
+    {
+      "allocated_size_bytes": 2306048,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2304074,
+      "mtime_epoch": 1790918720.1004612,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/dmsynth.dll",
+      "sha256": "28a634c4ae5d220cba5c370ce265fda31712ccf61dc3d454b067f0e45e69f22b"
+    },
+    {
+      "allocated_size_bytes": 2240512,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2237733,
+      "mtime_epoch": 1790918676.727103,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/uiautomationcore.dll",
+      "sha256": "9b09b308988f3b1a83afde621d6c2fffe93a7ea498fd65a84959edd1741a07a9"
+    },
+    {
+      "allocated_size_bytes": 2215936,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2212785,
+      "mtime_epoch": 1790918675.9576044,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/dmime.dll",
+      "sha256": "fd765d71641a58a92af630060c0a2cd80f8745e2250524dafc135f6680fc94cf"
+    },
+    {
+      "allocated_size_bytes": 2134016,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2133424,
+      "mtime_epoch": 1790918720.701154,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/setupapi.dll",
+      "sha256": "d1383d0687b7e61bfdb52ccd703ec3510b6f447682ed60afd9324e37afc4e4e1"
+    },
+    {
+      "allocated_size_bytes": 2134016,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2132487,
+      "mtime_epoch": 1790918675.7399583,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/combase.dll",
+      "sha256": "b5b3329996ed3c6d0dce1d253d3e600bf542d6287abfada58883393856f0cdc5"
+    },
+    {
+      "allocated_size_bytes": 2109440,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2107108,
+      "mtime_epoch": 1790918720.3240075,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/mfplat.dll",
+      "sha256": "56eb6f187907ee2e63200386aa7459690a8cdb660495d410584b58dd33589f44"
+    },
+    {
+      "allocated_size_bytes": 2097152,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2094813,
+      "mtime_epoch": 1790918720.9828293,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/wmphoto.dll",
+      "sha256": "f3f533ec6fc784f64053f74b150362731f340ccf765cf59b45b2771fefcfc928"
+    },
+    {
+      "allocated_size_bytes": 2093056,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2091960,
+      "mtime_epoch": 1790918676.7751017,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/webservices.dll",
+      "sha256": "0d4b964f371e8b2fbf368afe65b9e059ed4e710d457de69b53ddeee2f60eead3"
+    },
+    {
+      "allocated_size_bytes": 2072576,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2069228,
+      "mtime_epoch": 1790918676.2259724,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/mp3dmod.dll",
+      "sha256": "cfd8f15c4a535c581f5e19b2747594deecce4705c7d0e27f3b8919f4a87d1df4"
+    },
+    {
+      "allocated_size_bytes": 2064384,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2060374,
+      "mtime_epoch": 1790918720.9427555,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/wininet.dll",
+      "sha256": "0cc20b3df570e5989086c2f98c47d3108affc62348b7510eb0290516ddd39874"
+    },
+    {
+      "allocated_size_bytes": 2035712,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2033131,
+      "mtime_epoch": 1790918720.149417,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/evr.dll",
+      "sha256": "09a4a20bd30c60e3c77c7cd639c233999e28e69e78ec56cc72674c53da154210"
+    },
+    {
+      "allocated_size_bytes": 2023424,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2022184,
+      "mtime_epoch": 1790918720.2530735,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/kernel32.dll",
+      "sha256": "55e9ac10fbc88e1a883b5b0fe5af7fc06ab48cea3e4b595f5189e5c6139cb724"
+    },
+    {
+      "allocated_size_bytes": 1978368,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1974976,
+      "mtime_epoch": 1790918719.9224572,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/d3drm.dll",
+      "sha256": "91bb189b2a31b8fb4563e15d63fee4e464971ccac6c097ca9a21b3ed3f00ef57"
+    },
+    {
+      "allocated_size_bytes": 1966080,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1965439,
+      "mtime_epoch": 1790918676.973894,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/winmm.dll",
+      "sha256": "3df34e14b9fb77f7f7b01aa5a1a6ac7371dda8f967dbd1ed2c17da7c699a9ffd"
+    },
+    {
+      "allocated_size_bytes": 1961984,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1958228,
+      "mtime_epoch": 1790918675.8464134,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/d3dx10_43.dll",
+      "sha256": "f7616378277ef39a0f57aabd16a07b1ad8f07ed6816f640d2eca839f9bad1b58"
+    },
+    {
+      "allocated_size_bytes": 1953792,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1952283,
+      "mtime_epoch": 1790918675.777964,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/cryptui.dll",
+      "sha256": "90cd3df3cc2cc3144e5d1265dbcc688dc24b88d100d48fc3ea3dcb22ffb26d5e"
+    },
+    {
+      "allocated_size_bytes": 1916928,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1913598,
+      "mtime_epoch": 1790918677.0826855,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/xactengine3_7.dll",
+      "sha256": "56eac3e34db90f8ddd4ea5db106bf99f0208dbe5c8c325da1a74db8ca12cea13"
+    },
+    {
+      "allocated_size_bytes": 1916928,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1913598,
+      "mtime_epoch": 1790918677.079848,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/xactengine3_6.dll",
+      "sha256": "4aa6c7414b637bb124c7f960eab12d8cdae64fb07b9d070a474544bc649611fb"
+    },
+    {
+      "allocated_size_bytes": 1916928,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1913598,
+      "mtime_epoch": 1790918677.0768228,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/xactengine3_5.dll",
+      "sha256": "370bd800ca51ebd42caf22e72724fa63c0ff41dd616235e16e4cb7b13726cc1b"
+    },
+    {
+      "allocated_size_bytes": 1916928,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1912986,
+      "mtime_epoch": 1790918677.0733223,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/xactengine3_4.dll",
+      "sha256": "a81f0ffef8c724051c7a858a96245ef91b880bb744c1aeec86b1f1a394629646"
+    },
+    {
+      "allocated_size_bytes": 1916928,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1912986,
+      "mtime_epoch": 1790918677.0698256,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/xactengine3_3.dll",
+      "sha256": "cd5644ee4d3a2a756fc6eb3acbbb9dc1c528c52dcc97556d61d5c3700cd4bb68"
+    },
+    {
+      "allocated_size_bytes": 1916928,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1912986,
+      "mtime_epoch": 1790918677.0670943,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/xactengine3_2.dll",
+      "sha256": "e5e812a893108eaeedd92b1c53fea280c389b0057e3091355c1bbc0de10593b0"
+    },
+    {
+      "allocated_size_bytes": 1916928,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1912986,
+      "mtime_epoch": 1790918677.0646212,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/xactengine3_1.dll",
+      "sha256": "bf71f6b8d343566f5b8b5ea18bf4f9ed6047558064dead7efc3898fe9aaff939"
+    },
+    {
+      "allocated_size_bytes": 1916928,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1912986,
+      "mtime_epoch": 1790918677.061922,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/xactengine3_0.dll",
+      "sha256": "a90acdd45b10b7960f53b4f457ea6958d87752ef1169165d6d7f4ec64d9f1e02"
+    },
+    {
+      "allocated_size_bytes": 1908736,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1905969,
+      "mtime_epoch": 1790918677.0583496,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/xactengine2_9.dll",
+      "sha256": "05fbfdde3856baf46fdfa987b84256115591cb2d1c2b2e6482ee99b6a0872dbf"
+    },
+    {
+      "allocated_size_bytes": 1908736,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1905969,
+      "mtime_epoch": 1790918677.055216,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/xactengine2_7.dll",
+      "sha256": "a6ef22f1bf31e8acd4ecef2d50686f740dd08f62d8940d2d4aecb6c571f382cb"
+    },
+    {
+      "allocated_size_bytes": 1908736,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1905738,
+      "mtime_epoch": 1790918675.8033073,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/d3d9.dll",
+      "sha256": "d263306cebfaf484110c01c694c0389071e733a2341053e953bbb2d1f46bcc98"
+    },
+    {
+      "allocated_size_bytes": 1896448,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1892786,
+      "mtime_epoch": 1790918720.8006184,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/vbscript.dll",
+      "sha256": "fdbff833485080fafd971a6a44e52ef4aeaa9e933f9c67ee1949d7892ece0acc"
+    },
+    {
+      "allocated_size_bytes": 1888256,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1887886,
+      "mtime_epoch": 1790918720.087301,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/dmime.dll",
+      "sha256": "63f1f2cb1a2824ae90ba0e17cb6126630a164670c76523b2f9d7e58d7f1b6bc6"
+    },
+    {
+      "allocated_size_bytes": 1880064,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1878412,
+      "mtime_epoch": 1790918676.8968515,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/winecfg.exe",
+      "sha256": "d4fd4e0e8e79da4d14993ff678506939d5991858f95bb72bf6b1353db88f4ebd"
+    },
+    {
+      "allocated_size_bytes": 1880064,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1879592,
+      "mtime_epoch": 1790918675.7378402,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/cmd.exe",
+      "sha256": "6b78929cb6471b3949898c32d6ec3bf8824b514639818a26110279613fd683ee"
+    },
+    {
+      "allocated_size_bytes": 1863680,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1862557,
+      "mtime_epoch": 1790918720.773801,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/uiautomationcore.dll",
+      "sha256": "5369d31a5b1e6293b803a17d9981fdf8be3a1400d677c01010414ebb9a4aa469"
+    },
+    {
+      "allocated_size_bytes": 1855488,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1853839,
+      "mtime_epoch": 1790918677.0525935,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/xactengine2_4.dll",
+      "sha256": "a2b50a7592912db968211e76d185ddd7b11defd91c3c180abf83970715776d13"
+    },
+    {
+      "allocated_size_bytes": 1855488,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1853839,
+      "mtime_epoch": 1790918677.0502727,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/xactengine2_0.dll",
+      "sha256": "d0d6ce1c2007e6392e6769ba5e7a36801ca60b4d294d62926f18653271a985ec"
+    },
+    {
+      "allocated_size_bytes": 1830912,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1829758,
+      "mtime_epoch": 1790918719.8669531,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/cryptui.dll",
+      "sha256": "fb989c12a71b00b8181429f0d83109d1318e63a5113e1896254fc45a7487b1c2"
+    },
+    {
+      "allocated_size_bytes": 1830912,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1830593,
+      "mtime_epoch": 1790918676.0032563,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/dsound.dll",
+      "sha256": "a31b03107b6f4c96ec5cee667834179cbd44fe888129ae20e440404a1e966b6b"
+    },
+    {
+      "allocated_size_bytes": 1814528,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1813246,
+      "mtime_epoch": 1790918676.5736942,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/qcap.dll",
+      "sha256": "53c719bb89a2e25d5fc3a77de3d97e744c222f3f4886da32312eacc1d6ca8aeb"
+    },
+    {
+      "allocated_size_bytes": 1802240,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1800286,
+      "mtime_epoch": 1790918676.0221791,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/dxgi.dll",
+      "sha256": "073642e189648625b04cea47eeeef85dadf4999f0e685d419935fb6fa225364b"
+    },
+    {
+      "allocated_size_bytes": 1761280,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1758703,
+      "mtime_epoch": 1790918720.359036,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/mscms.dll",
+      "sha256": "fc15591fe7d401c17099180b4d9f176a91193df0c2fb0661c2dde6f82e9ca5c6"
+    },
+    {
+      "allocated_size_bytes": 1761280,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1760954,
+      "mtime_epoch": 1790918720.348131,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/mp3dmod.dll",
+      "sha256": "e182a45342c62a43745231722d30d25d61dc28ed461f9e52e688f4db30c099c8"
+    },
+    {
+      "allocated_size_bytes": 1744896,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1742687,
+      "mtime_epoch": 1790918720.8831222,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/winecfg.exe",
+      "sha256": "9d30ca41a9413bd03a384d472b0de41c097901cc1a1b8ffb3286f8c58739f97c"
+    },
+    {
+      "allocated_size_bytes": 1744896,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1741198,
+      "mtime_epoch": 1790918719.824999,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/combase.dll",
+      "sha256": "be9b76c592aeb1f731ec1b5141d848bf6823fa20b0c980f2aeacdb29164f7fdb"
+    },
+    {
+      "allocated_size_bytes": 1744896,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1743346,
+      "mtime_epoch": 1790918677.1220858,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/xaudio2_9.dll",
+      "sha256": "9f321d4de6dd1e345810c0cd3e1e8abc6c0085e8fb3e67cb615e6e51885ab84f"
+    },
+    {
+      "allocated_size_bytes": 1744896,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1743346,
+      "mtime_epoch": 1790918677.1199028,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/xaudio2_8.dll",
+      "sha256": "b07916bb7e346b5918c71d39d3324913b54b79eaeedfa88302841f8d418a38cc"
+    },
+    {
+      "allocated_size_bytes": 1744896,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1743953,
+      "mtime_epoch": 1790918676.9601736,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/winevulkan.dll",
+      "sha256": "9645b8f06c8dfde91aad5df3aa32cd3ba9d19355c46d1db0d271806032378a07"
+    },
+    {
+      "allocated_size_bytes": 1740800,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1739745,
+      "mtime_epoch": 1790918676.4842794,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/ntoskrnl.exe",
+      "sha256": "7f421fc55fad3d4a63d4e682e3338c902d82818d34f00c95fa2e0d2d66e70586"
+    },
+    {
+      "allocated_size_bytes": 1736704,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1732636,
+      "mtime_epoch": 1790918719.9355457,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/d3dx10_43.dll",
+      "sha256": "0fd4ea1df6eeaafd43739dc099a791cf2d4534528b90a5d6708cd174ab33b381"
+    },
+    {
+      "allocated_size_bytes": 1728512,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1725593,
+      "mtime_epoch": 1790918675.629309,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/wbem/wbemprox.dll",
+      "sha256": "ee4a5bf60424e1f7ddede7ed8699d18354065648410b8d8788b011273cd39165"
+    },
+    {
+      "allocated_size_bytes": 1712128,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1711384,
+      "mtime_epoch": 1790918676.96567,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/winhttp.dll",
+      "sha256": "5af3065b017145bc772cfa07b59d0abcfe0c92e56a544923c496edaa36da496e"
+    },
+    {
+      "allocated_size_bytes": 1712128,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1709603,
+      "mtime_epoch": 1790918676.1076312,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/inetcomm.dll",
+      "sha256": "a7d525e16ea92a5b0a8225834bcc0dc96ab16d8068bd746170d28d278242c82f"
+    },
+    {
+      "allocated_size_bytes": 1708032,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1706113,
+      "mtime_epoch": 1790918675.7883909,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/d3d10.dll",
+      "sha256": "cc470413d4a3e53bb40bc9a76f7d595837fcdf92cc1797a41f5ce2ea7141fad4"
+    },
+    {
+      "allocated_size_bytes": 1703936,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1701860,
+      "mtime_epoch": 1790918719.8227558,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/cmd.exe",
+      "sha256": "617ec0299973ef01f37ec6f5f6ff8e718a70559f777f53ff83f6955f7a295f37"
+    },
+    {
+      "allocated_size_bytes": 1699840,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1696529,
+      "mtime_epoch": 1790918675.982596,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/dplayx.dll",
+      "sha256": "6a9930eb52c21d522cb75b8a6358e176df18e394d7ba916e6f7d4fbe50db5b2b"
+    },
+    {
+      "allocated_size_bytes": 1687552,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1687273,
+      "mtime_epoch": 1790918676.6783423,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/shlwapi.dll",
+      "sha256": "1c284f2af38438e34ba4494c1c95a132acb2362731fca23967c75cd19aa4ef6f"
+    },
+    {
+      "allocated_size_bytes": 1671168,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1670568,
+      "mtime_epoch": 1790918720.9462485,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/winmm.dll",
+      "sha256": "fa8a3d92ce6ecf8c7a4a31965bf6280515c17e8e378094fb039bf3ab12a0d6e1"
+    },
+    {
+      "allocated_size_bytes": 1667072,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1665463,
+      "mtime_epoch": 1790918720.8270845,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/webservices.dll",
+      "sha256": "a28457dc26ecacf902591825200522ab14ba3c6be8b8e355b775282b5466af02"
+    },
+    {
+      "allocated_size_bytes": 1638400,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1637831,
+      "mtime_epoch": 1790918675.9447277,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/dinput8.dll",
+      "sha256": "4857e04c33bf79f6231770576f54e24c11e1d31655bb12b68e5e785e636181d3"
+    },
+    {
+      "allocated_size_bytes": 1638400,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1638379,
+      "mtime_epoch": 1790918675.9425762,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/dinput.dll",
+      "sha256": "06cdd6a65065788aa4ca7cddc0e87a3ad29ae6e7edfe9d17ff5a5bccb428d087"
+    },
+    {
+      "allocated_size_bytes": 1630208,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1627393,
+      "mtime_epoch": 1790918677.116851,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/xaudio2_7.dll",
+      "sha256": "7a9535a582838741d7ac6a24520b0a15daf9d5598c71d8a3ff9c97ef51e76d44"
+    },
+    {
+      "allocated_size_bytes": 1630208,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1626745,
+      "mtime_epoch": 1790918677.1130369,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/xaudio2_6.dll",
+      "sha256": "8f95efcb17bc54fcdb0fdea8a7dc55f8fe212001c855346f20ee0fd236663ed8"
+    },
+    {
+      "allocated_size_bytes": 1630208,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1626745,
+      "mtime_epoch": 1790918677.110841,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/xaudio2_5.dll",
+      "sha256": "b807f6275b3723db748f7fb5da7c2c2d6552aa62a604b0d808ab929b3db4b357"
+    },
+    {
+      "allocated_size_bytes": 1630208,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1626745,
+      "mtime_epoch": 1790918677.106969,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/xaudio2_4.dll",
+      "sha256": "7f7ec9be8e4964202631449cdf4f422e91b7d5f6264613848f7ffe6e31249da1"
+    },
+    {
+      "allocated_size_bytes": 1613824,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1610941,
+      "mtime_epoch": 1790918720.1253746,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/dsound.dll",
+      "sha256": "4e656099faee6f9d4c1c6730c5f428f7c5f027889f66528edcdc27fc3bf50286"
+    },
+    {
+      "allocated_size_bytes": 1609728,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1608079,
+      "mtime_epoch": 1790918719.8965645,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/d3d9.dll",
+      "sha256": "fca6019c612c06ed110d4272e3d685014fc5d5da12071ccb550f5e84aab88bd1"
+    },
+    {
+      "allocated_size_bytes": 1609728,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1608238,
+      "mtime_epoch": 1790918677.1035867,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/xaudio2_3.dll",
+      "sha256": "c42843ae72c49fb142f32fe40e89e604fd7fbba7d22ec7349406b0d57b2f7b6e"
+    },
+    {
+      "allocated_size_bytes": 1609728,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1608238,
+      "mtime_epoch": 1790918677.1011262,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/xaudio2_2.dll",
+      "sha256": "7f5f82fbde6579065b35041f3a51aff130d46cacdbe0401b6a041f3b856ffd4b"
+    },
+    {
+      "allocated_size_bytes": 1609728,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1608238,
+      "mtime_epoch": 1790918677.097875,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/xaudio2_1.dll",
+      "sha256": "3471731fd9a7d565f36a282b9ce4559270c79f93657fb6700eb6ba0435de3854"
+    },
+    {
+      "allocated_size_bytes": 1605632,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1604142,
+      "mtime_epoch": 1790918677.0952823,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/xaudio2_0.dll",
+      "sha256": "48067853759d253a5e6cd1e88216d5bbe5f9b6933b46ef9db5aa1dc360f19301"
+    },
+    {
+      "allocated_size_bytes": 1593344,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1592875,
+      "mtime_epoch": 1790918721.0427322,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/xactengine3_7.dll",
+      "sha256": "2ecbe9a282e9e7ea0b8a836d79244621bd97bc0858e54ff63b73ffbb6f4dbfbb"
+    },
+    {
+      "allocated_size_bytes": 1593344,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1592875,
+      "mtime_epoch": 1790918721.040507,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/xactengine3_6.dll",
+      "sha256": "8e59431477c0d0dfa44efa9a5d78f5939715fc06ca1edc8ad6b255ecace1f767"
+    },
+    {
+      "allocated_size_bytes": 1593344,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1592875,
+      "mtime_epoch": 1790918721.0385551,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/xactengine3_5.dll",
+      "sha256": "f791aac72b938c6cd891ed8073179ec18cb713715c33084a45d9897964030189"
+    },
+    {
+      "allocated_size_bytes": 1589248,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1588460,
+      "mtime_epoch": 1790918721.0365498,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/xactengine3_4.dll",
+      "sha256": "7db6f593c79c18cf41690952fb2f731e3f9060085f7444ac8831d57b7fc49606"
+    },
+    {
+      "allocated_size_bytes": 1589248,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1588460,
+      "mtime_epoch": 1790918721.0345616,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/xactengine3_3.dll",
+      "sha256": "9d8a25c0b5a746e51cd6d6797400be4ebd576fef7f2a3f32c9f3592f1c898fc3"
+    },
+    {
+      "allocated_size_bytes": 1589248,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1588460,
+      "mtime_epoch": 1790918721.0321164,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/xactengine3_2.dll",
+      "sha256": "65f6536044fa35137e82daee398f184710a7cadf2cf39e91c1825b1913d9e7a0"
+    },
+    {
+      "allocated_size_bytes": 1589248,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1588460,
+      "mtime_epoch": 1790918721.0298443,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/xactengine3_1.dll",
+      "sha256": "814d11661c218a5318e55b4f21d79482cbd0c3da0f8f4489dbf0ddcaf53f9feb"
+    },
+    {
+      "allocated_size_bytes": 1589248,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1588460,
+      "mtime_epoch": 1790918721.0273583,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/xactengine3_0.dll",
+      "sha256": "8b8a4957e1695996feb43fad3f81f92a4a0f9727ac14e57833139b015a5be9a6"
+    },
+    {
+      "allocated_size_bytes": 1589248,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1589072,
+      "mtime_epoch": 1790918721.025404,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/xactengine2_9.dll",
+      "sha256": "c8d27a65ca7fcc75a9ca33fc212403b43cfc0d45e48caf09c4a27a8db0eccbef"
+    },
+    {
+      "allocated_size_bytes": 1589248,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1589072,
+      "mtime_epoch": 1790918721.0234632,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/xactengine2_7.dll",
+      "sha256": "ad383160305b05a991f72fd3ec886eb832cab59b95e8175d7c7e096c6119623e"
+    },
+    {
+      "allocated_size_bytes": 1581056,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1579817,
+      "mtime_epoch": 1790918676.5817935,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/qedit.dll",
+      "sha256": "1452a0e963deea1406ce6b63ab2b39ee2a7d8d8cd2ef53d14896d45f180a7fee"
+    },
+    {
+      "allocated_size_bytes": 1581056,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1578602,
+      "mtime_epoch": 1790918676.246069,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/msctf.dll",
+      "sha256": "c7031991afefef081475f391c0d7f6315071735aa86b7a7a0511fa3de880acf1"
+    },
+    {
+      "allocated_size_bytes": 1568768,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1567599,
+      "mtime_epoch": 1790918720.142987,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/dxgi.dll",
+      "sha256": "8069414b0ece8e5380eabc4c3e5d7013dae799945e3ee86bb0b7c4687beb9c13"
+    },
+    {
+      "allocated_size_bytes": 1568768,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1566092,
+      "mtime_epoch": 1790918675.616754,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/Speech/Common/sapi.dll",
+      "sha256": "de0144e9af4822f11d1fc7ea297d9bac93839841f4abdfd57804cbe9be53e355"
+    },
+    {
+      "allocated_size_bytes": 1552384,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1548327,
+      "mtime_epoch": 1790918721.0208771,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/xactengine2_4.dll",
+      "sha256": "5051ed6116f0ad463a3eb9e9b4b02951a8362590e2df0cf37f6efbaebc707f9f"
+    },
+    {
+      "allocated_size_bytes": 1552384,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1548327,
+      "mtime_epoch": 1790918721.0192935,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/xactengine2_0.dll",
+      "sha256": "3877d8f9d116a9b02d67bf2c55b2dd40f7d7e2611e250c9392a16b5b426d2da3"
+    },
+    {
+      "allocated_size_bytes": 1548288,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1546563,
+      "mtime_epoch": 1790918720.6370358,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/qcap.dll",
+      "sha256": "5d66bc11fe516facfd16ed1d2a57332c28fe04172005c71d3880eb2289f7f6e0"
+    },
+    {
+      "allocated_size_bytes": 1507328,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1505834,
+      "mtime_epoch": 1790918675.6894486,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/advapi32.dll",
+      "sha256": "7655efe114cab03206363f5e32eb428cab021ed3f67a0c1a2f57c5969eb8b06b"
+    },
+    {
+      "allocated_size_bytes": 1503232,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1500603,
+      "mtime_epoch": 1790918720.5720878,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/ntoskrnl.exe",
+      "sha256": "434e1367b5e8043b362f56473a87ee459620565985bacb252e10716d6857ff30"
+    },
+    {
+      "allocated_size_bytes": 1462272,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1462173,
+      "mtime_epoch": 1790918677.01742,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/wow64.dll",
+      "sha256": "d11aa492483a90bc38c971eb6fc768f60d601b4361060ab2e7d6f24e93991821"
+    },
+    {
+      "allocated_size_bytes": 1454080,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1450620,
+      "mtime_epoch": 1790918720.934862,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/winevulkan.dll",
+      "sha256": "09d57e28428fb22edd0e311ba26eb54f515232ef3c9ff8fb7c509509942d7c69"
+    },
+    {
+      "allocated_size_bytes": 1454080,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1453389,
+      "mtime_epoch": 1790918720.7222593,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/shlwapi.dll",
+      "sha256": "cb59321d88f2c1e9ac897b929e03b296961bb7ba9dbf4bb8c61d7d41e2f85eaf"
+    },
+    {
+      "allocated_size_bytes": 1449984,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1447681,
+      "mtime_epoch": 1790918721.0729344,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/xaudio2_9.dll",
+      "sha256": "8182320997717af8778c43600409158d915a2b1d9ee09ad371541a7a24c39acd"
+    },
+    {
+      "allocated_size_bytes": 1449984,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1447681,
+      "mtime_epoch": 1790918721.0706031,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/xaudio2_8.dll",
+      "sha256": "8fe5c3cc4d3164bc815d1c71d86c072ed3600c834d61eb7a0f98be65be9833d4"
+    },
+    {
+      "allocated_size_bytes": 1445888,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1444059,
+      "mtime_epoch": 1790918719.6488333,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/wbem/wbemprox.dll",
+      "sha256": "9a9ea3ecdabaff9de8a4cd5623a3579a2a5ff2004c9b8928f0edc471b82681da"
+    },
+    {
+      "allocated_size_bytes": 1437696,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1436127,
+      "mtime_epoch": 1790918676.2424448,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/mscoree.dll",
+      "sha256": "aeee558b44c32f6b7e1d1c2e8baf003b272f881ba926dcdd87489ce5dd9e17a0"
+    },
+    {
+      "allocated_size_bytes": 1429504,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1429118,
+      "mtime_epoch": 1790918720.9402099,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/winhttp.dll",
+      "sha256": "32207da74ecf2e78126f085e44d228fc1695737b68a7ff569dfb7472f9e546c5"
+    },
+    {
+      "allocated_size_bytes": 1413120,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1412056,
+      "mtime_epoch": 1790918720.2185876,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/inetcomm.dll",
+      "sha256": "131d97b02d0e6481e3ae0ad4c91d70599208a5f93d7b1d73114101357030dad9"
+    },
+    {
+      "allocated_size_bytes": 1409024,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1407035,
+      "mtime_epoch": 1790918676.7928994,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/windows.gaming.input.dll",
+      "sha256": "08028811239db427da8ea0defaca077238b6527926650f095c54fd191344cf3f"
+    },
+    {
+      "allocated_size_bytes": 1404928,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1400919,
+      "mtime_epoch": 1790918720.1105301,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/dplayx.dll",
+      "sha256": "388e70fb2a2e16e3932da58672cf07c5519c99dfe7aa32534365acfcb8af4518"
+    },
+    {
+      "allocated_size_bytes": 1396736,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1394826,
+      "mtime_epoch": 1790918720.0674655,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/dinput.dll",
+      "sha256": "897f734a1b7f4c85679dceffafe8467e38ba9da88d0ed1bf69dc27371bade0bd"
+    },
+    {
+      "allocated_size_bytes": 1392640,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1390424,
+      "mtime_epoch": 1790918720.0703077,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/dinput8.dll",
+      "sha256": "f2844d88c8001fec8bf2dc1b1b8f269a4d228d8228c359e602ec834e06e9ffe5"
+    },
+    {
+      "allocated_size_bytes": 1384448,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1380882,
+      "mtime_epoch": 1790918676.571386,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/qasf.dll",
+      "sha256": "234896d7f9ea1499cb2086e4af73e10bc3ccf4d06222720bb77945a16afda48d"
+    },
+    {
+      "allocated_size_bytes": 1368064,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1364607,
+      "mtime_epoch": 1790918719.8802652,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/d3d10.dll",
+      "sha256": "a473998c7cbf5232e48acc62325e8aaaf4b77a040305eeae32788b6c1aca3f1a"
+    },
+    {
+      "allocated_size_bytes": 1355776,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1351966,
+      "mtime_epoch": 1790918675.799977,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/d3d8.dll",
+      "sha256": "56abb4aa3eddf4dc45b4fa05ca03df86da21e97dd55f886f8718420848d66d2f"
+    },
+    {
+      "allocated_size_bytes": 1351680,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1348120,
+      "mtime_epoch": 1790918720.6404016,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/qedit.dll",
+      "sha256": "3b82704f5e865bbe5237958ec84e736a3ff6d867b6a639d44641946850c966d4"
+    },
+    {
+      "allocated_size_bytes": 1347584,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1346946,
+      "mtime_epoch": 1790918675.7169259,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/avifil32.dll",
+      "sha256": "7489f6f6a23e3d508466439dcc4d8e42f34ae9498f8a9c637b53e45016393885"
+    },
+    {
+      "allocated_size_bytes": 1343488,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1340611,
+      "mtime_epoch": 1790918721.0682151,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/xaudio2_7.dll",
+      "sha256": "a784bf69fe233ce8eaa1c83c619c9d067b4dd0675633a1f9731469bd380c7474"
+    },
+    {
+      "allocated_size_bytes": 1343488,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1339963,
+      "mtime_epoch": 1790918721.0662348,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/xaudio2_6.dll",
+      "sha256": "406153a0a6c68b22cae8ad5be82db83b4194193af8e7099cdd4cea78e6a77e9f"
+    },
+    {
+      "allocated_size_bytes": 1343488,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1339963,
+      "mtime_epoch": 1790918721.0642452,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/xaudio2_5.dll",
+      "sha256": "2b0af0a0a4ac7ce1d34795359e33755f0f5faae4dbeb85ed411b4fd44cdf480a"
+    },
+    {
+      "allocated_size_bytes": 1343488,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1339963,
+      "mtime_epoch": 1790918721.0614896,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/xaudio2_4.dll",
+      "sha256": "8c1b8d07799aa6e121aa825cc66715900d130a62267b3f3df175fe0fdac736cf"
+    },
+    {
+      "allocated_size_bytes": 1335296,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1334827,
+      "mtime_epoch": 1790918720.365061,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/msctf.dll",
+      "sha256": "154748455b4eaf37673bf2755001ccc2d58ebd29889006488ce1240f83402412"
+    },
+    {
+      "allocated_size_bytes": 1335296,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1334619,
+      "mtime_epoch": 1790918719.628637,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/Speech/Common/sapi.dll",
+      "sha256": "55bbbe077a10fb3927dc1377413d42f432d846ff70ad921d89a12d4bf78a366a"
+    },
+    {
+      "allocated_size_bytes": 1331200,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1330710,
+      "mtime_epoch": 1790918675.9748378,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/dmusic.dll",
+      "sha256": "d40c27425868d1688496d80aa87e676b076f7f665dca508175bf4bad5d630c8f"
+    },
+    {
+      "allocated_size_bytes": 1331200,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1328616,
+      "mtime_epoch": 1790918675.63948,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/Program Files/Windows NT/Accessories/wordpad.exe",
+      "sha256": "fdfce1630f091288686926ef671845aacaad89f45371dff52132dd95b4651097"
+    },
+    {
+      "allocated_size_bytes": 1327104,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1326562,
+      "mtime_epoch": 1790918721.0594654,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/xaudio2_3.dll",
+      "sha256": "1df2b1b7cd315600df8da6c606e33588c99c1f08121145d86c77d995fdc04c0b"
+    },
+    {
+      "allocated_size_bytes": 1327104,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1326562,
+      "mtime_epoch": 1790918721.0573838,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/xaudio2_2.dll",
+      "sha256": "79ce8e2006f58e92988c95a0244ed3b02440ef703e9fb138b32b3d53cdcf785c"
+    },
+    {
+      "allocated_size_bytes": 1327104,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1326562,
+      "mtime_epoch": 1790918721.0555127,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/xaudio2_1.dll",
+      "sha256": "f23a3feb243e6a0d524c4ed81e4f87423eec8482a4d25ddd25cdf598035bd952"
+    },
+    {
+      "allocated_size_bytes": 1327104,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1326507,
+      "mtime_epoch": 1790918721.0535185,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/xaudio2_0.dll",
+      "sha256": "2c4e46689fa2b7771420bf7853fb28ae738df783e437695e79d9c800a80fce54"
+    },
+    {
+      "allocated_size_bytes": 1310720,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1310215,
+      "mtime_epoch": 1790918677.021485,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/wow64win.dll",
+      "sha256": "69204fadee6db127d6ed24dcf71a021725d8fcb4fe7cac9cf040ffbf34b68b1d"
+    },
+    {
+      "allocated_size_bytes": 1306624,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1305675,
+      "mtime_epoch": 1790918675.6937594,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/amstream.dll",
+      "sha256": "09a31cab0fdbe1bb35b76ec7f4fec7d1580c91a58146d29ba63477ee335228c4"
+    },
+    {
+      "allocated_size_bytes": 1298432,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1294590,
+      "mtime_epoch": 1790918675.9685853,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/dmstyle.dll",
+      "sha256": "23e84902dd68b75a94b3229eaba1c32a928466b5b7bdd82a3a291e9e8f3fb83c"
+    },
+    {
+      "allocated_size_bytes": 1294336,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1290561,
+      "mtime_epoch": 1790918676.7076297,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/taskschd.dll",
+      "sha256": "5afa387e6fd5ffd388c806ace8b82cb727d076e236f132e74021ab240d50619a"
+    },
+    {
+      "allocated_size_bytes": 1286144,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1285902,
+      "mtime_epoch": 1790918676.2230794,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/mmdevapi.dll",
+      "sha256": "209270fb9221d0c536d6f1dd727ac09eeb63662c7ad9185a837acb66729827fd"
+    },
+    {
+      "allocated_size_bytes": 1257472,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1256589,
+      "mtime_epoch": 1790918675.2251341,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/regedit.exe",
+      "sha256": "7cc916844e430b9be611d1981ff454a37a6825d15b2fd78187576d82714d4685"
+    },
+    {
+      "allocated_size_bytes": 1253376,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1251185,
+      "mtime_epoch": 1790918676.1988914,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/mfmediaengine.dll",
+      "sha256": "e4ff777d23f04611d5b65714ad247dfd17ae10660a7f3645430cad908d951da7"
+    },
+    {
+      "allocated_size_bytes": 1253376,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1251192,
+      "mtime_epoch": 1790918675.641606,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/Program Files/Common Files/System/OLE DB/oledb32.dll",
+      "sha256": "4dba38f66d14b7371d1bab3dd7e79535da609ba3366b98036bdeb16c601bb12c"
+    },
+    {
+      "allocated_size_bytes": 1249280,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1245297,
+      "mtime_epoch": 1790918719.725728,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/Program Files (x86)/Windows NT/Accessories/wordpad.exe",
+      "sha256": "eb7374d2a5f89cd9c9a03d19e5e4b197b7f57495e4a1161806515c83aa15df45"
+    },
+    {
+      "allocated_size_bytes": 1236992,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1236365,
+      "mtime_epoch": 1790918676.7055814,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/taskmgr.exe",
+      "sha256": "8d27e5c7b06138adb9f7a4cbf6d4d025d13fc2805e21d02c8d271f4a7417cfa8"
+    },
+    {
+      "allocated_size_bytes": 1220608,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1218309,
+      "mtime_epoch": 1790918720.3616,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/mscoree.dll",
+      "sha256": "18d8e1d885ae71fe3cc85c05f756c0301ccf5dacf9ff4eda444f0ac00009ce1b"
+    },
+    {
+      "allocated_size_bytes": 1208320,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1207510,
+      "mtime_epoch": 1790918719.7769547,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/advapi32.dll",
+      "sha256": "3ce3d7d8c0cee70dcb96454c75f5cb2048d0c81d5cd88098157f7d1aad16b581"
+    },
+    {
+      "allocated_size_bytes": 1204224,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1203954,
+      "mtime_epoch": 1790918720.635635,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/qasf.dll",
+      "sha256": "dae8c2ae5e25bc22aea14ac35d42be6feb8776cd6c6146f5d1c4ccf0d09d4b31"
+    },
+    {
+      "allocated_size_bytes": 1204224,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1202255,
+      "mtime_epoch": 1790918676.6392574,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/scrrun.dll",
+      "sha256": "61530cae743412a8e58e8d44e379d4ce0284c15692f808b6eae0bbc0654d3ee6"
+    },
+    {
+      "allocated_size_bytes": 1191936,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1188193,
+      "mtime_epoch": 1790918675.6790245,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/actxprxy.dll",
+      "sha256": "b572cf72765c28cf0ce049f0ada9b3a224d42120be033326a1d02ec6f802af02"
+    },
+    {
+      "allocated_size_bytes": 1183744,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1182420,
+      "mtime_epoch": 1790918720.7497501,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/taskmgr.exe",
+      "sha256": "eb0ee37ad9ec100a8a93c50fdf48aa410501a9b35ee5e60ef9b9eff9c22f7660"
+    },
+    {
+      "allocated_size_bytes": 1171456,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1170890,
+      "mtime_epoch": 1790918720.8467505,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/windows.gaming.input.dll",
+      "sha256": "4d9380289ce4bf38bc3cbb6315c7241ddd914a7ce67d75ccfa6f1c773d0699cc"
+    },
+    {
+      "allocated_size_bytes": 1155072,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1152644,
+      "mtime_epoch": 1790918720.6596065,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/regedit.exe",
+      "sha256": "2e6e717aaa7cd14f16dc7a902a5dbcbeeeb02d4d2ba52a96250bff654e4cc4f3"
+    },
+    {
+      "allocated_size_bytes": 1155072,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1152220,
+      "mtime_epoch": 1790918719.8033495,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/avifil32.dll",
+      "sha256": "a2d4559a4b7e013d9d46761b2ea46b80aaff0f2e23c9dfbcde8e8e6f88d50593"
+    },
+    {
+      "allocated_size_bytes": 1150976,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1149541,
+      "mtime_epoch": 1790918676.5178685,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/oleview.exe",
+      "sha256": "b7bc5e9c7f2f17a1b88b370efdf6f3c51e0c99d49a2ffe900675db789a10cada"
+    },
+    {
+      "allocated_size_bytes": 1150976,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1147246,
+      "mtime_epoch": 1790918676.2098737,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/mfsrcsnk.dll",
+      "sha256": "6612485d69516fdb321a7cebdbeef96535a9a996ef1607e6fe226ecaff6fc155"
+    },
+    {
+      "allocated_size_bytes": 1146880,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1143506,
+      "mtime_epoch": 1790918720.1028733,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/dmusic.dll",
+      "sha256": "ef5213c90ddd53b020479ed227d6c1ab689833994eba86d3660b8157aac08121"
+    },
+    {
+      "allocated_size_bytes": 1142784,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1141711,
+      "mtime_epoch": 1790918675.6510658,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/Program Files/Common Files/System/ADO/msado15.dll",
+      "sha256": "64ee59eea0a7b0de8820fc11bb69449b1e4c996f8d4eb34e1d1c466664d7bc7f"
+    },
+    {
+      "allocated_size_bytes": 1134592,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1134254,
+      "mtime_epoch": 1790918720.0970547,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/dmstyle.dll",
+      "sha256": "6cb03597fe6f8541d58277b6fc806ec05d1286b2c5ea561bd68e0aae9ac4795d"
+    },
+    {
+      "allocated_size_bytes": 1134592,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1131716,
+      "mtime_epoch": 1790918719.892665,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/d3d8.dll",
+      "sha256": "3af0742836774f516c2317d1afb6c927658e15590fe32992c3c615d9680ae5d3"
+    },
+    {
+      "allocated_size_bytes": 1130496,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1128216,
+      "mtime_epoch": 1790918719.7808845,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/amstream.dll",
+      "sha256": "3437227116a2a456e9f748fd18d942aab27bb62479b944a3deef0c8840b2ca9a"
+    },
+    {
+      "allocated_size_bytes": 1126400,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1125908,
+      "mtime_epoch": 1790918719.7275925,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/Program Files (x86)/Common Files/System/OLE DB/oledb32.dll",
+      "sha256": "47b2db839cb778b9f93e32c50e1ba8361ea02b85c20e5097c650ced0beab586d"
+    },
+    {
+      "allocated_size_bytes": 1118208,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1117360,
+      "mtime_epoch": 1790918675.644489,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/Program Files/Common Files/System/OLE DB/msdaps.dll",
+      "sha256": "42bb2075540ad12a94e88fa6c884e3915e81255c900eedf134cc94fa9dacf6f2"
+    },
+    {
+      "allocated_size_bytes": 1114112,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1111596,
+      "mtime_epoch": 1790918719.765763,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/actxprxy.dll",
+      "sha256": "fd7f17f038d76e1bdbae294f3db1e0c8ca8d40935edb4546e6df4b7ab83ef014"
+    },
+    {
+      "allocated_size_bytes": 1114112,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1110046,
+      "mtime_epoch": 1790918676.4897337,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/odbc32.dll",
+      "sha256": "c9b8bf2908d907bcd04db49edbb2bebcf9191327df6c72b091d7a6f6b1af4afc"
+    },
+    {
+      "allocated_size_bytes": 1110016,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1108318,
+      "mtime_epoch": 1790918720.3190343,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/mfmediaengine.dll",
+      "sha256": "4db6f914327efe14118623b0605f36af67ecde9a3e2763fe686aa0f2010ee2e6"
+    },
+    {
+      "allocated_size_bytes": 1105920,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1103018,
+      "mtime_epoch": 1790918675.82442,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/d3dcompiler_46.dll",
+      "sha256": "40eb61c1b6f03189160872b1c84e60f72e2e0613d011cb08322b8fbbe6dded85"
+    },
+    {
+      "allocated_size_bytes": 1105920,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1102607,
+      "mtime_epoch": 1790918675.8226988,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/d3dcompiler_43.dll",
+      "sha256": "a343436618b65a1b1290de1d5dff50befc6bdc62db3c14e50462d57a7eb1523b"
+    },
+    {
+      "allocated_size_bytes": 1105920,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1102403,
+      "mtime_epoch": 1790918675.8211086,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/d3dcompiler_42.dll",
+      "sha256": "eb5b18f059efefc541ba541323c6cb40a06f7df6e9fa61b3164a7a206cb062e6"
+    },
+    {
+      "allocated_size_bytes": 1105920,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1102403,
+      "mtime_epoch": 1790918675.8195255,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/d3dcompiler_41.dll",
+      "sha256": "6a09ef646f02ec1671bf945594b3ecaa8b4e3cfc7ec1443730be105ea7ff40de"
+    },
+    {
+      "allocated_size_bytes": 1105920,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1102352,
+      "mtime_epoch": 1790918675.8178964,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/d3dcompiler_40.dll",
+      "sha256": "1cbde320f708b75610b9cc918aa3754af8558f1eef7a6526c69597f140305a20"
+    },
+    {
+      "allocated_size_bytes": 1105920,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1102298,
+      "mtime_epoch": 1790918675.8161397,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/d3dcompiler_39.dll",
+      "sha256": "194015538a276f1178344b1d9d164d866ce572909d1aa96bb4be42ba4a69fff5"
+    },
+    {
+      "allocated_size_bytes": 1105920,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1102298,
+      "mtime_epoch": 1790918675.814536,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/d3dcompiler_38.dll",
+      "sha256": "e3d9e0f3e9ef6af2e7628079377a5ff9e2fdc5841e4b385b00d3b20dbf77ce54"
+    },
+    {
+      "allocated_size_bytes": 1105920,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1102250,
+      "mtime_epoch": 1790918675.812963,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/d3dcompiler_37.dll",
+      "sha256": "6ff357320b56d7254bb72e61cb01f8d3a3c3c777b49b8b78c5865398787db1d6"
+    },
+    {
+      "allocated_size_bytes": 1105920,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1102250,
+      "mtime_epoch": 1790918675.8111362,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/d3dcompiler_36.dll",
+      "sha256": "6c863ad3922bd7df4211dea331073dd63dc884c6a426dc16e1ec384e32d30f55"
+    },
+    {
+      "allocated_size_bytes": 1105920,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1102250,
+      "mtime_epoch": 1790918675.8093913,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/d3dcompiler_35.dll",
+      "sha256": "0daa0586e10f1ac075a5497de52eaa1a92695af0e5e01194d0053d0f137d6148"
+    },
+    {
+      "allocated_size_bytes": 1105920,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1102250,
+      "mtime_epoch": 1790918675.8071992,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/d3dcompiler_34.dll",
+      "sha256": "fdb182e5bc5b180eb5c2ac176eeb52ede651f9fec3d52df01da2b3202d8c5c81"
+    },
+    {
+      "allocated_size_bytes": 1105920,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1102250,
+      "mtime_epoch": 1790918675.8051202,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/d3dcompiler_33.dll",
+      "sha256": "cbc5a8a83d8fdb7055c4a1e5cce3f438b452120eb4e0e12203f6059fb4cc1d23"
+    },
+    {
+      "allocated_size_bytes": 1101824,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1099133,
+      "mtime_epoch": 1790918675.82622,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/d3dcompiler_47.dll",
+      "sha256": "6879326a34f674f26ede03c83eb947ed6adf9c30285ab84699b220f89945380a"
+    },
+    {
+      "allocated_size_bytes": 1089536,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1086582,
+      "mtime_epoch": 1790918675.8502493,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/d3dx11_43.dll",
+      "sha256": "dbf1333d44bf2979514545c8a4799a8f0e08aac0e5a9d5278c07669ce35dd46b"
+    },
+    {
+      "allocated_size_bytes": 1081344,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1080934,
+      "mtime_epoch": 1790918677.001667,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/wmp.dll",
+      "sha256": "0655ca92d8aecdae3bce16b10eb97916307162f36c349614ced37f26d0634a5c"
+    },
+    {
+      "allocated_size_bytes": 1077248,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1074888,
+      "mtime_epoch": 1790918676.2079525,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/mfreadwrite.dll",
+      "sha256": "54241ed67d23864a0c127946f8cabb6b414820ea4b70b6d5a686e417ec958e32"
+    },
+    {
+      "allocated_size_bytes": 1077248,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1073912,
+      "mtime_epoch": 1790918675.9179575,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/dbgeng.dll",
+      "sha256": "0c5d2555dfe3561a70af3a2c608472caf8297d04b7f0aa76b00107f271ebbe8d"
+    },
+    {
+      "allocated_size_bytes": 1060864,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1057866,
+      "mtime_epoch": 1790918720.3424766,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/syswow64/mmdevapi.dll",
+      "sha256": "b10ea9107abe851a7e4873f5d19ce1751fe6a0bbd09ddbddbb7e41f4250cdaf8"
+    },
+    {
+      "allocated_size_bytes": 1056768,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1053605,
+      "mtime_epoch": 1790918675.7044165,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/atl.dll",
+      "sha256": "235a4b68907d5e0570dbd5a7ec0353529d0e40ba5f26b0a6959f104fe84d44ed"
+    },
+    {
+      "allocated_size_bytes": 1052672,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1048832,
+      "mtime_epoch": 1790918676.9421463,
+      "path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix/drive_c/windows/system32/winefile.exe",
+      "sha256": "4ddaf4a57e742685dbca0a1dca6a8b9e7b23cf832c5a32480ba89e276e7576cd"
+    }
+  ],
+  "dosdevices_symlink_targets": {
+    "c:": "../drive_c",
+    "z:": "/"
+  },
+  "estimated_prefix_bytes": {
+    "allocated_path_bytes": 1502646272,
+    "allocated_unique_inode_bytes": 1502646272,
+    "file_count": 1824,
+    "logical_bytes": 1498690358
+  },
+  "plan_decision": "SNAPSHOT_REGISTRY_THEN_DELETE",
+  "reason": "Completed run or diagnostic environment; retain registry/config snapshot and run evidence, then enforce the two-prefix cap.",
+  "registry_archive": {
+    "path": "registry-config.tar.gz",
+    "sha256": "a323dcdbc0c5313c192d8d39ef43967df33ab392961442defdbe617937b87229",
+    "size_bytes": 585734
+  },
+  "registry_files": [
+    {
+      "path": "system.reg",
+      "sha256": "c4a60c44a8a8295a96baa9ada0e0759b07b5868b0421d69701cc6002e90fb76b",
+      "size_bytes": 3937057
+    },
+    {
+      "path": "user.reg",
+      "sha256": "1838cc0534a56a4303f9710ed94f17e421ded76e29cdb06ebf97d0b5f976d01d",
+      "size_bytes": 74951
+    },
+    {
+      "path": "userdef.reg",
+      "sha256": "3f6114c6072001343d5ce1b9c0864e192b6fe26fec7725a13d04ab0b45747020",
+      "size_bytes": 4190
+    },
+    {
+      "path": "drive_c/windows/system.ini",
+      "sha256": "67b6444441f3e325b644a1c7b3c1dffff17dfcdd51dd2550d4155ac4e628797e",
+      "size_bytes": 478
+    }
+  ],
+  "snapshot_time_unix": 1791313733.1338072,
+  "source_path": "/Users/nima/Library/Caches/fgmetal-step8b-prefix",
+  "source_root_kind": "COMPLETED_DISPOSABLE_PREFIX",
+  "unique_evidence_note": "Run logs, manifests, source snapshots, and timing evidence remain in their original evidence directories; this snapshot preserves prefix registry/config state and binary identity references."
+}

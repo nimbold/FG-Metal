@@ -1,0 +1,104 @@
+{
+  "cases": [
+    {
+      "index": 0,
+      "stage": "armed",
+      "delay_ms_after_active_stage": 0,
+      "mode": "exit",
+      "exit_status": 0,
+      "wall_seconds": 0.6,
+      "termination_state": "presented=1 stage_entered=1 stage=armed delay_ms=0 mode=ExitProcess",
+      "active_stage_reached": true,
+      "device_shutdown_logs": 0,
+      "loaded_pinned_mvk": true
+    },
+    {
+      "index": 1,
+      "stage": "claimed",
+      "delay_ms_after_active_stage": 1,
+      "mode": "return",
+      "exit_status": 0,
+      "wall_seconds": 0.879,
+      "termination_state": "presented=1 stage_entered=1 stage=claimed delay_ms=1 mode=normal-return",
+      "active_stage_reached": true,
+      "device_shutdown_logs": 0,
+      "loaded_pinned_mvk": true
+    },
+    {
+      "index": 2,
+      "stage": "image-acquired",
+      "delay_ms_after_active_stage": 10,
+      "mode": "exit",
+      "exit_status": 0,
+      "wall_seconds": 0.592,
+      "termination_state": "presented=1 stage_entered=1 stage=image-acquired delay_ms=10 mode=ExitProcess",
+      "active_stage_reached": true,
+      "device_shutdown_logs": 0,
+      "loaded_pinned_mvk": true
+    },
+    {
+      "index": 3,
+      "stage": "command-recording",
+      "delay_ms_after_active_stage": 17,
+      "mode": "return",
+      "exit_status": 0,
+      "wall_seconds": 0.586,
+      "termination_state": "presented=1 stage_entered=1 stage=command-recording delay_ms=17 mode=normal-return",
+      "active_stage_reached": true,
+      "device_shutdown_logs": 0,
+      "loaded_pinned_mvk": true
+    },
+    {
+      "index": 4,
+      "stage": "submission-queued",
+      "delay_ms_after_active_stage": 25,
+      "mode": "exit",
+      "exit_status": 0,
+      "wall_seconds": 0.608,
+      "termination_state": "presented=1 stage_entered=1 stage=submission-queued delay_ms=25 mode=ExitProcess",
+      "active_stage_reached": true,
+      "device_shutdown_logs": 0,
+      "loaded_pinned_mvk": true
+    },
+    {
+      "index": 5,
+      "stage": "gpu-pending",
+      "delay_ms_after_active_stage": 50,
+      "mode": "return",
+      "exit_status": 0,
+      "wall_seconds": 0.594,
+      "termination_state": "presented=1 stage_entered=1 stage=gpu-pending delay_ms=50 mode=normal-return",
+      "active_stage_reached": true,
+      "device_shutdown_logs": 0,
+      "loaded_pinned_mvk": true
+    },
+    {
+      "index": 6,
+      "stage": "present-pending",
+      "delay_ms_after_active_stage": 100,
+      "mode": "exit",
+      "exit_status": 0,
+      "wall_seconds": 1.098,
+      "termination_state": "presented=1 stage_entered=1 stage=present-pending delay_ms=100 mode=ExitProcess",
+      "active_stage_reached": true,
+      "device_shutdown_logs": 0,
+      "loaded_pinned_mvk": true
+    },
+    {
+      "index": 7,
+      "stage": "retirement-pending",
+      "delay_ms_after_active_stage": 250,
+      "mode": "return",
+      "exit_status": 0,
+      "wall_seconds": 0.822,
+      "termination_state": "presented=1 stage_entered=1 stage=retirement-pending delay_ms=250 mode=normal-return",
+      "active_stage_reached": true,
+      "device_shutdown_logs": 0,
+      "loaded_pinned_mvk": true
+    }
+  ],
+  "all_exited_zero": true,
+  "all_reached_active_stage": true,
+  "all_avoided_normal_device_shutdown": true,
+  "all_loaded_pinned_mvk": true
+}

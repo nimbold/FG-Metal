@@ -1,0 +1,16 @@
+{
+  "drawindex_old_exit": 10,
+  "drawindex_new_exit": 0,
+  "ordinary_dxvk_vertex_old_exit": 0,
+  "interop_old_fixed_exit": 0,
+  "interop_new_exit": 0,
+  "native_clear_exit": 0,
+  "wine_enumeration_exit": 0,
+  "visual_observations": {
+    "wine_dxvk": "user: it is black screen",
+    "native_clear": "user: Red and green render correctly"
+  },
+  "gate1": "FAIL",
+  "gate2": "NOT TESTED",
+  "negative_old_hud_exit": "watchdog timeout, terminated after 55.047 seconds"
+}

@@ -1,0 +1,15 @@
+test_bad_plan_signature_fails_closed (test_evidence_consolidation.EvidenceConsolidationTests.test_bad_plan_signature_fails_closed) ... ok
+test_each_transaction_phase_is_persisted_before_irreversible_unlink (test_evidence_consolidation.EvidenceConsolidationTests.test_each_transaction_phase_is_persisted_before_irreversible_unlink) ... ok
+test_failure_during_unlink_restores_original_and_removes_temporary (test_evidence_consolidation.EvidenceConsolidationTests.test_failure_during_unlink_restores_original_and_removes_temporary) ... ok
+test_hardlinked_evidence_becomes_zero_copy_reference (test_evidence_consolidation.EvidenceConsolidationTests.test_hardlinked_evidence_becomes_zero_copy_reference) ... ok
+test_hash_mismatch_does_not_remove_evidence (test_evidence_consolidation.EvidenceConsolidationTests.test_hash_mismatch_does_not_remove_evidence) ... ok
+test_inventory_recertification_rejects_changed_row (test_evidence_consolidation.EvidenceConsolidationTests.test_inventory_recertification_rejects_changed_row) ... ok
+test_manifest_must_bind_original_path (test_evidence_consolidation.EvidenceConsolidationTests.test_manifest_must_bind_original_path) ... ok
+test_plan_rejects_duplicate_paths_before_row_processing (test_evidence_consolidation.EvidenceConsolidationTests.test_plan_rejects_duplicate_paths_before_row_processing) ... ok
+test_restart_recovers_exchange_from_durable_swap_intent (test_evidence_consolidation.EvidenceConsolidationTests.test_restart_recovers_exchange_from_durable_swap_intent) ... ok
+test_unlisted_hardlink_blocks_group_before_any_change (test_evidence_consolidation.EvidenceConsolidationTests.test_unlisted_hardlink_blocks_group_before_any_change) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 0.013s
+
+OK

@@ -1,0 +1,16 @@
+{
+  "canonical_artifact_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/f9e581029c215edc2ecad46f5c22cc1b0b0cfc8d17fbaec5f7d96667fc556169/slow-visual.exe",
+  "completed_at_unix": 1791344874.634399,
+  "isolated_inode": 93189248,
+  "isolated_link_count": 1,
+  "lease_hmac_sha256": "a51e5254b8c60e1833403596599ccd1709ef832c4a8cb52da9f283208d7c94aa",
+  "prepared_at_unix": 1791344874.6328058,
+  "previous_inode": 92894733,
+  "previous_link_count": 63,
+  "reason": "Step 11D.3 Gate 0 isolates schema-v1 CAS payloads from mutable build-tree hardlink aliases",
+  "receipt_type": "LEGACY_CAS_HARDLINK_ISOLATION",
+  "result": "DETACHED_WITH_HASH_PRESERVED",
+  "schema_version": 1,
+  "sha256": "f9e581029c215edc2ecad46f5c22cc1b0b0cfc8d17fbaec5f7d96667fc556169",
+  "size_bytes": 2502834
+}

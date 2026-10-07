@@ -1,0 +1,43 @@
+{
+  "build_id": "step11d3a-mvk-x86_64-20261007",
+  "command": [
+    "/Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild",
+    "-project",
+    "/Users/nima/Library/Caches/FGMetal/builds/step11d3a-mvk-x86_64-20261007/MoltenVKSource/MoltenVK/MoltenVK.xcodeproj",
+    "-scheme",
+    "MoltenVK-macOS-dylib",
+    "-configuration",
+    "Release",
+    "-sdk",
+    "macosx",
+    "-destination",
+    "platform=macOS,arch=x86_64",
+    "-derivedDataPath",
+    "/Users/nima/Library/Caches/FGMetal/builds/step11d3a-mvk-x86_64-20261007/DerivedData",
+    "SYMROOT=/Users/nima/Library/Caches/FGMetal/builds/step11d3a-mvk-x86_64-20261007/Build/Products",
+    "OBJROOT=/Users/nima/Library/Caches/FGMetal/builds/step11d3a-mvk-x86_64-20261007/Build/Intermediates.noindex",
+    "CLANG_MODULE_CACHE_PATH=/Users/nima/Library/Caches/FGMetal/builds/step11d3a-mvk-x86_64-20261007/ModuleCache",
+    "COMPILATION_CACHE_CAS_PATH=/Users/nima/Library/Caches/FGMetal/builds/step11d3a-mvk-x86_64-20261007/CompilationCache",
+    "COMPILER_INDEX_STORE_ENABLE=NO",
+    "SDK_STAT_CACHE_ENABLE=NO",
+    "ARCHS=x86_64",
+    "ONLY_ACTIVE_ARCH=NO",
+    "CODE_SIGNING_ALLOWED=NO",
+    "MACOSX_DEPLOYMENT_TARGET=12.0",
+    "DEBUG_INFORMATION_FORMAT=dwarf",
+    "build"
+  ],
+  "configuration_and_logs": [
+    {
+      "mode": "0o644",
+      "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/step11d3a-mvk-x86_64-20261007.failure/build.log",
+      "sha256": "1cbc336c5daf4b744f893c013a08f126063570466dc7dcdab6861aee01a99533",
+      "size_bytes": 46,
+      "source_path": "/Users/nima/Library/Caches/FGMetal/builds/step11d3a-mvk-x86_64-20261007/build.log"
+    }
+  ],
+  "error": "NameError(\"name 'file_count' is not defined\")",
+  "failed_at_unix": 1791406366.483142,
+  "generated_diagnostics": [],
+  "return_code": -1
+}

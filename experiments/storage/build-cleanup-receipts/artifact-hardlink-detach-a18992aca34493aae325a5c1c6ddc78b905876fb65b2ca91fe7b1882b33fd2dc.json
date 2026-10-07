@@ -1,0 +1,20 @@
+{
+  "canonical_artifact_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/a18992aca34493aae325a5c1c6ddc78b905876fb65b2ca91fe7b1882b33fd2dc/winevulkan.dll",
+  "completed_at_unix": 1791346848.505712,
+  "isolated_inode": 93204214,
+  "isolated_link_count": 1,
+  "lease_hmac_sha256": "8f82f4ad1f702c130ae5aae20c2786ac5a6b1d32e583f82e7506f71ede98c6a0",
+  "prepared_at_unix": 1791346848.503531,
+  "previous_device": 16777230,
+  "previous_inode": 92388795,
+  "previous_link_count": 3,
+  "reason": "Step 11D.3 Gate 0 isolates schema-v1 CAS payloads from mutable build-tree hardlink aliases",
+  "receipt_type": "LEGACY_CAS_HARDLINK_ISOLATION",
+  "result": "DETACHED_WITH_HASH_PRESERVED",
+  "schema_version": 1,
+  "sha256": "a18992aca34493aae325a5c1c6ddc78b905876fb65b2ca91fe7b1882b33fd2dc",
+  "size_bytes": 2096724,
+  "temporary_device": 16777230,
+  "temporary_inode": 93204214,
+  "temporary_name": ".winevulkan.dll.9635a4bd696d492fb37b1ea6d0de4523.detach"
+}

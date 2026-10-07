@@ -1,0 +1,13 @@
+{
+  "executable": "d3d11_dynamic_unload.exe",
+  "exit_status": 0,
+  "wall_seconds": 0.6490831249975599,
+  "internal_enabled": true,
+  "sha256": {
+    "d3d11_dynamic_unload.exe": "3a46f08793d830ee79c79c34ebb527ad9a2c1a6aa0c83ec9c96a8762a43cf989",
+    "d3d11.dll": "5f41dc59a12b492530781daf85c2be35c7cabb4cc88e4384b61353b7d75b6956",
+    "dxgi.dll": "0319f3ddca7d1a6cd18aaa528df1ac95380d72b8d68002848b7a524282d340c2"
+  },
+  "runtime": "/Users/nima/Library/Caches/FGMetalStep11C1R/runtime-frozen/runtime/wine/bin/wine",
+  "icd": "/Users/nima/Library/Caches/FGMetalStep11C1R/moltenvk-1.4.2/MoltenVK/MoltenVK/dynamic/dylib/macOS/MoltenVK_icd.json"
+}

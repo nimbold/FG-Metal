@@ -1,0 +1,1 @@
+{"phase":"fresh-prefix preparation / before application launch","result":"ENOSPC opening runtime log; application did not launch","visual_result":"NOT TESTED","action":"Preserved failed preparation and registries; removed only task-owned disposable prefixes; retried in fresh prefix"}

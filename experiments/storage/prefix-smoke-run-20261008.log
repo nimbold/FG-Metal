@@ -1,0 +1,15 @@
+{"blockers": [], "decision": "ALLOW", "estimated_peak_new_bytes": 3254779904, "experiment_id": "step11d3-storage-policy-smoke-20261007-3de4c9d611a34dba", "free_before_bytes": 87002710016, "manifest_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/manifests/step11d3-storage-policy-smoke-20261007-3de4c9d611a34dba.json", "project_budget_bytes": 53687091200, "project_usage_before_bytes": 42550657024, "warnings": []}
+{"active_lease_marker_removed": true, "bytes_reclaimed": 0, "cleanup_receipt": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/smoke-runs/step11d3-storage-policy-smoke-20261007-3de4c9d611a34dba/prefix-cleanup.json", "experiment_id": "step11d3-storage-policy-smoke-20261007-3de4c9d611a34dba", "free_space_status": "PASS", "net_free_space_delta_bytes": 20480, "prefix_created": false, "prefix_deleted": false, "prefix_preserved": false, "receipt_write_error": null, "status": "PASS", "storage_hygiene_status": "PASS"}
+Traceback (most recent call last):
+  File "/Users/nima/Documents/Code/FG-Metal/experiments/storage/smoke_prefix_lease.py", line 412, in <module>
+    raise SystemExit(main())
+                     ~~~~^^
+  File "/Users/nima/Documents/Code/FG-Metal/experiments/storage/smoke_prefix_lease.py", line 336, in main
+    lease.set_env(env)
+    ~~~~~~~~~~~~~^^^^^
+  File "/Users/nima/Documents/Code/FG-Metal/experiments/storage/storage_policy.py", line 3188, in set_env
+    _validate_wine_child_environment(selected_env)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "/Users/nima/Documents/Code/FG-Metal/experiments/storage/storage_policy.py", line 1951, in _validate_wine_child_environment
+    raise ValueError(f"Wine child environment contains a forbidden process startup hook: {key}")
+ValueError: Wine child environment contains a forbidden process startup hook: PYTHONDONTWRITEBYTECODE

@@ -1,0 +1,138 @@
+ninja: Entering directory `/tmp/fgmetal-step11b1/build'
+[0/1] Regenerating build files
+Cleaning... 1 files.
+The Meson build system
+Version: 1.12.1
+Source dir: /private/tmp/fgmetal-step11b1/dxvk-diagnostic
+Build dir: /private/tmp/fgmetal-step11b1/build
+Build type: cross build
+Project name: dxvk
+Project version: 3.1.1
+C compiler for the host machine: x86_64-w64-mingw32-gcc (gcc 16.2.0 "x86_64-w64-mingw32-gcc (GCC) 16.2.0")
+C linker for the host machine: x86_64-w64-mingw32-gcc ld.bfd 2.47.20260726
+C++ compiler for the host machine: x86_64-w64-mingw32-g++ (gcc 16.2.0 "x86_64-w64-mingw32-g++ (GCC) 16.2.0")
+C++ linker for the host machine: x86_64-w64-mingw32-g++ ld.bfd 2.47.20260726
+C compiler for the build machine: cc (clang 21.0.0 "Apple clang version 21.0.0 (clang-2100.3.34.2)")
+C linker for the build machine: cc ld64 27037.1
+C++ compiler for the build machine: c++ (clang 21.0.0 "Apple clang version 21.0.0 (clang-2100.3.34.2)")
+C++ linker for the build machine: c++ ld64 27037.1
+Build machine cpu family: aarch64
+Build machine cpu: aarch64
+Host machine cpu family: x86_64
+Host machine cpu: x86_64
+Target machine cpu family: x86_64
+Target machine cpu: x86_64
+Found pkg-config: NO
+Found CMake: NO
+Run-time dependency libdisplay-info found: NO  (tried pkg-config and cmake)
+Looking for a fallback subproject for the dependency libdisplay-info
+
+Executing subproject libdisplay-info for machine: host 
+
+libdisplay-info| Project name: libdisplay-info
+libdisplay-info| Project version: 0.0.0
+libdisplay-info| C compiler for the host machine: x86_64-w64-mingw32-gcc (gcc 16.2.0 "x86_64-w64-mingw32-gcc (GCC) 16.2.0")
+libdisplay-info| C linker for the host machine: x86_64-w64-mingw32-gcc ld.bfd 2.47.20260726
+libdisplay-info| C compiler for the build machine: cc (clang 21.0.0 "Apple clang version 21.0.0 (clang-2100.3.34.2)")
+libdisplay-info| C linker for the build machine: cc ld64 27037.1
+libdisplay-info| Program tool/gen-search-table.py found: YES (/private/tmp/fgmetal-step11b1/dxvk-diagnostic/subprojects/libdisplay-info/tool/gen-search-table.py)
+libdisplay-info| Library m found: YES
+libdisplay-info| Compiler for C supports arguments -Wundef: YES (cached)
+libdisplay-info| Compiler for C supports arguments -Wmissing-prototypes: YES (cached)
+libdisplay-info| Compiler for C supports arguments -Walloca: YES (cached)
+libdisplay-info| Compiler for C supports arguments -Wdeclaration-after-statement: YES (cached)
+libdisplay-info| Compiler for C supports arguments -Wconversion: YES (cached)
+libdisplay-info| Compiler for C supports arguments -Wno-unused-parameter: YES (cached)
+libdisplay-info| Compiler for C supports arguments -Wno-missing-field-initializers: YES (cached)
+libdisplay-info| Compiler for C supports arguments -Werror=implicit: YES (cached)
+libdisplay-info| Build targets in project: 2
+libdisplay-info| Subproject libdisplay-info finished.
+
+Dependency libdisplay-info for host machine from subproject subprojects/libdisplay-info found: YES 0.0.0
+Library d3d9 found: YES
+Library d3d11 found: YES
+Library dxgi found: YES
+Library gdi32 found: YES
+Library version found: YES
+Program x86_64-w64-mingw32-windres found: YES
+
+Executing subproject dxbc-spirv for machine: host 
+
+dxbc-spirv| Project name: dxbc-spirv
+dxbc-spirv| Project version: 0.1.0
+dxbc-spirv| C++ compiler for the host machine: x86_64-w64-mingw32-g++ (gcc 16.2.0 "x86_64-w64-mingw32-g++ (GCC) 16.2.0")
+dxbc-spirv| C++ linker for the host machine: x86_64-w64-mingw32-g++ ld.bfd 2.47.20260726
+dxbc-spirv| C++ compiler for the build machine: c++ (clang 21.0.0 "Apple clang version 21.0.0 (clang-2100.3.34.2)")
+dxbc-spirv| C++ linker for the build machine: c++ ld64 27037.1
+dxbc-spirv| Build targets in project: 3
+dxbc-spirv| Subproject dxbc-spirv finished.
+
+Compiler for C++ supports arguments -msse: YES (cached)
+Compiler for C++ supports arguments -msse2: YES (cached)
+Compiler for C++ supports arguments -msse3: YES (cached)
+Compiler for C++ supports arguments -mfpmath=sse: YES (cached)
+Compiler for C++ supports arguments -Wimplicit-fallthrough: YES (cached)
+Compiler for C++ supports arguments -Wno-missing-field-initializers: YES (cached)
+Compiler for C++ supports arguments -Wno-unused-parameter: YES (cached)
+Compiler for C++ supports arguments -Wno-misleading-indentation: YES (cached)
+Compiler for C++ supports arguments -Wno-cast-function-type: YES (cached)
+Compiler for C++ supports arguments -Wno-unused-private-field: NO (cached)
+Compiler for C++ supports arguments -Wno-microsoft-exception-spec: NO (cached)
+Compiler for C++ supports arguments -Wno-extern-c-compat: NO (cached)
+Compiler for C++ supports arguments -Wno-unused-const-variable: YES (cached)
+Compiler for C++ supports arguments -Wno-missing-braces: YES (cached)
+Compiler for C++ supports arguments -DNOMINMAX: YES (cached)
+Compiler for C++ supports arguments -D_WIN32_WINNT=0xa00: YES (cached)
+Compiler for C++ supports arguments -DDXVK_WSI_WIN32: YES (cached)
+Compiler for C supports arguments -msse: YES (cached)
+Compiler for C supports arguments -msse2: YES (cached)
+Compiler for C supports arguments -msse3: YES (cached)
+Compiler for C supports arguments -mfpmath=sse: YES (cached)
+Compiler for C supports arguments -Wimplicit-fallthrough: YES (cached)
+Compiler for C supports arguments -Wno-missing-field-initializers: YES (cached)
+Compiler for C supports arguments -Wno-unused-parameter: YES (cached)
+Compiler for C supports arguments -Wno-misleading-indentation: YES (cached)
+Compiler for C supports arguments -Wno-cast-function-type: YES (cached)
+Compiler for C supports arguments -Wno-unused-private-field: NO (cached)
+Compiler for C supports arguments -Wno-microsoft-exception-spec: NO (cached)
+Compiler for C supports arguments -Wno-extern-c-compat: NO (cached)
+Compiler for C supports arguments -Wno-unused-const-variable: YES (cached)
+Compiler for C supports arguments -Wno-missing-braces: YES (cached)
+Compiler for C supports arguments -DNOMINMAX: YES (cached)
+Compiler for C supports arguments -D_WIN32_WINNT=0xa00: YES (cached)
+Compiler for C supports arguments -DDXVK_WSI_WIN32: YES (cached)
+Compiler for C++ supports link arguments -static: YES (cached)
+Compiler for C++ supports link arguments -static-libgcc: YES (cached)
+Compiler for C++ supports link arguments -static-libstdc++: YES (cached)
+Compiler for C++ supports link arguments -Wl,--file-alignment=4096: YES (cached)
+Compiler for C supports link arguments -static: YES (cached)
+Compiler for C supports link arguments -static-libgcc: YES (cached)
+Compiler for C supports link arguments -static-libstdc++: YES (cached)
+Compiler for C supports link arguments -Wl,--file-alignment=4096: YES (cached)
+Program glslang found: YES (/opt/homebrew/bin/glslang)
+Configuring buildenv.h using configuration
+Library setupapi found: YES
+Dependency threads for host machine found: YES unknown (cached)
+Dependency threads for host machine found: YES unknown (cached)
+Library version found: YES
+Build targets in project: 14
+
+dxvk 3.1.1
+
+  Subprojects (for host machine)
+    dxbc-spirv     : YES
+    libdisplay-info: YES
+
+  User defined options
+    Cross files    : /tmp/fgmetal-step11b1/dxvk-diagnostic/build-win64.txt
+    buildtype      : release
+
+Found ninja-1.13.2 at /opt/homebrew/bin/ninja
+[1/12] Generating version.h with a custom command
+[2/9] Compiling C++ object src/d3d11/d3d11.dll.p/d3d11_swapchain.cpp.obj
+[3/9] Compiling C++ object src/dxvk/libdxvk.a.p/dxvk_presenter.cpp.obj
+[4/9] Compiling C++ object src/d3d11/d3d11.dll.p/d3d11_device.cpp.obj
+[5/9] Compiling C++ object src/dxvk/libdxvk.a.p/dxvk_swapchain_blitter.cpp.obj
+[6/9] Compiling C++ object src/dxvk/libdxvk.a.p/dxvk_context.cpp.obj
+[7/9] Linking static target src/dxvk/libdxvk.a
+[8/9] Linking target src/d3d11/d3d11.dll

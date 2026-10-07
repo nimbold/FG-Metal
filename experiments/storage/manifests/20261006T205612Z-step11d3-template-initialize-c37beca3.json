@@ -1,0 +1,41 @@
+{
+  "blockers": [],
+  "candidate_hashes": {
+    "moltenvk_icd": "578ff08cd0d8734619357541771a5abc9c3470ca300030219a971a9e9dbbe466",
+    "moltenvk_runtime_candidate": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+    "wine_binary": "946a7032484d02981182d59f82edda03f40f38c510e0208d48482c0830ef20e9",
+    "wine_runtime_tree": "2fea825b205073bf011ce948ec4cbe6560d9d90e26982233ad05822a17a92bfe"
+  },
+  "cleanup_policy": "PrefixLease finally cleanup; preserve registry/config snapshot and compact logs",
+  "created_at_unix": 1791320173.726315,
+  "decision": "ALLOW",
+  "estimated_max_new_disk_bytes": 3221225472,
+  "estimated_persistent_bytes": 0,
+  "expected_build_bytes": 0,
+  "expected_build_requirement": false,
+  "expected_duration_seconds": 300,
+  "expected_prefix_bytes": 3221225472,
+  "expected_prefix_requirement": true,
+  "experiment_id": "20261006T205612Z-step11d3-template-initialize-c37beca3",
+  "free_before_bytes": 67407446016,
+  "graphics_experiments_run": false,
+  "internal_storage_setup": true,
+  "manifest_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/manifests/20261006T205612Z-step11d3-template-initialize-c37beca3.json",
+  "output_dir": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/template-initialization-flushed-20261007",
+  "project_budget_bytes": 53687091200,
+  "project_budget_remaining_before_bytes": 11906564096,
+  "project_estimated_peak_bytes": 45001752576,
+  "project_usage_before": {
+    "allocated_inode_deduplicated_bytes": 41780527104,
+    "apfs_clone_awareness": false,
+    "file_count": 121420,
+    "hardlinks_deduplicated": true,
+    "logical_bytes": 94550727585
+  },
+  "purpose": "Initialize one pristine Wine 11.17 prefix with wineboot -u only; no graphics experiment",
+  "retention_policy": "Retain this single certified template; later runs use PrefixLease clone and finally cleanup.",
+  "storage_justification": "One required retained template; exact tree is fingerprinted and reused by APFS clone-on-write for sequential runs.",
+  "warnings": [],
+  "wine_runtime_tree_entries": 6947,
+  "wine_runtime_tree_manifest": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/runtime-manifests/step11d_r_active_runtime.json"
+}

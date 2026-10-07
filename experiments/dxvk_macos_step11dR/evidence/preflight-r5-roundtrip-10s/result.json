@@ -1,0 +1,19 @@
+{
+  "case": "preflight-r5-roundtrip-10s",
+  "exit_status": 0,
+  "wall_seconds": 18.287,
+  "prefix": "/Users/nima/Library/Caches/FGMetalStep11D-R/p0.2-current-r5-flipseq-internal-prefix",
+  "source_snapshot": "/private/tmp/fgmetal-step11d-r-source-snapshot-current-r5-20261006",
+  "binary_hashes": {
+    "d3d11.dll": "e747ca5a5c2087d1f788762a5c4bae13939593a2cb89dedf2f7c04999ab94de5",
+    "dxgi.dll": "58e972688c739ee8444c8efa7a175503ff8dd0774ceb63e9b8526168054d9132",
+    "d3d11-semantics-30hz.exe": "fd3cad69203f030d370d772730d6a3bb96d9df7fe23d98fb0a4af01606e44134"
+  },
+  "settings": {
+    "source_hz": 30,
+    "duration_s": 10,
+    "enableMetalInterop": true,
+    "DXVK_INTERNAL_WSI_PROOF": true,
+    "monitoring": false
+  }
+}

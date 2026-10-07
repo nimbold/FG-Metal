@@ -1,0 +1,21 @@
+{
+  "version": "3.1.1",
+  "descriptive_name": "dxvk",
+  "license": [
+    "unknown"
+  ],
+  "license_files": [],
+  "subproject_dir": "subprojects",
+  "subprojects": [
+    {
+      "name": "libdisplay-info",
+      "version": "0.0.0",
+      "descriptive_name": "libdisplay-info"
+    },
+    {
+      "name": "dxbc-spirv",
+      "version": "0.1.0",
+      "descriptive_name": "dxbc-spirv"
+    }
+  ]
+}

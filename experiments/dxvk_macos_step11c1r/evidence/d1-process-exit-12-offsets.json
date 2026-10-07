@@ -1,0 +1,140 @@
+{
+  "cases": [
+    {
+      "index": 0,
+      "delay_ms": 0,
+      "mode": "exit",
+      "exit_status": 0,
+      "wall_seconds": 0.536,
+      "termination_state": "presented=1 stage_entered=0 stage=none delay_ms=0 mode=ExitProcess",
+      "device_shutdown_log_count": 0,
+      "internal_evidence_lines": 0,
+      "loaded_pinned_mvk": true
+    },
+    {
+      "index": 1,
+      "delay_ms": 1,
+      "mode": "return",
+      "exit_status": 0,
+      "wall_seconds": 0.519,
+      "termination_state": "presented=1 stage_entered=0 stage=none delay_ms=1 mode=normal-return",
+      "device_shutdown_log_count": 0,
+      "internal_evidence_lines": 0,
+      "loaded_pinned_mvk": true
+    },
+    {
+      "index": 2,
+      "delay_ms": 5,
+      "mode": "exit",
+      "exit_status": 0,
+      "wall_seconds": 0.541,
+      "termination_state": "presented=1 stage_entered=0 stage=none delay_ms=5 mode=ExitProcess",
+      "device_shutdown_log_count": 0,
+      "internal_evidence_lines": 0,
+      "loaded_pinned_mvk": true
+    },
+    {
+      "index": 3,
+      "delay_ms": 10,
+      "mode": "return",
+      "exit_status": 0,
+      "wall_seconds": 0.547,
+      "termination_state": "presented=1 stage_entered=0 stage=none delay_ms=10 mode=normal-return",
+      "device_shutdown_log_count": 0,
+      "internal_evidence_lines": 0,
+      "loaded_pinned_mvk": true
+    },
+    {
+      "index": 4,
+      "delay_ms": 17,
+      "mode": "exit",
+      "exit_status": 0,
+      "wall_seconds": 0.548,
+      "termination_state": "presented=1 stage_entered=0 stage=none delay_ms=17 mode=ExitProcess",
+      "device_shutdown_log_count": 0,
+      "internal_evidence_lines": 0,
+      "loaded_pinned_mvk": true
+    },
+    {
+      "index": 5,
+      "delay_ms": 20,
+      "mode": "return",
+      "exit_status": 0,
+      "wall_seconds": 0.549,
+      "termination_state": "presented=1 stage_entered=0 stage=none delay_ms=20 mode=normal-return",
+      "device_shutdown_log_count": 0,
+      "internal_evidence_lines": 0,
+      "loaded_pinned_mvk": true
+    },
+    {
+      "index": 6,
+      "delay_ms": 25,
+      "mode": "exit",
+      "exit_status": 0,
+      "wall_seconds": 0.543,
+      "termination_state": "presented=1 stage_entered=0 stage=none delay_ms=25 mode=ExitProcess",
+      "device_shutdown_log_count": 0,
+      "internal_evidence_lines": 0,
+      "loaded_pinned_mvk": true
+    },
+    {
+      "index": 7,
+      "delay_ms": 33,
+      "mode": "return",
+      "exit_status": 0,
+      "wall_seconds": 0.593,
+      "termination_state": "presented=1 stage_entered=0 stage=none delay_ms=33 mode=normal-return",
+      "device_shutdown_log_count": 0,
+      "internal_evidence_lines": 0,
+      "loaded_pinned_mvk": true
+    },
+    {
+      "index": 8,
+      "delay_ms": 50,
+      "mode": "exit",
+      "exit_status": 0,
+      "wall_seconds": 0.592,
+      "termination_state": "presented=1 stage_entered=0 stage=none delay_ms=50 mode=ExitProcess",
+      "device_shutdown_log_count": 0,
+      "internal_evidence_lines": 0,
+      "loaded_pinned_mvk": true
+    },
+    {
+      "index": 9,
+      "delay_ms": 100,
+      "mode": "return",
+      "exit_status": 0,
+      "wall_seconds": 0.648,
+      "termination_state": "presented=1 stage_entered=0 stage=none delay_ms=100 mode=normal-return",
+      "device_shutdown_log_count": 0,
+      "internal_evidence_lines": 0,
+      "loaded_pinned_mvk": true
+    },
+    {
+      "index": 10,
+      "delay_ms": 250,
+      "mode": "exit",
+      "exit_status": 0,
+      "wall_seconds": 0.767,
+      "termination_state": "presented=1 stage_entered=0 stage=none delay_ms=250 mode=ExitProcess",
+      "device_shutdown_log_count": 0,
+      "internal_evidence_lines": 0,
+      "loaded_pinned_mvk": true
+    },
+    {
+      "index": 11,
+      "delay_ms": 500,
+      "mode": "return",
+      "exit_status": 0,
+      "wall_seconds": 1.154,
+      "termination_state": "presented=1 stage_entered=0 stage=none delay_ms=500 mode=normal-return",
+      "device_shutdown_log_count": 0,
+      "internal_evidence_lines": 0,
+      "loaded_pinned_mvk": true
+    }
+  ],
+  "all_exited_zero": true,
+  "all_showed_source_present": true,
+  "all_loaded_pinned_mvk": true,
+  "process_root_destruction_logged": 0
+}

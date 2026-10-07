@@ -1,0 +1,20 @@
+{
+  "canonical_artifact_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/da69a9a9d5a7eaacd5b31208be249dc565c136cb24612bc91e801ddefac49017/d3d11.dll",
+  "completed_at_unix": 1791346850.747475,
+  "isolated_inode": 93204230,
+  "isolated_link_count": 1,
+  "lease_hmac_sha256": "d9f6ffe4cecce9f979e4144205d95b6df18c871ef1347dd263ba520f5526bd13",
+  "prepared_at_unix": 1791346850.5876439,
+  "previous_device": 16777230,
+  "previous_inode": 92929805,
+  "previous_link_count": 2,
+  "reason": "Step 11D.3 Gate 0 isolates schema-v1 CAS payloads from mutable build-tree hardlink aliases",
+  "receipt_type": "LEGACY_CAS_HARDLINK_ISOLATION",
+  "result": "DETACHED_WITH_HASH_PRESERVED",
+  "schema_version": 1,
+  "sha256": "da69a9a9d5a7eaacd5b31208be249dc565c136cb24612bc91e801ddefac49017",
+  "size_bytes": 381170647,
+  "temporary_device": 16777230,
+  "temporary_inode": 93204230,
+  "temporary_name": ".d3d11.dll.1da258cbe02c475f9dda4cda93bf5394.detach"
+}

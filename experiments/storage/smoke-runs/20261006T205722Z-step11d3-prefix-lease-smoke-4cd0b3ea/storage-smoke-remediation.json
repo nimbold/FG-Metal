@@ -1,0 +1,18 @@
+{
+  "experiment_id": "20261006T205722Z-step11d3-prefix-lease-smoke-4cd0b3ea",
+  "action": "REMOVE_OWNED_DISPOSABLE_SMOKE_CLONE_AFTER_PROCESS_AND_OPEN_FILE_CHECKS",
+  "prefix_path": "/Users/nima/Library/Caches/FGMetal/prefixes/smoke-20261006T205722Z-step11d3-prefix-lease-smoke-4cd0b3ea",
+  "prefix_deleted": true,
+  "prefix_allocated_bytes_removed_estimate": 2303459328,
+  "prefix_size_estimate": {
+    "logical_bytes": 2293361875,
+    "allocated_inode_deduplicated_bytes": 2303459328,
+    "file_count": 4907
+  },
+  "lsof_returncode": 1,
+  "lsof_output_empty": true,
+  "failed_automatic_cleanup_reason": "No Wine process was launched in the storage-only smoke, but PrefixLease attempted wineserver -k; return code 1 was treated as shutdown failure and the two-prefix retention cap prevented preserving this third prefix.",
+  "policy_fix": "Skip wineserver shutdown when no Wine child was launched through PrefixLease.",
+  "reconciled_at_unix": 1791320321.3213508,
+  "graphics_experiments_run": false
+}

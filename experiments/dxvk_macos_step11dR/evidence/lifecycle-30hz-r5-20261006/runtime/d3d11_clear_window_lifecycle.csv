@@ -1,0 +1,13 @@
+event,frame,elapsed_us,result,hr
+resize_begin,90,3005850,800x450,0x00000000
+resize_complete,90,3030146,succeeded,0x00000000
+resize_back_begin,150,5008563,640x360,0x00000000
+resize_back_complete,150,5017533,succeeded,0x00000000
+framegen_disabled,451,15009358,verified_env_0,0x00000000
+framegen_enabled,601,20009564,verified_env_1,0x00000000
+focus_loss,751,25009703,minimized,0x00000000
+focus_recovery,781,26015705,restore_requested,0x00000000
+fullscreen_enter,1051,35008205,succeeded,0x00000000
+fullscreen_exit,1096,36578555,succeeded,0x00000000
+swapchain_recreation,1351,45015524,succeeded,0x00000000
+exit,1800,60009836,success,0x00000000

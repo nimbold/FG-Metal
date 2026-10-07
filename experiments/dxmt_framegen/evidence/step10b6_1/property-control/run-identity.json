@@ -1,0 +1,43 @@
+{
+  "mode": "fullscreen",
+  "name": "property-control",
+  "start_utc": "2026-10-04T11:08:29.432232+00:00",
+  "seconds": 40,
+  "generation": "1",
+  "failure": "none",
+  "trace_seconds": 20,
+  "pretrace_qualified": true,
+  "cold_entry": true,
+  "source_geometry": "640x360",
+  "trace_profile": "Metal System Trace + Display + Points of Interest; attached Wine process",
+  "environment": {
+    "DXMT_FRAMEGEN_START_FULLSCREEN": "1",
+    "DXMT_FRAMEGEN_EXPERIMENT_ALLOW_FULLSCREEN": "1",
+    "DXMT_FRAMEGEN_EXPERIMENT_CONTROLLED_HARNESS": "step10b6_1",
+    "DXMT_FRAMEGEN_LAYER_LOG": "/Users/nima/Documents/Code/FG-Metal/experiments/dxmt_framegen/evidence/step10b6_1/property-control/layer-runtime.jsonl",
+    "DXMT_FRAMEGEN_SIGNPOSTS": "1",
+    "DXMT_FRAMEGEN_PREFERRED_FRAME_LATENCY": "1"
+  },
+  "runtime_sha256": {
+    "bin/wine": "1b992a3e0bc5f2a058a24f923832aaa6e464d44766fb0ad13054797e02060d10",
+    "bin/wineserver": "6dfe1f9d2d8a67cc6a09a57966f5ef88fd461abe7321d6fb0d4a1672e8ff0350",
+    "lib/wine/x86_64-windows/d3d10core.dll": "786d42842609a07bd63409def87ddeb1ef29471ddc5853352b5f6040f320e2be",
+    "lib/wine/x86_64-windows/d3d11.dll": "c0e7a71f9b9ecf9136cd51aa95e719bb87ae636a3b913fbaa0d35cc9af2904c7",
+    "lib/wine/x86_64-windows/dxgi.dll": "086f0c433a191cc20967682ed437e62b0f1a5c2d6c641bd41732808c06c3bc7f",
+    "lib/wine/x86_64-windows/winemetal.dll": "abd5ff1e9c0873513c778736596d848037e057784b081ccd430c6070fca7aa75",
+    "lib/wine/x86_64-unix/winemetal.so": "afc38267aa129d781193285589c2c6eefb8bc61609ab66f54c6228e5438d8f28",
+    "lib/wine/x86_64-unix/libc++.1.dylib": "3f0da0b4025c6fb5e50fc23c8a1feea67c839b40df93baff3b2781089b42ad35",
+    "lib/wine/x86_64-unix/libc++abi.1.dylib": "9a95b4ce2be40951b688c394db99f79b7e0b81fa2372e5e49615319869e72e49",
+    "lib/wine/x86_64-unix/libunwind.1.dylib": "964d4e5d6242163e4e8099efd08ba75540f253257b834bf5b7a45f8c84b4ea78",
+    "lib/libinotify.0.dylib": "0565014c42c3506fb5635aeb12f09bad3a4eef8f7ff3e6c9cf9d9e9e6b339df8"
+  },
+  "app_sha256": "b682fd40608816be004f9ea2476d2147a8e1e244a392dc709966e1e200450d74",
+  "trace_process_lineage": [
+    "68255",
+    "68225",
+    "/Users/nima/Docu",
+    "/Users/nima/Documents/Code/FG-Metal/experiments/dxmt_framegen/evidence/step10b6_1/property-control/d3d11_clear_window.exe "
+  ],
+  "trace_pid": "68255",
+  "runner_exit": 0
+}

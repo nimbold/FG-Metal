@@ -1,0 +1,53 @@
+{
+  "active_lease_marker_removed_after_receipt": true,
+  "bytes_reclaimed": 2303463424,
+  "bytes_reclaimed_method": "prefix st_blocks estimate; APFS clone sharing is not observable here",
+  "cleanup_error": null,
+  "exception": null,
+  "expected_persistent_bytes": 33554432,
+  "experiment_id": "20261006T205847Z-step11d3-prefix-lease-smoke-c84c87f7",
+  "free_after_bytes": 65094332416,
+  "free_before_bytes": 65094070272,
+  "free_peak_or_estimate_bytes": 61839290368,
+  "free_space_status": "PASS",
+  "interrupted_by_signal": null,
+  "net_free_space_delta_bytes": 270336,
+  "persistent_retained_allocated_estimate_bytes": 12288,
+  "prefix_allocated_bytes_removed_estimate": 2303463424,
+  "prefix_created": true,
+  "prefix_deleted": true,
+  "prefix_path": "/Users/nima/Library/Caches/FGMetal/prefixes/smoke-20261006T205847Z-step11d3-prefix-lease-smoke-c84c87f7",
+  "prefix_preserved": false,
+  "prefix_size_error": null,
+  "project_usage_after": {
+    "allocated_inode_deduplicated_bytes": 44084101120,
+    "apfs_clone_awareness": false,
+    "file_count": 126345,
+    "hardlinks_deduplicated": true,
+    "logical_bytes": 96844165859
+  },
+  "project_usage_before": {
+    "allocated_inode_deduplicated_bytes": 44084088832,
+    "apfs_clone_awareness": false,
+    "file_count": 126342,
+    "hardlinks_deduplicated": true,
+    "logical_bytes": 96844163200
+  },
+  "reason": "Wine server stopped; disposable prefix removed in finally",
+  "receipt_write_error": null,
+  "registry_snapshot_error": null,
+  "schema_version": 2,
+  "storage_hygiene_status": "PASS",
+  "storage_watch_events": [],
+  "temporary_created": true,
+  "temporary_created_allocated_estimate_bytes": 2303463424,
+  "temporary_created_logical_bytes": 2293362510,
+  "temporary_removed": true,
+  "temporary_removed_logical_bytes": 2293362510,
+  "unexpected_persistent_bytes": 0,
+  "wineserver_shutdown": [
+    {
+      "status": "SKIPPED_NO_WINE_PROCESS_STARTED"
+    }
+  ]
+}

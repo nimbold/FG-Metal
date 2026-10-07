@@ -1,0 +1,857 @@
+info:  Creating device:
+info:  Apple M3:
+info:    Driver   : MoltenVK 0.2.2210
+info:  Queues:
+info:    Graphics : (0, 0)
+info:    Transfer : (0, 0)
+info:    Sparse   : (4294967295, 0)
+info:  Memory:
+info:    Heap 0: 16.0 GiB (DEVICE_LOCAL)
+info:    Budget: 11.84 GiB
+info:      Type  0: DEVICE_LOCAL
+info:      Type  1: DEVICE_LOCAL | HOST_VISIBLE | HOST_COHERENT | HOST_CACHED
+info:      Type  2: DEVICE_LOCAL | LAZILY_ALLOCATED
+info:  Enabled extensions:
+info:    VK_EXT_extended_dynamic_state3
+info:    VK_EXT_fragment_shader_interlock
+info:    VK_EXT_hdr_metadata
+info:    VK_EXT_robustness2
+info:    VK_EXT_sample_locations
+info:    VK_EXT_shader_stencil_export
+info:    VK_EXT_vertex_attribute_divisor
+info:    VK_KHR_calibrated_timestamps
+info:    VK_KHR_dynamic_rendering_local_read
+info:    VK_KHR_incremental_present
+info:    VK_KHR_load_store_op_none
+info:    VK_KHR_maintenance5
+info:    VK_KHR_maintenance6
+info:    VK_KHR_maintenance7
+info:    VK_KHR_maintenance8
+info:    VK_KHR_maintenance9
+info:    VK_KHR_present_id
+info:    VK_KHR_present_wait
+info:    VK_KHR_shader_float_controls2
+info:    VK_KHR_shader_subgroup_uniform_control_flow
+info:    VK_KHR_swapchain
+info:    VK_KHR_swapchain_maintenance1
+info:    VK_KHR_swapchain_mutable_format
+info:    VK_EXT_metal_objects
+info:  Enabled features:
+info:    depthBiasClamp                 : 1
+info:    depthBounds                    : 0
+info:    depthClamp                     : 1
+info:    drawIndirectFirstInstance      : 1
+info:    dualSrcBlend                   : 1
+info:    fillModeNonSolid               : 1
+info:    fragmentStoresAndAtomics       : 1
+info:    fullDrawIndexUint32            : 1
+info:    geometryShader                 : 0
+info:    imageCubeArray                 : 1
+info:    independentBlend               : 1
+info:    largePoints                    : 1
+info:    logicOp                        : 0
+info:    multiDrawIndirect              : 1
+info:    multiViewport                  : 1
+info:    occlusionQueryPrecise          : 1
+info:    pipelineStatisticsQuery        : 0
+info:    robustBufferAccess             : 1
+info:    sampleRateShading              : 1
+info:    samplerAnisotropy              : 1
+info:    shaderClipDistance             : 1
+info:    shaderCullDistance             : 0
+info:    shaderFloat64                  : 0
+info:    shaderImageGatherExtended      : 1
+info:    shaderInt16                    : 1
+info:    shaderInt64                    : 1
+info:    shaderUniformBufferArrayDynamicIndexing : 1
+info:    shaderSampledImageArrayDynamicIndexing : 1
+info:    shaderStorageBufferArrayDynamicIndexing : 1
+info:    shaderStorageImageArrayDynamicIndexing : 1
+info:    sparseBinding                  : 0
+info:    sparseResidencyBuffer          : 0
+info:    sparseResidencyImage2D         : 0
+info:    sparseResidencyImage3D         : 0
+info:    sparseResidency2Samples        : 0
+info:    sparseResidency4Samples        : 0
+info:    sparseResidency8Samples        : 0
+info:    sparseResidency16Samples       : 0
+info:    sparseResidencyAliased         : 0
+info:    shaderResourceResidency        : 0
+info:    shaderResourceMinLod           : 1
+info:    tessellationShader             : 1
+info:    textureCompressionBC           : 1
+info:    variableMultisampleRate        : 0
+info:    vertexPipelineStoresAndAtomics : 1
+info:    wideLines                      : 0
+info:    shaderDrawParameters           : 1
+info:    storageBuffer16BitAccess       : 1
+info:    storagePushConstant16          : 1
+info:    bufferDeviceAddress            : 1
+info:    descriptorIndexing             : 1
+info:    storageBuffer8BitAccess        : 1
+info:    storagePushConstant8           : 1
+info:    shaderUniformTexelBufferArrayDynamicIndexing : 1
+info:    shaderStorageTexelBufferArrayDynamicIndexing : 1
+info:    shaderUniformBufferArrayNonUniformIndexing : 1
+info:    shaderSampledImageArrayNonUniformIndexing : 1
+info:    shaderStorageBufferArrayNonUniformIndexing : 1
+info:    shaderStorageImageArrayNonUniformIndexing : 1
+info:    shaderUniformTexelBufferArrayNonUniformIndexing : 1
+info:    shaderStorageTexelBufferArrayNonUniformIndexing : 1
+info:    descriptorBindingSampledImageUpdateAfterBind : 1
+info:    descriptorBindingUpdateUnusedWhilePending : 1
+info:    descriptorBindingPartiallyBound : 1
+info:    drawIndirectCount              : 0
+info:    hostQueryReset                 : 1
+info:    runtimeDescriptorArray         : 1
+info:    samplerFilterMinmax            : 0
+info:    samplerMirrorClampToEdge       : 1
+info:    scalarBlockLayout              : 1
+info:    shaderFloat16                  : 1
+info:    shaderInt8                     : 1
+info:    shaderOutputViewportIndex      : 1
+info:    shaderOutputLayer              : 1
+info:    timelineSemaphore              : 1
+info:    uniformBufferStandardLayout    : 1
+info:    vulkanMemoryModel              : 1
+info:    inlineUniformBlock             : 1
+info:    computeFullSubgroups           : 1
+info:    dynamicRendering               : 1
+info:    maintenance4                   : 1
+info:    robustImageAccess              : 0
+info:    pipelineCreationCacheControl   : 1
+info:    shaderDemoteToHelperInvocation : 1
+info:    shaderZeroInitializeWorkgroupMemory : 1
+info:    subgroupSizeControl            : 1
+info:    synchronization2               : 1
+info:  VK_EXT_attachment_feedback_loop_layout:
+info:    attachmentFeedbackLoopLayout   : 0
+info:  VK_EXT_border_color_swizzle:
+info:    borderColorSwizzle             : 0
+info:    borderColorSwizzleFromImage    : 0
+info:  VK_EXT_conservative_rasterization:
+info:    extConservativeRasterization   : 0
+info:  VK_EXT_custom_border_color:
+info:    customBorderColors             : 0
+info:    customBorderColorWithoutFormat : 0
+info:  VK_EXT_depth_clip_enable:
+info:    depthClipEnable                : 0
+info:  VK_EXT_depth_bias_control:
+info:    depthBiasControl               : 0
+info:    leastRepresentableValueForceUnormRepresentation : 0
+info:    floatRepresentation            : 0
+info:    depthBiasExact                 : 0
+info:  VK_EXT_descriptor_buffer:
+info:    descriptorBuffer               : 0
+info:  VK_EXT_descriptor_heap:
+info:    descriptorHeap                 : 0
+info:  VK_EXT_dynamic_rendering_unused_attachments:
+info:    dynamicRenderingUnusedAttachments : 0
+info:  VK_EXT_extended_dynamic_state3:
+info:    extendedDynamicState3AlphaToCoverageEnable : 0
+info:    extendedDynamicState3DepthClipEnable : 1
+info:    extendedDynamicState3RasterizationSamples : 0
+info:    extendedDynamicState3SampleMask : 0
+info:    extendedDynamicState3LineRasterizationMode : 1
+info:    extendedDynamicState3SampleLocationsEnable : 1
+info:  VK_EXT_fragment_shader_interlock:
+info:    fragmentShaderSampleInterlock  : 1
+info:    fragmentShaderPixelInterlock   : 1
+info:  VK_EXT_full_screen_exclusive:
+info:    extFullScreenExclusive         : 0
+info:  VK_EXT_graphics_pipeline_library:
+info:    graphicsPipelineLibrary        : 0
+info:  VK_EXT_hdr_metadata:
+info:    extHdrMetadata                 : 1
+info:  VK_EXT_line_rasterization:
+info:    rectangularLines               : 0
+info:    smoothLines                    : 0
+info:  VK_EXT_memory_budget:
+info:    extMemoryBudget                : 1
+info:  VK_EXT_memory_priority:
+info:    memoryPriority                 : 0
+info:  VK_EXT_multi_draw:
+info:    multiDraw                      : 0
+info:  VK_EXT_non_seamless_cube_map:
+info:    nonSeamlessCubeMap             : 0
+info:  VK_EXT_pageable_device_local_memory:
+info:    pageableDeviceLocalMemory      : 0
+info:  VK_EXT_present_timing:
+info:    presentTiming                  : 0
+info:    presentAtAbsoluteTime          : 0
+info:    presentAtRelativeTime          : 0
+info:  VK_EXT_robustness2:
+info:    robustBufferAccess2            : 0
+info:    robustImageAccess2             : 1
+info:    nullDescriptor                 : 0
+info:  VK_EXT_sample_locations:
+info:    extSampleLocations             : 1
+info:  VK_EXT_shader_module_identifier:
+info:    shaderModuleIdentifier         : 0
+info:  VK_EXT_shader_stencil_export:
+info:    extShaderStencilExport         : 1
+info:  VK_EXT_swapchain_colorspace:
+info:    extSwapchainColorSpace         : 0
+info:  VK_EXT_swapchain_maintenance1:
+info:    swapchainMaintenance1          : 0
+info:  VK_EXT_transform_feedback:
+info:    transformFeedback              : 0
+info:    geometryStreams                : 0
+info:  VK_EXT_vertex_attribute_divisor:
+info:    vertexAttributeInstanceRateDivisor : 1
+info:    vertexAttributeInstanceRateZeroDivisor : 1
+info:  VK_KHR_calibrated_timestamps:
+info:    khrCalibratedTimestamps        : 1
+info:  VK_KHR_device_fault:
+info:    deviceFault                    : 0
+info:    deviceFaultVendorBinary        : 0
+info:  VK_KHR_dynamic_rendering_local_read:
+info:    dynamicRenderingLocalRead      : 1
+info:  VK_KHR_external_memory_win32:
+info:    khrExternalMemoryWin32         : 0
+info:  VK_KHR_external_semaphore_win32:
+info:    khrExternalSemaphoreWin32      : 0
+info:  VK_KHR_incremental_present:
+info:    khrIncrementalPresent          : 1
+info:  VK_KHR_load_store_op_none:
+info:    khrLoadStoreOpNone             : 1
+info:  VK_KHR_maintenance5:
+info:    maintenance5                   : 1
+info:  VK_KHR_maintenance6:
+info:    maintenance6                   : 1
+info:  VK_KHR_maintenance7:
+info:    maintenance7                   : 1
+info:  VK_KHR_maintenance8:
+info:    maintenance8                   : 1
+info:  VK_KHR_maintenance9:
+info:    maintenance9                   : 1
+info:  VK_KHR_maintenance10:
+info:    maintenance10                  : 0
+info:  VK_KHR_maintenance11:
+info:    maintenance11                  : 0
+info:  VK_KHR_pipeline_library:
+info:    khrPipelineLibrary             : 0
+info:  VK_KHR_present_id:
+info:    presentId                      : 1
+info:  VK_KHR_present_id2:
+info:    presentId2                     : 0
+info:  VK_KHR_present_wait:
+info:    presentWait                    : 1
+info:  VK_KHR_present_wait2:
+info:    presentWait2                   : 0
+info:  VK_KHR_shader_float_controls2:
+info:    shaderFloatControls2           : 1
+info:  VK_KHR_shader_subgroup_uniform_control_flow:
+info:    shaderSubgroupUniformControlFlow : 1
+info:  VK_KHR_shader_untyped_pointers:
+info:    shaderUntypedPointers          : 0
+info:  VK_KHR_swapchain:
+info:    khrSwapchain                   : 1
+info:  VK_KHR_swapchain_maintenance1:
+info:    swapchainMaintenance1          : 1
+info:  VK_KHR_swapchain_mutable_format:
+info:    khrSwapchainMutableFormat      : 1
+info:  VK_KHR_unified_image_layouts:
+info:    unifiedImageLayouts            : 0
+info:  VK_KHR_win32_keyed_mutex:
+info:    khrWin32KeyedMutex             : 0
+info:  VK_AMD_buffer_marker:
+info:    amdBufferMarker                : 0
+info:  VK_NV_device_diagnostic_checkpoints:
+info:    nvDeviceDiagnosticCheckpoints  : 0
+info:  VK_NV_low_latency2:
+info:    nvLowLatency2                  : 0
+info:  VK_NV_raw_access_chains:
+info:    shaderRawAccessChains          : 0
+info:  VK_NVX_binary_import:
+info:    nvxBinaryImport                : 0
+info:  VK_NVX_image_view_handle:
+info:    nvxImageViewHandle             : 0
+info:  Memory type mask for buffer resources: 0x3, usage: 0x201ff
+info:  Graphics pipeline libraries not supported
+info:  MetalInterop: provider ready version=0x30000 device=0x7fa3da039000 queue=0x7fa3db873400 path=/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/process-termination-r5-20261006/offset-01s/overlay/x86_64-unix/fgmetalbridge.so
+info:  Binding model: Legacy
+warn:  D3D11DeviceFeatures: External memory features not supported
+info:  D3D11InternalCreateDevice: Maximum supported feature level: D3D_FEATURE_LEVEL_11_0
+info:  D3D11InternalCreateDevice: Using feature level D3D_FEATURE_LEVEL_11_0
+info:  DXGI: VK_FORMAT_D24_UNORM_S8_UINT -> VK_FORMAT_D32_SFLOAT_S8_UINT
+warn:  D3D11DXGIDevice::QueryInterface: Unknown interface query
+warn:  0ec870a6-5d7e-4c22-8cfc-5baae07616ed
+info:  Presenter: Actual swapchain properties:
+info:    Format:          VK_FORMAT_B8G8R8A8_UNORM
+info:    Color space:     VK_COLOR_SPACE_SRGB_NONLINEAR_KHR
+info:    Present mode:    VK_PRESENT_MODE_FIFO_KHR (dynamic: yes)
+info:    Buffer size:     640x360
+info:    Image count:     3
+info:    Timing:          no
+info:  Presenter: Created swapchain generation 2
+info:  InternalWSI: source-present app=17 duration-us=13151 hr=0x0
+info:  MetalInterop: slot-created generation=2 slot=1 history-id=6 output-id=7 history-mtl=0x7fa3bc39d750 output-mtl=0x7fa3bc39dc40 event-mtl=0x7fa3bc39beb0
+info:  MetalInterop: slot-created generation=2 slot=2 history-id=8 output-id=9 history-mtl=0x7fa3bc39e860 output-mtl=0x7fa3bc39ed50 event-mtl=0x7fa3bc39bef0
+info:  MetalInterop: captured InteropJobId=1 AppFrameId=17 generation=2 slot=1 slot-serial=1 history-id=6 output-id=7 READY=1 DONE=2 CONSUMED=3 copy-record-us=1557
+info:  WSI: present origin=APPLICATION_SOURCE wsi=1 app=17 internal=0 acquire=1 image=0 generation=2
+info:  InternalWSI: source-present app=18 duration-us=12266 hr=0x0
+info:  MetalInterop: captured InteropJobId=2 AppFrameId=18 generation=2 slot=2 slot-serial=1 history-id=8 output-id=9 READY=1 DONE=2 CONSUMED=3 copy-record-us=12
+info:  MetalInterop: committed InteropJobId=1 AppFrameId=17 slot=1 slot-serial=1 native-job=1 READY=1 DONE=2 initial-job-state=1 kernel=rgb_invert_alpha_preserve ready-to-commit-us=15882
+info:  WSI: app-frame-latency-signal app=17 via=source-submit-completion
+info:  WSI: app-completion app=17 app-signal=signaled
+info:  WSI: present origin=APPLICATION_SOURCE wsi=2 app=18 internal=0 acquire=2 image=1 generation=2
+info:  InternalWSI: source-present app=19 duration-us=2266 hr=0x0
+info:  MetalInterop: dropped AppFrameId=19 reason=no-free-history-output-slot generation=2
+info:  MetalInterop: committed InteropJobId=2 AppFrameId=18 slot=2 slot-serial=1 native-job=2 READY=1 DONE=2 initial-job-state=1 kernel=rgb_invert_alpha_preserve ready-to-commit-us=2514
+info:  InternalWSI: dropped opportunity=2 reason=queue-full
+info:  WSI: app-frame-latency-signal app=18 via=source-submit-completion
+info:  WSI: app-completion app=18 app-signal=signaled
+info:  MetalInterop: terminal InteropJobId=2 AppFrameId=18 slot=2 slot-serial=1 state=internal-queue-full terminal-value=2 capture-to-terminal-us=3133
+info:  MetalInterop: job-retired InteropJobId=2 AppFrameId=18 slot=2 slot-serial=1 native-job=2 semaphore-value=2 capture-to-retire-us=3313 terminal-to-retire-us=180
+info:  WSI: present origin=APPLICATION_SOURCE wsi=3 app=19 internal=0 acquire=3 image=2 generation=2
+info:  InternalWSI: source-present app=20 duration-us=1735 hr=0x0
+info:  MetalInterop: captured InteropJobId=3 AppFrameId=20 generation=2 slot=2 slot-serial=2 history-id=8 output-id=9 READY=4 DONE=5 CONSUMED=6 copy-record-us=13
+info:  WSI: app-completion app=19 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=19 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=4 app=20 internal=0 acquire=4 image=0 generation=2
+info:  InternalWSI: source-present app=21 duration-us=655 hr=0x0
+info:  MetalInterop: dropped AppFrameId=21 reason=no-free-history-output-slot generation=2
+info:  MetalInterop: committed InteropJobId=3 AppFrameId=20 slot=2 slot-serial=2 native-job=3 READY=4 DONE=5 initial-job-state=1 kernel=rgb_invert_alpha_preserve ready-to-commit-us=832
+info:  InternalWSI: dropped opportunity=3 reason=queue-full
+info:  WSI: app-completion app=20 app-signal=deferred
+info:  WSI: present origin=APPLICATION_SOURCE wsi=5 app=21 internal=0 acquire=5 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=20 via=source-present-retirement
+info:  InternalWSI: source-present app=22 duration-us=705 hr=0x0
+info:  MetalInterop: dropped AppFrameId=22 reason=no-free-history-output-slot generation=2
+info:  WSI: app-completion app=21 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=21 via=source-present-retirement
+info:  MetalInterop: terminal InteropJobId=3 AppFrameId=20 slot=2 slot-serial=2 state=internal-queue-full terminal-value=5 capture-to-terminal-us=1965
+info:  MetalInterop: job-retired InteropJobId=3 AppFrameId=20 slot=2 slot-serial=2 native-job=3 semaphore-value=5 capture-to-retire-us=1994 terminal-to-retire-us=29
+info:  WSI: present origin=APPLICATION_SOURCE wsi=6 app=22 internal=0 acquire=6 image=2 generation=2
+info:  InternalWSI: source-present app=23 duration-us=527 hr=0x0
+info:  MetalInterop: captured InteropJobId=4 AppFrameId=23 generation=2 slot=2 slot-serial=3 history-id=8 output-id=9 READY=7 DONE=8 CONSUMED=9 copy-record-us=9
+info:  WSI: app-completion app=22 app-signal=deferred
+info:  WSI: present origin=APPLICATION_SOURCE wsi=7 app=23 internal=0 acquire=7 image=0 generation=2
+info:  WSI: app-frame-latency-signal app=22 via=source-present-retirement
+info:  InternalWSI: source-present app=24 duration-us=498 hr=0x0
+info:  MetalInterop: committed InteropJobId=4 AppFrameId=23 slot=2 slot-serial=3 native-job=4 READY=7 DONE=8 initial-job-state=1 kernel=rgb_invert_alpha_preserve ready-to-commit-us=544
+info:  MetalInterop: dropped AppFrameId=24 reason=no-free-history-output-slot generation=2
+info:  InternalWSI: dropped opportunity=4 reason=queue-full
+info:  WSI: app-completion app=23 app-signal=deferred
+info:  WSI: present origin=APPLICATION_SOURCE wsi=8 app=24 internal=0 acquire=8 image=1 generation=2
+info:  WSI: app-frame-latency-signal app=23 via=source-present-retirement
+info:  InternalWSI: source-present app=25 duration-us=453 hr=0x0
+info:  MetalInterop: dropped AppFrameId=25 reason=no-free-history-output-slot generation=2
+info:  WSI: app-completion app=24 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=24 via=source-present-retirement
+info:  MetalInterop: terminal InteropJobId=4 AppFrameId=23 slot=2 slot-serial=3 state=internal-queue-full terminal-value=8 capture-to-terminal-us=1413
+info:  MetalInterop: job-retired InteropJobId=4 AppFrameId=23 slot=2 slot-serial=3 native-job=4 semaphore-value=8 capture-to-retire-us=1441 terminal-to-retire-us=28
+info:  WSI: present origin=APPLICATION_SOURCE wsi=9 app=25 internal=0 acquire=9 image=2 generation=2
+info:  InternalWSI: source-present app=26 duration-us=479 hr=0x0
+info:  MetalInterop: captured InteropJobId=5 AppFrameId=26 generation=2 slot=2 slot-serial=4 history-id=8 output-id=9 READY=10 DONE=11 CONSUMED=12 copy-record-us=9
+info:  WSI: app-completion app=25 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=25 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=10 app=26 internal=0 acquire=10 image=0 generation=2
+info:  InternalWSI: source-present app=27 duration-us=444 hr=0x0
+info:  MetalInterop: dropped AppFrameId=27 reason=no-free-history-output-slot generation=2
+info:  MetalInterop: committed InteropJobId=5 AppFrameId=26 slot=2 slot-serial=4 native-job=5 READY=10 DONE=11 initial-job-state=1 kernel=rgb_invert_alpha_preserve ready-to-commit-us=486
+info:  InternalWSI: dropped opportunity=5 reason=queue-full
+info:  WSI: app-completion app=26 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=26 via=source-present-retirement
+info:  MetalInterop: terminal InteropJobId=5 AppFrameId=26 slot=2 slot-serial=4 state=internal-queue-full terminal-value=11 capture-to-terminal-us=1467
+info:  MetalInterop: job-retired InteropJobId=5 AppFrameId=26 slot=2 slot-serial=4 native-job=5 semaphore-value=11 capture-to-retire-us=1486 terminal-to-retire-us=19
+info:  WSI: present origin=APPLICATION_SOURCE wsi=11 app=27 internal=0 acquire=11 image=1 generation=2
+info:  InternalWSI: source-present app=28 duration-us=1095 hr=0x0
+info:  MetalInterop: captured InteropJobId=6 AppFrameId=28 generation=2 slot=2 slot-serial=5 history-id=8 output-id=9 READY=13 DONE=14 CONSUMED=15 copy-record-us=6
+info:  WSI: app-completion app=27 app-signal=deferred
+info:  WSI: present origin=APPLICATION_SOURCE wsi=12 app=28 internal=0 acquire=12 image=2 generation=2
+info:  WSI: app-frame-latency-signal app=27 via=source-present-retirement
+info:  InternalWSI: source-present app=29 duration-us=498 hr=0x0
+info:  MetalInterop: dropped AppFrameId=29 reason=no-free-history-output-slot generation=2
+info:  MetalInterop: committed InteropJobId=6 AppFrameId=28 slot=2 slot-serial=5 native-job=6 READY=13 DONE=14 initial-job-state=1 kernel=rgb_invert_alpha_preserve ready-to-commit-us=544
+info:  InternalWSI: dropped opportunity=6 reason=queue-full
+info:  WSI: app-completion app=28 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=28 via=source-present-retirement
+info:  MetalInterop: terminal InteropJobId=6 AppFrameId=28 slot=2 slot-serial=5 state=internal-queue-full terminal-value=14 capture-to-terminal-us=16605
+info:  MetalInterop: job-retired InteropJobId=6 AppFrameId=28 slot=2 slot-serial=5 native-job=6 semaphore-value=14 capture-to-retire-us=16633 terminal-to-retire-us=28
+info:  WSI: present origin=APPLICATION_SOURCE wsi=13 app=29 internal=0 acquire=13 image=0 generation=2
+info:  InternalWSI: source-present app=30 duration-us=16236 hr=0x0
+info:  MetalInterop: captured InteropJobId=7 AppFrameId=30 generation=2 slot=2 slot-serial=6 history-id=8 output-id=9 READY=16 DONE=17 CONSUMED=18 copy-record-us=7
+info:  WSI: app-completion app=29 app-signal=deferred
+info:  InternalWSI: dropped opportunity=1 reason=source-queue-nonempty generation=2
+info:  WSI: app-frame-latency-signal app=29 via=source-present-retirement
+info:  MetalInterop: terminal InteropJobId=1 AppFrameId=17 slot=1 slot-serial=1 state=source-queue-nonempty terminal-value=2 capture-to-terminal-us=59612
+info:  MetalInterop: job-retired InteropJobId=1 AppFrameId=17 slot=1 slot-serial=1 native-job=1 semaphore-value=2 capture-to-retire-us=59639 terminal-to-retire-us=27
+info:  WSI: present origin=APPLICATION_SOURCE wsi=14 app=30 internal=0 acquire=14 image=1 generation=2
+info:  InternalWSI: source-present app=31 duration-us=16514 hr=0x0
+info:  MetalInterop: committed InteropJobId=7 AppFrameId=30 slot=2 slot-serial=6 native-job=7 READY=16 DONE=17 initial-job-state=1 kernel=rgb_invert_alpha_preserve ready-to-commit-us=16528
+info:  MetalInterop: captured InteropJobId=8 AppFrameId=31 generation=2 slot=1 slot-serial=2 history-id=6 output-id=7 READY=4 DONE=5 CONSUMED=6 copy-record-us=7
+info:  WSI: app-completion app=30 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=30 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=15 app=31 internal=0 acquire=15 image=2 generation=2
+info:  InternalWSI: source-present app=32 duration-us=16517 hr=0x0
+info:  MetalInterop: committed InteropJobId=8 AppFrameId=31 slot=1 slot-serial=2 native-job=8 READY=4 DONE=5 initial-job-state=1 kernel=rgb_invert_alpha_preserve ready-to-commit-us=16579
+info:  InternalWSI: dropped opportunity=8 reason=queue-full
+info:  MetalInterop: dropped AppFrameId=32 reason=no-free-history-output-slot generation=2
+info:  WSI: app-completion app=31 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=31 via=source-present-retirement
+info:  MetalInterop: terminal InteropJobId=8 AppFrameId=31 slot=1 slot-serial=2 state=internal-queue-full terminal-value=5 capture-to-terminal-us=33019
+info:  MetalInterop: job-retired InteropJobId=8 AppFrameId=31 slot=1 slot-serial=2 native-job=8 semaphore-value=5 capture-to-retire-us=33048 terminal-to-retire-us=29
+info:  WSI: present origin=APPLICATION_SOURCE wsi=16 app=32 internal=0 acquire=16 image=0 generation=2
+info:  InternalWSI: source-present app=33 duration-us=16577 hr=0x0
+info:  MetalInterop: captured InteropJobId=9 AppFrameId=33 generation=2 slot=1 slot-serial=3 history-id=6 output-id=7 READY=7 DONE=8 CONSUMED=9 copy-record-us=8
+info:  InternalWSI: dropped request internal=7 reason=deadline-expired
+info:  WSI: app-completion app=32 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=32 via=source-present-retirement
+info:  MetalInterop: terminal InteropJobId=7 AppFrameId=30 slot=2 slot-serial=6 state=deadline-expired-before-claim terminal-value=17 capture-to-terminal-us=66188
+info:  MetalInterop: job-retired InteropJobId=7 AppFrameId=30 slot=2 slot-serial=6 native-job=7 semaphore-value=17 capture-to-retire-us=66216 terminal-to-retire-us=28
+info:  WSI: present origin=APPLICATION_SOURCE wsi=17 app=33 internal=0 acquire=17 image=1 generation=2
+info:  InternalWSI: source-present app=34 duration-us=16581 hr=0x0
+info:  MetalInterop: committed InteropJobId=9 AppFrameId=33 slot=1 slot-serial=3 native-job=9 READY=7 DONE=8 initial-job-state=1 kernel=rgb_invert_alpha_preserve ready-to-commit-us=16644
+info:  MetalInterop: captured InteropJobId=10 AppFrameId=34 generation=2 slot=2 slot-serial=7 history-id=8 output-id=9 READY=19 DONE=20 CONSUMED=21 copy-record-us=10
+info:  WSI: app-completion app=33 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=33 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=18 app=34 internal=0 acquire=18 image=2 generation=2
+info:  InternalWSI: source-present app=35 duration-us=16613 hr=0x0
+info:  MetalInterop: dropped AppFrameId=35 reason=no-free-history-output-slot generation=2
+info:  MetalInterop: committed InteropJobId=10 AppFrameId=34 slot=2 slot-serial=7 native-job=10 READY=19 DONE=20 initial-job-state=1 kernel=rgb_invert_alpha_preserve ready-to-commit-us=16690
+info:  InternalWSI: dropped opportunity=10 reason=queue-full
+info:  WSI: app-completion app=34 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=34 via=source-present-retirement
+info:  MetalInterop: terminal InteropJobId=10 AppFrameId=34 slot=2 slot-serial=7 state=internal-queue-full terminal-value=20 capture-to-terminal-us=33144
+info:  MetalInterop: job-retired InteropJobId=10 AppFrameId=34 slot=2 slot-serial=7 native-job=10 semaphore-value=20 capture-to-retire-us=33179 terminal-to-retire-us=35
+info:  WSI: present origin=APPLICATION_SOURCE wsi=19 app=35 internal=0 acquire=19 image=0 generation=2
+info:  InternalWSI: source-present app=36 duration-us=16696 hr=0x0
+info:  InternalWSI: dropped request internal=9 reason=deadline-expired
+info:  MetalInterop: captured InteropJobId=11 AppFrameId=36 generation=2 slot=2 slot-serial=8 history-id=8 output-id=9 READY=22 DONE=23 CONSUMED=24 copy-record-us=9
+info:  WSI: app-completion app=35 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=35 via=source-present-retirement
+info:  MetalInterop: terminal InteropJobId=9 AppFrameId=33 slot=1 slot-serial=3 state=deadline-expired-before-claim terminal-value=8 capture-to-terminal-us=66420
+info:  MetalInterop: job-retired InteropJobId=9 AppFrameId=33 slot=1 slot-serial=3 native-job=9 semaphore-value=8 capture-to-retire-us=66452 terminal-to-retire-us=32
+info:  WSI: present origin=APPLICATION_SOURCE wsi=20 app=36 internal=0 acquire=20 image=1 generation=2
+info:  InternalWSI: source-present app=37 duration-us=16536 hr=0x0
+info:  MetalInterop: committed InteropJobId=11 AppFrameId=36 slot=2 slot-serial=8 native-job=11 READY=22 DONE=23 initial-job-state=1 kernel=rgb_invert_alpha_preserve ready-to-commit-us=16587
+info:  MetalInterop: captured InteropJobId=12 AppFrameId=37 generation=2 slot=1 slot-serial=4 history-id=6 output-id=7 READY=10 DONE=11 CONSUMED=12 copy-record-us=11
+info:  WSI: app-completion app=36 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=36 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=21 app=37 internal=0 acquire=21 image=2 generation=2
+info:  InternalWSI: source-present app=38 duration-us=16713 hr=0x0
+info:  MetalInterop: dropped AppFrameId=38 reason=no-free-history-output-slot generation=2
+info:  MetalInterop: committed InteropJobId=12 AppFrameId=37 slot=1 slot-serial=4 native-job=12 READY=10 DONE=11 initial-job-state=1 kernel=rgb_invert_alpha_preserve ready-to-commit-us=16823
+info:  InternalWSI: dropped opportunity=12 reason=queue-full
+info:  WSI: app-completion app=37 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=37 via=source-present-retirement
+info:  MetalInterop: terminal InteropJobId=12 AppFrameId=37 slot=1 slot-serial=4 state=internal-queue-full terminal-value=11 capture-to-terminal-us=33337
+info:  MetalInterop: job-retired InteropJobId=12 AppFrameId=37 slot=1 slot-serial=4 native-job=12 semaphore-value=11 capture-to-retire-us=33391 terminal-to-retire-us=54
+info:  WSI: present origin=APPLICATION_SOURCE wsi=22 app=38 internal=0 acquire=22 image=0 generation=2
+info:  InternalWSI: source-present app=39 duration-us=16826 hr=0x0
+info:  InternalWSI: dropped request internal=11 reason=deadline-expired
+info:  MetalInterop: captured InteropJobId=13 AppFrameId=39 generation=2 slot=1 slot-serial=5 history-id=6 output-id=7 READY=13 DONE=14 CONSUMED=15 copy-record-us=15
+info:  WSI: app-completion app=38 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=38 via=source-present-retirement
+info:  MetalInterop: terminal InteropJobId=11 AppFrameId=36 slot=2 slot-serial=8 state=deadline-expired-before-claim terminal-value=23 capture-to-terminal-us=66598
+info:  MetalInterop: job-retired InteropJobId=11 AppFrameId=36 slot=2 slot-serial=8 native-job=11 semaphore-value=23 capture-to-retire-us=66654 terminal-to-retire-us=56
+info:  WSI: present origin=APPLICATION_SOURCE wsi=23 app=39 internal=0 acquire=23 image=1 generation=2
+info:  InternalWSI: source-present app=40 duration-us=16542 hr=0x0
+info:  MetalInterop: committed InteropJobId=13 AppFrameId=39 slot=1 slot-serial=5 native-job=13 READY=13 DONE=14 initial-job-state=1 kernel=rgb_invert_alpha_preserve ready-to-commit-us=16679
+info:  MetalInterop: captured InteropJobId=14 AppFrameId=40 generation=2 slot=2 slot-serial=9 history-id=8 output-id=9 READY=25 DONE=26 CONSUMED=27 copy-record-us=17
+info:  WSI: app-completion app=39 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=39 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=24 app=40 internal=0 acquire=24 image=2 generation=2
+info:  InternalWSI: source-present app=41 duration-us=17610 hr=0x0
+info:  MetalInterop: dropped AppFrameId=41 reason=no-free-history-output-slot generation=2
+info:  MetalInterop: committed InteropJobId=14 AppFrameId=40 slot=2 slot-serial=9 native-job=14 READY=25 DONE=26 initial-job-state=1 kernel=rgb_invert_alpha_preserve ready-to-commit-us=18647
+info:  InternalWSI: dropped opportunity=14 reason=queue-full
+info:  MetalInterop: terminal InteropJobId=14 AppFrameId=40 slot=2 slot-serial=9 state=internal-queue-full terminal-value=26 capture-to-terminal-us=18873
+info:  WSI: app-frame-latency-signal app=40 via=source-submit-completion
+info:  WSI: app-completion app=40 app-signal=signaled
+info:  MetalInterop: job-retired InteropJobId=14 AppFrameId=40 slot=2 slot-serial=9 native-job=14 semaphore-value=26 capture-to-retire-us=18988 terminal-to-retire-us=115
+info:  WSI: present origin=APPLICATION_SOURCE wsi=25 app=41 internal=0 acquire=25 image=0 generation=2
+info:  InternalWSI: dropped request internal=13 reason=deadline-expired
+info:  InternalWSI: source-present app=42 duration-us=16066 hr=0x0
+info:  WSI: app-frame-latency-signal app=41 via=source-submit-completion
+info:  WSI: app-completion app=41 app-signal=signaled
+info:  MetalInterop: captured InteropJobId=15 AppFrameId=42 generation=2 slot=2 slot-serial=10 history-id=8 output-id=9 READY=28 DONE=29 CONSUMED=30 copy-record-us=111
+info:  MetalInterop: terminal InteropJobId=13 AppFrameId=39 slot=1 slot-serial=5 state=deadline-expired-before-claim terminal-value=14 capture-to-terminal-us=66368
+info:  MetalInterop: job-retired InteropJobId=13 AppFrameId=39 slot=1 slot-serial=5 native-job=13 semaphore-value=14 capture-to-retire-us=66434 terminal-to-retire-us=66
+info:  WSI: present origin=APPLICATION_SOURCE wsi=26 app=42 internal=0 acquire=26 image=1 generation=2
+info:  InternalWSI: source-present app=43 duration-us=14412 hr=0x0
+info:  MetalInterop: committed InteropJobId=15 AppFrameId=42 slot=2 slot-serial=10 native-job=15 READY=28 DONE=29 initial-job-state=1 kernel=rgb_invert_alpha_preserve ready-to-commit-us=14929
+info:  MetalInterop: captured InteropJobId=16 AppFrameId=43 generation=2 slot=1 slot-serial=6 history-id=6 output-id=7 READY=16 DONE=17 CONSUMED=18 copy-record-us=53
+info:  WSI: app-completion app=42 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=42 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=27 app=43 internal=0 acquire=27 image=2 generation=2
+info:  InternalWSI: source-present app=44 duration-us=16534 hr=0x0
+info:  MetalInterop: committed InteropJobId=16 AppFrameId=43 slot=1 slot-serial=6 native-job=16 READY=16 DONE=17 initial-job-state=1 kernel=rgb_invert_alpha_preserve ready-to-commit-us=16594
+info:  MetalInterop: dropped AppFrameId=44 reason=no-free-history-output-slot generation=2
+info:  InternalWSI: dropped opportunity=16 reason=queue-full
+info:  WSI: app-frame-latency-signal app=43 via=source-submit-completion
+info:  WSI: app-completion app=43 app-signal=signaled
+info:  MetalInterop: terminal InteropJobId=16 AppFrameId=43 slot=1 slot-serial=6 state=internal-queue-full terminal-value=17 capture-to-terminal-us=32987
+info:  MetalInterop: job-retired InteropJobId=16 AppFrameId=43 slot=1 slot-serial=6 native-job=16 semaphore-value=17 capture-to-retire-us=33082 terminal-to-retire-us=95
+info:  WSI: present origin=APPLICATION_SOURCE wsi=28 app=44 internal=0 acquire=28 image=0 generation=2
+info:  InternalWSI: dropped request internal=15 reason=deadline-expired
+info:  InternalWSI: source-present app=45 duration-us=16677 hr=0x0
+info:  MetalInterop: captured InteropJobId=17 AppFrameId=45 generation=2 slot=1 slot-serial=7 history-id=6 output-id=7 READY=19 DONE=20 CONSUMED=21 copy-record-us=30
+info:  WSI: app-completion app=44 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=44 via=source-present-retirement
+info:  MetalInterop: terminal InteropJobId=15 AppFrameId=42 slot=2 slot-serial=10 state=deadline-expired-before-claim terminal-value=29 capture-to-terminal-us=64501
+info:  MetalInterop: job-retired InteropJobId=15 AppFrameId=42 slot=2 slot-serial=10 native-job=15 semaphore-value=29 capture-to-retire-us=64562 terminal-to-retire-us=61
+info:  WSI: present origin=APPLICATION_SOURCE wsi=29 app=45 internal=0 acquire=29 image=1 generation=2
+info:  InternalWSI: source-present app=46 duration-us=16304 hr=0x0
+info:  MetalInterop: committed InteropJobId=17 AppFrameId=45 slot=1 slot-serial=7 native-job=17 READY=19 DONE=20 initial-job-state=1 kernel=rgb_invert_alpha_preserve ready-to-commit-us=16475
+info:  MetalInterop: captured InteropJobId=18 AppFrameId=46 generation=2 slot=2 slot-serial=11 history-id=8 output-id=9 READY=31 DONE=32 CONSUMED=33 copy-record-us=65
+info:  WSI: app-completion app=45 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=45 via=source-present-retirement
+info:  WSI: present origin=APPLICATION_SOURCE wsi=30 app=46 internal=0 acquire=30 image=2 generation=2
+info:  InternalWSI: source-present app=47 duration-us=18880 hr=0x0
+info:  MetalInterop: committed InteropJobId=18 AppFrameId=46 slot=2 slot-serial=11 native-job=18 READY=31 DONE=32 initial-job-state=1 kernel=rgb_invert_alpha_preserve ready-to-commit-us=19053
+info:  MetalInterop: dropped AppFrameId=47 reason=no-free-history-output-slot generation=2
+info:  InternalWSI: dropped opportunity=18 reason=queue-full
+info:  WSI: app-frame-latency-signal app=46 via=source-submit-completion
+info:  WSI: app-completion app=46 app-signal=signaled
+info:  MetalInterop: terminal InteropJobId=18 AppFrameId=46 slot=2 slot-serial=11 state=internal-queue-full terminal-value=32 capture-to-terminal-us=33326
+info:  MetalInterop: job-retired InteropJobId=18 AppFrameId=46 slot=2 slot-serial=11 native-job=18 semaphore-value=32 capture-to-retire-us=33688 terminal-to-retire-us=362
+info:  WSI: present origin=APPLICATION_SOURCE wsi=31 app=47 internal=0 acquire=31 image=0 generation=2
+info:  InternalWSI: dropped request internal=17 reason=deadline-expired
+info:  WSI: app-frame-latency-signal app=47 via=source-submit-completion
+info:  WSI: app-completion app=47 app-signal=signaled
+info:  MetalInterop: captured InteropJobId=19 AppFrameId=48 generation=2 slot=2 slot-serial=12 history-id=8 output-id=9 READY=34 DONE=35 CONSUMED=36 copy-record-us=40
+info:  InternalWSI: source-present app=48 duration-us=10454 hr=0x0
+info:  MetalInterop: terminal InteropJobId=17 AppFrameId=45 slot=1 slot-serial=7 state=deadline-expired-before-claim terminal-value=20 capture-to-terminal-us=66288
+info:  MetalInterop: job-retired InteropJobId=17 AppFrameId=45 slot=1 slot-serial=7 native-job=17 semaphore-value=20 capture-to-retire-us=66623 terminal-to-retire-us=335
+info:  WSI: present origin=APPLICATION_SOURCE wsi=32 app=48 internal=0 acquire=32 image=1 generation=2
+info:  MetalInterop: committed InteropJobId=19 AppFrameId=48 slot=2 slot-serial=12 native-job=19 READY=34 DONE=35 initial-job-state=1 kernel=rgb_invert_alpha_preserve ready-to-commit-us=16033
+info:  WSI: app-frame-latency-signal app=48 via=source-submit-completion
+info:  WSI: app-completion app=48 app-signal=signaled
+info:  InternalWSI: source-present app=49 duration-us=237 hr=0x0
+info:  MetalInterop: captured InteropJobId=20 AppFrameId=49 generation=2 slot=1 slot-serial=8 history-id=6 output-id=7 READY=22 DONE=23 CONSUMED=24 copy-record-us=47
+info:  WSI: present origin=APPLICATION_SOURCE wsi=33 app=49 internal=0 acquire=33 image=2 generation=2
+info:  MetalInterop: committed InteropJobId=20 AppFrameId=49 slot=1 slot-serial=8 native-job=20 READY=22 DONE=23 initial-job-state=1 kernel=rgb_invert_alpha_preserve ready-to-commit-us=7522
+info:  InternalWSI: dropped opportunity=20 reason=queue-full
+info:  WSI: app-completion app=49 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=49 via=source-present-retirement
+info:  MetalInterop: Vulkan-consumer InteropJobId=19 AppFrameId=48 InternalPresentId=1 generation=2 DONE=35 CONSUMED=36
+info:  MetalInterop: Metal output ready InteropJobId=19 AppFrameId=48 slot=2 slot-serial=12 generation=2 DONE=35 event-value=35
+info:  MetalInterop: consumer-claimed InteropJobId=19 AppFrameId=48 slot=2 slot-serial=12 generation=2 DONE=35 metal-state=Completed-event-signaled
+info:  MetalInterop: terminal InteropJobId=19 AppFrameId=48 slot=2 slot-serial=12 state=VULKAN_CONSUMED terminal-value=36 capture-to-terminal-us=52449
+info:  WSI: present origin=INTERNAL_OUTPUT wsi=34 app=0 internal=1 acquire=34 image=0 generation=2
+info:  MetalInterop: WSI-submit InteropJobId=19 AppFrameId=48 InternalPresentOpportunityId=19 InternalPresentId=1 WsiPresentId=34 VkPresentResult=VK_SUCCESS
+info:  InternalWSI: queued origin=INTERNAL_OUTPUT wsi=34 internal=1 app=none pattern=metal-invert InteropJobId=19 vkPresent=VK_SUCCESS
+info:  InternalWSI: retirement outcome=presented wsi=34 internal=1 status=VK_SUCCESS app-signals=unchanged actual-display-timing=separate
+info:  InternalWSI: source-present app=50 duration-us=118 hr=0x0
+info:  MetalInterop: terminal InteropJobId=20 AppFrameId=49 slot=1 slot-serial=8 state=internal-queue-full terminal-value=23 capture-to-terminal-us=32810
+info:  MetalInterop: dropped AppFrameId=50 reason=no-free-history-output-slot generation=2
+info:  MetalInterop: job-retired InteropJobId=20 AppFrameId=49 slot=1 slot-serial=8 native-job=20 semaphore-value=23 capture-to-retire-us=33040 terminal-to-retire-us=230
+info:  MetalInterop: job-retired InteropJobId=19 AppFrameId=48 slot=2 slot-serial=12 native-job=19 semaphore-value=36 capture-to-retire-us=56337 terminal-to-retire-us=3888
+info:  WSI: present origin=APPLICATION_SOURCE wsi=35 app=50 internal=0 acquire=35 image=1 generation=2
+info:  WSI: app-completion app=50 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=50 via=source-present-retirement
+info:  InternalWSI: source-present app=51 duration-us=71 hr=0x0
+info:  MetalInterop: captured InteropJobId=21 AppFrameId=51 generation=2 slot=1 slot-serial=9 history-id=6 output-id=7 READY=25 DONE=26 CONSUMED=27 copy-record-us=31
+info:  WSI: present origin=APPLICATION_SOURCE wsi=36 app=51 internal=0 acquire=36 image=2 generation=2
+info:  MetalInterop: committed InteropJobId=21 AppFrameId=51 slot=1 slot-serial=9 native-job=21 READY=25 DONE=26 initial-job-state=1 kernel=rgb_invert_alpha_preserve ready-to-commit-us=968
+info:  WSI: app-completion app=51 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=51 via=source-present-retirement
+info:  InternalWSI: source-present app=52 duration-us=196 hr=0x0
+info:  MetalInterop: captured InteropJobId=22 AppFrameId=52 generation=2 slot=2 slot-serial=13 history-id=8 output-id=9 READY=37 DONE=38 CONSUMED=39 copy-record-us=38
+info:  WSI: present origin=APPLICATION_SOURCE wsi=37 app=52 internal=0 acquire=37 image=0 generation=2
+info:  MetalInterop: committed InteropJobId=22 AppFrameId=52 slot=2 slot-serial=13 native-job=22 READY=37 DONE=38 initial-job-state=1 kernel=rgb_invert_alpha_preserve ready-to-commit-us=3264
+info:  InternalWSI: dropped opportunity=22 reason=queue-full
+info:  WSI: app-frame-latency-signal app=52 via=source-submit-completion
+info:  WSI: app-completion app=52 app-signal=signaled
+info:  MetalInterop: Vulkan-consumer InteropJobId=21 AppFrameId=51 InternalPresentId=2 generation=2 DONE=26 CONSUMED=27
+info:  MetalInterop: Metal output ready InteropJobId=21 AppFrameId=51 slot=1 slot-serial=9 generation=2 DONE=26 event-value=26
+info:  MetalInterop: consumer-claimed InteropJobId=21 AppFrameId=51 slot=1 slot-serial=9 generation=2 DONE=26 metal-state=Completed-event-signaled
+info:  MetalInterop: terminal InteropJobId=21 AppFrameId=51 slot=1 slot-serial=9 state=VULKAN_CONSUMED terminal-value=27 capture-to-terminal-us=38966
+info:  WSI: present origin=INTERNAL_OUTPUT wsi=38 app=0 internal=2 acquire=38 image=1 generation=2
+info:  MetalInterop: WSI-submit InteropJobId=21 AppFrameId=51 InternalPresentOpportunityId=21 InternalPresentId=2 WsiPresentId=38 VkPresentResult=VK_SUCCESS
+info:  InternalWSI: retirement outcome=presented wsi=38 internal=2 status=VK_SUCCESS app-signals=unchanged actual-display-timing=separate
+info:  InternalWSI: queued origin=INTERNAL_OUTPUT wsi=38 internal=2 app=none pattern=metal-invert InteropJobId=21 vkPresent=VK_SUCCESS
+info:  InternalWSI: source-present app=53 duration-us=238 hr=0x0
+info:  MetalInterop: dropped AppFrameId=53 reason=no-free-history-output-slot generation=2
+info:  MetalInterop: terminal InteropJobId=22 AppFrameId=52 slot=2 slot-serial=13 state=internal-queue-full terminal-value=38 capture-to-terminal-us=32029
+info:  MetalInterop: job-retired InteropJobId=22 AppFrameId=52 slot=2 slot-serial=13 native-job=22 semaphore-value=38 capture-to-retire-us=32295 terminal-to-retire-us=266
+info:  MetalInterop: job-retired InteropJobId=21 AppFrameId=51 slot=1 slot-serial=9 native-job=21 semaphore-value=27 capture-to-retire-us=66063 terminal-to-retire-us=27097
+info:  WSI: present origin=APPLICATION_SOURCE wsi=39 app=53 internal=0 acquire=39 image=2 generation=2
+info:  WSI: app-completion app=53 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=53 via=source-present-retirement
+info:  InternalWSI: source-present app=54 duration-us=63 hr=0x0
+info:  MetalInterop: captured InteropJobId=23 AppFrameId=54 generation=2 slot=1 slot-serial=10 history-id=6 output-id=7 READY=28 DONE=29 CONSUMED=30 copy-record-us=80
+info:  WSI: present origin=APPLICATION_SOURCE wsi=40 app=54 internal=0 acquire=40 image=0 generation=2
+info:  MetalInterop: committed InteropJobId=23 AppFrameId=54 slot=1 slot-serial=10 native-job=23 READY=28 DONE=29 initial-job-state=1 kernel=rgb_invert_alpha_preserve ready-to-commit-us=897
+info:  WSI: app-completion app=54 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=54 via=source-present-retirement
+info:  MetalInterop: Vulkan-consumer InteropJobId=23 AppFrameId=54 InternalPresentId=3 generation=2 DONE=29 CONSUMED=30
+warn:  InternalWSI: lease validation failed before submit internal=3 acquire=41 image=1 generation=2 expected=2 current=2 dirty-surface=0 dirty-swapchain=0 source-acquire-intent=1 source-frame-pending=0
+info:  InternalWSI: released pre-submit image lease acquire=41 image=1 generation=2 cached-acquire=preserved
+info:  InternalWSI: retirement outcome=failed wsi=0 internal=3 status=VK_ERROR_VALIDATION_FAILED_EXT app-signals=unchanged actual-display-timing=separate
+info:  InternalWSI: dropped opportunity=23 reason=lease-validation-before-submit generation=2
+info:  InternalWSI: source-present app=55 duration-us=3146 hr=0x0
+info:  MetalInterop: captured InteropJobId=24 AppFrameId=55 generation=2 slot=2 slot-serial=14 history-id=8 output-id=9 READY=40 DONE=41 CONSUMED=42 copy-record-us=39
+info:  MetalInterop: terminal InteropJobId=23 AppFrameId=54 slot=1 slot-serial=10 state=lease-validation-before-submit terminal-value=29 capture-to-terminal-us=38060
+info:  MetalInterop: job-retired InteropJobId=23 AppFrameId=54 slot=1 slot-serial=10 native-job=23 semaphore-value=29 capture-to-retire-us=38276 terminal-to-retire-us=216
+info:  WSI: present origin=APPLICATION_SOURCE wsi=41 app=55 internal=0 acquire=42 image=1 generation=2
+info:  MetalInterop: committed InteropJobId=24 AppFrameId=55 slot=2 slot-serial=14 native-job=24 READY=40 DONE=41 initial-job-state=1 kernel=rgb_invert_alpha_preserve ready-to-commit-us=2673
+info:  WSI: app-completion app=55 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=55 via=source-present-retirement
+info:  InternalWSI: source-present app=56 duration-us=72 hr=0x0
+info:  InternalWSI: dropped opportunity=24 reason=source-pending generation=2
+info:  MetalInterop: captured InteropJobId=25 AppFrameId=56 generation=2 slot=1 slot-serial=11 history-id=6 output-id=7 READY=31 DONE=32 CONSUMED=33 copy-record-us=74
+info:  MetalInterop: terminal InteropJobId=24 AppFrameId=55 slot=2 slot-serial=14 state=source-pending terminal-value=41 capture-to-terminal-us=22662
+info:  MetalInterop: job-retired InteropJobId=24 AppFrameId=55 slot=2 slot-serial=14 native-job=24 semaphore-value=41 capture-to-retire-us=22724 terminal-to-retire-us=62
+info:  WSI: present origin=APPLICATION_SOURCE wsi=42 app=56 internal=0 acquire=43 image=2 generation=2
+info:  MetalInterop: committed InteropJobId=25 AppFrameId=56 slot=1 slot-serial=11 native-job=25 READY=31 DONE=32 initial-job-state=1 kernel=rgb_invert_alpha_preserve ready-to-commit-us=1067
+info:  WSI: app-completion app=56 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=56 via=source-present-retirement
+info:  MetalInterop: Vulkan-consumer InteropJobId=25 AppFrameId=56 InternalPresentId=4 generation=2 DONE=32 CONSUMED=33
+info:  MetalInterop: Metal output ready InteropJobId=25 AppFrameId=56 slot=1 slot-serial=11 generation=2 DONE=32 event-value=32
+info:  MetalInterop: consumer-claimed InteropJobId=25 AppFrameId=56 slot=1 slot-serial=11 generation=2 DONE=32 metal-state=Completed-event-signaled
+info:  MetalInterop: terminal InteropJobId=25 AppFrameId=56 slot=1 slot-serial=11 state=VULKAN_CONSUMED terminal-value=33 capture-to-terminal-us=17431
+info:  WSI: present origin=INTERNAL_OUTPUT wsi=43 app=0 internal=4 acquire=44 image=0 generation=2
+info:  MetalInterop: WSI-submit InteropJobId=25 AppFrameId=56 InternalPresentOpportunityId=25 InternalPresentId=4 WsiPresentId=43 VkPresentResult=VK_SUCCESS
+info:  InternalWSI: retirement outcome=presented wsi=43 internal=4 status=VK_SUCCESS app-signals=unchanged actual-display-timing=separate
+info:  InternalWSI: queued origin=INTERNAL_OUTPUT wsi=43 internal=4 app=none pattern=metal-invert InteropJobId=25 vkPresent=VK_SUCCESS
+info:  InternalWSI: source-present app=57 duration-us=459 hr=0x0
+info:  MetalInterop: job-retired InteropJobId=25 AppFrameId=56 slot=1 slot-serial=11 native-job=25 semaphore-value=33 capture-to-retire-us=36528 terminal-to-retire-us=19097
+info:  MetalInterop: captured InteropJobId=26 AppFrameId=57 generation=2 slot=2 slot-serial=15 history-id=8 output-id=9 READY=43 DONE=44 CONSUMED=45 copy-record-us=43
+info:  WSI: present origin=APPLICATION_SOURCE wsi=44 app=57 internal=0 acquire=45 image=1 generation=2
+info:  MetalInterop: committed InteropJobId=26 AppFrameId=57 slot=2 slot-serial=15 native-job=26 READY=43 DONE=44 initial-job-state=1 kernel=rgb_invert_alpha_preserve ready-to-commit-us=1078
+info:  WSI: app-completion app=57 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=57 via=source-present-retirement
+info:  MetalInterop: Vulkan-consumer InteropJobId=26 AppFrameId=57 InternalPresentId=5 generation=2 DONE=44 CONSUMED=45
+info:  MetalInterop: Metal output ready InteropJobId=26 AppFrameId=57 slot=2 slot-serial=15 generation=2 DONE=44 event-value=44
+info:  MetalInterop: consumer-claimed InteropJobId=26 AppFrameId=57 slot=2 slot-serial=15 generation=2 DONE=44 metal-state=Completed-event-signaled
+info:  MetalInterop: terminal InteropJobId=26 AppFrameId=57 slot=2 slot-serial=15 state=VULKAN_CONSUMED terminal-value=45 capture-to-terminal-us=24637
+info:  WSI: present origin=INTERNAL_OUTPUT wsi=45 app=0 internal=5 acquire=46 image=2 generation=2
+info:  MetalInterop: WSI-submit InteropJobId=26 AppFrameId=57 InternalPresentOpportunityId=26 InternalPresentId=5 WsiPresentId=45 VkPresentResult=VK_SUCCESS
+info:  InternalWSI: retirement outcome=presented wsi=45 internal=5 status=VK_SUCCESS app-signals=unchanged actual-display-timing=separate
+info:  InternalWSI: queued origin=INTERNAL_OUTPUT wsi=45 internal=5 app=none pattern=metal-invert InteropJobId=26 vkPresent=VK_SUCCESS
+info:  InternalWSI: source-present app=58 duration-us=348 hr=0x0
+info:  MetalInterop: captured InteropJobId=27 AppFrameId=58 generation=2 slot=1 slot-serial=12 history-id=6 output-id=7 READY=34 DONE=35 CONSUMED=36 copy-record-us=40
+info:  MetalInterop: job-retired InteropJobId=26 AppFrameId=57 slot=2 slot-serial=15 native-job=26 semaphore-value=45 capture-to-retire-us=39308 terminal-to-retire-us=14671
+info:  WSI: present origin=APPLICATION_SOURCE wsi=46 app=58 internal=0 acquire=47 image=0 generation=2
+info:  MetalInterop: committed InteropJobId=27 AppFrameId=58 slot=1 slot-serial=12 native-job=27 READY=34 DONE=35 initial-job-state=1 kernel=rgb_invert_alpha_preserve ready-to-commit-us=3831
+info:  WSI: app-frame-latency-signal app=58 via=source-submit-completion
+info:  WSI: app-completion app=58 app-signal=signaled
+info:  InternalWSI: source-present app=59 duration-us=183 hr=0x0
+info:  MetalInterop: captured InteropJobId=28 AppFrameId=59 generation=2 slot=2 slot-serial=16 history-id=8 output-id=9 READY=46 DONE=47 CONSUMED=48 copy-record-us=45
+info:  InternalWSI: dropped opportunity=27 reason=source-pending generation=2
+info:  MetalInterop: terminal InteropJobId=27 AppFrameId=58 slot=1 slot-serial=12 state=source-pending terminal-value=35 capture-to-terminal-us=27338
+info:  MetalInterop: job-retired InteropJobId=27 AppFrameId=58 slot=1 slot-serial=12 native-job=27 semaphore-value=35 capture-to-retire-us=27673 terminal-to-retire-us=335
+info:  WSI: present origin=APPLICATION_SOURCE wsi=47 app=59 internal=0 acquire=48 image=1 generation=2
+info:  MetalInterop: committed InteropJobId=28 AppFrameId=59 slot=2 slot-serial=16 native-job=28 READY=46 DONE=47 initial-job-state=1 kernel=rgb_invert_alpha_preserve ready-to-commit-us=3410
+info:  WSI: app-frame-latency-signal app=59 via=source-submit-completion
+info:  WSI: app-completion app=59 app-signal=signaled
+info:  MetalInterop: Vulkan-consumer InteropJobId=28 AppFrameId=59 InternalPresentId=6 generation=2 DONE=47 CONSUMED=48
+info:  MetalInterop: Metal output ready InteropJobId=28 AppFrameId=59 slot=2 slot-serial=16 generation=2 DONE=47 event-value=47
+info:  MetalInterop: consumer-claimed InteropJobId=28 AppFrameId=59 slot=2 slot-serial=16 generation=2 DONE=47 metal-state=Completed-event-signaled
+info:  MetalInterop: terminal InteropJobId=28 AppFrameId=59 slot=2 slot-serial=16 state=VULKAN_CONSUMED terminal-value=48 capture-to-terminal-us=20479
+info:  WSI: present origin=INTERNAL_OUTPUT wsi=48 app=0 internal=6 acquire=49 image=2 generation=2
+info:  MetalInterop: WSI-submit InteropJobId=28 AppFrameId=59 InternalPresentOpportunityId=28 InternalPresentId=6 WsiPresentId=48 VkPresentResult=VK_SUCCESS
+info:  InternalWSI: retirement outcome=presented wsi=48 internal=6 status=VK_SUCCESS app-signals=unchanged actual-display-timing=separate
+info:  InternalWSI: queued origin=INTERNAL_OUTPUT wsi=48 internal=6 app=none pattern=metal-invert InteropJobId=28 vkPresent=VK_SUCCESS
+info:  InternalWSI: source-present app=60 duration-us=1446 hr=0x0
+info:  MetalInterop: job-retired InteropJobId=28 AppFrameId=59 slot=2 slot-serial=16 native-job=28 semaphore-value=48 capture-to-retire-us=39001 terminal-to-retire-us=18522
+info:  MetalInterop: captured InteropJobId=29 AppFrameId=60 generation=2 slot=1 slot-serial=13 history-id=6 output-id=7 READY=37 DONE=38 CONSUMED=39 copy-record-us=503
+info:  WSI: present origin=APPLICATION_SOURCE wsi=49 app=60 internal=0 acquire=50 image=0 generation=2
+info:  MetalInterop: committed InteropJobId=29 AppFrameId=60 slot=1 slot-serial=13 native-job=29 READY=37 DONE=38 initial-job-state=1 kernel=rgb_invert_alpha_preserve ready-to-commit-us=1797
+info:  WSI: app-completion app=60 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=60 via=source-present-retirement
+info:  MetalInterop: Vulkan-consumer InteropJobId=29 AppFrameId=60 InternalPresentId=7 generation=2 DONE=38 CONSUMED=39
+info:  MetalInterop: Metal output ready InteropJobId=29 AppFrameId=60 slot=1 slot-serial=13 generation=2 DONE=38 event-value=38
+info:  MetalInterop: consumer-claimed InteropJobId=29 AppFrameId=60 slot=1 slot-serial=13 generation=2 DONE=38 metal-state=Completed-event-signaled
+info:  MetalInterop: terminal InteropJobId=29 AppFrameId=60 slot=1 slot-serial=13 state=VULKAN_CONSUMED terminal-value=39 capture-to-terminal-us=25612
+info:  WSI: present origin=INTERNAL_OUTPUT wsi=50 app=0 internal=7 acquire=51 image=1 generation=2
+info:  MetalInterop: WSI-submit InteropJobId=29 AppFrameId=60 InternalPresentOpportunityId=29 InternalPresentId=7 WsiPresentId=50 VkPresentResult=VK_SUCCESS
+info:  InternalWSI: retirement outcome=presented wsi=50 internal=7 status=VK_SUCCESS app-signals=unchanged actual-display-timing=separate
+info:  InternalWSI: queued origin=INTERNAL_OUTPUT wsi=50 internal=7 app=none pattern=metal-invert InteropJobId=29 vkPresent=VK_SUCCESS
+info:  InternalWSI: source-present app=61 duration-us=92 hr=0x0
+info:  MetalInterop: job-retired InteropJobId=29 AppFrameId=60 slot=1 slot-serial=13 native-job=29 semaphore-value=39 capture-to-retire-us=34245 terminal-to-retire-us=8633
+info:  MetalInterop: captured InteropJobId=30 AppFrameId=61 generation=2 slot=2 slot-serial=17 history-id=8 output-id=9 READY=49 DONE=50 CONSUMED=51 copy-record-us=23
+info:  WSI: present origin=APPLICATION_SOURCE wsi=51 app=61 internal=0 acquire=52 image=2 generation=2
+info:  MetalInterop: committed InteropJobId=30 AppFrameId=61 slot=2 slot-serial=17 native-job=30 READY=49 DONE=50 initial-job-state=1 kernel=rgb_invert_alpha_preserve ready-to-commit-us=865
+info:  WSI: app-completion app=61 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=61 via=source-present-retirement
+info:  MetalInterop: Vulkan-consumer InteropJobId=30 AppFrameId=61 InternalPresentId=8 generation=2 DONE=50 CONSUMED=51
+info:  MetalInterop: Metal output ready InteropJobId=30 AppFrameId=61 slot=2 slot-serial=17 generation=2 DONE=50 event-value=50
+info:  MetalInterop: consumer-claimed InteropJobId=30 AppFrameId=61 slot=2 slot-serial=17 generation=2 DONE=50 metal-state=Completed-event-signaled
+info:  MetalInterop: terminal InteropJobId=30 AppFrameId=61 slot=2 slot-serial=17 state=VULKAN_CONSUMED terminal-value=51 capture-to-terminal-us=19691
+info:  WSI: present origin=INTERNAL_OUTPUT wsi=52 app=0 internal=8 acquire=53 image=0 generation=2
+info:  MetalInterop: WSI-submit InteropJobId=30 AppFrameId=61 InternalPresentOpportunityId=30 InternalPresentId=8 WsiPresentId=52 VkPresentResult=VK_SUCCESS
+info:  InternalWSI: retirement outcome=presented wsi=52 internal=8 status=VK_SUCCESS app-signals=unchanged actual-display-timing=separate
+info:  InternalWSI: queued origin=INTERNAL_OUTPUT wsi=52 internal=8 app=none pattern=metal-invert InteropJobId=30 vkPresent=VK_SUCCESS
+info:  InternalWSI: source-present app=62 duration-us=115 hr=0x0
+info:  MetalInterop: captured InteropJobId=31 AppFrameId=62 generation=2 slot=1 slot-serial=14 history-id=6 output-id=7 READY=40 DONE=41 CONSUMED=42 copy-record-us=15
+info:  MetalInterop: job-retired InteropJobId=30 AppFrameId=61 slot=2 slot-serial=17 native-job=30 semaphore-value=51 capture-to-retire-us=33456 terminal-to-retire-us=13765
+info:  WSI: present origin=APPLICATION_SOURCE wsi=53 app=62 internal=0 acquire=54 image=1 generation=2
+info:  MetalInterop: committed InteropJobId=31 AppFrameId=62 slot=1 slot-serial=14 native-job=31 READY=40 DONE=41 initial-job-state=1 kernel=rgb_invert_alpha_preserve ready-to-commit-us=901
+info:  WSI: app-completion app=62 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=62 via=source-present-retirement
+info:  MetalInterop: Vulkan-consumer InteropJobId=31 AppFrameId=62 InternalPresentId=9 generation=2 DONE=41 CONSUMED=42
+info:  MetalInterop: Metal output ready InteropJobId=31 AppFrameId=62 slot=1 slot-serial=14 generation=2 DONE=41 event-value=41
+info:  MetalInterop: consumer-claimed InteropJobId=31 AppFrameId=62 slot=1 slot-serial=14 generation=2 DONE=41 metal-state=Completed-event-signaled
+info:  MetalInterop: terminal InteropJobId=31 AppFrameId=62 slot=1 slot-serial=14 state=VULKAN_CONSUMED terminal-value=42 capture-to-terminal-us=21013
+info:  WSI: present origin=INTERNAL_OUTPUT wsi=54 app=0 internal=9 acquire=55 image=2 generation=2
+info:  MetalInterop: WSI-submit InteropJobId=31 AppFrameId=62 InternalPresentOpportunityId=31 InternalPresentId=9 WsiPresentId=54 VkPresentResult=VK_SUCCESS
+info:  InternalWSI: retirement outcome=presented wsi=54 internal=9 status=VK_SUCCESS app-signals=unchanged actual-display-timing=separate
+info:  InternalWSI: queued origin=INTERNAL_OUTPUT wsi=54 internal=9 app=none pattern=metal-invert InteropJobId=31 vkPresent=VK_SUCCESS
+info:  InternalWSI: source-present app=63 duration-us=104 hr=0x0
+info:  MetalInterop: captured InteropJobId=32 AppFrameId=63 generation=2 slot=2 slot-serial=18 history-id=8 output-id=9 READY=52 DONE=53 CONSUMED=54 copy-record-us=27
+info:  MetalInterop: job-retired InteropJobId=31 AppFrameId=62 slot=1 slot-serial=14 native-job=31 semaphore-value=42 capture-to-retire-us=32814 terminal-to-retire-us=11801
+info:  WSI: present origin=APPLICATION_SOURCE wsi=55 app=63 internal=0 acquire=56 image=0 generation=2
+info:  MetalInterop: committed InteropJobId=32 AppFrameId=63 slot=2 slot-serial=18 native-job=32 READY=52 DONE=53 initial-job-state=1 kernel=rgb_invert_alpha_preserve ready-to-commit-us=1001
+info:  WSI: app-completion app=63 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=63 via=source-present-retirement
+info:  MetalInterop: Vulkan-consumer InteropJobId=32 AppFrameId=63 InternalPresentId=10 generation=2 DONE=53 CONSUMED=54
+info:  MetalInterop: Metal output ready InteropJobId=32 AppFrameId=63 slot=2 slot-serial=18 generation=2 DONE=53 event-value=53
+info:  MetalInterop: consumer-claimed InteropJobId=32 AppFrameId=63 slot=2 slot-serial=18 generation=2 DONE=53 metal-state=Completed-event-signaled
+info:  MetalInterop: terminal InteropJobId=32 AppFrameId=63 slot=2 slot-serial=18 state=VULKAN_CONSUMED terminal-value=54 capture-to-terminal-us=21664
+info:  WSI: present origin=INTERNAL_OUTPUT wsi=56 app=0 internal=10 acquire=57 image=1 generation=2
+info:  MetalInterop: WSI-submit InteropJobId=32 AppFrameId=63 InternalPresentOpportunityId=32 InternalPresentId=10 WsiPresentId=56 VkPresentResult=VK_SUCCESS
+info:  InternalWSI: retirement outcome=presented wsi=56 internal=10 status=VK_SUCCESS app-signals=unchanged actual-display-timing=separate
+info:  InternalWSI: queued origin=INTERNAL_OUTPUT wsi=56 internal=10 app=none pattern=metal-invert InteropJobId=32 vkPresent=VK_SUCCESS
+info:  InternalWSI: source-present app=64 duration-us=193 hr=0x0
+info:  MetalInterop: job-retired InteropJobId=32 AppFrameId=63 slot=2 slot-serial=18 native-job=32 semaphore-value=54 capture-to-retire-us=34647 terminal-to-retire-us=12983
+info:  MetalInterop: captured InteropJobId=33 AppFrameId=64 generation=2 slot=1 slot-serial=15 history-id=6 output-id=7 READY=43 DONE=44 CONSUMED=45 copy-record-us=82
+info:  WSI: present origin=APPLICATION_SOURCE wsi=57 app=64 internal=0 acquire=58 image=2 generation=2
+info:  MetalInterop: committed InteropJobId=33 AppFrameId=64 slot=1 slot-serial=15 native-job=33 READY=43 DONE=44 initial-job-state=1 kernel=rgb_invert_alpha_preserve ready-to-commit-us=2482
+info:  WSI: app-frame-latency-signal app=64 via=source-submit-completion
+info:  WSI: app-completion app=64 app-signal=signaled
+info:  MetalInterop: Vulkan-consumer InteropJobId=33 AppFrameId=64 InternalPresentId=11 generation=2 DONE=44 CONSUMED=45
+warn:  InternalWSI: lease validation failed before submit internal=11 acquire=59 image=0 generation=2 expected=2 current=2 dirty-surface=0 dirty-swapchain=0 source-acquire-intent=1 source-frame-pending=0
+info:  InternalWSI: released pre-submit image lease acquire=59 image=0 generation=2 cached-acquire=preserved
+info:  InternalWSI: retirement outcome=failed wsi=0 internal=11 status=VK_ERROR_VALIDATION_FAILED_EXT app-signals=unchanged actual-display-timing=separate
+info:  InternalWSI: dropped opportunity=33 reason=lease-validation-before-submit generation=2
+info:  InternalWSI: source-present app=65 duration-us=697 hr=0x0
+info:  MetalInterop: captured InteropJobId=34 AppFrameId=65 generation=2 slot=2 slot-serial=19 history-id=8 output-id=9 READY=55 DONE=56 CONSUMED=57 copy-record-us=39
+info:  MetalInterop: terminal InteropJobId=33 AppFrameId=64 slot=1 slot-serial=15 state=lease-validation-before-submit terminal-value=44 capture-to-terminal-us=25530
+info:  MetalInterop: job-retired InteropJobId=33 AppFrameId=64 slot=1 slot-serial=15 native-job=33 semaphore-value=44 capture-to-retire-us=26125 terminal-to-retire-us=595
+info:  WSI: present origin=APPLICATION_SOURCE wsi=58 app=65 internal=0 acquire=60 image=0 generation=2
+info:  MetalInterop: committed InteropJobId=34 AppFrameId=65 slot=2 slot-serial=19 native-job=34 READY=55 DONE=56 initial-job-state=1 kernel=rgb_invert_alpha_preserve ready-to-commit-us=3492
+info:  WSI: app-completion app=65 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=65 via=source-present-retirement
+info:  MetalInterop: Vulkan-consumer InteropJobId=34 AppFrameId=65 InternalPresentId=12 generation=2 DONE=56 CONSUMED=57
+info:  MetalInterop: Metal output ready InteropJobId=34 AppFrameId=65 slot=2 slot-serial=19 generation=2 DONE=56 event-value=56
+info:  MetalInterop: consumer-claimed InteropJobId=34 AppFrameId=65 slot=2 slot-serial=19 generation=2 DONE=56 metal-state=Completed-event-signaled
+info:  MetalInterop: terminal InteropJobId=34 AppFrameId=65 slot=2 slot-serial=19 state=VULKAN_CONSUMED terminal-value=57 capture-to-terminal-us=20822
+info:  WSI: present origin=INTERNAL_OUTPUT wsi=59 app=0 internal=12 acquire=61 image=1 generation=2
+info:  MetalInterop: WSI-submit InteropJobId=34 AppFrameId=65 InternalPresentOpportunityId=34 InternalPresentId=12 WsiPresentId=59 VkPresentResult=VK_SUCCESS
+info:  InternalWSI: retirement outcome=presented wsi=59 internal=12 status=VK_SUCCESS app-signals=unchanged actual-display-timing=separate
+info:  InternalWSI: queued origin=INTERNAL_OUTPUT wsi=59 internal=12 app=none pattern=metal-invert InteropJobId=34 vkPresent=VK_SUCCESS
+info:  InternalWSI: source-present app=66 duration-us=246 hr=0x0
+info:  MetalInterop: job-retired InteropJobId=34 AppFrameId=65 slot=2 slot-serial=19 native-job=34 semaphore-value=57 capture-to-retire-us=39997 terminal-to-retire-us=19175
+info:  MetalInterop: captured InteropJobId=35 AppFrameId=66 generation=2 slot=1 slot-serial=16 history-id=6 output-id=7 READY=46 DONE=47 CONSUMED=48 copy-record-us=49
+info:  WSI: present origin=APPLICATION_SOURCE wsi=60 app=66 internal=0 acquire=62 image=2 generation=2
+info:  MetalInterop: committed InteropJobId=35 AppFrameId=66 slot=1 slot-serial=16 native-job=35 READY=46 DONE=47 initial-job-state=1 kernel=rgb_invert_alpha_preserve ready-to-commit-us=3229
+info:  WSI: app-frame-latency-signal app=66 via=source-submit-completion
+info:  WSI: app-completion app=66 app-signal=signaled
+info:  MetalInterop: Vulkan-consumer InteropJobId=35 AppFrameId=66 InternalPresentId=13 generation=2 DONE=47 CONSUMED=48
+info:  MetalInterop: Metal output ready InteropJobId=35 AppFrameId=66 slot=1 slot-serial=16 generation=2 DONE=47 event-value=47
+info:  MetalInterop: consumer-claimed InteropJobId=35 AppFrameId=66 slot=1 slot-serial=16 generation=2 DONE=47 metal-state=Completed-event-signaled
+info:  MetalInterop: terminal InteropJobId=35 AppFrameId=66 slot=1 slot-serial=16 state=VULKAN_CONSUMED terminal-value=48 capture-to-terminal-us=30312
+info:  WSI: present origin=INTERNAL_OUTPUT wsi=61 app=0 internal=13 acquire=63 image=0 generation=2
+info:  MetalInterop: WSI-submit InteropJobId=35 AppFrameId=66 InternalPresentOpportunityId=35 InternalPresentId=13 WsiPresentId=61 VkPresentResult=VK_SUCCESS
+info:  InternalWSI: retirement outcome=presented wsi=61 internal=13 status=VK_SUCCESS app-signals=unchanged actual-display-timing=separate
+info:  InternalWSI: queued origin=INTERNAL_OUTPUT wsi=61 internal=13 app=none pattern=metal-invert InteropJobId=35 vkPresent=VK_SUCCESS
+info:  InternalWSI: source-present app=67 duration-us=879 hr=0x0
+info:  MetalInterop: job-retired InteropJobId=35 AppFrameId=66 slot=1 slot-serial=16 native-job=35 semaphore-value=48 capture-to-retire-us=33952 terminal-to-retire-us=3640
+info:  MetalInterop: captured InteropJobId=36 AppFrameId=67 generation=2 slot=2 slot-serial=20 history-id=8 output-id=9 READY=58 DONE=59 CONSUMED=60 copy-record-us=43
+info:  WSI: present origin=APPLICATION_SOURCE wsi=62 app=67 internal=0 acquire=64 image=1 generation=2
+info:  MetalInterop: committed InteropJobId=36 AppFrameId=67 slot=2 slot-serial=20 native-job=36 READY=58 DONE=59 initial-job-state=1 kernel=rgb_invert_alpha_preserve ready-to-commit-us=2856
+info:  WSI: app-frame-latency-signal app=67 via=source-submit-completion
+info:  WSI: app-completion app=67 app-signal=signaled
+info:  MetalInterop: Vulkan-consumer InteropJobId=36 AppFrameId=67 InternalPresentId=14 generation=2 DONE=59 CONSUMED=60
+info:  MetalInterop: Metal output ready InteropJobId=36 AppFrameId=67 slot=2 slot-serial=20 generation=2 DONE=59 event-value=59
+info:  MetalInterop: consumer-claimed InteropJobId=36 AppFrameId=67 slot=2 slot-serial=20 generation=2 DONE=59 metal-state=Completed-event-signaled
+info:  MetalInterop: terminal InteropJobId=36 AppFrameId=67 slot=2 slot-serial=20 state=VULKAN_CONSUMED terminal-value=60 capture-to-terminal-us=24076
+info:  WSI: present origin=INTERNAL_OUTPUT wsi=63 app=0 internal=14 acquire=65 image=2 generation=2
+info:  MetalInterop: WSI-submit InteropJobId=36 AppFrameId=67 InternalPresentOpportunityId=36 InternalPresentId=14 WsiPresentId=63 VkPresentResult=VK_SUCCESS
+info:  InternalWSI: retirement outcome=presented wsi=63 internal=14 status=VK_SUCCESS app-signals=unchanged actual-display-timing=separate
+info:  InternalWSI: queued origin=INTERNAL_OUTPUT wsi=63 internal=14 app=none pattern=metal-invert InteropJobId=36 vkPresent=VK_SUCCESS
+info:  InternalWSI: source-present app=68 duration-us=252 hr=0x0
+info:  MetalInterop: job-retired InteropJobId=36 AppFrameId=67 slot=2 slot-serial=20 native-job=36 semaphore-value=60 capture-to-retire-us=35271 terminal-to-retire-us=11195
+info:  MetalInterop: captured InteropJobId=37 AppFrameId=68 generation=2 slot=1 slot-serial=17 history-id=6 output-id=7 READY=49 DONE=50 CONSUMED=51 copy-record-us=263
+info:  WSI: present origin=APPLICATION_SOURCE wsi=64 app=68 internal=0 acquire=66 image=0 generation=2
+info:  MetalInterop: committed InteropJobId=37 AppFrameId=68 slot=1 slot-serial=17 native-job=37 READY=49 DONE=50 initial-job-state=1 kernel=rgb_invert_alpha_preserve ready-to-commit-us=3051
+info:  WSI: app-frame-latency-signal app=68 via=source-submit-completion
+info:  WSI: app-completion app=68 app-signal=signaled
+info:  MetalInterop: Vulkan-consumer InteropJobId=37 AppFrameId=68 InternalPresentId=15 generation=2 DONE=50 CONSUMED=51
+info:  MetalInterop: Metal output ready InteropJobId=37 AppFrameId=68 slot=1 slot-serial=17 generation=2 DONE=50 event-value=50
+info:  MetalInterop: consumer-claimed InteropJobId=37 AppFrameId=68 slot=1 slot-serial=17 generation=2 DONE=50 metal-state=Completed-event-signaled
+info:  MetalInterop: terminal InteropJobId=37 AppFrameId=68 slot=1 slot-serial=17 state=VULKAN_CONSUMED terminal-value=51 capture-to-terminal-us=26436
+info:  WSI: present origin=INTERNAL_OUTPUT wsi=65 app=0 internal=15 acquire=67 image=1 generation=2
+info:  MetalInterop: WSI-submit InteropJobId=37 AppFrameId=68 InternalPresentOpportunityId=37 InternalPresentId=15 WsiPresentId=65 VkPresentResult=VK_SUCCESS
+info:  InternalWSI: queued origin=INTERNAL_OUTPUT wsi=65 internal=15 app=none pattern=metal-invert InteropJobId=37 vkPresent=VK_SUCCESS
+info:  InternalWSI: retirement outcome=presented wsi=65 internal=15 status=VK_SUCCESS app-signals=unchanged actual-display-timing=separate
+info:  MetalInterop: captured InteropJobId=38 AppFrameId=69 generation=2 slot=2 slot-serial=21 history-id=8 output-id=9 READY=61 DONE=62 CONSUMED=63 copy-record-us=52
+info:  InternalWSI: source-present app=69 duration-us=669 hr=0x0
+info:  MetalInterop: job-retired InteropJobId=37 AppFrameId=68 slot=1 slot-serial=17 native-job=37 semaphore-value=51 capture-to-retire-us=29668 terminal-to-retire-us=3232
+info:  WSI: present origin=APPLICATION_SOURCE wsi=66 app=69 internal=0 acquire=68 image=2 generation=2
+info:  MetalInterop: committed InteropJobId=38 AppFrameId=69 slot=2 slot-serial=21 native-job=38 READY=61 DONE=62 initial-job-state=1 kernel=rgb_invert_alpha_preserve ready-to-commit-us=5575
+info:  WSI: app-frame-latency-signal app=69 via=source-submit-completion
+info:  WSI: app-completion app=69 app-signal=signaled
+info:  MetalInterop: Vulkan-consumer InteropJobId=38 AppFrameId=69 InternalPresentId=16 generation=2 DONE=62 CONSUMED=63
+info:  MetalInterop: Metal output ready InteropJobId=38 AppFrameId=69 slot=2 slot-serial=21 generation=2 DONE=62 event-value=62
+info:  MetalInterop: consumer-claimed InteropJobId=38 AppFrameId=69 slot=2 slot-serial=21 generation=2 DONE=62 metal-state=Completed-event-signaled
+info:  MetalInterop: terminal InteropJobId=38 AppFrameId=69 slot=2 slot-serial=21 state=VULKAN_CONSUMED terminal-value=63 capture-to-terminal-us=25203
+info:  WSI: present origin=INTERNAL_OUTPUT wsi=67 app=0 internal=16 acquire=69 image=0 generation=2
+info:  MetalInterop: WSI-submit InteropJobId=38 AppFrameId=69 InternalPresentOpportunityId=38 InternalPresentId=16 WsiPresentId=67 VkPresentResult=VK_SUCCESS
+info:  InternalWSI: retirement outcome=presented wsi=67 internal=16 status=VK_SUCCESS app-signals=unchanged actual-display-timing=separate
+info:  InternalWSI: queued origin=INTERNAL_OUTPUT wsi=67 internal=16 app=none pattern=metal-invert InteropJobId=38 vkPresent=VK_SUCCESS
+info:  InternalWSI: source-present app=70 duration-us=162 hr=0x0
+info:  MetalInterop: captured InteropJobId=39 AppFrameId=70 generation=2 slot=1 slot-serial=18 history-id=6 output-id=7 READY=52 DONE=53 CONSUMED=54 copy-record-us=72
+info:  MetalInterop: job-retired InteropJobId=38 AppFrameId=69 slot=2 slot-serial=21 native-job=38 semaphore-value=63 capture-to-retire-us=32522 terminal-to-retire-us=7319
+info:  WSI: present origin=APPLICATION_SOURCE wsi=68 app=70 internal=0 acquire=70 image=1 generation=2
+info:  MetalInterop: committed InteropJobId=39 AppFrameId=70 slot=1 slot-serial=18 native-job=39 READY=52 DONE=53 initial-job-state=1 kernel=rgb_invert_alpha_preserve ready-to-commit-us=902
+info:  WSI: app-completion app=70 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=70 via=source-present-retirement
+info:  MetalInterop: Vulkan-consumer InteropJobId=39 AppFrameId=70 InternalPresentId=17 generation=2 DONE=53 CONSUMED=54
+info:  MetalInterop: Metal output ready InteropJobId=39 AppFrameId=70 slot=1 slot-serial=18 generation=2 DONE=53 event-value=53
+info:  MetalInterop: consumer-claimed InteropJobId=39 AppFrameId=70 slot=1 slot-serial=18 generation=2 DONE=53 metal-state=Completed-event-signaled
+info:  MetalInterop: terminal InteropJobId=39 AppFrameId=70 slot=1 slot-serial=18 state=VULKAN_CONSUMED terminal-value=54 capture-to-terminal-us=17542
+info:  WSI: present origin=INTERNAL_OUTPUT wsi=69 app=0 internal=17 acquire=71 image=2 generation=2
+info:  MetalInterop: WSI-submit InteropJobId=39 AppFrameId=70 InternalPresentOpportunityId=39 InternalPresentId=17 WsiPresentId=69 VkPresentResult=VK_SUCCESS
+info:  InternalWSI: retirement outcome=presented wsi=69 internal=17 status=VK_SUCCESS app-signals=unchanged actual-display-timing=separate
+info:  InternalWSI: queued origin=INTERNAL_OUTPUT wsi=69 internal=17 app=none pattern=metal-invert InteropJobId=39 vkPresent=VK_SUCCESS
+info:  InternalWSI: source-present app=71 duration-us=87 hr=0x0
+info:  MetalInterop: captured InteropJobId=40 AppFrameId=71 generation=2 slot=2 slot-serial=22 history-id=8 output-id=9 READY=64 DONE=65 CONSUMED=66 copy-record-us=12
+info:  MetalInterop: job-retired InteropJobId=39 AppFrameId=70 slot=1 slot-serial=18 native-job=39 semaphore-value=54 capture-to-retire-us=37287 terminal-to-retire-us=19745
+info:  WSI: present origin=APPLICATION_SOURCE wsi=70 app=71 internal=0 acquire=72 image=0 generation=2
+info:  MetalInterop: committed InteropJobId=40 AppFrameId=71 slot=2 slot-serial=22 native-job=40 READY=64 DONE=65 initial-job-state=1 kernel=rgb_invert_alpha_preserve ready-to-commit-us=694
+info:  WSI: app-completion app=71 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=71 via=source-present-retirement
+info:  MetalInterop: Vulkan-consumer InteropJobId=40 AppFrameId=71 InternalPresentId=18 generation=2 DONE=65 CONSUMED=66
+info:  MetalInterop: Metal output ready InteropJobId=40 AppFrameId=71 slot=2 slot-serial=22 generation=2 DONE=65 event-value=65
+info:  MetalInterop: consumer-claimed InteropJobId=40 AppFrameId=71 slot=2 slot-serial=22 generation=2 DONE=65 metal-state=Completed-event-signaled
+info:  MetalInterop: terminal InteropJobId=40 AppFrameId=71 slot=2 slot-serial=22 state=VULKAN_CONSUMED terminal-value=66 capture-to-terminal-us=22221
+info:  WSI: present origin=INTERNAL_OUTPUT wsi=71 app=0 internal=18 acquire=73 image=1 generation=2
+info:  MetalInterop: WSI-submit InteropJobId=40 AppFrameId=71 InternalPresentOpportunityId=40 InternalPresentId=18 WsiPresentId=71 VkPresentResult=VK_SUCCESS
+info:  InternalWSI: retirement outcome=presented wsi=71 internal=18 status=VK_SUCCESS app-signals=unchanged actual-display-timing=separate
+info:  InternalWSI: queued origin=INTERNAL_OUTPUT wsi=71 internal=18 app=none pattern=metal-invert InteropJobId=40 vkPresent=VK_SUCCESS
+info:  InternalWSI: source-present app=72 duration-us=59 hr=0x0
+info:  MetalInterop: job-retired InteropJobId=40 AppFrameId=71 slot=2 slot-serial=22 native-job=40 semaphore-value=66 capture-to-retire-us=32047 terminal-to-retire-us=9826
+info:  MetalInterop: captured InteropJobId=41 AppFrameId=72 generation=2 slot=1 slot-serial=19 history-id=6 output-id=7 READY=55 DONE=56 CONSUMED=57 copy-record-us=30
+info:  WSI: present origin=APPLICATION_SOURCE wsi=72 app=72 internal=0 acquire=74 image=2 generation=2
+info:  MetalInterop: committed InteropJobId=41 AppFrameId=72 slot=1 slot-serial=19 native-job=41 READY=55 DONE=56 initial-job-state=1 kernel=rgb_invert_alpha_preserve ready-to-commit-us=507
+info:  WSI: app-completion app=72 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=72 via=source-present-retirement
+info:  MetalInterop: Vulkan-consumer InteropJobId=41 AppFrameId=72 InternalPresentId=19 generation=2 DONE=56 CONSUMED=57
+info:  MetalInterop: Metal output ready InteropJobId=41 AppFrameId=72 slot=1 slot-serial=19 generation=2 DONE=56 event-value=56
+info:  MetalInterop: consumer-claimed InteropJobId=41 AppFrameId=72 slot=1 slot-serial=19 generation=2 DONE=56 metal-state=Completed-event-signaled
+info:  MetalInterop: terminal InteropJobId=41 AppFrameId=72 slot=1 slot-serial=19 state=VULKAN_CONSUMED terminal-value=57 capture-to-terminal-us=19138
+info:  WSI: present origin=INTERNAL_OUTPUT wsi=73 app=0 internal=19 acquire=75 image=0 generation=2
+info:  MetalInterop: WSI-submit InteropJobId=41 AppFrameId=72 InternalPresentOpportunityId=41 InternalPresentId=19 WsiPresentId=73 VkPresentResult=VK_SUCCESS
+info:  InternalWSI: retirement outcome=presented wsi=73 internal=19 status=VK_SUCCESS app-signals=unchanged actual-display-timing=separate
+info:  InternalWSI: queued origin=INTERNAL_OUTPUT wsi=73 internal=19 app=none pattern=metal-invert InteropJobId=41 vkPresent=VK_SUCCESS
+info:  InternalWSI: source-present app=73 duration-us=85 hr=0x0
+info:  MetalInterop: job-retired InteropJobId=41 AppFrameId=72 slot=1 slot-serial=19 native-job=41 semaphore-value=57 capture-to-retire-us=33430 terminal-to-retire-us=14292
+info:  MetalInterop: captured InteropJobId=42 AppFrameId=73 generation=2 slot=2 slot-serial=23 history-id=8 output-id=9 READY=67 DONE=68 CONSUMED=69 copy-record-us=26
+info:  WSI: present origin=APPLICATION_SOURCE wsi=74 app=73 internal=0 acquire=76 image=1 generation=2
+info:  MetalInterop: committed InteropJobId=42 AppFrameId=73 slot=2 slot-serial=23 native-job=42 READY=67 DONE=68 initial-job-state=1 kernel=rgb_invert_alpha_preserve ready-to-commit-us=583
+info:  WSI: app-completion app=73 app-signal=deferred
+info:  WSI: app-frame-latency-signal app=73 via=source-present-retirement
+info:  MetalInterop: Vulkan-consumer InteropJobId=42 AppFrameId=73 InternalPresentId=20 generation=2 DONE=68 CONSUMED=69
+info:  MetalInterop: Metal output ready InteropJobId=42 AppFrameId=73 slot=2 slot-serial=23 generation=2 DONE=68 event-value=68
+info:  MetalInterop: consumer-claimed InteropJobId=42 AppFrameId=73 slot=2 slot-serial=23 generation=2 DONE=68 metal-state=Completed-event-signaled
+info:  MetalInterop: terminal InteropJobId=42 AppFrameId=73 slot=2 slot-serial=23 state=VULKAN_CONSUMED terminal-value=69 capture-to-terminal-us=20079
+info:  WSI: present origin=INTERNAL_OUTPUT wsi=75 app=0 internal=20 acquire=77 image=2 generation=2
+info:  MetalInterop: WSI-submit InteropJobId=42 AppFrameId=73 InternalPresentOpportunityId=42 InternalPresentId=20 WsiPresentId=75 VkPresentResult=VK_SUCCESS
+info:  InternalWSI: retirement outcome=presented wsi=75 internal=20 status=VK_SUCCESS app-signals=unchanged actual-display-timing=separate
+info:  InternalWSI: queued origin=INTERNAL_OUTPUT wsi=75 internal=20 app=none pattern=metal-invert InteropJobId=42 vkPresent=VK_SUCCESS

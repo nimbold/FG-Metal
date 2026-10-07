@@ -1,0 +1,5 @@
+ninja: Entering directory `/tmp/fgmetal-step11b1/build'
+[1/8] Generating version.h with a custom command
+[2/4] Compiling C++ object src/d3d11/d3d11.dll.p/d3d11_swapchain.cpp.obj
+[3/4] Compiling C++ object src/d3d11/d3d11.dll.p/d3d11_device.cpp.obj
+[4/4] Linking target src/d3d11/d3d11.dll

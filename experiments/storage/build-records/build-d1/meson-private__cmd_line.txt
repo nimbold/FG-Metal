@@ -1,0 +1,9 @@
+[options]
+buildtype = debug
+native_glfw = disabled
+native_sdl2 = disabled
+native_sdl3 = disabled
+
+[properties]
+cross_file = ['/Users/nima/Library/Caches/FGMetalStep11C1R/mingw-x86_64.ini']
+

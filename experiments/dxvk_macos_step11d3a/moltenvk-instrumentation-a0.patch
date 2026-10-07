@@ -1,0 +1,769 @@
+diff --git a/MoltenVK/MoltenVK/GPUObjects/MVKImage.h b/MoltenVK/MoltenVK/GPUObjects/MVKImage.h
+index 45ddd3a..91d2f15 100644
+--- a/MoltenVK/MoltenVK/GPUObjects/MVKImage.h
++++ b/MoltenVK/MoltenVK/GPUObjects/MVKImage.h
+@@ -26,6 +26,45 @@
+ #include <unordered_map>
+ #include <mutex>
+ 
++/** Internal opt-in native WSI trace record. */
++struct MVKNativeTraceRecord {
++	const void* swapchain;
++	const void* image;
++	uint32_t imageIndex;
++	bool hasImageIndex;
++	uint64_t acquisitionSequence;
++	bool hasAcquisitionSequence;
++	const void* drawable;
++	const void* texture;
++	const void* queue;
++	uint64_t presentId;
++	bool hasPresentId;
++	uint32_t presentIDGoogle;
++	bool hasPresentIDGoogle;
++	uint64_t frameIndex;
++	bool hasFrameIndex;
++	uint64_t durationNs;
++	bool hasDurationNs;
++	uint64_t callBeginNs;
++	bool hasCallBeginNs;
++	uint64_t callEndNs;
++	bool hasCallEndNs;
++	uint64_t actualPresentTimeNs;
++	bool hasActualPresentTimeNs;
++	uint32_t attemptIndex;
++	bool hasAttemptIndex;
++	VkResult result;
++	bool hasResult;
++	const char* detail;
++	bool isDisplayed;
++	bool hasIsDisplayed;
++};
++
++/** Enables, timestamps, and writes opt-in JSONL native source trace events. */
++bool mvkNativeTraceEnabled();
++uint64_t mvkNativeTraceNow();
++void mvkNativeTraceLog(const char* event, const MVKNativeTraceRecord& record);
++
+ #import <IOSurface/IOSurfaceRef.h>
+ 
+ class MVKImage;
+@@ -478,6 +517,9 @@ public:
+ 	/** Presents the contained drawable to the OS. */
+ 	VkResult presentCAMetalDrawable(id<MTLCommandBuffer> mtlCmdBuff, MVKImagePresentInfo presentInfo);
+ 
++	/** Returns the current acquisition sequence for native trace correlation. */
++	uint64_t getTraceAcquisitionSequence();
++
+ 	/** Called when the presentation begins. */
+ 	void beginPresentation(const MVKImagePresentInfo& presentInfo);
+ 
+@@ -499,11 +541,13 @@ protected:
+ 	friend MVKSwapchain;
+ 
+ 	id<CAMetalDrawable> getCAMetalDrawable();
+-	void addPresentedHandler(id<CAMetalDrawable> mtlDrawable, MVKImagePresentInfo presentInfo, MVKSwapchainSignaler signaler);
++	void addPresentedHandler(id<CAMetalDrawable> mtlDrawable, MVKImagePresentInfo presentInfo,
++							 MVKSwapchainSignaler signaler, uint64_t acquisitionSequence, const void* swapchainIdentity);
+ 	void releaseMetalDrawable();
+ 	MVKSwapchainImageAvailability getAvailability();
+ 	void makeAvailable();
+-	VkResult acquireAndSignalWhenAvailable(MVKSemaphore* semaphore, MVKFence* fence);
++	VkResult acquireAndSignalWhenAvailable(MVKSemaphore* semaphore, MVKFence* fence,
++											  uint64_t* pTraceAcquisitionSequence = nullptr);
+ 	MVKSwapchainSignaler getPresentationSignaler();
+ 
+ 	id<CAMetalDrawable> _mtlDrawable = nil;
+diff --git a/MoltenVK/MoltenVK/GPUObjects/MVKImage.mm b/MoltenVK/MoltenVK/GPUObjects/MVKImage.mm
+index ef8ca60..f882953 100644
+--- a/MoltenVK/MoltenVK/GPUObjects/MVKImage.mm
++++ b/MoltenVK/MoltenVK/GPUObjects/MVKImage.mm
+@@ -31,9 +31,276 @@
+ 
+ #import <IOSurface/IOSurfaceRef.h>
+ 
++#include <inttypes.h>
++#include <mach/mach_time.h>
++#include <pthread.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <fcntl.h>
++#include <unistd.h>
++#include <atomic>
++
+ using namespace std;
+ using namespace SPIRV_CROSS_NAMESPACE;
+ 
++namespace {
++	static once_flag gNativeTraceInitOnce;
++	static once_flag gNativeTraceTimebaseOnce;
++	mach_timebase_info_data_t gNativeTraceTimebase = {};
++
++	struct MVKNativeTraceSlot {
++		uint64_t event_id;
++		uint64_t timestamp_ns;
++		uint64_t tid;
++		const char* event;
++		const void* swapchain;
++		const void* image;
++		uint32_t imageIndex;
++		bool hasImageIndex;
++		uint64_t acquisitionSequence;
++		bool hasAcquisitionSequence;
++		const void* drawable;
++		const void* texture;
++		const void* queue;
++		uint64_t presentId;
++		bool hasPresentId;
++		uint32_t presentIDGoogle;
++		bool hasPresentIDGoogle;
++		uint64_t frameIndex;
++		bool hasFrameIndex;
++		uint64_t durationNs;
++		bool hasDurationNs;
++		uint64_t callBeginNs;
++		bool hasCallBeginNs;
++		uint64_t callEndNs;
++		bool hasCallEndNs;
++		uint64_t actualPresentTimeNs;
++		bool hasActualPresentTimeNs;
++		uint32_t attemptIndex;
++		bool hasAttemptIndex;
++	int32_t result;
++		bool hasResult;
++		const char* detail;
++		bool isDisplayed;
++		bool hasIsDisplayed;
++		atomic<uint32_t> ready;
++	};
++
++	static constexpr size_t kMVKTraceCapacity = 131072;
++	static constexpr size_t kMVKTraceMask = kMVKTraceCapacity - 1;
++	static MVKNativeTraceSlot* gMVKTraceBuffer = nullptr;
++	static atomic<uint64_t> gMVKTraceHead{0};
++	static atomic<uint64_t> gMVKTraceTail{0};
++	static atomic<uint64_t> gMVKTraceEventID{0};
++	static atomic<uint64_t> gMVKTraceDroppedCount{0};
++	static atomic<bool> gMVKTraceDrainRunning{false};
++	static pthread_t gMVKTraceDrainThread;
++	static int gMVKTraceFd = -1;
++
++	static void* mvkTraceDrainWorker(void* arg) {
++		pthread_setname_np("mvk_trace_drain");
++		char lineBuf[2048];
++		while (gMVKTraceDrainRunning.load(memory_order_relaxed)) {
++			uint64_t tail = gMVKTraceTail.load(memory_order_relaxed);
++			uint64_t head = gMVKTraceHead.load(memory_order_acquire);
++			if (tail == head) {
++				usleep(2000);
++				continue;
++			}
++			while (tail < head) {
++				MVKNativeTraceSlot& slot = gMVKTraceBuffer[tail & kMVKTraceMask];
++				if (slot.ready.load(memory_order_acquire) != 1) {
++					break;
++				}
++				int len = snprintf(lineBuf, sizeof(lineBuf),
++					"{\"origin\":\"NATIVE_SOURCE\",\"event_id\":%" PRIu64 ",\"timestamp_ns\":%" PRIu64 ",\"tid\":%" PRIu64
++					",\"event\":\"%s\"",
++					slot.event_id, slot.timestamp_ns, slot.tid, slot.event ? slot.event : "unknown");
++				if (slot.swapchain && len > 0 && (size_t)len < sizeof(lineBuf)) {
++					len += snprintf(lineBuf + len, sizeof(lineBuf) - len, ",\"swapchain\":\"0x%" PRIxPTR "\"", (uintptr_t)slot.swapchain);
++				}
++				if (slot.hasImageIndex && len > 0 && (size_t)len < sizeof(lineBuf)) {
++					len += snprintf(lineBuf + len, sizeof(lineBuf) - len, ",\"image_index\":%u", slot.imageIndex);
++				}
++				if (slot.image && len > 0 && (size_t)len < sizeof(lineBuf)) {
++					len += snprintf(lineBuf + len, sizeof(lineBuf) - len, ",\"image_id\":\"0x%" PRIxPTR "\"", (uintptr_t)slot.image);
++				}
++				if (slot.hasAcquisitionSequence && len > 0 && (size_t)len < sizeof(lineBuf)) {
++					len += snprintf(lineBuf + len, sizeof(lineBuf) - len, ",\"acquisition_sequence\":%" PRIu64, slot.acquisitionSequence);
++				}
++				if (slot.drawable && len > 0 && (size_t)len < sizeof(lineBuf)) {
++					len += snprintf(lineBuf + len, sizeof(lineBuf) - len, ",\"drawable\":\"0x%" PRIxPTR "\"", (uintptr_t)slot.drawable);
++				}
++				if (slot.texture && len > 0 && (size_t)len < sizeof(lineBuf)) {
++					len += snprintf(lineBuf + len, sizeof(lineBuf) - len, ",\"texture\":\"0x%" PRIxPTR "\"", (uintptr_t)slot.texture);
++				}
++				if (slot.queue && len > 0 && (size_t)len < sizeof(lineBuf)) {
++					len += snprintf(lineBuf + len, sizeof(lineBuf) - len, ",\"queue\":\"0x%" PRIxPTR "\"", (uintptr_t)slot.queue);
++				}
++				if (slot.hasPresentId && len > 0 && (size_t)len < sizeof(lineBuf)) {
++					len += snprintf(lineBuf + len, sizeof(lineBuf) - len, ",\"present_id\":%" PRIu64, slot.presentId);
++				}
++				if (slot.hasPresentIDGoogle && len > 0 && (size_t)len < sizeof(lineBuf)) {
++					len += snprintf(lineBuf + len, sizeof(lineBuf) - len, ",\"present_id_google\":%u", slot.presentIDGoogle);
++				}
++				if (slot.hasFrameIndex && len > 0 && (size_t)len < sizeof(lineBuf)) {
++					len += snprintf(lineBuf + len, sizeof(lineBuf) - len, ",\"frame_index\":%" PRIu64, slot.frameIndex);
++				}
++				if (slot.hasDurationNs && len > 0 && (size_t)len < sizeof(lineBuf)) {
++					len += snprintf(lineBuf + len, sizeof(lineBuf) - len, ",\"duration_ns\":%" PRIu64, slot.durationNs);
++				}
++				if (slot.hasCallBeginNs && len > 0 && (size_t)len < sizeof(lineBuf)) {
++					len += snprintf(lineBuf + len, sizeof(lineBuf) - len, ",\"call_begin_ns\":%" PRIu64, slot.callBeginNs);
++				}
++				if (slot.hasCallEndNs && len > 0 && (size_t)len < sizeof(lineBuf)) {
++					len += snprintf(lineBuf + len, sizeof(lineBuf) - len, ",\"call_end_ns\":%" PRIu64, slot.callEndNs);
++				}
++				if (slot.hasActualPresentTimeNs && len > 0 && (size_t)len < sizeof(lineBuf)) {
++					len += snprintf(lineBuf + len, sizeof(lineBuf) - len, ",\"actual_present_time_ns\":%" PRIu64, slot.actualPresentTimeNs);
++				}
++				if (slot.hasIsDisplayed && len > 0 && (size_t)len < sizeof(lineBuf)) {
++					len += snprintf(lineBuf + len, sizeof(lineBuf) - len, ",\"is_displayed\":%s", slot.isDisplayed ? "true" : "false");
++				}
++				if (slot.hasAttemptIndex && len > 0 && (size_t)len < sizeof(lineBuf)) {
++					len += snprintf(lineBuf + len, sizeof(lineBuf) - len, ",\"attempt_index\":%u", slot.attemptIndex);
++				}
++				if (slot.hasResult && len > 0 && (size_t)len < sizeof(lineBuf)) {
++					len += snprintf(lineBuf + len, sizeof(lineBuf) - len, ",\"result\":%d", (int)slot.result);
++				}
++				if (slot.detail && len > 0 && (size_t)len < sizeof(lineBuf)) {
++					len += snprintf(lineBuf + len, sizeof(lineBuf) - len, ",\"detail\":\"%s\"", slot.detail);
++				}
++				if (len > 0 && (size_t)len < sizeof(lineBuf) - 2) {
++					lineBuf[len++] = '}';
++					lineBuf[len++] = '\n';
++					(void)write(gMVKTraceFd, lineBuf, len);
++				}
++				slot.ready.store(0, memory_order_relaxed);
++				tail++;
++			}
++			gMVKTraceTail.store(tail, memory_order_release);
++		}
++		uint64_t tail = gMVKTraceTail.load(memory_order_relaxed);
++		uint64_t head = gMVKTraceHead.load(memory_order_acquire);
++		while (tail < head) {
++			MVKNativeTraceSlot& slot = gMVKTraceBuffer[tail & kMVKTraceMask];
++			if (slot.ready.load(memory_order_acquire) == 1) {
++				int len = snprintf(lineBuf, sizeof(lineBuf),
++					"{\"origin\":\"NATIVE_SOURCE\",\"event_id\":%" PRIu64 ",\"timestamp_ns\":%" PRIu64 ",\"tid\":%" PRIu64
++					",\"event\":\"%s\"}\n",
++					slot.event_id, slot.timestamp_ns, slot.tid, slot.event ? slot.event : "unknown");
++				if (len > 0) { (void)write(gMVKTraceFd, lineBuf, len); }
++			}
++			tail++;
++		}
++		gMVKTraceTail.store(tail, memory_order_release);
++		uint64_t dropped = gMVKTraceDroppedCount.load(memory_order_relaxed);
++		if (dropped > 0) {
++			int len = snprintf(lineBuf, sizeof(lineBuf), "{\"origin\":\"NATIVE_SOURCE\",\"event\":\"trace_dropped_summary\",\"dropped_count\":%" PRIu64 "}\n", dropped);
++			if (len > 0) { (void)write(gMVKTraceFd, lineBuf, len); }
++		}
++		return nullptr;
++	}
++
++	static void mvkShutdownNativeTrace() {
++		if (gMVKTraceDrainRunning.exchange(false)) {
++			pthread_join(gMVKTraceDrainThread, nullptr);
++			if (gMVKTraceFd >= 0) {
++				close(gMVKTraceFd);
++				gMVKTraceFd = -1;
++			}
++		}
++	}
++
++	static void mvkInitializeNativeTrace() {
++		const char* tracePath = getenv("FG_NATIVE_MVK_TRACE");
++		if (tracePath && tracePath[0]) {
++			gMVKTraceFd = open(tracePath, O_WRONLY | O_CREAT | O_APPEND | O_CLOEXEC, 0644);
++			if (gMVKTraceFd >= 0) {
++				gMVKTraceBuffer = (MVKNativeTraceSlot*)calloc(kMVKTraceCapacity, sizeof(MVKNativeTraceSlot));
++				if (gMVKTraceBuffer) {
++					gMVKTraceDrainRunning.store(true);
++					pthread_attr_t attr;
++					pthread_attr_init(&attr);
++					pthread_attr_set_qos_class_np(&attr, QOS_CLASS_BACKGROUND, 0);
++					if (pthread_create(&gMVKTraceDrainThread, &attr, mvkTraceDrainWorker, nullptr) == 0) {
++						atexit(mvkShutdownNativeTrace);
++					} else {
++						gMVKTraceDrainRunning.store(false);
++					}
++					pthread_attr_destroy(&attr);
++				}
++			}
++		}
++	}
++}
++
++bool mvkNativeTraceEnabled() {
++	call_once(gNativeTraceInitOnce, mvkInitializeNativeTrace);
++	return gMVKTraceFd >= 0 && gMVKTraceBuffer != nullptr;
++}
++
++uint64_t mvkNativeTraceNow() {
++	call_once(gNativeTraceTimebaseOnce, [] { mach_timebase_info(&gNativeTraceTimebase); });
++	uint64_t ticks = mach_absolute_time();
++	if (!gNativeTraceTimebase.denom) { return ticks; }
++	return (uint64_t)(((__uint128_t)ticks * gNativeTraceTimebase.numer) / gNativeTraceTimebase.denom);
++}
++
++void mvkNativeTraceLog(const char* event, const MVKNativeTraceRecord& record) {
++	if (!mvkNativeTraceEnabled() || !gMVKTraceBuffer) { return; }
++
++	uint64_t timestampNs = mvkNativeTraceNow();
++	uint64_t threadID = 0;
++	pthread_threadid_np(pthread_self(), &threadID);
++	uint64_t eventID = gMVKTraceEventID.fetch_add(1, memory_order_relaxed) + 1;
++	uint64_t ticket = gMVKTraceHead.fetch_add(1, memory_order_relaxed);
++
++	uint64_t currentTail = gMVKTraceTail.load(memory_order_acquire);
++	if (ticket >= currentTail + kMVKTraceCapacity) {
++		gMVKTraceDroppedCount.fetch_add(1, memory_order_relaxed);
++		return;
++	}
++
++	MVKNativeTraceSlot& slot = gMVKTraceBuffer[ticket & kMVKTraceMask];
++	slot.ready.store(0, memory_order_relaxed);
++	slot.event_id = eventID;
++	slot.timestamp_ns = timestampNs;
++	slot.tid = threadID;
++	slot.event = event;
++	slot.swapchain = record.swapchain;
++	slot.image = record.image;
++	slot.imageIndex = record.imageIndex;
++	slot.hasImageIndex = record.hasImageIndex;
++	slot.acquisitionSequence = record.acquisitionSequence;
++	slot.hasAcquisitionSequence = record.hasAcquisitionSequence;
++	slot.drawable = record.drawable;
++	slot.texture = record.texture;
++	slot.queue = record.queue;
++	slot.presentId = record.presentId;
++	slot.hasPresentId = record.hasPresentId;
++	slot.presentIDGoogle = record.presentIDGoogle;
++	slot.hasPresentIDGoogle = record.hasPresentIDGoogle;
++	slot.frameIndex = record.frameIndex;
++	slot.hasFrameIndex = record.hasFrameIndex;
++	slot.durationNs = record.durationNs;
++	slot.hasDurationNs = record.hasDurationNs;
++	slot.callBeginNs = record.callBeginNs;
++	slot.hasCallBeginNs = record.hasCallBeginNs;
++	slot.callEndNs = record.callEndNs;
++	slot.hasCallEndNs = record.hasCallEndNs;
++	slot.actualPresentTimeNs = record.actualPresentTimeNs;
++	slot.hasActualPresentTimeNs = record.hasActualPresentTimeNs;
++	slot.attemptIndex = record.attemptIndex;
++	slot.hasAttemptIndex = record.hasAttemptIndex;
++	slot.result = (int32_t)record.result;
++	slot.hasResult = record.hasResult;
++	slot.detail = record.detail;
++	slot.isDisplayed = record.isDisplayed;
++	slot.hasIsDisplayed = record.hasIsDisplayed;
++	slot.ready.store(1, memory_order_release);
++}
++
+ static id<MTLTexture> mvkGetRootMTLTexture(id<MTLTexture> tex) {
+     while (tex.parentTexture && tex.parentTexture != tex) {
+       tex = tex.parentTexture;
+@@ -1539,6 +1806,11 @@ MVKSwapchainImageAvailability MVKPresentableSwapchainImage::getAvailability() {
+ 	return _availability;
+ }
+ 
++uint64_t MVKPresentableSwapchainImage::getTraceAcquisitionSequence() {
++	lock_guard<mutex> lock(_availabilityLock);
++	return _availability.acquisitionID;
++}
++
+ // Tell the semaphore and fence that they are being tracked for future signaling.
+ static void track(const MVKSwapchainSignaler& signaler) {
+ 	if (signaler.semaphore) { signaler.semaphore->retain(); }
+@@ -1562,7 +1834,8 @@ static void signalAndUntrack(const MVKSwapchainSignaler& signaler) {
+ 	if (signaler.fence) { signaler.fence->release(); }
+ }
+ 
+-VkResult MVKPresentableSwapchainImage::acquireAndSignalWhenAvailable(MVKSemaphore* semaphore, MVKFence* fence) {
++VkResult MVKPresentableSwapchainImage::acquireAndSignalWhenAvailable(MVKSemaphore* semaphore, MVKFence* fence,
++																	  uint64_t* pTraceAcquisitionSequence) {
+ 
+ 	// Now that this image is being acquired, release the existing drawable and its texture.
+ 	// This is not done earlier so the texture is retained for any post-processing such as screen captures, etc.
+@@ -1573,6 +1846,15 @@ VkResult MVKPresentableSwapchainImage::acquireAndSignalWhenAvailable(MVKSemaphor
+ 	// Upon acquisition, update acquisition ID immediately, to move it to the back of the chain,
+ 	// so other images will be preferred if either all images are available or no images are available.
+ 	_availability.acquisitionID = _swapchain->getNextAcquisitionID();
++	if (pTraceAcquisitionSequence) { *pTraceAcquisitionSequence = _availability.acquisitionID; }
++	if (mvkNativeTraceEnabled()) {
++		MVKNativeTraceRecord trace = {};
++		trace.image = this;
++		trace.imageIndex = _swapchainIndex; trace.hasImageIndex = true;
++		trace.acquisitionSequence = _availability.acquisitionID; trace.hasAcquisitionSequence = true;
++		trace.detail = "acquire_image_assigned";
++		mvkNativeTraceLog("acquire_image_assigned", trace);
++	}
+ 
+ 	auto signaler = MVKSwapchainSignaler{fence, semaphore, semaphore ? semaphore->deferSignal() : 0};
+ 	if (_availability.isAvailable) {
+@@ -1615,7 +1897,32 @@ id<CAMetalDrawable> MVKPresentableSwapchainImage::getCAMetalDrawable() {
+ 			uint32_t attemptCnt = _swapchain->getImageCount();	// Attempt a resonable number of times
+ 			for (uint32_t attemptIdx = 0; !_mtlDrawable && attemptIdx < attemptCnt; attemptIdx++) {
+ 				uint64_t startTime = getPerformanceTimestamp();
++				uint64_t nextDrawableBeginNs = mvkNativeTraceEnabled() ? mvkNativeTraceNow() : 0;
++				if (mvkNativeTraceEnabled()) {
++					MVKNativeTraceRecord trace = {};
++					trace.image = this;
++					trace.imageIndex = _swapchainIndex; trace.hasImageIndex = true;
++					trace.acquisitionSequence = getTraceAcquisitionSequence(); trace.hasAcquisitionSequence = true;
++					trace.attemptIndex = attemptIdx; trace.hasAttemptIndex = true;
++					trace.detail = "next_drawable_begin";
++					mvkNativeTraceLog("next_drawable_begin", trace);
++				}
+ 				_mtlDrawable = [_swapchain->getCAMetalLayer().nextDrawable retain];	// retained
++				uint64_t nextDrawableEndNs = mvkNativeTraceEnabled() ? mvkNativeTraceNow() : 0;
++				if (mvkNativeTraceEnabled()) {
++					MVKNativeTraceRecord trace = {};
++					trace.image = this;
++					trace.imageIndex = _swapchainIndex; trace.hasImageIndex = true;
++					trace.acquisitionSequence = getTraceAcquisitionSequence(); trace.hasAcquisitionSequence = true;
++					trace.attemptIndex = attemptIdx; trace.hasAttemptIndex = true;
++					trace.drawable = (const void*)_mtlDrawable;
++					trace.texture = _mtlDrawable ? (const void*)_mtlDrawable.texture : nullptr;
++					trace.callBeginNs = nextDrawableBeginNs; trace.hasCallBeginNs = true;
++					trace.callEndNs = nextDrawableEndNs; trace.hasCallEndNs = true;
++					trace.durationNs = nextDrawableEndNs - nextDrawableBeginNs; trace.hasDurationNs = true;
++					trace.detail = _mtlDrawable ? "next_drawable_acquired" : "next_drawable_null";
++					mvkNativeTraceLog("next_drawable_end", trace);
++				}
+ 				addPerformanceInterval(getPerformanceStats().queue.retrieveCAMetalDrawable, startTime);
+ 				hasInvalidFormat = _mtlDrawable && !_mtlDrawable.texture.pixelFormat;
+ 				if (hasInvalidFormat) { releaseMetalDrawable(); }
+@@ -1647,9 +1954,23 @@ VkResult MVKPresentableSwapchainImage::presentCAMetalDrawable(id<MTLCommandBuffe
+ 	// Attach present handler before presenting to avoid race condition.
+ 	id<CAMetalDrawable> mtlDrwbl = getCAMetalDrawable();
+ 	MVKSwapchainSignaler signaler = getPresentationSignaler();
++	uint64_t acquisitionSequence = getTraceAcquisitionSequence();
++	const void* swapchainIdentity = (const void*)_swapchain;
++	if (mvkNativeTraceEnabled()) {
++		MVKNativeTraceRecord trace = {};
++		trace.swapchain = swapchainIdentity; trace.image = this;
++		trace.imageIndex = _swapchainIndex; trace.hasImageIndex = true;
++		trace.acquisitionSequence = acquisitionSequence; trace.hasAcquisitionSequence = true;
++		trace.drawable = (const void*)mtlDrwbl;
++		trace.texture = mtlDrwbl ? (const void*)mtlDrwbl.texture : nullptr;
++		trace.queue = presentInfo.queue;
++		trace.presentId = presentInfo.presentId; trace.hasPresentId = presentInfo.presentId != 0;
++		trace.presentIDGoogle = presentInfo.presentIDGoogle; trace.hasPresentIDGoogle = presentInfo.presentIDGoogle != 0;
++		mvkNativeTraceLog("metal_present_request", trace);
++	}
+ 	[mtlCmdBuff addScheduledHandler: ^(id<MTLCommandBuffer> mcb) {
+ 
+-		addPresentedHandler(mtlDrwbl, presentInfo, signaler);
++		addPresentedHandler(mtlDrwbl, presentInfo, signaler, acquisitionSequence, swapchainIdentity);
+ 
+ 		// Try to do any present mode transitions as late as possible in an attempt
+ 		// to avoid visual disruptions on any presents already on the queue.
+@@ -1674,6 +1995,16 @@ VkResult MVKPresentableSwapchainImage::presentCAMetalDrawable(id<MTLCommandBuffe
+ 	auto* fence = presentInfo.fence;
+ 	if (fence) { fence->retain(); }
+ 	[mtlCmdBuff addCompletedHandler: ^(id<MTLCommandBuffer> mcb) {
++		if (mvkNativeTraceEnabled()) {
++			MVKNativeTraceRecord trace = {};
++			trace.swapchain = swapchainIdentity; trace.image = this;
++			trace.imageIndex = _swapchainIndex; trace.hasImageIndex = true;
++			trace.acquisitionSequence = acquisitionSequence; trace.hasAcquisitionSequence = true;
++			trace.drawable = (const void*)mtlDrwbl;
++			trace.queue = presentInfo.queue;
++			trace.detail = "command_buffer_completed";
++			mvkNativeTraceLog("present_command_buffer_complete", trace);
++		}
+ 		signal(fence);
+ 		if (fence) { fence->release(); }
+ 		[mtlDrwbl release];
+@@ -1711,16 +2042,59 @@ MVKSwapchainSignaler MVKPresentableSwapchainImage::getPresentationSignaler() {
+ // Pass MVKImagePresentInfo & MVKSwapchainSignaler by value because they may not exist when the callback runs.
+ void MVKPresentableSwapchainImage::addPresentedHandler(id<CAMetalDrawable> mtlDrawable,
+ 													   MVKImagePresentInfo presentInfo,
+-													   MVKSwapchainSignaler signaler) {
++													   MVKSwapchainSignaler signaler,
++													   uint64_t acquisitionSequence, const void* swapchainIdentity) {
++	if (mvkNativeTraceEnabled()) {
++		MVKNativeTraceRecord trace = {};
++		trace.swapchain = swapchainIdentity; trace.image = this;
++		trace.imageIndex = _swapchainIndex; trace.hasImageIndex = true;
++		trace.acquisitionSequence = acquisitionSequence; trace.hasAcquisitionSequence = true;
++		trace.drawable = (const void*)mtlDrawable;
++		trace.texture = mtlDrawable ? (const void*)mtlDrawable.texture : nullptr;
++		trace.queue = presentInfo.queue;
++		trace.presentId = presentInfo.presentId; trace.hasPresentId = presentInfo.presentId != 0;
++		trace.presentIDGoogle = presentInfo.presentIDGoogle; trace.hasPresentIDGoogle = presentInfo.presentIDGoogle != 0;
++		mvkNativeTraceLog("presented_handler_registered", trace);
++	}
+ 	beginPresentation(presentInfo);
+ 
+ #if !MVK_OS_SIMULATOR
+ 	[mtlDrawable addPresentedHandler: ^(id<MTLDrawable> mtlDrwbl) {
+-		endPresentation(presentInfo, signaler, mtlDrwbl.presentedTime * 1.0e9);
++		uint64_t actualPresentTimeNs = 0;
++		bool isDisplayed = false;
++		if (mtlDrwbl.presentedTime > 0.0) {
++			actualPresentTimeNs = (uint64_t)(mtlDrwbl.presentedTime * 1.0e9);
++			isDisplayed = true;
++		}
++		if (mvkNativeTraceEnabled()) {
++			MVKNativeTraceRecord trace = {};
++			trace.swapchain = swapchainIdentity; trace.image = this;
++			trace.imageIndex = _swapchainIndex; trace.hasImageIndex = true;
++			trace.acquisitionSequence = acquisitionSequence; trace.hasAcquisitionSequence = true;
++			trace.drawable = (const void*)mtlDrwbl;
++			trace.texture = mtlDrawable ? (const void*)mtlDrawable.texture : nullptr;
++			trace.queue = presentInfo.queue;
++			trace.presentId = presentInfo.presentId; trace.hasPresentId = presentInfo.presentId != 0;
++			trace.presentIDGoogle = presentInfo.presentIDGoogle; trace.hasPresentIDGoogle = presentInfo.presentIDGoogle != 0;
++			trace.actualPresentTimeNs = actualPresentTimeNs; trace.hasActualPresentTimeNs = true;
++			trace.isDisplayed = isDisplayed; trace.hasIsDisplayed = true;
++		mvkNativeTraceLog("presented_callback", trace);
++	}
++		endPresentation(presentInfo, signaler, actualPresentTimeNs);
+ 	}];
+ #else
+ 	// If MTLDrawable.presentedTime/addPresentedHandler isn't supported,
+ 	// treat it as if the present happened when requested.
++	if (mvkNativeTraceEnabled()) {
++		MVKNativeTraceRecord trace = {};
++		trace.swapchain = swapchainIdentity; trace.image = this;
++		trace.imageIndex = _swapchainIndex; trace.hasImageIndex = true;
++		trace.acquisitionSequence = acquisitionSequence; trace.hasAcquisitionSequence = true;
++		trace.drawable = (const void*)mtlDrawable;
++		trace.queue = presentInfo.queue;
++		trace.detail = "simulator_completion_assumed";
++		mvkNativeTraceLog("presentation_completion_assumed", trace);
++	}
+ 	endPresentation(presentInfo, signaler);
+ #endif
+ }
+@@ -1760,6 +2134,16 @@ void MVKPresentableSwapchainImage::endPresentation(const MVKImagePresentInfo& pr
+ 
+ // Releases the CAMetalDrawable underlying this image.
+ void MVKPresentableSwapchainImage::releaseMetalDrawable() {
++	if (_mtlDrawable && mvkNativeTraceEnabled()) {
++		MVKNativeTraceRecord trace = {};
++		trace.image = this;
++		trace.imageIndex = _swapchainIndex; trace.hasImageIndex = true;
++		trace.acquisitionSequence = getTraceAcquisitionSequence(); trace.hasAcquisitionSequence = true;
++		trace.drawable = (const void*)_mtlDrawable;
++		trace.texture = (const void*)_mtlDrawable.texture;
++		trace.detail = "release_metal_drawable";
++		mvkNativeTraceLog("drawable_release", trace);
++	}
+     [_mtlDrawable release];
+ 	_mtlDrawable = nil;
+ }
+@@ -1770,6 +2154,7 @@ void MVKPresentableSwapchainImage::makeAvailable() {
+ 	releaseMetalDrawable();
+ 	lock_guard<mutex> lock(_availabilityLock);
+ 
++	bool transitioned = false;
+ 	if ( !_availability.isAvailable ) {
+ 		signalAndUntrack(_preSignaler);
+ 		for (auto& sig : _availabilitySignalers) {
+@@ -1777,6 +2162,15 @@ void MVKPresentableSwapchainImage::makeAvailable() {
+ 		}
+ 		_availabilitySignalers.clear();
+ 		_availability.isAvailable = true;
++		transitioned = true;
++	}
++	if (mvkNativeTraceEnabled()) {
++		MVKNativeTraceRecord trace = {};
++		trace.image = this;
++		trace.imageIndex = _swapchainIndex; trace.hasImageIndex = true;
++		trace.acquisitionSequence = _availability.acquisitionID; trace.hasAcquisitionSequence = true;
++		trace.detail = transitioned ? "availability_transitioned" : "already_available";
++		mvkNativeTraceLog("make_available", trace);
+ 	}
+ }
+ 
+diff --git a/MoltenVK/MoltenVK/GPUObjects/MVKSwapchain.h b/MoltenVK/MoltenVK/GPUObjects/MVKSwapchain.h
+index 1665b51..354d422 100644
+--- a/MoltenVK/MoltenVK/GPUObjects/MVKSwapchain.h
++++ b/MoltenVK/MoltenVK/GPUObjects/MVKSwapchain.h
+@@ -77,7 +77,8 @@ public:
+ 							  VkSemaphore semaphore,
+ 							  VkFence fence,
+ 							  uint32_t deviceMask,
+-							  uint32_t* pImageIndex);
++							  uint32_t* pImageIndex,
++							  uint64_t* pTraceAcquisitionSequence = nullptr);
+ 
+ 	/** Releases swapchain images. */
+ 	VkResult releaseImages(const VkReleaseSwapchainImagesInfoKHR* pReleaseInfo);
+diff --git a/MoltenVK/MoltenVK/GPUObjects/MVKSwapchain.mm b/MoltenVK/MoltenVK/GPUObjects/MVKSwapchain.mm
+index 4c90866..996bbc1 100644
+--- a/MoltenVK/MoltenVK/GPUObjects/MVKSwapchain.mm
++++ b/MoltenVK/MoltenVK/GPUObjects/MVKSwapchain.mm
+@@ -78,8 +78,10 @@ VkResult MVKSwapchain::acquireNextImage(uint64_t timeout,
+ 										VkSemaphore semaphore,
+ 										VkFence fence,
+ 										uint32_t deviceMask,
+-										uint32_t* pImageIndex) {
++										uint32_t* pImageIndex,
++										uint64_t* pTraceAcquisitionSequence) {
+ 
++	if (pTraceAcquisitionSequence) { *pTraceAcquisitionSequence = 0; }
+ 	if ( _device->getConfigurationResult() != VK_SUCCESS ) { return _device->getConfigurationResult(); }
+ 	if ( getIsSurfaceLost() ) { return VK_ERROR_SURFACE_LOST_KHR; }
+ 
+@@ -99,7 +101,8 @@ VkResult MVKSwapchain::acquireNextImage(uint64_t timeout,
+ 	// Return the index of the image with the shortest wait,
+ 	// and signal the semaphore and fence when it's available
+ 	*pImageIndex = minWaitImage->_swapchainIndex;
+-	VkResult rslt = minWaitImage->acquireAndSignalWhenAvailable((MVKSemaphore*)semaphore, (MVKFence*)fence);
++	VkResult rslt = minWaitImage->acquireAndSignalWhenAvailable((MVKSemaphore*)semaphore, (MVKFence*)fence,
++																 pTraceAcquisitionSequence);
+ 	return rslt ? rslt : getSurfaceStatus();
+ }
+ 
+diff --git a/MoltenVK/MoltenVK/Vulkan/vulkan.mm b/MoltenVK/MoltenVK/Vulkan/vulkan.mm
+index b15fe5e..22b7c70 100644
+--- a/MoltenVK/MoltenVK/Vulkan/vulkan.mm
++++ b/MoltenVK/MoltenVK/Vulkan/vulkan.mm
+@@ -437,7 +437,22 @@ MVK_PUBLIC_VULKAN_SYMBOL VkResult vkQueueSubmit(
+ 
+ 	MVKTraceVulkanCallStart();
+ 	MVKQueue* mvkQ = MVKQueue::getMVKQueue(queue);
++	bool nativeTraceEnabled = mvkNativeTraceEnabled();
++	if (nativeTraceEnabled) {
++		MVKNativeTraceRecord trace = {}; trace.queue = mvkQ;
++		mvkNativeTraceLog("queue_submit_begin", trace);
++	}
++	uint64_t traceStartNs = nativeTraceEnabled ? mvkNativeTraceNow() : 0;
+ 	VkResult rslt = mvkQ->submit(submitCount, pSubmits, fence, kMVKCommandUseQueueSubmit);
++	uint64_t traceEndNs = nativeTraceEnabled ? mvkNativeTraceNow() : 0;
++	if (nativeTraceEnabled) {
++		MVKNativeTraceRecord trace = {}; trace.queue = mvkQ;
++		trace.callBeginNs = traceStartNs; trace.hasCallBeginNs = true;
++		trace.callEndNs = traceEndNs; trace.hasCallEndNs = true;
++		trace.durationNs = traceEndNs - traceStartNs; trace.hasDurationNs = true;
++		trace.result = rslt; trace.hasResult = true;
++		mvkNativeTraceLog("queue_submit_end", trace);
++	}
+ 	MVKTraceVulkanCallEnd();
+ 	return rslt;
+ }
+@@ -2896,7 +2911,22 @@ MVK_PUBLIC_VULKAN_SYMBOL VkResult vkQueueSubmit2(
+ 
+ 	MVKTraceVulkanCallStart();
+ 	MVKQueue* mvkQ = MVKQueue::getMVKQueue(queue);
++	bool nativeTraceEnabled = mvkNativeTraceEnabled();
++	if (nativeTraceEnabled) {
++		MVKNativeTraceRecord trace = {}; trace.queue = mvkQ;
++		mvkNativeTraceLog("queue_submit_begin", trace);
++	}
++	uint64_t traceStartNs = nativeTraceEnabled ? mvkNativeTraceNow() : 0;
+ 	VkResult rslt = mvkQ->submit(submitCount, pSubmits, fence, kMVKCommandUseQueueSubmit);
++	uint64_t traceEndNs = nativeTraceEnabled ? mvkNativeTraceNow() : 0;
++	if (nativeTraceEnabled) {
++		MVKNativeTraceRecord trace = {}; trace.queue = mvkQ;
++		trace.callBeginNs = traceStartNs; trace.hasCallBeginNs = true;
++		trace.callEndNs = traceEndNs; trace.hasCallEndNs = true;
++		trace.durationNs = traceEndNs - traceStartNs; trace.hasDurationNs = true;
++		trace.result = rslt; trace.hasResult = true;
++		mvkNativeTraceLog("queue_submit_end", trace);
++	}
+ 	MVKTraceVulkanCallEnd();
+ 	return rslt;
+ }
+@@ -3551,7 +3581,31 @@ MVK_PUBLIC_VULKAN_SYMBOL VkResult vkAcquireNextImageKHR(
+ 
+ 	MVKTraceVulkanCallStart();
+     MVKSwapchain* mvkSwapchain = (MVKSwapchain*)swapchain;
+-    VkResult rslt = mvkSwapchain->acquireNextImage(timeout, semaphore, fence, ~0u, pImageIndex);
++	bool nativeTraceEnabled = mvkNativeTraceEnabled();
++	if (nativeTraceEnabled) {
++		MVKNativeTraceRecord trace = {}; trace.swapchain = mvkSwapchain;
++		mvkNativeTraceLog("acquire_begin", trace);
++	}
++	uint64_t acquisitionSequence = 0;
++	uint64_t traceStartNs = nativeTraceEnabled ? mvkNativeTraceNow() : 0;
++    VkResult rslt = mvkSwapchain->acquireNextImage(timeout, semaphore, fence, ~0u, pImageIndex,
++													 nativeTraceEnabled ? &acquisitionSequence : nullptr);
++	uint64_t traceEndNs = nativeTraceEnabled ? mvkNativeTraceNow() : 0;
++	if (nativeTraceEnabled) {
++		MVKNativeTraceRecord trace = {}; trace.swapchain = mvkSwapchain;
++		trace.callBeginNs = traceStartNs; trace.hasCallBeginNs = true;
++		trace.callEndNs = traceEndNs; trace.hasCallEndNs = true;
++		trace.durationNs = traceEndNs - traceStartNs; trace.hasDurationNs = true;
++		trace.result = rslt; trace.hasResult = true;
++		if ((rslt == VK_SUCCESS || rslt == VK_SUBOPTIMAL_KHR) && pImageIndex && *pImageIndex < mvkSwapchain->getImageCount()) {
++			trace.imageIndex = *pImageIndex; trace.hasImageIndex = true;
++			trace.image = mvkSwapchain->getPresentableImage(*pImageIndex);
++		}
++		if (acquisitionSequence) {
++			trace.acquisitionSequence = acquisitionSequence; trace.hasAcquisitionSequence = true;
++		}
++		mvkNativeTraceLog("acquire_end", trace);
++	}
+ 	MVKTraceVulkanCallEnd();
+ 	return rslt;
+ }
+@@ -3562,7 +3616,35 @@ MVK_PUBLIC_VULKAN_SYMBOL VkResult vkQueuePresentKHR(
+ 
+ 	MVKTraceVulkanCallStart();
+     MVKQueue* mvkQ = MVKQueue::getMVKQueue(queue);
++	bool nativeTraceEnabled = mvkNativeTraceEnabled();
++	if (nativeTraceEnabled) {
++		MVKNativeTraceRecord trace = {}; trace.queue = mvkQ;
++		mvkNativeTraceLog("queue_present_begin", trace);
++		if (pPresentInfo && pPresentInfo->pSwapchains && pPresentInfo->pImageIndices) {
++			for (uint32_t itemIdx = 0; itemIdx < pPresentInfo->swapchainCount; itemIdx++) {
++				MVKSwapchain* mvkSwapchain = (MVKSwapchain*)pPresentInfo->pSwapchains[itemIdx];
++				uint32_t imageIndex = pPresentInfo->pImageIndices[itemIdx];
++				MVKNativeTraceRecord item = {}; item.queue = mvkQ; item.swapchain = mvkSwapchain;
++				if (imageIndex < mvkSwapchain->getImageCount()) {
++					MVKPresentableSwapchainImage* image = mvkSwapchain->getPresentableImage(imageIndex);
++					item.image = image; item.imageIndex = imageIndex; item.hasImageIndex = true;
++					item.acquisitionSequence = image->getTraceAcquisitionSequence(); item.hasAcquisitionSequence = true;
++				}
++				mvkNativeTraceLog("present_request", item);
++			}
++		}
++	}
++	uint64_t traceStartNs = nativeTraceEnabled ? mvkNativeTraceNow() : 0;
+     VkResult rslt = mvkQ->submit(pPresentInfo);
++	uint64_t traceEndNs = nativeTraceEnabled ? mvkNativeTraceNow() : 0;
++	if (nativeTraceEnabled) {
++		MVKNativeTraceRecord trace = {}; trace.queue = mvkQ;
++		trace.callBeginNs = traceStartNs; trace.hasCallBeginNs = true;
++		trace.callEndNs = traceEndNs; trace.hasCallEndNs = true;
++		trace.durationNs = traceEndNs - traceStartNs; trace.hasDurationNs = true;
++		trace.result = rslt; trace.hasResult = true;
++		mvkNativeTraceLog("queue_present_end", trace);
++	}
+ 	MVKTraceVulkanCallEnd();
+ 	return rslt;
+ }
+@@ -3612,11 +3694,35 @@ MVK_PUBLIC_VULKAN_SYMBOL VkResult vkAcquireNextImage2KHR(
+ 
+ 	MVKTraceVulkanCallStart();
+ 	MVKSwapchain* mvkSwapchain = (MVKSwapchain*)pAcquireInfo->swapchain;
++	bool nativeTraceEnabled = mvkNativeTraceEnabled();
++	if (nativeTraceEnabled) {
++		MVKNativeTraceRecord trace = {}; trace.swapchain = mvkSwapchain;
++		mvkNativeTraceLog("acquire_begin", trace);
++	}
++	uint64_t acquisitionSequence = 0;
++	uint64_t traceStartNs = nativeTraceEnabled ? mvkNativeTraceNow() : 0;
+ 	VkResult rslt = mvkSwapchain->acquireNextImage(pAcquireInfo->timeout,
+ 												   pAcquireInfo->semaphore,
+ 												   pAcquireInfo->fence,
+ 												   pAcquireInfo->deviceMask,
+-												   pImageIndex);
++												   pImageIndex,
++												   nativeTraceEnabled ? &acquisitionSequence : nullptr);
++	uint64_t traceEndNs = nativeTraceEnabled ? mvkNativeTraceNow() : 0;
++	if (nativeTraceEnabled) {
++		MVKNativeTraceRecord trace = {}; trace.swapchain = mvkSwapchain;
++		trace.callBeginNs = traceStartNs; trace.hasCallBeginNs = true;
++		trace.callEndNs = traceEndNs; trace.hasCallEndNs = true;
++		trace.durationNs = traceEndNs - traceStartNs; trace.hasDurationNs = true;
++		trace.result = rslt; trace.hasResult = true;
++		if ((rslt == VK_SUCCESS || rslt == VK_SUBOPTIMAL_KHR) && pImageIndex && *pImageIndex < mvkSwapchain->getImageCount()) {
++			trace.imageIndex = *pImageIndex; trace.hasImageIndex = true;
++			trace.image = mvkSwapchain->getPresentableImage(*pImageIndex);
++		}
++		if (acquisitionSequence) {
++			trace.acquisitionSequence = acquisitionSequence; trace.hasAcquisitionSequence = true;
++		}
++		mvkNativeTraceLog("acquire_end", trace);
++	}
+ 	MVKTraceVulkanCallEnd();
+ 	return rslt;
+ }

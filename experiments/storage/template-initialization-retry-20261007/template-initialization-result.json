@@ -1,0 +1,46 @@
+{
+  "experiment_id": "20261006T205149Z-step11d3-template-initialize-76363cc5",
+  "decision": "ALLOW",
+  "template_path": "/Users/nima/Library/Caches/FGMetal/prefixes/wine-11.17-mvk142-pristine",
+  "template_retained": false,
+  "template_certified": false,
+  "prefix_size": null,
+  "wineserver_shutdown": null,
+  "wineboot_process_reaped": true,
+  "prefix_removed_after_failure": true,
+  "cleanup_error": null,
+  "storage_watch_events": [],
+  "free_before_bytes": 67393327104,
+  "free_after_bytes": 67407757312,
+  "project_usage_after": {
+    "logical_bytes": 94550700207,
+    "allocated_inode_deduplicated_bytes": 41780490240,
+    "file_count": 121415,
+    "hardlinks_deduplicated": true,
+    "apfs_clone_awareness": false
+  },
+  "preserved_prefixes_after": [
+    "/Users/nima/Library/Caches/FGMetalStep11D-R/step11d2-diag-60s-07-submit-reclaim-split-prefix"
+  ],
+  "graphics_experiments_run": false,
+  "presentation_or_rendering_experiment_run": false,
+  "winevulkan_disabled": true,
+  "moltenvk_process_load_observed": true,
+  "storage_hygiene_status": "PASS_CLEANUP",
+  "result_correction_time_unix": 1791320072.027756,
+  "result_correction_note": "The original result emitter was revised while this attempt was running; it reported MoltenVK load as false and omitted shutdown return records. The raw wineboot log proves MoltenVK 1.4.3 and Vulkan instance/device enumeration occurred. Prefix removal after failure is confirmed.",
+  "winevulkan_disable_override_requested": true,
+  "winevulkan_disabled_by_override": false,
+  "graphics_api_initialization_observed": true,
+  "vulkan_device_enumeration_observed": true,
+  "graphics_initialization_log_sha256": "c23b53a64e311670a6c1b250ebc96b46337b941187a92cecce5f34a0bfd71e2f",
+  "graphics_initialization_observation_lines": [
+    "[mvk-info] MoltenVK version 1.4.3, supporting Vulkan version 1.4.357.",
+    "[mvk-info] MoltenVK version 1.4.3, supporting Vulkan version 1.4.357.",
+    "[mvk-info] GPU device:",
+    "[mvk-info] GPU device:",
+    "[mvk-info] Created VkInstance for Vulkan version 1.0.357, as requested by app, with the following 3 Vulkan extensions enabled:",
+    "[mvk-info] Created VkInstance for Vulkan version 1.0.357, as requested by app, with the following 3 Vulkan extensions enabled:"
+  ],
+  "wineserver_shutdown_records_captured": false
+}

@@ -1,0 +1,258 @@
+ninja: Entering directory `/tmp/fgmetal-step11b1/build'
+[1/257] Generating 'src/dxvk/libdxvk.a.p/dxvk_cursor_vert.h'
+[2/257] Generating 'src/dxvk/libdxvk.a.p/dxvk_cursor_frag.h'
+[3/257] Generating version.h with a custom command
+[4/257] Generating 'src/dxvk/libdxvk.a.p/dxvk_dummy_frag.h'
+[5/257] Generating 'src/dxvk/libdxvk.a.p/dxvk_present_frag.h'
+[6/257] Generating 'src/dxvk/libdxvk.a.p/dxvk_mipgen.h'
+[7/257] Generating 'src/dxvk/libdxvk.a.p/dxvk_present_frag_blit.h'
+[8/257] Generating 'src/dxvk/libdxvk.a.p/dxvk_present_frag_ms.h'
+[9/257] Generating 'src/dxvk/libdxvk.a.p/dxvk_present_frag_ms_blit.h'
+[10/257] Generating 'src/dxvk/libdxvk.a.p/dxvk_present_vert.h'
+[11/257] Generating 'src/dxvk/libdxvk.a.p/hud_chunk_frag_background.h'
+[12/257] Generating 'src/dxvk/libdxvk.a.p/hud_chunk_frag_visualize.h'
+[13/257] Generating 'src/dxvk/libdxvk.a.p/hud_chunk_vert_background.h'
+[14/257] Generating 'src/dxvk/libdxvk.a.p/hud_chunk_vert_visualize.h'
+[15/257] Generating 'src/dxvk/libdxvk.a.p/hud_frame_time_eval.h'
+[16/257] Generating 'src/dxvk/libdxvk.a.p/hud_graph_frag.h'
+[17/257] Generating 'src/dxvk/libdxvk.a.p/hud_graph_vert.h'
+[18/257] Generating 'src/dxvk/libdxvk.a.p/hud_text_frag.h'
+[19/257] Generating subprojects/libdisplay-info/pnp-id-table.c with a custom command
+[20/257] Generating 'src/dxvk/libdxvk.a.p/hud_text_vert.h'
+[21/257] Compiling C object subprojects/libdisplay-info/libdisplay-info.a.p/dmt-table.c.obj
+[22/257] Compiling C object subprojects/libdisplay-info/libdisplay-info.a.p/displayid.c.obj
+[23/257] Compiling C object subprojects/libdisplay-info/libdisplay-info.a.p/cta.c.obj
+[24/257] Compiling C object subprojects/libdisplay-info/libdisplay-info.a.p/gtf.c.obj
+[25/257] Compiling C object subprojects/libdisplay-info/libdisplay-info.a.p/info.c.obj
+[26/257] Compiling C object subprojects/libdisplay-info/libdisplay-info.a.p/log.c.obj
+[27/257] Compiling C object subprojects/libdisplay-info/libdisplay-info.a.p/edid.c.obj
+[28/257] Compiling C object subprojects/libdisplay-info/libdisplay-info.a.p/meson-generated_.._pnp-id-table.c.obj
+[29/257] Compiling C object subprojects/libdisplay-info/libdisplay-info.a.p/memory-stream.c.obj
+[30/257] Compiling C++ object subprojects/dxbc-spirv/libdxbc_spv.a.p/ir_ir.cpp.obj
+[31/257] Compiling C++ object subprojects/dxbc-spirv/libdxbc_spv.a.p/ir_ir_builder.cpp.obj
+[32/257] Compiling C++ object subprojects/dxbc-spirv/libdxbc_spv.a.p/ir_ir_divergence.cpp.obj
+[33/257] Compiling C++ object subprojects/dxbc-spirv/libdxbc_spv.a.p/ir_ir_legalize.cpp.obj
+[34/257] Compiling C++ object subprojects/dxbc-spirv/libdxbc_spv.a.p/ir_ir_dominance.cpp.obj
+[35/257] Compiling C++ object subprojects/dxbc-spirv/libdxbc_spv.a.p/ir_ir_disasm.cpp.obj
+[36/257] Compiling C++ object subprojects/dxbc-spirv/libdxbc_spv.a.p/ir_ir_serialize.cpp.obj
+[37/257] Compiling C++ object subprojects/dxbc-spirv/libdxbc_spv.a.p/ir_ir_utils.cpp.obj
+[38/257] Compiling C++ object subprojects/dxbc-spirv/libdxbc_spv.a.p/ir_passes_ir_pass_cfg_cleanup.cpp.obj
+[39/257] Compiling C++ object subprojects/dxbc-spirv/libdxbc_spv.a.p/ir_passes_ir_pass_cfg_convert.cpp.obj
+[40/257] Compiling C++ object subprojects/dxbc-spirv/libdxbc_spv.a.p/ir_passes_ir_pass_cse.cpp.obj
+[41/257] Compiling C++ object subprojects/dxbc-spirv/libdxbc_spv.a.p/ir_passes_ir_pass_buffer_kind.cpp.obj
+[42/257] Compiling C++ object subprojects/dxbc-spirv/libdxbc_spv.a.p/ir_passes_ir_pass_derivative.cpp.obj
+[43/257] Compiling C++ object subprojects/dxbc-spirv/libdxbc_spv.a.p/ir_passes_ir_pass_lower_consume.cpp.obj
+[44/257] Compiling C++ object subprojects/dxbc-spirv/libdxbc_spv.a.p/ir_passes_ir_pass_descriptor_indexing.cpp.obj
+[45/257] Compiling C++ object subprojects/dxbc-spirv/libdxbc_spv.a.p/ir_passes_ir_pass_function.cpp.obj
+[46/257] Compiling C++ object subprojects/dxbc-spirv/libdxbc_spv.a.p/ir_passes_ir_pass_lower_min16.cpp.obj
+[47/257] Compiling C++ object subprojects/dxbc-spirv/libdxbc_spv.a.p/ir_passes_ir_pass_arithmetic.cpp.obj
+[48/257] Compiling C++ object subprojects/dxbc-spirv/libdxbc_spv.a.p/ir_passes_ir_pass_propagate_types.cpp.obj
+[49/257] Compiling C++ object subprojects/dxbc-spirv/libdxbc_spv.a.p/ir_passes_ir_pass_remove_unused.cpp.obj
+[50/257] Compiling C++ object subprojects/dxbc-spirv/libdxbc_spv.a.p/ir_passes_ir_pass_lower_io.cpp.obj
+[51/257] Compiling C++ object subprojects/dxbc-spirv/libdxbc_spv.a.p/ir_passes_ir_pass_propagate_resource_types.cpp.obj
+[52/257] Compiling C++ object subprojects/dxbc-spirv/libdxbc_spv.a.p/ir_passes_ir_pass_scalarize.cpp.obj
+[53/257] Compiling C++ object subprojects/dxbc-spirv/libdxbc_spv.a.p/util_util_float16.cpp.obj
+[54/257] Compiling C++ object subprojects/dxbc-spirv/libdxbc_spv.a.p/util_util_log.cpp.obj
+[55/257] Compiling C++ object subprojects/dxbc-spirv/libdxbc_spv.a.p/ir_passes_ir_pass_ssa.cpp.obj
+[56/257] Compiling C++ object subprojects/dxbc-spirv/libdxbc_spv.a.p/util_util_md5.cpp.obj
+[57/257] Compiling C++ object subprojects/dxbc-spirv/libdxbc_spv.a.p/util_util_swizzle.cpp.obj
+[58/257] Compiling C++ object subprojects/dxbc-spirv/libdxbc_spv.a.p/ir_passes_ir_pass_sync.cpp.obj
+[59/257] Compiling C++ object subprojects/dxbc-spirv/libdxbc_spv.a.p/sm3_sm3_types.cpp.obj
+[60/257] Compiling C++ object subprojects/dxbc-spirv/libdxbc_spv.a.p/ir_passes_ir_pass_scratch.cpp.obj
+[61/257] Compiling C++ object subprojects/dxbc-spirv/libdxbc_spv.a.p/sm3_sm3_disasm.cpp.obj
+[62/257] Compiling C++ object subprojects/dxbc-spirv/libdxbc_spv.a.p/sm3_sm3_parser.cpp.obj
+[63/257] Compiling C++ object subprojects/dxbc-spirv/libdxbc_spv.a.p/sm3_sm3_registers.cpp.obj
+[64/257] Compiling C++ object subprojects/dxbc-spirv/libdxbc_spv.a.p/sm3_sm3_io_map.cpp.obj
+[65/257] Compiling C++ object subprojects/dxbc-spirv/libdxbc_spv.a.p/dxbc_dxbc_api.cpp.obj
+[66/257] Compiling C++ object subprojects/dxbc-spirv/libdxbc_spv.a.p/dxbc_dxbc_container.cpp.obj
+[67/257] Compiling C++ object subprojects/dxbc-spirv/libdxbc_spv.a.p/sm3_sm3_converter.cpp.obj
+[68/257] Compiling C++ object subprojects/dxbc-spirv/libdxbc_spv.a.p/sm3_sm3_resources.cpp.obj
+[69/257] Compiling C++ object subprojects/dxbc-spirv/libdxbc_spv.a.p/dxbc_dxbc_disasm.cpp.obj
+[70/257] Compiling C++ object subprojects/dxbc-spirv/libdxbc_spv.a.p/dxbc_dxbc_interface.cpp.obj
+[71/257] Compiling C++ object subprojects/dxbc-spirv/libdxbc_spv.a.p/dxbc_dxbc_parser.cpp.obj
+[72/257] Compiling C++ object subprojects/dxbc-spirv/libdxbc_spv.a.p/dxbc_dxbc_io_map.cpp.obj
+[73/257] Compiling C++ object subprojects/dxbc-spirv/libdxbc_spv.a.p/dxbc_dxbc_converter.cpp.obj
+[74/257] Compiling C++ object subprojects/dxbc-spirv/libdxbc_spv.a.p/dxbc_dxbc_registers.cpp.obj
+[75/257] Compiling C++ object subprojects/dxbc-spirv/libdxbc_spv.a.p/dxbc_dxbc_signature.cpp.obj
+[76/257] Compiling C++ object subprojects/dxbc-spirv/libdxbc_spv.a.p/dxbc_dxbc_types.cpp.obj
+[77/257] Compiling C++ object subprojects/dxbc-spirv/libdxbc_spv.a.p/spirv_spirv_mapping.cpp.obj
+[78/257] Compiling C++ object subprojects/dxbc-spirv/libdxbc_spv.a.p/dxbc_dxbc_resources.cpp.obj
+[79/257] Compiling C++ object src/wsi/libwsi.a.p/wsi_edid.cpp.obj
+[80/257] Compiling C++ object src/wsi/libwsi.a.p/wsi_platform.cpp.obj
+[81/257] Compiling C++ object src/wsi/libwsi.a.p/win32_wsi_monitor_win32.cpp.obj
+[82/257] Compiling C++ object src/wsi/libwsi.a.p/win32_wsi_platform_win32.cpp.obj
+[83/257] Compiling C++ object src/wsi/libwsi.a.p/sdl3_wsi_monitor_sdl3.cpp.obj
+[84/257] Compiling C++ object src/wsi/libwsi.a.p/sdl3_wsi_platform_sdl3.cpp.obj
+[85/257] Compiling C++ object src/wsi/libwsi.a.p/sdl3_wsi_window_sdl3.cpp.obj
+[86/257] Compiling C++ object src/wsi/libwsi.a.p/sdl2_wsi_monitor_sdl2.cpp.obj
+[87/257] Compiling C++ object src/wsi/libwsi.a.p/sdl2_wsi_platform_sdl2.cpp.obj
+[88/257] Compiling C++ object src/wsi/libwsi.a.p/sdl2_wsi_window_sdl2.cpp.obj
+[89/257] Compiling C++ object src/wsi/libwsi.a.p/glfw_wsi_monitor_glfw.cpp.obj
+[90/257] Compiling C++ object src/wsi/libwsi.a.p/glfw_wsi_platform_glfw.cpp.obj
+[91/257] Compiling C++ object src/wsi/libwsi.a.p/glfw_wsi_window_glfw.cpp.obj
+[92/257] Compiling C++ object src/wsi/libwsi.a.p/win32_wsi_window_win32.cpp.obj
+[93/257] Compiling C++ object src/util/libutil.a.p/util_string.cpp.obj
+[94/257] Compiling C++ object src/util/libutil.a.p/util_env.cpp.obj
+[95/257] Compiling C++ object src/util/libutil.a.p/util_fps_limiter.cpp.obj
+[96/257] Compiling C++ object subprojects/dxbc-spirv/libdxbc_spv.a.p/spirv_spirv_builder.cpp.obj
+[97/257] Compiling C++ object src/util/libutil.a.p/util_flush.cpp.obj
+[98/257] Compiling C++ object src/util/libutil.a.p/util_file.cpp.obj
+[99/257] Compiling C++ object src/util/libutil.a.p/util_luid.cpp.obj
+[100/257] Compiling C++ object src/util/libutil.a.p/util_gdi.cpp.obj
+[101/257] Compiling C++ object src/util/libutil.a.p/util_matrix.cpp.obj
+[102/257] Compiling C++ object src/util/libutil.a.p/util_shared_res.cpp.obj
+[103/257] Compiling C++ object src/util/libutil.a.p/util_unmap.cpp.obj
+[104/257] Compiling C++ object src/util/libutil.a.p/util_sleep.cpp.obj
+[105/257] Compiling C++ object src/util/libutil.a.p/thread.cpp.obj
+[106/257] Compiling C++ object src/util/libutil.a.p/com_com_destruction_notifier.cpp.obj
+[107/257] Compiling C++ object src/util/libutil.a.p/com_com_private_data.cpp.obj
+[108/257] Compiling C++ object src/util/libutil.a.p/log_log.cpp.obj
+[109/257] Compiling C object src/util/libutil.a.p/sha1_sha1.c.obj
+[110/257] Compiling C++ object src/util/libutil.a.p/com_com_guid.cpp.obj
+[111/257] Compiling C++ object src/util/libutil.a.p/sha1_sha1_util.cpp.obj
+[112/257] Compiling C++ object src/util/libutil.a.p/log_log_debug.cpp.obj
+[113/257] Compiling C++ object src/util/libutil.a.p/sync_sync_recursive.cpp.obj
+[114/257] Compiling C++ object src/util/libutil.a.p/sync_sync_scoped.cpp.obj
+[115/257] Compiling C++ object src/spirv/libspirv.a.p/spirv_code_buffer.cpp.obj
+[116/257] Compiling C++ object src/dxvk/libdxvk.a.p/dxvk_access.cpp.obj
+[117/257] Compiling C++ object src/vulkan/libvkcommon.a.p/vulkan_names.cpp.obj
+[118/257] Compiling C++ object src/vulkan/libvkcommon.a.p/vulkan_loader.cpp.obj
+[119/257] Compiling C++ object src/dxvk/libdxvk.a.p/dxvk_allocator.cpp.obj
+[120/257] Compiling C++ object src/dxvk/libdxvk.a.p/dxvk_adapter.cpp.obj
+[121/257] Compiling C++ object src/dxvk/libdxvk.a.p/dxvk_barrier.cpp.obj
+[122/257] Compiling C++ object src/util/libutil.a.p/config_config.cpp.obj
+[123/257] Compiling C++ object src/dxvk/libdxvk.a.p/dxvk_buffer.cpp.obj
+[124/257] Compiling C++ object src/dxvk/libdxvk.a.p/dxvk_compute.cpp.obj
+[125/257] Compiling C++ object src/dxvk/libdxvk.a.p/dxvk_constant_state.cpp.obj
+[126/257] Compiling C++ object src/dxvk/libdxvk.a.p/dxvk_cmdlist.cpp.obj
+[127/257] Compiling C++ object src/dxvk/libdxvk.a.p/dxvk_cs.cpp.obj
+[128/257] Compiling C++ object src/dxvk/libdxvk.a.p/dxvk_descriptor_heap.cpp.obj
+[129/257] Compiling C++ object src/dxvk/libdxvk.a.p/dxvk_descriptor_info.cpp.obj
+[130/257] Compiling C++ object src/dxvk/libdxvk.a.p/dxvk_descriptor_pool.cpp.obj
+[131/257] Compiling C++ object src/dxvk/libdxvk.a.p/dxvk_descriptor_worker.cpp.obj
+[132/257] Compiling C++ object src/dxvk/libdxvk.a.p/dxvk_device.cpp.obj
+[133/257] Compiling C++ object src/dxvk/libdxvk.a.p/dxvk_device_filter.cpp.obj
+[134/257] Compiling C++ object src/dxvk/libdxvk.a.p/dxvk_format.cpp.obj
+[135/257] Compiling C++ object src/dxvk/libdxvk.a.p/dxvk_fence.cpp.obj
+[136/257] Compiling C++ object src/dxvk/libdxvk.a.p/dxvk_device_info.cpp.obj
+[137/257] Compiling C++ object src/dxvk/libdxvk.a.p/dxvk_context.cpp.obj
+[138/257] Compiling C++ object src/dxvk/libdxvk.a.p/dxvk_framebuffer.cpp.obj
+[139/257] Compiling C++ object src/dxvk/libdxvk.a.p/dxvk_gpu_event.cpp.obj
+[140/257] Compiling C++ object src/dxvk/libdxvk.a.p/dxvk_gpu_query.cpp.obj
+[141/257] Compiling C++ object src/dxvk/libdxvk.a.p/dxvk_hang.cpp.obj
+[142/257] Compiling C++ object src/dxvk/libdxvk.a.p/dxvk_implicit_resolve.cpp.obj
+[143/257] Compiling C++ object src/dxvk/libdxvk.a.p/dxvk_graphics.cpp.obj
+[144/257] Compiling C++ object src/dxvk/libdxvk.a.p/dxvk_image.cpp.obj
+[145/257] Compiling C++ object src/dxvk/libdxvk.a.p/dxvk_latency_builtin.cpp.obj
+[146/257] Compiling C++ object src/dxvk/libdxvk.a.p/dxvk_instance.cpp.obj
+[147/257] Compiling C++ object src/dxvk/libdxvk.a.p/dxvk_latency_reflex.cpp.obj
+[148/257] Compiling C++ object src/dxvk/libdxvk.a.p/dxvk_memory.cpp.obj
+[149/257] Compiling C++ object src/dxvk/libdxvk.a.p/dxvk_meta_clear.cpp.obj
+[150/257] Compiling C++ object src/dxvk/libdxvk.a.p/dxvk_meta_mipgen.cpp.obj
+[151/257] Compiling C++ object src/dxvk/libdxvk.a.p/dxvk_meta_copy.cpp.obj
+[152/257] Compiling C++ object src/dxvk/libdxvk.a.p/dxvk_meta_blit.cpp.obj
+[153/257] Compiling C++ object src/dxvk/libdxvk.a.p/dxvk_options.cpp.obj
+[154/257] Compiling C++ object src/dxvk/libdxvk.a.p/dxvk_meta_resolve.cpp.obj
+[155/257] Compiling C++ object src/dxvk/libdxvk.a.p/dxvk_platform_exts.cpp.obj
+[156/257] Compiling C++ object src/dxvk/libdxvk.a.p/dxvk_pipelayout.cpp.obj
+[157/257] Compiling C++ object src/dxvk/libdxvk.a.p/dxvk_pipemanager.cpp.obj
+[158/257] Compiling C++ object src/dxvk/libdxvk.a.p/dxvk_queue.cpp.obj
+[159/257] Compiling C++ object src/dxvk/libdxvk.a.p/dxvk_presenter.cpp.obj
+[160/257] Compiling C++ object src/dxvk/libdxvk.a.p/dxvk_sampler.cpp.obj
+[161/257] Compiling C++ object src/dxvk/libdxvk.a.p/dxvk_shader.cpp.obj
+[162/257] Compiling C++ object src/dxvk/libdxvk.a.p/dxvk_shader_io.cpp.obj
+[163/257] Compiling C++ object src/dxvk/libdxvk.a.p/dxvk_shader_key.cpp.obj
+[164/257] Compiling C++ object src/dxvk/libdxvk.a.p/dxvk_shader_cache.cpp.obj
+[165/257] Compiling C++ object src/dxvk/libdxvk.a.p/dxvk_shader_builtin.cpp.obj
+[166/257] Compiling C++ object src/dxvk/libdxvk.a.p/dxvk_signal.cpp.obj
+[167/257] Compiling C++ object src/dxvk/libdxvk.a.p/dxvk_shader_ir.cpp.obj
+[168/257] Compiling C++ object src/dxvk/libdxvk.a.p/dxvk_staging.cpp.obj
+[169/257] Compiling C++ object src/dxvk/libdxvk.a.p/dxvk_shader_spirv.cpp.obj
+[170/257] Compiling C++ object src/dxvk/libdxvk.a.p/dxvk_sparse.cpp.obj
+[171/257] Compiling C++ object src/dxvk/libdxvk.a.p/dxvk_stats.cpp.obj
+[172/257] Compiling C++ object src/dxvk/libdxvk.a.p/dxvk_util.cpp.obj
+[173/257] Compiling C++ object src/dxvk/libdxvk.a.p/hud_dxvk_hud_font.cpp.obj
+[174/257] Compiling C++ object src/dxvk/libdxvk.a.p/dxvk_unbound.cpp.obj
+[175/257] Compiling C++ object src/dxvk/libdxvk.a.p/dxvk_swapchain_blitter.cpp.obj
+[176/257] Compiling C++ object src/dxvk/libdxvk.a.p/hud_dxvk_hud.cpp.obj
+[177/257] Compiling C++ object src/dxvk/libdxvk.a.p/dxvk_openxr.cpp.obj
+[178/257] Generating 'src/d3d11/d3d11.dll.p/d3d11_video_blit_frag.h'
+[179/257] Compiling C++ object src/dxvk/libdxvk.a.p/dxvk_openvr.cpp.obj
+[180/257] Generating 'src/d3d11/d3d11.dll.p/d3d11_video_blit_vert.h'
+[181/257] Generating 'src/d3d11/d3d11.dll.p/d3d11_composition_frag.h'
+[182/257] Compiling C++ object src/dxvk/libdxvk.a.p/hud_dxvk_hud_renderer.cpp.obj
+[183/257] Linking static target subprojects/libdisplay-info/libdisplay-info.a
+[184/257] Linking static target src/wsi/libwsi.a
+[185/257] Generating 'src/d3d11/d3d11.dll.p/d3d11_composition_vert.h'
+[186/257] Linking static target subprojects/dxbc-spirv/libdxbc_spv.a
+[187/257] Linking static target src/spirv/libspirv.a
+[188/257] Linking static target src/util/libutil.a
+[189/257] Linking static target src/vulkan/libvkcommon.a
+[190/257] Generating 'src/dxgi/dxgi.dll.p/version.o'
+[191/257] Compiling C++ object src/dxvk/libdxvk.a.p/hud_dxvk_hud_item.cpp.obj
+[192/257] Linking static target src/dxvk/libdxvk.a
+[193/257] Compiling C++ object src/dxgi/dxgi.dll.p/dxgi_enums.cpp.obj
+[194/257] Compiling C++ object src/dxgi/dxgi.dll.p/dxgi_adapter.cpp.obj
+[195/257] Compiling C++ object src/dxgi/dxgi.dll.p/dxgi_factory.cpp.obj
+[196/257] Compiling C++ object src/dxgi/dxgi.dll.p/dxgi_format.cpp.obj
+[197/257] Compiling C++ object src/dxgi/dxgi.dll.p/dxgi_main.cpp.obj
+[198/257] Compiling C++ object src/dxgi/dxgi.dll.p/dxgi_options.cpp.obj
+[199/257] Compiling C++ object src/dxgi/dxgi.dll.p/dxgi_monitor.cpp.obj
+[200/257] Generating 'src/d3d11/d3d11.dll.p/version.o'
+[201/257] Compiling C++ object src/dxgi/dxgi.dll.p/dxgi_surface.cpp.obj
+[202/257] Compiling C++ object src/dxgi/dxgi.dll.p/dxgi_output.cpp.obj
+[203/257] Compiling C++ object src/dxgi/dxgi.dll.p/dxgi_swapchain.cpp.obj
+[204/257] Compiling C++ object src/d3d11/d3d11.dll.p/.._dxgi_dxgi_format.cpp.obj
+[205/257] Compiling C++ object src/d3d11/d3d11.dll.p/d3d11_blend.cpp.obj
+[206/257] Compiling C++ object src/d3d11/d3d11.dll.p/d3d11_annotation.cpp.obj
+[207/257] Compiling C++ object src/d3d11/d3d11.dll.p/d3d11_buffer.cpp.obj
+[208/257] Compiling C++ object src/d3d11/d3d11.dll.p/d3d11_class_linkage.cpp.obj
+[209/257] Compiling C++ object src/d3d11/d3d11.dll.p/d3d11_cmdlist.cpp.obj
+[210/257] Compiling C++ object src/d3d11/d3d11.dll.p/d3d11_context_def.cpp.obj
+[211/257] Compiling C++ object src/d3d11/d3d11.dll.p/d3d11_context_ext.cpp.obj
+[212/257] Compiling C++ object src/d3d11/d3d11.dll.p/d3d11_context_imm.cpp.obj
+[213/257] Compiling C++ object src/d3d11/d3d11.dll.p/d3d11_cuda.cpp.obj
+[214/257] Compiling C++ object src/d3d11/d3d11.dll.p/d3d11_depth_stencil.cpp.obj
+[215/257] Compiling C++ object src/d3d11/d3d11.dll.p/d3d11_enums.cpp.obj
+[216/257] Compiling C++ object src/d3d11/d3d11.dll.p/d3d11_features.cpp.obj
+[217/257] Compiling C++ object src/d3d11/d3d11.dll.p/d3d11_fence.cpp.obj
+[218/257] Compiling C++ object src/d3d11/d3d11.dll.p/d3d11_gdi.cpp.obj
+[219/257] Compiling C++ object src/d3d11/d3d11.dll.p/d3d11_device.cpp.obj
+[220/257] Compiling C++ object src/d3d11/d3d11.dll.p/d3d11_context.cpp.obj
+[221/257] Compiling C++ object src/d3d11/d3d11.dll.p/d3d11_initializer.cpp.obj
+[222/257] Compiling C++ object src/d3d11/d3d11.dll.p/d3d11_input_layout.cpp.obj
+[223/257] Compiling C++ object src/d3d11/d3d11.dll.p/d3d11_interop.cpp.obj
+[224/257] Compiling C++ object src/d3d11/d3d11.dll.p/d3d11_main.cpp.obj
+[225/257] Compiling C++ object src/d3d11/d3d11.dll.p/d3d11_on_12.cpp.obj
+[226/257] Compiling C++ object src/d3d11/d3d11.dll.p/d3d11_options.cpp.obj
+[227/257] Compiling C++ object src/d3d11/d3d11.dll.p/d3d11_query.cpp.obj
+[228/257] Compiling C++ object src/d3d11/d3d11.dll.p/d3d11_rasterizer.cpp.obj
+[229/257] Compiling C++ object src/d3d11/d3d11.dll.p/d3d11_resource.cpp.obj
+[230/257] Compiling C++ object src/d3d11/d3d11.dll.p/d3d11_state.cpp.obj
+[231/257] Compiling C++ object src/d3d11/d3d11.dll.p/d3d11_sampler.cpp.obj
+[232/257] Compiling C++ object src/d3d11/d3d11.dll.p/d3d11_shader.cpp.obj
+[233/257] Compiling C++ object src/d3d11/d3d11.dll.p/d3d11_state_object.cpp.obj
+[234/257] Compiling C++ object src/d3d11/d3d11.dll.p/d3d11_texture.cpp.obj
+[235/257] Compiling C++ object src/d3d11/d3d11.dll.p/d3d11_swapchain.cpp.obj
+[236/257] Compiling C++ object src/d3d11/d3d11.dll.p/d3d11_util.cpp.obj
+[237/257] Compiling C++ object src/d3d11/d3d11.dll.p/d3d11_video.cpp.obj
+[238/257] Compiling C++ object src/d3d11/d3d11.dll.p/d3d11_view_dsv.cpp.obj
+[239/257] Compiling C++ object src/d3d11/d3d11.dll.p/d3d11_view_rtv.cpp.obj
+[240/257] Compiling C++ object src/d3d11/d3d11.dll.p/d3d11_view_srv.cpp.obj
+[241/257] Compiling C++ object src/d3d11/d3d11.dll.p/d3d11_view_uav.cpp.obj
+[242/257] Compiling C++ object src/d3d11/d3d11.dll.p/.._d3d10_d3d10_blend.cpp.obj
+[243/257] Compiling C++ object src/d3d11/d3d11.dll.p/.._d3d10_d3d10_buffer.cpp.obj
+[244/257] Compiling C++ object src/d3d11/d3d11.dll.p/.._d3d10_d3d10_depth_stencil.cpp.obj
+[245/257] Compiling C++ object src/d3d11/d3d11.dll.p/.._d3d10_d3d10_multithread.cpp.obj
+[246/257] Compiling C++ object src/d3d11/d3d11.dll.p/.._d3d10_d3d10_device.cpp.obj
+[247/257] Compiling C++ object src/d3d11/d3d11.dll.p/.._d3d10_d3d10_input_layout.cpp.obj
+[248/257] Compiling C++ object src/d3d11/d3d11.dll.p/.._d3d10_d3d10_query.cpp.obj
+[249/257] Compiling C++ object src/d3d11/d3d11.dll.p/.._d3d10_d3d10_rasterizer.cpp.obj
+[250/257] Compiling C++ object src/d3d11/d3d11.dll.p/.._d3d10_d3d10_sampler.cpp.obj
+[251/257] Compiling C++ object src/d3d11/d3d11.dll.p/.._d3d10_d3d10_texture.cpp.obj
+[252/257] Compiling C++ object src/d3d11/d3d11.dll.p/.._d3d10_d3d10_util.cpp.obj
+[253/257] Linking target src/dxgi/dxgi.dll
+[254/257] Compiling C++ object src/d3d11/d3d11.dll.p/.._d3d10_d3d10_view_dsv.cpp.obj
+[255/257] Compiling C++ object src/d3d11/d3d11.dll.p/.._d3d10_d3d10_view_rtv.cpp.obj
+[256/257] Compiling C++ object src/d3d11/d3d11.dll.p/.._d3d10_d3d10_view_srv.cpp.obj
+[257/257] Linking target src/d3d11/d3d11.dll

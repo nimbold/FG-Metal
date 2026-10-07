@@ -1,0 +1,42 @@
+{
+  "bytes_reclaimed": 2303463424,
+  "cleanup_receipt": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/smoke-runs/step11d3-storage-policy-smoke-20261007-34b4237d66004223/prefix-cleanup.json",
+  "cleanup_receipt_sha256": "5591e2b1cad86576cde6e08ce4134f4146525621baecf0e19a61782f8313d646",
+  "created_at_unix": 1791339730.504694,
+  "experiment_id": "step11d3-storage-policy-smoke-20261007-34b4237d66004223",
+  "failure_cleanup_test": "PASS",
+  "free_space_status": "PASS",
+  "graphics_experiments_run": false,
+  "manifest_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/manifests/step11d3-storage-policy-smoke-20261007-34b4237d66004223.json",
+  "manifest_sha256": "1f59c5413a0069e3ebe6ff7f6578a6b22ea061b1749ee4386296636219cd565e",
+  "prefix_created": true,
+  "prefix_deleted": true,
+  "preflight_attestation_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/smoke-runs/step11d3-storage-policy-smoke-20261007-34b4237d66004223/gate0-preflight-attestation.json",
+  "preflight_attestation_sha256": "35e07abf273ec7166e41faae6f07c5c21c3ed335f5f5e9e24cbca1a2bb0c5de3",
+  "preserved_prefix_policy": "PASS",
+  "schema_version": 1,
+  "smoke_nonce_claim_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/smoke-claims/step11d3-storage-policy-smoke-20261007-34b4237d66004223.json",
+  "smoke_nonce_claim_sha256": "81aac9ee6fc91d0ca66b4cdf561a0c036bbd67043774f907d34c4e1666dcbb0b",
+  "smoke_report_hmac_sha256": "84d2abb30757a6e199d3e047bee81d0ae6fe45cc294c016c923aac14d3f0558f",
+  "status": "PASS",
+  "storage_hygiene_status": "PASS",
+  "synthetic_policy_suite": {
+    "sha256": "12c43532bb30863561bcd584c2b7595e909a36b4fb9656ba423ce9894c8556d7",
+    "skipped_count": 0,
+    "status": "PASS",
+    "suite_output_sha256": "1ea955145f8cf490438c295ea7ecfb582c128490cb9938cbf7eb37fa055ddeea",
+    "test_count": 18,
+    "test_file": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/test_storage_policy.py",
+    "tests": [
+      "test_normal_cleanup_removes_prefix",
+      "test_original_failure_still_runs_and_finishes_cleanup",
+      "test_system_exit_zero_cannot_hide_cleanup_failure",
+      "test_uncertified_prefix_is_rejected",
+      "test_preservation_stays_within_configured_cap",
+      "test_full_preserved_cap_leaves_uncertified_prefix_for_gate_block"
+    ]
+  },
+  "system_exit_zero_cleanup_precedence": true,
+  "uncertified_prefix_rejection": "PASS",
+  "wine_app_launched": false
+}

@@ -1,0 +1,32 @@
+{
+  "name": "flipseq-internal",
+  "exit_status": 0,
+  "wall_seconds": 30.629371499991976,
+  "internal_wsi_enabled": true,
+  "requested_source_hz": 30,
+  "duration_seconds": 30,
+  "swap_effect": "DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL",
+  "buffer_count": 2,
+  "backbuffer_trace_enabled": true,
+  "waitable_requested": true,
+  "app_present_rows": 901,
+  "last_app_present_row": "present,901,30002330,0x00000000,0,0,0,0x00000000,0x00000000,3,0,1,0,1",
+  "semantics_observation_rows": 901,
+  "last_semantics_observation": "observe,901,00000000,901,00000000,900,39856246,39856248,6642707615480,0,0,000000000087abb0,00000000,00000000",
+  "internal_wsi_log_lines": 2613,
+  "backbuffer_trace_lines": 0,
+  "backbuffer_create_lines": 0,
+  "backbuffer_present_begin_lines": 0,
+  "backbuffer_rotation_slot_lines": 0,
+  "app_rotation_skipped_lines": 0,
+  "rejected_application_presents": 0,
+  "dll_source": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/flipseq-r5-exact-20261006/r5-dlls",
+  "dll_sha256": {
+    "d3d11.dll": "e747ca5a5c2087d1f788762a5c4bae13939593a2cb89dedf2f7c04999ab94de5",
+    "dxgi.dll": "58e972688c739ee8444c8efa7a175503ff8dd0774ceb63e9b8526168054d9132"
+  },
+  "app_sha256": "35a4f3be97b2b80aabc05f5bee1df3f766b175d042190c7c97997b52436b7d41",
+  "human_visual_confirmation": "not requested for this accounting run",
+  "screen_capture": false,
+  "cpu_pixel_readback": false
+}

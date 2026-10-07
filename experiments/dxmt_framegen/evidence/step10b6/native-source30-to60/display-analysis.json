@@ -1,0 +1,100 @@
+{
+  "application_surface_ids": [
+    96,
+    151,
+    158
+  ],
+  "ca_present_request": {
+    "count": 1236,
+    "gap_rate_hz": 60.00139897901504,
+    "span_seconds": 20.582853417
+  },
+  "ca_presented_handler": {
+    "count": 1235,
+    "gap_rate_hz": 60.000500572409564,
+    "span_seconds": 20.566495083
+  },
+  "display_surface_intervals": {
+    "adjacent_start_gap_ms": {
+      "max": 83.332375,
+      "n": 682,
+      "p50": 33.332917,
+      "p95": 33.33299795,
+      "p99": 33.333
+    },
+    "adjacent_start_gap_rate_hz": 33.268684401399874,
+    "count": 683,
+    "cpu_to_display_latency_ms": {
+      "max": 49.89475,
+      "n": 682,
+      "p50": 48.383478999999994,
+      "p95": 48.866433650000005,
+      "p99": 49.07665327
+    },
+    "direct_to_display": {
+      "No": 1,
+      "Yes": 682
+    },
+    "direct_to_display_failure_reason": {
+      "(empty)": 683
+    },
+    "duration_ms": {
+      "max": 83.332375,
+      "n": 683,
+      "p50": 33.332917,
+      "p95": 33.3329959,
+      "p99": 33.333
+    },
+    "frame_label_count": 682,
+    "frame_label_step": {
+      "1": 136,
+      "2": 544,
+      "4": 1
+    },
+    "frame_label_step_stats": {
+      "max": 4.0,
+      "n": 681,
+      "p50": 2.0,
+      "p95": 2.0,
+      "p99": 2.0
+    },
+    "row_rate_hz": 33.31746546357201,
+    "span_seconds": 20.499758625
+  },
+  "dxmt_present_call_alignment": null,
+  "native_callback_alignment": {
+    "adjacent_color_changes": 1235,
+    "alignment_residual_max_ns": 295917.0,
+    "alignment_residual_p95_ns": 50500.0,
+    "callback_rate_hz": 60.00182033862634,
+    "gpu_completion_count": 1236,
+    "matched_rows": 1236,
+    "native_csv_rows": 1678,
+    "native_start_index": 219,
+    "output_kind_counts": {
+      "1": 309,
+      "2": 618,
+      "3": 309
+    },
+    "positive_presented_time_count": 1236,
+    "presented_handler_count": 1236,
+    "status": "ALIGNED",
+    "trace_to_mach_offset_ns": 346976018598333,
+    "unique_colors": 1236,
+    "window_seconds": 20.582708875,
+    "zero_presented_time_count": 0
+  },
+  "process_name": "native_display_control",
+  "quantile_method": "linear interpolation at rank (n - 1) * p",
+  "surface_display_names": [
+    "Built-In Display 1"
+  ],
+  "trace_duration_seconds": 20.863931,
+  "vsync_by_surface_display_in_surface_window": {
+    "Built-In Display 1": {
+      "count": 1230,
+      "gap_rate_hz": 59.95192540956077,
+      "span_seconds": 20.499758625
+    }
+  }
+}

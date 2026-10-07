@@ -1,0 +1,16 @@
+{
+  "canonical_artifact_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/be440874606959c6ef3a7d5f54d22632455672c74b387157b89900509d3580d9/libMoltenVKShaderConverter.a",
+  "completed_at_unix": 1791344873.889395,
+  "isolated_inode": 93189239,
+  "isolated_link_count": 1,
+  "lease_hmac_sha256": "3fc9a3fdc6e66fabdfdb085a9388f67e732bdfbe420acdae96620adf4bdf17f6",
+  "prepared_at_unix": 1791344873.8708448,
+  "previous_inode": 91466994,
+  "previous_link_count": 2,
+  "reason": "Step 11D.3 Gate 0 isolates schema-v1 CAS payloads from mutable build-tree hardlink aliases",
+  "receipt_type": "LEGACY_CAS_HARDLINK_ISOLATION",
+  "result": "DETACHED_WITH_HASH_PRESERVED",
+  "schema_version": 1,
+  "sha256": "be440874606959c6ef3a7d5f54d22632455672c74b387157b89900509d3580d9",
+  "size_bytes": 42264984
+}

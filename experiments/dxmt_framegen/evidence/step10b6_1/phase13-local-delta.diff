@@ -1,0 +1,23 @@
+--- base-local/src/winemetal/unix/winemetal_unix.c
++++ property-local/src/winemetal/unix/winemetal_unix.c
+@@ -1740,6 +1740,20 @@
+     layer.displaySyncEnabled = props->display_sync_enabled;
+     layer.drawableSize = CGSizeMake(props->drawable_width, props->drawable_height);
+     layer.pixelFormat = to_metal_pixel_format(props->pixel_format);
++    /* LOCAL DOWNSTREAM EXPERIMENT ONLY, Phase 13. At most one public property
++     * changes per run. Absent the property selector this is the matched base.
++     * Hypotheses are supported by the retained native/runtime getter table. */
++    const char *experiment = getenv("DXMT_FRAMEGEN_EXPERIMENT_PUBLIC_PROPERTY");
++    const char *allow = getenv("DXMT_FRAMEGEN_EXPERIMENT_ALLOW_FULLSCREEN");
++    const char *harness = getenv("DXMT_FRAMEGEN_EXPERIMENT_CONTROLLED_HARNESS");
++    if (experiment && allow && harness && !strcmp(allow, "1") &&
++        !strcmp(harness, "step10b6_1")) {
++      if (!strcmp(experiment, "contents-scale-2"))
++        layer.contentsScale = 2.0;
++      else if (!strcmp(experiment, "parent-opaque") &&
++               [layer.delegate isKindOfClass:NSView.class])
++        ((NSView *)layer.delegate).superview.layer.opaque = YES;
++    }
+     framegen_schedule_layer_snapshots(layer);
+   });
+   return STATUS_SUCCESS;

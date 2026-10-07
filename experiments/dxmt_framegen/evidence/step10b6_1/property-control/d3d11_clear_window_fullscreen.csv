@@ -1,0 +1,7 @@
+event,tick_ms,requested,fullscreen_state,visible,iconic,foreground,window_style,window_ex_style,left,top,right,bottom,hr
+before_transition,483147280,1,0,1,0,1,0x14cf0000,0x100,0,33,648,427,0x00000000
+transition_requested,483147312,1,1,1,0,1,0x14000000,0x8,0,0,1470,956,0x00000000
+mode_settled,483151343,1,1,1,0,1,0x14000000,0x8,0,0,1470,956,0x00000000
+measurement_ready,483154322,1,1,1,0,1,0x14000000,0x8,0,0,1470,956,0x00000000
+before_process_exit,483191387,1,1,1,0,1,0x14000000,0x8,0,0,1470,956,0x00000000
+restore_requested,483191514,0,0,1,0,1,0x14cf0000,0x100,0,33,648,427,0x00000000

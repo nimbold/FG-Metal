@@ -1,0 +1,8 @@
+{
+  "created_by_this_trial": true,
+  "prefix_path": "/Users/nima/Library/Caches/FGMetalStep11D-R/step11d1-cadence-A2-prefix",
+  "wineserver_kill_and_wait_returned_zero": true,
+  "removed_files": 4910,
+  "removed_bytes": 2293450142,
+  "reason": "release isolated temporary Wine prefix after successful normal test exit; logs and manifests are retained"
+}

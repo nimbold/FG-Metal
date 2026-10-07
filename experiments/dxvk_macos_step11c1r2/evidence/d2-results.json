@@ -1,0 +1,74 @@
+[
+  {
+    "name": "wait_for_0ms",
+    "passed": true,
+    "elapsed_ms": 0.00,
+    "details": "immediate timeout"
+  },
+  {
+    "name": "wait_for_negative",
+    "passed": true,
+    "elapsed_ms": 0.00,
+    "details": "immediate timeout"
+  },
+  {
+    "name": "wait_for_sub_ms",
+    "passed": true,
+    "elapsed_ms": 1.38,
+    "details": "rounded up to >=1ms"
+  },
+  {
+    "name": "wait_for_1ms",
+    "passed": true,
+    "elapsed_ms": 1.50,
+    "details": "timed out after >=1ms"
+  },
+  {
+    "name": "wait_for_10ms",
+    "passed": true,
+    "elapsed_ms": 12.08,
+    "details": "timed out ~10ms"
+  },
+  {
+    "name": "wait_until_past",
+    "passed": true,
+    "elapsed_ms": 0.23,
+    "details": "immediate timeout"
+  },
+  {
+    "name": "wait_until_future_1ms",
+    "passed": true,
+    "elapsed_ms": 1.26,
+    "details": "timed out >=1ms"
+  },
+  {
+    "name": "wait_until_future_10ms",
+    "passed": true,
+    "elapsed_ms": 12.01,
+    "details": "timed out ~10ms"
+  },
+  {
+    "name": "notify_one_before_timeout",
+    "passed": true,
+    "elapsed_ms": 7.76,
+    "details": "woken by notify_one"
+  },
+  {
+    "name": "notify_all_before_timeout",
+    "passed": true,
+    "elapsed_ms": 5.00,
+    "details": "all waiters woken"
+  },
+  {
+    "name": "spurious_false_predicate_wake",
+    "passed": true,
+    "elapsed_ms": 16.52,
+    "details": "resumed after false wakes and succeeded when true"
+  },
+  {
+    "name": "large_finite_timeout_conversion",
+    "passed": true,
+    "elapsed_ms": 7.69,
+    "details": "safely clamped and woken by notification"
+  }
+]

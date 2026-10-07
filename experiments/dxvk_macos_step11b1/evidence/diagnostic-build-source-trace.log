@@ -1,0 +1,17 @@
+ninja: Entering directory `/tmp/fgmetal-step11b1/build'
+[1/8] Generating version.h with a custom command
+[2/5] Compiling C++ object src/dxvk/libdxvk.a.p/dxvk_context.cpp.obj
+FAILED: [code=1] src/dxvk/libdxvk.a.p/dxvk_context.cpp.obj 
+x86_64-w64-mingw32-g++ -Isrc/dxvk/libdxvk.a.p -Isrc/dxvk -I../dxvk-diagnostic/src/dxvk -I../dxvk-diagnostic/include -I../dxvk-diagnostic/include/vulkan/include -I../dxvk-diagnostic/include/spirv/include -Isubprojects/dxbc-spirv -I../dxvk-diagnostic/subprojects/dxbc-spirv -I. -fdiagnostics-color=always -D_GLIBCXX_ASSERTIONS=1 -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++17 -O3 -msse -msse2 -msse3 -mfpmath=sse -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-misleading-indentation -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -DNOMINMAX -D_WIN32_WINNT=0xa00 -DDXVK_WSI_WIN32 -pthread -MD -MQ src/dxvk/libdxvk.a.p/dxvk_context.cpp.obj -MF src/dxvk/libdxvk.a.p/dxvk_context.cpp.obj.d -o src/dxvk/libdxvk.a.p/dxvk_context.cpp.obj -c ../dxvk-diagnostic/src/dxvk/dxvk_context.cpp
+../dxvk-diagnostic/src/dxvk/dxvk_context.cpp: In member function 'dxvk::Rc<dxvk::DxvkCommandList> dxvk::DxvkContext::beginExternalRendering()':
+../dxvk-diagnostic/src/dxvk/dxvk_context.cpp:214:54: error: request for member 'ptr' in 'clear.dxvk::DxvkDeferredClear::imageView.dxvk::Rc<dxvk::DxvkImageView>::operator->()->dxvk::DxvkImageView::image()', which is of pointer type 'dxvk::DxvkImage*' (maybe you meant to use '->' ?)
+  214 |           " image_object=", clear.imageView->image().ptr(),
+      |                                                      ^~~
+[3/5] Compiling C++ object src/d3d11/d3d11.dll.p/d3d11_swapchain.cpp.obj
+FAILED: [code=1] src/d3d11/d3d11.dll.p/d3d11_swapchain.cpp.obj 
+x86_64-w64-mingw32-g++ -Isrc/d3d11/d3d11.dll.p -Isrc/d3d11 -I../dxvk-diagnostic/src/d3d11 -I../dxvk-diagnostic/include -I../dxvk-diagnostic/include/vulkan/include -I../dxvk-diagnostic/include/spirv/include -Isubprojects/dxbc-spirv -I../dxvk-diagnostic/subprojects/dxbc-spirv -fdiagnostics-color=always -D_GLIBCXX_ASSERTIONS=1 -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++17 -O3 -msse -msse2 -msse3 -mfpmath=sse -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-misleading-indentation -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -DNOMINMAX -D_WIN32_WINNT=0xa00 -DDXVK_WSI_WIN32 -MD -MQ src/d3d11/d3d11.dll.p/d3d11_swapchain.cpp.obj -MF src/d3d11/d3d11.dll.p/d3d11_swapchain.cpp.obj.d -o src/d3d11/d3d11.dll.p/d3d11_swapchain.cpp.obj -c ../dxvk-diagnostic/src/d3d11/d3d11_swapchain.cpp
+../dxvk-diagnostic/src/d3d11/d3d11_swapchain.cpp: In lambda function:
+../dxvk-diagnostic/src/d3d11/d3d11_swapchain.cpp:553:91: error: request for member 'ptr' in 'cSwapImage.dxvk::Rc<dxvk::DxvkImageView>::operator->()->dxvk::DxvkImageView::image()', which is of pointer type 'dxvk::DxvkImage*' (maybe you meant to use '->' ?)
+  553 |           " image=", cSwapImage->image()->handle(), " image_object=", cSwapImage->image().ptr(),
+      |                                                                                           ^~~
+ninja: build stopped: subcommand failed.

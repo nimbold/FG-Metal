@@ -1,0 +1,369 @@
+{
+  "binary_path_hashes_from_storage_inventory": [
+    {
+      "allocated_size_bytes": 23105536,
+      "hard_link_count": 1,
+      "logical_size_bytes": 23103357,
+      "mtime_epoch": 1790976240.945204,
+      "path": "/private/tmp/step10a5-wine816-TorHDl/prefix/drive_c/windows/system32/d3d11.dll",
+      "sha256": "5e6a5e2b9bfba3100b8cfb109b525cad7c02d4342a7b5f4121866b599ae48d00"
+    },
+    {
+      "allocated_size_bytes": 14663680,
+      "hard_link_count": 1,
+      "logical_size_bytes": 14662018,
+      "mtime_epoch": 1790976241.087555,
+      "path": "/private/tmp/step10a5-wine816-TorHDl/prefix/drive_c/windows/system32/dxgi.dll",
+      "sha256": "0e334c15785431a227e2fa9a094cbc082594771b673d47ae0e89e6bb531458f9"
+    },
+    {
+      "allocated_size_bytes": 13651968,
+      "hard_link_count": 1,
+      "logical_size_bytes": 13651419,
+      "mtime_epoch": 1790976240.9251616,
+      "path": "/private/tmp/step10a5-wine816-TorHDl/prefix/drive_c/windows/system32/d3d10core.dll",
+      "sha256": "c07a8c7f07082444533714625173671ae3ff60dde53d99e62be515157b72ebae"
+    },
+    {
+      "allocated_size_bytes": 10207232,
+      "hard_link_count": 1,
+      "logical_size_bytes": 10203896,
+      "mtime_epoch": 1790976241.479331,
+      "path": "/private/tmp/step10a5-wine816-TorHDl/prefix/drive_c/windows/system32/shell32.dll",
+      "sha256": "8f59099f87ea65701e487bc7ead4de8ad1571b3555e6ade4613277ce447da88d"
+    },
+    {
+      "allocated_size_bytes": 3256320,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3252935,
+      "mtime_epoch": 1790976241.5834374,
+      "path": "/private/tmp/step10a5-wine816-TorHDl/prefix/drive_c/windows/system32/wined3d.dll",
+      "sha256": "6af7a8c983c175c8a8a9c7f2d1571bc98c711301a512574d6d8af658fee1f84d"
+    },
+    {
+      "allocated_size_bytes": 3252224,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3250076,
+      "mtime_epoch": 1790976241.1625044,
+      "path": "/private/tmp/step10a5-wine816-TorHDl/prefix/drive_c/windows/system32/kernelbase.dll",
+      "sha256": "5f08130140c32143d2847409d289332e90d1f7e88e147d99e8394e5e32432077"
+    },
+    {
+      "allocated_size_bytes": 2871296,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2871174,
+      "mtime_epoch": 1790976240.7618966,
+      "path": "/private/tmp/step10a5-wine816-TorHDl/prefix/drive_c/windows/winsxs/amd64_microsoft-windows-msxml30_31bf3856ad364e35_6.0.6000.16386_none_deadbeef/msxml3.dll",
+      "sha256": "7171aacecdf47ee2a56c33cc7b5478dc50916ee5f86e732256baa5187199274e"
+    },
+    {
+      "allocated_size_bytes": 2871296,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2871174,
+      "mtime_epoch": 1790976240.7495089,
+      "path": "/private/tmp/step10a5-wine816-TorHDl/prefix/drive_c/windows/system32/msxml3.dll",
+      "sha256": "7171aacecdf47ee2a56c33cc7b5478dc50916ee5f86e732256baa5187199274e"
+    },
+    {
+      "allocated_size_bytes": 2715648,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2712664,
+      "mtime_epoch": 1790976241.288514,
+      "path": "/private/tmp/step10a5-wine816-TorHDl/prefix/drive_c/windows/system32/mshtml.dll",
+      "sha256": "fa61ca371508729c1bfeb21b6c2c7b046bb5673157757f3b99ea9e45acd4b986"
+    },
+    {
+      "allocated_size_bytes": 2297856,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2296234,
+      "mtime_epoch": 1790976241.5748954,
+      "path": "/private/tmp/step10a5-wine816-TorHDl/prefix/drive_c/windows/system32/windowscodecs.dll",
+      "sha256": "752481d93d59364edc5cdd81737261420933d0da6d5f4b6e16f540870b58b6b8"
+    },
+    {
+      "allocated_size_bytes": 2211840,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2211422,
+      "mtime_epoch": 1790976241.5344827,
+      "path": "/private/tmp/step10a5-wine816-TorHDl/prefix/drive_c/windows/system32/user32.dll",
+      "sha256": "fe0b979316fc9bff188b97201dc63575a2dbecae3a04f2223d31995f031fb4d3"
+    },
+    {
+      "allocated_size_bytes": 1826816,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1824241,
+      "mtime_epoch": 1790976241.3218076,
+      "path": "/private/tmp/step10a5-wine816-TorHDl/prefix/drive_c/windows/system32/msi.dll",
+      "sha256": "3c410df32172458ba211767f84655146e939830983191a5eb9b021d68766c7be"
+    },
+    {
+      "allocated_size_bytes": 1761280,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1758826,
+      "mtime_epoch": 1790976241.6831255,
+      "path": "/private/tmp/step10a5-wine816-TorHDl/prefix/drive_c/windows/winsxs/amd64_microsoft.windows.common-controls_6595b64144ccf1df_6.0.2600.2982_none_deadbeef/comctl32.dll",
+      "sha256": "48d583d5a78e9c75a7b20528f0aaf24401f937c511ab8cef92b2d48fe6413b8b"
+    },
+    {
+      "allocated_size_bytes": 1761280,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1758826,
+      "mtime_epoch": 1790976240.8913927,
+      "path": "/private/tmp/step10a5-wine816-TorHDl/prefix/drive_c/windows/system32/comctl32.dll",
+      "sha256": "48d583d5a78e9c75a7b20528f0aaf24401f937c511ab8cef92b2d48fe6413b8b"
+    },
+    {
+      "allocated_size_bytes": 1601536,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1597509,
+      "mtime_epoch": 1790976241.4033835,
+      "path": "/private/tmp/step10a5-wine816-TorHDl/prefix/drive_c/windows/system32/ole32.dll",
+      "sha256": "9414fcca610d8f7aba709a63982d00489eff3db21ac98d71317d8e895599e858"
+    },
+    {
+      "allocated_size_bytes": 1531904,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1530062,
+      "mtime_epoch": 1790976240.8483346,
+      "path": "/private/tmp/step10a5-wine816-TorHDl/prefix/drive_c/windows/system32/actxprxy.dll",
+      "sha256": "90debfd2f09c6a6b60bdb8e5b6c79d3a4daa0cc6e6584625504e610d80836af7"
+    },
+    {
+      "allocated_size_bytes": 1482752,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1480738,
+      "mtime_epoch": 1790976241.68713,
+      "path": "/private/tmp/step10a5-wine816-TorHDl/prefix/drive_c/windows/winsxs/amd64_microsoft.vc90.crt_1fc8b3b9a1e18e3b_9.0.30729.6161_none_deadbeef/msvcp90.dll",
+      "sha256": "f536fb8c873af248b6ea974e44374c3b3bf56f5c21f4215bc46881b1c624ead5"
+    },
+    {
+      "allocated_size_bytes": 1482752,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1479379,
+      "mtime_epoch": 1790976241.6855583,
+      "path": "/private/tmp/step10a5-wine816-TorHDl/prefix/drive_c/windows/winsxs/amd64_microsoft.vc80.crt_1fc8b3b9a1e18e3b_8.0.50727.9672_none_deadbeef/msvcp80.dll",
+      "sha256": "c01513a5a3ca7ecd1d516142923576f208f9fd3d3c1c09ef1cb98e48aee09259"
+    },
+    {
+      "allocated_size_bytes": 1482752,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1480738,
+      "mtime_epoch": 1790976241.3591294,
+      "path": "/private/tmp/step10a5-wine816-TorHDl/prefix/drive_c/windows/system32/msvcp90.dll",
+      "sha256": "f536fb8c873af248b6ea974e44374c3b3bf56f5c21f4215bc46881b1c624ead5"
+    },
+    {
+      "allocated_size_bytes": 1482752,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1479379,
+      "mtime_epoch": 1790976241.3574524,
+      "path": "/private/tmp/step10a5-wine816-TorHDl/prefix/drive_c/windows/system32/msvcp80.dll",
+      "sha256": "c01513a5a3ca7ecd1d516142923576f208f9fd3d3c1c09ef1cb98e48aee09259"
+    },
+    {
+      "allocated_size_bytes": 1413120,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1411932,
+      "mtime_epoch": 1790976241.4092827,
+      "path": "/private/tmp/step10a5-wine816-TorHDl/prefix/drive_c/windows/system32/oleaut32.dll",
+      "sha256": "e98c535cf9a399385c4a9326a10058dc5cd8c070abdb61efa6453534b8df47c4"
+    },
+    {
+      "allocated_size_bytes": 1400832,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1400130,
+      "mtime_epoch": 1790976241.3558183,
+      "path": "/private/tmp/step10a5-wine816-TorHDl/prefix/drive_c/windows/system32/msvcp71.dll",
+      "sha256": "63fef6ab082c20c21c3c221d877ae1dae2dbc33a944b2898340eeabe52f3556d"
+    },
+    {
+      "allocated_size_bytes": 1380352,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1377408,
+      "mtime_epoch": 1790976241.3539128,
+      "path": "/private/tmp/step10a5-wine816-TorHDl/prefix/drive_c/windows/system32/msvcp70.dll",
+      "sha256": "ed72f398c79a1bea2862bf3273b179913b822368af308f11b34163261a0342d4"
+    },
+    {
+      "allocated_size_bytes": 1327104,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1323112,
+      "mtime_epoch": 1790976241.419166,
+      "path": "/private/tmp/step10a5-wine816-TorHDl/prefix/drive_c/windows/system32/opengl32.dll",
+      "sha256": "747924ff027d8b7a16e9dc657dcdb1fa7ef4aadc73feee0549ba302959c77207"
+    },
+    {
+      "allocated_size_bytes": 1327104,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1324336,
+      "mtime_epoch": 1790976240.8931339,
+      "path": "/private/tmp/step10a5-wine816-TorHDl/prefix/drive_c/windows/system32/comdlg32.dll",
+      "sha256": "8a22f2d31ee48c8356ec9c0ca36134a51881e3db493a5a9227c9dfd79d4dc78e"
+    },
+    {
+      "allocated_size_bytes": 1282048,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1279554,
+      "mtime_epoch": 1790976241.5176759,
+      "path": "/private/tmp/step10a5-wine816-TorHDl/prefix/drive_c/windows/system32/ucrtbase.dll",
+      "sha256": "b8d9eeb8af06fd207f0443c531e1b94f7b20ad11b7daf61145ab60877382d775"
+    },
+    {
+      "allocated_size_bytes": 1277952,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1277166,
+      "mtime_epoch": 1790976240.9062114,
+      "path": "/private/tmp/step10a5-wine816-TorHDl/prefix/drive_c/windows/system32/cryptui.dll",
+      "sha256": "411639e34a95bed0414b9119a9ca3dc614aff97ab23a50f6184289b44be430e0"
+    },
+    {
+      "allocated_size_bytes": 1273856,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1271492,
+      "mtime_epoch": 1790976241.3652124,
+      "path": "/private/tmp/step10a5-wine816-TorHDl/prefix/drive_c/windows/system32/msvcr120.dll",
+      "sha256": "97c4a2a3625960a1ec8f6d9d3f665873188dca7b4d409a3d726a3db0ae509133"
+    },
+    {
+      "allocated_size_bytes": 1236992,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1235017,
+      "mtime_epoch": 1790976241.3467858,
+      "path": "/private/tmp/step10a5-wine816-TorHDl/prefix/drive_c/windows/system32/msvcp140.dll",
+      "sha256": "41306be5b775be7ff049bf5836c30b209659d6eff660d659eccd023d42ea0287"
+    },
+    {
+      "allocated_size_bytes": 1232896,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1231199,
+      "mtime_epoch": 1790976241.3526251,
+      "path": "/private/tmp/step10a5-wine816-TorHDl/prefix/drive_c/windows/system32/msvcp60.dll",
+      "sha256": "ee98793a274502d2307a46de4b16294aed9fce211974ee7e85b0b041c9111bff"
+    },
+    {
+      "allocated_size_bytes": 1232896,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1230870,
+      "mtime_epoch": 1790976241.3422687,
+      "path": "/private/tmp/step10a5-wine816-TorHDl/prefix/drive_c/windows/system32/msvcp110.dll",
+      "sha256": "c5ac9e5e6eb9144434c619858519d84da000981352898b3dbdf06cbb0462c9c4"
+    },
+    {
+      "allocated_size_bytes": 1224704,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1221843,
+      "mtime_epoch": 1790976241.3438964,
+      "path": "/private/tmp/step10a5-wine816-TorHDl/prefix/drive_c/windows/system32/msvcp120.dll",
+      "sha256": "35e35632309c493ce54f0a36a3cb15becb5a7f409b79923c0e203f50dae54bc9"
+    },
+    {
+      "allocated_size_bytes": 1196032,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1192238,
+      "mtime_epoch": 1790976241.341137,
+      "path": "/private/tmp/step10a5-wine816-TorHDl/prefix/drive_c/windows/system32/msvcp100.dll",
+      "sha256": "96fcf6d81d1948e53656c39b8ead9467deb8c58ba68b635ee20758386d2db1ec"
+    },
+    {
+      "allocated_size_bytes": 1179648,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1176618,
+      "mtime_epoch": 1790976241.3635561,
+      "path": "/private/tmp/step10a5-wine816-TorHDl/prefix/drive_c/windows/system32/msvcr110.dll",
+      "sha256": "88f660c3fbed2f51a2345eae214e0f4d1eaddc667104f6f4869053db309255ca"
+    },
+    {
+      "allocated_size_bytes": 1163264,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1160202,
+      "mtime_epoch": 1790976241.3620512,
+      "path": "/private/tmp/step10a5-wine816-TorHDl/prefix/drive_c/windows/system32/msvcr100.dll",
+      "sha256": "7ccf5da52dd991971b2c87cf40f1b68ffda11a2d9c40cdb8ba47bfd02a552cd0"
+    },
+    {
+      "allocated_size_bytes": 1150976,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1150559,
+      "mtime_epoch": 1790976241.4398277,
+      "path": "/private/tmp/step10a5-wine816-TorHDl/prefix/drive_c/windows/system32/quartz.dll",
+      "sha256": "1a46381dd1f4ec4a894fc88e8402ff6fa1f29f50d883aa38e0dcbee12164f8eb"
+    },
+    {
+      "allocated_size_bytes": 1130496,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1129854,
+      "mtime_epoch": 1790976240.8884785,
+      "path": "/private/tmp/step10a5-wine816-TorHDl/prefix/drive_c/windows/system32/cmd.exe",
+      "sha256": "cb8ec22ba87087fd1dc890f9b9ee95596f951f63bc2d7b4cc08a89969db74863"
+    },
+    {
+      "allocated_size_bytes": 1097728,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1094098,
+      "mtime_epoch": 1790976240.9003882,
+      "path": "/private/tmp/step10a5-wine816-TorHDl/prefix/drive_c/windows/system32/crypt32.dll",
+      "sha256": "df3c8ef8b30a2cc0f45072444a60964ab152dddc205661a352eb0a0d68234276"
+    },
+    {
+      "allocated_size_bytes": 1069056,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1067524,
+      "mtime_epoch": 1790976241.5849845,
+      "path": "/private/tmp/step10a5-wine816-TorHDl/prefix/drive_c/windows/system32/winedbg.exe",
+      "sha256": "bb4427b7546db8c64aa897c9ca27ed62305281f51e3e1898b943a198d7214cc1"
+    },
+    {
+      "allocated_size_bytes": 1060864,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1060450,
+      "mtime_epoch": 1790976241.5807223,
+      "path": "/private/tmp/step10a5-wine816-TorHDl/prefix/drive_c/windows/system32/winecfg.exe",
+      "sha256": "e5d4eb2b79389a4fb06c8c8090eaa4a3380ef85d79f0758f86c287e09b578596"
+    }
+  ],
+  "dosdevices_symlink_targets": {
+    "c:": "../drive_c",
+    "d:": "/private/var/run/com.apple.security.cryptexd/mnt/com.apple.MobileAsset.MetalToolchain-v27.1.266.1.buDpLL",
+    "d::": "/dev/rdisk5s1",
+    "z:": "/"
+  },
+  "estimated_prefix_bytes": {
+    "allocated_path_bytes": 294871040,
+    "allocated_unique_inode_bytes": 294871040,
+    "file_count": 834,
+    "logical_bytes": 293075466
+  },
+  "plan_decision": "SNAPSHOT_REGISTRY_THEN_DELETE",
+  "reason": "Completed run or diagnostic environment; retain registry/config snapshot and run evidence, then enforce the two-prefix cap.",
+  "registry_archive": {
+    "path": "registry-config.tar.gz",
+    "sha256": "ae710533d0ffecd6dbff79d8139556d3bfb7a2a62ed19df98eefd04187f62489",
+    "size_bytes": 178565
+  },
+  "registry_files": [
+    {
+      "path": "system.reg",
+      "sha256": "e04be53ff85847d5311263d689b08488a0bcc2f87ec276ff85f067da38c6e136",
+      "size_bytes": 1593017
+    },
+    {
+      "path": "user.reg",
+      "sha256": "490008565a8013975f89e6ec378f67d7dba74d93bc8af308053d2a86eb5ce9d9",
+      "size_bytes": 52795
+    },
+    {
+      "path": "userdef.reg",
+      "sha256": "cbd3ec8185c2d71c4b839fd0486060694b5104097c7619ec06d471311f4bf6c7",
+      "size_bytes": 4026
+    },
+    {
+      "path": "drive_c/windows/system.ini",
+      "sha256": "67b6444441f3e325b644a1c7b3c1dffff17dfcdd51dd2550d4155ac4e628797e",
+      "size_bytes": 478
+    }
+  ],
+  "snapshot_time_unix": 1791313733.930068,
+  "source_path": "/private/tmp/step10a5-wine816-TorHDl/prefix",
+  "source_root_kind": "COMPLETED_DISPOSABLE_PREFIX",
+  "unique_evidence_note": "Run logs, manifests, source snapshots, and timing evidence remain in their original evidence directories; this snapshot preserves prefix registry/config state and binary identity references."
+}

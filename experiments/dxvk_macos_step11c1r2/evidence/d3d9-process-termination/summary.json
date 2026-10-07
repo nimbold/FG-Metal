@@ -1,0 +1,115 @@
+{
+  "cases": [
+    {
+      "index": 0,
+      "delay_ms": 0,
+      "mode": "exit",
+      "exit_status": 0,
+      "wall_seconds": 7.69,
+      "termination_state": "presented=1 delay_ms=0 mode=ExitProcess",
+      "device_shutdown_log_count": 0
+    },
+    {
+      "index": 1,
+      "delay_ms": 1,
+      "mode": "return",
+      "exit_status": 0,
+      "wall_seconds": 0.982,
+      "termination_state": "presented=1 delay_ms=1 mode=normal-return",
+      "device_shutdown_log_count": 0
+    },
+    {
+      "index": 2,
+      "delay_ms": 5,
+      "mode": "exit",
+      "exit_status": 0,
+      "wall_seconds": 0.86,
+      "termination_state": "presented=1 delay_ms=5 mode=ExitProcess",
+      "device_shutdown_log_count": 0
+    },
+    {
+      "index": 3,
+      "delay_ms": 10,
+      "mode": "return",
+      "exit_status": 0,
+      "wall_seconds": 0.915,
+      "termination_state": "presented=1 delay_ms=10 mode=normal-return",
+      "device_shutdown_log_count": 0
+    },
+    {
+      "index": 4,
+      "delay_ms": 17,
+      "mode": "exit",
+      "exit_status": 0,
+      "wall_seconds": 0.879,
+      "termination_state": "presented=1 delay_ms=17 mode=ExitProcess",
+      "device_shutdown_log_count": 0
+    },
+    {
+      "index": 5,
+      "delay_ms": 20,
+      "mode": "return",
+      "exit_status": 0,
+      "wall_seconds": 0.873,
+      "termination_state": "presented=1 delay_ms=20 mode=normal-return",
+      "device_shutdown_log_count": 0
+    },
+    {
+      "index": 6,
+      "delay_ms": 25,
+      "mode": "exit",
+      "exit_status": 0,
+      "wall_seconds": 0.826,
+      "termination_state": "presented=1 delay_ms=25 mode=ExitProcess",
+      "device_shutdown_log_count": 0
+    },
+    {
+      "index": 7,
+      "delay_ms": 33,
+      "mode": "return",
+      "exit_status": 0,
+      "wall_seconds": 0.858,
+      "termination_state": "presented=1 delay_ms=33 mode=normal-return",
+      "device_shutdown_log_count": 0
+    },
+    {
+      "index": 8,
+      "delay_ms": 50,
+      "mode": "exit",
+      "exit_status": 0,
+      "wall_seconds": 0.879,
+      "termination_state": "presented=1 delay_ms=50 mode=ExitProcess",
+      "device_shutdown_log_count": 0
+    },
+    {
+      "index": 9,
+      "delay_ms": 100,
+      "mode": "return",
+      "exit_status": 0,
+      "wall_seconds": 0.935,
+      "termination_state": "presented=1 delay_ms=100 mode=normal-return",
+      "device_shutdown_log_count": 0
+    },
+    {
+      "index": 10,
+      "delay_ms": 250,
+      "mode": "exit",
+      "exit_status": 0,
+      "wall_seconds": 1.088,
+      "termination_state": "presented=1 delay_ms=250 mode=ExitProcess",
+      "device_shutdown_log_count": 0
+    },
+    {
+      "index": 11,
+      "delay_ms": 500,
+      "mode": "return",
+      "exit_status": 0,
+      "wall_seconds": 1.304,
+      "termination_state": "presented=1 delay_ms=500 mode=normal-return",
+      "device_shutdown_log_count": 0
+    }
+  ],
+  "all_exited_zero": true,
+  "all_showed_source_present": true,
+  "process_root_destruction_logged": 0
+}

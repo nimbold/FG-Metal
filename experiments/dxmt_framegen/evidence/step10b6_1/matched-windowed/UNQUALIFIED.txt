@@ -1,0 +1,1 @@
+Capture supervisor failed before xctrace: Wine changed process title; no trace recorded. Interrupted app/logs cannot qualify safety/cadence. Superseded by fresh matched-windowed-v2.

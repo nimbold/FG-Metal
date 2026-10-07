@@ -1,0 +1,26 @@
+diff --git a/src/d3d11/d3d11_swapchain.cpp b/src/d3d11/d3d11_swapchain.cpp
+index a2be315..b3ba165 100644
+--- a/src/d3d11/d3d11_swapchain.cpp
++++ b/src/d3d11/d3d11_swapchain.cpp
+@@ -186,13 +186,18 @@ namespace dxvk {
+     const DXGI_SWAP_CHAIN_DESC1*    pDesc,
+     const UINT*                     pNodeMasks,
+           IUnknown* const*          ppPresentQueues) {
+-    if (m_desc.Format != pDesc->Format)
++    const bool formatChanged = m_desc.Format != pDesc->Format;
++    const bool extentChanged = m_desc.Width != pDesc->Width
++                            || m_desc.Height != pDesc->Height;
++
++    m_desc = *pDesc;
++
++    if (formatChanged)
+       m_presenter->setSurfaceFormat(GetSurfaceFormat(pDesc->Format));
+ 
+-    if (m_desc.Width != pDesc->Width || m_desc.Height != pDesc->Height)
++    if (extentChanged)
+       m_presenter->setSurfaceExtent({ m_desc.Width, m_desc.Height });
+ 
+-    m_desc = *pDesc;
+     CreateBackBuffers();
+     return S_OK;
+   }

@@ -1,0 +1,11 @@
+{
+  "executable": "d3d11_resize_test.exe",
+  "exit_status": 0,
+  "wall_seconds": 10.974372958007734,
+  "internal_enabled": false,
+  "sha256": {
+    "d3d11_resize_test.exe": "af1a562c19fc88d589fb1a23c4dce2c7a34238487a202ca7033f420945d920e3"
+  },
+  "runtime": "/Users/nima/Library/Caches/FGMetalStep11C1R/runtime-frozen/runtime/wine/bin/wine",
+  "icd": "/Users/nima/Library/Caches/FGMetalStep11C1R/moltenvk-1.4.2/MoltenVK/MoltenVK/dynamic/dylib/macOS/MoltenVK_icd.json"
+}

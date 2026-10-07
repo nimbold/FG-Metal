@@ -1,0 +1,18 @@
+[
+  {
+    "path": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11b1/evidence/d3d11_smoke.c",
+    "sha256": "5e169c47609c90cc1de0e820e4f81a662562eb1d47b70fe52a7ce72032c9d6dd"
+  },
+  {
+    "path": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11b1/evidence/format-ab.cpp",
+    "sha256": "5a9e18db35fb618d60e7afc27801b7774097d9148e06dbb7edb680aa313082f4"
+  },
+  {
+    "path": "/private/tmp/fgmetal-step11b1/repo-smoke.exe",
+    "sha256": "a4414cf011f9102deb3d35eafddb81c1180fe940cd00b9f7f0fffcac70fda8d9"
+  },
+  {
+    "path": "/private/tmp/fgmetal-step11b1/format-ab.exe",
+    "sha256": "4419ad8d46e2d96df93a4bf8d7d8e0cb4fee853282414fdbc28fe5f4d210e973"
+  }
+]

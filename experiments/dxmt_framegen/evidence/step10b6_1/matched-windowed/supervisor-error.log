@@ -1,0 +1,16 @@
+Disposable engine copy: /private/tmp/step10b6_1-matched-windowed/engine
+46a1e913ad4d8c55c52f04fec9da470064fd48828b1dd219544d223cb0530ca6  /private/tmp/step10b6_1-matched-windowed/engine/lib/wine/x86_64-windows/d3d10core.dll
+5820cce603eee6a7cd04e8f8e51b69de8fc21d605a5a17ab4890cbc5d7f76f02  /private/tmp/step10b6_1-matched-windowed/engine/lib/wine/x86_64-windows/d3d11.dll
+755cc635dc2c288ce20fbb0a5d5f312de83c9c35a7fd965ecf18d17bec1d67ad  /private/tmp/step10b6_1-matched-windowed/engine/lib/wine/x86_64-windows/dxgi.dll
+22c8f48f5cdfd409d43a0ee022d1995d10dec50083e56223a990bafc366910f5  /private/tmp/step10b6_1-matched-windowed/engine/lib/wine/x86_64-windows/winemetal.dll
+38dcbef55964fd100f0eb0a0497fca39472f80badd19a9031149c5e90a9426a0  /private/tmp/step10b6_1-matched-windowed/engine/lib/wine/x86_64-unix/winemetal.so
+3f0da0b4025c6fb5e50fc23c8a1feea67c839b40df93baff3b2781089b42ad35  /private/tmp/step10b6_1-matched-windowed/engine/lib/wine/x86_64-unix/libc++.1.dylib
+9a95b4ce2be40951b688c394db99f79b7e0b81fa2372e5e49615319869e72e49  /private/tmp/step10b6_1-matched-windowed/engine/lib/wine/x86_64-unix/libc++abi.1.dylib
+964d4e5d6242163e4e8099efd08ba75540f253257b834bf5b7a45f8c84b4ea78  /private/tmp/step10b6_1-matched-windowed/engine/lib/wine/x86_64-unix/libunwind.1.dylib
+Traceback (most recent call last):
+  File "/Users/nima/Documents/Code/FG-Metal/experiments/dxmt_framegen/evidence/step10b6_1/run_matched.py", line 102, in <module>
+    if __name__=='__main__': raise SystemExit(main())
+                                              ~~~~^^
+  File "/Users/nima/Documents/Code/FG-Metal/experiments/dxmt_framegen/evidence/step10b6_1/run_matched.py", line 84, in main
+    raise RuntimeError('ambiguous Wine process: '+repr(matches))
+RuntimeError: ambiguous Wine process: []

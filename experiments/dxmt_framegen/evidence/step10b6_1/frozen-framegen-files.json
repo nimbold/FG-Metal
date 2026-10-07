@@ -1,0 +1,14 @@
+{
+  "src/core/backend_registry.cpp": "ca021c2ada3d049c133d4b4a168ae75042e091a2d79afac8018d14da100920e4",
+  "src/core/c_api.cpp": "0b0cd7ce674cd8595429cb049903717dbccd9764fd47bcfef8a8bc240747cfcf",
+  "src/core/frame_generator.cpp": "5c1cf3dfacd6f604d8d911e976b234313a78d0fbb2396ba72363445349cdea4a",
+  "src/core/texture.cpp": "bf179c29f2a1caa81f8bfd9d4aeaac17e3d4363fdfc5228245b74efc9476a7d2",
+  "src/pacing/presentation_scheduler.cpp": "45a2258c2c9eb6e2e99cca65eb8c5bf0a5214e7cf90ceb57f13a2cfe233eb1c7",
+  "src/quality/temporal_quality_controller.cpp": "1f146b8e4ec287af428557ced54bae1bded207738f1f0866ec9b53570a148fac",
+  "experiments/dxmt_framegen/synthetic/CMakeLists.txt": "05491ae3e05cf3960034091c9e507c1bc10dfe5f7a9f91a960d70757b9757aa7",
+  "experiments/dxmt_framegen/synthetic/README.md": "6d564d19c189dc4fdec1850c1e9833f8e742b66ceac9af188fc5064de74fa2c7",
+  "experiments/dxmt_framegen/synthetic/failed-at-time-attempt.md": "f31ca848954e0e6a186cbce0bfca9e8d015d6520916a9e854699e147e583505b",
+  "experiments/dxmt_framegen/synthetic/main.mm": "621ae625418cc240baa26d05c6f7d8fab60a627f96bd82295f3c484acc2e7dc0",
+  "experiments/dxmt_framegen/synthetic/synthetic_metal_backend.hpp": "bb2df9f36c296a4bc5df6ba4e765307c6447675e5d25d4cd97eafeef62bcc399",
+  "experiments/dxmt_framegen/synthetic/synthetic_metal_backend.mm": "c5f8aa2892f6287dfe7cef037cf93f8b9e461c9ea34f1b56714691090a12cbfe"
+}

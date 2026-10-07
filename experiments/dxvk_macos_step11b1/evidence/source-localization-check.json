@@ -1,0 +1,15 @@
+{
+  "source-before": {
+    "same_source_image_object_storage": true,
+    "traced_frames": 16,
+    "pending_clears_at_external_ready": 1,
+    "clean_exit": true
+  },
+  "source-after": {
+    "same_source_image_object_storage": true,
+    "traced_frames": 16,
+    "pending_clears_at_external_ready": 0,
+    "clean_exit": true
+  },
+  "visual_authority": "direct user observation; metadata is not visible-rendering proof"
+}

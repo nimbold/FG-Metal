@@ -1,0 +1,6 @@
+command: clang++ -std=c++17 -O1 -g -pthread -fsanitize=thread experiments/dxvk_macos_step11d3a/trace_ring_stress.cpp -o /tmp/fgmetal_a1_trace_ring_stress_tsan && /tmp/fgmetal_a1_trace_ring_stress_tsan
+source_sha256: dc88d8161944512309865a302c8fd20a5e8c73b30d4d8998dc345b6ceba0f2ce
+TSan runtime: PASS; no diagnostics
+SHUTDOWN_TEST=PASS attempted=10020 accepted=6949 full_dropped=3071 shutdown_rejected=4 gate_rejections=0 late_rejected=80000 drained=6949
+STRESS_TEST=PASS producers=4 events=2000000 accepted=633682 dropped=1366318 elapsed_ns=537451167 throughput_events_s=1179050
+SYNTHETIC_EMISSION_BENCH count=100000 min_ns=1291 median_ns=1541 p95_ns=2000 p99_ns=2583 max_ns=41000 throughput_events_s=531178 payload=fixed_json_format_plus_event_id_clock_tid_gate_and_2048_byte_ring_publication

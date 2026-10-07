@@ -250,3 +250,9 @@ The anomaly logs show that foreground loss alone does not explain the earlier so
 **FAIL — RIFE NOT CLEARED.** Callback/submission/GPU cadence and source safety passed in the qualified primary runs. The independent 60 Hz VSync trace did not establish stable app-surface cadence: per-Present color-motion probes repeatedly showed roughly 8–9 consecutive Wine surface gaps/s and ~65 ms holds, with skipped Display frame labels. Per-attempt Display association and physical scanout remain unverified; the per-attempt zero-feedback classes remain `TRACE_INSUFFICIENT`.
 
 Next, keep the F policy and binaries frozen while running a dedicated, matched windowed-versus-fullscreen motion probe with the public Display and Core Animation instruments. Record the source color IDs and Display surface/frame labels together, and only claim per-drawable outcomes if the public export provides a defensible ID mapping. Investigate the shared presentation/compositor path before changing timing policy or starting RIFE.
+
+## Erratum — Xcode 27 Display export field order
+
+Added after the Step 10B.6 native-control calibration. The selected Xcode 27 `displayed-surfaces-interval` schema places `Duration` before the separate `CPU to Display Latency` field. The source-only and F-motion rows above label values near 65 ms as displayed duration; those values were read from the CPU-to-display-latency column. The original selected XML exports are unchanged.
+
+Re-reading the motion traces with the corrected field mapping gives actual `Duration` p50/p95/p99/max of **116.665/333.330/483.328/533.327 ms** for source-only motion, and **116.665/316.663/466.661/499.994 ms** for F motion. The approximately 65 ms values remain CPU-to-display latency, not surface duration. This corrects the field interpretation only; it does not create a per-drawable Display-row mapping or establish physical panel scanout.

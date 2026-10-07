@@ -1,0 +1,1592 @@
+{
+  "associated_evidence_manifests": [
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/storage-cleanup-current-r5-followup2-20261006.json",
+      "sha256": "41f3d7e83d1e46a95afdbac4491670a309935a5748b037a2eccd3eaf63b58fa3"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/storage-cleanup-current-r5-r6-prefixes-20261006.json",
+      "sha256": "b133ee2b49ea1669939966e02876ad607726bfaf06cc594131268bc376276a48"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/storage-cleanup-current-r5-20261006.json",
+      "sha256": "5d7b034b49637fb7a8720ae573a409d67c157132f9ab67bea60e887f92cae1da"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/storage-cleanup-current-r5-followup-20261006.json",
+      "sha256": "19f5059c53bcb56ba8d84f8c7854a6153c20e58dab1be0f31fefc2fb8dea659c"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/p0.2-r-current-r5/patch-validation.json",
+      "sha256": "ade506b53f77b5b735b253087811dabd737cd7553dc0b35df1ae51c8ada51397"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/p0.2-r-current-r5/frozen-current-r5-source-tree.json",
+      "sha256": "7faad45871a4e65c066f2248793c20f3957c981b9c75131e22c81a92e7e83e3f"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/p0.2-r-current-r5/manifest.json",
+      "sha256": "13c2078289523183c6819c7690a72ec38b19a48d9f0196cfa36a0202d4d2040c"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/p0.2-r-current-r5/execution-manifest.json",
+      "sha256": "6d564df830ea0f722b20b7e57cd1013e97012596f9b07df25414c4075cf2dcbb"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/ledger-audits/current-r5-300s-strict.json",
+      "sha256": "11c59f7348ed3f65e4c29e10608d76a03fac6bbf6811de74959861ccbb3cfbbc"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/ledger-audits/current-r5-lifecycle-ledger-strict.json",
+      "sha256": "4fbab2f7496c7f98546c3cc7fba3a504a7fc48a81b462f4721c43a83f359c214"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/ledger-audits/current-r5-async-injection-strict.json",
+      "sha256": "d9ec60b981b4c61fe05863a29026835552ebb67cca8b7979f1b77bfb479527d2"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/ledger-audits/current-r5-precommit-strict.json",
+      "sha256": "9740c35bd5dce9ebcc48b3e169e4d4a16b986db85a46845180d59fbe3c7940b1"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/p0.2-r-current-r5/runs/analysis.json",
+      "sha256": "98caa2b567618d8625ed39c469f6be74ac95332e9d59ce3dc29c96148df59265"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/p0.2-r-current-r5/runs/flipseq-source-only/result.json",
+      "sha256": "86be162172e356e7225627bced0e4a2c324480a653c84b08d944960ac9a3fa0f"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/p0.2-r-current-r5/runs/flipseq-internal/result.json",
+      "sha256": "9bf3e8b9851cd366c03b2dfb550200c376a0389a50bbf0a8a13ac0b50b275e21"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/build-repro/current-r5/manifest.json",
+      "sha256": "d03d484d33cc4495616d3bcc0446acd7b3898e9979f82f6a90e66910ee528a44"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/metal-invert-rate-30hz-300s-current-r5-controlled-nocapture/result.json",
+      "sha256": "bb0465425a12ad3113bb68dae0434629e270a6cc3dbba3efb492edf1f44900ff"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/metal-invert-rate-30hz-300s-current-r5-controlled-nocapture/synchronization-ledger-audit.json",
+      "sha256": "fee837fb0b6d0ee4cb4bde3f7d445c3f3110a29f6943eadabbe6384f0ecabfc9"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/metal-invert-rate-30hz-300s-current-r5-controlled-nocapture/human-observation.json",
+      "sha256": "fc59542809db4e0144cdd9132a471b5e43f30243e25084922e780ac1bcb45841"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/metal-invert-rate-30hz-300s-current-r5-controlled-nocapture/manifest.json",
+      "sha256": "f7c7e65d0d60b602a005f174408e24baa5e220c993ccbd4b33fe4c16864fd907"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/metal-invert-rate-30hz-300s-current-r5-controlled-nocapture/analysis.json",
+      "sha256": "f5b5953a3ddff600ed9a1c3817a2d2649ad661c809ba7732a360dfdc91df8158"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/source-only-current-r5-30hz-60s/result.json",
+      "sha256": "a27b7dfd1ff293a17fe14e61b2beb6fab0d506fbfb3443d541e1e73235cb45fe"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/source-only-current-r5-30hz-60s/manifest.json",
+      "sha256": "504386abff2f505a0cae4e2969d7fe6d10cb636d3ed15f0dcef93b58170484a5"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/source-only-current-r5-30hz-60s/analysis.json",
+      "sha256": "af7210e0df9594f0e85fed2933fe842c8e8a8ac36d56da9cfe5e784a42f00e9c"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/metal-invert-rate-30hz-60s-current-r5-controlled-nocapture/result.json",
+      "sha256": "2d548b43ea93f13d222e350c688b77cffc0d59f97c3036b4d46fa193faa3f977"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/metal-invert-rate-30hz-60s-current-r5-controlled-nocapture/synchronization-ledger-audit.json",
+      "sha256": "0b96e045c8d99edab833090586269867a360264af622911fd80a0ce396de8053"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/metal-invert-rate-30hz-60s-current-r5-controlled-nocapture/manifest.json",
+      "sha256": "4509b120151f4e03d6fa22a612c7ac88852fb43dabf7be93e0ad81395299482a"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/metal-invert-rate-30hz-60s-current-r5-controlled-nocapture/analysis.json",
+      "sha256": "c5a8c1be064935412b1a89b68c847f38fad9a0bc158acc05abf85fe238d0e064"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/metal-invert-rate-1hz-18s-current-r5/result.json",
+      "sha256": "b43fa88c60802e30cfad307b6796320c21983ab8025bdb0024b1ee2ef0914afd"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/metal-invert-rate-1hz-18s-current-r5/manifest.json",
+      "sha256": "b48388ef4cd573ffcfbd9a70b4774460cb1fe30b09b4ea5ae676f7f6ccd934c4"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/metal-invert-rate-1hz-20s-current-r5/result.json",
+      "sha256": "5f4404381f399917da530909bf9dde6e60d303c34aa8ecc15285e68d0afd8c3d"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/metal-invert-rate-1hz-20s-current-r5/manifest.json",
+      "sha256": "6d133a1090021775fe86042c2e2ace5f46a31c904b4b3d632831bb9157c6f0ce"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/metal-invert-rate-15hz-30s-current-r5/result.json",
+      "sha256": "daac5c0bbd6983264b3c644e6bc460d9d42b3e07eb585a30c8801dddfa545ce7"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/metal-invert-rate-15hz-30s-current-r5/synchronization-ledger-audit.json",
+      "sha256": "97cb308dc5d2ab93f9f2f2334fb18f272fba9b3eddd1ab7f6005700fbea4e111"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/metal-invert-rate-15hz-30s-current-r5/manifest.json",
+      "sha256": "a9fd7b35adafd660c0e4fafe040eadfdef87db5287a3794ae1a3c4af33ed651c"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/metal-invert-rate-15hz-30s-current-r5/analysis.json",
+      "sha256": "5e752007ccdeeffdeb1669933d767c5dbdeb5e0f5677f34ac82a68c689f71bfa"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/d3d9-smoke-current-r5-retry1/result.json",
+      "sha256": "859d5bff6f470da933fdca6fb8a19439800bc24210e5546e9e90d2ea61061712"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/d3d9-smoke-current-r5-retry1/manifest.json",
+      "sha256": "a36e5f406d38c5d2cc2caf89867e24828d64ed3da4c32fd26bcc91ec1b3166f3"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/metal-invert-rate-30hz-300s-current-r5-memory-soak-nocapture/result.json",
+      "sha256": "6b712d63aa8f110f4bf6482418a656a51dd1a01d2b936d808c0a4d4a118f81cd"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/metal-invert-rate-30hz-300s-current-r5-memory-soak-nocapture/memory-sampling.json",
+      "sha256": "3ab74c89ee050f7cf4740c30d0731aa53c38aaf527a66c6ee6297f5bd3ec1afc"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/metal-invert-rate-30hz-300s-current-r5-memory-soak-nocapture/synchronization-ledger-audit.json",
+      "sha256": "347addf4061f327c9a411e6fa42d39686595e2751f3a1b94719834dc40830c6f"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/metal-invert-rate-30hz-300s-current-r5-memory-soak-nocapture/human-observation.json",
+      "sha256": "92bcb8f4bd229fa31a87a3ee71eb8c411ecafe4ca6629898fbd7d4b0ab7dbfba"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/metal-invert-rate-30hz-300s-current-r5-memory-soak-nocapture/timeline-value-audit.json",
+      "sha256": "3bc6e24246d6ee50e5b0a5e72bd6438c40efa5957bf402572b530b9239113ecb"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/metal-invert-rate-30hz-300s-current-r5-memory-soak-nocapture/manifest.json",
+      "sha256": "7e6918ce90d77aa9f548c8791c243a56c313512e655e393ce6e6037ec8fcf04a"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/metal-invert-rate-30hz-300s-current-r5-memory-soak-nocapture/analysis.json",
+      "sha256": "05b5a7ba7c8d986c62bce7e0a0851fab3ab3ed0ec90083da55dafdefcb0a7fa3"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/metal-invert-rate-30hz-300s-current-r5-memory-soak-nocapture/source-frame-color-accounting.json",
+      "sha256": "a971b32e3068fd441a9109b1510bc9366055f4750ea42090dc6c86da19d62578"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/d3d9-smoke-current-r5/result.json",
+      "sha256": "298e7dd6cdca60bf26989dffa81456b7663dce82075ec283ef1213dad0eb3f08"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/d3d9-smoke-current-r5/manifest.json",
+      "sha256": "ffa8abbe56403802ba341157d0c6bc9cb833ea3bd98afa7592f8d344d408cb1c"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/metal-invert-rate-1hz-30s-current-r5/result.json",
+      "sha256": "c7e50a8cad015ed37c094f2e2fbe7cfb12aacef522019db47986e5c71e193106"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/metal-invert-rate-1hz-30s-current-r5/manifest.json",
+      "sha256": "8c5c93059c086bdedbf5aecb96893cfb8a347453cd2b4bac0b950da40be40e65"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/metal-invert-rate-1hz-40s-current-r5/result.json",
+      "sha256": "8adb882203686cefdef78983faed3d349835c3941d32930dfebef13de2c15a6c"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/metal-invert-rate-1hz-40s-current-r5/human-observation.json",
+      "sha256": "42be226bf3b5747bc6f9cdf8e7040cd15f2870e3d30d697bbf513ab1147773fb"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/metal-invert-rate-1hz-40s-current-r5/manifest.json",
+      "sha256": "a3e62eeaddd54a55119956b84a31678de123d50e95265626ffe471b064ca25f9"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/metal-invert-rate-30hz-60s-current-r5/result.json",
+      "sha256": "2cbf0a3edc53b8d45fe520383d4b5afce72868de1a4ccdf434c98f8231ebace7"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/metal-invert-rate-30hz-60s-current-r5/synchronization-ledger-audit.json",
+      "sha256": "0f345d95f17743e2d4a98642768341de24766de00e290df8f2b02b36f133b853"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/metal-invert-rate-30hz-60s-current-r5/manifest.json",
+      "sha256": "cc44941faf3663c28279d7d3c02090b408746155a3179a1f9b17b6324fe55e82"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/metal-invert-rate-30hz-60s-current-r5/analysis.json",
+      "sha256": "1067ce1c999cda20059f39b6eb332f7e45ed6ed2d07c8d3a9d5654ec829db81b"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/metal-invert-rate-30hz-60s-current-r5/live-captures.json",
+      "sha256": "0778ea3865ee6df5c0e1a4852e15a9376b590f29c666290ae8e77d58500bea36"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/metal-invert-rate-30hz-30s-current-r5-controlled-nocapture/result.json",
+      "sha256": "15a8a94d3fa50de00f3d2da10dd2b533e485ba45f6bf35d15063fdb7cdde0cdf"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/metal-invert-rate-30hz-30s-current-r5-controlled-nocapture/synchronization-ledger-audit.json",
+      "sha256": "d9547178dd8df98e71fd1169cd95685fe9171c205ded76d13b2d5306af2b1e00"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/metal-invert-rate-30hz-30s-current-r5-controlled-nocapture/human-observation.json",
+      "sha256": "5851a32bc1d350ce9f673803eb486550c31ad89610724e43271db17a98140592"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/metal-invert-rate-30hz-30s-current-r5-controlled-nocapture/host-screen-capture-disposition.json",
+      "sha256": "94e853e531d5a1f9d0e8d73069d5ddd3caaa064137e3d9c5076ca21c7d4b32dd"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/metal-invert-rate-30hz-30s-current-r5-controlled-nocapture/manifest.json",
+      "sha256": "bc6e190f9b7c509d6ada2d88dbecb4d149a9e99df02616c9a631550d54f3f396"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/metal-invert-rate-30hz-30s-current-r5-controlled-nocapture/analysis.json",
+      "sha256": "faad23d6c0db2ce1310a7d6d224c9b367663df4cc0fa52001ac96ba7746cc8cf"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/provider-unavailable-current-r5/result.json",
+      "sha256": "0d1f1972f12e94143ba1e54ed7e0c7ba798e1c9bd8ccbb03f90bd96a5a6e46ba"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/provider-unavailable-current-r5/manifest.json",
+      "sha256": "0ef5ac543e5d2d0a4f8ec36a68f14c23f0d34488e606fbc5b262c948a94249dd"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/metal-invert-failure-async-retry1-current-r5/result.json",
+      "sha256": "de42badcc5d164df6c0e8091a9776fca95a11e857c93f9880da6bcb8bb4c67b1"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/metal-invert-failure-async-retry1-current-r5/synchronization-ledger-audit.json",
+      "sha256": "c354cf001bb74fb533f6ed43c43031d875cd3223d4a13b5203e1c565270683fd"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/metal-invert-failure-async-retry1-current-r5/manifest.json",
+      "sha256": "a9632110ba7741dad542334a7fc3670060b2684f918681ebcd9f9990b81d6a1a"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/metal-invert-failure-precommit-primary-current-r5/result.json",
+      "sha256": "59e31aae6547293c9b11757ceb1e34ad42a605d48b49369d210a6bc8dd64e286"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/metal-invert-failure-precommit-primary-current-r5/synchronization-ledger-audit.json",
+      "sha256": "ad65f9c6372b77689e91ee8ffd3496b02fde2852713c590f036438ec9c7e6049"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/metal-invert-failure-precommit-primary-current-r5/manifest.json",
+      "sha256": "d6327f0c1e56768c7d9fa6df431c1143e6eeb015b2c95a02c03cdf51ca98fe4c"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/metal-invert-rate-1hz-16s-current-r5/result.json",
+      "sha256": "ab85e0b1313ff64f8a195c939893392a1b531b48785754d63fdea4059ef9deb2"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/metal-invert-rate-1hz-16s-current-r5/manifest.json",
+      "sha256": "c29d5acd4eb6257d1dca76eeebbb8e3769617e8aebedae0854d961af374f49b6"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/metal-invert-lifecycle-resize-roundtrip-current-r5/result.json",
+      "sha256": "218b88fcdc2f7e212be5c5e35dfbaa221f9c803a295a4a7f102f3ed1d49ac1c0"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/metal-invert-lifecycle-resize-roundtrip-current-r5/synchronization-ledger-audit.json",
+      "sha256": "184b2163e33c6a5a366e5c0048a8d5cfc786c5d02c5dcf53de73ebaf4ac78926"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/metal-invert-lifecycle-resize-roundtrip-current-r5/manifest.json",
+      "sha256": "8f0d316bf6731a1ccebe2b623546f4e51e197b82ce84f650fc5e5d266ca12780"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/metal-invert-lifecycle-resize-roundtrip-current-r5/analysis.json",
+      "sha256": "450934dd8e8ef6decc14fa3c9885f57e4d04319c09b313a3562da61b48e7a278"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/source-only-lifecycle-current-r5/result.json",
+      "sha256": "881bb3e9b87285ded6f78e599037742db3ab22d7ea7d9c17ad1640c4d4e65733"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/source-only-lifecycle-current-r5/human-observation.json",
+      "sha256": "79ff2b1a508a1f39b409405278f168648ea9f8be3ce470534cc6025781e391ef"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/source-only-lifecycle-current-r5/manifest.json",
+      "sha256": "0f1ca0c8270053f74aeb77c6be1aaf8d737a0641c9b400d5f007ddde3248d857"
+    }
+  ],
+  "binary_outputs": [
+    {
+      "allocated_bytes": 4096,
+      "hard_link_count": 1,
+      "mode": "0o644",
+      "name": "sanity_check_for_cpp_cross.exe",
+      "path": "/private/tmp/fgmetal-step11d-r-current-r5-build-A-20261006/meson-private/sanity_check_for_cpp_cross.exe",
+      "sha256": "8b9f2576e110837259a11b53fe119cc7860323d67920e216012c0738193a0381",
+      "size_bytes": 745
+    },
+    {
+      "allocated_bytes": 20480,
+      "hard_link_count": 1,
+      "mode": "0o755",
+      "name": "sanity_check_for_cpp.exe",
+      "path": "/private/tmp/fgmetal-step11d-r-current-r5-build-A-20261006/meson-private/sanity_check_for_cpp.exe",
+      "sha256": "d17316cb4ec47e1003cadbd6a986cde0c1fdcb0f5ae625c0daecbdca119d1301",
+      "size_bytes": 16856
+    },
+    {
+      "allocated_bytes": 20480,
+      "hard_link_count": 1,
+      "mode": "0o755",
+      "name": "sanity_check_for_c.exe",
+      "path": "/private/tmp/fgmetal-step11d-r-current-r5-build-A-20261006/meson-private/sanity_check_for_c.exe",
+      "sha256": "005309bd6a62e5bd80f497620f1c318fcae0490e5627467881dc8a39684ca33c",
+      "size_bytes": 16856
+    },
+    {
+      "allocated_bytes": 4096,
+      "hard_link_count": 1,
+      "mode": "0o644",
+      "name": "sanity_check_for_c_cross.exe",
+      "path": "/private/tmp/fgmetal-step11d-r-current-r5-build-A-20261006/meson-private/sanity_check_for_c_cross.exe",
+      "sha256": "2c62068ebb6ba39c5fc2d5ba298edc23b531fbb11e58cd8b99ba8a64c128e771",
+      "size_bytes": 741
+    },
+    {
+      "allocated_bytes": 4096,
+      "hard_link_count": 6,
+      "mode": "0o644",
+      "name": "libdisplay-info.a",
+      "path": "/private/tmp/fgmetal-step11d-r-current-r5-build-A-20261006/subprojects/libdisplay-info/libdisplay-info.a",
+      "sha256": "191861137307016cbaa0825ec73cbfd7b32170c03a93348e8285ee48c8ab647a",
+      "size_bytes": 3220
+    },
+    {
+      "allocated_bytes": 1404928,
+      "hard_link_count": 6,
+      "mode": "0o644",
+      "name": "libdxbc_spv.a",
+      "path": "/private/tmp/fgmetal-step11d-r-current-r5-build-A-20261006/subprojects/dxbc-spirv/libdxbc_spv.a",
+      "sha256": "11b1a4da08a61c38bcd1527b8a0e5cabd8c0368a6df0f1f56359e2f342f54e21",
+      "size_bytes": 1402778
+    },
+    {
+      "allocated_bytes": 286720,
+      "hard_link_count": 6,
+      "mode": "0o644",
+      "name": "libutil.a",
+      "path": "/private/tmp/fgmetal-step11d-r-current-r5-build-A-20261006/src/util/libutil.a",
+      "sha256": "1e8d3337d40553931e2f1d58c619c2820a1615c808ee7f0d5c5c86abb5fe2236",
+      "size_bytes": 283068
+    },
+    {
+      "allocated_bytes": 379817984,
+      "hard_link_count": 23,
+      "mode": "0o755",
+      "name": "d3d11.dll",
+      "path": "/private/tmp/fgmetal-step11d-r-current-r5-build-A-20261006/src/d3d11/d3d11.dll",
+      "sha256": "e747ca5a5c2087d1f788762a5c4bae13939593a2cb89dedf2f7c04999ab94de5",
+      "size_bytes": 379817429
+    },
+    {
+      "allocated_bytes": 4096,
+      "hard_link_count": 2,
+      "mode": "0o644",
+      "name": "d3d11.dll.a",
+      "path": "/private/tmp/fgmetal-step11d-r-current-r5-build-A-20261006/src/d3d11/d3d11.dll.a",
+      "sha256": "d68aeaf202721b052fb03a23b8312d3e0092ef6e92b391571c10d2e101ea086b",
+      "size_bytes": 3590
+    },
+    {
+      "allocated_bytes": 2170880,
+      "hard_link_count": 3,
+      "mode": "0o644",
+      "name": "libdxvk.a",
+      "path": "/private/tmp/fgmetal-step11d-r-current-r5-build-A-20261006/src/dxvk/libdxvk.a",
+      "sha256": "7b5c4b10a64f7e0888dd3a8ecc79fec242f1649a53e64fe9e4aa227e2a278449",
+      "size_bytes": 2170654
+    },
+    {
+      "allocated_bytes": 8192,
+      "hard_link_count": 6,
+      "mode": "0o644",
+      "name": "libspirv.a",
+      "path": "/private/tmp/fgmetal-step11d-r-current-r5-build-A-20261006/src/spirv/libspirv.a",
+      "sha256": "49c8d7b9f488317f2a4a811c4884d747165eaf4c6a61511b740f7c5f6bc1ed99",
+      "size_bytes": 6474
+    },
+    {
+      "allocated_bytes": 45056,
+      "hard_link_count": 6,
+      "mode": "0o644",
+      "name": "libwsi.a",
+      "path": "/private/tmp/fgmetal-step11d-r-current-r5-build-A-20261006/src/wsi/libwsi.a",
+      "sha256": "ee87227e339c9a756059a3dfb3ac1db7278fafb840f48154b26143c57da7bfb9",
+      "size_bytes": 43388
+    },
+    {
+      "allocated_bytes": 8192,
+      "hard_link_count": 6,
+      "mode": "0o644",
+      "name": "libvkcommon.a",
+      "path": "/private/tmp/fgmetal-step11d-r-current-r5-build-A-20261006/src/vulkan/libvkcommon.a",
+      "sha256": "429537aeb4c045234f020f4fdc33e4e13854775baddf843fcde9fc72e1e3c6fd",
+      "size_bytes": 7378
+    },
+    {
+      "allocated_bytes": 341319680,
+      "hard_link_count": 1,
+      "mode": "0o755",
+      "name": "d3d9.dll",
+      "path": "/private/tmp/fgmetal-step11d-r-current-r5-build-A-20261006/src/d3d9/d3d9.dll",
+      "sha256": "527829e0d7e64862680b55a4ca6c010db784d872361dd5fd434c5ed7a92162c3",
+      "size_bytes": 341319340
+    },
+    {
+      "allocated_bytes": 16384,
+      "hard_link_count": 2,
+      "mode": "0o644",
+      "name": "d3d9.dll.a",
+      "path": "/private/tmp/fgmetal-step11d-r-current-r5-build-A-20261006/src/d3d9/d3d9.dll.a",
+      "sha256": "3ec13ed1f94c82e301a7bca1775b00fea2ab6a610ae4ad871fc3d16af4a5b4a2",
+      "size_bytes": 13288
+    },
+    {
+      "allocated_bytes": 8192,
+      "hard_link_count": 2,
+      "mode": "0o644",
+      "name": "dxgi.dll.a",
+      "path": "/private/tmp/fgmetal-step11d-r-current-r5-build-A-20261006/src/dxgi/dxgi.dll.a",
+      "sha256": "5bfbb0050ab8d366e3d9a7754a1e33d0d8ecfd4fd80fdb121385fe3c2656a99b",
+      "size_bytes": 4244
+    },
+    {
+      "allocated_bytes": 221712384,
+      "hard_link_count": 23,
+      "mode": "0o755",
+      "name": "dxgi.dll",
+      "path": "/private/tmp/fgmetal-step11d-r-current-r5-build-A-20261006/src/dxgi/dxgi.dll",
+      "sha256": "58e972688c739ee8444c8efa7a175503ff8dd0774ceb63e9b8526168054d9132",
+      "size_bytes": 221710256
+    }
+  ],
+  "build_directory_category": "COMPLETED_BUILD_PENDING_REMOVAL",
+  "build_id": "fgmetal-step11d-r-current-r5-build-A-20261006",
+  "build_path": "/private/tmp/fgmetal-step11d-r-current-r5-build-A-20261006",
+  "identity": {
+    "build_path": "/private/tmp/fgmetal-step11d-r-current-r5-build-A-20261006",
+    "compiler_versions": {
+      "build": {
+        "c": "21.0.0",
+        "cpp": "21.0.0"
+      },
+      "host": {
+        "c": "16.2.0",
+        "cpp": "16.2.0"
+      }
+    },
+    "cross_file": {
+      "path": "/Users/nima/Library/Caches/FGMetalStep11C1R/mingw-x86_64.ini",
+      "sha256": "65725179cb979fd4a837a9579ee32f4d51b43d4402bc2eb50cc5e3bc412ae297",
+      "size_bytes": 303
+    },
+    "kind": "meson",
+    "meson_cmd_line": "[options]\nbuildtype = debug\nnative_glfw = disabled\nnative_sdl2 = disabled\nnative_sdl3 = disabled\n\n[properties]\ncross_file = ['/Users/nima/Library/Caches/FGMetalStep11C1R/mingw-x86_64.ini']\n\n",
+    "meson_log": {
+      "path": "/private/tmp/fgmetal-step11d-r-current-r5-build-A-20261006/meson-logs/meson-log.txt",
+      "sha256": "73c0bd48441654bce11e6e79d935b19ba156a7af7e4f7907a13ab507e2469f47",
+      "size_bytes": 53025
+    },
+    "meson_options": [
+      {
+        "choices": [
+          "enabled",
+          "disabled",
+          "auto"
+        ],
+        "description": "Override value of all 'auto' features",
+        "machine": "any",
+        "name": "auto_features",
+        "section": "core",
+        "type": "combo",
+        "value": "auto"
+      },
+      {
+        "choices": [
+          "ninja",
+          "vs",
+          "vs2010",
+          "vs2012",
+          "vs2013",
+          "vs2015",
+          "vs2017",
+          "vs2019",
+          "vs2022",
+          "vs2026",
+          "xcode",
+          "none"
+        ],
+        "description": "Backend to use",
+        "machine": "any",
+        "name": "backend",
+        "section": "core",
+        "type": "combo",
+        "value": "ninja"
+      },
+      {
+        "choices": [
+          "vs2022",
+          "vs2026"
+        ],
+        "description": "Setup multiple buildtype-suffixed ninja-backend build directories, and a [builddir]_vs containing a Visual Studio meta-backend with multiple configurations that calls into them",
+        "machine": "any",
+        "name": "genvslite",
+        "section": "core",
+        "type": "combo",
+        "value": "vs2022"
+      },
+      {
+        "choices": [
+          "plain",
+          "debug",
+          "debugoptimized",
+          "release",
+          "minsize",
+          "custom"
+        ],
+        "description": "Build type to use",
+        "machine": "any",
+        "name": "buildtype",
+        "section": "core",
+        "type": "combo",
+        "value": "debug"
+      },
+      {
+        "description": "Enable debug symbols and other information",
+        "machine": "any",
+        "name": "debug",
+        "section": "core",
+        "type": "boolean",
+        "value": true
+      },
+      {
+        "choices": [
+          "shared",
+          "static",
+          "both"
+        ],
+        "description": "Default library type",
+        "machine": "any",
+        "name": "default_library",
+        "section": "core",
+        "type": "combo",
+        "value": "shared"
+      },
+      {
+        "choices": [
+          "shared",
+          "static",
+          "auto"
+        ],
+        "description": "Default library type for both_libraries",
+        "machine": "any",
+        "name": "default_both_libraries",
+        "section": "core",
+        "type": "combo",
+        "value": "shared"
+      },
+      {
+        "description": "Default umask to apply on permissions of installed files",
+        "machine": "any",
+        "name": "install_umask",
+        "section": "core",
+        "type": "integer",
+        "value": 18
+      },
+      {
+        "choices": [
+          "mirror",
+          "flat"
+        ],
+        "description": "Build directory layout",
+        "machine": "any",
+        "name": "layout",
+        "section": "core",
+        "type": "combo",
+        "value": "mirror"
+      },
+      {
+        "choices": [
+          "plain",
+          "0",
+          "g",
+          "1",
+          "2",
+          "3",
+          "s"
+        ],
+        "description": "Optimization level",
+        "machine": "any",
+        "name": "optimization",
+        "section": "core",
+        "type": "combo",
+        "value": "0"
+      },
+      {
+        "description": "Whether to try static linking before shared linking",
+        "machine": "any",
+        "name": "prefer_static",
+        "section": "core",
+        "type": "boolean",
+        "value": false
+      },
+      {
+        "description": "Strip targets on install",
+        "machine": "any",
+        "name": "strip",
+        "section": "core",
+        "type": "boolean",
+        "value": false
+      },
+      {
+        "choices": [
+          "on",
+          "off",
+          "subprojects"
+        ],
+        "description": "Unity build",
+        "machine": "any",
+        "name": "unity",
+        "section": "core",
+        "type": "combo",
+        "value": "off"
+      },
+      {
+        "description": "Unity block size",
+        "machine": "any",
+        "name": "unity_size",
+        "section": "core",
+        "type": "integer",
+        "value": 4
+      },
+      {
+        "choices": [
+          "0",
+          "1",
+          "2",
+          "3",
+          "everything"
+        ],
+        "description": "Compiler warning level to use",
+        "machine": "any",
+        "name": "warning_level",
+        "section": "core",
+        "type": "combo",
+        "value": "2"
+      },
+      {
+        "description": "Treat warnings as errors",
+        "machine": "any",
+        "name": "werror",
+        "section": "core",
+        "type": "boolean",
+        "value": false
+      },
+      {
+        "choices": [
+          "default",
+          "nofallback",
+          "nodownload",
+          "forcefallback",
+          "nopromote"
+        ],
+        "description": "Wrap mode",
+        "machine": "any",
+        "name": "wrap_mode",
+        "section": "core",
+        "type": "combo",
+        "value": "default"
+      },
+      {
+        "description": "Force fallback for those subprojects",
+        "machine": "any",
+        "name": "force_fallback_for",
+        "section": "core",
+        "type": "array",
+        "value": []
+      },
+      {
+        "description": "Activate Visual Studio environment",
+        "machine": "any",
+        "name": "vsenv",
+        "section": "core",
+        "type": "boolean",
+        "value": false
+      },
+      {
+        "description": "Use OMF format on OS/2",
+        "machine": "any",
+        "name": "os2_emxomf",
+        "section": "core",
+        "type": "boolean",
+        "value": false
+      },
+      {
+        "description": "Generate pkgconfig files as relocatable",
+        "machine": "any",
+        "name": "pkgconfig.relocatable",
+        "section": "core",
+        "type": "boolean",
+        "value": false
+      },
+      {
+        "description": "Whether to compile bytecode",
+        "machine": "any",
+        "name": "python.bytecompile",
+        "section": "core",
+        "type": "integer",
+        "value": 0
+      },
+      {
+        "choices": [
+          "auto",
+          "prefix",
+          "system",
+          "venv"
+        ],
+        "description": "Which python environment to install to",
+        "machine": "any",
+        "name": "python.install_env",
+        "section": "core",
+        "type": "combo",
+        "value": "prefix"
+      },
+      {
+        "description": "Directory for site-specific, platform-specific files.",
+        "machine": "any",
+        "name": "python.platlibdir",
+        "section": "core",
+        "type": "string",
+        "value": ""
+      },
+      {
+        "description": "Directory for site-specific, non-platform-specific files.",
+        "machine": "any",
+        "name": "python.purelibdir",
+        "section": "core",
+        "type": "string",
+        "value": ""
+      },
+      {
+        "description": "Whether to allow use of the Python Limited API",
+        "machine": "any",
+        "name": "python.allow_limited_api",
+        "section": "core",
+        "type": "boolean",
+        "value": true
+      },
+      {
+        "description": "Config file containing the build details for the target Python installation.",
+        "machine": "any",
+        "name": "python.build_config",
+        "section": "core",
+        "type": "string",
+        "value": ""
+      },
+      {
+        "description": "List of additional paths for pkg-config to search",
+        "machine": "build",
+        "name": "build.pkg_config_path",
+        "section": "core",
+        "type": "array",
+        "value": []
+      },
+      {
+        "description": "List of additional prefixes for cmake to search",
+        "machine": "build",
+        "name": "build.cmake_prefix_path",
+        "section": "core",
+        "type": "array",
+        "value": []
+      },
+      {
+        "description": "List of additional paths for pkg-config to search",
+        "machine": "host",
+        "name": "pkg_config_path",
+        "section": "core",
+        "type": "array",
+        "value": []
+      },
+      {
+        "description": "List of additional prefixes for cmake to search",
+        "machine": "host",
+        "name": "cmake_prefix_path",
+        "section": "core",
+        "type": "array",
+        "value": []
+      },
+      {
+        "description": "Maximum number of linker processes to run or 0 for no limit",
+        "machine": "any",
+        "name": "backend_max_links",
+        "section": "backend",
+        "type": "integer",
+        "value": 0
+      },
+      {
+        "description": "Enable coverage tracking.",
+        "machine": "any",
+        "name": "b_coverage",
+        "section": "base",
+        "type": "boolean",
+        "value": false
+      },
+      {
+        "description": "Code sanitizer to use",
+        "machine": "any",
+        "name": "b_sanitize",
+        "section": "base",
+        "type": "array",
+        "value": []
+      },
+      {
+        "description": "Use multiple threads for Link Time Optimization",
+        "machine": "any",
+        "name": "b_lto_threads",
+        "section": "base",
+        "type": "integer",
+        "value": 0
+      },
+      {
+        "description": "Use precompiled headers",
+        "machine": "any",
+        "name": "b_pch",
+        "section": "base",
+        "type": "boolean",
+        "value": true
+      },
+      {
+        "description": "Build executables as position independent",
+        "machine": "any",
+        "name": "b_pie",
+        "section": "base",
+        "type": "boolean",
+        "value": false
+      },
+      {
+        "choices": [
+          "off",
+          "generate",
+          "use"
+        ],
+        "description": "Use profile guided optimization",
+        "machine": "any",
+        "name": "b_pgo",
+        "section": "base",
+        "type": "combo",
+        "value": "off"
+      },
+      {
+        "description": "Use link time optimization",
+        "machine": "any",
+        "name": "b_lto",
+        "section": "base",
+        "type": "boolean",
+        "value": false
+      },
+      {
+        "choices": [
+          "true",
+          "false",
+          "if-release"
+        ],
+        "description": "Disable asserts",
+        "machine": "any",
+        "name": "b_ndebug",
+        "section": "base",
+        "type": "combo",
+        "value": "false"
+      },
+      {
+        "description": "Directory to store ThinLTO cache objects",
+        "machine": "any",
+        "name": "b_thinlto_cache_dir",
+        "section": "base",
+        "type": "string",
+        "value": ""
+      },
+      {
+        "description": "Use LLVM ThinLTO caching for faster incremental builds",
+        "machine": "any",
+        "name": "b_thinlto_cache",
+        "section": "base",
+        "type": "boolean",
+        "value": false
+      },
+      {
+        "description": "Build static libraries as position independent",
+        "machine": "any",
+        "name": "b_staticpic",
+        "section": "base",
+        "type": "boolean",
+        "value": true
+      },
+      {
+        "choices": [
+          "auto",
+          "always",
+          "never"
+        ],
+        "description": "Use colored output",
+        "machine": "any",
+        "name": "b_colorout",
+        "section": "base",
+        "type": "combo",
+        "value": "always"
+      },
+      {
+        "description": "Use -Wl,--as-needed when linking",
+        "machine": "any",
+        "name": "b_asneeded",
+        "section": "base",
+        "type": "boolean",
+        "value": true
+      },
+      {
+        "description": "Use -Wl,--no-undefined when linking",
+        "machine": "any",
+        "name": "b_lundef",
+        "section": "base",
+        "type": "boolean",
+        "value": true
+      },
+      {
+        "choices": [
+          "default",
+          "thin"
+        ],
+        "description": "Select between different LTO modes.",
+        "machine": "any",
+        "name": "b_lto_mode",
+        "section": "base",
+        "type": "combo",
+        "value": "default"
+      },
+      {
+        "description": "Generate and embed bitcode (only macOS/iOS/tvOS)",
+        "machine": "any",
+        "name": "b_bitcode",
+        "section": "base",
+        "type": "boolean",
+        "value": false
+      },
+      {
+        "description": "Extra arguments passed to the c compiler",
+        "machine": "build",
+        "name": "build.c_args",
+        "section": "compiler",
+        "type": "array",
+        "value": []
+      },
+      {
+        "description": "Extra arguments passed to the c linker",
+        "machine": "build",
+        "name": "build.c_link_args",
+        "section": "compiler",
+        "type": "array",
+        "value": []
+      },
+      {
+        "choices": [
+          "none",
+          "c89",
+          "c99",
+          "c11",
+          "c17",
+          "c18",
+          "c2x",
+          "c23",
+          "c2y",
+          "gnu89",
+          "gnu99",
+          "gnu11",
+          "gnu17",
+          "gnu18",
+          "gnu2x",
+          "gnu23",
+          "gnu2y"
+        ],
+        "description": "c language standard to use",
+        "machine": "build",
+        "name": "build.c_std",
+        "section": "compiler",
+        "type": "combo",
+        "value": "none"
+      },
+      {
+        "description": "Extra arguments passed to the cpp compiler",
+        "machine": "build",
+        "name": "build.cpp_args",
+        "section": "compiler",
+        "type": "array",
+        "value": []
+      },
+      {
+        "description": "Extra arguments passed to the cpp linker",
+        "machine": "build",
+        "name": "build.cpp_link_args",
+        "section": "compiler",
+        "type": "array",
+        "value": []
+      },
+      {
+        "choices": [
+          "none",
+          "c++98",
+          "c++03",
+          "c++11",
+          "c++14",
+          "c++17",
+          "c++1z",
+          "c++2a",
+          "c++20",
+          "c++23",
+          "c++26",
+          "gnu++98",
+          "gnu++03",
+          "gnu++11",
+          "gnu++14",
+          "gnu++17",
+          "gnu++1z",
+          "gnu++2a",
+          "gnu++20",
+          "gnu++23",
+          "gnu++26"
+        ],
+        "description": "cpp language standard to use",
+        "machine": "build",
+        "name": "build.cpp_std",
+        "section": "compiler",
+        "type": "combo",
+        "value": "none"
+      },
+      {
+        "choices": [
+          "none",
+          "default",
+          "a",
+          "s",
+          "sc"
+        ],
+        "description": "C++ exception handling type.",
+        "machine": "build",
+        "name": "build.cpp_eh",
+        "section": "compiler",
+        "type": "combo",
+        "value": "default"
+      },
+      {
+        "description": "Enable RTTI",
+        "machine": "build",
+        "name": "build.cpp_rtti",
+        "section": "compiler",
+        "type": "boolean",
+        "value": true
+      },
+      {
+        "description": "STL debug mode",
+        "machine": "build",
+        "name": "build.cpp_debugstl",
+        "section": "compiler",
+        "type": "boolean",
+        "value": false
+      },
+      {
+        "description": "Extra arguments passed to the c compiler",
+        "machine": "host",
+        "name": "c_args",
+        "section": "compiler",
+        "type": "array",
+        "value": []
+      },
+      {
+        "description": "Extra arguments passed to the c linker",
+        "machine": "host",
+        "name": "c_link_args",
+        "section": "compiler",
+        "type": "array",
+        "value": []
+      },
+      {
+        "choices": [
+          "none",
+          "c89",
+          "c99",
+          "c11",
+          "c17",
+          "c18",
+          "c2x",
+          "c23",
+          "c2y",
+          "gnu89",
+          "gnu99",
+          "gnu11",
+          "gnu17",
+          "gnu18",
+          "gnu2x",
+          "gnu23",
+          "gnu2y"
+        ],
+        "description": "c language standard to use",
+        "machine": "host",
+        "name": "c_std",
+        "section": "compiler",
+        "type": "combo",
+        "value": "none"
+      },
+      {
+        "description": "Standard Windows libraries to link against",
+        "machine": "host",
+        "name": "c_winlibs",
+        "section": "compiler",
+        "type": "array",
+        "value": [
+          "-lkernel32",
+          "-luser32",
+          "-lgdi32",
+          "-lwinspool",
+          "-lshell32",
+          "-lole32",
+          "-loleaut32",
+          "-luuid",
+          "-lcomdlg32",
+          "-ladvapi32"
+        ]
+      },
+      {
+        "description": "Extra arguments passed to the cpp compiler",
+        "machine": "host",
+        "name": "cpp_args",
+        "section": "compiler",
+        "type": "array",
+        "value": []
+      },
+      {
+        "description": "Extra arguments passed to the cpp linker",
+        "machine": "host",
+        "name": "cpp_link_args",
+        "section": "compiler",
+        "type": "array",
+        "value": []
+      },
+      {
+        "choices": [
+          "none",
+          "c++98",
+          "c++03",
+          "c++11",
+          "c++14",
+          "c++17",
+          "c++1z",
+          "c++2a",
+          "c++20",
+          "c++23",
+          "c++26",
+          "gnu++98",
+          "gnu++03",
+          "gnu++11",
+          "gnu++14",
+          "gnu++17",
+          "gnu++1z",
+          "gnu++2a",
+          "gnu++20",
+          "gnu++23",
+          "gnu++26"
+        ],
+        "description": "cpp language standard to use",
+        "machine": "host",
+        "name": "cpp_std",
+        "section": "compiler",
+        "type": "combo",
+        "value": "c++17"
+      },
+      {
+        "choices": [
+          "none",
+          "default",
+          "a",
+          "s",
+          "sc"
+        ],
+        "description": "C++ exception handling type.",
+        "machine": "host",
+        "name": "cpp_eh",
+        "section": "compiler",
+        "type": "combo",
+        "value": "default"
+      },
+      {
+        "description": "Enable RTTI",
+        "machine": "host",
+        "name": "cpp_rtti",
+        "section": "compiler",
+        "type": "boolean",
+        "value": true
+      },
+      {
+        "description": "STL debug mode",
+        "machine": "host",
+        "name": "cpp_debugstl",
+        "section": "compiler",
+        "type": "boolean",
+        "value": false
+      },
+      {
+        "description": "Standard Win libraries to link against",
+        "machine": "host",
+        "name": "cpp_winlibs",
+        "section": "compiler",
+        "type": "array",
+        "value": [
+          "-lkernel32",
+          "-luser32",
+          "-lgdi32",
+          "-lwinspool",
+          "-lshell32",
+          "-lole32",
+          "-loleaut32",
+          "-luuid",
+          "-lcomdlg32",
+          "-ladvapi32"
+        ]
+      },
+      {
+        "choices": [
+          "false",
+          "true"
+        ],
+        "description": "Use #import std.",
+        "machine": "host",
+        "name": "cpp_importstd",
+        "section": "compiler",
+        "type": "combo",
+        "value": "false"
+      },
+      {
+        "description": "Installation prefix",
+        "machine": "any",
+        "name": "prefix",
+        "section": "directory",
+        "type": "string",
+        "value": "/opt/homebrew"
+      },
+      {
+        "description": "Executable directory",
+        "machine": "any",
+        "name": "bindir",
+        "section": "directory",
+        "type": "string",
+        "value": "bin"
+      },
+      {
+        "description": "Data file directory",
+        "machine": "any",
+        "name": "datadir",
+        "section": "directory",
+        "type": "string",
+        "value": "share"
+      },
+      {
+        "description": "Header file directory",
+        "machine": "any",
+        "name": "includedir",
+        "section": "directory",
+        "type": "string",
+        "value": "include"
+      },
+      {
+        "description": "Info page directory",
+        "machine": "any",
+        "name": "infodir",
+        "section": "directory",
+        "type": "string",
+        "value": "share/info"
+      },
+      {
+        "description": "Library directory",
+        "machine": "any",
+        "name": "libdir",
+        "section": "directory",
+        "type": "string",
+        "value": "lib"
+      },
+      {
+        "description": "Licenses directory",
+        "machine": "any",
+        "name": "licensedir",
+        "section": "directory",
+        "type": "string",
+        "value": ""
+      },
+      {
+        "description": "Library executable directory",
+        "machine": "any",
+        "name": "libexecdir",
+        "section": "directory",
+        "type": "string",
+        "value": "libexec"
+      },
+      {
+        "description": "Locale data directory",
+        "machine": "any",
+        "name": "localedir",
+        "section": "directory",
+        "type": "string",
+        "value": "share/locale"
+      },
+      {
+        "description": "Localstate data directory",
+        "machine": "any",
+        "name": "localstatedir",
+        "section": "directory",
+        "type": "string",
+        "value": "/opt/homebrew/var"
+      },
+      {
+        "description": "Manual page directory",
+        "machine": "any",
+        "name": "mandir",
+        "section": "directory",
+        "type": "string",
+        "value": "share/man"
+      },
+      {
+        "description": "System executable directory",
+        "machine": "any",
+        "name": "sbindir",
+        "section": "directory",
+        "type": "string",
+        "value": "sbin"
+      },
+      {
+        "description": "Architecture-independent data directory",
+        "machine": "any",
+        "name": "sharedstatedir",
+        "section": "directory",
+        "type": "string",
+        "value": "/opt/homebrew/var/lib"
+      },
+      {
+        "description": "Sysconf data directory",
+        "machine": "any",
+        "name": "sysconfdir",
+        "section": "directory",
+        "type": "string",
+        "value": "etc"
+      },
+      {
+        "description": "Build DXGI",
+        "machine": "any",
+        "name": "enable_dxgi",
+        "section": "user",
+        "type": "boolean",
+        "value": true
+      },
+      {
+        "description": "Build D3D8",
+        "machine": "any",
+        "name": "enable_d3d8",
+        "section": "user",
+        "type": "boolean",
+        "value": true
+      },
+      {
+        "description": "Build D3D9",
+        "machine": "any",
+        "name": "enable_d3d9",
+        "section": "user",
+        "type": "boolean",
+        "value": true
+      },
+      {
+        "description": "Build D3D10",
+        "machine": "any",
+        "name": "enable_d3d10",
+        "section": "user",
+        "type": "boolean",
+        "value": true
+      },
+      {
+        "description": "Build D3D11",
+        "machine": "any",
+        "name": "enable_d3d11",
+        "section": "user",
+        "type": "boolean",
+        "value": true
+      },
+      {
+        "description": "build_id",
+        "machine": "any",
+        "name": "build_id",
+        "section": "user",
+        "type": "boolean",
+        "value": false
+      },
+      {
+        "choices": [
+          "enabled",
+          "disabled",
+          "auto"
+        ],
+        "description": "Enable GLFW WSI for DXVK Native",
+        "machine": "any",
+        "name": "native_glfw",
+        "section": "user",
+        "type": "combo",
+        "value": "disabled"
+      },
+      {
+        "choices": [
+          "enabled",
+          "disabled",
+          "auto"
+        ],
+        "description": "Enable SDL2 WSI for DXVK Native",
+        "machine": "any",
+        "name": "native_sdl2",
+        "section": "user",
+        "type": "combo",
+        "value": "disabled"
+      },
+      {
+        "choices": [
+          "enabled",
+          "disabled",
+          "auto"
+        ],
+        "description": "Enable SDL3 WSI for DXVK Native",
+        "machine": "any",
+        "name": "native_sdl3",
+        "section": "user",
+        "type": "combo",
+        "value": "disabled"
+      },
+      {
+        "description": "Build with Shader Model 3 support",
+        "machine": "any",
+        "name": "dxbc-spirv:enable_sm3",
+        "section": "user",
+        "type": "boolean",
+        "value": true
+      },
+      {
+        "description": "Build with Shader Model 5 support",
+        "machine": "any",
+        "name": "dxbc-spirv:enable_sm5",
+        "section": "user",
+        "type": "boolean",
+        "value": true
+      },
+      {
+        "description": "Build with SPIR-V backend",
+        "machine": "any",
+        "name": "dxbc-spirv:enable_spirv",
+        "section": "user",
+        "type": "boolean",
+        "value": true
+      },
+      {
+        "description": "Build tests",
+        "machine": "any",
+        "name": "dxbc-spirv:enable_tests",
+        "section": "user",
+        "type": "boolean",
+        "value": false
+      },
+      {
+        "description": "Build utility programs",
+        "machine": "any",
+        "name": "dxbc-spirv:enable_tools",
+        "section": "user",
+        "type": "boolean",
+        "value": false
+      },
+      {
+        "description": "Whether to print the logs from failing tests",
+        "machine": "any",
+        "name": "errorlogs",
+        "section": "test",
+        "type": "boolean",
+        "value": true
+      },
+      {
+        "description": "Split stdout and stderr in test logs",
+        "machine": "any",
+        "name": "stdsplit",
+        "section": "test",
+        "type": "boolean",
+        "value": true
+      }
+    ],
+    "source_identity": {
+      "content_tree_sha256": "55de27765481a4c78b6583e12a7e1bedcd750a7b4993e52638680d0bf0a51b1c",
+      "git_commit": null,
+      "git_tree": null,
+      "path": "/private/tmp/fgmetal-step11d-r-source-snapshot-current-r5-20261006"
+    }
+  },
+  "metadata_copies": [
+    {
+      "copy": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-records/fgmetal-step11d-r-current-r5-build-A-20261006/meson-private__cmd_line.txt",
+      "sha256": "7fb81f80a60a61dc3283f287962129e5e02901fc7e5e94352aa51f61d6b05318",
+      "size_bytes": 190,
+      "source": "/private/tmp/fgmetal-step11d-r-current-r5-build-A-20261006/meson-private/cmd_line.txt"
+    },
+    {
+      "copy": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-records/fgmetal-step11d-r-current-r5-build-A-20261006/meson-info__intro-buildoptions.json",
+      "sha256": "17aec4a0d9c921143b2a580723cb706c2d6edb27849e5e5eb07379bbe097b8de",
+      "size_bytes": 21227,
+      "source": "/private/tmp/fgmetal-step11d-r-current-r5-build-A-20261006/meson-info/intro-buildoptions.json"
+    },
+    {
+      "copy": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-records/fgmetal-step11d-r-current-r5-build-A-20261006/meson-info__intro-compilers.json",
+      "sha256": "7f37baa2a8232735a184d8999ba5c4969a5839d588c32affa80fd3bfeab26f12",
+      "size_bytes": 1915,
+      "source": "/private/tmp/fgmetal-step11d-r-current-r5-build-A-20261006/meson-info/intro-compilers.json"
+    },
+    {
+      "copy": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-records/fgmetal-step11d-r-current-r5-build-A-20261006/meson-info__intro-buildsystem_files.json",
+      "sha256": "e1493d7125e16c481d8bbb18facfa663a79bf4e6c28b88191d718d6cbbd67fae",
+      "size_bytes": 1616,
+      "source": "/private/tmp/fgmetal-step11d-r-current-r5-build-A-20261006/meson-info/intro-buildsystem_files.json"
+    },
+    {
+      "copy": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-records/fgmetal-step11d-r-current-r5-build-A-20261006/meson-info__intro-projectinfo.json",
+      "sha256": "2406923efd60065ffad8b5f86fdccfad783d0ce3c1b64ac5be761f89959e1c0b",
+      "size_bytes": 391,
+      "source": "/private/tmp/fgmetal-step11d-r-current-r5-build-A-20261006/meson-info/intro-projectinfo.json"
+    },
+    {
+      "compression": "gzip",
+      "copy": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-records/fgmetal-step11d-r-current-r5-build-A-20261006/meson-log.txt.gz",
+      "sha256": "3c8b3b57ee8fa23790023e4f449911c4762c47cd6ab0bc7ad28d77f804ebc887",
+      "size_bytes": 5748,
+      "source": "/private/tmp/fgmetal-step11d-r-current-r5-build-A-20261006/meson-logs/meson-log.txt",
+      "source_sha256": "73c0bd48441654bce11e6e79d935b19ba156a7af7e4f7907a13ab507e2469f47"
+    }
+  ],
+  "recorded_at_unix": 1791314744.4151092,
+  "result_and_manifest_copies": [],
+  "retention": "Build directory is removable after each binary hash resolves to the canonical artifact store and this record exists.",
+  "schema_version": 1
+}

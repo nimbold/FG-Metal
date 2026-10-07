@@ -1,0 +1,12 @@
+{
+  "run": "A2",
+  "source_hz": 30,
+  "direct_user_observation": "It's flashing/flickering so fast and mostly white color is recognizable",
+  "revised_high_rate_criterion": {
+    "renderer_visibly_active": true,
+    "expected_fast_flicker": true,
+    "individual_complementary_colors_identified": false,
+    "persistent_black_or_frozen_or_corrupted_output_reported": false,
+    "scope": "The observation did not report sustained black, a frozen image, or persistent texture corruption; no screen capture was used."
+  }
+}

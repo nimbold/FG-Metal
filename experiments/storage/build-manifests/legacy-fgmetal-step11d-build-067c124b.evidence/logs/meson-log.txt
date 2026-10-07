@@ -1,0 +1,860 @@
+Build started at 2026-10-05T21:13:36.597934
+Main binary: /opt/homebrew/opt/python@3.14/bin/python3.14
+Build Options: -Dbuildtype=release --cross-file=build-win64.txt
+Python system: Darwin
+The Meson build system
+Version: 1.12.1
+Source dir: /private/tmp/fgmetal-step11d-dxvk-source
+Build dir: /private/tmp/fgmetal-step11d-build
+Build type: cross build
+Project name: dxvk
+Project version: 3.1.1
+-----------
+Detecting compiler via: `x86_64-w64-mingw32-gcc --version` -> 0
+stdout:
+x86_64-w64-mingw32-gcc (GCC) 16.2.0
+Copyright (C) 2026 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+-----------
+Running command: -cpp -x c -E -dM -
+-----
+-----------
+Detecting linker via: `x86_64-w64-mingw32-gcc -Wl,--version` -> 0
+stdout:
+GNU ld (GNU Binutils) 2.47.20260726
+Copyright (C) 2026 Free Software Foundation, Inc.
+This program is free software; you may redistribute it under the terms of
+the GNU General Public License version 3 or (at your option) a later version.
+This program has absolutely no warranty.
+-----------
+stderr:
+collect2 version 16.2.0
+/opt/homebrew/Cellar/mingw-w64/14.0.0_3/toolchain-x86_64/bin/x86_64-w64-mingw32-ld -plugin /opt/homebrew/Cellar/mingw-w64/14.0.0_3/toolchain-x86_64/libexec/gcc/x86_64-w64-mingw32/16.2.0/liblto_plugin.so -plugin-opt=/opt/homebrew/Cellar/mingw-w64/14.0.0_3/toolchain-x86_64/libexec/gcc/x86_64-w64-mingw32/16.2.0/lto-wrapper -plugin-opt=-fresolution=/var/folders/4l/yp39dwhd7rg2y9xscgvhkyqw0000gn/T//ccq7xvAc.res -plugin-opt=-pass-through=-lmingw32 -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_eh -plugin-opt=-pass-through=-lmingwex -plugin-opt=-pass-through=-lmsvcrt -plugin-opt=-pass-through=-lkernel32 -plugin-opt=-pass-through=-lpthread -plugin-opt=-pass-through=-ladvapi32 -plugin-opt=-pass-through=-lshell32 -plugin-opt=-pass-through=-luser32 -plugin-opt=-pass-through=-lkernel32 -plugin-opt=-pass-through=-lmingw32 -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_eh -plugin-opt=-pass-through=-lmingwex -plugin-opt=-pass-through=-lmsvcrt -plugin-opt=-pass-through=-lkernel32 --sysroot=/opt/homebrew/Cellar/mingw-w64/14.0.0_3/toolchain-x86_64 -m i386pep -Bdynamic /opt/homebrew/Cellar/mingw-w64/14.0.0_3/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/16.2.0/../../../../x86_64-w64-mingw32/lib/../lib/crt2.o /opt/homebrew/Cellar/mingw-w64/14.0.0_3/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/16.2.0/crtbegin.o -L/opt/homebrew/Cellar/mingw-w64/14.0.0_3/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/16.2.0 -L/opt/homebrew/Cellar/mingw-w64/14.0.0_3/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/16.2.0/../../../../x86_64-w64-mingw32/lib/../lib -L/opt/homebrew/Cellar/mingw-w64/14.0.0_3/toolchain-x86_64/mingw/lib/../lib -L/opt/homebrew/Cellar/mingw-w64/14.0.0_3/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/16.2.0/../../../../x86_64-w64-mingw32/lib -L/opt/homebrew/Cellar/mingw-w64/14.0.0_3/toolchain-x86_64/mingw/lib --version -lmingw32 -lgcc -lgcc_eh -lmingwex -lmsvcrt -lkernel32 -lpthread -ladvapi32 -lshell32 -luser32 -lkernel32 -lmingw32 -lgcc -lgcc_eh -lmingwex -lmsvcrt -lkernel32 /opt/homebrew/Cellar/mingw-w64/14.0.0_3/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/16.2.0/crtend.o
+-----------
+Sanity check compiler command line: x86_64-w64-mingw32-gcc -o sanity_check_for_c_cross.exe sanity_check_for_c.c -D_FILE_OFFSET_BITS=64 -c
+Sanity check compile stdout:
+
+-----
+Sanity check compile stderr:
+
+-----
+Cannot run cross check
+C compiler for the host machine: x86_64-w64-mingw32-gcc (gcc 16.2.0 "x86_64-w64-mingw32-gcc (GCC) 16.2.0")
+C linker for the host machine: x86_64-w64-mingw32-gcc ld.bfd 2.47.20260726
+-----------
+Detecting archiver via: `x86_64-w64-mingw32-ar --version` -> 0
+stdout:
+GNU ar (GNU Binutils) 2.47.20260726
+Copyright (C) 2026 Free Software Foundation, Inc.
+This program is free software; you may redistribute it under the terms of
+the GNU General Public License version 3 or (at your option) any later version.
+This program has absolutely no warranty.
+-----------
+-----------
+Detecting compiler via: `x86_64-w64-mingw32-g++ --version` -> 0
+stdout:
+x86_64-w64-mingw32-g++ (GCC) 16.2.0
+Copyright (C) 2026 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+-----------
+Running command: -cpp -x c++ -E -dM -
+-----
+-----------
+Detecting linker via: `x86_64-w64-mingw32-g++ -Wl,--version` -> 0
+stdout:
+GNU ld (GNU Binutils) 2.47.20260726
+Copyright (C) 2026 Free Software Foundation, Inc.
+This program is free software; you may redistribute it under the terms of
+the GNU General Public License version 3 or (at your option) a later version.
+This program has absolutely no warranty.
+-----------
+stderr:
+collect2 version 16.2.0
+/opt/homebrew/Cellar/mingw-w64/14.0.0_3/toolchain-x86_64/bin/x86_64-w64-mingw32-ld -plugin /opt/homebrew/Cellar/mingw-w64/14.0.0_3/toolchain-x86_64/libexec/gcc/x86_64-w64-mingw32/16.2.0/liblto_plugin.so -plugin-opt=/opt/homebrew/Cellar/mingw-w64/14.0.0_3/toolchain-x86_64/libexec/gcc/x86_64-w64-mingw32/16.2.0/lto-wrapper -plugin-opt=-fresolution=/var/folders/4l/yp39dwhd7rg2y9xscgvhkyqw0000gn/T//ccwkUrxb.res -plugin-opt=-pass-through=-lmingw32 -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lmingwex -plugin-opt=-pass-through=-lmsvcrt -plugin-opt=-pass-through=-lkernel32 -plugin-opt=-pass-through=-lpthread -plugin-opt=-pass-through=-ladvapi32 -plugin-opt=-pass-through=-lshell32 -plugin-opt=-pass-through=-luser32 -plugin-opt=-pass-through=-lkernel32 -plugin-opt=-pass-through=-lmingw32 -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lmingwex -plugin-opt=-pass-through=-lmsvcrt -plugin-opt=-pass-through=-lkernel32 --sysroot=/opt/homebrew/Cellar/mingw-w64/14.0.0_3/toolchain-x86_64 -m i386pep -Bdynamic /opt/homebrew/Cellar/mingw-w64/14.0.0_3/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/16.2.0/../../../../x86_64-w64-mingw32/lib/../lib/crt2.o /opt/homebrew/Cellar/mingw-w64/14.0.0_3/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/16.2.0/crtbegin.o -L/opt/homebrew/Cellar/mingw-w64/14.0.0_3/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/16.2.0 -L/opt/homebrew/Cellar/mingw-w64/14.0.0_3/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/16.2.0/../../../../x86_64-w64-mingw32/lib/../lib -L/opt/homebrew/Cellar/mingw-w64/14.0.0_3/toolchain-x86_64/mingw/lib/../lib -L/opt/homebrew/Cellar/mingw-w64/14.0.0_3/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/16.2.0/../../../../x86_64-w64-mingw32/lib -L/opt/homebrew/Cellar/mingw-w64/14.0.0_3/toolchain-x86_64/mingw/lib --version -lstdc++ -lmingw32 -lgcc_s -lgcc -lmingwex -lmsvcrt -lkernel32 -lpthread -ladvapi32 -lshell32 -luser32 -lkernel32 -lmingw32 -lgcc_s -lgcc -lmingwex -lmsvcrt -lkernel32 /opt/homebrew/Cellar/mingw-w64/14.0.0_3/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/16.2.0/crtend.o
+-----------
+Sanity check compiler command line: x86_64-w64-mingw32-g++ -o sanity_check_for_cpp_cross.exe sanity_check_for_cpp.cpp -D_FILE_OFFSET_BITS=64 -c
+Sanity check compile stdout:
+
+-----
+Sanity check compile stderr:
+
+-----
+Cannot run cross check
+C++ compiler for the host machine: x86_64-w64-mingw32-g++ (gcc 16.2.0 "x86_64-w64-mingw32-g++ (GCC) 16.2.0")
+C++ linker for the host machine: x86_64-w64-mingw32-g++ ld.bfd 2.47.20260726
+-----------
+Detecting compiler via: `cc --version` -> 0
+stdout:
+Apple clang version 21.0.0 (clang-2100.3.34.2)
+Target: arm64-apple-darwin27.0.0
+Thread model: posix
+InstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin
+-----------
+Running command: -x c -E -dM -
+-----
+-----------
+Detecting linker via: `cc -Wl,--version` -> 1
+stderr:
+ld: unknown options: --version 
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+-----------
+-----------
+Detecting Apple linker via: `cc -Wl,-v` -> 1
+stderr:
+@(#)PROGRAM:ld PROJECT:ld-27037.1
+BUILD 21:17:51 Aug 25 2026
+configured to support archs: armv6 armv7 armv7s arm64 arm64e arm64_32 i386 x86_64 x86_64h armv6m armv7k armv7m armv7em armv8m.main armv8.1m.main
+LTO support using: LLVM version 21.0.0 (static support for 30, runtime is 30)
+TAPI support using: Apple TAPI version 21.0.0 (tapi-2100.3.8.1)
+Library search paths:
+	/usr/local/lib
+	/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/lib
+	/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/lib/swift
+Framework search paths:
+	/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks
+Undefined symbols for architecture arm64:
+  "_main", referenced from:
+      <initial-undefines>
+ld: symbol(s) not found for architecture arm64
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+-----------
+Sanity check compiler command line: cc -o sanity_check_for_c.exe sanity_check_for_c.c
+Sanity check compile stdout:
+
+-----
+Sanity check compile stderr:
+
+-----
+Sanity check built target output for build machine c compiler
+ -- Running test binary command:  /private/tmp/fgmetal-step11d-build/meson-private/sanity_check_for_c.exe
+-----------
+Sanity check: `/private/tmp/fgmetal-step11d-build/meson-private/sanity_check_for_c.exe` -> 0
+ -- stdout:
+ 
+ -- stderr:
+ 
+ -- returncode: 0
+C compiler for the build machine: cc (clang 21.0.0 "Apple clang version 21.0.0 (clang-2100.3.34.2)")
+C linker for the build machine: cc ld64 27037.1
+-----------
+Detecting archiver via: `llvm-ar-21 --version` -> [Errno 2] No such file or directory: 'llvm-ar-21'
+-----------
+Detecting archiver via: `llvm-ar --version` -> [Errno 2] No such file or directory: 'llvm-ar'
+-----------
+Detecting archiver via: `ar --version` -> 1
+stderr:
+usage:  ar -d [-TLsv] archive file ...
+	ar -m [-TLsv] archive file ...
+	ar -m [-abiTLsv] position archive file ...
+	ar -p [-TLsv] archive [file ...]
+	ar -q [-cTLsv] archive file ...
+	ar -r [-cuTLsv] archive file ...
+	ar -r [-abciuTLsv] position archive file ...
+	ar -t [-TLsv] archive [file ...]
+	ar -x [-ouTLsv] archive [file ...]
+-----------
+-----------
+Detecting compiler via: `c++ --version` -> 0
+stdout:
+Apple clang version 21.0.0 (clang-2100.3.34.2)
+Target: arm64-apple-darwin27.0.0
+Thread model: posix
+InstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin
+-----------
+Running command: -x c++ -E -dM -
+-----
+-----------
+Detecting linker via: `c++ -Wl,--version` -> 1
+stderr:
+ld: unknown options: --version 
+clang++: error: linker command failed with exit code 1 (use -v to see invocation)
+-----------
+-----------
+Detecting Apple linker via: `c++ -Wl,-v` -> 1
+stderr:
+@(#)PROGRAM:ld PROJECT:ld-27037.1
+BUILD 21:17:51 Aug 25 2026
+configured to support archs: armv6 armv7 armv7s arm64 arm64e arm64_32 i386 x86_64 x86_64h armv6m armv7k armv7m armv7em armv8m.main armv8.1m.main
+LTO support using: LLVM version 21.0.0 (static support for 30, runtime is 30)
+TAPI support using: Apple TAPI version 21.0.0 (tapi-2100.3.8.1)
+Library search paths:
+	/usr/local/lib
+	/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/lib
+	/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/lib/swift
+Framework search paths:
+	/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks
+Undefined symbols for architecture arm64:
+  "_main", referenced from:
+      <initial-undefines>
+ld: symbol(s) not found for architecture arm64
+clang++: error: linker command failed with exit code 1 (use -v to see invocation)
+-----------
+Sanity check compiler command line: c++ -o sanity_check_for_cpp.exe sanity_check_for_cpp.cpp
+Sanity check compile stdout:
+
+-----
+Sanity check compile stderr:
+
+-----
+Sanity check built target output for build machine cpp compiler
+ -- Running test binary command:  /private/tmp/fgmetal-step11d-build/meson-private/sanity_check_for_cpp.exe
+-----------
+Sanity check: `/private/tmp/fgmetal-step11d-build/meson-private/sanity_check_for_cpp.exe` -> 0
+ -- stdout:
+ 
+ -- stderr:
+ 
+ -- returncode: 0
+C++ compiler for the build machine: c++ (clang 21.0.0 "Apple clang version 21.0.0 (clang-2100.3.34.2)")
+C++ linker for the build machine: c++ ld64 27037.1
+Build machine cpu family: aarch64
+Build machine cpu: aarch64
+Host machine cpu family: x86_64
+Host machine cpu: x86_64
+Target machine cpu family: x86_64
+Target machine cpu: x86_64
+Pkg-config binary missing from cross or native file, or env var undefined.
+Default target is not allowed for cross use
+Found pkg-config: NO
+Pkg-config for machine host machine not found. Giving up.
+CMake binary for host machine is not cached
+CMake binary missing from cross or native file, or env var undefined.
+Default target is not allowed for cross use
+Found CMake: NO
+CMake binary for machine host machine not found. Giving up.
+Run-time dependency libdisplay-info found: NO  (tried pkg-config and cmake)
+Looking for a fallback subproject for the dependency libdisplay-info
+
+Executing subproject libdisplay-info for machine: host 
+
+Project name: libdisplay-info
+Project version: 0.0.0
+C compiler for the host machine: x86_64-w64-mingw32-gcc (gcc 16.2.0 "x86_64-w64-mingw32-gcc (GCC) 16.2.0")
+C linker for the host machine: x86_64-w64-mingw32-gcc ld.bfd 2.47.20260726
+C compiler for the build machine: cc (clang 21.0.0 "Apple clang version 21.0.0 (clang-2100.3.34.2)")
+C linker for the build machine: cc ld64 27037.1
+Program tool/gen-search-table.py found: YES (/private/tmp/fgmetal-step11d-dxvk-source/subprojects/libdisplay-info/tool/gen-search-table.py)
+Running compile:
+Working directory:  /private/tmp/fgmetal-step11d-build/meson-private/tmp3_1a8783
+Code:
+int main(void) { return 0; }
+
+-----------
+Command line: `x86_64-w64-mingw32-gcc /private/tmp/fgmetal-step11d-build/meson-private/tmp3_1a8783/testfile.c -o /private/tmp/fgmetal-step11d-build/meson-private/tmp3_1a8783/output.exe -D_FILE_OFFSET_BITS=64 -O0 -U_FORTIFY_SOURCE -lm -Wl,--allow-shlib-undefined` -> 0
+Library m found: YES
+Running compile:
+Working directory:  /private/tmp/fgmetal-step11d-build/meson-private/tmpepi32n5p
+Code:
+extern int i;
+int i;
+
+-----------
+Command line: `x86_64-w64-mingw32-gcc /private/tmp/fgmetal-step11d-build/meson-private/tmpepi32n5p/testfile.c -o /private/tmp/fgmetal-step11d-build/meson-private/tmpepi32n5p/output.obj -c -D_FILE_OFFSET_BITS=64 -O0 -U_FORTIFY_SOURCE -Wundef` -> 0
+Compiler for C supports arguments -Wundef: YES 
+Running compile:
+Working directory:  /private/tmp/fgmetal-step11d-build/meson-private/tmpmvn93c5h
+Code:
+extern int i;
+int i;
+
+-----------
+Command line: `x86_64-w64-mingw32-gcc /private/tmp/fgmetal-step11d-build/meson-private/tmpmvn93c5h/testfile.c -o /private/tmp/fgmetal-step11d-build/meson-private/tmpmvn93c5h/output.obj -c -D_FILE_OFFSET_BITS=64 -O0 -U_FORTIFY_SOURCE -Wmissing-prototypes` -> 0
+Compiler for C supports arguments -Wmissing-prototypes: YES 
+Running compile:
+Working directory:  /private/tmp/fgmetal-step11d-build/meson-private/tmpck5lhqjk
+Code:
+extern int i;
+int i;
+
+-----------
+Command line: `x86_64-w64-mingw32-gcc /private/tmp/fgmetal-step11d-build/meson-private/tmpck5lhqjk/testfile.c -o /private/tmp/fgmetal-step11d-build/meson-private/tmpck5lhqjk/output.obj -c -D_FILE_OFFSET_BITS=64 -O0 -U_FORTIFY_SOURCE -Walloca` -> 0
+Compiler for C supports arguments -Walloca: YES 
+Running compile:
+Working directory:  /private/tmp/fgmetal-step11d-build/meson-private/tmpja8ab5bm
+Code:
+extern int i;
+int i;
+
+-----------
+Command line: `x86_64-w64-mingw32-gcc /private/tmp/fgmetal-step11d-build/meson-private/tmpja8ab5bm/testfile.c -o /private/tmp/fgmetal-step11d-build/meson-private/tmpja8ab5bm/output.obj -c -D_FILE_OFFSET_BITS=64 -O0 -U_FORTIFY_SOURCE -Wdeclaration-after-statement` -> 0
+Compiler for C supports arguments -Wdeclaration-after-statement: YES 
+Running compile:
+Working directory:  /private/tmp/fgmetal-step11d-build/meson-private/tmphdzznj8r
+Code:
+extern int i;
+int i;
+
+-----------
+Command line: `x86_64-w64-mingw32-gcc /private/tmp/fgmetal-step11d-build/meson-private/tmphdzznj8r/testfile.c -o /private/tmp/fgmetal-step11d-build/meson-private/tmphdzznj8r/output.obj -c -D_FILE_OFFSET_BITS=64 -O0 -U_FORTIFY_SOURCE -Wconversion` -> 0
+Compiler for C supports arguments -Wconversion: YES 
+Running compile:
+Working directory:  /private/tmp/fgmetal-step11d-build/meson-private/tmp76duqbs3
+Code:
+extern int i;
+int i;
+
+-----------
+Command line: `x86_64-w64-mingw32-gcc /private/tmp/fgmetal-step11d-build/meson-private/tmp76duqbs3/testfile.c -o /private/tmp/fgmetal-step11d-build/meson-private/tmp76duqbs3/output.obj -c -D_FILE_OFFSET_BITS=64 -O0 -U_FORTIFY_SOURCE -Wunused-parameter -Wno-unused-parameter` -> 0
+Compiler for C supports arguments -Wno-unused-parameter: YES 
+Running compile:
+Working directory:  /private/tmp/fgmetal-step11d-build/meson-private/tmpil_iwmbx
+Code:
+extern int i;
+int i;
+
+-----------
+Command line: `x86_64-w64-mingw32-gcc /private/tmp/fgmetal-step11d-build/meson-private/tmpil_iwmbx/testfile.c -o /private/tmp/fgmetal-step11d-build/meson-private/tmpil_iwmbx/output.obj -c -D_FILE_OFFSET_BITS=64 -O0 -U_FORTIFY_SOURCE -Wmissing-field-initializers -Wno-missing-field-initializers` -> 0
+Compiler for C supports arguments -Wno-missing-field-initializers: YES 
+Running compile:
+Working directory:  /private/tmp/fgmetal-step11d-build/meson-private/tmph8zt231w
+Code:
+extern int i;
+int i;
+
+-----------
+Command line: `x86_64-w64-mingw32-gcc /private/tmp/fgmetal-step11d-build/meson-private/tmph8zt231w/testfile.c -o /private/tmp/fgmetal-step11d-build/meson-private/tmph8zt231w/output.obj -c -D_FILE_OFFSET_BITS=64 -O0 -U_FORTIFY_SOURCE -Werror=implicit` -> 0
+Compiler for C supports arguments -Werror=implicit: YES 
+Build targets in project: 2
+Subproject libdisplay-info finished.
+
+Dependency libdisplay-info for host machine from subproject subprojects/libdisplay-info found: YES 0.0.0
+Running compile:
+Working directory:  /private/tmp/fgmetal-step11d-build/meson-private/tmpeczqio7a
+Code:
+int main(void) { return 0; }
+
+-----------
+Command line: `x86_64-w64-mingw32-g++ /private/tmp/fgmetal-step11d-build/meson-private/tmpeczqio7a/testfile.cpp -o /private/tmp/fgmetal-step11d-build/meson-private/tmpeczqio7a/output.exe -D_FILE_OFFSET_BITS=64 -O0 -U_FORTIFY_SOURCE -fpermissive -ld3d9 -Wl,--allow-shlib-undefined` -> 0
+Library d3d9 found: YES
+Running compile:
+Working directory:  /private/tmp/fgmetal-step11d-build/meson-private/tmp9rswtwbs
+Code:
+int main(void) { return 0; }
+
+-----------
+Command line: `x86_64-w64-mingw32-g++ /private/tmp/fgmetal-step11d-build/meson-private/tmp9rswtwbs/testfile.cpp -o /private/tmp/fgmetal-step11d-build/meson-private/tmp9rswtwbs/output.exe -D_FILE_OFFSET_BITS=64 -O0 -U_FORTIFY_SOURCE -fpermissive -ld3d11 -Wl,--allow-shlib-undefined` -> 0
+Library d3d11 found: YES
+Running compile:
+Working directory:  /private/tmp/fgmetal-step11d-build/meson-private/tmpvcanpl89
+Code:
+int main(void) { return 0; }
+
+-----------
+Command line: `x86_64-w64-mingw32-g++ /private/tmp/fgmetal-step11d-build/meson-private/tmpvcanpl89/testfile.cpp -o /private/tmp/fgmetal-step11d-build/meson-private/tmpvcanpl89/output.exe -D_FILE_OFFSET_BITS=64 -O0 -U_FORTIFY_SOURCE -fpermissive -ldxgi -Wl,--allow-shlib-undefined` -> 0
+Library dxgi found: YES
+Running compile:
+Working directory:  /private/tmp/fgmetal-step11d-build/meson-private/tmpw12ta_n6
+Code:
+int main(void) { return 0; }
+
+-----------
+Command line: `x86_64-w64-mingw32-g++ /private/tmp/fgmetal-step11d-build/meson-private/tmpw12ta_n6/testfile.cpp -o /private/tmp/fgmetal-step11d-build/meson-private/tmpw12ta_n6/output.exe -D_FILE_OFFSET_BITS=64 -O0 -U_FORTIFY_SOURCE -fpermissive -lgdi32 -Wl,--allow-shlib-undefined` -> 0
+Library gdi32 found: YES
+Running compile:
+Working directory:  /private/tmp/fgmetal-step11d-build/meson-private/tmp4_2siy0n
+Code:
+int main(void) { return 0; }
+
+-----------
+Command line: `x86_64-w64-mingw32-g++ /private/tmp/fgmetal-step11d-build/meson-private/tmp4_2siy0n/testfile.cpp -o /private/tmp/fgmetal-step11d-build/meson-private/tmp4_2siy0n/output.exe -D_FILE_OFFSET_BITS=64 -O0 -U_FORTIFY_SOURCE -fpermissive -lversion -Wl,--allow-shlib-undefined` -> 0
+Library version found: YES
+Program x86_64-w64-mingw32-windres found: YES
+
+Executing subproject dxbc-spirv for machine: host 
+
+Project name: dxbc-spirv
+Project version: 0.1.0
+C++ compiler for the host machine: x86_64-w64-mingw32-g++ (gcc 16.2.0 "x86_64-w64-mingw32-g++ (GCC) 16.2.0")
+C++ linker for the host machine: x86_64-w64-mingw32-g++ ld.bfd 2.47.20260726
+C++ compiler for the build machine: c++ (clang 21.0.0 "Apple clang version 21.0.0 (clang-2100.3.34.2)")
+C++ linker for the build machine: c++ ld64 27037.1
+Running compile:
+Working directory:  /private/tmp/fgmetal-step11d-build/meson-private/tmpqtg55qfp
+Code:
+
+        #ifdef __has_include
+         #if !__has_include("version")
+          #error "Header 'version' could not be found"
+         #endif
+        #else
+         #include <version>
+        #endif
+-----------
+Command line: `x86_64-w64-mingw32-g++ /private/tmp/fgmetal-step11d-build/meson-private/tmpqtg55qfp/testfile.cpp -E -P -D_FILE_OFFSET_BITS=64 -P -O0 -U_FORTIFY_SOURCE -fpermissive` -> 0
+Running compile:
+Working directory:  /private/tmp/fgmetal-step11d-build/meson-private/tmpos97jszo
+Code:
+
+        #include <version>
+        int main(void) {
+            /* If it's not defined as a macro, try to use as a symbol */
+            #ifndef _LIBCPP_VERSION
+                _LIBCPP_VERSION;
+            #endif
+            return 0;
+        }
+-----------
+Command line: `x86_64-w64-mingw32-g++ /private/tmp/fgmetal-step11d-build/meson-private/tmpos97jszo/testfile.cpp -o /private/tmp/fgmetal-step11d-build/meson-private/tmpos97jszo/output.obj -c -D_FILE_OFFSET_BITS=64 -O0 -U_FORTIFY_SOURCE -fpermissive` -> 1
+stderr:
+/private/tmp/fgmetal-step11d-build/meson-private/tmpos97jszo/testfile.cpp: In function 'int main()':
+/private/tmp/fgmetal-step11d-build/meson-private/tmpos97jszo/testfile.cpp:6:17: error: '_LIBCPP_VERSION' was not declared in this scope
+    6 |                 _LIBCPP_VERSION;
+      |                 ^~~~~~~~~~~~~~~
+-----------
+Running compile:
+Working directory:  /private/tmp/fgmetal-step11d-build/meson-private/tmpx6hk8vk1
+Code:
+
+        #include <version>
+        using _LIBCPP_VERSION;
+        int main(void) { return 0; }
+-----------
+Command line: `x86_64-w64-mingw32-g++ /private/tmp/fgmetal-step11d-build/meson-private/tmpx6hk8vk1/testfile.cpp -o /private/tmp/fgmetal-step11d-build/meson-private/tmpx6hk8vk1/output.obj -c -D_FILE_OFFSET_BITS=64 -O0 -U_FORTIFY_SOURCE -fpermissive` -> 1
+stderr:
+/private/tmp/fgmetal-step11d-build/meson-private/tmpx6hk8vk1/testfile.cpp:3:15: error: expected nested-name-specifier before '_LIBCPP_VERSION'
+    3 |         using _LIBCPP_VERSION;
+      |               ^~~~~~~~~~~~~~~
+-----------
+Build targets in project: 3
+Subproject dxbc-spirv finished.
+
+Running compile:
+Working directory:  /private/tmp/fgmetal-step11d-build/meson-private/tmp7gjoljrk
+Code:
+extern int i;
+int i;
+
+-----------
+Command line: `x86_64-w64-mingw32-g++ /private/tmp/fgmetal-step11d-build/meson-private/tmp7gjoljrk/testfile.cpp -o /private/tmp/fgmetal-step11d-build/meson-private/tmp7gjoljrk/output.obj -c -D_FILE_OFFSET_BITS=64 -O0 -U_FORTIFY_SOURCE -fpermissive -msse` -> 0
+Compiler for C++ supports arguments -msse: YES 
+Running compile:
+Working directory:  /private/tmp/fgmetal-step11d-build/meson-private/tmpzj1suu1m
+Code:
+extern int i;
+int i;
+
+-----------
+Command line: `x86_64-w64-mingw32-g++ /private/tmp/fgmetal-step11d-build/meson-private/tmpzj1suu1m/testfile.cpp -o /private/tmp/fgmetal-step11d-build/meson-private/tmpzj1suu1m/output.obj -c -D_FILE_OFFSET_BITS=64 -O0 -U_FORTIFY_SOURCE -fpermissive -msse2` -> 0
+Compiler for C++ supports arguments -msse2: YES 
+Running compile:
+Working directory:  /private/tmp/fgmetal-step11d-build/meson-private/tmpkxek305v
+Code:
+extern int i;
+int i;
+
+-----------
+Command line: `x86_64-w64-mingw32-g++ /private/tmp/fgmetal-step11d-build/meson-private/tmpkxek305v/testfile.cpp -o /private/tmp/fgmetal-step11d-build/meson-private/tmpkxek305v/output.obj -c -D_FILE_OFFSET_BITS=64 -O0 -U_FORTIFY_SOURCE -fpermissive -msse3` -> 0
+Compiler for C++ supports arguments -msse3: YES 
+Running compile:
+Working directory:  /private/tmp/fgmetal-step11d-build/meson-private/tmpqg8t7xih
+Code:
+extern int i;
+int i;
+
+-----------
+Command line: `x86_64-w64-mingw32-g++ /private/tmp/fgmetal-step11d-build/meson-private/tmpqg8t7xih/testfile.cpp -o /private/tmp/fgmetal-step11d-build/meson-private/tmpqg8t7xih/output.obj -c -D_FILE_OFFSET_BITS=64 -O0 -U_FORTIFY_SOURCE -fpermissive -mfpmath=sse` -> 0
+Compiler for C++ supports arguments -mfpmath=sse: YES 
+Running compile:
+Working directory:  /private/tmp/fgmetal-step11d-build/meson-private/tmpghox6xn6
+Code:
+extern int i;
+int i;
+
+-----------
+Command line: `x86_64-w64-mingw32-g++ /private/tmp/fgmetal-step11d-build/meson-private/tmpghox6xn6/testfile.cpp -o /private/tmp/fgmetal-step11d-build/meson-private/tmpghox6xn6/output.obj -c -D_FILE_OFFSET_BITS=64 -O0 -U_FORTIFY_SOURCE -fpermissive -Wimplicit-fallthrough` -> 0
+Compiler for C++ supports arguments -Wimplicit-fallthrough: YES 
+Running compile:
+Working directory:  /private/tmp/fgmetal-step11d-build/meson-private/tmp1qqgybmh
+Code:
+extern int i;
+int i;
+
+-----------
+Command line: `x86_64-w64-mingw32-g++ /private/tmp/fgmetal-step11d-build/meson-private/tmp1qqgybmh/testfile.cpp -o /private/tmp/fgmetal-step11d-build/meson-private/tmp1qqgybmh/output.obj -c -D_FILE_OFFSET_BITS=64 -O0 -U_FORTIFY_SOURCE -fpermissive -Wmissing-field-initializers -Wno-missing-field-initializers` -> 0
+Compiler for C++ supports arguments -Wno-missing-field-initializers: YES 
+Running compile:
+Working directory:  /private/tmp/fgmetal-step11d-build/meson-private/tmpzfiumlw3
+Code:
+extern int i;
+int i;
+
+-----------
+Command line: `x86_64-w64-mingw32-g++ /private/tmp/fgmetal-step11d-build/meson-private/tmpzfiumlw3/testfile.cpp -o /private/tmp/fgmetal-step11d-build/meson-private/tmpzfiumlw3/output.obj -c -D_FILE_OFFSET_BITS=64 -O0 -U_FORTIFY_SOURCE -fpermissive -Wunused-parameter -Wno-unused-parameter` -> 0
+Compiler for C++ supports arguments -Wno-unused-parameter: YES 
+Running compile:
+Working directory:  /private/tmp/fgmetal-step11d-build/meson-private/tmpjiivvmgj
+Code:
+extern int i;
+int i;
+
+-----------
+Command line: `x86_64-w64-mingw32-g++ /private/tmp/fgmetal-step11d-build/meson-private/tmpjiivvmgj/testfile.cpp -o /private/tmp/fgmetal-step11d-build/meson-private/tmpjiivvmgj/output.obj -c -D_FILE_OFFSET_BITS=64 -O0 -U_FORTIFY_SOURCE -fpermissive -Wmisleading-indentation -Wno-misleading-indentation` -> 0
+Compiler for C++ supports arguments -Wno-misleading-indentation: YES 
+Running compile:
+Working directory:  /private/tmp/fgmetal-step11d-build/meson-private/tmpj4mgfpb4
+Code:
+extern int i;
+int i;
+
+-----------
+Command line: `x86_64-w64-mingw32-g++ /private/tmp/fgmetal-step11d-build/meson-private/tmpj4mgfpb4/testfile.cpp -o /private/tmp/fgmetal-step11d-build/meson-private/tmpj4mgfpb4/output.obj -c -D_FILE_OFFSET_BITS=64 -O0 -U_FORTIFY_SOURCE -fpermissive -Wcast-function-type -Wno-cast-function-type` -> 0
+Compiler for C++ supports arguments -Wno-cast-function-type: YES 
+Running compile:
+Working directory:  /private/tmp/fgmetal-step11d-build/meson-private/tmp483hfuwf
+Code:
+extern int i;
+int i;
+
+-----------
+Command line: `x86_64-w64-mingw32-g++ /private/tmp/fgmetal-step11d-build/meson-private/tmp483hfuwf/testfile.cpp -o /private/tmp/fgmetal-step11d-build/meson-private/tmp483hfuwf/output.obj -c -D_FILE_OFFSET_BITS=64 -O0 -U_FORTIFY_SOURCE -fpermissive -Wunused-private-field -Wno-unused-private-field` -> 1
+stderr:
+x86_64-w64-mingw32-g++: error: unrecognized command-line option '-Wunused-private-field'
+-----------
+Compiler for C++ supports arguments -Wno-unused-private-field: NO 
+Running compile:
+Working directory:  /private/tmp/fgmetal-step11d-build/meson-private/tmpinwj0n3h
+Code:
+extern int i;
+int i;
+
+-----------
+Command line: `x86_64-w64-mingw32-g++ /private/tmp/fgmetal-step11d-build/meson-private/tmpinwj0n3h/testfile.cpp -o /private/tmp/fgmetal-step11d-build/meson-private/tmpinwj0n3h/output.obj -c -D_FILE_OFFSET_BITS=64 -O0 -U_FORTIFY_SOURCE -fpermissive -Wmicrosoft-exception-spec -Wno-microsoft-exception-spec` -> 1
+stderr:
+x86_64-w64-mingw32-g++: error: unrecognized command-line option '-Wmicrosoft-exception-spec'
+-----------
+Compiler for C++ supports arguments -Wno-microsoft-exception-spec: NO 
+Running compile:
+Working directory:  /private/tmp/fgmetal-step11d-build/meson-private/tmpcsicyd5e
+Code:
+extern int i;
+int i;
+
+-----------
+Command line: `x86_64-w64-mingw32-g++ /private/tmp/fgmetal-step11d-build/meson-private/tmpcsicyd5e/testfile.cpp -o /private/tmp/fgmetal-step11d-build/meson-private/tmpcsicyd5e/output.obj -c -D_FILE_OFFSET_BITS=64 -O0 -U_FORTIFY_SOURCE -fpermissive -Wextern-c-compat -Wno-extern-c-compat` -> 1
+stderr:
+x86_64-w64-mingw32-g++: error: unrecognized command-line option '-Wextern-c-compat'
+-----------
+Compiler for C++ supports arguments -Wno-extern-c-compat: NO 
+Running compile:
+Working directory:  /private/tmp/fgmetal-step11d-build/meson-private/tmpoh47856i
+Code:
+extern int i;
+int i;
+
+-----------
+Command line: `x86_64-w64-mingw32-g++ /private/tmp/fgmetal-step11d-build/meson-private/tmpoh47856i/testfile.cpp -o /private/tmp/fgmetal-step11d-build/meson-private/tmpoh47856i/output.obj -c -D_FILE_OFFSET_BITS=64 -O0 -U_FORTIFY_SOURCE -fpermissive -Wunused-const-variable -Wno-unused-const-variable` -> 0
+Compiler for C++ supports arguments -Wno-unused-const-variable: YES 
+Running compile:
+Working directory:  /private/tmp/fgmetal-step11d-build/meson-private/tmpz7qlhskk
+Code:
+extern int i;
+int i;
+
+-----------
+Command line: `x86_64-w64-mingw32-g++ /private/tmp/fgmetal-step11d-build/meson-private/tmpz7qlhskk/testfile.cpp -o /private/tmp/fgmetal-step11d-build/meson-private/tmpz7qlhskk/output.obj -c -D_FILE_OFFSET_BITS=64 -O0 -U_FORTIFY_SOURCE -fpermissive -Wmissing-braces -Wno-missing-braces` -> 0
+Compiler for C++ supports arguments -Wno-missing-braces: YES 
+Running compile:
+Working directory:  /private/tmp/fgmetal-step11d-build/meson-private/tmpgfb606e4
+Code:
+extern int i;
+int i;
+
+-----------
+Command line: `x86_64-w64-mingw32-g++ /private/tmp/fgmetal-step11d-build/meson-private/tmpgfb606e4/testfile.cpp -o /private/tmp/fgmetal-step11d-build/meson-private/tmpgfb606e4/output.obj -c -D_FILE_OFFSET_BITS=64 -O0 -U_FORTIFY_SOURCE -fpermissive -DNOMINMAX` -> 0
+Compiler for C++ supports arguments -DNOMINMAX: YES 
+Running compile:
+Working directory:  /private/tmp/fgmetal-step11d-build/meson-private/tmptb8zoc98
+Code:
+extern int i;
+int i;
+
+-----------
+Command line: `x86_64-w64-mingw32-g++ /private/tmp/fgmetal-step11d-build/meson-private/tmptb8zoc98/testfile.cpp -o /private/tmp/fgmetal-step11d-build/meson-private/tmptb8zoc98/output.obj -c -D_FILE_OFFSET_BITS=64 -O0 -U_FORTIFY_SOURCE -fpermissive -D_WIN32_WINNT=0xa00` -> 0
+Compiler for C++ supports arguments -D_WIN32_WINNT=0xa00: YES 
+Running compile:
+Working directory:  /private/tmp/fgmetal-step11d-build/meson-private/tmpnontze7n
+Code:
+extern int i;
+int i;
+
+-----------
+Command line: `x86_64-w64-mingw32-g++ /private/tmp/fgmetal-step11d-build/meson-private/tmpnontze7n/testfile.cpp -o /private/tmp/fgmetal-step11d-build/meson-private/tmpnontze7n/output.obj -c -D_FILE_OFFSET_BITS=64 -O0 -U_FORTIFY_SOURCE -fpermissive -DDXVK_WSI_WIN32` -> 0
+Compiler for C++ supports arguments -DDXVK_WSI_WIN32: YES 
+Running compile:
+Working directory:  /private/tmp/fgmetal-step11d-build/meson-private/tmp4n944_l1
+Code:
+extern int i;
+int i;
+
+-----------
+Command line: `x86_64-w64-mingw32-gcc /private/tmp/fgmetal-step11d-build/meson-private/tmp4n944_l1/testfile.c -o /private/tmp/fgmetal-step11d-build/meson-private/tmp4n944_l1/output.obj -c -D_FILE_OFFSET_BITS=64 -O0 -U_FORTIFY_SOURCE -msse` -> 0
+Compiler for C supports arguments -msse: YES 
+Running compile:
+Working directory:  /private/tmp/fgmetal-step11d-build/meson-private/tmpi8ijym66
+Code:
+extern int i;
+int i;
+
+-----------
+Command line: `x86_64-w64-mingw32-gcc /private/tmp/fgmetal-step11d-build/meson-private/tmpi8ijym66/testfile.c -o /private/tmp/fgmetal-step11d-build/meson-private/tmpi8ijym66/output.obj -c -D_FILE_OFFSET_BITS=64 -O0 -U_FORTIFY_SOURCE -msse2` -> 0
+Compiler for C supports arguments -msse2: YES 
+Running compile:
+Working directory:  /private/tmp/fgmetal-step11d-build/meson-private/tmpg16h8oe8
+Code:
+extern int i;
+int i;
+
+-----------
+Command line: `x86_64-w64-mingw32-gcc /private/tmp/fgmetal-step11d-build/meson-private/tmpg16h8oe8/testfile.c -o /private/tmp/fgmetal-step11d-build/meson-private/tmpg16h8oe8/output.obj -c -D_FILE_OFFSET_BITS=64 -O0 -U_FORTIFY_SOURCE -msse3` -> 0
+Compiler for C supports arguments -msse3: YES 
+Running compile:
+Working directory:  /private/tmp/fgmetal-step11d-build/meson-private/tmp7aoewfka
+Code:
+extern int i;
+int i;
+
+-----------
+Command line: `x86_64-w64-mingw32-gcc /private/tmp/fgmetal-step11d-build/meson-private/tmp7aoewfka/testfile.c -o /private/tmp/fgmetal-step11d-build/meson-private/tmp7aoewfka/output.obj -c -D_FILE_OFFSET_BITS=64 -O0 -U_FORTIFY_SOURCE -mfpmath=sse` -> 0
+Compiler for C supports arguments -mfpmath=sse: YES 
+Running compile:
+Working directory:  /private/tmp/fgmetal-step11d-build/meson-private/tmp7bem8nj3
+Code:
+extern int i;
+int i;
+
+-----------
+Command line: `x86_64-w64-mingw32-gcc /private/tmp/fgmetal-step11d-build/meson-private/tmp7bem8nj3/testfile.c -o /private/tmp/fgmetal-step11d-build/meson-private/tmp7bem8nj3/output.obj -c -D_FILE_OFFSET_BITS=64 -O0 -U_FORTIFY_SOURCE -Wimplicit-fallthrough` -> 0
+Compiler for C supports arguments -Wimplicit-fallthrough: YES 
+Using cached compile:
+Cached command line:  x86_64-w64-mingw32-gcc /private/tmp/fgmetal-step11d-build/meson-private/tmpil_iwmbx/testfile.c -o /private/tmp/fgmetal-step11d-build/meson-private/tmpil_iwmbx/output.obj -c -D_FILE_OFFSET_BITS=64 -O0 -U_FORTIFY_SOURCE -Wmissing-field-initializers -Wno-missing-field-initializers 
+
+Code:
+ extern int i;
+int i;
+
+Cached compiler stdout:
+ 
+Cached compiler stderr:
+ 
+Compiler for C supports arguments -Wno-missing-field-initializers: YES (cached)
+Using cached compile:
+Cached command line:  x86_64-w64-mingw32-gcc /private/tmp/fgmetal-step11d-build/meson-private/tmp76duqbs3/testfile.c -o /private/tmp/fgmetal-step11d-build/meson-private/tmp76duqbs3/output.obj -c -D_FILE_OFFSET_BITS=64 -O0 -U_FORTIFY_SOURCE -Wunused-parameter -Wno-unused-parameter 
+
+Code:
+ extern int i;
+int i;
+
+Cached compiler stdout:
+ 
+Cached compiler stderr:
+ 
+Compiler for C supports arguments -Wno-unused-parameter: YES (cached)
+Running compile:
+Working directory:  /private/tmp/fgmetal-step11d-build/meson-private/tmp5ydjy8mf
+Code:
+extern int i;
+int i;
+
+-----------
+Command line: `x86_64-w64-mingw32-gcc /private/tmp/fgmetal-step11d-build/meson-private/tmp5ydjy8mf/testfile.c -o /private/tmp/fgmetal-step11d-build/meson-private/tmp5ydjy8mf/output.obj -c -D_FILE_OFFSET_BITS=64 -O0 -U_FORTIFY_SOURCE -Wmisleading-indentation -Wno-misleading-indentation` -> 0
+Compiler for C supports arguments -Wno-misleading-indentation: YES 
+Running compile:
+Working directory:  /private/tmp/fgmetal-step11d-build/meson-private/tmpfic8542v
+Code:
+extern int i;
+int i;
+
+-----------
+Command line: `x86_64-w64-mingw32-gcc /private/tmp/fgmetal-step11d-build/meson-private/tmpfic8542v/testfile.c -o /private/tmp/fgmetal-step11d-build/meson-private/tmpfic8542v/output.obj -c -D_FILE_OFFSET_BITS=64 -O0 -U_FORTIFY_SOURCE -Wcast-function-type -Wno-cast-function-type` -> 0
+Compiler for C supports arguments -Wno-cast-function-type: YES 
+Running compile:
+Working directory:  /private/tmp/fgmetal-step11d-build/meson-private/tmpxzf2gv_b
+Code:
+extern int i;
+int i;
+
+-----------
+Command line: `x86_64-w64-mingw32-gcc /private/tmp/fgmetal-step11d-build/meson-private/tmpxzf2gv_b/testfile.c -o /private/tmp/fgmetal-step11d-build/meson-private/tmpxzf2gv_b/output.obj -c -D_FILE_OFFSET_BITS=64 -O0 -U_FORTIFY_SOURCE -Wunused-private-field -Wno-unused-private-field` -> 1
+stderr:
+x86_64-w64-mingw32-gcc: error: unrecognized command-line option '-Wunused-private-field'
+-----------
+Compiler for C supports arguments -Wno-unused-private-field: NO 
+Running compile:
+Working directory:  /private/tmp/fgmetal-step11d-build/meson-private/tmp4gz75ug0
+Code:
+extern int i;
+int i;
+
+-----------
+Command line: `x86_64-w64-mingw32-gcc /private/tmp/fgmetal-step11d-build/meson-private/tmp4gz75ug0/testfile.c -o /private/tmp/fgmetal-step11d-build/meson-private/tmp4gz75ug0/output.obj -c -D_FILE_OFFSET_BITS=64 -O0 -U_FORTIFY_SOURCE -Wmicrosoft-exception-spec -Wno-microsoft-exception-spec` -> 1
+stderr:
+x86_64-w64-mingw32-gcc: error: unrecognized command-line option '-Wmicrosoft-exception-spec'
+-----------
+Compiler for C supports arguments -Wno-microsoft-exception-spec: NO 
+Running compile:
+Working directory:  /private/tmp/fgmetal-step11d-build/meson-private/tmpkj9w1e7u
+Code:
+extern int i;
+int i;
+
+-----------
+Command line: `x86_64-w64-mingw32-gcc /private/tmp/fgmetal-step11d-build/meson-private/tmpkj9w1e7u/testfile.c -o /private/tmp/fgmetal-step11d-build/meson-private/tmpkj9w1e7u/output.obj -c -D_FILE_OFFSET_BITS=64 -O0 -U_FORTIFY_SOURCE -Wextern-c-compat -Wno-extern-c-compat` -> 1
+stderr:
+x86_64-w64-mingw32-gcc: error: unrecognized command-line option '-Wextern-c-compat'
+-----------
+Compiler for C supports arguments -Wno-extern-c-compat: NO 
+Running compile:
+Working directory:  /private/tmp/fgmetal-step11d-build/meson-private/tmpnay9cx0x
+Code:
+extern int i;
+int i;
+
+-----------
+Command line: `x86_64-w64-mingw32-gcc /private/tmp/fgmetal-step11d-build/meson-private/tmpnay9cx0x/testfile.c -o /private/tmp/fgmetal-step11d-build/meson-private/tmpnay9cx0x/output.obj -c -D_FILE_OFFSET_BITS=64 -O0 -U_FORTIFY_SOURCE -Wunused-const-variable -Wno-unused-const-variable` -> 0
+Compiler for C supports arguments -Wno-unused-const-variable: YES 
+Running compile:
+Working directory:  /private/tmp/fgmetal-step11d-build/meson-private/tmpa5n6b606
+Code:
+extern int i;
+int i;
+
+-----------
+Command line: `x86_64-w64-mingw32-gcc /private/tmp/fgmetal-step11d-build/meson-private/tmpa5n6b606/testfile.c -o /private/tmp/fgmetal-step11d-build/meson-private/tmpa5n6b606/output.obj -c -D_FILE_OFFSET_BITS=64 -O0 -U_FORTIFY_SOURCE -Wmissing-braces -Wno-missing-braces` -> 0
+Compiler for C supports arguments -Wno-missing-braces: YES 
+Running compile:
+Working directory:  /private/tmp/fgmetal-step11d-build/meson-private/tmpsqwuema1
+Code:
+extern int i;
+int i;
+
+-----------
+Command line: `x86_64-w64-mingw32-gcc /private/tmp/fgmetal-step11d-build/meson-private/tmpsqwuema1/testfile.c -o /private/tmp/fgmetal-step11d-build/meson-private/tmpsqwuema1/output.obj -c -D_FILE_OFFSET_BITS=64 -O0 -U_FORTIFY_SOURCE -DNOMINMAX` -> 0
+Compiler for C supports arguments -DNOMINMAX: YES 
+Running compile:
+Working directory:  /private/tmp/fgmetal-step11d-build/meson-private/tmp7el5jauw
+Code:
+extern int i;
+int i;
+
+-----------
+Command line: `x86_64-w64-mingw32-gcc /private/tmp/fgmetal-step11d-build/meson-private/tmp7el5jauw/testfile.c -o /private/tmp/fgmetal-step11d-build/meson-private/tmp7el5jauw/output.obj -c -D_FILE_OFFSET_BITS=64 -O0 -U_FORTIFY_SOURCE -D_WIN32_WINNT=0xa00` -> 0
+Compiler for C supports arguments -D_WIN32_WINNT=0xa00: YES 
+Running compile:
+Working directory:  /private/tmp/fgmetal-step11d-build/meson-private/tmpdnldx0cp
+Code:
+extern int i;
+int i;
+
+-----------
+Command line: `x86_64-w64-mingw32-gcc /private/tmp/fgmetal-step11d-build/meson-private/tmpdnldx0cp/testfile.c -o /private/tmp/fgmetal-step11d-build/meson-private/tmpdnldx0cp/output.obj -c -D_FILE_OFFSET_BITS=64 -O0 -U_FORTIFY_SOURCE -DDXVK_WSI_WIN32` -> 0
+Compiler for C supports arguments -DDXVK_WSI_WIN32: YES 
+Running compile:
+Working directory:  /private/tmp/fgmetal-step11d-build/meson-private/tmp1zit4xil
+Code:
+int main(void) { return 0; }
+
+-----------
+Command line: `x86_64-w64-mingw32-g++ /private/tmp/fgmetal-step11d-build/meson-private/tmp1zit4xil/testfile.cpp -o /private/tmp/fgmetal-step11d-build/meson-private/tmp1zit4xil/output.exe -D_FILE_OFFSET_BITS=64 -O0 -U_FORTIFY_SOURCE -fpermissive -Wl,--fatal-warnings -static` -> 0
+Compiler for C++ supports link arguments -static: YES 
+Running compile:
+Working directory:  /private/tmp/fgmetal-step11d-build/meson-private/tmpwece6h4m
+Code:
+int main(void) { return 0; }
+
+-----------
+Command line: `x86_64-w64-mingw32-g++ /private/tmp/fgmetal-step11d-build/meson-private/tmpwece6h4m/testfile.cpp -o /private/tmp/fgmetal-step11d-build/meson-private/tmpwece6h4m/output.exe -D_FILE_OFFSET_BITS=64 -O0 -U_FORTIFY_SOURCE -fpermissive -Wl,--fatal-warnings -static-libgcc` -> 0
+Compiler for C++ supports link arguments -static-libgcc: YES 
+Running compile:
+Working directory:  /private/tmp/fgmetal-step11d-build/meson-private/tmp4bu5_rp5
+Code:
+int main(void) { return 0; }
+
+-----------
+Command line: `x86_64-w64-mingw32-g++ /private/tmp/fgmetal-step11d-build/meson-private/tmp4bu5_rp5/testfile.cpp -o /private/tmp/fgmetal-step11d-build/meson-private/tmp4bu5_rp5/output.exe -D_FILE_OFFSET_BITS=64 -O0 -U_FORTIFY_SOURCE -fpermissive -Wl,--fatal-warnings -static-libstdc++` -> 0
+Compiler for C++ supports link arguments -static-libstdc++: YES 
+Running compile:
+Working directory:  /private/tmp/fgmetal-step11d-build/meson-private/tmpgb1zm8wz
+Code:
+int main(void) { return 0; }
+
+-----------
+Command line: `x86_64-w64-mingw32-g++ /private/tmp/fgmetal-step11d-build/meson-private/tmpgb1zm8wz/testfile.cpp -o /private/tmp/fgmetal-step11d-build/meson-private/tmpgb1zm8wz/output.exe -D_FILE_OFFSET_BITS=64 -O0 -U_FORTIFY_SOURCE -fpermissive -Wl,--fatal-warnings -Wl,--file-alignment=4096` -> 0
+Compiler for C++ supports link arguments -Wl,--file-alignment=4096: YES 
+Running compile:
+Working directory:  /private/tmp/fgmetal-step11d-build/meson-private/tmp_3yyc7p4
+Code:
+int main(void) { return 0; }
+
+-----------
+Command line: `x86_64-w64-mingw32-gcc /private/tmp/fgmetal-step11d-build/meson-private/tmp_3yyc7p4/testfile.c -o /private/tmp/fgmetal-step11d-build/meson-private/tmp_3yyc7p4/output.exe -D_FILE_OFFSET_BITS=64 -O0 -U_FORTIFY_SOURCE -Wl,--fatal-warnings -static` -> 0
+Compiler for C supports link arguments -static: YES 
+Running compile:
+Working directory:  /private/tmp/fgmetal-step11d-build/meson-private/tmp8yvzxmp5
+Code:
+int main(void) { return 0; }
+
+-----------
+Command line: `x86_64-w64-mingw32-gcc /private/tmp/fgmetal-step11d-build/meson-private/tmp8yvzxmp5/testfile.c -o /private/tmp/fgmetal-step11d-build/meson-private/tmp8yvzxmp5/output.exe -D_FILE_OFFSET_BITS=64 -O0 -U_FORTIFY_SOURCE -Wl,--fatal-warnings -static-libgcc` -> 0
+Compiler for C supports link arguments -static-libgcc: YES 
+Running compile:
+Working directory:  /private/tmp/fgmetal-step11d-build/meson-private/tmpu3k0vnfv
+Code:
+int main(void) { return 0; }
+
+-----------
+Command line: `x86_64-w64-mingw32-gcc /private/tmp/fgmetal-step11d-build/meson-private/tmpu3k0vnfv/testfile.c -o /private/tmp/fgmetal-step11d-build/meson-private/tmpu3k0vnfv/output.exe -D_FILE_OFFSET_BITS=64 -O0 -U_FORTIFY_SOURCE -Wl,--fatal-warnings -static-libstdc++` -> 0
+Compiler for C supports link arguments -static-libstdc++: YES 
+Running compile:
+Working directory:  /private/tmp/fgmetal-step11d-build/meson-private/tmpqzwdosrp
+Code:
+int main(void) { return 0; }
+
+-----------
+Command line: `x86_64-w64-mingw32-gcc /private/tmp/fgmetal-step11d-build/meson-private/tmpqzwdosrp/testfile.c -o /private/tmp/fgmetal-step11d-build/meson-private/tmpqzwdosrp/output.exe -D_FILE_OFFSET_BITS=64 -O0 -U_FORTIFY_SOURCE -Wl,--fatal-warnings -Wl,--file-alignment=4096` -> 0
+Compiler for C supports link arguments -Wl,--file-alignment=4096: YES 
+Program glslang found: YES (/opt/homebrew/bin/glslang)
+Configuring buildenv.h using configuration
+Running compile:
+Working directory:  /private/tmp/fgmetal-step11d-build/meson-private/tmp0mzeoa3a
+Code:
+int main(void) { return 0; }
+
+-----------
+Command line: `x86_64-w64-mingw32-g++ /private/tmp/fgmetal-step11d-build/meson-private/tmp0mzeoa3a/testfile.cpp -o /private/tmp/fgmetal-step11d-build/meson-private/tmp0mzeoa3a/output.exe -D_FILE_OFFSET_BITS=64 -O0 -U_FORTIFY_SOURCE -fpermissive -lsetupapi -Wl,--allow-shlib-undefined` -> 0
+Library setupapi found: YES
+Run-time dependency threads found: YES
+Dependency threads for host machine found: YES unknown (cached)
+Library version found: YES
+Build targets in project: 14
+
+dxvk 3.1.1
+
+  Subprojects (for host machine)
+    dxbc-spirv     : YES
+    libdisplay-info: YES
+
+  User defined options
+    Cross files    : build-win64.txt
+    buildtype      : release
+
+Found ninja-1.13.2 at /opt/homebrew/bin/ninja
+Running compile:
+Working directory:  /var/folders/4l/yp39dwhd7rg2y9xscgvhkyqw0000gn/T/tmp_f0v3_8b
+Code:
+int i = static_cast<int>(0);
+-----------
+Command line: `x86_64-w64-mingw32-g++ /var/folders/4l/yp39dwhd7rg2y9xscgvhkyqw0000gn/T/tmp_f0v3_8b/testfile.cpp -o /var/folders/4l/yp39dwhd7rg2y9xscgvhkyqw0000gn/T/tmp_f0v3_8b/output.obj -D_FILE_OFFSET_BITS=64 -c -std=c++17` -> 0
+Compiler accepts -std=c++17: YES
+Running compile:
+Working directory:  /private/tmp/fgmetal-step11d-build/meson-private/tmpjj_jw5od
+Code:
+
+-----------
+Command line: `x86_64-w64-mingw32-g++ /private/tmp/fgmetal-step11d-build/meson-private/tmpjj_jw5od/testfile.cpp -o /private/tmp/fgmetal-step11d-build/meson-private/tmpjj_jw5od/output.obj -c -D_FILE_OFFSET_BITS=64 -O0 -U_FORTIFY_SOURCE -fpermissive --print-search-dirs` -> 0
+stdout:
+install: /opt/homebrew/Cellar/mingw-w64/14.0.0_3/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/16.2.0/
+programs: =/opt/homebrew/Cellar/mingw-w64/14.0.0_3/toolchain-x86_64/libexec/gcc/x86_64-w64-mingw32/16.2.0/:/opt/homebrew/Cellar/mingw-w64/14.0.0_3/toolchain-x86_64/libexec/gcc/x86_64-w64-mingw32/16.2.0/:/opt/homebrew/Cellar/mingw-w64/14.0.0_3/toolchain-x86_64/libexec/gcc/x86_64-w64-mingw32/:/opt/homebrew/Cellar/mingw-w64/14.0.0_3/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/16.2.0/:/opt/homebrew/Cellar/mingw-w64/14.0.0_3/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/:/opt/homebrew/Cellar/mingw-w64/14.0.0_3/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/16.2.0/../../../../x86_64-w64-mingw32/bin/x86_64-w64-mingw32/16.2.0/:/opt/homebrew/Cellar/mingw-w64/14.0.0_3/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/16.2.0/../../../../x86_64-w64-mingw32/bin/
+libraries: =/opt/homebrew/Cellar/mingw-w64/14.0.0_3/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/16.2.0/:/opt/homebrew/Cellar/mingw-w64/14.0.0_3/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/16.2.0/../../../../x86_64-w64-mingw32/lib/x86_64-w64-mingw32/16.2.0/:/opt/homebrew/Cellar/mingw-w64/14.0.0_3/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/16.2.0/../../../../x86_64-w64-mingw32/lib/../lib/:/opt/homebrew/Cellar/mingw-w64/14.0.0_3/toolchain-x86_64/mingw/lib/x86_64-w64-mingw32/16.2.0/:/opt/homebrew/Cellar/mingw-w64/14.0.0_3/toolchain-x86_64/mingw/lib/../lib/:/opt/homebrew/Cellar/mingw-w64/14.0.0_3/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/16.2.0/../../../../x86_64-w64-mingw32/lib/:/opt/homebrew/Cellar/mingw-w64/14.0.0_3/toolchain-x86_64/mingw/lib/
+-----------

@@ -1,0 +1,12 @@
+{
+  "runtime_root": "/Users/nima/Library/Caches/FGMetalStep11D-R/runtime-vulkan-overlay/wine",
+  "runtime_tree_manifest": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/runtime-manifests/step11d_r_active_runtime.json",
+  "runtime_tree_sha256": "2fea825b205073bf011ce948ec4cbe6560d9d90e26982233ad05822a17a92bfe",
+  "runtime_tree_entry_count": 6947,
+  "wine_version": "wine-11.17 (WineForge 0.6.0.5)",
+  "wine_binary_sha256": "946a7032484d02981182d59f82edda03f40f38c510e0208d48482c0830ef20e9",
+  "moltenvk_path": "/Users/nima/Library/Caches/FGMetalStep11C1R/moltenvk-loader-override/libMoltenVK.1.dylib",
+  "moltenvk_sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+  "icd_path": "/Users/nima/Library/Caches/FGMetalStep11C1R/moltenvk-1.4.2/MoltenVK/MoltenVK/dynamic/dylib/macOS/MoltenVK_icd.json",
+  "icd_sha256": "578ff08cd0d8734619357541771a5abc9c3470ca300030219a971a9e9dbbe466"
+}

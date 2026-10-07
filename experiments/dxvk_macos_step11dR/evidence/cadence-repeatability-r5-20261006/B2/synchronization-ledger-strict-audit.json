@@ -1,0 +1,79 @@
+{
+  "async_failure_jobs": [],
+  "captured_interop_jobs": 8931,
+  "consumer_attempts": 8790,
+  "consumer_wsi_retirements_missing_or_multiple": [],
+  "event_counts": {
+    "captured": 8931,
+    "committed": 8931,
+    "consumer_attempt": 8790,
+    "consumer_claimed": 8699,
+    "dropped": 70,
+    "internal_opportunity_drop": 224,
+    "output_ready": 8715,
+    "retired": 8930,
+    "terminal": 8931,
+    "wsi_retirement": 8790,
+    "wsi_submit": 8699
+  },
+  "internal_opportunity_drop_reason_counts": {
+    "deadline-expired-before-submit": 1,
+    "lease-validation-before-submit": 75,
+    "queue-full": 98,
+    "source-or-swapchain-conflict-before-submit": 15,
+    "source-pending": 30,
+    "source-queue-nonempty": 5
+  },
+  "interop_jobs_missing_job_retired": [
+    8931
+  ],
+  "issues": [
+    {
+      "InteropJobId": 8931,
+      "code": "interop-retirement-field-mismatch",
+      "message": "CSV retired flag does not match the job-retired event count"
+    },
+    {
+      "InteropJobId": 8931,
+      "code": "interop-job-not-retired",
+      "message": "captured job has no job-retired marker (distinct from WSI retirement)"
+    },
+    {
+      "code": "slot-owned-at-log-end",
+      "message": "generation/slot (2, 1) still has job 8931 as its last logged owner"
+    }
+  ],
+  "max_concurrent_owned_slots_by_generation": {
+    "2": 2
+  },
+  "pre_capture_drop_classes": {
+    "NO_FREE_HISTORY": 70
+  },
+  "row_count": 8931,
+  "run_dir": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/cadence-repeatability-r5-20261006/B2",
+  "scope_note": "This audits captured InteropJobId lifecycles and logged internal-WSI opportunities. It does not replace deterministic shutdown-state hooks or generation-invalidation tests.",
+  "slot_ids_by_generation": {
+    "2": [
+      1,
+      2
+    ]
+  },
+  "slots_owned_at_log_end": {
+    "generation=2 slot=1 history=6 output=7": 8931
+  },
+  "source_identity": {
+    "dll_sha256_match_frozen_r5": true,
+    "failure_injection": null,
+    "native_provider_build_id": "status-v3-current-20261006",
+    "source_build_id": "current-r5-build-A-20261006"
+  },
+  "status": "FAIL",
+  "successful_consumer_submits": 8699,
+  "terminal_classes": {
+    "DEADLINE_EXPIRED": 9,
+    "PRESENTED": 8699,
+    "SCHEDULER_QUEUE_FULL": 98,
+    "SOURCE_PRIORITY": 50,
+    "WSI_FAILURE": 75
+  }
+}

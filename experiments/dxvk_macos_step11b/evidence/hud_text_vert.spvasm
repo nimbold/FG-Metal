@@ -1,0 +1,359 @@
+; SPIR-V
+; Version: 1.6
+; Generator: Khronos Glslang Reference Front End; 11
+; Bound: 210
+; Schema: 0
+               OpCapability Shader
+               OpCapability SampledBuffer
+               OpCapability DrawParameters
+          %1 = OpExtInstImport "GLSL.std.450"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Vertex %main "main" %_ %gl_DrawID %o_color %gl_VertexIndex %text_buffer %__0 %o_texcoord %__1 %__2
+               OpSource GLSL 460
+               OpName %main "main"
+               OpName %unpack_u16_u1_ "unpack_u16(u1;"
+               OpName %v "v"
+               OpName %hi "hi"
+               OpName %lo "lo"
+               OpName %draw_info_t "draw_info_t"
+               OpMemberName %draw_info_t 0 "text_offset"
+               OpMemberName %draw_info_t 1 "text_length_and_size"
+               OpMemberName %draw_info_t 2 "packed_xy"
+               OpMemberName %draw_info_t 3 "color"
+               OpName %draw_info "draw_info"
+               OpName %draw_info_t_0 "draw_info_t"
+               OpMemberName %draw_info_t_0 0 "text_offset"
+               OpMemberName %draw_info_t_0 1 "text_length_and_size"
+               OpMemberName %draw_info_t_0 2 "packed_xy"
+               OpMemberName %draw_info_t_0 3 "color"
+               OpName %draw_buffer_t "draw_buffer_t"
+               OpMemberName %draw_buffer_t 0 "draw_infos"
+               OpName %_ ""
+               OpName %gl_DrawID "gl_DrawID"
+               OpName %o_color "o_color"
+               OpName %chr_idx "chr_idx"
+               OpName %gl_VertexIndex "gl_VertexIndex"
+               OpName %vtx_idx "vtx_idx"
+               OpName %glyph_idx "glyph_idx"
+               OpName %text_buffer "text_buffer"
+               OpName %glyph_info_t "glyph_info_t"
+               OpMemberName %glyph_info_t 0 "packed_xy"
+               OpMemberName %glyph_info_t 1 "packed_wh"
+               OpMemberName %glyph_info_t 2 "packed_origin"
+               OpName %glyph_info "glyph_info"
+               OpName %font_info_t "font_info_t"
+               OpMemberName %font_info_t 0 "size"
+               OpMemberName %font_info_t 1 "advance"
+               OpMemberName %font_info_t 2 "padding"
+               OpName %glyph_info_t_0 "glyph_info_t"
+               OpMemberName %glyph_info_t_0 0 "packed_xy"
+               OpMemberName %glyph_info_t_0 1 "packed_wh"
+               OpMemberName %glyph_info_t_0 2 "packed_origin"
+               OpName %font_buffer_t "font_buffer_t"
+               OpMemberName %font_buffer_t 0 "font_data"
+               OpMemberName %font_buffer_t 1 "glyph_data"
+               OpName %__0 ""
+               OpName %coord "coord"
+               OpName %tex_xy "tex_xy"
+               OpName %param "param"
+               OpName %tex_wh "tex_wh"
+               OpName %param_0 "param"
+               OpName %o_texcoord "o_texcoord"
+               OpName %text_size "text_size"
+               OpName %size_factor "size_factor"
+               OpName %surface_size_f "surface_size_f"
+               OpName %push_data_t "push_data_t"
+               OpMemberName %push_data_t 0 "surface_size"
+               OpMemberName %push_data_t 1 "opacity"
+               OpMemberName %push_data_t 2 "scale"
+               OpMemberName %push_data_t 3 "samplerIndex"
+               OpName %__1 ""
+               OpName %text_pos "text_pos"
+               OpName %param_1 "param"
+               OpName %local_pos "local_pos"
+               OpName %param_2 "param"
+               OpName %pixel_pos "pixel_pos"
+               OpName %scaled_pos "scaled_pos"
+               OpName %gl_PerVertex "gl_PerVertex"
+               OpMemberName %gl_PerVertex 0 "gl_Position"
+               OpMemberName %gl_PerVertex 1 "gl_PointSize"
+               OpMemberName %gl_PerVertex 2 "gl_ClipDistance"
+               OpMemberName %gl_PerVertex 3 "gl_CullDistance"
+               OpName %__2 ""
+               OpMemberDecorate %draw_info_t_0 0 Offset 0
+               OpMemberDecorate %draw_info_t_0 1 Offset 4
+               OpMemberDecorate %draw_info_t_0 2 Offset 8
+               OpMemberDecorate %draw_info_t_0 3 Offset 12
+               OpDecorate %_runtimearr_draw_info_t_0 ArrayStride 16
+               OpDecorate %draw_buffer_t Block
+               OpMemberDecorate %draw_buffer_t 0 NonWritable
+               OpMemberDecorate %draw_buffer_t 0 Offset 0
+               OpDecorate %_ NonWritable
+               OpDecorate %_ Binding 1
+               OpDecorate %_ DescriptorSet 1
+               OpDecorate %gl_DrawID BuiltIn DrawIndex
+               OpDecorate %o_color Location 1
+               OpDecorate %gl_VertexIndex BuiltIn VertexIndex
+               OpDecorate %text_buffer Binding 2
+               OpDecorate %text_buffer DescriptorSet 1
+               OpMemberDecorate %font_info_t 0 Offset 0
+               OpMemberDecorate %font_info_t 1 Offset 4
+               OpMemberDecorate %font_info_t 2 Offset 8
+               OpMemberDecorate %glyph_info_t_0 0 Offset 0
+               OpMemberDecorate %glyph_info_t_0 1 Offset 4
+               OpMemberDecorate %glyph_info_t_0 2 Offset 8
+               OpDecorate %_runtimearr_glyph_info_t_0 ArrayStride 12
+               OpDecorate %font_buffer_t Block
+               OpMemberDecorate %font_buffer_t 0 NonWritable
+               OpMemberDecorate %font_buffer_t 0 Offset 0
+               OpMemberDecorate %font_buffer_t 1 NonWritable
+               OpMemberDecorate %font_buffer_t 1 Offset 16
+               OpDecorate %__0 NonWritable
+               OpDecorate %__0 Binding 0
+               OpDecorate %__0 DescriptorSet 1
+               OpDecorate %o_texcoord Location 0
+               OpDecorate %push_data_t Block
+               OpMemberDecorate %push_data_t 0 Offset 0
+               OpMemberDecorate %push_data_t 1 Offset 8
+               OpMemberDecorate %push_data_t 2 Offset 12
+               OpMemberDecorate %push_data_t 3 Offset 16
+               OpDecorate %gl_PerVertex Block
+               OpMemberDecorate %gl_PerVertex 0 BuiltIn Position
+               OpMemberDecorate %gl_PerVertex 1 BuiltIn PointSize
+               OpMemberDecorate %gl_PerVertex 2 BuiltIn ClipDistance
+               OpMemberDecorate %gl_PerVertex 3 BuiltIn CullDistance
+       %void = OpTypeVoid
+          %3 = OpTypeFunction %void
+       %uint = OpTypeInt 32 0
+%_ptr_Function_uint = OpTypePointer Function %uint
+      %float = OpTypeFloat 32
+    %v2float = OpTypeVector %float 2
+         %10 = OpTypeFunction %v2float %_ptr_Function_uint
+        %int = OpTypeInt 32 1
+%_ptr_Function_int = OpTypePointer Function %int
+     %int_16 = OpConstant %int 16
+%draw_info_t = OpTypeStruct %uint %uint %uint %uint
+%_ptr_Function_draw_info_t = OpTypePointer Function %draw_info_t
+%draw_info_t_0 = OpTypeStruct %uint %uint %uint %uint
+%_runtimearr_draw_info_t_0 = OpTypeRuntimeArray %draw_info_t_0
+%draw_buffer_t = OpTypeStruct %_runtimearr_draw_info_t_0
+%_ptr_StorageBuffer_draw_buffer_t = OpTypePointer StorageBuffer %draw_buffer_t
+          %_ = OpVariable %_ptr_StorageBuffer_draw_buffer_t StorageBuffer
+      %int_0 = OpConstant %int 0
+%_ptr_Input_int = OpTypePointer Input %int
+  %gl_DrawID = OpVariable %_ptr_Input_int Input
+%_ptr_StorageBuffer_draw_info_t_0 = OpTypePointer StorageBuffer %draw_info_t_0
+    %v4float = OpTypeVector %float 4
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+    %o_color = OpVariable %_ptr_Output_v4float Output
+      %int_3 = OpConstant %int 3
+%gl_VertexIndex = OpVariable %_ptr_Input_int Input
+      %int_6 = OpConstant %int 6
+     %uint_6 = OpConstant %uint 6
+         %70 = OpTypeImage %uint Buffer 0 0 0 1 Unknown
+%_ptr_UniformConstant_70 = OpTypePointer UniformConstant %70
+%text_buffer = OpVariable %_ptr_UniformConstant_70 UniformConstant
+     %v4uint = OpTypeVector %uint 4
+     %uint_0 = OpConstant %uint 0
+%glyph_info_t = OpTypeStruct %uint %uint %uint
+%_ptr_Function_glyph_info_t = OpTypePointer Function %glyph_info_t
+     %v2uint = OpTypeVector %uint 2
+%font_info_t = OpTypeStruct %float %float %v2uint
+%glyph_info_t_0 = OpTypeStruct %uint %uint %uint
+%_runtimearr_glyph_info_t_0 = OpTypeRuntimeArray %glyph_info_t_0
+%font_buffer_t = OpTypeStruct %font_info_t %_runtimearr_glyph_info_t_0
+%_ptr_StorageBuffer_font_buffer_t = OpTypePointer StorageBuffer %font_buffer_t
+        %__0 = OpVariable %_ptr_StorageBuffer_font_buffer_t StorageBuffer
+      %int_1 = OpConstant %int 1
+%_ptr_StorageBuffer_glyph_info_t_0 = OpTypePointer StorageBuffer %glyph_info_t_0
+%_ptr_Function_v2float = OpTypePointer Function %v2float
+    %uint_42 = OpConstant %uint 42
+    %uint_28 = OpConstant %uint 28
+        %103 = OpConstantComposite %v2uint %uint_42 %uint_28
+     %uint_1 = OpConstant %uint 1
+%_ptr_Output_v2float = OpTypePointer Output %v2float
+ %o_texcoord = OpVariable %_ptr_Output_v2float Output
+%_ptr_Function_float = OpTypePointer Function %float
+%_ptr_StorageBuffer_float = OpTypePointer StorageBuffer %float
+%push_data_t = OpTypeStruct %v2uint %float %float %uint
+%_ptr_PushConstant_push_data_t = OpTypePointer PushConstant %push_data_t
+        %__1 = OpVariable %_ptr_PushConstant_push_data_t PushConstant
+%_ptr_PushConstant_v2uint = OpTypePointer PushConstant %v2uint
+      %int_2 = OpConstant %int 2
+%_ptr_PushConstant_float = OpTypePointer PushConstant %float
+    %float_0 = OpConstant %float 0
+        %165 = OpConstantComposite %v2float %float_0 %float_0
+       %bool = OpTypeBool
+     %v2bool = OpTypeVector %bool 2
+    %float_2 = OpConstant %float 2
+    %float_1 = OpConstant %float 1
+%_arr_float_uint_1 = OpTypeArray %float %uint_1
+%gl_PerVertex = OpTypeStruct %v4float %float %_arr_float_uint_1 %_arr_float_uint_1
+%_ptr_Output_gl_PerVertex = OpTypePointer Output %gl_PerVertex
+        %__2 = OpVariable %_ptr_Output_gl_PerVertex Output
+       %main = OpFunction %void None %3
+          %5 = OpLabel
+  %draw_info = OpVariable %_ptr_Function_draw_info_t Function
+    %chr_idx = OpVariable %_ptr_Function_uint Function
+    %vtx_idx = OpVariable %_ptr_Function_uint Function
+  %glyph_idx = OpVariable %_ptr_Function_uint Function
+ %glyph_info = OpVariable %_ptr_Function_glyph_info_t Function
+      %coord = OpVariable %_ptr_Function_v2float Function
+     %tex_xy = OpVariable %_ptr_Function_v2float Function
+      %param = OpVariable %_ptr_Function_uint Function
+     %tex_wh = OpVariable %_ptr_Function_v2float Function
+    %param_0 = OpVariable %_ptr_Function_uint Function
+  %text_size = OpVariable %_ptr_Function_uint Function
+%size_factor = OpVariable %_ptr_Function_float Function
+%surface_size_f = OpVariable %_ptr_Function_v2float Function
+   %text_pos = OpVariable %_ptr_Function_v2float Function
+    %param_1 = OpVariable %_ptr_Function_uint Function
+  %local_pos = OpVariable %_ptr_Function_v2float Function
+    %param_2 = OpVariable %_ptr_Function_uint Function
+  %pixel_pos = OpVariable %_ptr_Function_v2float Function
+ %scaled_pos = OpVariable %_ptr_Function_v2float Function
+         %44 = OpLoad %int %gl_DrawID
+         %46 = OpAccessChain %_ptr_StorageBuffer_draw_info_t_0 %_ %int_0 %44
+         %47 = OpLoad %draw_info_t_0 %46
+         %48 = OpCopyLogical %draw_info_t %47
+               OpStore %draw_info %48
+         %53 = OpAccessChain %_ptr_Function_uint %draw_info %int_3
+         %54 = OpLoad %uint %53
+         %55 = OpExtInst %v4float %1 UnpackUnorm4x8 %54
+               OpStore %o_color %55
+         %58 = OpLoad %int %gl_VertexIndex
+         %60 = OpSDiv %int %58 %int_6
+         %61 = OpBitcast %uint %60
+               OpStore %chr_idx %61
+         %63 = OpLoad %int %gl_VertexIndex
+         %64 = OpBitcast %uint %63
+         %66 = OpLoad %uint %chr_idx
+         %67 = OpIMul %uint %uint_6 %66
+         %68 = OpISub %uint %64 %67
+               OpStore %vtx_idx %68
+         %73 = OpLoad %70 %text_buffer
+         %74 = OpAccessChain %_ptr_Function_uint %draw_info %int_0
+         %75 = OpLoad %uint %74
+         %76 = OpLoad %uint %chr_idx
+         %77 = OpIAdd %uint %75 %76
+         %78 = OpBitcast %int %77
+         %80 = OpImageFetch %v4uint %73 %78 ZeroExtend
+         %82 = OpCompositeExtract %uint %80 0
+               OpStore %glyph_idx %82
+         %94 = OpLoad %uint %glyph_idx
+         %96 = OpAccessChain %_ptr_StorageBuffer_glyph_info_t_0 %__0 %int_1 %94
+         %97 = OpLoad %glyph_info_t_0 %96
+         %98 = OpCopyLogical %glyph_info_t %97
+               OpStore %glyph_info %98
+        %104 = OpLoad %uint %vtx_idx
+        %105 = OpCompositeConstruct %v2uint %104 %104
+        %106 = OpShiftRightLogical %v2uint %103 %105
+        %108 = OpCompositeConstruct %v2uint %uint_1 %uint_1
+        %109 = OpBitwiseAnd %v2uint %106 %108
+        %110 = OpConvertUToF %v2float %109
+               OpStore %coord %110
+        %113 = OpAccessChain %_ptr_Function_uint %glyph_info %int_0
+        %114 = OpLoad %uint %113
+               OpStore %param %114
+        %115 = OpFunctionCall %v2float %unpack_u16_u1_ %param
+               OpStore %tex_xy %115
+        %118 = OpAccessChain %_ptr_Function_uint %glyph_info %int_1
+        %119 = OpLoad %uint %118
+               OpStore %param_0 %119
+        %120 = OpFunctionCall %v2float %unpack_u16_u1_ %param_0
+               OpStore %tex_wh %120
+        %123 = OpLoad %v2float %tex_xy
+        %124 = OpLoad %v2float %coord
+        %125 = OpLoad %v2float %tex_wh
+        %126 = OpFMul %v2float %124 %125
+        %127 = OpFAdd %v2float %123 %126
+               OpStore %o_texcoord %127
+        %129 = OpAccessChain %_ptr_Function_uint %draw_info %int_1
+        %130 = OpLoad %uint %129
+        %131 = OpBitFieldUExtract %uint %130 %int_16 %int_16
+               OpStore %text_size %131
+        %134 = OpLoad %uint %text_size
+        %135 = OpConvertUToF %float %134
+        %137 = OpAccessChain %_ptr_StorageBuffer_float %__0 %int_0 %int_0
+        %138 = OpLoad %float %137
+        %139 = OpFDiv %float %135 %138
+               OpStore %size_factor %139
+        %145 = OpAccessChain %_ptr_PushConstant_v2uint %__1 %int_0
+        %146 = OpLoad %v2uint %145
+        %147 = OpConvertUToF %v2float %146
+        %150 = OpAccessChain %_ptr_PushConstant_float %__1 %int_2
+        %151 = OpLoad %float %150
+        %152 = OpCompositeConstruct %v2float %151 %151
+        %153 = OpFDiv %v2float %147 %152
+               OpStore %surface_size_f %153
+        %156 = OpAccessChain %_ptr_Function_uint %draw_info %int_2
+        %157 = OpLoad %uint %156
+               OpStore %param_1 %157
+        %158 = OpFunctionCall %v2float %unpack_u16_u1_ %param_1
+               OpStore %text_pos %158
+        %159 = OpLoad %v2float %text_pos
+        %160 = OpLoad %v2float %surface_size_f
+        %161 = OpLoad %v2float %text_pos
+        %162 = OpFAdd %v2float %160 %161
+        %163 = OpLoad %v2float %text_pos
+        %168 = OpFOrdLessThan %v2bool %163 %165
+        %169 = OpSelect %v2float %168 %162 %159
+               OpStore %text_pos %169
+        %171 = OpLoad %v2float %tex_wh
+        %172 = OpLoad %v2float %coord
+        %173 = OpFMul %v2float %171 %172
+        %175 = OpAccessChain %_ptr_Function_uint %glyph_info %int_2
+        %176 = OpLoad %uint %175
+               OpStore %param_2 %176
+        %177 = OpFunctionCall %v2float %unpack_u16_u1_ %param_2
+        %178 = OpFSub %v2float %173 %177
+        %179 = OpAccessChain %_ptr_StorageBuffer_float %__0 %int_0 %int_1
+        %180 = OpLoad %float %179
+        %181 = OpLoad %uint %chr_idx
+        %182 = OpConvertUToF %float %181
+        %183 = OpFMul %float %180 %182
+        %184 = OpCompositeConstruct %v2float %183 %float_0
+        %185 = OpFAdd %v2float %178 %184
+               OpStore %local_pos %185
+        %187 = OpLoad %v2float %text_pos
+        %188 = OpLoad %float %size_factor
+        %189 = OpLoad %v2float %local_pos
+        %190 = OpVectorTimesScalar %v2float %189 %188
+        %191 = OpFAdd %v2float %187 %190
+               OpStore %pixel_pos %191
+        %194 = OpLoad %v2float %pixel_pos
+        %195 = OpLoad %v2float %surface_size_f
+        %196 = OpFDiv %v2float %194 %195
+        %197 = OpVectorTimesScalar %v2float %196 %float_2
+        %199 = OpCompositeConstruct %v2float %float_1 %float_1
+        %200 = OpFSub %v2float %197 %199
+               OpStore %scaled_pos %200
+        %205 = OpLoad %v2float %scaled_pos
+        %206 = OpCompositeExtract %float %205 0
+        %207 = OpCompositeExtract %float %205 1
+        %208 = OpCompositeConstruct %v4float %206 %207 %float_0 %float_1
+        %209 = OpAccessChain %_ptr_Output_v4float %__2 %int_0
+               OpStore %209 %208
+               OpReturn
+               OpFunctionEnd
+%unpack_u16_u1_ = OpFunction %v2float None %10
+          %v = OpFunctionParameter %_ptr_Function_uint
+         %13 = OpLabel
+         %hi = OpVariable %_ptr_Function_int Function
+         %lo = OpVariable %_ptr_Function_int Function
+         %17 = OpLoad %uint %v
+         %18 = OpBitcast %int %17
+               OpStore %hi %18
+         %20 = OpLoad %uint %v
+         %22 = OpShiftLeftLogical %uint %20 %int_16
+         %23 = OpBitcast %int %22
+               OpStore %lo %23
+         %24 = OpLoad %int %lo
+         %25 = OpShiftRightArithmetic %int %24 %int_16
+         %26 = OpConvertSToF %float %25
+         %27 = OpLoad %int %hi
+         %28 = OpShiftRightArithmetic %int %27 %int_16
+         %29 = OpConvertSToF %float %28
+         %30 = OpCompositeConstruct %v2float %26 %29
+               OpReturnValue %30
+               OpFunctionEnd

@@ -1,0 +1,11 @@
+{
+  "name": "gate-c-lifecycle",
+  "exit_status": 0,
+  "wall_seconds": 69.33447862497997,
+  "sha256": {
+    "d3d9.dll": "247277188718e047459919e868793bc176969e7a495a8e1c7d6b7a33ae148f4a",
+    "d3d11.dll": "2312e90bc1f87ef5c7fe96bdf752f7ba10e9540f37058198bec10cad6a3e6f7e",
+    "dxgi.dll": "f269f52d16b72a5b764be7d8574fb4fbf6b38fe82895b16c4695565bc307dda0",
+    "d3d11-semantics-30hz.exe": "fd3cad69203f030d370d772730d6a3bb96d9df7fe23d98fb0a4af01606e44134"
+  }
+}

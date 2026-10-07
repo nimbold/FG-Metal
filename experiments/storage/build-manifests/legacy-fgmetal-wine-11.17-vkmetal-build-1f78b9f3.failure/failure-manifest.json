@@ -1,0 +1,20 @@
+{
+  "build_id": "legacy-fgmetal-wine-11.17-vkmetal-build-1f78b9f3",
+  "capture_paths": null,
+  "capture_policy": "full-small-root",
+  "captured_at_unix": 1791335656.039281,
+  "classification": "FAILED_OR_SCRATCH",
+  "reason": "Wine configure-only attempt failed; retain config.log and retire the scratch root",
+  "retained_files": [
+    {
+      "mode": "0o644",
+      "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-wine-11.17-vkmetal-build-1f78b9f3.failure/configuration/config.log",
+      "sha256": "d0bd395cd3705558e669c5823daec5c3c92b3fde7cbfa4ab6f21f9846d7320d8",
+      "size_bytes": 31613,
+      "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-wine-11.17-vkmetal-build-1f78b9f3/config.log"
+    }
+  ],
+  "schema_version": 1,
+  "source_estimated_allocated_bytes": 32768,
+  "source_logical_bytes": 31613
+}

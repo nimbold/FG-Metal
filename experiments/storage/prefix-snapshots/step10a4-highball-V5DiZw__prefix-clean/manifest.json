@@ -1,0 +1,279 @@
+{
+  "binary_path_hashes_from_storage_inventory": [
+    {
+      "allocated_size_bytes": 9580544,
+      "hard_link_count": 1,
+      "logical_size_bytes": 9576462,
+      "mtime_epoch": 1790975267.115087,
+      "path": "/private/tmp/step10a4-highball-V5DiZw/prefix-clean/drive_c/windows/system32/shell32.dll",
+      "sha256": "c245972abba824fd2c367ebc4b44a8c845c6bb043e2f95afe0a5d3ef88d187fb"
+    },
+    {
+      "allocated_size_bytes": 9543680,
+      "hard_link_count": 1,
+      "logical_size_bytes": 9539598,
+      "mtime_epoch": 1790975270.3079972,
+      "path": "/private/tmp/step10a4-highball-V5DiZw/prefix-clean/drive_c/windows/syswow64/shell32.dll",
+      "sha256": "9aa9ee4cbad5fde3983d6a580ccbd3589d5f98776e5121f353ac9a54bd182aaa"
+    },
+    {
+      "allocated_size_bytes": 4517888,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4517888,
+      "mtime_epoch": 1790975267.4689207,
+      "path": "/private/tmp/step10a4-highball-V5DiZw/prefix-clean/drive_c/windows/system32/winedbg.exe",
+      "sha256": "96be4f66b4dffe4b4a72d55b77fd6672fb8d60b40cef5d747ed1bf65ca02155c"
+    },
+    {
+      "allocated_size_bytes": 4485120,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4481038,
+      "mtime_epoch": 1790975270.490206,
+      "path": "/private/tmp/step10a4-highball-V5DiZw/prefix-clean/drive_c/windows/syswow64/winedbg.exe",
+      "sha256": "b099c838413ef287c7ad59fdc67bbe9ccdca8e6625f80210efbaa44515d8a4f7"
+    },
+    {
+      "allocated_size_bytes": 2850816,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2846734,
+      "mtime_epoch": 1790975270.4875236,
+      "path": "/private/tmp/step10a4-highball-V5DiZw/prefix-clean/drive_c/windows/syswow64/wined3d.dll",
+      "sha256": "2f4bc67c5964b8494ea05c33ae2ad3db687d12e5ac1bf935398bad834d349b84"
+    },
+    {
+      "allocated_size_bytes": 2846720,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2846720,
+      "mtime_epoch": 1790975267.4651444,
+      "path": "/private/tmp/step10a4-highball-V5DiZw/prefix-clean/drive_c/windows/system32/wined3d.dll",
+      "sha256": "cdeb510599acc2891ec313fc46f8a83e5e36194f783504a263902506f93fc13f"
+    },
+    {
+      "allocated_size_bytes": 2744320,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2740238,
+      "mtime_epoch": 1790975266.6837149,
+      "path": "/private/tmp/step10a4-highball-V5DiZw/prefix-clean/drive_c/windows/system32/kernelbase.dll",
+      "sha256": "5849f8a94440abe9e8f67bc5bf180fb9465946e92144a5bf850010633a0a39bf"
+    },
+    {
+      "allocated_size_bytes": 2695168,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2691086,
+      "mtime_epoch": 1790975269.8427103,
+      "path": "/private/tmp/step10a4-highball-V5DiZw/prefix-clean/drive_c/windows/syswow64/kernelbase.dll",
+      "sha256": "1f3ede331fc50a9fd963487747ec6f4383beecb89dc89e8417288247f506e921"
+    },
+    {
+      "allocated_size_bytes": 2134016,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2129934,
+      "mtime_epoch": 1790975265.8394706,
+      "path": "/private/tmp/step10a4-highball-V5DiZw/prefix-clean/drive_c/windows/winsxs/amd64_microsoft-windows-msxml30_31bf3856ad364e35_6.0.6000.16386_none_deadbeef/msxml3.dll",
+      "sha256": "da0bd11d2efe8be7b68cdb52d1ac72ffd7f758cc7da49ef3deff586f3ad89366"
+    },
+    {
+      "allocated_size_bytes": 2134016,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2129934,
+      "mtime_epoch": 1790975265.8222692,
+      "path": "/private/tmp/step10a4-highball-V5DiZw/prefix-clean/drive_c/windows/system32/msxml3.dll",
+      "sha256": "da0bd11d2efe8be7b68cdb52d1ac72ffd7f758cc7da49ef3deff586f3ad89366"
+    },
+    {
+      "allocated_size_bytes": 2027520,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2023438,
+      "mtime_epoch": 1790975269.3255756,
+      "path": "/private/tmp/step10a4-highball-V5DiZw/prefix-clean/drive_c/windows/winsxs/x86_microsoft-windows-msxml30_31bf3856ad364e35_6.0.6000.16386_none_deadbeef/msxml3.dll",
+      "sha256": "c5624dfe29e27925be6cea6e11b531c852e7349194331d72ce9f7aad29a33a80"
+    },
+    {
+      "allocated_size_bytes": 2027520,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2023438,
+      "mtime_epoch": 1790975269.2965913,
+      "path": "/private/tmp/step10a4-highball-V5DiZw/prefix-clean/drive_c/windows/syswow64/msxml3.dll",
+      "sha256": "c5624dfe29e27925be6cea6e11b531c852e7349194331d72ce9f7aad29a33a80"
+    },
+    {
+      "allocated_size_bytes": 1994752,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1990670,
+      "mtime_epoch": 1790975266.820517,
+      "path": "/private/tmp/step10a4-highball-V5DiZw/prefix-clean/drive_c/windows/system32/mshtml.dll",
+      "sha256": "3d518859b6d7963d5d398fce851b9bb7aa576942b385103090c557cc7fc0616e"
+    },
+    {
+      "allocated_size_bytes": 1863680,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1859598,
+      "mtime_epoch": 1790975269.9886808,
+      "path": "/private/tmp/step10a4-highball-V5DiZw/prefix-clean/drive_c/windows/syswow64/mshtml.dll",
+      "sha256": "3d26dd61dd96235f082562b996fc8f84448d735a9ea51161a1801818b7574551"
+    },
+    {
+      "allocated_size_bytes": 1843200,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1843200,
+      "mtime_epoch": 1790975267.2229412,
+      "path": "/private/tmp/step10a4-highball-V5DiZw/prefix-clean/drive_c/windows/system32/user32.dll",
+      "sha256": "52b981363ba79a50bcbe92fab041640630ee77806d99dbe29eb759c624c1323a"
+    },
+    {
+      "allocated_size_bytes": 1839104,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1835022,
+      "mtime_epoch": 1790975270.400927,
+      "path": "/private/tmp/step10a4-highball-V5DiZw/prefix-clean/drive_c/windows/syswow64/user32.dll",
+      "sha256": "76cebda1206c9da9704e76e0533a5c0c8c889e660f553dbbb79e925d63d4ba0d"
+    },
+    {
+      "allocated_size_bytes": 1454080,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1449998,
+      "mtime_epoch": 1790975267.3578277,
+      "path": "/private/tmp/step10a4-highball-V5DiZw/prefix-clean/drive_c/windows/system32/windowscodecs.dll",
+      "sha256": "04d4d2f36b077313717b03c60a5aa6e7bdd3c23882fe4fcfbf7d392700ba75b7"
+    },
+    {
+      "allocated_size_bytes": 1413120,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1409038,
+      "mtime_epoch": 1790975270.4700012,
+      "path": "/private/tmp/step10a4-highball-V5DiZw/prefix-clean/drive_c/windows/syswow64/windowscodecs.dll",
+      "sha256": "619d3b529b113a40ec9aaaa7a76751c04dc23b0d7f29785e812bde9e40650110"
+    },
+    {
+      "allocated_size_bytes": 1359872,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1355790,
+      "mtime_epoch": 1790975270.6401958,
+      "path": "/private/tmp/step10a4-highball-V5DiZw/prefix-clean/drive_c/windows/winsxs/x86_microsoft.windows.common-controls_6595b64144ccf1df_6.0.2600.2982_none_deadbeef/comctl32.dll",
+      "sha256": "f7d4f2eb102c6f5c02e74391932096db4966e5c2de1ef179dec60ad1bca1f36e"
+    },
+    {
+      "allocated_size_bytes": 1359872,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1355790,
+      "mtime_epoch": 1790975269.5182304,
+      "path": "/private/tmp/step10a4-highball-V5DiZw/prefix-clean/drive_c/windows/syswow64/comctl32.dll",
+      "sha256": "f7d4f2eb102c6f5c02e74391932096db4966e5c2de1ef179dec60ad1bca1f36e"
+    },
+    {
+      "allocated_size_bytes": 1327104,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1323022,
+      "mtime_epoch": 1790975267.7490692,
+      "path": "/private/tmp/step10a4-highball-V5DiZw/prefix-clean/drive_c/windows/winsxs/amd64_microsoft.windows.common-controls_6595b64144ccf1df_6.0.2600.2982_none_deadbeef/comctl32.dll",
+      "sha256": "3067c6073f1a685809f9438d01a86bbc439c30b8182d83bd5933f1c920647703"
+    },
+    {
+      "allocated_size_bytes": 1327104,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1323022,
+      "mtime_epoch": 1790975266.063983,
+      "path": "/private/tmp/step10a4-highball-V5DiZw/prefix-clean/drive_c/windows/system32/comctl32.dll",
+      "sha256": "3067c6073f1a685809f9438d01a86bbc439c30b8182d83bd5933f1c920647703"
+    },
+    {
+      "allocated_size_bytes": 1241088,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1237006,
+      "mtime_epoch": 1790975266.8724892,
+      "path": "/private/tmp/step10a4-highball-V5DiZw/prefix-clean/drive_c/windows/system32/msi.dll",
+      "sha256": "a417ba22efb08e80ebb3ac7bd23907ae9f6e7d25449331dac9e0626e2d9d9873"
+    },
+    {
+      "allocated_size_bytes": 1220608,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1216526,
+      "mtime_epoch": 1790975270.0644622,
+      "path": "/private/tmp/step10a4-highball-V5DiZw/prefix-clean/drive_c/windows/syswow64/msi.dll",
+      "sha256": "3e67fc9f95e5100f192bdd06241fca21e2565e0f2a753ef5409d559d9886a307"
+    },
+    {
+      "allocated_size_bytes": 1171456,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1171456,
+      "mtime_epoch": 1790975270.1974747,
+      "path": "/private/tmp/step10a4-highball-V5DiZw/prefix-clean/drive_c/windows/syswow64/opengl32.dll",
+      "sha256": "42b1e936cefea3dc61087fb93b611e90989e310ca4044ce022f4fe79cd216049"
+    },
+    {
+      "allocated_size_bytes": 1089536,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1089536,
+      "mtime_epoch": 1790975266.3344421,
+      "path": "/private/tmp/step10a4-highball-V5DiZw/prefix-clean/drive_c/windows/system32/cryptui.dll",
+      "sha256": "6a62e1bbb669bcf707bf130497fd203435238094276a790bc66589604df89e76"
+    },
+    {
+      "allocated_size_bytes": 1085440,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1085440,
+      "mtime_epoch": 1790975267.0122883,
+      "path": "/private/tmp/step10a4-highball-V5DiZw/prefix-clean/drive_c/windows/system32/opengl32.dll",
+      "sha256": "9dd7d4b99468e67319cc80849de12989b2a0306c2862fea8a4f5a1abfbffe5d1"
+    },
+    {
+      "allocated_size_bytes": 1073152,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1073152,
+      "mtime_epoch": 1790975269.5413368,
+      "path": "/private/tmp/step10a4-highball-V5DiZw/prefix-clean/drive_c/windows/syswow64/cryptui.dll",
+      "sha256": "74b83a37386a262d9150a8c83b06deea93624be84b80c31555035136fecb3064"
+    },
+    {
+      "allocated_size_bytes": 1052672,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1052672,
+      "mtime_epoch": 1790975266.069609,
+      "path": "/private/tmp/step10a4-highball-V5DiZw/prefix-clean/drive_c/windows/system32/comdlg32.dll",
+      "sha256": "536342a272284196ba41c8c6d28242e9559ed377c65c50e7ad6737c003036dcc"
+    }
+  ],
+  "dosdevices_symlink_targets": {
+    "c:": "../drive_c",
+    "z:": "/"
+  },
+  "estimated_prefix_bytes": {
+    "allocated_path_bytes": 344399872,
+    "allocated_unique_inode_bytes": 344399872,
+    "file_count": 1799,
+    "logical_bytes": 342648504
+  },
+  "plan_decision": "SNAPSHOT_REGISTRY_THEN_DELETE",
+  "reason": "Completed run or diagnostic environment; retain registry/config snapshot and run evidence, then enforce the two-prefix cap.",
+  "registry_archive": {
+    "path": "registry-config.tar.gz",
+    "sha256": "ed2f0d707019a1beb6cd608b961fe84b9ee014a9d03ded2e20f91bd2b33cb879",
+    "size_bytes": 357085
+  },
+  "registry_files": [
+    {
+      "path": "system.reg",
+      "sha256": "9503507104c9d9860a5e16fd7bf79dc41719dba41fcf1f733e41668ad51bc56f",
+      "size_bytes": 3153648
+    },
+    {
+      "path": "user.reg",
+      "sha256": "aea91e6aa863d6a2fa1e3e9e717121773337b8ae8484b47c65901e3e994b39fd",
+      "size_bytes": 22121
+    },
+    {
+      "path": "userdef.reg",
+      "sha256": "1151a57b24b657376f8c9d73ea1aa2f51ebdeebe237be9a37df167f8a12611c9",
+      "size_bytes": 4026
+    },
+    {
+      "path": "drive_c/windows/system.ini",
+      "sha256": "67b6444441f3e325b644a1c7b3c1dffff17dfcdd51dd2550d4155ac4e628797e",
+      "size_bytes": 478
+    }
+  ],
+  "snapshot_time_unix": 1791313733.782151,
+  "source_path": "/private/tmp/step10a4-highball-V5DiZw/prefix-clean",
+  "source_root_kind": "COMPLETED_DISPOSABLE_PREFIX",
+  "unique_evidence_note": "Run logs, manifests, source snapshots, and timing evidence remain in their original evidence directories; this snapshot preserves prefix registry/config state and binary identity references."
+}

@@ -22,3 +22,12 @@ __pycache__/
 # and generated runtime weights out of Git history.
 /models/local/
 /models/cache/
+# Step 11D.2 native DXVK outputs are retained in the local content-addressed
+# store. Evidence manifests pin their hashes; do not stage absolute CAS symlinks
+# or multi-gigabyte build products in the source repository.
+/experiments/dxvk_macos_step11dR/evidence/**/d3d11.dll
+/experiments/dxvk_macos_step11dR/evidence/**/dxgi.dll
+# GitHub rejects individual files above 100 MiB. Keep the original captures
+# locally and track their byte-exact gzip archives beside them.
+/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-300s-10-low-candidate/runtime.log
+/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-300s-10-low-candidate/slow-visual_d3d11.log

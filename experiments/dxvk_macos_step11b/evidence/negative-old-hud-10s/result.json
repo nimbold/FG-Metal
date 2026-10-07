@@ -1,0 +1,13 @@
+{
+  "runtime": "/tmp/fgmetal-dxvk-macos-audit-run/runtime/wine",
+  "exit_status": "timeout",
+  "wall_seconds": 55.04725383303594,
+  "duration": 10,
+  "enhanced": false,
+  "waitable": false,
+  "lifecycle": false,
+  "dll_hashes": {
+    "d3d11.dll": "6940b883fb4bc1b744fb7ca3aa6a486303eaf180c9fe85c03ed7cb175057bf28",
+    "dxgi.dll": "17cbe8e84906ce9657493b1301e712cfc8123413034666fd9387dfe1bbf5b33c"
+  }
+}

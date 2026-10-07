@@ -1,0 +1,38 @@
+{
+  "run": "runtime",
+  "ledger": "runtime/synchronization-ledger.csv",
+  "rows": 1721,
+  "event_counts": {
+    "capture": 1721,
+    "commit": 1720,
+    "terminal": 1721,
+    "retired": 1720,
+    "consumer_attempt": 1619,
+    "consumer_submit": 1541,
+    "wsi_submit": 1541
+  },
+  "terminal_exactly_once": true,
+  "missing_or_multiple_terminal_job_ids": [],
+  "missing_capture_job_ids": [],
+  "jobs_with_committed_metal": 1720,
+  "jobs_with_consumer_attempt": 1619,
+  "jobs_with_consumer_done_wait_submitted": 1541,
+  "failed_metal_jobs_that_submitted_done_wait": [],
+  "jobs_with_wsi_present_attempt": 1541,
+  "jobs_with_successful_wsi_present": 1539,
+  "jobs_retired": 1720,
+  "terminal_states": {
+    "source-queue-nonempty": 3,
+    "internal-queue-full": 68,
+    "deadline-expired-before-claim": 5,
+    "source-pending": 22,
+    "VULKAN_CONSUMED": 1541,
+    "lease-validation-before-submit": 71,
+    "source-or-swapchain-conflict-before-submit": 6,
+    "surface-or-swapchain-dirty": 1,
+    "source-present-or-metal-commit-failed": 1,
+    "deadline-expired-before-submit": 1,
+    "PRESENTER_RETIREMENT": 1,
+    "presenter-busy": 1
+  }
+}

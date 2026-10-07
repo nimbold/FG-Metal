@@ -1,0 +1,17 @@
+{
+  "offset_seconds_after_active_commit": 1,
+  "source_hz": 30,
+  "test_run_duration_seconds": 60,
+  "dll_sha256": {
+    "d3d11.dll": "e747ca5a5c2087d1f788762a5c4bae13939593a2cb89dedf2f7c04999ab94de5",
+    "dxgi.dll": "58e972688c739ee8444c8efa7a175503ff8dd0774ceb63e9b8526168054d9132",
+    "FGMetalBridge.dll": "44cdaa3ff503a1beb3afd735620c3b33eac4bca17377fa78e5c3be5f852c18cf",
+    "fgmetalbridge.so": "033e3a8cbd957b1e16131fc690256aba8684d51b17688514a5ff7eaa351c2fe2"
+  },
+  "app_sha256": "f9e581029c215edc2ecad46f5c22cc1b0b0cfc8d17fbaec5f7d96667fc556169",
+  "source_build_id": "current-r5-build-A-20261006",
+  "native_provider_build_id": "status-v3-current-20261006",
+  "termination_method": "Wine taskkill /F /IM slow-visual.exe",
+  "screen_capture": false,
+  "cpu_pixel_readback": false
+}

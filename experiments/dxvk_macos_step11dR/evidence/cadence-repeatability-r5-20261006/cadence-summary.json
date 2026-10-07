@@ -1,0 +1,459 @@
+{
+  "runs": [
+    {
+      "trial": "A1",
+      "monitoring": "none",
+      "source_presents": 9001,
+      "source_hz": 29.9999,
+      "captures_commits": 7046,
+      "consumer_attempts": 4600,
+      "DONE_wait_submits": 4470,
+      "internal_wsi_successes": 4470,
+      "combined_wsi_hz": 44.8983,
+      "source_present_cpu_us": {
+        "count": 9001,
+        "p50_us": 369,
+        "p95_us": 3953,
+        "p99_us": 9717,
+        "p99_9_us": 14693,
+        "max_us": 51637
+      },
+      "metal_drop_records": 1955,
+      "internal_opportunity_drop_records": 2574,
+      "internal_failed_retirements": 120,
+      "ledger_audit_local": null,
+      "source_tail_counts": {
+        ">5ms": 343,
+        ">10ms": 83,
+        ">25ms": 3,
+        ">50ms": 1,
+        ">100ms": 0
+      },
+      "strict_ledger_audit": {
+        "status": "FAIL",
+        "captured_jobs": 7046,
+        "jobs_with_exactly_one_terminal": 7046,
+        "jobs_with_job_retired": 7045,
+        "missing_job_retired": [
+          7046
+        ],
+        "slot_owned_at_log_end": {
+          "generation=2 slot=2 history=8 output=9": 7046
+        },
+        "consumer_attempts": 4600,
+        "consumer_wsi_retirement_join_errors": 0,
+        "successful_consumer_submits": 4470,
+        "pre_capture_drop_classes": {
+          "NO_FREE_HISTORY": 1955
+        },
+        "terminal_classes": {
+          "DEADLINE_EXPIRED": 8,
+          "OTHER_EXPLICIT": 1,
+          "PRESENTED": 4470,
+          "SCHEDULER_QUEUE_FULL": 2389,
+          "SOURCE_PRIORITY": 58,
+          "WSI_FAILURE": 120
+        },
+        "internal_opportunity_drop_reason_counts": {
+          "deadline-expired": 1,
+          "deadline-expired-before-submit": 5,
+          "lease-validation-before-submit": 120,
+          "presenter-busy": 1,
+          "queue-full": 2389,
+          "source-or-swapchain-conflict-before-submit": 5,
+          "source-pending": 44,
+          "source-queue-nonempty": 9
+        }
+      }
+    },
+    {
+      "trial": "B1",
+      "monitoring": "RSS 1Hz",
+      "source_presents": 8999,
+      "source_hz": 29.9907,
+      "captures_commits": 7012,
+      "consumer_attempts": 4749,
+      "DONE_wait_submits": 4647,
+      "internal_wsi_successes": 4647,
+      "combined_wsi_hz": 45.4777,
+      "source_present_cpu_us": {
+        "count": 8999,
+        "p50_us": 273,
+        "p95_us": 4457,
+        "p99_us": 16616,
+        "p99_9_us": 30677,
+        "max_us": 43962
+      },
+      "metal_drop_records": 1987,
+      "internal_opportunity_drop_records": 2364,
+      "internal_failed_retirements": 99,
+      "ledger_audit_local": null,
+      "source_tail_counts": {
+        ">5ms": 422,
+        ">10ms": 313,
+        ">25ms": 30,
+        ">50ms": 0,
+        ">100ms": 0
+      },
+      "strict_ledger_audit": {
+        "status": "FAIL",
+        "captured_jobs": 7012,
+        "jobs_with_exactly_one_terminal": 7012,
+        "jobs_with_job_retired": 7011,
+        "missing_job_retired": [
+          7009
+        ],
+        "slot_owned_at_log_end": {
+          "generation=2 slot=2 history=8 output=9": 7009
+        },
+        "consumer_attempts": 4749,
+        "consumer_wsi_retirement_join_errors": 0,
+        "successful_consumer_submits": 4647,
+        "pre_capture_drop_classes": {
+          "NO_FREE_HISTORY": 1987
+        },
+        "terminal_classes": {
+          "DEADLINE_EXPIRED": 1,
+          "OTHER_EXPLICIT": 2,
+          "PRESENTED": 4647,
+          "SCHEDULER_QUEUE_FULL": 2203,
+          "SOURCE_PRIORITY": 60,
+          "WSI_FAILURE": 99
+        },
+        "internal_opportunity_drop_reason_counts": {
+          "lease-validation-before-submit": 99,
+          "presenter-busy": 2,
+          "queue-full": 2203,
+          "source-or-swapchain-conflict-before-submit": 3,
+          "source-pending": 52,
+          "source-queue-nonempty": 5
+        }
+      }
+    },
+    {
+      "trial": "A2",
+      "monitoring": "none",
+      "source_presents": 8999,
+      "source_hz": 29.9967,
+      "captures_commits": 7158,
+      "consumer_attempts": 4816,
+      "DONE_wait_submits": 4678,
+      "internal_wsi_successes": 4678,
+      "combined_wsi_hz": 45.5901,
+      "source_present_cpu_us": {
+        "count": 8999,
+        "p50_us": 359,
+        "p95_us": 13642,
+        "p99_us": 18711,
+        "p99_9_us": 33333,
+        "max_us": 1144259
+      },
+      "metal_drop_records": 1841,
+      "internal_opportunity_drop_records": 2468,
+      "internal_failed_retirements": 125,
+      "ledger_audit_local": null,
+      "source_tail_counts": {
+        ">5ms": 1282,
+        ">10ms": 784,
+        ">25ms": 54,
+        ">50ms": 1,
+        ">100ms": 1
+      },
+      "strict_ledger_audit": {
+        "status": "PASS",
+        "captured_jobs": 7158,
+        "jobs_with_exactly_one_terminal": 7158,
+        "jobs_with_job_retired": 7158,
+        "missing_job_retired": [],
+        "slot_owned_at_log_end": {},
+        "consumer_attempts": 4816,
+        "consumer_wsi_retirement_join_errors": 0,
+        "successful_consumer_submits": 4678,
+        "pre_capture_drop_classes": {
+          "NO_FREE_HISTORY": 1841
+        },
+        "terminal_classes": {
+          "DEADLINE_EXPIRED": 14,
+          "PRESENTED": 4678,
+          "SCHEDULER_QUEUE_FULL": 2263,
+          "SOURCE_PRIORITY": 78,
+          "WSI_FAILURE": 125
+        },
+        "internal_opportunity_drop_reason_counts": {
+          "deadline-expired-before-submit": 2,
+          "lease-validation-before-submit": 125,
+          "queue-full": 2263,
+          "source-or-swapchain-conflict-before-submit": 11,
+          "source-pending": 60,
+          "source-queue-nonempty": 7
+        }
+      }
+    },
+    {
+      "trial": "B2",
+      "monitoring": "RSS 1Hz",
+      "source_presents": 9001,
+      "source_hz": 30.0,
+      "captures_commits": 8931,
+      "consumer_attempts": 8790,
+      "DONE_wait_submits": 8699,
+      "internal_wsi_successes": 8699,
+      "combined_wsi_hz": 58.9934,
+      "source_present_cpu_us": {
+        "count": 9001,
+        "p50_us": 230,
+        "p95_us": 554,
+        "p99_us": 1874,
+        "p99_9_us": 16751,
+        "max_us": 38431
+      },
+      "metal_drop_records": 70,
+      "internal_opportunity_drop_records": 224,
+      "internal_failed_retirements": 75,
+      "ledger_audit_local": null,
+      "source_tail_counts": {
+        ">5ms": 40,
+        ">10ms": 37,
+        ">25ms": 1,
+        ">50ms": 0,
+        ">100ms": 0
+      },
+      "strict_ledger_audit": {
+        "status": "FAIL",
+        "captured_jobs": 8931,
+        "jobs_with_exactly_one_terminal": 8931,
+        "jobs_with_job_retired": 8930,
+        "missing_job_retired": [
+          8931
+        ],
+        "slot_owned_at_log_end": {
+          "generation=2 slot=1 history=6 output=7": 8931
+        },
+        "consumer_attempts": 8790,
+        "consumer_wsi_retirement_join_errors": 0,
+        "successful_consumer_submits": 8699,
+        "pre_capture_drop_classes": {
+          "NO_FREE_HISTORY": 70
+        },
+        "terminal_classes": {
+          "DEADLINE_EXPIRED": 9,
+          "PRESENTED": 8699,
+          "SCHEDULER_QUEUE_FULL": 98,
+          "SOURCE_PRIORITY": 50,
+          "WSI_FAILURE": 75
+        },
+        "internal_opportunity_drop_reason_counts": {
+          "deadline-expired-before-submit": 1,
+          "lease-validation-before-submit": 75,
+          "queue-full": 98,
+          "source-or-swapchain-conflict-before-submit": 15,
+          "source-pending": 30,
+          "source-queue-nonempty": 5
+        }
+      }
+    },
+    {
+      "trial": "A3",
+      "monitoring": "none",
+      "source_presents": 9001,
+      "source_hz": 29.9996,
+      "captures_commits": 8840,
+      "consumer_attempts": 8482,
+      "DONE_wait_submits": 8431,
+      "internal_wsi_successes": 8431,
+      "combined_wsi_hz": 58.0994,
+      "source_present_cpu_us": {
+        "count": 9001,
+        "p50_us": 247,
+        "p95_us": 508,
+        "p99_us": 1933,
+        "p99_9_us": 16926,
+        "max_us": 45320
+      },
+      "metal_drop_records": 161,
+      "internal_opportunity_drop_records": 402,
+      "internal_failed_retirements": 45,
+      "ledger_audit_local": null,
+      "source_tail_counts": {
+        ">5ms": 55,
+        ">10ms": 35,
+        ">25ms": 2,
+        ">50ms": 0,
+        ">100ms": 0
+      },
+      "strict_ledger_audit": {
+        "status": "FAIL",
+        "captured_jobs": 8840,
+        "jobs_with_exactly_one_terminal": 8840,
+        "jobs_with_job_retired": 8839,
+        "missing_job_retired": [
+          8840
+        ],
+        "slot_owned_at_log_end": {
+          "generation=2 slot=2 history=8 output=9": 8840
+        },
+        "consumer_attempts": 8482,
+        "consumer_wsi_retirement_join_errors": 0,
+        "successful_consumer_submits": 8431,
+        "pre_capture_drop_classes": {
+          "NO_FREE_HISTORY": 161
+        },
+        "terminal_classes": {
+          "DEADLINE_EXPIRED": 9,
+          "PRESENTED": 8431,
+          "SCHEDULER_QUEUE_FULL": 287,
+          "SOURCE_PRIORITY": 68,
+          "WSI_FAILURE": 45
+        },
+        "internal_opportunity_drop_reason_counts": {
+          "deadline-expired-before-submit": 2,
+          "lease-validation-before-submit": 45,
+          "queue-full": 287,
+          "source-or-swapchain-conflict-before-submit": 4,
+          "source-pending": 60,
+          "source-queue-nonempty": 4
+        }
+      }
+    },
+    {
+      "trial": "B3",
+      "monitoring": "RSS 1Hz",
+      "source_presents": 9001,
+      "source_hz": 29.9996,
+      "captures_commits": 8962,
+      "consumer_attempts": 8858,
+      "DONE_wait_submits": 8680,
+      "internal_wsi_successes": 8680,
+      "combined_wsi_hz": 58.9293,
+      "source_present_cpu_us": {
+        "count": 9001,
+        "p50_us": 232,
+        "p95_us": 673,
+        "p99_us": 1846,
+        "p99_9_us": 3743,
+        "max_us": 39771
+      },
+      "metal_drop_records": 39,
+      "internal_opportunity_drop_records": 280,
+      "internal_failed_retirements": 157,
+      "ledger_audit_local": null,
+      "source_tail_counts": {
+        ">5ms": 6,
+        ">10ms": 5,
+        ">25ms": 2,
+        ">50ms": 0,
+        ">100ms": 0
+      },
+      "strict_ledger_audit": {
+        "status": "FAIL",
+        "captured_jobs": 8962,
+        "jobs_with_exactly_one_terminal": 8962,
+        "jobs_with_job_retired": 8961,
+        "missing_job_retired": [
+          8962
+        ],
+        "slot_owned_at_log_end": {
+          "generation=2 slot=1 history=6 output=7": 8962
+        },
+        "consumer_attempts": 8858,
+        "consumer_wsi_retirement_join_errors": 0,
+        "successful_consumer_submits": 8680,
+        "pre_capture_drop_classes": {
+          "NO_FREE_HISTORY": 39
+        },
+        "terminal_classes": {
+          "DEADLINE_EXPIRED": 2,
+          "PRESENTED": 8680,
+          "SCHEDULER_QUEUE_FULL": 45,
+          "SOURCE_PRIORITY": 78,
+          "WSI_FAILURE": 157
+        },
+        "internal_opportunity_drop_reason_counts": {
+          "lease-validation-before-submit": 157,
+          "queue-full": 45,
+          "source-or-swapchain-conflict-before-submit": 21,
+          "source-pending": 51,
+          "source-queue-nonempty": 6
+        }
+      }
+    }
+  ],
+  "statistics": {
+    "mean": 51.99803333333333,
+    "median": 51.844750000000005,
+    "min": 44.8983,
+    "max": 58.9934,
+    "sample_stdev": 7.323753919860134,
+    "by_arm": {
+      "unmonitored": {
+        "values_wsi_hz": [
+          44.8983,
+          45.5901,
+          58.0994
+        ],
+        "mean": 49.529266666666665,
+        "median": 45.5901,
+        "min": 44.8983,
+        "max": 58.0994,
+        "sample_stdev": 7.430009140191778,
+        "runs_below_52": 2
+      },
+      "rss_monitored_1hz": {
+        "values_wsi_hz": [
+          45.4777,
+          58.9934,
+          58.9293
+        ],
+        "mean": 54.4668,
+        "median": 58.9293,
+        "min": 45.4777,
+        "max": 58.9934,
+        "sample_stdev": 7.784854931853259,
+        "runs_below_52": 1
+      }
+    }
+  },
+  "monitoring_control": {
+    "sampling_command": "ps -axo pid=,ppid=,rss=,command=",
+    "interval_seconds": 1,
+    "process_tree_enumeration": "yes; one full-host ps table each interval, descendant scan by parent PID; Wine server included when matching the tested runtime",
+    "repeated_individual_wine_child_queries": "no",
+    "measured_monitor_cpu_percent_wall": [
+      4.593,
+      4.455,
+      4.516
+    ],
+    "measured_monitor_cpu_seconds": [
+      14.697,
+      14.255,
+      14.361
+    ],
+    "measured_timer_wakeups": [
+      320,
+      320,
+      318
+    ],
+    "classification": "Measurable instrumentation cost, but no consistent cadence reduction: one monitored collapse and two monitored runs near 59 WSI/s; two unmonitored runs below 46 and the third 58.1. The prior 56.396 vs 50.794 two-run difference is unresolved and cannot be solely attributed to monitoring."
+  },
+  "ledger_verdict": {
+    "all_captured_jobs_have_exactly_one_terminal": true,
+    "all_submitted_consumers_have_exactly_one_wsi_retirement": true,
+    "runs_with_final_job_retirement_gap": [
+      "A1",
+      "B1",
+      "B2",
+      "A3",
+      "B3"
+    ],
+    "runs_with_no_final_job_retirement_gap": [
+      "A2"
+    ],
+    "note": "Interop job retirement and WSI consumer retirement are separate events. Captured-job terminal and submitted-consumer WSI joins pass; five runs end while their last slot owner lacks the distinct interop job-retired marker."
+  },
+  "latency_correlation_artifacts": {
+    "comparison": "../source-latency-comparison-20261006.json",
+    "outlier_join_csv": "../source-present-tail-correlation-20261006.csv",
+    "outlier_join_json": "../source-present-tail-correlation-20261006.json",
+    "limitation": "Per-source duration and AppFrameId are logged; backend has no per-frame monotonic timestamps/state snapshots for acquire duration, locks, slot/scheduler state, Metal bridge call, submit stages, lifecycle, Wine scheduling, or OS scheduling. Correlation is exact by AppFrameId/recorded event IDs where present, but cause is unverified."
+  }
+}

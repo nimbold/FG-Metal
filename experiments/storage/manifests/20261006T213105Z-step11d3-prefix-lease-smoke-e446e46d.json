@@ -1,0 +1,41 @@
+{
+  "blockers": [],
+  "candidate_hashes": {
+    "moltenvk": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+    "wine_binary": "946a7032484d02981182d59f82edda03f40f38c510e0208d48482c0830ef20e9",
+    "wine_runtime_tree": "2fea825b205073bf011ce948ec4cbe6560d9d90e26982233ad05822a17a92bfe"
+  },
+  "cleanup_policy": "PrefixLease finally cleanup; preserve registry/config snapshot and compact logs",
+  "created_at_unix": 1791322267.256199,
+  "decision": "ALLOW",
+  "estimated_max_new_disk_bytes": 3254779904,
+  "estimated_persistent_bytes": 33554432,
+  "expected_build_bytes": 0,
+  "expected_build_requirement": false,
+  "expected_duration_seconds": 300,
+  "expected_prefix_bytes": 3221225472,
+  "expected_prefix_requirement": true,
+  "experiment_id": "20261006T213105Z-step11d3-prefix-lease-smoke-e446e46d",
+  "free_before_bytes": 65032421376,
+  "gate0_attestation_sha256": null,
+  "graphics_experiments_run": false,
+  "internal_storage_setup": true,
+  "manifest_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/manifests/20261006T213105Z-step11d3-prefix-lease-smoke-e446e46d.json",
+  "output_dir": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/smoke-runs/20261006T213105Z-step11d3-prefix-lease-smoke-e446e46d",
+  "presentation_or_rendering_experiment_run": false,
+  "project_budget_bytes": 53687091200,
+  "project_budget_remaining_before_bytes": 9602646016,
+  "project_estimated_peak_bytes": 47339225088,
+  "project_usage_before": {
+    "allocated_inode_deduplicated_bytes": 44084445184,
+    "apfs_clone_awareness": false,
+    "file_count": 126347,
+    "hardlinks_deduplicated": true,
+    "logical_bytes": 96844508598
+  },
+  "purpose": "Storage-only validation of the certified prefix clone and finally cleanup; no Wine app or graphics experiment",
+  "retention_policy": "Keep only the template and one failure reproduction; remove this smoke clone in finally.",
+  "storage_justification": "Storage-only check of one APFS template clone; the clone is removed in finally and no application is launched.",
+  "warnings": [],
+  "wine_app_launched": false
+}

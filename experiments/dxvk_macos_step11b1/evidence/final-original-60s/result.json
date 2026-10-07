@@ -1,0 +1,24 @@
+{
+  "name": "final-original-60s",
+  "exit_status": 0,
+  "wall_seconds": 60.811425582971424,
+  "visual": "VISIBLE CHANGING COLOR THROUGH SHUTDOWN",
+  "environment": {
+    "WINEPREFIX": "/tmp/fgmetal-step11b1/prefix-final-original-60s",
+    "WINEDLLOVERRIDES": "d3d11,dxgi=n,b",
+    "WINEDEBUG": "+loaddll",
+    "DXVK_LOG_LEVEL": "info",
+    "DXVK_LOG_PATH": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11b1/evidence/final-original-60s",
+    "DXVK_HUD": "",
+    "DYLD_PRINT_LIBRARIES": "1",
+    "FG_AUDIT_ENABLE": "1",
+    "FG_AUDIT_RUN_SECONDS": "60",
+    "FG_AUDIT_SKIP_RESIZE": "1",
+    "FG_AB_BGRA": "0"
+  },
+  "hashes": {
+    "d3d11.dll": "b63c935e55a0854dc6857414fceaf7fde850da9f201e027b41a4cf97fed59352",
+    "d3d11_clear_window.exe": "18509edad2e1ae8d49941bd1868dd384d03cf693cc66b5542e7bba1611e21163",
+    "dxgi.dll": "17cbe8e84906ce9657493b1301e712cfc8123413034666fd9387dfe1bbf5b33c"
+  }
+}

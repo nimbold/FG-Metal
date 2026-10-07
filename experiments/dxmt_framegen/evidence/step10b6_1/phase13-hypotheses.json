@@ -1,0 +1,15 @@
+{
+  "control": "same public-property dispatcher binary; selector absent",
+  "contents-scale-2": {
+    "hypothesis": "Align WineMetal contentsScale=1 to native=2 to remove scaling eligibility mismatch",
+    "single_property": "CAMetalLayer.contentsScale = 2.0",
+    "expected_effect": "shorter surface Duration and predominant Direct-to-Display Yes; reduced zero feedback",
+    "source_geometry_unchanged": "640x360"
+  },
+  "parent-opaque": {
+    "hypothesis": "Native explicitly opaque parent backing layer; Wine runtime parent backing layer is nonopaque, potentially requiring CA composition",
+    "single_property": "WineMetalView.superview.layer.opaque = YES",
+    "expected_effect": "Direct-to-Display eligibility becomes predominant Yes and surface Duration approaches33.333ms",
+    "contents_scale_unchanged": 1
+  }
+}

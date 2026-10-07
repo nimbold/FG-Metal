@@ -1,0 +1,1909 @@
+diff --git a/src/d3d11/d3d11_device.cpp b/src/d3d11/d3d11_device.cpp
+index 97df7a0..3d2754b 100644
+--- a/src/d3d11/d3d11_device.cpp
++++ b/src/d3d11/d3d11_device.cpp
+@@ -60,9 +60,15 @@ namespace dxvk {
+   
+   
+   D3D11Device::~D3D11Device() {
++    if (this_thread::isInModuleDetachment())
++      return;
++
++    m_dxvkDevice->beginShutdown();
+     delete m_d3d10Device;
+     m_context = nullptr;
+     delete m_initializer;
++    m_dxvkDevice->closeSourceAdmission();
++    m_dxvkDevice->shutdownAndJoin();
+   }
+   
+   
+@@ -3811,10 +3817,14 @@ namespace dxvk {
+     m_dxvkFactory   (this, &m_d3d11Device),
+     m_destructionNotifier(this) {
+     m_vendorHacks.igd10iumd64 = initVendorHacks();
++    m_dxvkDevice->retainForProcessLifetime();
+   }
+ 
+ 
+   D3D11DXGIDevice::~D3D11DXGIDevice() {
++    if (this_thread::isInModuleDetachment())
++      return;
++
+     cleanupVendorHacks();
+   }
+   
+diff --git a/src/d3d11/d3d11_swapchain.cpp b/src/d3d11/d3d11_swapchain.cpp
+index f64c1c6..a2be315 100644
+--- a/src/d3d11/d3d11_swapchain.cpp
++++ b/src/d3d11/d3d11_swapchain.cpp
+@@ -79,6 +79,7 @@ namespace dxvk {
+     CreatePresenter();
+     CreateBackBuffers();
+     CreateBlitter();
++    m_presenter->retainForProcessLifetime();
+   }
+ 
+ 
+@@ -88,7 +89,7 @@ namespace dxvk {
+     if (this_thread::isInModuleDetachment())
+       return;
+ 
+-    m_presenter->destroyResources();
++    m_presenter->shutdownAndJoin();
+     
+     DestroyFrameLatencyEvent();
+     DestroyLatencyTracker();
+diff --git a/src/d3d9/d3d9_device.cpp b/src/d3d9/d3d9_device.cpp
+index 606f9bd..c39f552 100644
+--- a/src/d3d9/d3d9_device.cpp
++++ b/src/d3d9/d3d9_device.cpp
+@@ -160,16 +160,20 @@ namespace dxvk {
+     if (this_thread::isInModuleDetachment())
+       return;
+ 
++    m_dxvkDevice->beginShutdown();
+     ExecuteFlush(true);
++    m_csThread.closeAdmission();
+     SynchronizeCsThread(DxvkCsThread::SynchronizeAll);
++    m_dxvkDevice->closeSourceAdmission();
+ 
+     if (m_annotation)
+       delete m_annotation;
+ 
+     delete m_initializer;
++    m_csThread.shutdownAndJoin();
+     delete m_converter;
+-
+-    m_dxvkDevice->waitForIdle(); // Sync Device
++    m_dxvkDevice->shutdownAndJoin();
++    m_implicitSwapchain = nullptr;
+   }
+ 
+ 
+diff --git a/src/d3d9/d3d9_interface.cpp b/src/d3d9/d3d9_interface.cpp
+index 119dfa4..eb7565c 100644
+--- a/src/d3d9/d3d9_interface.cpp
++++ b/src/d3d9/d3d9_interface.cpp
+@@ -412,7 +412,7 @@ namespace dxvk {
+     try {
+       auto dxvkDevice = dxvkAdapter->createDevice();
+ 
+-      auto* device = new D3D9DeviceEx(
++      Com<D3D9DeviceEx, false> device = new D3D9DeviceEx(
+         this,
+         adapter,
+         DeviceType,
+@@ -428,7 +428,8 @@ namespace dxvk {
+       if (unlikely(FAILED(hr)))
+         return hr;
+ 
+-      *ppReturnedDeviceInterface = ref(device);
++      dxvkDevice->retainForProcessLifetime();
++      *ppReturnedDeviceInterface = ref(device.ptr());
+     }
+     catch (const DxvkError& e) {
+       Logger::err(e.message());
+diff --git a/src/d3d9/d3d9_swapchain.cpp b/src/d3d9/d3d9_swapchain.cpp
+index 5cda01d..5071f43 100644
+--- a/src/d3d9/d3d9_swapchain.cpp
++++ b/src/d3d9/d3d9_swapchain.cpp
+@@ -70,7 +70,7 @@ namespace dxvk {
+ 
+     for (auto& p : m_presenters) {
+       if (p.second.presenter) {
+-        p.second.presenter->destroyResources();
++        p.second.presenter->shutdownAndJoin();
+         p.second.presenter = nullptr;
+       }
+     }
+@@ -760,7 +760,7 @@ namespace dxvk {
+ 
+     if (entry != m_presenters.end()) {
+       if (entry->second.presenter) {
+-        entry->second.presenter->destroyResources();
++        entry->second.presenter->shutdownAndJoin();
+         entry->second.presenter = nullptr;
+ 
+         if (m_presentParams.hDeviceWindow == hWindow)
+@@ -1088,6 +1088,8 @@ namespace dxvk {
+ 
+       if (m_presentParams.hDeviceWindow == m_window && m_latencyTracking)
+         m_latencyTracker = m_device->createLatencyTracker(entry->second.presenter);
++
++      entry->second.presenter->retainForProcessLifetime();
+     }
+ 
+     m_wctx = &entry->second;
+diff --git a/src/dxgi/dxgi_adapter.cpp b/src/dxgi/dxgi_adapter.cpp
+index 259c782..4e6c1c3 100644
+--- a/src/dxgi/dxgi_adapter.cpp
++++ b/src/dxgi/dxgi_adapter.cpp
+@@ -66,11 +66,22 @@ namespace dxvk {
+     m_index   (index),
+     m_desc    (GetAdapterDesc()),
+     m_destructionNotifier(this) {
+-    
++    // Resolve the process-detach probe during normal construction even when
++    // this adapter never starts its optional memory-budget event thread.
++    this_thread::isInModuleDetachment();
+   }
+   
+   
+   DxgiAdapter::~DxgiAdapter() {
++    if (this_thread::isInModuleDetachment()) {
++      // ExitProcess has already stopped the other process threads before DLL
++      // detach. Do not coordinate with them here; process termination reclaims
++      // the event thread and its state.
++      if (m_eventThread.joinable())
++        m_eventThread.detach();
++      return;
++    }
++
+     if (m_eventThread.joinable()) {
+       std::unique_lock<dxvk::mutex> lock(m_mutex);
+       m_eventCookie = ~0u;
+@@ -361,8 +372,12 @@ namespace dxvk {
+ 
+     m_eventMap.insert({ cookie, hEvent });
+ 
+-    if (!m_eventThread.joinable())
++    if (!m_eventThread.joinable()) {
++      // Resolve the process-detach probe before the event worker can exist, so
++      // adapter destruction never performs a first DLL lookup under loader lock.
++      this_thread::isInModuleDetachment();
+       m_eventThread = dxvk::thread([this] { runEventThread(); });
++    }
+ 
+     // This method seems to fire the
+     // event immediately on Windows
+diff --git a/src/dxvk/dxvk_cs.cpp b/src/dxvk/dxvk_cs.cpp
+index 06f6aa4..aba5759 100644
+--- a/src/dxvk/dxvk_cs.cpp
++++ b/src/dxvk/dxvk_cs.cpp
+@@ -105,12 +105,55 @@ namespace dxvk {
+   
+   
+   DxvkCsThread::~DxvkCsThread() {
++    if (this_thread::isInModuleDetachment()) {
++      // Process termination has already stopped the other threads. Do not
++      // enter synchronization or join paths from DLL_PROCESS_DETACH.
++      if (m_thread.joinable())
++        m_thread.detach();
++      return;
++    }
++
++    shutdownAndJoin();
++  }
++
++
++  void DxvkCsThread::shutdownAndJoin() {
++    if (this_thread::isInModuleDetachment())
++      return;
++
++    closeAdmission();
++
+     { std::unique_lock<dxvk::mutex> lock(m_mutex);
+       m_stopped.store(true);
+     }
+-    
+-    m_condOnAdd.notify_one();
+-    m_thread.join();
++
++    m_condOnAdd.notify_all();
++    m_condOnSync.notify_all();
++
++    if (m_thread.joinable()) {
++      if (m_thread.get_id() == this_thread::get_id())
++        std::terminate();
++      m_thread.join();
++    }
++
++    if (m_thread.joinable())
++      std::terminate();
++
++    // Release the command context only after its executor has stopped. In
++    // D3D9 the device owner invokes this before shutting down/unregistering
++    // DxvkDevice, so context-owned workers (including the descriptor worker)
++    // are joined while the Device root is still present.
++    m_context = nullptr;
++  }
++
++
++  void DxvkCsThread::closeAdmission() {
++    { std::unique_lock<dxvk::mutex> lock(m_mutex);
++      m_admissionClosed = true;
++    }
++
++    m_condOnAdd.notify_all();
++    m_condOnSync.notify_all();
+   }
+   
+   
+@@ -118,6 +161,9 @@ namespace dxvk {
+     uint64_t seq;
+ 
+     { std::unique_lock<dxvk::mutex> lock(m_mutex);
++      if (m_admissionClosed)
++        return m_queueOrdered.seqDispatch;
++
+       seq = ++m_queueOrdered.seqDispatch;
+ 
+       auto& entry = m_queueOrdered.queue.emplace_back();
+@@ -135,6 +181,9 @@ namespace dxvk {
+     uint64_t timeline = 0u;
+ 
+     { std::unique_lock<dxvk::mutex> lock(m_mutex);
++      if (m_admissionClosed)
++        return;
++
+       auto& q = getQueue(queue);
+ 
+       if (synchronize)
+@@ -199,7 +248,7 @@ namespace dxvk {
+     std::vector<DxvkCsQueuedChunk> highPrio;
+ 
+     try {
+-      while (!m_stopped.load()) {
++      while (true) {
+         { std::unique_lock<dxvk::mutex> lock(m_mutex);
+ 
+           auto pred = [this] { return
+@@ -219,6 +268,11 @@ namespace dxvk {
+             m_device->addStatCtr(DxvkStatCounter::CsIdleTicks, std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count());
+           }
+ 
++          if (m_stopped.load()
++           && m_queueOrdered.queue.empty()
++           && m_queueHighPrio.queue.empty())
++            return;
++
+           std::swap(ordered, m_queueOrdered.queue);
+           std::swap(highPrio, m_queueHighPrio.queue);
+ 
+diff --git a/src/dxvk/dxvk_cs.h b/src/dxvk/dxvk_cs.h
+index b4d98c3..14af916 100644
+--- a/src/dxvk/dxvk_cs.h
++++ b/src/dxvk/dxvk_cs.h
+@@ -520,6 +520,10 @@ namespace dxvk {
+       const Rc<DxvkDevice>&   device,
+       const Rc<DxvkContext>&  context);
+     ~DxvkCsThread();
++
++    void closeAdmission();
++
++    void shutdownAndJoin();
+     
+     /**
+      * \brief Dispatches an entire chunk
+@@ -582,6 +586,7 @@ namespace dxvk {
+ 
+     std::atomic<bool>           m_stopped     = { false };
+     std::atomic<bool>           m_hasHighPrio = { false };
++    bool                        m_admissionClosed = false;
+ 
+     alignas(CACHE_LINE_SIZE)
+     dxvk::mutex                 m_mutex;
+diff --git a/src/dxvk/dxvk_descriptor_worker.cpp b/src/dxvk/dxvk_descriptor_worker.cpp
+index ffa44aa..3aac742 100644
+--- a/src/dxvk/dxvk_descriptor_worker.cpp
++++ b/src/dxvk/dxvk_descriptor_worker.cpp
+@@ -1,6 +1,8 @@
+ #include "dxvk_descriptor_worker.h"
+ #include "dxvk_device.h"
+ 
++#include "../util/util_env.h"
++
+ namespace dxvk {
+ 
+   DxvkDescriptorCopyWorker::DxvkDescriptorCopyWorker(const Rc<DxvkDevice>& device)
+@@ -9,17 +11,61 @@ namespace dxvk {
+     m_appendFence   (new sync::Fence()),
+     m_consumeFence  (new sync::Fence()),
+     m_writeBufferDescriptorsFn(getWriteBufferDescriptorFn()) {
+-    if (m_device->canUseDescriptorHeap() || m_device->canUseDescriptorBuffer())
++    const bool testWorkerEnabled = env::getEnvVar(
++      "DXVK_INTERNAL_WSI_TEST_DESCRIPTOR_WORKER") == "1";
++    if (m_device->canUseDescriptorHeap() || m_device->canUseDescriptorBuffer()
++     || testWorkerEnabled) {
++#ifdef _WIN32
++      if (testWorkerEnabled) {
++        const std::string prefix = env::getEnvVar("DXVK_INTERNAL_WSI_TEST_PREFIX");
++        if (!prefix.empty()) {
++          const std::string eventPrefix = "Local\\FGMetal11C1R_" + prefix + "_descriptor_worker_";
++          m_testWorkerStartedEvent = OpenEventA(EVENT_MODIFY_STATE, FALSE,
++            (eventPrefix + "started").c_str());
++          m_testWorkerDetachedEvent = OpenEventA(EVENT_MODIFY_STATE, FALSE,
++            (eventPrefix + "detached").c_str());
++        }
++      }
++#endif
++      // Prime the process-detach probe before any worker-owning context can
++      // be released by a DLL static destructor.
++      this_thread::isInModuleDetachment();
+       m_thread = std::thread([this] { runWorker(); });
++    }
+   }
+ 
+ 
+   DxvkDescriptorCopyWorker::~DxvkDescriptorCopyWorker() {
++    if (this_thread::isInModuleDetachment()) {
++      // ExitProcess has terminated peer threads before DLL detach. Skip the
++      // fence wait and coordination; only make std::thread non-joinable so
++      // its destructor cannot call std::terminate during process teardown.
++#ifdef _WIN32
++      if (m_testWorkerDetachedEvent)
++        SetEvent(m_testWorkerDetachedEvent);
++#endif
++      if (m_thread.joinable())
++        m_thread.detach();
++#ifdef _WIN32
++      if (m_testWorkerStartedEvent)
++        CloseHandle(m_testWorkerStartedEvent);
++      if (m_testWorkerDetachedEvent)
++        CloseHandle(m_testWorkerDetachedEvent);
++#endif
++      return;
++    }
++
+     if (m_thread.joinable()) {
+       m_consumeFence->wait(m_appendFence->value());
+       m_appendFence->signal(-1);
+       m_thread.join();
+     }
++#ifdef _WIN32
++    if (m_testWorkerStartedEvent)
++      CloseHandle(m_testWorkerStartedEvent);
++    if (m_testWorkerDetachedEvent)
++      CloseHandle(m_testWorkerDetachedEvent);
++#endif
+   }
+ 
+ 
+@@ -105,6 +151,11 @@ namespace dxvk {
+   void DxvkDescriptorCopyWorker::runWorker() {
+     env::setThreadName("dxvk-descriptor");
+ 
++#ifdef _WIN32
++    if (m_testWorkerStartedEvent)
++      SetEvent(m_testWorkerStartedEvent);
++#endif
++
+     uint64_t consume = 0u;
+ 
+     while (true) {
+diff --git a/src/dxvk/dxvk_descriptor_worker.h b/src/dxvk/dxvk_descriptor_worker.h
+index 7681e78..1147429 100644
+--- a/src/dxvk/dxvk_descriptor_worker.h
++++ b/src/dxvk/dxvk_descriptor_worker.h
+@@ -2,6 +2,10 @@
+ 
+ #include <array>
+ 
++#ifdef _WIN32
++#include <windows.h>
++#endif
++
+ #include "dxvk_descriptor_heap.h"
+ #include "dxvk_pipelayout.h"
+ 
+@@ -147,6 +151,13 @@ namespace dxvk {
+ 
+     std::thread m_thread;
+ 
++#ifdef _WIN32
++    // Optional lifecycle-probe events. These are opened only when the
++    // descriptor worker test switch is enabled.
++    HANDLE m_testWorkerStartedEvent = nullptr;
++    HANDLE m_testWorkerDetachedEvent = nullptr;
++#endif
++
+     Block* getBlock() {
+       return &m_blocks[m_blockIndex];
+     }
+diff --git a/src/dxvk/dxvk_device.cpp b/src/dxvk/dxvk_device.cpp
+index 97de471..c398900 100644
+--- a/src/dxvk/dxvk_device.cpp
++++ b/src/dxvk/dxvk_device.cpp
+@@ -4,6 +4,7 @@
+ #include "dxvk_latency_reflex.h"
+ #include "dxvk_shader_cache.h"
+ #include "dxvk_shader_ir.h"
++#include "dxvk_process_lifetime.h"
+ 
+ namespace dxvk {
+   
+@@ -46,26 +47,108 @@ namespace dxvk {
+   
+   
+   DxvkDevice::~DxvkDevice() {
++    if (this_thread::isInModuleDetachment())
++      return;
++
++    shutdownAndJoin();
++
+     if (m_kmtLocal) {
+       D3DKMT_DESTROYDEVICE destroy = { };
+       destroy.hDevice = m_kmtLocal;
+       D3DKMTDestroyDevice(&destroy);
+     }
++  }
++
++
++  void DxvkDevice::retainForProcessLifetime() {
++    // Resolve the ntdll shutdown probe while running normally so that a
++    // first lookup cannot happen from a destructor called under loader lock.
++    this_thread::isInModuleDetachment();
++    DxvkProcessLifetimeRegistry::retainDevice(Rc<DxvkDevice>(this));
++  }
++
+ 
+-    // If we are being destroyed during/after DLL process detachment
+-    // from TerminateProcess, etc, our CS threads are already destroyed
+-    // and we cannot synchronize against them.
+-    // The best we can do is just wait for the Vulkan device to be idle.
++  void DxvkDevice::beginShutdown() {
++    ShutdownState expected = ShutdownState::Running;
++    m_shutdownState.compare_exchange_strong(expected, ShutdownState::ClosingAdmission);
++    m_submissionQueue.closeInternalAdmission();
++    DxvkProcessLifetimeRegistry::testNotify("device-shutdown");
++  }
++
++
++  void DxvkDevice::closeSourceAdmission() {
++    m_submissionQueue.closeSourceAdmission();
++  }
++
++
++  void DxvkDevice::shutdownAndJoin() {
+     if (this_thread::isInModuleDetachment())
+       return;
+ 
+-    // Wait for all pending Vulkan commands to be
+-    // executed before we destroy any resources.
+-    this->waitForIdle();
++    if (m_submissionQueue.isWorkerThread())
++      std::terminate();
++
++    beginShutdown();
++
++    {
++      std::unique_lock<std::mutex> lock(m_shutdownMutex);
++      if (m_shutdownState.load() == ShutdownState::Stopped)
++        return;
++      if (m_shutdownInProgress) {
++        m_shutdownCond.wait(lock, [this] {
++          return m_shutdownState.load() == ShutdownState::Stopped;
++        });
++        return;
++      }
++      m_shutdownInProgress = true;
++    }
++
++    m_shutdownState.store(ShutdownState::Draining);
++
++    closeSourceAdmission();
++    m_shutdownState.store(ShutdownState::StoppingWorkers);
++    m_submissionQueue.shutdownAndJoin();
++
++    // A frontend can still be holding a Presenter that was not retired by
++    // ordinary swapchain teardown. Submission workers are now stopped, so
++    // release these surfaces and frame workers without dropping the final
++    // Presenter reference on a queue worker.
++    auto presenters = DxvkProcessLifetimeRegistry::presentersForDevice(this);
++    for (const auto& presenter : presenters)
++      presenter->shutdownAndJoin();
+ 
+-    // Stop workers explicitly in order to prevent
+-    // access to structures that are being destroyed.
+     m_objects.pipelineManager().stopWorkerThreads();
++    DxvkProcessLifetimeRegistry::releaseDevice(this);
++
++    const bool deviceRootRetained = DxvkProcessLifetimeRegistry::retainsDevice(this);
++    const size_t presenterRootsRetained =
++      DxvkProcessLifetimeRegistry::retainedPresentersForDevice(this);
++    const bool queueWorkersJoined = m_submissionQueue.workersJoined();
++    try {
++      Logger::info(str::format("DeviceShutdown: normal roots-device=",
++        deviceRootRetained, " roots-presenter=", presenterRootsRetained,
++        " submit-finish-workers-joined=", queueWorkersJoined));
++    } catch (...) {
++    }
++    if (deviceRootRetained || presenterRootsRetained || !queueWorkersJoined)
++      std::terminate();
++
++    {
++      std::lock_guard<std::mutex> lock(m_shutdownMutex);
++      m_shutdownState.store(ShutdownState::Stopped);
++      m_shutdownInProgress = false;
++    }
++    m_shutdownCond.notify_all();
++  }
++
++
++  void DxvkDevice::cancelInternalPresentsForPresenter(Presenter* presenter) {
++    m_submissionQueue.cancelInternalPresentsForPresenter(presenter);
++  }
++
++
++  void DxvkDevice::waitForInternalPresents(Presenter* presenter) {
++    m_submissionQueue.waitForInternalPresents(presenter);
+   }
+ 
+ 
+@@ -633,15 +716,19 @@ namespace dxvk {
+     }
+ 
+     if (result != VK_SUCCESS) {
++      const bool shutdownRejection = m_submissionQueue.sourceAdmissionClosed();
++
+       // The caller may already have queued the command list that consumes
+       // this acquire semaphore. Retire that GPU work before invalidating the
+       // WSI lease so swapchain recreation cannot destroy an in-use semaphore.
+       waitForIdle();
+       presenter->signalFailedSourceFrame(frameId, result, tracker);
+       presenter->cancelSourceImageLease();
+-      m_submissionQueue.reportError(result);
++      if (!shutdownRejection)
++        m_submissionQueue.reportError(result);
+       try {
+-        Logger::err("DxvkDevice: failed to queue source present; draining before lease retirement");
++        Logger::err(str::format("DxvkDevice: failed to queue source present; ",
++          shutdownRejection ? "shutdown rejected source work" : "draining before lease retirement"));
+       } catch (...) {
+       }
+       return result;
+diff --git a/src/dxvk/dxvk_device.h b/src/dxvk/dxvk_device.h
+index b10741c..3cf2737 100644
+--- a/src/dxvk/dxvk_device.h
++++ b/src/dxvk/dxvk_device.h
+@@ -26,6 +26,9 @@
+ #include "dxvk_stats.h"
+ #include "dxvk_unbound.h"
+ 
++#include <condition_variable>
++#include <mutex>
++
+ namespace dxvk {
+   
+   class DxvkInstance;
+@@ -94,6 +97,18 @@ namespace dxvk {
+       const DxvkQueueCallback&        queueCallback);
+       
+     ~DxvkDevice();
++
++    void retainForProcessLifetime();
++
++    void beginShutdown();
++
++    void closeSourceAdmission();
++
++    void shutdownAndJoin();
++
++    void cancelInternalPresentsForPresenter(Presenter* presenter);
++
++    void waitForInternalPresents(Presenter* presenter);
+     
+     /**
+      * \brief Vulkan device functions
+@@ -763,6 +778,19 @@ namespace dxvk {
+     void waitForIdle();
+     
+   private:
++
++    enum class ShutdownState : uint8_t {
++      Running,
++      ClosingAdmission,
++      Draining,
++      StoppingWorkers,
++      Stopped,
++    };
++
++    std::atomic<ShutdownState> m_shutdownState = { ShutdownState::Running };
++    std::mutex                 m_shutdownMutex;
++    std::condition_variable    m_shutdownCond;
++    bool                       m_shutdownInProgress = false;
+     
+     DxvkOptions                 m_options;
+ 
+diff --git a/src/dxvk/dxvk_fence.cpp b/src/dxvk/dxvk_fence.cpp
+index 8485c40..a5130eb 100644
+--- a/src/dxvk/dxvk_fence.cpp
++++ b/src/dxvk/dxvk_fence.cpp
+@@ -63,6 +63,14 @@ namespace dxvk {
+ 
+ 
+   DxvkFence::~DxvkFence() {
++    if (this_thread::isInModuleDetachment()) {
++      // Do not coordinate with a wait worker or destroy Vulkan state during
++      // process detach. Process termination reclaims the fence and worker.
++      if (m_thread.joinable())
++        m_thread.detach();
++      return;
++    }
++
+     if (m_thread.joinable()) {
+       {
+         std::unique_lock<dxvk::mutex> lock(m_mutex);
+@@ -87,6 +95,7 @@ namespace dxvk {
+ 
+       if (!m_running) {
+         m_running = true;
++        this_thread::isInModuleDetachment();
+         m_thread = dxvk::thread([this] { run(); });
+       } else {
+         m_condVar.notify_one();
+diff --git a/src/dxvk/dxvk_presenter.cpp b/src/dxvk/dxvk_presenter.cpp
+index da40f03..b0f53c4 100644
+--- a/src/dxvk/dxvk_presenter.cpp
++++ b/src/dxvk/dxvk_presenter.cpp
+@@ -3,6 +3,7 @@
+ 
+ #include "dxvk_device.h"
+ #include "dxvk_presenter.h"
++#include "dxvk_process_lifetime.h"
+ 
+ #include "../util/util_sleep.h"
+ 
+@@ -55,9 +56,71 @@ namespace dxvk {
+ 
+   
+   Presenter::~Presenter() {
+-    destroySwapchain();
+-    destroySurface();
+-    destroyLatencySemaphore();
++    if (this_thread::isInModuleDetachment()) {
++      // A process-lifetime root normally prevents this destructor from
++      // running during detach. Keep the fallback non-blocking if a partially
++      // constructed or unregistered Presenter reaches it anyway.
++      if (m_frameThread.joinable())
++        m_frameThread.detach();
++      return;
++    }
++
++    shutdownAndJoin();
++  }
++
++
++  Rc<DxvkDevice> Presenter::device() const {
++    return m_device;
++  }
++
++
++  void Presenter::retainForProcessLifetime() {
++    DxvkProcessLifetimeRegistry::retainPresenter(Rc<Presenter>(this));
++  }
++
++
++  bool Presenter::mayStartInternalWork() {
++    std::lock_guard<std::mutex> lock(m_shutdownMutex);
++    return !m_shutdownRequested.load();
++  }
++
++
++  void Presenter::shutdownAndJoin() {
++    if (this_thread::isInModuleDetachment())
++      return;
++
++    {
++      std::unique_lock<std::mutex> lock(m_shutdownMutex);
++      if (m_shutdownComplete)
++        return;
++      if (m_shutdownInProgress) {
++        m_shutdownCond.wait(lock, [this] { return m_shutdownComplete; });
++        return;
++      }
++
++      m_shutdownInProgress = true;
++    }
++
++    // Serialize the admission boundary with source/internal surface claims.
++    // A claim that already owns m_surfaceMutex finishes before shutdown is
++    // published; every later claim observes shutdownRequested under that lock.
++    {
++      std::lock_guard lock(m_surfaceMutex);
++      m_shutdownRequested.store(true);
++    }
++    m_surfaceCond.notify_all();
++    DxvkProcessLifetimeRegistry::testNotify("presenter-shutdown");
++
++    if (m_frameThread.joinable()
++     && m_frameThread.get_id() == this_thread::get_id())
++      std::terminate();
++
++    m_device->cancelInternalPresentsForPresenter(this);
++    // Retire this presenter's accepted internal work before destroyResources
++    // marks its surface as unavailable. A request already submitted to Vulkan
++    // must still call vkQueuePresentKHR and reach normal GPU/WSI completion.
++    m_device->waitForInternalPresents(this);
++    destroyResources();
+ 
+     if (m_frameThread.joinable()) {
+       PresenterFrame shutdownFrame = { };
+@@ -65,6 +128,32 @@ namespace dxvk {
+       pushFrame(shutdownFrame);
+       m_frameThread.join();
+     }
++
++    if (m_frameThread.joinable())
++      std::terminate();
++
++    bool noOutstandingLease = false;
++    {
++      std::lock_guard lock(m_surfaceMutex);
++      noOutstandingLease = !m_presentPending && !m_activeImageLease;
++    }
++    if (!noOutstandingLease)
++      std::terminate();
++
++    destroyLatencySemaphore();
++    DxvkProcessLifetimeRegistry::releasePresenter(this);
++
++    try {
++      Logger::info("PresenterShutdown: active-lease=0 present-pending=0 frame-worker-joined=1");
++    } catch (...) {
++    }
++
++    {
++      std::lock_guard<std::mutex> lock(m_shutdownMutex);
++      m_shutdownComplete = true;
++      m_shutdownInProgress = false;
++    }
++    m_shutdownCond.notify_all();
+   }
+ 
+ 
+@@ -82,19 +171,31 @@ namespace dxvk {
+ 
+ 
+   VkResult Presenter::acquireNextImage(PresenterSync& sync, Rc<DxvkImage>& image) {
++    if (m_shutdownRequested.load())
++      return VK_ERROR_SURFACE_LOST_KHR;
++
+     m_sourceAcquireIntent.store(true);
+     std::unique_lock lock(m_surfaceMutex);
+ 
++    // Close the race with shutdown that begins after the fast-path check.
++    if (m_shutdownRequested.load()) {
++      m_sourceAcquireIntent.store(false);
++      m_surfaceCond.notify_all();
++      return VK_ERROR_SURFACE_LOST_KHR;
++    }
++
+     // Don't acquire more than one image at a time
+     VkResult status = VK_SUCCESS;
+ 
+     m_surfaceCond.wait(lock, [this, &status] {
+       status = m_device->getDeviceStatus();
+-      return !m_presentPending || status < 0 || m_destroyingResources;
++      return !m_presentPending || status < 0 || m_destroyingResources
++          || m_shutdownRequested.load();
+     });
+ 
+-    if (status < 0 || m_destroyingResources) {
++    if (status < 0 || m_destroyingResources || m_shutdownRequested.load()) {
+       m_sourceAcquireIntent.store(false);
++      m_surfaceCond.notify_all();
+       return status < 0 ? status : VK_ERROR_SURFACE_LOST_KHR;
+     }
+ 
+@@ -195,9 +296,9 @@ namespace dxvk {
+           Rc<DxvkImage>&  image,
+     const char**          dropReason) {
+     // The submission owner must never wait behind an application acquire.
+-    if (m_destroyingResources || m_sourceAcquireIntent.load() || m_sourceFramePending.load()) {
++    if (m_shutdownRequested.load() || m_sourceAcquireIntent.load() || m_sourceFramePending.load()) {
+       if (dropReason)
+-        *dropReason = m_destroyingResources ? "presenter-destroying" : "source-pending";
++        *dropReason = m_shutdownRequested.load() ? "presenter-shutdown" : "source-pending";
+       return VK_NOT_READY;
+     }
+ 
+@@ -209,9 +310,11 @@ namespace dxvk {
+       return VK_NOT_READY;
+     }
+ 
+-    if (m_destroyingResources || m_sourceAcquireIntent.load() || m_sourceFramePending.load()) {
++    if (m_shutdownRequested.load() || m_destroyingResources
++     || m_sourceAcquireIntent.load() || m_sourceFramePending.load()) {
+       if (dropReason)
+-        *dropReason = m_destroyingResources ? "presenter-destroying" : "source-pending";
++        *dropReason = m_shutdownRequested.load() ? "presenter-shutdown"
++          : m_destroyingResources ? "presenter-destroying" : "source-pending";
+       return VK_NOT_READY;
+     }
+ 
+diff --git a/src/dxvk/dxvk_presenter.h b/src/dxvk/dxvk_presenter.h
+index 8624da8..ad06eb6 100644
+--- a/src/dxvk/dxvk_presenter.h
++++ b/src/dxvk/dxvk_presenter.h
+@@ -1,9 +1,11 @@
+ #pragma once
+ 
+ #include <atomic>
++#include <condition_variable>
+ #include <cstdint>
+ #include <functional>
+ #include <map>
++#include <mutex>
+ #include <optional>
+ #include <queue>
+ #include <vector>
+@@ -198,6 +200,18 @@ namespace dxvk {
+     
+     ~Presenter();
+ 
++    Rc<DxvkDevice> device() const;
++
++    void retainForProcessLifetime();
++
++    void shutdownAndJoin();
++
++    bool isShutdownRequested() const {
++      return m_shutdownRequested.load();
++    }
++
++    bool mayStartInternalWork();
++
+     /**
+      * \brief Tests swap chain status
+      *
+@@ -481,6 +495,11 @@ namespace dxvk {
+     DxvkPresentOrigin           m_activeOrigin = DxvkPresentOrigin::ApplicationSource;
+     bool                        m_activeImageLease = false;
+     std::atomic<bool>           m_destroyingResources = { false };
++    std::atomic<bool>           m_shutdownRequested = { false };
++    std::mutex                  m_shutdownMutex;
++    std::condition_variable     m_shutdownCond;
++    bool                        m_shutdownInProgress = false;
++    bool                        m_shutdownComplete = false;
+     std::atomic<bool>           m_swapchainChanging = { false };
+     std::atomic<bool>           m_sourceAcquireIntent = { false };
+     std::atomic<bool>           m_sourceFramePending = { false };
+diff --git a/src/dxvk/dxvk_process_lifetime.cpp b/src/dxvk/dxvk_process_lifetime.cpp
+new file mode 100644
+index 0000000..7b36419
+--- /dev/null
++++ b/src/dxvk/dxvk_process_lifetime.cpp
+@@ -0,0 +1,237 @@
++#include <mutex>
++#include <string>
++#include <unordered_map>
++
++#include "../util/util_env.h"
++#include "dxvk_device.h"
++#include "dxvk_presenter.h"
++#include "dxvk_process_lifetime.h"
++
++#ifdef _WIN32
++#ifndef WIN32_LEAN_AND_MEAN
++#define WIN32_LEAN_AND_MEAN
++#endif
++#include <windows.h>
++#endif
++
++namespace dxvk {
++
++  namespace {
++
++    struct RetainedPresenter {
++      DxvkDevice* device = nullptr;
++      Rc<Presenter> presenter;
++    };
++
++    struct Registry {
++      std::mutex mutex;
++      std::unordered_map<DxvkDevice*, Rc<DxvkDevice>> devices;
++      std::unordered_map<Presenter*, RetainedPresenter> presenters;
++    };
++
++    Registry& registry() {
++      // Intentionally leaked. Its mutex and strong references must survive
++      // DLL_PROCESS_DETACH during process termination.
++      static Registry* instance = new Registry();
++      return *instance;
++    }
++
++    std::string testEventName(const char* prefix, const char* stage, const char* suffix) {
++      return std::string("Local\\FGMetal11C1R_") + prefix + "_" + stage + "_" + suffix;
++    }
++
++  }
++
++
++  void DxvkProcessLifetimeRegistry::retainDevice(const Rc<DxvkDevice>& device) {
++#ifdef _WIN32
++    if (!device)
++      return;
++
++    Registry& state = registry();
++    std::lock_guard<std::mutex> lock(state.mutex);
++    state.devices.emplace(device.ptr(), device);
++#else
++    (void) device;
++#endif
++  }
++
++
++  void DxvkProcessLifetimeRegistry::releaseDevice(DxvkDevice* device) {
++#ifdef _WIN32
++    Rc<DxvkDevice> retired;
++    Registry& state = registry();
++    {
++      std::lock_guard<std::mutex> lock(state.mutex);
++      auto entry = state.devices.find(device);
++      if (entry != state.devices.end()) {
++        retired = std::move(entry->second);
++        state.devices.erase(entry);
++      }
++    }
++#else
++    (void) device;
++#endif
++  }
++
++
++  void DxvkProcessLifetimeRegistry::retainPresenter(const Rc<Presenter>& presenter) {
++#ifdef _WIN32
++    if (!presenter)
++      return;
++
++    Registry& state = registry();
++    std::lock_guard<std::mutex> lock(state.mutex);
++    state.presenters.emplace(presenter.ptr(), RetainedPresenter {
++      presenter->device().ptr(), presenter,
++    });
++#else
++    (void) presenter;
++#endif
++  }
++
++
++  void DxvkProcessLifetimeRegistry::releasePresenter(Presenter* presenter) {
++#ifdef _WIN32
++    Rc<Presenter> retired;
++    Registry& state = registry();
++    {
++      std::lock_guard<std::mutex> lock(state.mutex);
++      auto entry = state.presenters.find(presenter);
++      if (entry != state.presenters.end()) {
++        retired = std::move(entry->second.presenter);
++        state.presenters.erase(entry);
++      }
++    }
++#else
++    (void) presenter;
++#endif
++  }
++
++
++  std::vector<Rc<Presenter>> DxvkProcessLifetimeRegistry::presentersForDevice(DxvkDevice* device) {
++    std::vector<Rc<Presenter>> result;
++#ifdef _WIN32
++    Registry& state = registry();
++    std::lock_guard<std::mutex> lock(state.mutex);
++    result.reserve(state.presenters.size());
++    for (const auto& entry : state.presenters) {
++      if (entry.second.device == device)
++        result.push_back(entry.second.presenter);
++    }
++#else
++    (void) device;
++#endif
++    return result;
++  }
++
++
++  bool DxvkProcessLifetimeRegistry::retainsDevice(DxvkDevice* device) {
++#ifdef _WIN32
++    Registry& state = registry();
++    std::lock_guard<std::mutex> lock(state.mutex);
++    return state.devices.find(device) != state.devices.end();
++#else
++    (void) device;
++    return false;
++#endif
++  }
++
++
++  size_t DxvkProcessLifetimeRegistry::retainedPresentersForDevice(DxvkDevice* device) {
++#ifdef _WIN32
++    Registry& state = registry();
++    std::lock_guard<std::mutex> lock(state.mutex);
++    size_t count = 0u;
++    for (const auto& entry : state.presenters)
++      count += entry.second.device == device;
++    return count;
++#else
++    (void) device;
++    return 0u;
++#endif
++  }
++
++
++  size_t DxvkProcessLifetimeRegistry::retainedDeviceCount() {
++#ifdef _WIN32
++    Registry& state = registry();
++    std::lock_guard<std::mutex> lock(state.mutex);
++    return state.devices.size();
++#else
++    return 0u;
++#endif
++  }
++
++
++  size_t DxvkProcessLifetimeRegistry::retainedPresenterCount() {
++#ifdef _WIN32
++    Registry& state = registry();
++    std::lock_guard<std::mutex> lock(state.mutex);
++    return state.presenters.size();
++#else
++    return 0u;
++#endif
++  }
++
++
++  bool DxvkProcessLifetimeRegistry::testModeEnabled() {
++#ifdef _WIN32
++    return !env::getEnvVar("DXVK_INTERNAL_WSI_TEST_PREFIX").empty();
++#else
++    return false;
++#endif
++  }
++
++
++  void DxvkProcessLifetimeRegistry::testGate(const char* stage) {
++#ifdef _WIN32
++    auto prefix = env::getEnvVar("DXVK_INTERNAL_WSI_TEST_PREFIX");
++    auto selectedStage = env::getEnvVar("DXVK_INTERNAL_WSI_TEST_STAGE");
++    if (prefix.empty() || selectedStage != stage)
++      return;
++
++    auto enteredName = testEventName(prefix.c_str(), stage, "entered");
++    auto releaseName = testEventName(prefix.c_str(), stage, "release");
++    HANDLE entered = ::CreateEventA(nullptr, TRUE, FALSE, enteredName.c_str());
++    HANDLE release = ::CreateEventA(nullptr, TRUE, FALSE, releaseName.c_str());
++    if (!entered || !release) {
++      if (entered)
++        ::CloseHandle(entered);
++      if (release)
++        ::CloseHandle(release);
++      return;
++    }
++
++    try {
++      Logger::info(str::format("InternalWSI-Test: entered stage=", stage));
++    } catch (...) {
++    }
++    ::SetEvent(entered);
++    ::WaitForSingleObject(release, 30000);
++    ::CloseHandle(release);
++    ::CloseHandle(entered);
++#else
++    (void) stage;
++#endif
++  }
++
++
++  void DxvkProcessLifetimeRegistry::testNotify(const char* stage) {
++#ifdef _WIN32
++    auto prefix = env::getEnvVar("DXVK_INTERNAL_WSI_TEST_PREFIX");
++    if (prefix.empty())
++      return;
++
++    auto enteredName = testEventName(prefix.c_str(), stage, "entered");
++    HANDLE entered = ::CreateEventA(nullptr, TRUE, FALSE, enteredName.c_str());
++    if (entered) {
++      ::SetEvent(entered);
++      ::CloseHandle(entered);
++    }
++#else
++    (void) stage;
++#endif
++  }
++
++}
+diff --git a/src/dxvk/dxvk_process_lifetime.h b/src/dxvk/dxvk_process_lifetime.h
+new file mode 100644
+index 0000000..106871d
+--- /dev/null
++++ b/src/dxvk/dxvk_process_lifetime.h
+@@ -0,0 +1,47 @@
++#pragma once
++
++#include <cstddef>
++#include <vector>
++
++#include "../util/rc/util_rc_ptr.h"
++
++namespace dxvk {
++
++  class DxvkDevice;
++  class Presenter;
++
++  /**
++   * \brief Roots worker-owning renderer objects until normal shutdown
++   *
++   * On Windows, DLL_PROCESS_DETACH during process termination is not a safe
++   * place to join renderer workers or destroy their owners. This registry is
++   * allocated lazily during normal execution and intentionally has no static
++   * destructor. Normal device and Presenter teardown must explicitly remove
++   * each root after its workers and queued references have been retired.
++   */
++  class DxvkProcessLifetimeRegistry {
++  public:
++
++    static void retainDevice(const Rc<DxvkDevice>& device);
++    static void releaseDevice(DxvkDevice* device);
++
++    static void retainPresenter(const Rc<Presenter>& presenter);
++    static void releasePresenter(Presenter* presenter);
++
++    static std::vector<Rc<Presenter>> presentersForDevice(DxvkDevice* device);
++
++    static bool retainsDevice(DxvkDevice* device);
++
++    static size_t retainedPresentersForDevice(DxvkDevice* device);
++
++    // Exposed for focused lifecycle diagnostics and regression tests.
++    static size_t retainedDeviceCount();
++    static size_t retainedPresenterCount();
++
++    static bool testModeEnabled();
++    static void testGate(const char* stage);
++    static void testNotify(const char* stage);
++
++  };
++
++}
+diff --git a/src/dxvk/dxvk_queue.cpp b/src/dxvk/dxvk_queue.cpp
+index 41a530a..a8f3c98 100644
+--- a/src/dxvk/dxvk_queue.cpp
++++ b/src/dxvk/dxvk_queue.cpp
+@@ -1,6 +1,7 @@
+ #include "dxvk_device.h"
+ #include "dxvk_queue.h"
+ #include "dxvk_context.h"
++#include "dxvk_process_lifetime.h"
+ 
+ #include <memory>
+ 
+@@ -40,9 +41,7 @@ namespace dxvk {
+   : m_device        (device),
+     m_checkpoints   (device->getCheckpointBuffer()),
+     m_callback      (callback),
+-    m_internalProofEnabled (env::getEnvVar("DXVK_INTERNAL_WSI_PROOF") == "1"),
+-    m_submitThread  ([this] () { submitCmdLists(); }),
+-    m_finishThread  ([this] () { finishCmdLists(); }) {
++    m_internalProofEnabled (env::getEnvVar("DXVK_INTERNAL_WSI_PROOF") == "1") {
+     auto vk = m_device->vkd();
+ 
+     VkSemaphoreTypeCreateInfo semaphoreType = { VK_STRUCTURE_TYPE_SEMAPHORE_TYPE_CREATE_INFO };
+@@ -54,37 +53,175 @@ namespace dxvk {
+     VkResult vrTransfer = vk->vkCreateSemaphore(vk->device(), &semaphoreInfo, nullptr, &m_semaphores.transfer);
+ 
+     if (vrGraphics || vrTransfer) {
++      if (m_semaphores.graphics)
++        vk->vkDestroySemaphore(vk->device(), m_semaphores.graphics, nullptr);
++      if (m_semaphores.transfer)
++        vk->vkDestroySemaphore(vk->device(), m_semaphores.transfer, nullptr);
++      m_semaphores = { };
+       throw DxvkError(str::format("Failed to create timeline semaphores: ",
+         vrGraphics > vrTransfer ? vrGraphics : vrTransfer));
+     }
+ 
+     if (m_internalProofEnabled)
+       Logger::warn("InternalWSI: experimental synthetic output enabled; app-facing accounting remains source-only");
++
++    try {
++      m_submitThread = dxvk::thread([this] () { submitCmdLists(); });
++      m_finishThread = dxvk::thread([this] () { finishCmdLists(); });
++    } catch (...) {
++      m_state.store(State::StoppingWorkers);
++      m_appendCond.notify_all();
++      if (m_submitThread.joinable())
++        m_submitThread.join();
++      if (m_semaphores.graphics)
++        vk->vkDestroySemaphore(vk->device(), m_semaphores.graphics, nullptr);
++      if (m_semaphores.transfer)
++        vk->vkDestroySemaphore(vk->device(), m_semaphores.transfer, nullptr);
++      m_semaphores = { };
++      m_semaphoresDestroyed = true;
++      m_state.store(State::Stopped);
++      throw;
++    }
+   }
+   
+   
+   DxvkSubmissionQueue::~DxvkSubmissionQueue() {
+-    auto vk = m_device->vkd();
++    if (this_thread::isInModuleDetachment()) {
++      // The process-lifetime Device root should keep this queue alive until
++      // the OS reclaims the process. This fallback is non-blocking and only
++      // runs after process termination has stopped the workers.
++      if (m_submitThread.joinable())
++        m_submitThread.detach();
++      if (m_finishThread.joinable())
++        m_finishThread.detach();
++      return;
++    }
+ 
+-    { std::unique_lock<dxvk::mutex> lock(m_mutex);
+-      m_stopped.store(true);
++    shutdownAndJoin();
++  }
++
++
++  void DxvkSubmissionQueue::closeInternalAdmission() {
++    std::queue<DxvkInternalPresentRequest> cancelled;
++    {
++      std::lock_guard<dxvk::mutex> lock(m_mutex);
++      if (m_state.load() == State::Running)
++        m_state.store(State::InternalAdmissionClosed);
++      cancelled.swap(m_internalQueue);
++    }
+ 
+-      while (!m_internalQueue.empty()) {
+-        const auto& request = m_internalQueue.front();
++    while (!cancelled.empty()) {
++      const auto opportunityId = cancelled.front().opportunityId;
++      cancelled.pop();
++      try {
+         Logger::info(str::format("InternalWSI: dropped opportunity=",
+-          request.opportunityId, " reason=shutdown"));
++          opportunityId, " reason=shutdown-before-claim"));
++      } catch (...) {
++      }
++    }
++
++    m_appendCond.notify_all();
++    m_submitCond.notify_all();
++    m_finishCond.notify_all();
++  }
++
++
++  void DxvkSubmissionQueue::closeSourceAdmission() {
++    closeInternalAdmission();
++    {
++      std::lock_guard<dxvk::mutex> lock(m_mutex);
++      if (m_state.load() < State::SourceAdmissionClosed)
++        m_state.store(State::SourceAdmissionClosed);
++    }
++
++    m_appendCond.notify_all();
++    m_submitCond.notify_all();
++    m_finishCond.notify_all();
++  }
++
++
++  void DxvkSubmissionQueue::cancelInternalPresentsForPresenter(Presenter* presenter) {
++    std::optional<DxvkInternalPresentRequest> cancelled;
++    {
++      std::lock_guard<dxvk::mutex> lock(m_mutex);
++      if (!m_internalQueue.empty()
++       && m_internalQueue.front().presenter.ptr() == presenter) {
++        cancelled.emplace(std::move(m_internalQueue.front()));
+         m_internalQueue.pop();
+       }
+     }
+ 
++    if (cancelled) {
++      try {
++        Logger::info(str::format("InternalWSI: dropped opportunity=",
++          cancelled->opportunityId, " reason=presenter-shutdown-before-claim"));
++      } catch (...) {
++      }
++    }
++
++    m_appendCond.notify_all();
++    m_submitCond.notify_all();
++  }
++
++
++  void DxvkSubmissionQueue::waitForInternalPresents(Presenter* presenter) {
++    std::unique_lock<dxvk::mutex> lock(m_mutex);
++    m_submitCond.wait(lock, [this, presenter] {
++      const bool queued = !m_internalQueue.empty()
++        && m_internalQueue.front().presenter.ptr() == presenter;
++      return !queued
++          && m_activeInternalPresenter != presenter
++          && m_activeInternalFinishPresenter != presenter
++          && !m_finishQueue.containsInternalPresenter(presenter);
++    });
++  }
++
++
++  void DxvkSubmissionQueue::shutdownAndJoin() {
++    if (this_thread::isInModuleDetachment())
++      return;
++
++    if (isWorkerThread())
++      std::terminate();
++
++    if (m_state.load() == State::Stopped)
++      return;
++
++    closeSourceAdmission();
++    m_state.store(State::Draining);
++    waitForIdle();
++
++    auto vk = m_device->vkd();
++    lockDeviceQueue();
++    VkResult idleStatus = vk->vkDeviceWaitIdle(vk->device());
++    unlockDeviceQueue();
++    if (idleStatus != VK_SUCCESS)
++      Logger::err(str::format("DxvkSubmissionQueue: vkDeviceWaitIdle during shutdown failed: ", idleStatus));
++
++    {
++      std::lock_guard<dxvk::mutex> lock(m_mutex);
++      m_state.store(State::StoppingWorkers);
++    }
+     m_appendCond.notify_all();
+     m_submitCond.notify_all();
++    m_finishCond.notify_all();
+ 
+-    m_submitThread.join();
+-    m_finishThread.join();
++    if (m_submitThread.joinable())
++      m_submitThread.join();
++    if (m_finishThread.joinable())
++      m_finishThread.join();
+ 
+-    vk->vkDestroySemaphore(vk->device(), m_semaphores.graphics, nullptr);
+-    vk->vkDestroySemaphore(vk->device(), m_semaphores.transfer, nullptr);
++    if (m_submitThread.joinable() || m_finishThread.joinable())
++      std::terminate();
++
++    if (!m_semaphoresDestroyed) {
++      vk->vkDestroySemaphore(vk->device(), m_semaphores.graphics, nullptr);
++      vk->vkDestroySemaphore(vk->device(), m_semaphores.transfer, nullptr);
++      m_semaphores = { };
++      m_semaphoresDestroyed = true;
++    }
++
++    m_state.store(State::Stopped);
+   }
+   
+   
+@@ -95,9 +232,16 @@ namespace dxvk {
+     std::unique_lock<dxvk::mutex> lock(m_mutex);
+ 
+     m_finishCond.wait(lock, [this] {
+-      return applicationQueueLoad() <= MaxNumQueuedCommandBuffers;
++      return applicationQueueLoad() <= MaxNumQueuedCommandBuffers
++          || isSourceAdmissionClosed();
+     });
+ 
++    if (isSourceAdmissionClosed()) {
++      if (status)
++        status->result = VK_ERROR_OUT_OF_DATE_KHR;
++      return;
++    }
++
+     DxvkSubmitEntry entry = { };
+     entry.status = status;
+     entry.submit = std::move(submitInfo);
+@@ -123,14 +267,27 @@ namespace dxvk {
+       return VK_ERROR_VALIDATION_FAILED_EXT;
+     }
+ 
++    if (isSourceAdmissionClosed()) {
++      if (status)
++        status->result = VK_ERROR_SURFACE_LOST_KHR;
++      return VK_ERROR_SURFACE_LOST_KHR;
++    }
++
+     // A present is commonly paired with the command-list entry immediately
+     // before it. Permit that final paired entry while keeping a bound on
+     // source-only backlog. Internal completion records are excluded by
+     // applicationQueueLoad(), so optional output cannot consume this budget.
+     m_finishCond.wait(lock, [this] {
+-      return applicationQueueLoad() <= MaxNumQueuedCommandBuffers + 1u;
++      return applicationQueueLoad() <= MaxNumQueuedCommandBuffers + 1u
++          || isSourceAdmissionClosed();
+     });
+ 
++    if (isSourceAdmissionClosed()) {
++      if (status)
++        status->result = VK_ERROR_SURFACE_LOST_KHR;
++      return VK_ERROR_SURFACE_LOST_KHR;
++    }
++
+     DxvkSubmitEntry entry = { };
+     entry.status  = status;
+     entry.present = std::move(presentInfo);
+@@ -202,7 +359,7 @@ namespace dxvk {
+     uint64_t trackedSubmitId = 0u;
+     uint64_t trackedPresentId = 0u;
+ 
+-    while (!m_stopped.load()) {
++    while (true) {
+       // Keep frontend idle waits aware of a submit entry after it has left
+       // the queue but still owns local Presenter references. Locals declared
+       // after this guard are destroyed before the active count is released.
+@@ -228,6 +385,8 @@ namespace dxvk {
+       DxvkSubmitEntry entry;
+       DxvkInternalPresentRequest internalRequest;
+       bool processInternal = false;
++      bool internalExpired = false;
++      bool internalArmed = false;
+       Rc<Presenter> failedSourcePresenter;
+       std::optional<AppFrameId> failedSourceFrame;
+       Rc<Presenter> lostSourcePresenter;
+@@ -235,7 +394,7 @@ namespace dxvk {
+ 
+       { std::unique_lock<dxvk::mutex> lock(m_mutex);
+ 
+-        while (!m_stopped.load()) {
++        while (true) {
+           if (!m_submitQueue.empty()) {
+             entry = std::move(m_submitQueue.front());
+             m_submitActive += 1u;
+@@ -245,19 +404,21 @@ namespace dxvk {
+ 
+           if (!m_internalQueue.empty()) {
+             auto now = dxvk::high_resolution_clock::now();
+-            auto next = m_internalQueue.front();
++            const auto& next = m_internalQueue.front();
+ 
+             if (now >= next.deadline) {
+-              Logger::info(str::format("InternalWSI: dropped request internal=",
+-                next.opportunityId, " reason=deadline-expired"));
++              internalRequest = std::move(m_internalQueue.front());
+               m_internalQueue.pop();
++              internalExpired = true;
++              Logger::info(str::format("InternalWSI: dropped request internal=",
++                internalRequest.opportunityId, " reason=deadline-expired"));
+               m_submitCond.notify_all();
+-              continue;
++              break;
+             }
+ 
+             if (now < next.target) {
+               m_appendCond.wait_until(lock, next.target, [this] {
+-                return m_stopped.load() || !m_submitQueue.empty();
++                return stopRequested() || !m_submitQueue.empty();
+               });
+               continue;
+             }
+@@ -265,20 +426,28 @@ namespace dxvk {
+             internalRequest = std::move(m_internalQueue.front());
+             m_internalQueue.pop();
+             m_internalActive += 1u;
++            m_activeInternalPresenter = internalRequest.presenter.ptr();
+             processInternal = true;
+             break;
+           }
+ 
++          if (stopRequested())
++            return;
++
+           m_appendCond.wait(lock, [this] {
+-            return m_stopped.load() || !m_submitQueue.empty() || !m_internalQueue.empty();
++            return stopRequested() || !m_submitQueue.empty() || !m_internalQueue.empty();
+           });
+         }
+ 
+-        if (m_stopped.load())
+-          return;
++      }
++
++      if (internalExpired) {
++        internalRequest.presenter = nullptr;
++        continue;
+       }
+ 
+       if (processInternal) {
++        DxvkProcessLifetimeRegistry::testGate("claimed");
+         processInternalPresent(std::move(internalRequest));
+         m_device->m_objects.memoryManager().performTimedTasks();
+         continue;
+@@ -420,7 +589,9 @@ namespace dxvk {
+           // current entry is still part of the worker's own queue here.
+         }
+ 
+-        if (m_internalProofEnabled && eligibleSource) {
++        if (m_internalProofEnabled && eligibleSource
++         && m_state.load() == State::Running
++         && !sourcePresenter->isShutdownRequested()) {
+           auto now = dxvk::high_resolution_clock::now();
+           auto interval = std::chrono::duration_cast<dxvk::high_resolution_clock::duration>(
+             std::chrono::milliseconds(33));
+@@ -444,8 +615,13 @@ namespace dxvk {
+             request.generation = request.presenter->getSwapchainGeneration();
+             request.target = now + interval / 2;
+             request.deadline = now + interval - std::chrono::milliseconds(2);
++            if (DxvkProcessLifetimeRegistry::testModeEnabled()) {
++              request.target = now - std::chrono::milliseconds(1);
++              request.deadline = now + std::chrono::seconds(10);
++            }
+             try {
+               m_internalQueue.push(std::move(request));
++              internalArmed = true;
+               m_appendCond.notify_all();
+             } catch (const std::bad_alloc&) {
+               try {
+@@ -462,6 +638,9 @@ namespace dxvk {
+         m_finishCond.notify_all();
+       }
+ 
++      if (internalArmed)
++        DxvkProcessLifetimeRegistry::testGate("armed");
++
+       // Presenter state has its own lock. Release the queue lock first so a
+       // source thread recreating the swapchain cannot form a lock cycle here.
+       if (failedSourcePresenter) {
+@@ -486,12 +665,15 @@ namespace dxvk {
+ 
+   void DxvkSubmissionQueue::processInternalPresent(
+     DxvkInternalPresentRequest request) {
+-    auto releaseActive = [this, &request](int*) {
++    Presenter* activePresenter = request.presenter.ptr();
++    auto releaseActive = [this, &request, activePresenter](int*) {
+       // Release the request's strong Presenter reference before making the
+       // worker appear idle. Frontend teardown waits on m_internalActive while
+       // it still owns the Presenter, so the final release stays off-worker.
+       request.presenter = nullptr;
+       std::lock_guard<dxvk::mutex> lock(m_mutex);
++      if (m_activeInternalPresenter == activePresenter)
++        m_activeInternalPresenter = nullptr;
+       if (m_internalActive)
+         m_internalActive -= 1u;
+       m_submitCond.notify_all();
+@@ -518,6 +700,11 @@ namespace dxvk {
+       return;
+     }
+ 
++    if (!internalWorkAdmissionOpen() || !request.presenter->mayStartInternalWork()) {
++      drop("shutdown-before-acquire");
++      return;
++    }
++
+     { std::lock_guard<dxvk::mutex> lock(m_mutex);
+       if (!m_submitQueue.empty()) {
+         drop("source-queue-nonempty");
+@@ -541,8 +728,18 @@ namespace dxvk {
+       return;
+     }
+ 
++    DxvkProcessLifetimeRegistry::testGate("image-acquired");
++
+     request.internalPresentId = InternalPresentId { m_nextInternalPresentId++ };
+ 
++    if (!internalWorkAdmissionOpen() || !request.presenter->mayStartInternalWork()) {
++      request.presenter->releaseInternalImageLeaseBeforeSubmit();
++      request.presenter->signalInternalPresentComplete(
++        WsiPresentId { }, request.internalPresentId, VK_ERROR_OUT_OF_DATE_KHR);
++      drop("shutdown-before-recording");
++      return;
++    }
++
+     Rc<DxvkCommandList> commandList;
+     try {
+       auto context = m_device->createContext();
+@@ -551,6 +748,7 @@ namespace dxvk {
+       commandList = context->beginExternalRendering();
+       context->synchronizeWsi(sync);
+       commandList->track(image, DxvkAccess::Write);
++      DxvkProcessLifetimeRegistry::testGate("command-recording");
+ 
+       VkImageMemoryBarrier2 toTransfer = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2 };
+       toTransfer.srcStageMask = VK_PIPELINE_STAGE_2_NONE;
+@@ -642,6 +840,7 @@ namespace dxvk {
+     VkResult presentStatus = VK_NOT_READY;
+     bool leaseRejectedBeforeSubmit = false;
+     bool deadlineExpiredBeforeSubmit = false;
++    bool shutdownBeforeSubmit = false;
+     bool submitAttempted = false;
+     {
+       std::lock_guard<dxvk::mutex> lock(m_mutexQueue);
+@@ -652,6 +851,8 @@ namespace dxvk {
+       // lock and before consuming the cached image's acquire semaphore.
+       if (dxvk::high_resolution_clock::now() >= request.deadline) {
+         deadlineExpiredBeforeSubmit = true;
++      } else if (!internalWorkAdmissionOpen() || !request.presenter->mayStartInternalWork()) {
++        shutdownBeforeSubmit = true;
+       } else if (!request.presenter->validateInternalImageLease(
+             request.internalPresentId, request.generation)) {
+         leaseRejectedBeforeSubmit = true;
+@@ -667,6 +868,18 @@ namespace dxvk {
+         finishEntry.timelines = m_timelines;
+ 
+         if (status == VK_SUCCESS) {
++          DxvkProcessLifetimeRegistry::testGate("gpu-pending");
++          // Submission has committed ownership of this WSI lease. Shutdown
++          // is observed here for traceability, but the present call must run
++          // so GPU and Presenter retirement remain paired.
++          if (!internalWorkAdmissionOpen() || !request.presenter->mayStartInternalWork()) {
++            try {
++              Logger::info(str::format("InternalWSI: retiring committed lease after shutdown internal=",
++                request.internalPresentId.value));
++            } catch (...) {
++            }
++          }
++
+           try {
+             presentStatus = request.presenter->presentImage(identity, nullptr, 0u, nullptr);
+           } catch (const std::bad_alloc&) {
+@@ -675,6 +888,8 @@ namespace dxvk {
+             presentStatus = VK_ERROR_UNKNOWN;
+           }
+ 
++          DxvkProcessLifetimeRegistry::testGate("present-pending");
++
+           if (identity.wsiPresentId.value == 0u && presentStatus != VK_SUCCESS)
+             finishEntry.retireInternalLeaseOnCompletion = true;
+           else if (presentStatus == VK_ERROR_DEVICE_LOST)
+@@ -707,6 +922,14 @@ namespace dxvk {
+       return;
+     }
+ 
++    if (shutdownBeforeSubmit) {
++      request.presenter->releaseInternalImageLeaseBeforeSubmit();
++      request.presenter->signalInternalPresentComplete(
++        WsiPresentId { }, request.internalPresentId, VK_ERROR_OUT_OF_DATE_KHR);
++      drop("shutdown-before-submit");
++      return;
++    }
++
+     if (status != VK_SUCCESS) {
+       if (status == VK_ERROR_DEVICE_LOST)
+         m_lastError = status;
+@@ -733,6 +956,7 @@ namespace dxvk {
+       }
+       if (queued)
+         m_internalFinishEntries += 1u;
++      DxvkProcessLifetimeRegistry::testGate("submission-queued");
+       m_submitCond.notify_all();
+     }
+ 
+@@ -749,17 +973,20 @@ namespace dxvk {
+ 
+     auto vk = m_device->vkd();
+ 
+-    while (!m_stopped.load()) {
++    while (true) {
+       // Keep frontend idle waits blocked until the local completion entry
+       // and all of its Presenter/latency/resource references are destroyed.
+       bool finishEntryActive = false;
++      Presenter* internalFinishPresenter = nullptr;
+       int finishActivityGuardToken = 0;
+-      auto releaseFinishActivity = [this, &finishEntryActive](int*) noexcept {
++      auto releaseFinishActivity = [this, &finishEntryActive, &internalFinishPresenter](int*) noexcept {
+         if (!finishEntryActive)
+           return;
+ 
+         try {
+           std::lock_guard<dxvk::mutex> lock(m_mutex);
++          if (m_activeInternalFinishPresenter == internalFinishPresenter)
++            m_activeInternalFinishPresenter = nullptr;
+           if (m_finishActive)
+             m_finishActive -= 1u;
+           finishEntryActive = false;
+@@ -777,14 +1004,14 @@ namespace dxvk {
+         auto t0 = dxvk::high_resolution_clock::now();
+ 
+         m_submitCond.wait(lock, [this] {
+-          return m_stopped.load() || !m_finishQueue.empty();
++          return stopRequested() || !m_finishQueue.empty();
+         });
+ 
+         auto t1 = dxvk::high_resolution_clock::now();
+         m_gpuIdle += std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count();
+       }
+ 
+-      if (m_stopped.load())
++      if (m_finishQueue.empty() && stopRequested())
+         return;
+       
+       DxvkSubmitEntry entry = std::move(m_finishQueue.front());
+@@ -792,7 +1019,14 @@ namespace dxvk {
+       finishEntryActive = true;
+       const bool internalEntry = entry.present.presenter != nullptr
+         && entry.present.identity.origin == DxvkPresentOrigin::InternalOutput;
++      if (internalEntry) {
++        internalFinishPresenter = entry.present.presenter.ptr();
++        m_activeInternalFinishPresenter = internalFinishPresenter;
++      }
+       lock.unlock();
++
++      if (internalEntry)
++        DxvkProcessLifetimeRegistry::testGate("retirement-pending");
+       
+       if (entry.submit.cmdList != nullptr) {
+         VkResult status = m_lastError.load();
+diff --git a/src/dxvk/dxvk_queue.h b/src/dxvk/dxvk_queue.h
+index 7490260..73a258c 100644
+--- a/src/dxvk/dxvk_queue.h
++++ b/src/dxvk/dxvk_queue.h
+@@ -91,7 +91,7 @@ namespace dxvk {
+ 
+ 
+   /**
+-   * rief Preallocated queue for entries whose completion cannot be lost
++   * \brief Preallocated queue for entries whose completion cannot be lost
+    *
+    * Source and internal WSI entries reach this queue only after Vulkan work
+    * has been submitted. A dynamic allocation failure at that point would
+@@ -135,6 +135,16 @@ namespace dxvk {
+       return m_size == Capacity;
+     }
+ 
++    bool containsInternalPresenter(Presenter* presenter) const {
++      for (size_t i = 0u; i < m_size; i++) {
++        const T& entry = m_entries[(m_head + i) % Capacity];
++        if (entry.present.presenter.ptr() == presenter
++         && entry.present.identity.origin == DxvkPresentOrigin::InternalOutput)
++          return true;
++      }
++      return false;
++    }
++
+   private:
+     std::array<T, Capacity> m_entries = { };
+     size_t m_head = 0u;
+@@ -156,6 +166,20 @@ namespace dxvk {
+ 
+     ~DxvkSubmissionQueue();
+ 
++    void closeInternalAdmission();
++
++    void closeSourceAdmission();
++
++    void cancelInternalPresentsForPresenter(Presenter* presenter);
++
++    void waitForInternalPresents(Presenter* presenter);
++
++    void shutdownAndJoin();
++
++    bool sourceAdmissionClosed() const {
++      return isSourceAdmissionClosed();
++    }
++
+     /**
+      * \brief Retrieves estimated GPU idle time
+      *
+@@ -271,6 +295,10 @@ namespace dxvk {
+           || m_finishThread.get_id() == threadId;
+     }
+ 
++    bool workersJoined() const {
++      return !m_submitThread.joinable() && !m_finishThread.joinable();
++    }
++
+     /**
+      * \brief Locks device queue
+      *
+@@ -300,7 +328,17 @@ namespace dxvk {
+ 
+     std::atomic<VkResult>       m_lastError = { VK_SUCCESS };
+     
+-    std::atomic<bool>           m_stopped = { false };
++    enum class State : uint8_t {
++      Running,
++      InternalAdmissionClosed,
++      SourceAdmissionClosed,
++      Draining,
++      StoppingWorkers,
++      Stopped,
++    };
++
++    std::atomic<State>          m_state = { State::Running };
++    bool                        m_semaphoresDestroyed = false;
+     std::atomic<uint64_t>       m_gpuIdle = { 0ull };
+     bool                        m_internalProofEnabled = false;
+ 
+@@ -321,11 +359,13 @@ namespace dxvk {
+     size_t                      m_internalFinishEntries = 0u;
+     size_t                      m_submitActive = 0u;
+     size_t                      m_finishActive = 0u;
++    Presenter*                  m_activeInternalFinishPresenter = nullptr;
+ 
+     uint64_t                    m_nextInternalPresentId = 1u;
+     uint64_t                    m_nextInternalOpportunityId = 1u;
+     dxvk::high_resolution_clock::time_point m_lastSourcePresentTime;
+     uint32_t                    m_internalActive = 0u;
++    Presenter*                  m_activeInternalPresenter = nullptr;
+ 
+     dxvk::thread                m_submitThread;
+     dxvk::thread                m_finishThread;
+@@ -334,6 +374,23 @@ namespace dxvk {
+ 
+     void finishCmdLists();
+ 
++    bool isInternalAdmissionClosed() const {
++      return m_state.load() >= State::InternalAdmissionClosed;
++    }
++
++    bool isSourceAdmissionClosed() const {
++      return m_state.load() >= State::SourceAdmissionClosed;
++    }
++
++    bool stopRequested() const {
++      return m_state.load() >= State::StoppingWorkers;
++    }
++
++    bool internalWorkAdmissionOpen() {
++      std::lock_guard<dxvk::mutex> lock(m_mutex);
++      return m_state.load() == State::Running;
++    }
++
+     void processInternalPresent(
+       DxvkInternalPresentRequest request);
+ 
+diff --git a/src/dxvk/dxvk_shader_cache.cpp b/src/dxvk/dxvk_shader_cache.cpp
+index 0bec839..2e15f83 100644
+--- a/src/dxvk/dxvk_shader_cache.cpp
++++ b/src/dxvk/dxvk_shader_cache.cpp
+@@ -16,6 +16,14 @@ namespace dxvk {
+ 
+ 
+   DxvkShaderCache::~DxvkShaderCache() {
++    if (this_thread::isInModuleDetachment()) {
++      // The worker was stopped with the rest of the process. Avoid taking
++      // locks or joining from DLL_PROCESS_DETACH; the OS reclaims this state.
++      if (m_writer.joinable())
++        m_writer.detach();
++      return;
++    }
++
+     if (m_writer.joinable()) {
+       { std::unique_lock lock(m_writeMutex);
+         m_writeQueue.push(nullptr);
+@@ -82,8 +90,10 @@ namespace dxvk {
+       m_writeQueue.push(std::move(shader));
+       m_writeCond.notify_one();
+ 
+-      if (!m_writer.joinable())
++      if (!m_writer.joinable()) {
++        this_thread::isInModuleDetachment();
+         m_writer = dxvk::thread([this] { runWriter(); });
++      }
+     }
+   }
+ 
+diff --git a/src/dxvk/meson.build b/src/dxvk/meson.build
+index 6b12f95..bb612a7 100644
+--- a/src/dxvk/meson.build
++++ b/src/dxvk/meson.build
+@@ -65,6 +65,7 @@ dxvk_src = [
+   'dxvk_options.cpp',
+   'dxvk_pipelayout.cpp',
+   'dxvk_pipemanager.cpp',
++  'dxvk_process_lifetime.cpp',
+   'dxvk_platform_exts.cpp',
+   'dxvk_presenter.cpp',
+   'dxvk_queue.cpp',
+diff --git a/src/util/thread.cpp b/src/util/thread.cpp
+index 7e85b9f..3f3393a 100644
+--- a/src/util/thread.cpp
++++ b/src/util/thread.cpp
+@@ -85,7 +85,7 @@ namespace dxvk::this_thread {
+     static auto RtlDllShutdownInProgress = reinterpret_cast<PFN_RtlDllShutdownInProgress>(
+       ::GetProcAddress(::GetModuleHandleW(L"ntdll.dll"), "RtlDllShutdownInProgress"));
+ 
+-    return RtlDllShutdownInProgress();
++    return RtlDllShutdownInProgress && RtlDllShutdownInProgress();
+   }
+ 
+ }

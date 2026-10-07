@@ -1,0 +1,86 @@
+{
+  "architecture_basis": "STEP 11D.2 sample identifies the Wine PID as X86-64 translated and shows winevulkan.so -> libMoltenVK.1.dylib vkQueueSubmit2 -> MVKPresentableSwapchainImage::getCAMetalDrawable -> WineMetalLayer nextDrawable -> CAMetalLayer nextDrawable.",
+  "base_git_commit": "db66022459ffb663aa2b50f6b018bc2e124f5edf",
+  "base_git_tree": "efebd918bbe772eead074100c0a18789ad39606d",
+  "base_source_file_count": 7631,
+  "base_source_tree_sha256": "2a51f319d33f6e554a2d5e073ac86a1968f35a5746d298d46f6614b6dcd3f3f5",
+  "changed_files": [
+    {
+      "path": "MoltenVK/MoltenVK.xcodeproj/project.pbxproj",
+      "prepared_sha256": "84b88f60a39af6f3af848337d7b33da4b70de72e8aa49848321587b332f67dfa",
+      "pristine_sha256": "4187ee0ed93828a576fa0b8f5550f11f64a1a9a276db3fcd492eb8f94b276bc3"
+    },
+    {
+      "path": "MoltenVK/MoltenVK/GPUObjects/MVKImage.h",
+      "prepared_sha256": "28a7b86af23466ef25ed32a4015a7336516eaa790e7c9c1a70bc24ca6a4c9ca7",
+      "pristine_sha256": "24e4fdaf440642c0fe4d9d04d436c89f603411349cf84288dd54878a34cb5c4b"
+    },
+    {
+      "path": "MoltenVK/MoltenVK/GPUObjects/MVKImage.mm",
+      "prepared_sha256": "c98c37f31538ace23e214726a4c5c281b46ec4a19f8ab0c267e307012e713272",
+      "pristine_sha256": "55639a1dd7c55a58f26c3ed4cab6f461dd12f8ef18fee2954712361f7c428adf"
+    },
+    {
+      "path": "MoltenVK/MoltenVK/GPUObjects/MVKNativeTrace.h",
+      "prepared_sha256": "a42bb7eea1aa6e485dcc77ae7b1cbe5a9bff89951cf2ad254001f7dd774baeb3",
+      "pristine_sha256": "ABSENT"
+    },
+    {
+      "path": "MoltenVK/MoltenVK/GPUObjects/MVKNativeTraceRing.hpp",
+      "prepared_sha256": "fd51bd23c088f109f046d3b5dff2c6d7499781fb986e992111b16070f52825d8",
+      "pristine_sha256": "ABSENT"
+    },
+    {
+      "path": "MoltenVK/MoltenVK/GPUObjects/MVKNativeTraceRuntime.inc",
+      "prepared_sha256": "8db51a96f8fd297c5c40f14e89a42f5da4921d9051a63f50db1afadc2dd43aed",
+      "pristine_sha256": "ABSENT"
+    },
+    {
+      "path": "MoltenVK/MoltenVK/GPUObjects/MVKSwapchain.h",
+      "prepared_sha256": "216009b4acab6bdb1ab309640781211057f9723bd758e7d8d1c42747c157d9e6",
+      "pristine_sha256": "d70ef4295685e93ce4596e202d7b900282f9a1ffce4eb47572dd4ed2db16f1b5"
+    },
+    {
+      "path": "MoltenVK/MoltenVK/GPUObjects/MVKSwapchain.mm",
+      "prepared_sha256": "42d6d2a192fedc25d2d6c4562b13b999aa9c2854cfeeb5dbfb733b64b26add9d",
+      "pristine_sha256": "3615c9417827b1777e5dd0dc7391950065af657155887793f98b31358a770582"
+    },
+    {
+      "path": "MoltenVK/MoltenVK/Vulkan/vulkan.mm",
+      "prepared_sha256": "7d2039ce264a48dfef34b2d369be542cba458b6b96af232f137a7e6587cde336",
+      "pristine_sha256": "f7e2be05f062c1944cf89253de826c6ef5928d4ba3ca856cab60ceae66bd8294"
+    },
+    {
+      "path": "NativeControl/build_native_control.sh",
+      "prepared_sha256": "1caab9693c8e4008bbb6f1886a7e444c07fad1444b9900476430ab8c93831c89",
+      "pristine_sha256": "ABSENT"
+    },
+    {
+      "path": "NativeControl/native_control.mm",
+      "prepared_sha256": "f4e8e87cc2653360021b5b802ced745748d081d9b08065bb2deaa2592a15d501",
+      "pristine_sha256": "ABSENT"
+    },
+    {
+      "path": "NativeControl/native_trace_api.h",
+      "prepared_sha256": "00804a69f85ecab9370f708546bff04595999eea013db9f41b8e45ec6c183c87",
+      "pristine_sha256": "ABSENT"
+    }
+  ],
+  "external_revisions": {
+    "SPIRV-Cross": "6c09849fe88c48eaed08413aa022aaa136a3a057",
+    "SPIRV-Tools": "0d6fd73ca73830ccab5fa1f00ed5ed40124e2c55",
+    "Volk": "776893306c5d3b22b6185b5d4a258b81d94572bf",
+    "Vulkan-Headers": "e3b1eec08173d6b825cd3ac88c885a63b621504a",
+    "Vulkan-Tools": "8c66b352925cb771f793a4d3220b1321ae0febf1",
+    "cereal": "a56bad8bbb770ee266e930c95d37fff2a5be7fea"
+  },
+  "patch_sha256": "64645b52ecbaf4be617533b01ea794b4f7ecb13c1a54bcd57b3c0701b1264f47",
+  "patch_size_bytes": 156654,
+  "prepared_source_sha256": null,
+  "primary_architecture": "x86_64",
+  "project_file_sha256": "84b88f60a39af6f3af848337d7b33da4b70de72e8aa49848321587b332f67dfa",
+  "project_relative_path": "MoltenVK/MoltenVK.xcodeproj",
+  "status": "PATCH_VERIFIED_NOT_YET_MATERIALIZED_OR_BUILT",
+  "vulkan_headers_file_count": 89,
+  "vulkan_headers_tree_sha256": "e1af281c6f8eded7271a48474fbba1199ef6a77c24aa01911a60915d12dafbb0"
+}

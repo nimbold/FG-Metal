@@ -1,0 +1,3055 @@
+{
+  "binary_path_hashes_from_storage_inventory": [
+    {
+      "allocated_size_bytes": 71094272,
+      "hard_link_count": 1,
+      "logical_size_bytes": 71093616,
+      "mtime_epoch": 1791115316.4311364,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/icu.dll",
+      "sha256": "03fb25afacf44c7143923f4f771a2ade314533eb6a39fa7702a5b72214d13923"
+    },
+    {
+      "allocated_size_bytes": 59985920,
+      "hard_link_count": 1,
+      "logical_size_bytes": 59984860,
+      "mtime_epoch": 1791115689.6167767,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/icu.dll",
+      "sha256": "7a951a8730c59de265df324457cf9e4f0db4b1ade8e8f36f391739dfb29e8efb"
+    },
+    {
+      "allocated_size_bytes": 31956992,
+      "hard_link_count": 1,
+      "logical_size_bytes": 31956519,
+      "mtime_epoch": 1791115317.181693,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/wined3d.dll",
+      "sha256": "4a3eccaa8a300ec6ce9ca318128a733445bc79c7bdbd08839af650a4d735dc1b"
+    },
+    {
+      "allocated_size_bytes": 30867456,
+      "hard_link_count": 1,
+      "logical_size_bytes": 30867129,
+      "mtime_epoch": 1791115316.6621685,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/mshtml.dll",
+      "sha256": "8bb28d9c08ca1d914cefd9b996c8cbfb961b904a9131d9614ed393792c1421bc"
+    },
+    {
+      "allocated_size_bytes": 27443200,
+      "hard_link_count": 1,
+      "logical_size_bytes": 27442324,
+      "mtime_epoch": 1791115690.3178415,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/wined3d.dll",
+      "sha256": "322cbffbcea15cc7b4ed5ea67563ecff2271d412cd0802f1746838104d6e38e0"
+    },
+    {
+      "allocated_size_bytes": 25935872,
+      "hard_link_count": 1,
+      "logical_size_bytes": 25931827,
+      "mtime_epoch": 1791115689.8465514,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/mshtml.dll",
+      "sha256": "c7763c80bf7cc778aa746614993ff6affc7e740484c8c28cf390de651680c7ce"
+    },
+    {
+      "allocated_size_bytes": 15953920,
+      "hard_link_count": 1,
+      "logical_size_bytes": 15953383,
+      "mtime_epoch": 1791115315.8598444,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/winsxs/amd64_microsoft-windows-msxml30_31bf3856ad364e35_6.0.6000.16386_none_deadbeef/msxml3.dll",
+      "sha256": "00f2fa96c26dd95c3251fd0c09e33ac37f128dc46f51c7fba7a3c8a531624423"
+    },
+    {
+      "allocated_size_bytes": 15953920,
+      "hard_link_count": 1,
+      "logical_size_bytes": 15953383,
+      "mtime_epoch": 1791115315.8378372,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/msxml3.dll",
+      "sha256": "00f2fa96c26dd95c3251fd0c09e33ac37f128dc46f51c7fba7a3c8a531624423"
+    },
+    {
+      "allocated_size_bytes": 15880192,
+      "hard_link_count": 1,
+      "logical_size_bytes": 15878088,
+      "mtime_epoch": 1791115316.9778407,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/shell32.dll",
+      "sha256": "f15f13c7879405431e79ecc593b5559e12052142b24558b266298bb4e19ee5a7"
+    },
+    {
+      "allocated_size_bytes": 14671872,
+      "hard_link_count": 1,
+      "logical_size_bytes": 14670993,
+      "mtime_epoch": 1791115317.1925607,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/winedbg.exe",
+      "sha256": "3f2e1c91a03ef6a17d9aac767526f22269ee600e976ec7ab0387ff9162a4a67a"
+    },
+    {
+      "allocated_size_bytes": 14471168,
+      "hard_link_count": 1,
+      "logical_size_bytes": 14467707,
+      "mtime_epoch": 1791115690.135304,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/shell32.dll",
+      "sha256": "1fce3311ba1c9cc2ec29e2b8918aa97ab98dd1c7e6d78e4c4616d47d595d6d57"
+    },
+    {
+      "allocated_size_bytes": 13344768,
+      "hard_link_count": 1,
+      "logical_size_bytes": 13343848,
+      "mtime_epoch": 1791115690.3308384,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/winedbg.exe",
+      "sha256": "f9cadc20686f660c4a8ad8fdb813df67f299a18a161c5b046657e2060550b374"
+    },
+    {
+      "allocated_size_bytes": 12668928,
+      "hard_link_count": 1,
+      "logical_size_bytes": 12666671,
+      "mtime_epoch": 1791115689.1410325,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/winsxs/x86_microsoft-windows-msxml30_31bf3856ad364e35_6.0.6000.16386_none_deadbeef/msxml3.dll",
+      "sha256": "ce8cc6730f173ba261c31641904b94d3d5fcc845f007acc442c6b99b1cc9d9b6"
+    },
+    {
+      "allocated_size_bytes": 12668928,
+      "hard_link_count": 1,
+      "logical_size_bytes": 12666671,
+      "mtime_epoch": 1791115689.1270127,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/msxml3.dll",
+      "sha256": "ce8cc6730f173ba261c31641904b94d3d5fcc845f007acc442c6b99b1cc9d9b6"
+    },
+    {
+      "allocated_size_bytes": 9719808,
+      "hard_link_count": 1,
+      "logical_size_bytes": 9719319,
+      "mtime_epoch": 1791115317.152127,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/windowscodecs.dll",
+      "sha256": "51dad5efc8b0e6910ecc0f0a9b4427df987b3ed549213c81550b571df0395bf6"
+    },
+    {
+      "allocated_size_bytes": 9334784,
+      "hard_link_count": 1,
+      "logical_size_bytes": 9331609,
+      "mtime_epoch": 1791115317.2338395,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/winsqlite3.dll",
+      "sha256": "4400ed64dd2309d833eb69d13a7160c456ff2d6463fa5505f8d3b8226b2511c5"
+    },
+    {
+      "allocated_size_bytes": 8237056,
+      "hard_link_count": 1,
+      "logical_size_bytes": 8233920,
+      "mtime_epoch": 1791115316.8718925,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/opengl32.dll",
+      "sha256": "281c88d31661da3bad69082cea243b74e81aec49f92f65462beff3c9ab5c70b4"
+    },
+    {
+      "allocated_size_bytes": 8237056,
+      "hard_link_count": 1,
+      "logical_size_bytes": 8236185,
+      "mtime_epoch": 1791115316.4718769,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/iyuv_32.dll",
+      "sha256": "cc174d2f9b4b26a0e16135083b9879ca3d515d6244f19be6ae7e388cf2f8bdd9"
+    },
+    {
+      "allocated_size_bytes": 8220672,
+      "hard_link_count": 1,
+      "logical_size_bytes": 8216672,
+      "mtime_epoch": 1791115316.0161347,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/colorcnv.dll",
+      "sha256": "b8dc55aa60c4f263af96db325aeea78696ab2ca9eeaa9f615faff45fdc99fb64"
+    },
+    {
+      "allocated_size_bytes": 8216576,
+      "hard_link_count": 1,
+      "logical_size_bytes": 8213250,
+      "mtime_epoch": 1791115317.0883133,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/vidreszr.dll",
+      "sha256": "11b9b4e25aae3d2e0b2cd88676b9c4f4b12927ac88cf4ae5c0c6c34b227ec7d0"
+    },
+    {
+      "allocated_size_bytes": 8146944,
+      "hard_link_count": 1,
+      "logical_size_bytes": 8146221,
+      "mtime_epoch": 1791115316.8070004,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/msvproc.dll",
+      "sha256": "ed1ccf4184d0190a387d687c5298e03e5d21d32eb3584f62a6acc571f3d19f32"
+    },
+    {
+      "allocated_size_bytes": 7901184,
+      "hard_link_count": 1,
+      "logical_size_bytes": 7900456,
+      "mtime_epoch": 1791115690.2932997,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/windowscodecs.dll",
+      "sha256": "9d3acc0955e21cb1f22c36c17878466c7b736711b9732d3b60c2762e0d499b1e"
+    },
+    {
+      "allocated_size_bytes": 7680000,
+      "hard_link_count": 1,
+      "logical_size_bytes": 7678488,
+      "mtime_epoch": 1791115316.489827,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/kernelbase.dll",
+      "sha256": "31d06691d3ef8f04cbdb87e47a996d1d14a4060a02d95750079b5087315919d2"
+    },
+    {
+      "allocated_size_bytes": 7393280,
+      "hard_link_count": 1,
+      "logical_size_bytes": 7390750,
+      "mtime_epoch": 1791115317.0649576,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/user32.dll",
+      "sha256": "81e894e9bdff2def8e1256bfbcab424b38c2bf198e726aaef2e0b5b19ebc9368"
+    },
+    {
+      "allocated_size_bytes": 7286784,
+      "hard_link_count": 1,
+      "logical_size_bytes": 7285950,
+      "mtime_epoch": 1791115690.3690896,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/winsqlite3.dll",
+      "sha256": "6b9b532aadb9d6502ec05e11d9911c10554bdb4a570901fb50918573c5bb92b3"
+    },
+    {
+      "allocated_size_bytes": 7139328,
+      "hard_link_count": 1,
+      "logical_size_bytes": 7139162,
+      "mtime_epoch": 1791115316.7069688,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/msi.dll",
+      "sha256": "cb10fc86649e548e7c7ccfa061bb689c3bca619887b00b13da8222d45addb188"
+    },
+    {
+      "allocated_size_bytes": 6791168,
+      "hard_link_count": 1,
+      "logical_size_bytes": 6790579,
+      "mtime_epoch": 1791115317.3545306,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/winsxs/amd64_microsoft.windows.common-controls_6595b64144ccf1df_6.0.2600.2982_none_deadbeef/comctl32.dll",
+      "sha256": "ca675683bf6803219c9e68cb2e9ba1e7a0f20d55ca3f5d8d38be5dc428484d58"
+    },
+    {
+      "allocated_size_bytes": 6762496,
+      "hard_link_count": 1,
+      "logical_size_bytes": 6760694,
+      "mtime_epoch": 1791115690.044975,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/opengl32.dll",
+      "sha256": "7269e65cec8f2ada466f139647a080cb8c78586ffcac00d1bdbe30d232d45451"
+    },
+    {
+      "allocated_size_bytes": 6561792,
+      "hard_link_count": 1,
+      "logical_size_bytes": 6560256,
+      "mtime_epoch": 1786645246.0,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/mono/mono-2.0/lib/mono/gac/PresentationFramework/4.0.0.0__31bf3856ad364e35/PresentationFramework.dll",
+      "sha256": "92986304513a9cc684bda7ae79eb82141b3235c9ca65f782af9ea246cc3852b5"
+    },
+    {
+      "allocated_size_bytes": 6541312,
+      "hard_link_count": 1,
+      "logical_size_bytes": 6541299,
+      "mtime_epoch": 1791115689.672526,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/kernelbase.dll",
+      "sha256": "06e6538a627cb0a88ec1d69f3789d90bc271d3d1aca06b70dceac2e84f0a00fc"
+    },
+    {
+      "allocated_size_bytes": 6455296,
+      "hard_link_count": 1,
+      "logical_size_bytes": 6454272,
+      "mtime_epoch": 1786645260.0,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/mono/mono-2.0/lib/x86_64/wpfgfx_cor3.dll",
+      "sha256": "534ef1fd43fe97a3fc27229a149f2c74a7efe0afe8d676a180005c67c841debb"
+    },
+    {
+      "allocated_size_bytes": 6373376,
+      "hard_link_count": 1,
+      "logical_size_bytes": 6370386,
+      "mtime_epoch": 1791115690.233372,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/vidreszr.dll",
+      "sha256": "eebc916f94215026aec92071bc4ecf0c036b6fc64d1e1263a00ef49bf78fed9c"
+    },
+    {
+      "allocated_size_bytes": 6373376,
+      "hard_link_count": 1,
+      "logical_size_bytes": 6369790,
+      "mtime_epoch": 1791115689.6567512,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/iyuv_32.dll",
+      "sha256": "27eb9b38146ef57f76560ab0492bd54620617a7a56eb45c9a6d804f0a83b93eb"
+    },
+    {
+      "allocated_size_bytes": 6369280,
+      "hard_link_count": 1,
+      "logical_size_bytes": 6365731,
+      "mtime_epoch": 1791115689.2737002,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/colorcnv.dll",
+      "sha256": "3238fd7d42658b293684c9c70c6f145642a1234078438966cde4f5590209f067"
+    },
+    {
+      "allocated_size_bytes": 6361088,
+      "hard_link_count": 1,
+      "logical_size_bytes": 6358016,
+      "mtime_epoch": 1786645260.0,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/mono/mono-2.0/lib/x86/wpfgfx_cor3.dll",
+      "sha256": "3f498ef43fa22c202f75395a38bfdc73f0ade91b779b9b62514eabbfa8814563"
+    },
+    {
+      "allocated_size_bytes": 6311936,
+      "hard_link_count": 1,
+      "logical_size_bytes": 6309678,
+      "mtime_epoch": 1791115689.9746644,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/msvproc.dll",
+      "sha256": "1dcee32df0c1560bca3db18bf8a1111a60b13a4e9b942ed0bd8c78baa61e429f"
+    },
+    {
+      "allocated_size_bytes": 6234112,
+      "hard_link_count": 1,
+      "logical_size_bytes": 6230543,
+      "mtime_epoch": 1791115316.0683525,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/d2d1.dll",
+      "sha256": "2f0a55efe726503db79aa2a22aa1a86f3392abb9ccb1d8105369dd70e27cf8ca"
+    },
+    {
+      "allocated_size_bytes": 6205440,
+      "hard_link_count": 1,
+      "logical_size_bytes": 6203999,
+      "mtime_epoch": 1791115690.213804,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/user32.dll",
+      "sha256": "35431110bf5bb5a0d0f319d95d9aa8614e87a0c80ffbfcaec83c1a61d75c707e"
+    },
+    {
+      "allocated_size_bytes": 6021120,
+      "hard_link_count": 1,
+      "logical_size_bytes": 6018960,
+      "mtime_epoch": 1786645258.0,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/mono/mono-2.0/lib/mono/4.5/Microsoft.CodeAnalysis.CSharp.dll",
+      "sha256": "58fc067e6cfb52480ce558eed5c55b6806e602ea235acd0fd0634dd771c9b715"
+    },
+    {
+      "allocated_size_bytes": 5771264,
+      "hard_link_count": 1,
+      "logical_size_bytes": 5767574,
+      "mtime_epoch": 1791115689.8907726,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/msi.dll",
+      "sha256": "73fa9954c1fe9aff58a83b0fb803498763c434fee1bb0e1f997cda766fe81f93"
+    },
+    {
+      "allocated_size_bytes": 5730304,
+      "hard_link_count": 1,
+      "logical_size_bytes": 5728768,
+      "mtime_epoch": 1786645216.0,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/mono/mono-2.0/lib/mono/gac/System.Windows.Forms/4.0.0.0__b77a5c561934e089/System.Windows.Forms.dll",
+      "sha256": "68615a2f574f3430dec8f6969df0bb3d463b889af8294a2468be6027c345aa0e"
+    },
+    {
+      "allocated_size_bytes": 5599232,
+      "hard_link_count": 1,
+      "logical_size_bytes": 5597195,
+      "mtime_epoch": 1791115690.483852,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/winsxs/x86_microsoft.windows.common-controls_6595b64144ccf1df_6.0.2600.2982_none_deadbeef/comctl32.dll",
+      "sha256": "973db2b06cb1142a8abd506a9b4ac0b9057dcdca9425d131be885b54eb2b223f"
+    },
+    {
+      "allocated_size_bytes": 5447680,
+      "hard_link_count": 1,
+      "logical_size_bytes": 5444537,
+      "mtime_epoch": 1791115316.023305,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/comctl32.dll",
+      "sha256": "853a4bd30d2b3b5af18f5da4c373a963dc5062e81b4ae1a65698cf05681027c2"
+    },
+    {
+      "allocated_size_bytes": 5382144,
+      "hard_link_count": 1,
+      "logical_size_bytes": 5380863,
+      "mtime_epoch": 1791115689.3153985,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/d2d1.dll",
+      "sha256": "db29928c8ca00bf1542658d9b21dc9aec5120e6912f973c08f1915440e58abb4"
+    },
+    {
+      "allocated_size_bytes": 5382144,
+      "hard_link_count": 1,
+      "logical_size_bytes": 5380849,
+      "mtime_epoch": 1791115316.7772782,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/msvcr120.dll",
+      "sha256": "ab91e189d6ecfdbccef4177b04c33bcc464eb1ac85507416ac5a5c4262da0ca8"
+    },
+    {
+      "allocated_size_bytes": 5320704,
+      "hard_link_count": 1,
+      "logical_size_bytes": 5319510,
+      "mtime_epoch": 1791115316.4773967,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/jscript.dll",
+      "sha256": "39d35dfba6ea2f572b128ab267e17651ce5dad9506903a951c20f9e01f2c12de"
+    },
+    {
+      "allocated_size_bytes": 5214208,
+      "hard_link_count": 1,
+      "logical_size_bytes": 5211294,
+      "mtime_epoch": 1791115317.037127,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/ucrtbase.dll",
+      "sha256": "30c8282d35b10391536cbdea2bd687a6947a2a22e5ca91b106d712a013c60b81"
+    },
+    {
+      "allocated_size_bytes": 5214208,
+      "hard_link_count": 1,
+      "logical_size_bytes": 5212048,
+      "mtime_epoch": 1786645258.0,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/mono/mono-2.0/lib/mono/4.5/Microsoft.CodeAnalysis.VisualBasic.dll",
+      "sha256": "d5e68fbd201b285d582344468e9271e2008fa07e942ea4bc84f928e141aa968e"
+    },
+    {
+      "allocated_size_bytes": 5111808,
+      "hard_link_count": 1,
+      "logical_size_bytes": 5109849,
+      "mtime_epoch": 1791115316.7441268,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/msvcp140.dll",
+      "sha256": "c1bf20f65485a3be3623ad9a93741b27141188f10325a350964582d3dd733070"
+    },
+    {
+      "allocated_size_bytes": 5070848,
+      "hard_link_count": 1,
+      "logical_size_bytes": 5070454,
+      "mtime_epoch": 1791115316.8306837,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/ntdll.dll",
+      "sha256": "41af3aca5b9b47264c6dadb32e6e13842c65bc8ea336ee3e9c7d3fd329fccc85"
+    },
+    {
+      "allocated_size_bytes": 5046272,
+      "hard_link_count": 1,
+      "logical_size_bytes": 5044739,
+      "mtime_epoch": 1791115316.8438146,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/ole32.dll",
+      "sha256": "3696aec0e052e3180c0b0c791a2d79d5358f68cf3f30b375b80b7d1f4c974d58"
+    },
+    {
+      "allocated_size_bytes": 5017600,
+      "hard_link_count": 1,
+      "logical_size_bytes": 5015478,
+      "mtime_epoch": 1791115317.3669581,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/winsxs/amd64_microsoft.vc90.crt_1fc8b3b9a1e18e3b_9.0.30729.6161_none_deadbeef/msvcp90.dll",
+      "sha256": "87f4cb60d81e5ffd1fe44ced346b3d2408c77def9c120ed848b0ff68b5aed517"
+    },
+    {
+      "allocated_size_bytes": 5017600,
+      "hard_link_count": 1,
+      "logical_size_bytes": 5014760,
+      "mtime_epoch": 1791115317.3628225,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/winsxs/amd64_microsoft.vc80.crt_1fc8b3b9a1e18e3b_8.0.50727.9672_none_deadbeef/msvcp80.dll",
+      "sha256": "a91ee6892660ce2b0ec3b575bcf86a974740257c360b22b47bc5477b9e8926b9"
+    },
+    {
+      "allocated_size_bytes": 5017600,
+      "hard_link_count": 1,
+      "logical_size_bytes": 5015478,
+      "mtime_epoch": 1791115316.7665272,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/msvcp90.dll",
+      "sha256": "87f4cb60d81e5ffd1fe44ced346b3d2408c77def9c120ed848b0ff68b5aed517"
+    },
+    {
+      "allocated_size_bytes": 5017600,
+      "hard_link_count": 1,
+      "logical_size_bytes": 5014760,
+      "mtime_epoch": 1791115316.7629857,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/msvcp80.dll",
+      "sha256": "a91ee6892660ce2b0ec3b575bcf86a974740257c360b22b47bc5477b9e8926b9"
+    },
+    {
+      "allocated_size_bytes": 4997120,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4997054,
+      "mtime_epoch": 1791115316.7737641,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/msvcr110.dll",
+      "sha256": "6020388cce6493cf02f19dde7c012b97bb6fc691e9c4ca310899d390f23d7792"
+    },
+    {
+      "allocated_size_bytes": 4980736,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4979441,
+      "mtime_epoch": 1791115316.7348592,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/msvcp110.dll",
+      "sha256": "29611fe810339b6a42310ec253248aa5f09d6765d68e36f64eb08782cf048244"
+    },
+    {
+      "allocated_size_bytes": 4972544,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4971564,
+      "mtime_epoch": 1791115316.7387595,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/msvcp120.dll",
+      "sha256": "f0751470f8dfa6e0d8ca525a70927215c0ee044143d129dd988ce4a1f6fe19f9"
+    },
+    {
+      "allocated_size_bytes": 4964352,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4963660,
+      "mtime_epoch": 1791115316.7594788,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/msvcp71.dll",
+      "sha256": "6049593a1607f6570adb30b46cbf826774f436857a80b28031f1c59931206305"
+    },
+    {
+      "allocated_size_bytes": 4964352,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4963444,
+      "mtime_epoch": 1791115316.7537804,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/msvcp70.dll",
+      "sha256": "90ddc59ff29f28f6d68c9a3aa478e8a555a6c05fab5b10002661d0bb6eb92040"
+    },
+    {
+      "allocated_size_bytes": 4935680,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4934619,
+      "mtime_epoch": 1791115316.7702994,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/msvcr100.dll",
+      "sha256": "d7775d3e7cabca666afbbc047ce51a5da333ab5512304cc4b9f9e8267cff4d6c"
+    },
+    {
+      "allocated_size_bytes": 4841472,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4840523,
+      "mtime_epoch": 1791115316.7319999,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/msvcp100.dll",
+      "sha256": "19279c8f5396e505ce086d96c739dea4a5b7b6ce97ba0197a3253a2de70a9c89"
+    },
+    {
+      "allocated_size_bytes": 4681728,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4678144,
+      "mtime_epoch": 1786645258.0,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/mono/mono-2.0/lib/mono/4.5/mscorlib.dll",
+      "sha256": "b715602dfd62e0eec01c8f2167fb6afee859ea7e6513eed2c7b8aeafc6da33d9"
+    },
+    {
+      "allocated_size_bytes": 4595712,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4593180,
+      "mtime_epoch": 1791115316.0767744,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/d3d11.dll",
+      "sha256": "2ea49b9c79fb2b2cdf95ea370283de17464f795cc8bbde08e573977c8f9c327b"
+    },
+    {
+      "allocated_size_bytes": 4505600,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4504192,
+      "mtime_epoch": 1791115689.2780898,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/comctl32.dll",
+      "sha256": "1633647a2482aa6e7232451fcb0d0e891949c078173d2d64427f2c838ba987ca"
+    },
+    {
+      "allocated_size_bytes": 4497408,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4493331,
+      "mtime_epoch": 1791115316.0520773,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/crypt32.dll",
+      "sha256": "22b188b912042aa61120c3b0f1ad523f5449a427e46a67fedbf660c8c355ee50"
+    },
+    {
+      "allocated_size_bytes": 4419584,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4416757,
+      "mtime_epoch": 1791115317.361325,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/winsxs/amd64_microsoft.vc80.crt_1fc8b3b9a1e18e3b_8.0.50727.9672_none_deadbeef/msvcr80.dll",
+      "sha256": "6c9dbba11ed3c54d37bab38e02ea41bc85e658e3f5e2c819849b35c95ee7706c"
+    },
+    {
+      "allocated_size_bytes": 4419584,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4416757,
+      "mtime_epoch": 1791115316.7877874,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/msvcr80.dll",
+      "sha256": "6c9dbba11ed3c54d37bab38e02ea41bc85e658e3f5e2c819849b35c95ee7706c"
+    },
+    {
+      "allocated_size_bytes": 4415488,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4415090,
+      "mtime_epoch": 1791115317.365643,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/winsxs/amd64_microsoft.vc90.crt_1fc8b3b9a1e18e3b_9.0.30729.6161_none_deadbeef/msvcr90.dll",
+      "sha256": "270be0fd368969cf23ab8ae07d5ef4a3dc8ed28f87b381eb525937d8ce99eba8"
+    },
+    {
+      "allocated_size_bytes": 4415488,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4415090,
+      "mtime_epoch": 1791115316.7909532,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/msvcr90.dll",
+      "sha256": "270be0fd368969cf23ab8ae07d5ef4a3dc8ed28f87b381eb525937d8ce99eba8"
+    },
+    {
+      "allocated_size_bytes": 4415488,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4411398,
+      "mtime_epoch": 1791115316.2021976,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/d3dx9_41.dll",
+      "sha256": "1408ee6e7fa860bc5b10c47259677d7a395d0ec2d6c6d59898c54e919ec0a61f"
+    },
+    {
+      "allocated_size_bytes": 4415488,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4411398,
+      "mtime_epoch": 1791115316.1988757,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/d3dx9_40.dll",
+      "sha256": "5673b79fab08f81f2492c58908b477a1bc32bbd1ae98d0be4b2c6d61faac38ac"
+    },
+    {
+      "allocated_size_bytes": 4415488,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4411398,
+      "mtime_epoch": 1791115316.1955216,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/d3dx9_39.dll",
+      "sha256": "495f32e8657dce609617baeb43a0c1248211e24b741ea04ecfc3533fd0642ca9"
+    },
+    {
+      "allocated_size_bytes": 4415488,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4411398,
+      "mtime_epoch": 1791115316.192352,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/d3dx9_38.dll",
+      "sha256": "da4d4dbba10dd32f0bab7caa51eb0822d2dda773c0be23006ab4097dc9b8de34"
+    },
+    {
+      "allocated_size_bytes": 4415488,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4411398,
+      "mtime_epoch": 1791115316.1895568,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/d3dx9_37.dll",
+      "sha256": "b840d84422a497897e9a50ab603c545449ae4c0cda967747c4a995fdffb30a10"
+    },
+    {
+      "allocated_size_bytes": 4415488,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4411398,
+      "mtime_epoch": 1791115316.1866283,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/d3dx9_36.dll",
+      "sha256": "e6e937bb1cee0675be71aae00526d847c8b2e2cf20e16df7c7dd0dfbb3b37b1c"
+    },
+    {
+      "allocated_size_bytes": 4411392,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4411294,
+      "mtime_epoch": 1791115316.1830497,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/d3dx9_35.dll",
+      "sha256": "e31d506956aba8843922b679862fbc7c77d21010fc4c557e40beb6e53d197357"
+    },
+    {
+      "allocated_size_bytes": 4411392,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4411294,
+      "mtime_epoch": 1791115316.180242,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/d3dx9_34.dll",
+      "sha256": "a6bc925f0670d23da6f89308ae1da482a9b0b25b7fec9ee0d2248df810724c2e"
+    },
+    {
+      "allocated_size_bytes": 4411392,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4411294,
+      "mtime_epoch": 1791115316.1770618,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/d3dx9_33.dll",
+      "sha256": "eaea2e02ea5c79e72ba648e6fb87db153e4a6c6d5afc554e05ca30c348f72ec7"
+    },
+    {
+      "allocated_size_bytes": 4411392,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4411294,
+      "mtime_epoch": 1791115316.1740842,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/d3dx9_32.dll",
+      "sha256": "3fcfd7bb0d8de739b4194f3a93758b89cbc3698b8effdea88c7e25da5feb8104"
+    },
+    {
+      "allocated_size_bytes": 4411392,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4410906,
+      "mtime_epoch": 1791115316.1708326,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/d3dx9_31.dll",
+      "sha256": "0686987e93d82cc29884ebd07efaed954c4dacbe723d1cad77358528de9f7b94"
+    },
+    {
+      "allocated_size_bytes": 4411392,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4411209,
+      "mtime_epoch": 1791115316.1672275,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/d3dx9_30.dll",
+      "sha256": "ed0b0921be8870db1913503e24f6bf6c161462f7e59972765ad274719e49771b"
+    },
+    {
+      "allocated_size_bytes": 4411392,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4411209,
+      "mtime_epoch": 1791115316.1638725,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/d3dx9_29.dll",
+      "sha256": "0ba24209cd411aba52f1ce830700e1aef6896bb9d8163f44b9bd49ad80bb70b1"
+    },
+    {
+      "allocated_size_bytes": 4411392,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4411209,
+      "mtime_epoch": 1791115316.160634,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/d3dx9_28.dll",
+      "sha256": "99e782b70d8bca66ea3ce34d6cb89273c0f0fb08b9ed00e57aff9cdfbad0ee27"
+    },
+    {
+      "allocated_size_bytes": 4411392,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4410949,
+      "mtime_epoch": 1791115316.155,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/d3dx9_27.dll",
+      "sha256": "5835c745fc0b4aecf6376e5f119f27fee5dc361ec229cd17ac1f13eaa0ee5607"
+    },
+    {
+      "allocated_size_bytes": 4407296,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4405602,
+      "mtime_epoch": 1791115316.2083404,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/d3dx9_43.dll",
+      "sha256": "48008e17c77f7467518b3847f6fe3cc060fe99cbc4711a68eb38630ab32d1784"
+    },
+    {
+      "allocated_size_bytes": 4407296,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4405602,
+      "mtime_epoch": 1791115316.2051113,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/d3dx9_42.dll",
+      "sha256": "388d3ec78b1839fb9f610563df0edac16a009322225bf3c0804104a5f9453515"
+    },
+    {
+      "allocated_size_bytes": 4403200,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4402466,
+      "mtime_epoch": 1791115316.1517758,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/d3dx9_26.dll",
+      "sha256": "d205fc01124747d2af708cbc12ce86c70c63427a9446673c87f0798281800267"
+    },
+    {
+      "allocated_size_bytes": 4399104,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4397525,
+      "mtime_epoch": 1791115316.1493585,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/d3dx9_25.dll",
+      "sha256": "9d90cb22e52d6c53a840c33bc4e16171ef5efb7fa6c67cba67ec884c6f76e1f4"
+    },
+    {
+      "allocated_size_bytes": 4399104,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4397170,
+      "mtime_epoch": 1791115316.146124,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/d3dx9_24.dll",
+      "sha256": "d1dc7ee10fc91a6b97f46ecfea41db13fe7f0b32f15b4d37725ff8dacc614ba8"
+    },
+    {
+      "allocated_size_bytes": 4304896,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4303696,
+      "mtime_epoch": 1791115316.794489,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/msvcrt.dll",
+      "sha256": "34817673c54a3e7022754dea015b921b5dfc5eddff46ae35da7a67dfba08d732"
+    },
+    {
+      "allocated_size_bytes": 4276224,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4272621,
+      "mtime_epoch": 1791115689.6610577,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/jscript.dll",
+      "sha256": "a0c07577fb77af7baa9d0fa0767519a6d6a31f1eb1d37aac8072c1cff3d10ddb"
+    },
+    {
+      "allocated_size_bytes": 4239360,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4235731,
+      "mtime_epoch": 1791115689.9498215,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/msvcr120.dll",
+      "sha256": "dd82e9a204473a5db017bb3978fc49762aa4d091ab1528a6747d0c1833a4571e"
+    },
+    {
+      "allocated_size_bytes": 4206592,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4204745,
+      "mtime_epoch": 1791115316.2168522,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/dbghelp.dll",
+      "sha256": "8a66cdad33a264b6b35b8f91295b95327cc872bd1296343040e756207fa192f4"
+    },
+    {
+      "allocated_size_bytes": 4177920,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4175335,
+      "mtime_epoch": 1791115316.7505748,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/msvcp60.dll",
+      "sha256": "b5157c3e2bdbe01352133218af2a9d0fb5b6d562db6a653492bca7eff02e5886"
+    },
+    {
+      "allocated_size_bytes": 4161536,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4158728,
+      "mtime_epoch": 1791115316.8529522,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/oleaut32.dll",
+      "sha256": "d646c0a8124580588ce961f6a56d77758fdadcffc41276c3cccdbc0ddbbe0c62"
+    },
+    {
+      "allocated_size_bytes": 4136960,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4134400,
+      "mtime_epoch": 1786645258.0,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/mono/mono-2.0/bin/libmono-2.0-x86_64.dll",
+      "sha256": "ffc91174da9285dd7fdd1ee144db417ddf5233efc42914f45747ced0095e547c"
+    },
+    {
+      "allocated_size_bytes": 4132864,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4131079,
+      "mtime_epoch": 1791115316.7987335,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/msvcrtd.dll",
+      "sha256": "a35d9805aa0d378c5bb2877228fe88d27fbf4fc90fb3dd5b3987ce4774017278"
+    },
+    {
+      "allocated_size_bytes": 4124672,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4124175,
+      "mtime_epoch": 1791115316.7849126,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/msvcr71.dll",
+      "sha256": "ffcf5b84f7e1ede8a75adbc189c292ccd6f6b976afd5191497284872638debb3"
+    },
+    {
+      "allocated_size_bytes": 4120576,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4119568,
+      "mtime_epoch": 1791115316.7817545,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/msvcr70.dll",
+      "sha256": "cf85c494ae29da99a31c6d7451630eb01d5820f3ab80138685c31a4ce3279cdb"
+    },
+    {
+      "allocated_size_bytes": 4104192,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4101485,
+      "mtime_epoch": 1791115316.0483139,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/crtdll.dll",
+      "sha256": "3dfcdb35f7c0b3103255e07526676ba6eca62ea845e05581375d1afa92415706"
+    },
+    {
+      "allocated_size_bytes": 4063232,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4061923,
+      "mtime_epoch": 1791115690.1888268,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/ucrtbase.dll",
+      "sha256": "386d19ba32ccc251c120b7a24dacbbacf85798aea3ad270842c0294b36715282"
+    },
+    {
+      "allocated_size_bytes": 4042752,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4042273,
+      "mtime_epoch": 1791115690.014229,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/ole32.dll",
+      "sha256": "9f6322265fe03a0dc226aa168fc3276b0af72d081aa4bed4bf9d6882f8720fc3"
+    },
+    {
+      "allocated_size_bytes": 4034560,
+      "hard_link_count": 1,
+      "logical_size_bytes": 4031076,
+      "mtime_epoch": 1791115316.4353344,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/ieframe.dll",
+      "sha256": "19c741ace935dc4d0d4886bef2bc45f4402e828bb3e24ea896f44a6d3e2b4fc4"
+    },
+    {
+      "allocated_size_bytes": 3981312,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3979166,
+      "mtime_epoch": 1791115689.9991515,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/ntdll.dll",
+      "sha256": "3152ce57d2717b6c0d41f49e5b6f8c7a9ad2647bb675b6a09e685fed92e97d91"
+    },
+    {
+      "allocated_size_bytes": 3936256,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3936162,
+      "mtime_epoch": 1791115316.9039483,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/quartz.dll",
+      "sha256": "d84f4088373e105242e1c94737d19299b5ff7625615ec8931350f2f533b6b727"
+    },
+    {
+      "allocated_size_bytes": 3936256,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3932672,
+      "mtime_epoch": 1786645230.0,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/mono/mono-2.0/lib/mono/gac/PresentationCore/4.0.0.0__31bf3856ad364e35/PresentationCore.dll",
+      "sha256": "98cbdddaa5e7199d00fc6f6df350815abc76304fae9601600cbfd20f71fb8518"
+    },
+    {
+      "allocated_size_bytes": 3887104,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3884600,
+      "mtime_epoch": 1791115317.359612,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/winsxs/amd64_microsoft.windows.gdiplus_6595b64144ccf1df_1.1.7601.23038_none_deadbeef/gdiplus.dll",
+      "sha256": "c12740fdfef6c5b030c1a4bc5c65d1053ee9a09711df25049792763186cf69a7"
+    },
+    {
+      "allocated_size_bytes": 3887104,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3884600,
+      "mtime_epoch": 1791115317.3577263,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/winsxs/amd64_microsoft.windows.gdiplus_6595b64144ccf1df_1.0.6000.16386_none_deadbeef/gdiplus.dll",
+      "sha256": "c12740fdfef6c5b030c1a4bc5c65d1053ee9a09711df25049792763186cf69a7"
+    },
+    {
+      "allocated_size_bytes": 3887104,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3884600,
+      "mtime_epoch": 1791115316.336661,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/gdiplus.dll",
+      "sha256": "c12740fdfef6c5b030c1a4bc5c65d1053ee9a09711df25049792763186cf69a7"
+    },
+    {
+      "allocated_size_bytes": 3878912,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3877217,
+      "mtime_epoch": 1791115316.2934766,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/dwrite.dll",
+      "sha256": "df533405419929c50ae05a5355332c710a1da808c88e2a38d5c59ba71da0f62b"
+    },
+    {
+      "allocated_size_bytes": 3866624,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3863945,
+      "mtime_epoch": 1791115689.947442,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/msvcr110.dll",
+      "sha256": "21d4c1b383b34baeb0352b5d8cb5c602068afad76d66b55f7b8a5504d18a7648"
+    },
+    {
+      "allocated_size_bytes": 3821568,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3817590,
+      "mtime_epoch": 1791115689.3226528,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/d3d11.dll",
+      "sha256": "85395107b2c88bba4481f01d2fe749974830e59e3184dd9ba96dd835848735fb"
+    },
+    {
+      "allocated_size_bytes": 3809280,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3806574,
+      "mtime_epoch": 1791115689.9447384,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/msvcr100.dll",
+      "sha256": "f2e5f8ab13bd902eaafb77db4b1bdba468966b8855b7e21342b1e4a81813a005"
+    },
+    {
+      "allocated_size_bytes": 3796992,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3795349,
+      "mtime_epoch": 1791115690.4938726,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/winsxs/x86_microsoft.vc90.crt_1fc8b3b9a1e18e3b_9.0.30729.6161_none_deadbeef/msvcp90.dll",
+      "sha256": "ce3e20723bf0e4a1ea02ad38dcf7aba276c51261668b66172bb79ec72edbc429"
+    },
+    {
+      "allocated_size_bytes": 3796992,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3795349,
+      "mtime_epoch": 1791115689.9409976,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/msvcp90.dll",
+      "sha256": "ce3e20723bf0e4a1ea02ad38dcf7aba276c51261668b66172bb79ec72edbc429"
+    },
+    {
+      "allocated_size_bytes": 3788800,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3786604,
+      "mtime_epoch": 1791115690.4900672,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/winsxs/x86_microsoft.vc80.crt_1fc8b3b9a1e18e3b_8.0.50727.9672_none_deadbeef/msvcp80.dll",
+      "sha256": "c6cf81ac43f75a959c0f28d8aa3ef93f2fc777bda1b0f42534180022e3d52649"
+    },
+    {
+      "allocated_size_bytes": 3788800,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3786604,
+      "mtime_epoch": 1791115689.9381013,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/msvcp80.dll",
+      "sha256": "c6cf81ac43f75a959c0f28d8aa3ef93f2fc777bda1b0f42534180022e3d52649"
+    },
+    {
+      "allocated_size_bytes": 3780608,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3778211,
+      "mtime_epoch": 1791115689.931655,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/msvcp70.dll",
+      "sha256": "d9141b68f25aa29480ea519d60a71d5bd747ac04bcf2f16fed0123f906d9c039"
+    },
+    {
+      "allocated_size_bytes": 3768320,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3764458,
+      "mtime_epoch": 1791115689.9246194,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/msvcp140.dll",
+      "sha256": "f1ba3bd068aee9fb5740fb525a685ac6bb9247dc0c2b5cc6516276ccccf06692"
+    },
+    {
+      "allocated_size_bytes": 3751936,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3747922,
+      "mtime_epoch": 1791115689.9349797,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/msvcp71.dll",
+      "sha256": "d61903559dbbab46ed49d1ee91bc891940b839b9c2e8495eb6c9ece0b4c7b98a"
+    },
+    {
+      "allocated_size_bytes": 3727360,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3725824,
+      "mtime_epoch": 1786645258.0,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/mono/mono-2.0/bin/libmono-2.0-x86.dll",
+      "sha256": "cda071f4f4948abc4ab85593ec06f3b633c7420dcf455d10157e06d460f2db9f"
+    },
+    {
+      "allocated_size_bytes": 3678208,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3676157,
+      "mtime_epoch": 1791115689.9171135,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/msvcp110.dll",
+      "sha256": "39aff5a8bd5f1f1c743cab1637d2eca9c88b6e1cdac0ef4c61b202a247dd6ce3"
+    },
+    {
+      "allocated_size_bytes": 3670016,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3666877,
+      "mtime_epoch": 1791115689.920056,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/msvcp120.dll",
+      "sha256": "469f4fe531e6b13fc6417f6e0a6273042f1039e8461647878001a9cbc42875bf"
+    },
+    {
+      "allocated_size_bytes": 3616768,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3613448,
+      "mtime_epoch": 1791115316.9276383,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/rpcrt4.dll",
+      "sha256": "3bb9c47012804898e82e4906550cf089070e68593115b5771aeaf2f2c77fb01b"
+    },
+    {
+      "allocated_size_bytes": 3612672,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3611497,
+      "mtime_epoch": 1791115316.590621,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/mf.dll",
+      "sha256": "df4308dd018288974117f4965ab347cab397195a949c525fa93cb462aec2a80a"
+    },
+    {
+      "allocated_size_bytes": 3608576,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3605326,
+      "mtime_epoch": 1791115317.246318,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/wldap32.dll",
+      "sha256": "96c371520351cc6baaa235b8047054065b895ef8b5522b3e14b7b311bfa4237e"
+    },
+    {
+      "allocated_size_bytes": 3608576,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3604490,
+      "mtime_epoch": 1791115316.2218945,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/ddraw.dll",
+      "sha256": "208c84fbc3f05ddf0939c6b3616463481fccb17184b9002cfa9ad2552947e6c7"
+    },
+    {
+      "allocated_size_bytes": 3563520,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3562817,
+      "mtime_epoch": 1791115689.9137728,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/msvcp100.dll",
+      "sha256": "51f5974c20795828d0447f5c53b47177aedd893b7c2e3d53c74907251c3de60e"
+    },
+    {
+      "allocated_size_bytes": 3563520,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3559935,
+      "mtime_epoch": 1791115689.4195282,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/d3dx9_43.dll",
+      "sha256": "8379a96946ca416383c93ab2aac0cf8a53a32048a9402f963a22e20bcf9da417"
+    },
+    {
+      "allocated_size_bytes": 3563520,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3559935,
+      "mtime_epoch": 1791115689.416776,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/d3dx9_42.dll",
+      "sha256": "d9ffcbeb00b7acca3a1cb4c6bb8b8873b4cbda4ae77648c2c881df5ed469b504"
+    },
+    {
+      "allocated_size_bytes": 3563520,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3561650,
+      "mtime_epoch": 1791115689.413779,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/d3dx9_41.dll",
+      "sha256": "b40db55984fbb0416b6902e443c90db1939e4bc818d6bb85773ea4171875bdd9"
+    },
+    {
+      "allocated_size_bytes": 3563520,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3561650,
+      "mtime_epoch": 1791115689.410882,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/d3dx9_40.dll",
+      "sha256": "0972c4f11e10766fa2c377e6c6eb606052bf0b3b6bb781fd5d91754f7ac834cd"
+    },
+    {
+      "allocated_size_bytes": 3563520,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3561650,
+      "mtime_epoch": 1791115689.4076788,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/d3dx9_39.dll",
+      "sha256": "bb0243be89752cb42ed93d31048e635be65c0296112aeb998df4eb90b184752c"
+    },
+    {
+      "allocated_size_bytes": 3563520,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3561650,
+      "mtime_epoch": 1791115689.4046519,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/d3dx9_38.dll",
+      "sha256": "7a43dcb2b522f3239d8fcb666ab13e9207ef1702f592f9b06b0c884fc5325a02"
+    },
+    {
+      "allocated_size_bytes": 3563520,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3561650,
+      "mtime_epoch": 1791115689.400277,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/d3dx9_37.dll",
+      "sha256": "201195c27998ab7664f446fad214d6d56e27b5db972fc52877ae10bb2a5d2944"
+    },
+    {
+      "allocated_size_bytes": 3563520,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3561650,
+      "mtime_epoch": 1791115689.397676,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/d3dx9_36.dll",
+      "sha256": "3e05908504942f7c48599fac81e27b8a1f0352f24ba74d8ddbd1c803be711c75"
+    },
+    {
+      "allocated_size_bytes": 3563520,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3561546,
+      "mtime_epoch": 1791115689.394939,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/d3dx9_35.dll",
+      "sha256": "98288a68efb1652eaf580cc25ce8c703b7172192fcd1bcdb6f03af25225fa402"
+    },
+    {
+      "allocated_size_bytes": 3563520,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3561546,
+      "mtime_epoch": 1791115689.392031,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/d3dx9_34.dll",
+      "sha256": "dda3a32be0628c890701191c0711f703967bac83470302266bd185d421b7dbe5"
+    },
+    {
+      "allocated_size_bytes": 3563520,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3561546,
+      "mtime_epoch": 1791115689.3888285,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/d3dx9_33.dll",
+      "sha256": "681aa8881eee54528169034a3622c3bea83a3530c662c24dffa4bf9d3de78d65"
+    },
+    {
+      "allocated_size_bytes": 3563520,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3561546,
+      "mtime_epoch": 1791115689.3860168,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/d3dx9_32.dll",
+      "sha256": "cccbdd59a2383232bc64c37a0456ea808c209882313f3906eea0c61dff47e930"
+    },
+    {
+      "allocated_size_bytes": 3563520,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3561156,
+      "mtime_epoch": 1791115689.3831468,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/d3dx9_31.dll",
+      "sha256": "5ad61d49870c858668b2bf980181945b5d20545236fd1e9b074a875e098b0d43"
+    },
+    {
+      "allocated_size_bytes": 3563520,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3561461,
+      "mtime_epoch": 1791115689.3806386,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/d3dx9_30.dll",
+      "sha256": "2e8bbfeeb0baf85581d8ac22ef884c40f9a547df7f54b5eb3c22331d4b099034"
+    },
+    {
+      "allocated_size_bytes": 3563520,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3561461,
+      "mtime_epoch": 1791115689.3780785,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/d3dx9_29.dll",
+      "sha256": "63e249bd7fb84638aa7c3f044c9d5376d93509857e07312bd070d2dfb006c2ab"
+    },
+    {
+      "allocated_size_bytes": 3563520,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3561461,
+      "mtime_epoch": 1791115689.37529,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/d3dx9_28.dll",
+      "sha256": "f3c072b638d24367e0eca78192225f4d06c163f80ff8c7404349172c4ce9d43e"
+    },
+    {
+      "allocated_size_bytes": 3563520,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3561201,
+      "mtime_epoch": 1791115689.3728106,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/d3dx9_27.dll",
+      "sha256": "33c834bfba39dac24a9f016f303c514401552162fcaf910d9db5b7a8dcd9babf"
+    },
+    {
+      "allocated_size_bytes": 3563520,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3561039,
+      "mtime_epoch": 1791115689.3701386,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/d3dx9_26.dll",
+      "sha256": "9d935cacad3e69acd8e143acad1214ca7a471ee21c311520a143fdb71c10b34e"
+    },
+    {
+      "allocated_size_bytes": 3563520,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3560338,
+      "mtime_epoch": 1791115689.3675168,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/d3dx9_25.dll",
+      "sha256": "16e7e0d6946e4d0fafe0e40888fd16b02e45a56c718ee948f8bb6b3ce642f6c4"
+    },
+    {
+      "allocated_size_bytes": 3563520,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3559980,
+      "mtime_epoch": 1791115689.3636105,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/d3dx9_24.dll",
+      "sha256": "efe61cbf01a0b4099a1ca5d964bff55c430331253eadd20687a868df26d068fb"
+    },
+    {
+      "allocated_size_bytes": 3563520,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3562090,
+      "mtime_epoch": 1791115689.3002186,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/crypt32.dll",
+      "sha256": "2269d073170886e6bd3e180c5f3c0e8021a335d6e3077a8e60c4683d40a3307d"
+    },
+    {
+      "allocated_size_bytes": 3485696,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3483457,
+      "mtime_epoch": 1791115689.428749,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/dbghelp.dll",
+      "sha256": "083575928bc87b57b3ecb849350220bd382815035defe97755f234b24bec16b5"
+    },
+    {
+      "allocated_size_bytes": 3420160,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3418976,
+      "mtime_epoch": 1791115690.0237606,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/oleaut32.dll",
+      "sha256": "6eb4976f79b66b47ad482ace4031e179508951e7cdae3f5e98668a46d282e39f"
+    },
+    {
+      "allocated_size_bytes": 3411968,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3408604,
+      "mtime_epoch": 1791115690.492877,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/winsxs/x86_microsoft.vc90.crt_1fc8b3b9a1e18e3b_9.0.30729.6161_none_deadbeef/msvcr90.dll",
+      "sha256": "d4681e6247a41abfcf14937eb72212cfc40d7a1c5f94f45304b2aaba5eb9cc94"
+    },
+    {
+      "allocated_size_bytes": 3411968,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3409524,
+      "mtime_epoch": 1791115690.4890747,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/winsxs/x86_microsoft.vc80.crt_1fc8b3b9a1e18e3b_8.0.50727.9672_none_deadbeef/msvcr80.dll",
+      "sha256": "d1046fa5039c91c9e63fbfca8d53a6d49b20d393c76c15fbe22958418b1aa490"
+    },
+    {
+      "allocated_size_bytes": 3411968,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3408604,
+      "mtime_epoch": 1791115689.9609575,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/msvcr90.dll",
+      "sha256": "d4681e6247a41abfcf14937eb72212cfc40d7a1c5f94f45304b2aaba5eb9cc94"
+    },
+    {
+      "allocated_size_bytes": 3411968,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3409524,
+      "mtime_epoch": 1791115689.9584255,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/msvcr80.dll",
+      "sha256": "d1046fa5039c91c9e63fbfca8d53a6d49b20d393c76c15fbe22958418b1aa490"
+    },
+    {
+      "allocated_size_bytes": 3395584,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3392358,
+      "mtime_epoch": 1791115689.621144,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/ieframe.dll",
+      "sha256": "8a62fcd46d2a0ba754749134829122878f2f7776a5e4f24a5888dafa98690169"
+    },
+    {
+      "allocated_size_bytes": 3391488,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3390825,
+      "mtime_epoch": 1791115316.9214277,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/riched20.dll",
+      "sha256": "c63b5f35ba5499326053f6acf23a5dcc8d5f4315e94890a8e72f11624fbe6626"
+    },
+    {
+      "allocated_size_bytes": 3342336,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3338752,
+      "mtime_epoch": 1786645258.0,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/mono/mono-2.0/lib/mono/gac/System.Data.Entity/4.0.0.0__b77a5c561934e089/System.Data.Entity.dll",
+      "sha256": "8efff12b054ed63c465d3f1e0ce9c86f43c2ea2585f7fbfe7fe7001605ee9137"
+    },
+    {
+      "allocated_size_bytes": 3330048,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3329535,
+      "mtime_epoch": 1791115689.9627247,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/msvcrt.dll",
+      "sha256": "240a457149b3291e61468473ae52e5510172518feac33eee5f4e539bdc3340ab"
+    },
+    {
+      "allocated_size_bytes": 3264512,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3262642,
+      "mtime_epoch": 1791115316.262363,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/dmsynth.dll",
+      "sha256": "f3115913687a3f00549275f7065a3cda18d9da74e4900543759acbe85d07b1fa"
+    },
+    {
+      "allocated_size_bytes": 3260416,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3259839,
+      "mtime_epoch": 1791115689.9665449,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/msvcrtd.dll",
+      "sha256": "418d47833bef916451b4816f8af27cfd6971e05c036833b5f9d17d99fbdef0cf"
+    },
+    {
+      "allocated_size_bytes": 3256320,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3255254,
+      "mtime_epoch": 1791115689.9563317,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/msvcr71.dll",
+      "sha256": "8767f1f26afa9f8c7ec947553787ef05a309b305bb60d1a4cd708b704b0fc433"
+    },
+    {
+      "allocated_size_bytes": 3256320,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3255230,
+      "mtime_epoch": 1791115689.9536672,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/msvcr70.dll",
+      "sha256": "005f8aa1545b2a922ffe0495ec25893183e7453f496eca8531c91828805f8e14"
+    },
+    {
+      "allocated_size_bytes": 3227648,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3224714,
+      "mtime_epoch": 1791115689.2982812,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/crtdll.dll",
+      "sha256": "8a868f8de7e5d81c425b201c54fc990d6894817481f2ceb165b82728e4547d81"
+    },
+    {
+      "allocated_size_bytes": 3223552,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3221592,
+      "mtime_epoch": 1791115317.1984973,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/winegstreamer.dll",
+      "sha256": "dc6156159a70468598f8485d4d71233ae7b84ccf296a1d434aac45c4bce1dbc3"
+    },
+    {
+      "allocated_size_bytes": 3223552,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3223398,
+      "mtime_epoch": 1791115316.3337886,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/gdi32.dll",
+      "sha256": "7064e1157673c49fc9173f5494239026be56e632ac1fff6af4fc5fd84ead7171"
+    },
+    {
+      "allocated_size_bytes": 3211264,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3209199,
+      "mtime_epoch": 1791115690.48784,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/winsxs/x86_microsoft.windows.gdiplus_6595b64144ccf1df_1.1.7601.23038_none_deadbeef/gdiplus.dll",
+      "sha256": "5d3d4ddbe85a0635e360594c20b239db40da65d7def12ac09b08d7008463a039"
+    },
+    {
+      "allocated_size_bytes": 3211264,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3209199,
+      "mtime_epoch": 1791115690.486155,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/winsxs/x86_microsoft.windows.gdiplus_6595b64144ccf1df_1.0.6000.16386_none_deadbeef/gdiplus.dll",
+      "sha256": "5d3d4ddbe85a0635e360594c20b239db40da65d7def12ac09b08d7008463a039"
+    },
+    {
+      "allocated_size_bytes": 3211264,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3209199,
+      "mtime_epoch": 1791115689.5450385,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/gdiplus.dll",
+      "sha256": "5d3d4ddbe85a0635e360594c20b239db40da65d7def12ac09b08d7008463a039"
+    },
+    {
+      "allocated_size_bytes": 3194880,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3194505,
+      "mtime_epoch": 1791115690.0719376,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/quartz.dll",
+      "sha256": "243d7ad234d85ac3be9eb2bbb98bdd53341ee891dc1f9752cfa3a05d53596bb4"
+    },
+    {
+      "allocated_size_bytes": 3174400,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3173888,
+      "mtime_epoch": 1786645258.0,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/mono/mono-2.0/lib/mono/gac/System.Xml/4.0.0.0__b77a5c561934e089/System.Xml.dll",
+      "sha256": "dceb3d49690a2e72a96436e06b1fea2b0b60a2cf6d9a27709aa5a8723bcfc892"
+    },
+    {
+      "allocated_size_bytes": 3153920,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3149888,
+      "mtime_epoch": 1791115689.9291432,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/msvcp60.dll",
+      "sha256": "3526fd4d38fb343009b3f2fe5c0303b9bc7f692294c15696301b0946254debad"
+    },
+    {
+      "allocated_size_bytes": 3100672,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3098698,
+      "mtime_epoch": 1791115689.510168,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/dwrite.dll",
+      "sha256": "b243d947d8d17c20935eb22709479ab52ee8935b6c5497d24bc1b32bf7286593"
+    },
+    {
+      "allocated_size_bytes": 3051520,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3048045,
+      "mtime_epoch": 1791115316.6021585,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/mfplat.dll",
+      "sha256": "8f1825cdde0865a5948eb229f8c4dd38a318db7e8d1c5bdd0e5414759945fdd2"
+    },
+    {
+      "allocated_size_bytes": 3035136,
+      "hard_link_count": 1,
+      "logical_size_bytes": 3034697,
+      "mtime_epoch": 1791115317.05722,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/urlmon.dll",
+      "sha256": "201f2d8c99b7d4ff2fd8993d1f21e7e8a46a89e69aaaf092d79582d6c2c52f27"
+    },
+    {
+      "allocated_size_bytes": 2994176,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2991301,
+      "mtime_epoch": 1791115690.097045,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/rpcrt4.dll",
+      "sha256": "1916fd0d61702138b519c36cd95c5b62469ffd0c6392d675abb82a842e8306fd"
+    },
+    {
+      "allocated_size_bytes": 2994176,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2991104,
+      "mtime_epoch": 1786645258.0,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/mono/mono-2.0/lib/mono/gac/System.Web/4.0.0.0__b03f5f7f11d50a3a/System.Web.dll",
+      "sha256": "ac2c97ca3fd75c711b6b04b4d24941cfa150a33435e5bdc8c81a66399ad5a743"
+    },
+    {
+      "allocated_size_bytes": 2990080,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2986158,
+      "mtime_epoch": 1791115315.9937446,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/bcrypt.dll",
+      "sha256": "343f9041747081a53ed8ba848bee5d26b4ad27173cd86ac4508aea897d3cae0a"
+    },
+    {
+      "allocated_size_bytes": 2961408,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2961327,
+      "mtime_epoch": 1791115689.431586,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/ddraw.dll",
+      "sha256": "e127cb650d6925e429374f8ddcb18674318f08c2d20ace9aa01cc71526133f8a"
+    },
+    {
+      "allocated_size_bytes": 2940928,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2939003,
+      "mtime_epoch": 1791115316.0344222,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/comdlg32.dll",
+      "sha256": "c0616bb6d55ff7877f96b7f6524baf94155683e0342eff60f663e9659be240df"
+    },
+    {
+      "allocated_size_bytes": 2908160,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2907648,
+      "mtime_epoch": 1786645258.0,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/mono/mono-2.0/lib/x86_64/SDL3.dll",
+      "sha256": "9210eb358dd0d438576538f5261887ead460d8885306b32a4e6cd3f8190b3e64"
+    },
+    {
+      "allocated_size_bytes": 2899968,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2898093,
+      "mtime_epoch": 1791115317.070481,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/vbscript.dll",
+      "sha256": "1d27048d40d63387d5df12bc618a6f929c86e88fd336b856370893a6e9df04f4"
+    },
+    {
+      "allocated_size_bytes": 2895872,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2895159,
+      "mtime_epoch": 1791115690.3809717,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/wldap32.dll",
+      "sha256": "909e339d02e61ac9a4aae61b63b29f1babafe5119de11493989e841a26332cf4"
+    },
+    {
+      "allocated_size_bytes": 2891776,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2891678,
+      "mtime_epoch": 1791115689.7748587,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/mf.dll",
+      "sha256": "75aa2c1a71ccb6cf16fddedc7a10fa1fb843bb6c544b61a374a3c7e6744f6a99"
+    },
+    {
+      "allocated_size_bytes": 2879488,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2876928,
+      "mtime_epoch": 1786645258.0,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/mono/mono-2.0/lib/mono/gac/System/4.0.0.0__b77a5c561934e089/System.dll",
+      "sha256": "014bb58cc9cb0b590aa66cefade1a5a49bfa5ecd51d0bbeec7450e7d328d6cde"
+    },
+    {
+      "allocated_size_bytes": 2809856,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2806160,
+      "mtime_epoch": 1786645258.0,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/mono/mono-2.0/lib/mono/4.5/Microsoft.CodeAnalysis.dll",
+      "sha256": "44297d9a467210a10a8c66573297956cee1f3ab4290d126eb53cf3aed0de1d97"
+    },
+    {
+      "allocated_size_bytes": 2768896,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2768248,
+      "mtime_epoch": 1791115690.0901635,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/riched20.dll",
+      "sha256": "64ee5f052887171763805d9679f9ecd8d97bd3ed65175f2d271390832f130095"
+    },
+    {
+      "allocated_size_bytes": 2760704,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2757391,
+      "mtime_epoch": 1791115316.1297252,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/d3drm.dll",
+      "sha256": "b4427c0b7eb8af9b51b276fdb33fa606b8a84d78cc0f61d71a99fefea1f65c27"
+    },
+    {
+      "allocated_size_bytes": 2715648,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2714324,
+      "mtime_epoch": 1791115316.9176621,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/resampledmo.dll",
+      "sha256": "dac8938ad4a9e9bbad7386226c5720ce634c3608afdb2fd78e84d570eee10f2e"
+    },
+    {
+      "allocated_size_bytes": 2678784,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2678179,
+      "mtime_epoch": 1791115317.21976,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/wininet.dll",
+      "sha256": "e5c62146c5feed74f8fd46cf39509e7a65cf5cf3ba91d75c3e39996f7b1882f5"
+    },
+    {
+      "allocated_size_bytes": 2658304,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2657280,
+      "mtime_epoch": 1786645258.0,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/mono/mono-2.0/lib/x86/SDL3.dll",
+      "sha256": "409ad52d2f583d03a219dd6209254eedb468d2bd4cb44530e29c62887172660c"
+    },
+    {
+      "allocated_size_bytes": 2654208,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2651800,
+      "mtime_epoch": 1791115689.476241,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/dmsynth.dll",
+      "sha256": "96333fc1797e935b7e2fd2eb12332bf279187e9272420ba484c029331cf665bc"
+    },
+    {
+      "allocated_size_bytes": 2629632,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2629202,
+      "mtime_epoch": 1791115316.9620993,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/setupapi.dll",
+      "sha256": "c61d02668bd225e05b6408e6a96ccec0bdd0fd6117472f39f85a6164c88fdc55"
+    },
+    {
+      "allocated_size_bytes": 2613248,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2612891,
+      "mtime_epoch": 1791115690.3380647,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/winegstreamer.dll",
+      "sha256": "3d6f8a13cbd5c89a9317c82c00b065da5f114aec3a6d643c33b7160071a6059d"
+    },
+    {
+      "allocated_size_bytes": 2584576,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2582208,
+      "mtime_epoch": 1791115689.542583,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/gdi32.dll",
+      "sha256": "58e2216c47d313e5aac90cb75e48ae685ec5df84d9889ff3d663ebba1dcf5c2b"
+    },
+    {
+      "allocated_size_bytes": 2584576,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2582790,
+      "mtime_epoch": 1791115689.2847264,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/comdlg32.dll",
+      "sha256": "bb6deed1f98f17457eaa25bcbe000a820856c8be9e51455fa4e9d2d17f1dbe9e"
+    },
+    {
+      "allocated_size_bytes": 2576384,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2572687,
+      "mtime_epoch": 1791115316.3134427,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/evr.dll",
+      "sha256": "aea901480034cce3a614864d140cd6a1860819f7c403c737135cd48baafc36b5"
+    },
+    {
+      "allocated_size_bytes": 2564096,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2561137,
+      "mtime_epoch": 1791115317.257945,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/wmphoto.dll",
+      "sha256": "4daa239304eb7cfb2fc18bd2071a6890ced316571bde527f8ec968bb8dab878c"
+    },
+    {
+      "allocated_size_bytes": 2510848,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2508346,
+      "mtime_epoch": 1791115316.485798,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/kernel32.dll",
+      "sha256": "31dce9a0d68a9055f414bfe9f08c67a3e3b742c045e691cab8392918592a929b"
+    },
+    {
+      "allocated_size_bytes": 2469888,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2467083,
+      "mtime_epoch": 1791115689.2561455,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/bcrypt.dll",
+      "sha256": "11ab4bc60eba18e5e9cf1c8eb54619ea60a7e616339db8d79a5ccf378a47678f"
+    },
+    {
+      "allocated_size_bytes": 2465792,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2462829,
+      "mtime_epoch": 1791115690.206577,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/urlmon.dll",
+      "sha256": "87428a8a3eb03d7b48c48009dcf4c159b8044a6b8d8ac046686043908db01470"
+    },
+    {
+      "allocated_size_bytes": 2461696,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2459666,
+      "mtime_epoch": 1791115316.6290996,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/mscms.dll",
+      "sha256": "12f23cecef6a10d40560e5bcb93e6fc85cc70f7c0eda082cc57cc2f08c359c8a"
+    },
+    {
+      "allocated_size_bytes": 2355200,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2353874,
+      "mtime_epoch": 1791115689.786541,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/mfplat.dll",
+      "sha256": "f3926c5d7b978d927c4a37d6091194359609b696d2cb3a4add3d046143e54526"
+    },
+    {
+      "allocated_size_bytes": 2334720,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2331622,
+      "mtime_epoch": 1791115317.0423262,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/uiautomationcore.dll",
+      "sha256": "83bfecd1b53ef70f46d562d5a0b6709c99dfcd944315bd00a4e5c5336c7c6099"
+    },
+    {
+      "allocated_size_bytes": 2297856,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2295163,
+      "mtime_epoch": 1791115316.2497458,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/dmime.dll",
+      "sha256": "d713923151515241cb3988efdf2abef2fdb4632d1995fb4892f2597f708b0975"
+    },
+    {
+      "allocated_size_bytes": 2289664,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2288030,
+      "mtime_epoch": 1791115690.219583,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/vbscript.dll",
+      "sha256": "8f64028ae1a143b75bb82f80c61db379f3eb1e049880793c32ac44d231c017e0"
+    },
+    {
+      "allocated_size_bytes": 2289664,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2288317,
+      "mtime_epoch": 1791115316.0193179,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/combase.dll",
+      "sha256": "05ced7b4b49f10bd9ce2dab72d12617a7a03aec9975ebb2b483bc9aeb98b1842"
+    },
+    {
+      "allocated_size_bytes": 2273280,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2271887,
+      "mtime_epoch": 1791115316.9317658,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/rsaenh.dll",
+      "sha256": "8bb8803f7d7f7539d04b531cda681a9b7c290850de29df13d65dee784d64de19"
+    },
+    {
+      "allocated_size_bytes": 2269184,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2266459,
+      "mtime_epoch": 1791115690.087011,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/resampledmo.dll",
+      "sha256": "cc1045c22d0b23c20362311e1c496ef38197690d400c955a5b5e9b7b763635dd"
+    },
+    {
+      "allocated_size_bytes": 2244608,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2240628,
+      "mtime_epoch": 1791115316.141032,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/d3dx10_43.dll",
+      "sha256": "f0cc593e8c4f8bd9498dee7493ddc570b8be5cb42d85be0d6950b244c6006aa7"
+    },
+    {
+      "allocated_size_bytes": 2187264,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2183617,
+      "mtime_epoch": 1791115690.121685,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/setupapi.dll",
+      "sha256": "ee4aa195c07803a5055bed9dbf688c6e19cd2c024e5e63a400ff9190a512eabd"
+    },
+    {
+      "allocated_size_bytes": 2166784,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2163185,
+      "mtime_epoch": 1791115317.1012013,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/webservices.dll",
+      "sha256": "57b16014559e7bdca77d71ba6be54c12eb056acb35667e7febc53406080b3743"
+    },
+    {
+      "allocated_size_bytes": 2154496,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2153984,
+      "mtime_epoch": 1786645258.0,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/mono/mono-2.0/lib/mono/gac/System.Data/4.0.0.0__b77a5c561934e089/System.Data.dll",
+      "sha256": "7af051fbfec5c4dd35ef29227663ded4498360a7c84ebfb2588af5c82591188e"
+    },
+    {
+      "allocated_size_bytes": 2150400,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2150016,
+      "mtime_epoch": 1791115690.3564222,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/wininet.dll",
+      "sha256": "45fb6ed8e141f86886a6569aee8b90b6f3477d3db6c44cb8c3f7a376b453c591"
+    },
+    {
+      "allocated_size_bytes": 2138112,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2136721,
+      "mtime_epoch": 1791115690.3934941,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/wmphoto.dll",
+      "sha256": "128b190de754bcdc8c8173747a8765d16523429175c1013f8572ce7caeeb4d8c"
+    },
+    {
+      "allocated_size_bytes": 2121728,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2121134,
+      "mtime_epoch": 1791115689.5242858,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/evr.dll",
+      "sha256": "4ca687a4fff771257e4655f74547761f051fc81e185c4dbd3be4566bfa8ad4ee"
+    },
+    {
+      "allocated_size_bytes": 2121728,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2117640,
+      "mtime_epoch": 1791115316.095655,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/d3d9.dll",
+      "sha256": "26dd748779a45f036ed28d84f4f507c83d88e002a56e44c51732bfd13133691c"
+    },
+    {
+      "allocated_size_bytes": 2109440,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2105768,
+      "mtime_epoch": 1791115316.6192713,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/mp3dmod.dll",
+      "sha256": "cb5428191c5465e8022e5db7ce3defca001c945a03a8ddf50a20fe32e930d921"
+    },
+    {
+      "allocated_size_bytes": 2105344,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2104012,
+      "mtime_epoch": 1791115689.669324,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/kernel32.dll",
+      "sha256": "59a2d8eb359ea1b4eaa9637621784f322e6e7fa385993f9274116d08a16b7557"
+    },
+    {
+      "allocated_size_bytes": 2101248,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2097784,
+      "mtime_epoch": 1791115317.2665164,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/wow64win.dll",
+      "sha256": "a842adba6e24bbe17f09b420827e6b4c1b0356c43a2aac0bcf9b950883e09e18"
+    },
+    {
+      "allocated_size_bytes": 2097152,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2096433,
+      "mtime_epoch": 1791115317.2106993,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/winevulkan.dll",
+      "sha256": "540fd49c262987861c76e40db3a88ef97b729f7093f75578f559b255e94bbb2f"
+    },
+    {
+      "allocated_size_bytes": 2080768,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2078244,
+      "mtime_epoch": 1791115689.3510234,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/d3drm.dll",
+      "sha256": "c29169f77c273d166fa90489cfe6c7f40c9caa77021bb83592022dbf66db307d"
+    },
+    {
+      "allocated_size_bytes": 2043904,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2041296,
+      "mtime_epoch": 1791115316.0116136,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/cmd.exe",
+      "sha256": "9b9a0ff98b77331dbd3e8f2969a5bb89cce4a3f33d80c908a9c4b92ed882d694"
+    },
+    {
+      "allocated_size_bytes": 2015232,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2014406,
+      "mtime_epoch": 1791115317.316464,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/xactengine3_7.dll",
+      "sha256": "85ab86ba27108fcec113e4c3082687dfde1c5d83646327c78ff3a7a10fb9c829"
+    },
+    {
+      "allocated_size_bytes": 2015232,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2014406,
+      "mtime_epoch": 1791115317.314918,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/xactengine3_6.dll",
+      "sha256": "61231d4923f7e86d543a6b952346313cc8c55e063f8966ca2b6d0e8ad06b44d2"
+    },
+    {
+      "allocated_size_bytes": 2015232,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2014406,
+      "mtime_epoch": 1791115317.3133113,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/xactengine3_5.dll",
+      "sha256": "1ca0a84369ece5194f96cd22469b92bb5b9b4c4ea3ba09f1abfcb1e4e3805736"
+    },
+    {
+      "allocated_size_bytes": 2015232,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2013758,
+      "mtime_epoch": 1791115317.311657,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/xactengine3_4.dll",
+      "sha256": "7ee0131f00fa7416c8a5cbd1694769d457080d10a695502c45ec1ab3314246c8"
+    },
+    {
+      "allocated_size_bytes": 2015232,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2013758,
+      "mtime_epoch": 1791115317.3096998,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/xactengine3_3.dll",
+      "sha256": "cfb877c69bc0cd17fabec0064f88847d2b6149ae6f548fa8ebe49dc5fce0d413"
+    },
+    {
+      "allocated_size_bytes": 2015232,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2013758,
+      "mtime_epoch": 1791115317.3080468,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/xactengine3_2.dll",
+      "sha256": "6993994bfb6b6bcfde915974490aa9fff0aca755dd6f098953851462400eaaac"
+    },
+    {
+      "allocated_size_bytes": 2015232,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2013758,
+      "mtime_epoch": 1791115317.3059144,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/xactengine3_1.dll",
+      "sha256": "2afbec844bb27b389e2c1df026f4f041c1f23f685ce34e42b28dc70b38564384"
+    },
+    {
+      "allocated_size_bytes": 2015232,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2013758,
+      "mtime_epoch": 1791115317.3038409,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/xactengine3_0.dll",
+      "sha256": "617d659e7b41ad99491df74c76ec280e0bd57891d4eb7ad718999b833b0abd9f"
+    },
+    {
+      "allocated_size_bytes": 2015232,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2014720,
+      "mtime_epoch": 1786645182.0,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/mono/mono-2.0/lib/mono/gac/System.Windows.Forms.DataVisualization/4.0.0.0__31bf3856ad364e35/System.Windows.Forms.DataVisualization.dll",
+      "sha256": "9a6a06e0b010637069a5bd853dea72dbeaeee1c4fb447c66afac91d71ebe97d9"
+    },
+    {
+      "allocated_size_bytes": 2011136,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2010909,
+      "mtime_epoch": 1791115317.3018892,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/xactengine2_9.dll",
+      "sha256": "2c3f882c87160cda0004bccb61bb80f5518b77c99445f68a0e1f26a812c240ba"
+    },
+    {
+      "allocated_size_bytes": 2011136,
+      "hard_link_count": 1,
+      "logical_size_bytes": 2010909,
+      "mtime_epoch": 1791115317.3001118,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/xactengine2_7.dll",
+      "sha256": "d57e3bb6b8aac43697927562c1eb749012d95ad5b5e1b12ee2e605fa9fa0d63d"
+    },
+    {
+      "allocated_size_bytes": 1982464,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1979633,
+      "mtime_epoch": 1791115316.0608344,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/cryptui.dll",
+      "sha256": "101e2f998e9dea274305123c66d5482e4af660738dfaf95367df2a63f3361e32"
+    },
+    {
+      "allocated_size_bytes": 1978368,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1975264,
+      "mtime_epoch": 1791115317.222792,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/winmm.dll",
+      "sha256": "c45c009a30ba03ff8d4e965e5fc7b282169cb6cdc99406904e939407c5bbf3d8"
+    },
+    {
+      "allocated_size_bytes": 1974272,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1971955,
+      "mtime_epoch": 1791115316.8344173,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/ntoskrnl.exe",
+      "sha256": "4828ca8a6a8c842ee6c27c2304247167f540e30e52c5c93048b428c25f34ebf7"
+    },
+    {
+      "allocated_size_bytes": 1966080,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1962461,
+      "mtime_epoch": 1791115317.2977927,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/xactengine2_4.dll",
+      "sha256": "9bc46fa4c11d388f4bd3e2e404f48a5769b788628a0648b01203f3776fed4ee3"
+    },
+    {
+      "allocated_size_bytes": 1966080,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1962461,
+      "mtime_epoch": 1791115317.296142,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/xactengine2_0.dll",
+      "sha256": "37ce7a26d2876de2f06e90c2c641cbae00e035bacfd3c459aa98af1f3c965194"
+    },
+    {
+      "allocated_size_bytes": 1953792,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1952892,
+      "mtime_epoch": 1791115317.2172384,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/winhttp.dll",
+      "sha256": "9c0072b33b59f825d7c2aad4fda3b903ecaa58f54ff4781511da79b98d25c120"
+    },
+    {
+      "allocated_size_bytes": 1941504,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1939935,
+      "mtime_epoch": 1791115689.358427,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/d3dx10_43.dll",
+      "sha256": "fd2176f97f83ea110da5063772156f56b85154384d3fdd040d1c56037b935c57"
+    },
+    {
+      "allocated_size_bytes": 1937408,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1934562,
+      "mtime_epoch": 1791115689.4617338,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/dmime.dll",
+      "sha256": "ddb36abd53629f5689e4d6089824ac790e485b60a33c7b595660167c083519f2"
+    },
+    {
+      "allocated_size_bytes": 1925120,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1921073,
+      "mtime_epoch": 1791115690.1919744,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/uiautomationcore.dll",
+      "sha256": "64b0224d78b7e630df74a8bfd95c00a93b1c8e10d1fffc755b3677858b5733fd"
+    },
+    {
+      "allocated_size_bytes": 1908736,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1905906,
+      "mtime_epoch": 1791115317.1612792,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/winecfg.exe",
+      "sha256": "0b535754526456717e404c72c6b62b511bba1e6b8ecdf736dc23333dd0198f66"
+    },
+    {
+      "allocated_size_bytes": 1888256,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1884833,
+      "mtime_epoch": 1791115316.28394,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/dsound.dll",
+      "sha256": "0c3cd36c76955f574d5108afd7a2d3210aa5f8702a7bb9a4a24d814c4228e94d"
+    },
+    {
+      "allocated_size_bytes": 1871872,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1868145,
+      "mtime_epoch": 1791115316.306229,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/dxgi.dll",
+      "sha256": "0c58fb3b609e1859832ea99eb1addefdfbe48bb155b83ccd7098fb5c832370b6"
+    },
+    {
+      "allocated_size_bytes": 1859584,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1859392,
+      "mtime_epoch": 1791115689.8155503,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/mscms.dll",
+      "sha256": "1176ea9957194147182a6b242ebee40239839aa6bacd8775e24c3036710a7368"
+    },
+    {
+      "allocated_size_bytes": 1851392,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1847412,
+      "mtime_epoch": 1791115689.308191,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/cryptui.dll",
+      "sha256": "63f7009d3e7e59a3a756312662b73a6dc5e40fb0e5915a6fa5d0915d9fc4d799"
+    },
+    {
+      "allocated_size_bytes": 1851392,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1849411,
+      "mtime_epoch": 1791115689.2752843,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/combase.dll",
+      "sha256": "aafdec831b9bf60ed9dd99355532626dc36dfae92b412222897693461da3f2da"
+    },
+    {
+      "allocated_size_bytes": 1843200,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1841877,
+      "mtime_epoch": 1791115690.0993721,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/rsaenh.dll",
+      "sha256": "fc26f9a6982799b783e5a97f2a05eaab067d926f33771e5b85a17328a526f59c"
+    },
+    {
+      "allocated_size_bytes": 1839104,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1836558,
+      "mtime_epoch": 1791115317.338446,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/xaudio2_9.dll",
+      "sha256": "b38fe3cb7e1ecca5cfb0a5d9f8a521db802c713ffe06b54ae86cb2126147cd6c"
+    },
+    {
+      "allocated_size_bytes": 1835008,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1832426,
+      "mtime_epoch": 1791115317.3364108,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/xaudio2_8.dll",
+      "sha256": "7da41cd2c6c0496eddd881cae383c55a780fba4efc20a73fc4597241f6440ad8"
+    },
+    {
+      "allocated_size_bytes": 1822720,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1822142,
+      "mtime_epoch": 1791115689.269977,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/cmd.exe",
+      "sha256": "84ceba75417a6ee6331f89f9ec8cb9f6da3e20510d27109cb7f74721966707bf"
+    },
+    {
+      "allocated_size_bytes": 1822720,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1820160,
+      "mtime_epoch": 1786645258.0,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/mono/mono-2.0/lib/mono/4.5/mcs.exe",
+      "sha256": "2341f240cb912cdade7283d4f478ffd8a86cd16d8f923012fb7e2618db363ed8"
+    },
+    {
+      "allocated_size_bytes": 1818624,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1818454,
+      "mtime_epoch": 1791115315.88564,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/Speech/Common/sapi.dll",
+      "sha256": "e463a3fb48deae423cda40351cd9a3b321b48e7cbd56a9f375ec201aa7d9d079"
+    },
+    {
+      "allocated_size_bytes": 1798144,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1796808,
+      "mtime_epoch": 1791115689.8053813,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/mp3dmod.dll",
+      "sha256": "281a55c455475969e1b189b7abd324ea884e8c52e163cf3abc4e4554782cd9fa"
+    },
+    {
+      "allocated_size_bytes": 1794048,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1791964,
+      "mtime_epoch": 1791115316.8939903,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/qcap.dll",
+      "sha256": "f33739229a70cc3825bd8e4ea8788e6913496390e55d26631a9544ae01d24fa4"
+    },
+    {
+      "allocated_size_bytes": 1789952,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1787863,
+      "mtime_epoch": 1791115689.3292305,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/d3d9.dll",
+      "sha256": "4bf87fb5e69b38ebb8565ab0590449068df7e4700dfa6fab80d43afbb12bbf7b"
+    },
+    {
+      "allocated_size_bytes": 1789952,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1788446,
+      "mtime_epoch": 1791115315.8976493,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/wbem/wbemprox.dll",
+      "sha256": "eb5f6ff28603a756c1854351628b508b74967b165f2128b9edda114b9317bef4"
+    },
+    {
+      "allocated_size_bytes": 1777664,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1776546,
+      "mtime_epoch": 1791115316.4510744,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/inetcomm.dll",
+      "sha256": "f96998c68b9a367084ac1fdfc8f66877a50a967d737c2295cb7db2c88efba42c"
+    },
+    {
+      "allocated_size_bytes": 1753088,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1752012,
+      "mtime_epoch": 1791115690.3013272,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/winecfg.exe",
+      "sha256": "0c486572a27b054c5b666c1b0035002ab70298dc0bd60cd453f18876c4940e30"
+    },
+    {
+      "allocated_size_bytes": 1744896,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1741388,
+      "mtime_epoch": 1791115316.9869652,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/shlwapi.dll",
+      "sha256": "5ebd3cad100e428cd05fa7c1a8d7b042819c1ca309947081f6499624aecc7a98"
+    },
+    {
+      "allocated_size_bytes": 1740800,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1738409,
+      "mtime_epoch": 1791115316.2695646,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/dplayx.dll",
+      "sha256": "036eecd6be7f25f4c11d323951763a923292b50a87e84f61b82a0bf6c049492b"
+    },
+    {
+      "allocated_size_bytes": 1732608,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1731681,
+      "mtime_epoch": 1791115316.2380934,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/dinput.dll",
+      "sha256": "6b8851b9bb12f397370348f77eb8ee712f2ff8f5eeb653f5b2e7aa00948b11f3"
+    },
+    {
+      "allocated_size_bytes": 1728512,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1727521,
+      "mtime_epoch": 1791115690.348723,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/winevulkan.dll",
+      "sha256": "8e29a9e7ee67084fc5c1c8a7fd05d0f748ac70411b5c91267b117599c5a41f91"
+    },
+    {
+      "allocated_size_bytes": 1728512,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1727001,
+      "mtime_epoch": 1791115316.2397206,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/dinput8.dll",
+      "sha256": "fb784693e1b213e7af0a07781f2d4772e149ec3a42d11d475c8653df701617e0"
+    },
+    {
+      "allocated_size_bytes": 1724416,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1722900,
+      "mtime_epoch": 1791115690.4467137,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/xactengine3_7.dll",
+      "sha256": "5824914b71a592b11da2156ab5c53f427042879c8dd2c44c8b468ea0383297d3"
+    },
+    {
+      "allocated_size_bytes": 1724416,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1722900,
+      "mtime_epoch": 1791115690.4452488,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/xactengine3_6.dll",
+      "sha256": "2b791c08282dfba1ea765d64cd3a87149098d85bccb3836eb2616f3e8eee8008"
+    },
+    {
+      "allocated_size_bytes": 1724416,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1722900,
+      "mtime_epoch": 1791115690.4426453,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/xactengine3_5.dll",
+      "sha256": "f9ce7de468c54dbd1a60834a4d7ed886622cb2cd66542c7defdbb4cd91aab40d"
+    },
+    {
+      "allocated_size_bytes": 1724416,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1722545,
+      "mtime_epoch": 1791115690.4403982,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/xactengine3_4.dll",
+      "sha256": "20a3e20edf2286b95c0caa94fb6c7761314b5221ba15a3dbed0572df48b5fea1"
+    },
+    {
+      "allocated_size_bytes": 1724416,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1722545,
+      "mtime_epoch": 1791115690.4387133,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/xactengine3_3.dll",
+      "sha256": "84b3c97772cbdf31cfe818e756e42adc2bc55168851a409476ae7cc14253c0cd"
+    },
+    {
+      "allocated_size_bytes": 1724416,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1722545,
+      "mtime_epoch": 1791115690.4366455,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/xactengine3_2.dll",
+      "sha256": "575e548d056ca24024d31a7e48abe61b6242026231b35a6fc1b4dbc31d9366cf"
+    },
+    {
+      "allocated_size_bytes": 1724416,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1722545,
+      "mtime_epoch": 1791115690.4343743,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/xactengine3_1.dll",
+      "sha256": "03689b432477c0c9846767b4b5863761ebf97b17cf6e9016204e7f9fbbe68ce8"
+    },
+    {
+      "allocated_size_bytes": 1724416,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1722545,
+      "mtime_epoch": 1791115690.4327745,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/xactengine3_0.dll",
+      "sha256": "fccad3a04f11a3a0f802a5bb16701ce61ac5d2275b569b64124b5581bd724466"
+    },
+    {
+      "allocated_size_bytes": 1716224,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1715037,
+      "mtime_epoch": 1791115690.430979,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/xactengine2_9.dll",
+      "sha256": "e09edc5175f99c57c82d49e286f41359eceb514d5adee8c5f32c445569a64ee7"
+    },
+    {
+      "allocated_size_bytes": 1716224,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1715037,
+      "mtime_epoch": 1791115690.429357,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/xactengine2_7.dll",
+      "sha256": "d4590f1122cc3900b881ebebe9bc6bd88877490c672efffb523a8d654be58db3"
+    },
+    {
+      "allocated_size_bytes": 1703936,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1703108,
+      "mtime_epoch": 1791115317.33457,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/xaudio2_7.dll",
+      "sha256": "fd4fdb61870e68b9f2e8d5b2cccd1201b3dcecd0aac7d23e5d4de7681dc7f354"
+    },
+    {
+      "allocated_size_bytes": 1703936,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1702460,
+      "mtime_epoch": 1791115317.3329732,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/xaudio2_6.dll",
+      "sha256": "5a96f1f66ad066613f9f426d90e226cd03df89d5d28ae574901196926630aa23"
+    },
+    {
+      "allocated_size_bytes": 1703936,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1702460,
+      "mtime_epoch": 1791115317.3314028,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/xaudio2_5.dll",
+      "sha256": "3e97ce53fc262a03d2912cc23ac2601bd9e1b3cb8afe88d91324898166acbdc3"
+    },
+    {
+      "allocated_size_bytes": 1703936,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1702460,
+      "mtime_epoch": 1791115317.3293905,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/xaudio2_4.dll",
+      "sha256": "99b713dc109214b53c83735ed1a37a603a577fbfd3c7dc823f136dca51fec41b"
+    },
+    {
+      "allocated_size_bytes": 1695744,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1693019,
+      "mtime_epoch": 1791115690.2466342,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/webservices.dll",
+      "sha256": "af80619de410bb1ece492fe5147e17314b5cadf6fc6fc213565dcc9fcf54eceb"
+    },
+    {
+      "allocated_size_bytes": 1695744,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1695171,
+      "mtime_epoch": 1791115690.0018456,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/ntoskrnl.exe",
+      "sha256": "e4823ea65ac6177e60ee526d4b09f84e9a5b4d10f44bff643c43533ccd60083f"
+    },
+    {
+      "allocated_size_bytes": 1691648,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1687923,
+      "mtime_epoch": 1791115317.327506,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/xaudio2_3.dll",
+      "sha256": "8f50509bf1fa2bc6e0522c2d2342c765b2a830e26c82e4a2bc5566d07640aac2"
+    },
+    {
+      "allocated_size_bytes": 1691648,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1687923,
+      "mtime_epoch": 1791115317.3257198,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/xaudio2_2.dll",
+      "sha256": "9c436428ab4c89d548005264fc24414bab3390b3c77fd15789f6fbcd171554f0"
+    },
+    {
+      "allocated_size_bytes": 1691648,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1687923,
+      "mtime_epoch": 1791115317.3242614,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/xaudio2_1.dll",
+      "sha256": "ffb406568bb5d9e8658f93954af6e70da50d878b1be755dc476b2e8140e74ddf"
+    },
+    {
+      "allocated_size_bytes": 1691648,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1687923,
+      "mtime_epoch": 1791115317.3223665,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/xaudio2_0.dll",
+      "sha256": "83fbfa88134f9b961c606e4c12d392fcaecf4d24aae09eebc194e7289b750ada"
+    },
+    {
+      "allocated_size_bytes": 1691648,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1690348,
+      "mtime_epoch": 1791115316.6347241,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/msctf.dll",
+      "sha256": "84a1966276114beef8a76dbf7a158c86aca9553b4896eaee521b6104accd50ae"
+    },
+    {
+      "allocated_size_bytes": 1675264,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1673878,
+      "mtime_epoch": 1791115690.427191,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/xactengine2_4.dll",
+      "sha256": "02d7339f00946aefd6ec215d4f92bb78b20ff97f8f542105bd36fb3ac8a2c1e2"
+    },
+    {
+      "allocated_size_bytes": 1675264,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1673878,
+      "mtime_epoch": 1791115690.4254403,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/xactengine2_0.dll",
+      "sha256": "8c1050086c1cc4c965faa12222236622f4961e66f60ca5425deca0b0e7e66b8c"
+    },
+    {
+      "allocated_size_bytes": 1658880,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1658446,
+      "mtime_epoch": 1791115690.359043,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/winmm.dll",
+      "sha256": "26ba334f71e74af26ef9c2e64e5b428cd02c01d9a79b7c8c4a1fe35b64ed90a9"
+    },
+    {
+      "allocated_size_bytes": 1638400,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1635638,
+      "mtime_epoch": 1791115689.4986408,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/dsound.dll",
+      "sha256": "3fdec2cd3479a96ef6d98f6dd272082e403d33586b3dceab2f6db8f863b2e9c8"
+    },
+    {
+      "allocated_size_bytes": 1634304,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1630774,
+      "mtime_epoch": 1791115315.9660964,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/advapi32.dll",
+      "sha256": "88541e6222ed8eb811bd1dd5c06c85a3cc365b4e924ba00c81cfe82391b79e8e"
+    },
+    {
+      "allocated_size_bytes": 1626112,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1625818,
+      "mtime_epoch": 1791115690.3540938,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/winhttp.dll",
+      "sha256": "e7e36daccc95ab95211133a6c8e4d6ca9cb38b73579c16cc48fb7f98f1887ccd"
+    },
+    {
+      "allocated_size_bytes": 1622016,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1620166,
+      "mtime_epoch": 1791115317.2644935,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/wow64.dll",
+      "sha256": "c4b93a72fb05fa543c2bb2d2e9bf5df407ea523c21ee7163754c53c61abe91bd"
+    },
+    {
+      "allocated_size_bytes": 1617920,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1617312,
+      "mtime_epoch": 1791115316.8977299,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/qedit.dll",
+      "sha256": "57f2087f17eeb708651f6cfd9c82f6143bb7e66e820d78a53d271252b669365f"
+    },
+    {
+      "allocated_size_bytes": 1609728,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1607579,
+      "mtime_epoch": 1791115689.5169132,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/dxgi.dll",
+      "sha256": "4c683650b1ac925d76c3092921e534efb75fba5b6f77c7dd881df07ec2c0e440"
+    },
+    {
+      "allocated_size_bytes": 1585152,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1584898,
+      "mtime_epoch": 1791115315.919297,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/Program Files/Common Files/System/ADO/msado15.dll",
+      "sha256": "c721ac22f0a5d72aed3bd0718ae9abd5d27f3bb7a9db421a48328d47bf6a5d69"
+    },
+    {
+      "allocated_size_bytes": 1576960,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1575675,
+      "mtime_epoch": 1791115316.070785,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/d3d10.dll",
+      "sha256": "26c6143edc65643dc30ddccc153aeb1ac58a0640cedd055728474d41614df5bd"
+    },
+    {
+      "allocated_size_bytes": 1548288,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1544999,
+      "mtime_epoch": 1791115690.4681337,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/xaudio2_9.dll",
+      "sha256": "5ea8f9a1e1c12089fb7f9deea2c4ec908f00c1efb8bf26e59d2ff048447aecf9"
+    },
+    {
+      "allocated_size_bytes": 1544192,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1540867,
+      "mtime_epoch": 1791115690.466727,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/xaudio2_8.dll",
+      "sha256": "0dace70cfbd39b25a549a7b721b962d43848ad706e02096008970d0e15d6563d"
+    },
+    {
+      "allocated_size_bytes": 1536000,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1534681,
+      "mtime_epoch": 1791115689.089744,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/Speech/Common/sapi.dll",
+      "sha256": "bff261c027ec16cd553983ec070631485a03a483fe2eb5ac6fdc65834ee2bf8f"
+    },
+    {
+      "allocated_size_bytes": 1515520,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1513455,
+      "mtime_epoch": 1791115690.064391,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/qcap.dll",
+      "sha256": "229a833ddd206b4c132ca07b63bae102ae048c352f80d12719e026e836a71c7e"
+    },
+    {
+      "allocated_size_bytes": 1511424,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1510076,
+      "mtime_epoch": 1791115317.1221223,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/windows.gaming.input.dll",
+      "sha256": "48910607463ce4583f3ac866021eb4269442ea79e0e9173d18785cb993269129"
+    },
+    {
+      "allocated_size_bytes": 1499136,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1497813,
+      "mtime_epoch": 1791115690.1441195,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/shlwapi.dll",
+      "sha256": "d53c4b7d9d1c3f26b39887f1aaf8dc9cb36796f4e723fb6caa77ac33bb3f9f14"
+    },
+    {
+      "allocated_size_bytes": 1478656,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1474817,
+      "mtime_epoch": 1791115689.104046,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/wbem/wbemprox.dll",
+      "sha256": "5253145314113c31ae0a692532ef9f307548402407bd3cb803f2be639d82c859"
+    },
+    {
+      "allocated_size_bytes": 1470464,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1469440,
+      "mtime_epoch": 1786645258.0,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/mono/mono-2.0/lib/x86_64/libmono-btls-shared.dll",
+      "sha256": "f335c75d12bfd7bd4a035a99e4256197c59232e84d4970a12075fcaa6986137e"
+    },
+    {
+      "allocated_size_bytes": 1462272,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1460388,
+      "mtime_epoch": 1791115689.6374664,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/inetcomm.dll",
+      "sha256": "fecf97fa4f134cfc14aecb9a404bc651e4e8ac63864f3d2359235bce44c0ec16"
+    },
+    {
+      "allocated_size_bytes": 1458176,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1457129,
+      "mtime_epoch": 1791115689.446496,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/dinput.dll",
+      "sha256": "0336138ed310c2e687e68ee6cfcaddc514ab90968d6185d1e72927747362cecb"
+    },
+    {
+      "allocated_size_bytes": 1458176,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1456119,
+      "mtime_epoch": 1791115316.6306512,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/mscoree.dll",
+      "sha256": "ad9706f88fe3b3e6ecd30fd36e331b043c205665de62750e311ad42a37f68a10"
+    },
+    {
+      "allocated_size_bytes": 1458176,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1456128,
+      "mtime_epoch": 1786645254.0,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/mono/mono-2.0/lib/mono/gac/System.Windows.Controls.Ribbon/4.0.0.0__b77a5c561934e089/System.Windows.Controls.Ribbon.dll",
+      "sha256": "db9cf98e2c7d22ff54be56419ab96cb9cf1833da27302e7c4048cbfca96bec96"
+    },
+    {
+      "allocated_size_bytes": 1449984,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1448595,
+      "mtime_epoch": 1791115689.4484916,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/dinput8.dll",
+      "sha256": "5ab483ac55afa94bb6aeccd738012a6f1312417fb7c1d6c86ce0638b12254b79"
+    },
+    {
+      "allocated_size_bytes": 1445888,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1444447,
+      "mtime_epoch": 1791115317.0212724,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/taskschd.dll",
+      "sha256": "a2f393077a8e3b4545846fc83d67e9f8dd694bfe64c10ab93eeff335acb24f1b"
+    },
+    {
+      "allocated_size_bytes": 1441792,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1441081,
+      "mtime_epoch": 1791115690.4645052,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/xaudio2_7.dll",
+      "sha256": "8b0c2d746bf348f095f04cffbc0097f63cb3dd26835e9af0a190ab89765a9137"
+    },
+    {
+      "allocated_size_bytes": 1441792,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1440433,
+      "mtime_epoch": 1791115690.4629707,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/xaudio2_6.dll",
+      "sha256": "e0fe7389a44faa7611888e6ed028a64bf0bc40604feb89765b8d2bc7b893532d"
+    },
+    {
+      "allocated_size_bytes": 1441792,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1440433,
+      "mtime_epoch": 1791115690.4610386,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/xaudio2_5.dll",
+      "sha256": "d292da89e4a9d4d18eaea88a6f6b34ff896dfe610098c6e8754224d29c8c742c"
+    },
+    {
+      "allocated_size_bytes": 1441792,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1440433,
+      "mtime_epoch": 1791115690.4590797,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/xaudio2_4.dll",
+      "sha256": "d1a5a4e65a9dbd4a1422448990a3666323271320c39ac3ffa391418aca9d4fb9"
+    },
+    {
+      "allocated_size_bytes": 1433600,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1431002,
+      "mtime_epoch": 1791115690.4571342,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/xaudio2_3.dll",
+      "sha256": "68163fabfe8d784b332580a0c662a0222f4c088699bc95183b2e412920a24f55"
+    },
+    {
+      "allocated_size_bytes": 1433600,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1431002,
+      "mtime_epoch": 1791115690.4558322,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/xaudio2_2.dll",
+      "sha256": "bb73f2ad791c518593c261b4650c9567bd93ed9ba579026925f3be3218bcb77a"
+    },
+    {
+      "allocated_size_bytes": 1433600,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1431002,
+      "mtime_epoch": 1791115690.4537244,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/xaudio2_1.dll",
+      "sha256": "c1284a8c6d16ab11d574325eb9eee5ac2f48acecfaef5ea23478939ef56dc97a"
+    },
+    {
+      "allocated_size_bytes": 1433600,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1430929,
+      "mtime_epoch": 1791115690.452003,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/xaudio2_0.dll",
+      "sha256": "a216e4bb977e09cf920b4a3aae4bea594429796bf1e6bc54dd8fb8c9fccd6b0f"
+    },
+    {
+      "allocated_size_bytes": 1433600,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1430528,
+      "mtime_epoch": 1786645258.0,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/mono/mono-2.0/lib/mono/gac/System.ServiceModel/4.0.0.0__b77a5c561934e089/System.ServiceModel.dll",
+      "sha256": "aa082b22681f5aabe7256664159aba61819cd3d916de4eb9da230f2cdfb6380c"
+    },
+    {
+      "allocated_size_bytes": 1417216,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1415707,
+      "mtime_epoch": 1791115689.4843197,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/dplayx.dll",
+      "sha256": "807e0176e4286421cd50c9453594e1faf56e2ffb39f373fd843bcaae8f5267ff"
+    },
+    {
+      "allocated_size_bytes": 1417216,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1414115,
+      "mtime_epoch": 1791115315.9702992,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/amstream.dll",
+      "sha256": "b0b3c38f116a9c449fd8355d942b8ede31f07e61604beab2f3de4b610e0ac57a"
+    },
+    {
+      "allocated_size_bytes": 1413120,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1409453,
+      "mtime_epoch": 1791115316.8922784,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/qasf.dll",
+      "sha256": "329a9367fc599a48938ff210a4e8205726862fbd47dc59fd304476030ecc1b33"
+    },
+    {
+      "allocated_size_bytes": 1409024,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1404953,
+      "mtime_epoch": 1791115315.9894383,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/avifil32.dll",
+      "sha256": "72a5db41afae65c10334e297df3b21593682d6da6679cacc49172e2faba3dc47"
+    },
+    {
+      "allocated_size_bytes": 1392640,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1391242,
+      "mtime_epoch": 1791115316.2644923,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/dmusic.dll",
+      "sha256": "8fcfa605f7ede2b11725447c083b58c5669a94a7200a0628b5fd6952ac0e8021"
+    },
+    {
+      "allocated_size_bytes": 1388544,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1385116,
+      "mtime_epoch": 1791115689.819645,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/msctf.dll",
+      "sha256": "0e06df55db829e593bce2a80593bcafe4002aa39731f89cccfb8bd5cae730b31"
+    },
+    {
+      "allocated_size_bytes": 1388544,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1388479,
+      "mtime_epoch": 1791115316.0824301,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/d3d8.dll",
+      "sha256": "39c2b5fae2ed92e5279483768f0f7deefc773f84e8bf14ac00ff8439d24c9a3b"
+    },
+    {
+      "allocated_size_bytes": 1388544,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1386496,
+      "mtime_epoch": 1786645258.0,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/mono/mono-2.0/lib/mono/4.5/csharp.exe",
+      "sha256": "1f3405a38853b626edff0d21d198812c53011e6ac44934cfe391e93180f9cc55"
+    },
+    {
+      "allocated_size_bytes": 1359872,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1359699,
+      "mtime_epoch": 1791115690.0676098,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/qedit.dll",
+      "sha256": "3a50da62ceb37a87cfca103fc98212814a62774edf76edbae5e37a3c61f75868"
+    },
+    {
+      "allocated_size_bytes": 1355776,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1355623,
+      "mtime_epoch": 1791115316.6169183,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/mmdevapi.dll",
+      "sha256": "cd5cd51cd88e8a2ac24eb836079fe530237ae206669ce8172249f3ece6f23e78"
+    },
+    {
+      "allocated_size_bytes": 1351680,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1349679,
+      "mtime_epoch": 1791115315.9061668,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/Program Files/Windows NT/Accessories/wordpad.exe",
+      "sha256": "e4da8c9f86d86ad8ad653108977c790cad9d0d53b5becd714fce79f42ae577ef"
+    },
+    {
+      "allocated_size_bytes": 1343488,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1339640,
+      "mtime_epoch": 1791115316.5977097,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/mfmediaengine.dll",
+      "sha256": "11721bb1086ad6a2c7097853ff21c8230f5b3ebe271987bfc8872d677a5be893"
+    },
+    {
+      "allocated_size_bytes": 1323008,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1320474,
+      "mtime_epoch": 1791115315.9107733,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/Program Files/Common Files/System/OLE DB/oledb32.dll",
+      "sha256": "74f52c3fafddfba97c96fe3d6e1eb7a5f5584417b16fe72c0d2495d0479b2509"
+    },
+    {
+      "allocated_size_bytes": 1314816,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1314452,
+      "mtime_epoch": 1791115689.2280996,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/advapi32.dll",
+      "sha256": "369e3bbb3af819e9c293861dc254cb0139dcf8ebc1b6bd96ab4d3c5c1f90d84a"
+    },
+    {
+      "allocated_size_bytes": 1282048,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1280938,
+      "mtime_epoch": 1791115316.2587752,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/dmstyle.dll",
+      "sha256": "682feae6f2af3ad566b2142bf83f5dea49f4171042bdd2135739e0d5d0dee544"
+    },
+    {
+      "allocated_size_bytes": 1282048,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1282048,
+      "mtime_epoch": 1786645258.0,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/mono/mono-2.0/lib/x86/libmono-btls-shared.dll",
+      "sha256": "8e1bad78ae187b5625d708ecb7c1bf3fb3464cea30501240baee543564c2d0cf"
+    },
+    {
+      "allocated_size_bytes": 1277952,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1277931,
+      "mtime_epoch": 1791115315.803291,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/regedit.exe",
+      "sha256": "81ba47e6d03378b24ffcf34b28fc8fc7e99e3eef7d89b46f5b58b7cd6a9730dc"
+    },
+    {
+      "allocated_size_bytes": 1273856,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1273370,
+      "mtime_epoch": 1791115316.9494379,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/scrrun.dll",
+      "sha256": "80abcbc8334f06fe355315c15c9f579d47e31f6e23437fbc29567f515a35d9a7"
+    },
+    {
+      "allocated_size_bytes": 1257472,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1255163,
+      "mtime_epoch": 1791115689.1824727,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/Program Files (x86)/Common Files/System/ADO/msado15.dll",
+      "sha256": "8e8286b0bf8af415043e87cf35df1e13086fceab5ce0db0d927b1efaeb0c8ac9"
+    },
+    {
+      "allocated_size_bytes": 1249280,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1249228,
+      "mtime_epoch": 1791115689.317857,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/d3d10.dll",
+      "sha256": "30818e6a03cb73223dc3d5bae5cefbbbfb1ce1e13d1dbfc8823bfbb7e763660a"
+    },
+    {
+      "allocated_size_bytes": 1249280,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1245237,
+      "mtime_epoch": 1791115317.0196686,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/taskmgr.exe",
+      "sha256": "c701932d3a93f6846d057a4453d9bb47c440b7fae42a7f98396fdee68943d131"
+    },
+    {
+      "allocated_size_bytes": 1245184,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1243118,
+      "mtime_epoch": 1791115690.2661955,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/windows.gaming.input.dll",
+      "sha256": "72bacf089ba71ae670f090cce55bb95ba201b5f61dfcead999be031a3938ece2"
+    },
+    {
+      "allocated_size_bytes": 1241088,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1241088,
+      "mtime_epoch": 1786645220.0,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/mono/mono-2.0/lib/mono/gac/WindowsBase/4.0.0.0__31bf3856ad364e35/WindowsBase.dll",
+      "sha256": "f0215d90dace69635e5045ae0222fba8e2550bd51b3b48c0a50c534b1b26753d"
+    },
+    {
+      "allocated_size_bytes": 1236992,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1236189,
+      "mtime_epoch": 1791115689.1694777,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/Program Files (x86)/Windows NT/Accessories/wordpad.exe",
+      "sha256": "cc95bcc8fd55f557ec6bbde814459d9285f35eb800f560ad8f8ae9353bf0b9f4"
+    },
+    {
+      "allocated_size_bytes": 1224704,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1224174,
+      "mtime_epoch": 1791115315.912914,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/Program Files/Common Files/System/OLE DB/msdaps.dll",
+      "sha256": "5ff2d9aec68e350265e0e09a2e68c9ab5501405f4189f1a5c3ff3d8f26ff7e85"
+    },
+    {
+      "allocated_size_bytes": 1212416,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1211631,
+      "mtime_epoch": 1791115689.8167276,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/mscoree.dll",
+      "sha256": "d85af46eca22c6e265ec1b7ef0f2d7cf553eea008eb6f4b615471650d226e356"
+    },
+    {
+      "allocated_size_bytes": 1204224,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1202442,
+      "mtime_epoch": 1791115316.60658,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/mfsrcsnk.dll",
+      "sha256": "5bde77dbd0c4fde55caebcc09c893a26105cfc276bd999171021e89b86404d8d"
+    },
+    {
+      "allocated_size_bytes": 1200128,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1197946,
+      "mtime_epoch": 1791115690.0627043,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/qasf.dll",
+      "sha256": "49a6bca7782ba493385707ba1d6ab516a9224e5ad28a6469dd169e29d20cf080"
+    },
+    {
+      "allocated_size_bytes": 1200128,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1200048,
+      "mtime_epoch": 1791115317.132111,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/windows.media.speech.dll",
+      "sha256": "462037f9a301f47d2cd3daed833797f28019b40d2de59c7c41c30c7af805f9ad"
+    },
+    {
+      "allocated_size_bytes": 1191936,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1189733,
+      "mtime_epoch": 1791115689.4785225,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/dmusic.dll",
+      "sha256": "1e3ba3c4dfb9281aaef1418f8ada1caadc99d703564ba6b521d3389984f0bcf0"
+    },
+    {
+      "allocated_size_bytes": 1187840,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1186821,
+      "mtime_epoch": 1791115690.1730433,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/taskmgr.exe",
+      "sha256": "5382796f0a51ffdfb843a42b9d116a38928432f5692ffa0991fc747a785b26f5"
+    },
+    {
+      "allocated_size_bytes": 1187840,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1185300,
+      "mtime_epoch": 1791115689.2323945,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/amstream.dll",
+      "sha256": "0ab7d778b7d288f3be1dd0d51ec077bba242ba3ecc98cf5c960d43bee8ae8a63"
+    },
+    {
+      "allocated_size_bytes": 1187840,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1183937,
+      "mtime_epoch": 1791115316.8386517,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/odbc32.dll",
+      "sha256": "c66f6b9a44fd95d4e8f38e03c9660f0066dd7d40a8e201b4c0806bb90eb6545a"
+    },
+    {
+      "allocated_size_bytes": 1179648,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1176271,
+      "mtime_epoch": 1791115690.0830016,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/regedit.exe",
+      "sha256": "7dea092c5ee2a9e84e1f3da3b89bb9851099d90b65e99d6b918758dabfa350fd"
+    },
+    {
+      "allocated_size_bytes": 1179648,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1179385,
+      "mtime_epoch": 1791115689.250775,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/avifil32.dll",
+      "sha256": "595ce785b5a4ca7cfe5b3505974b84d77e11a95e5ebbaa2abe326c1f9ddc6e42"
+    },
+    {
+      "allocated_size_bytes": 1167360,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1166715,
+      "mtime_epoch": 1791115689.173613,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/Program Files (x86)/Common Files/System/OLE DB/oledb32.dll",
+      "sha256": "31c8befa22ea9b7a3f8711764ccd24209a5156b56a37b173323b4d2d0a080df8"
+    },
+    {
+      "allocated_size_bytes": 1163264,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1161726,
+      "mtime_epoch": 1791115316.605334,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/mfreadwrite.dll",
+      "sha256": "9a720e3a08e48c38bee0551f25ec597fd77f27d5750249f61662a7726ff75e19"
+    },
+    {
+      "allocated_size_bytes": 1159168,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1157861,
+      "mtime_epoch": 1791115316.8649218,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/oleview.exe",
+      "sha256": "2a6fc3e36cfdaa15190a878705f7c1a9972126fb2f0465c7a86eda25be8c7fd0"
+    },
+    {
+      "allocated_size_bytes": 1159168,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1155134,
+      "mtime_epoch": 1791115315.955994,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/actxprxy.dll",
+      "sha256": "97682e7bb4f5e7600853d8c59d9ccd37cccfdec01efd6881f2fd5443f5183d55"
+    },
+    {
+      "allocated_size_bytes": 1150976,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1150976,
+      "mtime_epoch": 1786645178.0,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/mono/mono-2.0/lib/mono/gac/WineMono.FNA/26.8.0.0__0738eb9f132ed756/WineMono.FNA.dll",
+      "sha256": "917fc5adde325f80ea9c65d84b8716ba47524c7fde294f8422a360402e4dd118"
+    },
+    {
+      "allocated_size_bytes": 1146880,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1145644,
+      "mtime_epoch": 1791115689.7820594,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/mfmediaengine.dll",
+      "sha256": "ba6aaa4ee015fc03b0d4ad9b2561efb1ed345388adb02fa93a5388e932c0be2d"
+    },
+    {
+      "allocated_size_bytes": 1142784,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1141418,
+      "mtime_epoch": 1791115689.3271515,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/d3d8.dll",
+      "sha256": "9d99c6cf2400dde86246e2a791b59fd2869dd6a631d7410c6bb42e8a80394943"
+    },
+    {
+      "allocated_size_bytes": 1122304,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1121455,
+      "mtime_epoch": 1791115317.2527206,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/wmp.dll",
+      "sha256": "7c984eba29394f994a0d871c33c21ddc3533eb870c411223afb9e3114e85fc59"
+    },
+    {
+      "allocated_size_bytes": 1114112,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1111098,
+      "mtime_epoch": 1791115690.1740649,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/taskschd.dll",
+      "sha256": "1c1e07fc89beeafe116b3e0bebb7a75f5dc995642a8586b59a74a8030401371d"
+    },
+    {
+      "allocated_size_bytes": 1110016,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1106203,
+      "mtime_epoch": 1791115689.472302,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/dmstyle.dll",
+      "sha256": "5d35baa9bfbbb9f6409c8a9f132537e08f72e3e6cf9b7912cc38cbd9482dccac"
+    },
+    {
+      "allocated_size_bytes": 1105920,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1104095,
+      "mtime_epoch": 1791115316.2143567,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/dbgeng.dll",
+      "sha256": "3a5b985b2831f094787ee2a083eaf71e2f6ca3f439862ea1c3b588baccdfc294"
+    },
+    {
+      "allocated_size_bytes": 1101824,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1100356,
+      "mtime_epoch": 1791115689.8024454,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/mmdevapi.dll",
+      "sha256": "11605a09ce1f77affb60e74e9ff2ee777d9b46a3602cf7741a7fb794263dc7ea"
+    },
+    {
+      "allocated_size_bytes": 1093632,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1092608,
+      "mtime_epoch": 1786645258.0,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/mono/mono-2.0/lib/mono/gac/System.Core/4.0.0.0__b77a5c561934e089/System.Core.dll",
+      "sha256": "c13e0ba3e988cf34e2aec1c0700c5156187a64834891cada82dc29497f295804"
+    },
+    {
+      "allocated_size_bytes": 1089536,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1087616,
+      "mtime_epoch": 1791115316.3487952,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/hnetcfg.dll",
+      "sha256": "bebbca801451fc560825f892479a9b34c5c07cadbd40a687274d99c7deb51a9d"
+    },
+    {
+      "allocated_size_bytes": 1089536,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1085458,
+      "mtime_epoch": 1791115315.9772468,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/atl.dll",
+      "sha256": "cbdeec76232ce9c3a58ce6a853e6ea24496b79cdca50792440a7cd6a8d3298f6"
+    },
+    {
+      "allocated_size_bytes": 1069056,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1068473,
+      "mtime_epoch": 1791115689.2173567,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/actxprxy.dll",
+      "sha256": "24367273c1ed5f0f4f5e9d8d786e4d785e003a619fcce60da04ddfaee74b61a8"
+    },
+    {
+      "allocated_size_bytes": 1064960,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1062543,
+      "mtime_epoch": 1791115317.1960971,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/system32/winefile.exe",
+      "sha256": "7d1d58a88913912dcd17d240c9f8fbeac660c4d1282f3297aeba65760d7a4ac0"
+    },
+    {
+      "allocated_size_bytes": 1056768,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1054158,
+      "mtime_epoch": 1791115690.113863,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/scrrun.dll",
+      "sha256": "fbb87a243404081fc3380edb7abd95f5518820c9cc6ab74bc6aa7f4499a14972"
+    },
+    {
+      "allocated_size_bytes": 1052672,
+      "hard_link_count": 1,
+      "logical_size_bytes": 1050536,
+      "mtime_epoch": 1791115690.0392108,
+      "path": "/private/tmp/fgmetal-step11b/prefix/drive_c/windows/syswow64/oleview.exe",
+      "sha256": "1a6a2a76f6cdf9ef27f8ea22dffb590e5ab3bef8acdbce4258719662b27ca7fd"
+    }
+  ],
+  "dosdevices_symlink_targets": {
+    "c:": "../drive_c",
+    "z:": "/"
+  },
+  "estimated_prefix_bytes": {
+    "allocated_path_bytes": 2200195072,
+    "allocated_unique_inode_bytes": 2200195072,
+    "file_count": 4844,
+    "logical_bytes": 2190223239
+  },
+  "plan_decision": "SNAPSHOT_REGISTRY_THEN_DELETE",
+  "reason": "Completed run or diagnostic environment; retain registry/config snapshot and run evidence, then enforce the two-prefix cap.",
+  "registry_archive": {
+    "path": "registry-config.tar.gz",
+    "sha256": "b3cb1c3bc0f3d334a7fab83f1f0fc2985028f1bc96661d3dbd1a60e935665041",
+    "size_bytes": 413430
+  },
+  "registry_files": [
+    {
+      "path": "system.reg",
+      "sha256": "6929c3261cb260a5b6066aefd92f370f2ed1392c6603d48a75de1d7cc4291f49",
+      "size_bytes": 3540759
+    },
+    {
+      "path": "user.reg",
+      "sha256": "a86e2a70c4d9adca387df6b12e196d71e9bb2568f8f207a995bf892d019f1172",
+      "size_bytes": 65452
+    },
+    {
+      "path": "userdef.reg",
+      "sha256": "658ab91189124a73fdd02b918d2a4725807865b143a65d65f2cc44c439b85d59",
+      "size_bytes": 4026
+    },
+    {
+      "path": "drive_c/windows/system.ini",
+      "sha256": "44f0087f77675e66653a6c8f4fb6c729130705b3df9deba1b2027180c6ca8b97",
+      "size_bytes": 524
+    }
+  ],
+  "snapshot_time_unix": 1791313733.460737,
+  "source_path": "/private/tmp/fgmetal-step11b/prefix",
+  "source_root_kind": "COMPLETED_DISPOSABLE_PREFIX",
+  "unique_evidence_note": "Run logs, manifests, source snapshots, and timing evidence remain in their original evidence directories; this snapshot preserves prefix registry/config state and binary identity references."
+}

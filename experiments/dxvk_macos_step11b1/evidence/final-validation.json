@@ -1,0 +1,14 @@
+{
+  "status": "PASS",
+  "visual_authority": "direct user observations",
+  "normal_renderer_diagnostic_modes": "removed",
+  "validated_runs": [
+    "final-original-30s",
+    "final-original-60s",
+    "final-bgra8-60s",
+    "final-repository-smoke",
+    "final-lifecycle-65s",
+    "final-waitable-30s"
+  ],
+  "scope": "local D3D11 clear-only baseline; no image capture or pixel readback; no internal presents"
+}

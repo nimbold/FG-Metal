@@ -1,0 +1,12 @@
+ninja: Entering directory `/private/tmp/fg-metal-step10b6_1-build'
+[1/13] Generating src/winemetal/postprocess_lib with a custom command
+[2/13] Generating version.h with a custom command
+[3/9] Generating src/dxgi/postprocess_libdxgi with a custom command
+[4/9] Compiling C++ object src/d3d11/d3d11.dll.p/d3d11_swapchain.cpp.obj
+[5/9] Linking target src/d3d11/d3d11.dll
+[6/9] Generating src/d3d11/postprocess_libd3d11 with a custom command
+[7/9] Generating symbol file src/d3d11/d3d11.dll.p/d3d11.dll.symbols
+[8/9] Linking target src/d3d10/d3d10core.dll
+[9/9] Generating src/d3d10/postprocess_libd3d10core with a custom command
+INFO: autodetecting backend as ninja
+INFO: calculating backend command to run: /opt/homebrew/bin/ninja -C /private/tmp/fg-metal-step10b6_1-build -j 6

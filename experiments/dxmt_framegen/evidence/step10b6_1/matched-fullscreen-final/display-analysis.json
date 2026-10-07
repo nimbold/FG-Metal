@@ -1,0 +1,123 @@
+{
+  "application_surface_ids": [
+    27,
+    32,
+    49,
+    56
+  ],
+  "ca_present_request": {
+    "count": 1232,
+    "gap_rate_hz": 59.6119602776984,
+    "span_seconds": 20.650218417
+  },
+  "ca_presented_handler": {
+    "count": 1231,
+    "gap_rate_hz": 59.54343281935483,
+    "span_seconds": 20.657189916
+  },
+  "display_surface_intervals": {
+    "adjacent_start_gap_ms": {
+      "max": 333.329625,
+      "n": 239,
+      "p50": 83.332375,
+      "p95": 183.33125,
+      "p99": 265.9969919600006
+    },
+    "adjacent_start_gap_rate_hz": 11.70625561341865,
+    "count": 240,
+    "cpu_to_display_latency_ms": {
+      "max": 83.141208,
+      "n": 240,
+      "p50": 65.8095625,
+      "p95": 82.4586726,
+      "p99": 82.78851825000001
+    },
+    "direct_to_display": {
+      "No": 240
+    },
+    "direct_to_display_failure_reason": {
+      "(empty)": 44,
+      "wine (67285):  display rejected": 196
+    },
+    "duration_ms": {
+      "max": 333.329625,
+      "n": 240,
+      "p50": 91.665604,
+      "p95": 183.33125,
+      "p99": 264.66367487999804
+    },
+    "frame_label_count": 240,
+    "frame_label_step": {
+      "1": 106,
+      "2": 3,
+      "3": 5,
+      "4": 8,
+      "5": 3,
+      "6": 9,
+      "7": 20,
+      "8": 29,
+      "9": 13,
+      "10": 20,
+      "11": 1,
+      "12": 19,
+      "19": 1,
+      "20": 1,
+      "21": 1
+    },
+    "frame_label_step_stats": {
+      "max": 21.0,
+      "n": 239,
+      "p50": 4.0,
+      "p95": 12.0,
+      "p99": 16.340000000000032
+    },
+    "row_rate_hz": 11.75523576242877,
+    "span_seconds": 20.416434417
+  },
+  "dxmt_present_call_alignment": {
+    "alignment_residual_max_ns": 1996062.5,
+    "alignment_residual_p95_ns": 426437.5,
+    "callback_count_in_request_window": 1232,
+    "callback_rate_hz_in_request_window": 59.66131890533186,
+    "dxmt_csv_rows": 41975,
+    "dxmt_start_index": 275,
+    "gpu_status": {
+      "completed": 1232
+    },
+    "matched_feedback_records": 1232,
+    "matched_generated_submissions": 608,
+    "matched_kind_values": {
+      "1": 624,
+      "2": 608
+    },
+    "matched_requests": 1232,
+    "matched_source_submissions": 624,
+    "matched_terminal_classes": {
+      "generated_submitted": 608,
+      "source_submitted": 624
+    },
+    "matched_tick_ids": 1232,
+    "missing_feedback_record_count": 0,
+    "positive_presented_time_count": 1196,
+    "present_call_rows": 2984,
+    "status": "ALIGNED",
+    "trace_request_rate_hz": 59.6119602776984,
+    "trace_to_dxmt_mach_offset_ns": 353149699411187,
+    "window_seconds": 20.650218417,
+    "zero_presented_time_count": 36
+  },
+  "native_callback_alignment": null,
+  "process_name": "wine",
+  "quantile_method": "linear interpolation at rank (n - 1) * p",
+  "surface_display_names": [
+    "Built-In Display 1"
+  ],
+  "trace_duration_seconds": 20.9085,
+  "vsync_by_surface_display_in_surface_window": {
+    "Built-In Display 1": {
+      "count": 1226,
+      "gap_rate_hz": 60.00068253739685,
+      "span_seconds": 20.416434417
+    }
+  }
+}

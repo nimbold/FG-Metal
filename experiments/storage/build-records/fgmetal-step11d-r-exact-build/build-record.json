@@ -1,0 +1,1249 @@
+{
+  "associated_evidence_manifests": [],
+  "binary_outputs": [
+    {
+      "allocated_bytes": 4096,
+      "hard_link_count": 1,
+      "mode": "0o644",
+      "name": "sanity_check_for_cpp_cross.exe",
+      "path": "/private/tmp/fgmetal-step11d-r-exact-build/meson-private/sanity_check_for_cpp_cross.exe",
+      "sha256": "8b9f2576e110837259a11b53fe119cc7860323d67920e216012c0738193a0381",
+      "size_bytes": 745
+    },
+    {
+      "allocated_bytes": 20480,
+      "hard_link_count": 1,
+      "mode": "0o755",
+      "name": "sanity_check_for_cpp.exe",
+      "path": "/private/tmp/fgmetal-step11d-r-exact-build/meson-private/sanity_check_for_cpp.exe",
+      "sha256": "d17316cb4ec47e1003cadbd6a986cde0c1fdcb0f5ae625c0daecbdca119d1301",
+      "size_bytes": 16856
+    },
+    {
+      "allocated_bytes": 20480,
+      "hard_link_count": 1,
+      "mode": "0o755",
+      "name": "sanity_check_for_c.exe",
+      "path": "/private/tmp/fgmetal-step11d-r-exact-build/meson-private/sanity_check_for_c.exe",
+      "sha256": "005309bd6a62e5bd80f497620f1c318fcae0490e5627467881dc8a39684ca33c",
+      "size_bytes": 16856
+    },
+    {
+      "allocated_bytes": 4096,
+      "hard_link_count": 1,
+      "mode": "0o644",
+      "name": "sanity_check_for_c_cross.exe",
+      "path": "/private/tmp/fgmetal-step11d-r-exact-build/meson-private/sanity_check_for_c_cross.exe",
+      "sha256": "2c62068ebb6ba39c5fc2d5ba298edc23b531fbb11e58cd8b99ba8a64c128e771",
+      "size_bytes": 741
+    },
+    {
+      "allocated_bytes": 4096,
+      "hard_link_count": 2,
+      "mode": "0o644",
+      "name": "libdisplay-info.a",
+      "path": "/private/tmp/fgmetal-step11d-r-exact-build/subprojects/libdisplay-info/libdisplay-info.a",
+      "sha256": "8fd8fb441d0f5c66a92769a5325d9f32afe3250463a3afd0366a920087ec184a",
+      "size_bytes": 3220
+    },
+    {
+      "allocated_bytes": 1404928,
+      "hard_link_count": 2,
+      "mode": "0o644",
+      "name": "libdxbc_spv.a",
+      "path": "/private/tmp/fgmetal-step11d-r-exact-build/subprojects/dxbc-spirv/libdxbc_spv.a",
+      "sha256": "f273221ece12d124578fe76ecb346e908950887343cee34e4f6fd76f0a2cd2e0",
+      "size_bytes": 1402778
+    },
+    {
+      "allocated_bytes": 286720,
+      "hard_link_count": 2,
+      "mode": "0o644",
+      "name": "libutil.a",
+      "path": "/private/tmp/fgmetal-step11d-r-exact-build/src/util/libutil.a",
+      "sha256": "bc91d615db2ddeb11d8a0bdc2320639f979938c785d070239d952377a633d1e5",
+      "size_bytes": 283068
+    },
+    {
+      "allocated_bytes": 372310016,
+      "hard_link_count": 1,
+      "mode": "0o755",
+      "name": "d3d11.dll",
+      "path": "/private/tmp/fgmetal-step11d-r-exact-build/src/d3d11/d3d11.dll",
+      "sha256": "2a58fafda9fb82442770d1be00ed92ff05fe11fde24f361b1f1f907bfa3dacbc",
+      "size_bytes": 372306163
+    },
+    {
+      "allocated_bytes": 4096,
+      "hard_link_count": 2,
+      "mode": "0o644",
+      "name": "d3d11.dll.a",
+      "path": "/private/tmp/fgmetal-step11d-r-exact-build/src/d3d11/d3d11.dll.a",
+      "sha256": "90989f9ddae7f34d9b26431f583c56796922aba8b9e513d8c9454ee463acc586",
+      "size_bytes": 3590
+    },
+    {
+      "allocated_bytes": 2084864,
+      "hard_link_count": 2,
+      "mode": "0o644",
+      "name": "libdxvk.a",
+      "path": "/private/tmp/fgmetal-step11d-r-exact-build/src/dxvk/libdxvk.a",
+      "sha256": "4e26f211be22b5bbc39110ce17fb101f694f457a784e1fcf040fbf9d0346b43b",
+      "size_bytes": 2081156
+    },
+    {
+      "allocated_bytes": 8192,
+      "hard_link_count": 2,
+      "mode": "0o644",
+      "name": "libspirv.a",
+      "path": "/private/tmp/fgmetal-step11d-r-exact-build/src/spirv/libspirv.a",
+      "sha256": "82da3b27d1c298be2b162e0545bcc5b69d3b60625f2086df4323e12b13b10eb9",
+      "size_bytes": 6474
+    },
+    {
+      "allocated_bytes": 45056,
+      "hard_link_count": 2,
+      "mode": "0o644",
+      "name": "libwsi.a",
+      "path": "/private/tmp/fgmetal-step11d-r-exact-build/src/wsi/libwsi.a",
+      "sha256": "7a6b55b7dc65d111e28d6698d8a938d84bc5888f09795265702f23236511ec11",
+      "size_bytes": 43388
+    },
+    {
+      "allocated_bytes": 8192,
+      "hard_link_count": 2,
+      "mode": "0o644",
+      "name": "libvkcommon.a",
+      "path": "/private/tmp/fgmetal-step11d-r-exact-build/src/vulkan/libvkcommon.a",
+      "sha256": "83da1c7e3ebaeffef8f4d4ae0e73c93732af12e6fd5b5e33a24de51d2e197f83",
+      "size_bytes": 7378
+    },
+    {
+      "allocated_bytes": 8192,
+      "hard_link_count": 2,
+      "mode": "0o644",
+      "name": "dxgi.dll.a",
+      "path": "/private/tmp/fgmetal-step11d-r-exact-build/src/dxgi/dxgi.dll.a",
+      "sha256": "b2899ed40e0621f31b8ab19a42c08936762db9b21ab72630b20d50fe7545a6e1",
+      "size_bytes": 4244
+    },
+    {
+      "allocated_bytes": 215113728,
+      "hard_link_count": 1,
+      "mode": "0o755",
+      "name": "dxgi.dll",
+      "path": "/private/tmp/fgmetal-step11d-r-exact-build/src/dxgi/dxgi.dll",
+      "sha256": "f7389e2f79c0e20a8f990a74d555518317527a01aae57c295c83834a96ee4571",
+      "size_bytes": 215110136
+    }
+  ],
+  "build_directory_category": "COMPLETED_BUILD_PENDING_REMOVAL",
+  "build_id": "fgmetal-step11d-r-exact-build",
+  "build_path": "/private/tmp/fgmetal-step11d-r-exact-build",
+  "identity": {
+    "build_path": "/private/tmp/fgmetal-step11d-r-exact-build",
+    "compiler_versions": {
+      "build": {
+        "c": "21.0.0",
+        "cpp": "21.0.0"
+      },
+      "host": {
+        "c": "16.2.0",
+        "cpp": "16.2.0"
+      }
+    },
+    "cross_file": {
+      "path": "/Users/nima/Library/Caches/FGMetalStep11C1R/mingw-x86_64.ini",
+      "sha256": "65725179cb979fd4a837a9579ee32f4d51b43d4402bc2eb50cc5e3bc412ae297",
+      "size_bytes": 303
+    },
+    "kind": "meson",
+    "meson_cmd_line": "[options]\nbuildtype = debug\nnative_glfw = disabled\nnative_sdl2 = disabled\nnative_sdl3 = disabled\n\n[properties]\ncross_file = ['/Users/nima/Library/Caches/FGMetalStep11C1R/mingw-x86_64.ini']\n\n",
+    "meson_log": {
+      "path": "/private/tmp/fgmetal-step11d-r-exact-build/meson-logs/meson-log.txt",
+      "sha256": "53ea628ac37716b2fd6c877fed344ff3d38fc87c477b802aaa4f82c88a11e807",
+      "size_bytes": 49875
+    },
+    "meson_options": [
+      {
+        "choices": [
+          "enabled",
+          "disabled",
+          "auto"
+        ],
+        "description": "Override value of all 'auto' features",
+        "machine": "any",
+        "name": "auto_features",
+        "section": "core",
+        "type": "combo",
+        "value": "auto"
+      },
+      {
+        "choices": [
+          "ninja",
+          "vs",
+          "vs2010",
+          "vs2012",
+          "vs2013",
+          "vs2015",
+          "vs2017",
+          "vs2019",
+          "vs2022",
+          "vs2026",
+          "xcode",
+          "none"
+        ],
+        "description": "Backend to use",
+        "machine": "any",
+        "name": "backend",
+        "section": "core",
+        "type": "combo",
+        "value": "ninja"
+      },
+      {
+        "choices": [
+          "vs2022",
+          "vs2026"
+        ],
+        "description": "Setup multiple buildtype-suffixed ninja-backend build directories, and a [builddir]_vs containing a Visual Studio meta-backend with multiple configurations that calls into them",
+        "machine": "any",
+        "name": "genvslite",
+        "section": "core",
+        "type": "combo",
+        "value": "vs2022"
+      },
+      {
+        "choices": [
+          "plain",
+          "debug",
+          "debugoptimized",
+          "release",
+          "minsize",
+          "custom"
+        ],
+        "description": "Build type to use",
+        "machine": "any",
+        "name": "buildtype",
+        "section": "core",
+        "type": "combo",
+        "value": "debug"
+      },
+      {
+        "description": "Enable debug symbols and other information",
+        "machine": "any",
+        "name": "debug",
+        "section": "core",
+        "type": "boolean",
+        "value": true
+      },
+      {
+        "choices": [
+          "shared",
+          "static",
+          "both"
+        ],
+        "description": "Default library type",
+        "machine": "any",
+        "name": "default_library",
+        "section": "core",
+        "type": "combo",
+        "value": "shared"
+      },
+      {
+        "choices": [
+          "shared",
+          "static",
+          "auto"
+        ],
+        "description": "Default library type for both_libraries",
+        "machine": "any",
+        "name": "default_both_libraries",
+        "section": "core",
+        "type": "combo",
+        "value": "shared"
+      },
+      {
+        "description": "Default umask to apply on permissions of installed files",
+        "machine": "any",
+        "name": "install_umask",
+        "section": "core",
+        "type": "integer",
+        "value": 18
+      },
+      {
+        "choices": [
+          "mirror",
+          "flat"
+        ],
+        "description": "Build directory layout",
+        "machine": "any",
+        "name": "layout",
+        "section": "core",
+        "type": "combo",
+        "value": "mirror"
+      },
+      {
+        "choices": [
+          "plain",
+          "0",
+          "g",
+          "1",
+          "2",
+          "3",
+          "s"
+        ],
+        "description": "Optimization level",
+        "machine": "any",
+        "name": "optimization",
+        "section": "core",
+        "type": "combo",
+        "value": "0"
+      },
+      {
+        "description": "Whether to try static linking before shared linking",
+        "machine": "any",
+        "name": "prefer_static",
+        "section": "core",
+        "type": "boolean",
+        "value": false
+      },
+      {
+        "description": "Strip targets on install",
+        "machine": "any",
+        "name": "strip",
+        "section": "core",
+        "type": "boolean",
+        "value": false
+      },
+      {
+        "choices": [
+          "on",
+          "off",
+          "subprojects"
+        ],
+        "description": "Unity build",
+        "machine": "any",
+        "name": "unity",
+        "section": "core",
+        "type": "combo",
+        "value": "off"
+      },
+      {
+        "description": "Unity block size",
+        "machine": "any",
+        "name": "unity_size",
+        "section": "core",
+        "type": "integer",
+        "value": 4
+      },
+      {
+        "choices": [
+          "0",
+          "1",
+          "2",
+          "3",
+          "everything"
+        ],
+        "description": "Compiler warning level to use",
+        "machine": "any",
+        "name": "warning_level",
+        "section": "core",
+        "type": "combo",
+        "value": "2"
+      },
+      {
+        "description": "Treat warnings as errors",
+        "machine": "any",
+        "name": "werror",
+        "section": "core",
+        "type": "boolean",
+        "value": false
+      },
+      {
+        "choices": [
+          "default",
+          "nofallback",
+          "nodownload",
+          "forcefallback",
+          "nopromote"
+        ],
+        "description": "Wrap mode",
+        "machine": "any",
+        "name": "wrap_mode",
+        "section": "core",
+        "type": "combo",
+        "value": "default"
+      },
+      {
+        "description": "Force fallback for those subprojects",
+        "machine": "any",
+        "name": "force_fallback_for",
+        "section": "core",
+        "type": "array",
+        "value": []
+      },
+      {
+        "description": "Activate Visual Studio environment",
+        "machine": "any",
+        "name": "vsenv",
+        "section": "core",
+        "type": "boolean",
+        "value": false
+      },
+      {
+        "description": "Use OMF format on OS/2",
+        "machine": "any",
+        "name": "os2_emxomf",
+        "section": "core",
+        "type": "boolean",
+        "value": false
+      },
+      {
+        "description": "Generate pkgconfig files as relocatable",
+        "machine": "any",
+        "name": "pkgconfig.relocatable",
+        "section": "core",
+        "type": "boolean",
+        "value": false
+      },
+      {
+        "description": "Whether to compile bytecode",
+        "machine": "any",
+        "name": "python.bytecompile",
+        "section": "core",
+        "type": "integer",
+        "value": 0
+      },
+      {
+        "choices": [
+          "auto",
+          "prefix",
+          "system",
+          "venv"
+        ],
+        "description": "Which python environment to install to",
+        "machine": "any",
+        "name": "python.install_env",
+        "section": "core",
+        "type": "combo",
+        "value": "prefix"
+      },
+      {
+        "description": "Directory for site-specific, platform-specific files.",
+        "machine": "any",
+        "name": "python.platlibdir",
+        "section": "core",
+        "type": "string",
+        "value": ""
+      },
+      {
+        "description": "Directory for site-specific, non-platform-specific files.",
+        "machine": "any",
+        "name": "python.purelibdir",
+        "section": "core",
+        "type": "string",
+        "value": ""
+      },
+      {
+        "description": "Whether to allow use of the Python Limited API",
+        "machine": "any",
+        "name": "python.allow_limited_api",
+        "section": "core",
+        "type": "boolean",
+        "value": true
+      },
+      {
+        "description": "Config file containing the build details for the target Python installation.",
+        "machine": "any",
+        "name": "python.build_config",
+        "section": "core",
+        "type": "string",
+        "value": ""
+      },
+      {
+        "description": "List of additional paths for pkg-config to search",
+        "machine": "build",
+        "name": "build.pkg_config_path",
+        "section": "core",
+        "type": "array",
+        "value": []
+      },
+      {
+        "description": "List of additional prefixes for cmake to search",
+        "machine": "build",
+        "name": "build.cmake_prefix_path",
+        "section": "core",
+        "type": "array",
+        "value": []
+      },
+      {
+        "description": "List of additional paths for pkg-config to search",
+        "machine": "host",
+        "name": "pkg_config_path",
+        "section": "core",
+        "type": "array",
+        "value": []
+      },
+      {
+        "description": "List of additional prefixes for cmake to search",
+        "machine": "host",
+        "name": "cmake_prefix_path",
+        "section": "core",
+        "type": "array",
+        "value": []
+      },
+      {
+        "description": "Maximum number of linker processes to run or 0 for no limit",
+        "machine": "any",
+        "name": "backend_max_links",
+        "section": "backend",
+        "type": "integer",
+        "value": 0
+      },
+      {
+        "description": "Directory to store ThinLTO cache objects",
+        "machine": "any",
+        "name": "b_thinlto_cache_dir",
+        "section": "base",
+        "type": "string",
+        "value": ""
+      },
+      {
+        "description": "Use multiple threads for Link Time Optimization",
+        "machine": "any",
+        "name": "b_lto_threads",
+        "section": "base",
+        "type": "integer",
+        "value": 0
+      },
+      {
+        "description": "Code sanitizer to use",
+        "machine": "any",
+        "name": "b_sanitize",
+        "section": "base",
+        "type": "array",
+        "value": []
+      },
+      {
+        "description": "Build static libraries as position independent",
+        "machine": "any",
+        "name": "b_staticpic",
+        "section": "base",
+        "type": "boolean",
+        "value": true
+      },
+      {
+        "description": "Enable coverage tracking.",
+        "machine": "any",
+        "name": "b_coverage",
+        "section": "base",
+        "type": "boolean",
+        "value": false
+      },
+      {
+        "description": "Use precompiled headers",
+        "machine": "any",
+        "name": "b_pch",
+        "section": "base",
+        "type": "boolean",
+        "value": true
+      },
+      {
+        "description": "Use LLVM ThinLTO caching for faster incremental builds",
+        "machine": "any",
+        "name": "b_thinlto_cache",
+        "section": "base",
+        "type": "boolean",
+        "value": false
+      },
+      {
+        "description": "Build executables as position independent",
+        "machine": "any",
+        "name": "b_pie",
+        "section": "base",
+        "type": "boolean",
+        "value": false
+      },
+      {
+        "choices": [
+          "auto",
+          "always",
+          "never"
+        ],
+        "description": "Use colored output",
+        "machine": "any",
+        "name": "b_colorout",
+        "section": "base",
+        "type": "combo",
+        "value": "always"
+      },
+      {
+        "description": "Use link time optimization",
+        "machine": "any",
+        "name": "b_lto",
+        "section": "base",
+        "type": "boolean",
+        "value": false
+      },
+      {
+        "choices": [
+          "true",
+          "false",
+          "if-release"
+        ],
+        "description": "Disable asserts",
+        "machine": "any",
+        "name": "b_ndebug",
+        "section": "base",
+        "type": "combo",
+        "value": "false"
+      },
+      {
+        "choices": [
+          "off",
+          "generate",
+          "use"
+        ],
+        "description": "Use profile guided optimization",
+        "machine": "any",
+        "name": "b_pgo",
+        "section": "base",
+        "type": "combo",
+        "value": "off"
+      },
+      {
+        "description": "Generate and embed bitcode (only macOS/iOS/tvOS)",
+        "machine": "any",
+        "name": "b_bitcode",
+        "section": "base",
+        "type": "boolean",
+        "value": false
+      },
+      {
+        "choices": [
+          "default",
+          "thin"
+        ],
+        "description": "Select between different LTO modes.",
+        "machine": "any",
+        "name": "b_lto_mode",
+        "section": "base",
+        "type": "combo",
+        "value": "default"
+      },
+      {
+        "description": "Use -Wl,--as-needed when linking",
+        "machine": "any",
+        "name": "b_asneeded",
+        "section": "base",
+        "type": "boolean",
+        "value": true
+      },
+      {
+        "description": "Use -Wl,--no-undefined when linking",
+        "machine": "any",
+        "name": "b_lundef",
+        "section": "base",
+        "type": "boolean",
+        "value": true
+      },
+      {
+        "description": "Extra arguments passed to the c compiler",
+        "machine": "build",
+        "name": "build.c_args",
+        "section": "compiler",
+        "type": "array",
+        "value": []
+      },
+      {
+        "description": "Extra arguments passed to the c linker",
+        "machine": "build",
+        "name": "build.c_link_args",
+        "section": "compiler",
+        "type": "array",
+        "value": []
+      },
+      {
+        "choices": [
+          "none",
+          "c89",
+          "c99",
+          "c11",
+          "c17",
+          "c18",
+          "c2x",
+          "c23",
+          "c2y",
+          "gnu89",
+          "gnu99",
+          "gnu11",
+          "gnu17",
+          "gnu18",
+          "gnu2x",
+          "gnu23",
+          "gnu2y"
+        ],
+        "description": "c language standard to use",
+        "machine": "build",
+        "name": "build.c_std",
+        "section": "compiler",
+        "type": "combo",
+        "value": "none"
+      },
+      {
+        "description": "Extra arguments passed to the cpp compiler",
+        "machine": "build",
+        "name": "build.cpp_args",
+        "section": "compiler",
+        "type": "array",
+        "value": []
+      },
+      {
+        "description": "Extra arguments passed to the cpp linker",
+        "machine": "build",
+        "name": "build.cpp_link_args",
+        "section": "compiler",
+        "type": "array",
+        "value": []
+      },
+      {
+        "choices": [
+          "none",
+          "c++98",
+          "c++03",
+          "c++11",
+          "c++14",
+          "c++17",
+          "c++1z",
+          "c++2a",
+          "c++20",
+          "c++23",
+          "c++26",
+          "gnu++98",
+          "gnu++03",
+          "gnu++11",
+          "gnu++14",
+          "gnu++17",
+          "gnu++1z",
+          "gnu++2a",
+          "gnu++20",
+          "gnu++23",
+          "gnu++26"
+        ],
+        "description": "cpp language standard to use",
+        "machine": "build",
+        "name": "build.cpp_std",
+        "section": "compiler",
+        "type": "combo",
+        "value": "none"
+      },
+      {
+        "choices": [
+          "none",
+          "default",
+          "a",
+          "s",
+          "sc"
+        ],
+        "description": "C++ exception handling type.",
+        "machine": "build",
+        "name": "build.cpp_eh",
+        "section": "compiler",
+        "type": "combo",
+        "value": "default"
+      },
+      {
+        "description": "Enable RTTI",
+        "machine": "build",
+        "name": "build.cpp_rtti",
+        "section": "compiler",
+        "type": "boolean",
+        "value": true
+      },
+      {
+        "description": "STL debug mode",
+        "machine": "build",
+        "name": "build.cpp_debugstl",
+        "section": "compiler",
+        "type": "boolean",
+        "value": false
+      },
+      {
+        "description": "Extra arguments passed to the c compiler",
+        "machine": "host",
+        "name": "c_args",
+        "section": "compiler",
+        "type": "array",
+        "value": []
+      },
+      {
+        "description": "Extra arguments passed to the c linker",
+        "machine": "host",
+        "name": "c_link_args",
+        "section": "compiler",
+        "type": "array",
+        "value": []
+      },
+      {
+        "choices": [
+          "none",
+          "c89",
+          "c99",
+          "c11",
+          "c17",
+          "c18",
+          "c2x",
+          "c23",
+          "c2y",
+          "gnu89",
+          "gnu99",
+          "gnu11",
+          "gnu17",
+          "gnu18",
+          "gnu2x",
+          "gnu23",
+          "gnu2y"
+        ],
+        "description": "c language standard to use",
+        "machine": "host",
+        "name": "c_std",
+        "section": "compiler",
+        "type": "combo",
+        "value": "none"
+      },
+      {
+        "description": "Standard Windows libraries to link against",
+        "machine": "host",
+        "name": "c_winlibs",
+        "section": "compiler",
+        "type": "array",
+        "value": [
+          "-lkernel32",
+          "-luser32",
+          "-lgdi32",
+          "-lwinspool",
+          "-lshell32",
+          "-lole32",
+          "-loleaut32",
+          "-luuid",
+          "-lcomdlg32",
+          "-ladvapi32"
+        ]
+      },
+      {
+        "description": "Extra arguments passed to the cpp compiler",
+        "machine": "host",
+        "name": "cpp_args",
+        "section": "compiler",
+        "type": "array",
+        "value": []
+      },
+      {
+        "description": "Extra arguments passed to the cpp linker",
+        "machine": "host",
+        "name": "cpp_link_args",
+        "section": "compiler",
+        "type": "array",
+        "value": []
+      },
+      {
+        "choices": [
+          "none",
+          "c++98",
+          "c++03",
+          "c++11",
+          "c++14",
+          "c++17",
+          "c++1z",
+          "c++2a",
+          "c++20",
+          "c++23",
+          "c++26",
+          "gnu++98",
+          "gnu++03",
+          "gnu++11",
+          "gnu++14",
+          "gnu++17",
+          "gnu++1z",
+          "gnu++2a",
+          "gnu++20",
+          "gnu++23",
+          "gnu++26"
+        ],
+        "description": "cpp language standard to use",
+        "machine": "host",
+        "name": "cpp_std",
+        "section": "compiler",
+        "type": "combo",
+        "value": "c++17"
+      },
+      {
+        "choices": [
+          "none",
+          "default",
+          "a",
+          "s",
+          "sc"
+        ],
+        "description": "C++ exception handling type.",
+        "machine": "host",
+        "name": "cpp_eh",
+        "section": "compiler",
+        "type": "combo",
+        "value": "default"
+      },
+      {
+        "description": "Enable RTTI",
+        "machine": "host",
+        "name": "cpp_rtti",
+        "section": "compiler",
+        "type": "boolean",
+        "value": true
+      },
+      {
+        "description": "STL debug mode",
+        "machine": "host",
+        "name": "cpp_debugstl",
+        "section": "compiler",
+        "type": "boolean",
+        "value": false
+      },
+      {
+        "description": "Standard Win libraries to link against",
+        "machine": "host",
+        "name": "cpp_winlibs",
+        "section": "compiler",
+        "type": "array",
+        "value": [
+          "-lkernel32",
+          "-luser32",
+          "-lgdi32",
+          "-lwinspool",
+          "-lshell32",
+          "-lole32",
+          "-loleaut32",
+          "-luuid",
+          "-lcomdlg32",
+          "-ladvapi32"
+        ]
+      },
+      {
+        "choices": [
+          "false",
+          "true"
+        ],
+        "description": "Use #import std.",
+        "machine": "host",
+        "name": "cpp_importstd",
+        "section": "compiler",
+        "type": "combo",
+        "value": "false"
+      },
+      {
+        "description": "Installation prefix",
+        "machine": "any",
+        "name": "prefix",
+        "section": "directory",
+        "type": "string",
+        "value": "/opt/homebrew"
+      },
+      {
+        "description": "Executable directory",
+        "machine": "any",
+        "name": "bindir",
+        "section": "directory",
+        "type": "string",
+        "value": "bin"
+      },
+      {
+        "description": "Data file directory",
+        "machine": "any",
+        "name": "datadir",
+        "section": "directory",
+        "type": "string",
+        "value": "share"
+      },
+      {
+        "description": "Header file directory",
+        "machine": "any",
+        "name": "includedir",
+        "section": "directory",
+        "type": "string",
+        "value": "include"
+      },
+      {
+        "description": "Info page directory",
+        "machine": "any",
+        "name": "infodir",
+        "section": "directory",
+        "type": "string",
+        "value": "share/info"
+      },
+      {
+        "description": "Library directory",
+        "machine": "any",
+        "name": "libdir",
+        "section": "directory",
+        "type": "string",
+        "value": "lib"
+      },
+      {
+        "description": "Licenses directory",
+        "machine": "any",
+        "name": "licensedir",
+        "section": "directory",
+        "type": "string",
+        "value": ""
+      },
+      {
+        "description": "Library executable directory",
+        "machine": "any",
+        "name": "libexecdir",
+        "section": "directory",
+        "type": "string",
+        "value": "libexec"
+      },
+      {
+        "description": "Locale data directory",
+        "machine": "any",
+        "name": "localedir",
+        "section": "directory",
+        "type": "string",
+        "value": "share/locale"
+      },
+      {
+        "description": "Localstate data directory",
+        "machine": "any",
+        "name": "localstatedir",
+        "section": "directory",
+        "type": "string",
+        "value": "/opt/homebrew/var"
+      },
+      {
+        "description": "Manual page directory",
+        "machine": "any",
+        "name": "mandir",
+        "section": "directory",
+        "type": "string",
+        "value": "share/man"
+      },
+      {
+        "description": "System executable directory",
+        "machine": "any",
+        "name": "sbindir",
+        "section": "directory",
+        "type": "string",
+        "value": "sbin"
+      },
+      {
+        "description": "Architecture-independent data directory",
+        "machine": "any",
+        "name": "sharedstatedir",
+        "section": "directory",
+        "type": "string",
+        "value": "/opt/homebrew/var/lib"
+      },
+      {
+        "description": "Sysconf data directory",
+        "machine": "any",
+        "name": "sysconfdir",
+        "section": "directory",
+        "type": "string",
+        "value": "etc"
+      },
+      {
+        "description": "Build DXGI",
+        "machine": "any",
+        "name": "enable_dxgi",
+        "section": "user",
+        "type": "boolean",
+        "value": true
+      },
+      {
+        "description": "Build D3D8",
+        "machine": "any",
+        "name": "enable_d3d8",
+        "section": "user",
+        "type": "boolean",
+        "value": true
+      },
+      {
+        "description": "Build D3D9",
+        "machine": "any",
+        "name": "enable_d3d9",
+        "section": "user",
+        "type": "boolean",
+        "value": true
+      },
+      {
+        "description": "Build D3D10",
+        "machine": "any",
+        "name": "enable_d3d10",
+        "section": "user",
+        "type": "boolean",
+        "value": true
+      },
+      {
+        "description": "Build D3D11",
+        "machine": "any",
+        "name": "enable_d3d11",
+        "section": "user",
+        "type": "boolean",
+        "value": true
+      },
+      {
+        "description": "build_id",
+        "machine": "any",
+        "name": "build_id",
+        "section": "user",
+        "type": "boolean",
+        "value": false
+      },
+      {
+        "choices": [
+          "enabled",
+          "disabled",
+          "auto"
+        ],
+        "description": "Enable GLFW WSI for DXVK Native",
+        "machine": "any",
+        "name": "native_glfw",
+        "section": "user",
+        "type": "combo",
+        "value": "disabled"
+      },
+      {
+        "choices": [
+          "enabled",
+          "disabled",
+          "auto"
+        ],
+        "description": "Enable SDL2 WSI for DXVK Native",
+        "machine": "any",
+        "name": "native_sdl2",
+        "section": "user",
+        "type": "combo",
+        "value": "disabled"
+      },
+      {
+        "choices": [
+          "enabled",
+          "disabled",
+          "auto"
+        ],
+        "description": "Enable SDL3 WSI for DXVK Native",
+        "machine": "any",
+        "name": "native_sdl3",
+        "section": "user",
+        "type": "combo",
+        "value": "disabled"
+      },
+      {
+        "description": "Build with Shader Model 3 support",
+        "machine": "any",
+        "name": "dxbc-spirv:enable_sm3",
+        "section": "user",
+        "type": "boolean",
+        "value": true
+      },
+      {
+        "description": "Build with Shader Model 5 support",
+        "machine": "any",
+        "name": "dxbc-spirv:enable_sm5",
+        "section": "user",
+        "type": "boolean",
+        "value": true
+      },
+      {
+        "description": "Build with SPIR-V backend",
+        "machine": "any",
+        "name": "dxbc-spirv:enable_spirv",
+        "section": "user",
+        "type": "boolean",
+        "value": true
+      },
+      {
+        "description": "Build tests",
+        "machine": "any",
+        "name": "dxbc-spirv:enable_tests",
+        "section": "user",
+        "type": "boolean",
+        "value": false
+      },
+      {
+        "description": "Build utility programs",
+        "machine": "any",
+        "name": "dxbc-spirv:enable_tools",
+        "section": "user",
+        "type": "boolean",
+        "value": false
+      },
+      {
+        "description": "Whether to print the logs from failing tests",
+        "machine": "any",
+        "name": "errorlogs",
+        "section": "test",
+        "type": "boolean",
+        "value": true
+      },
+      {
+        "description": "Split stdout and stderr in test logs",
+        "machine": "any",
+        "name": "stdsplit",
+        "section": "test",
+        "type": "boolean",
+        "value": true
+      }
+    ],
+    "source_identity": {
+      "content_tree_sha256": null,
+      "git_commit": "8d348236e14a3db25ffbe528a83010b3dd69a3ef",
+      "git_tree": "fdc9bece86eef6c1ed0cfc2bfe0ec85d9b9a99e5",
+      "path": "/private/tmp/fgmetal-step11d-r-exact-source"
+    }
+  },
+  "metadata_copies": [
+    {
+      "copy": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-records/fgmetal-step11d-r-exact-build/meson-private__cmd_line.txt",
+      "sha256": "7fb81f80a60a61dc3283f287962129e5e02901fc7e5e94352aa51f61d6b05318",
+      "size_bytes": 190,
+      "source": "/private/tmp/fgmetal-step11d-r-exact-build/meson-private/cmd_line.txt"
+    },
+    {
+      "copy": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-records/fgmetal-step11d-r-exact-build/meson-info__intro-buildoptions.json",
+      "sha256": "0f3b6e31cf364b7d49509419f6478fd311648a8e0b28bb07ff5032dc0ae72a75",
+      "size_bytes": 21227,
+      "source": "/private/tmp/fgmetal-step11d-r-exact-build/meson-info/intro-buildoptions.json"
+    },
+    {
+      "copy": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-records/fgmetal-step11d-r-exact-build/meson-info__intro-compilers.json",
+      "sha256": "7f37baa2a8232735a184d8999ba5c4969a5839d588c32affa80fd3bfeab26f12",
+      "size_bytes": 1915,
+      "source": "/private/tmp/fgmetal-step11d-r-exact-build/meson-info/intro-compilers.json"
+    },
+    {
+      "copy": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-records/fgmetal-step11d-r-exact-build/meson-info__intro-buildsystem_files.json",
+      "sha256": "c9d75ff50999989e75358e81c8a61e5f1ad93a9a884b926a735ea44b11e64d15",
+      "size_bytes": 1225,
+      "source": "/private/tmp/fgmetal-step11d-r-exact-build/meson-info/intro-buildsystem_files.json"
+    },
+    {
+      "copy": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-records/fgmetal-step11d-r-exact-build/meson-info__intro-projectinfo.json",
+      "sha256": "2406923efd60065ffad8b5f86fdccfad783d0ce3c1b64ac5be761f89959e1c0b",
+      "size_bytes": 391,
+      "source": "/private/tmp/fgmetal-step11d-r-exact-build/meson-info/intro-projectinfo.json"
+    },
+    {
+      "compression": "gzip",
+      "copy": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-records/fgmetal-step11d-r-exact-build/meson-log.txt.gz",
+      "sha256": "2501606c60adc78a8b41aa9e8d8eabd8a25784c7d65f0af809fe3b20f0dd42af",
+      "size_bytes": 5708,
+      "source": "/private/tmp/fgmetal-step11d-r-exact-build/meson-logs/meson-log.txt",
+      "source_sha256": "53ea628ac37716b2fd6c877fed344ff3d38fc87c477b802aaa4f82c88a11e807"
+    }
+  ],
+  "recorded_at_unix": 1791314745.748189,
+  "result_and_manifest_copies": [],
+  "retention": "Build directory is removable after each binary hash resolves to the canonical artifact store and this record exists.",
+  "schema_version": 1
+}

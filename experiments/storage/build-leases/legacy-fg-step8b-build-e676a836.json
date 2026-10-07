@@ -1,0 +1,66 @@
+{
+  "adopted_at_unix": 1791335656.223309,
+  "adopted_existing": true,
+  "allowed_external_symlink_roots": [],
+  "approved_parent": "/Users/nima/Library/Caches/FGMetal/builds",
+  "approved_parent_identity": {
+    "device": 16777230,
+    "filesystem_id": 16777230,
+    "inode": 93094313,
+    "mode": 448,
+    "owner_uid": 501,
+    "sticky": false
+  },
+  "build_device": 16777230,
+  "build_filesystem_id": 16777230,
+  "build_id": "legacy-fg-step8b-build-e676a836",
+  "build_inode": 89870981,
+  "cleanup_attempted": true,
+  "cleanup_free_before_bytes": 80123428864,
+  "cleanup_receipt_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-cleanup-receipts/legacy-fg-step8b-build-e676a836.json",
+  "created_at_unix": 1791335656.222444,
+  "estimated_bytes": 0,
+  "expected_bytes": 0,
+  "failed_at_unix": 1791335656.283694,
+  "failed_command": [
+    "legacy-root-reconciliation"
+  ],
+  "failure_evidence_files": [
+    {
+      "mode": "0o600",
+      "path": "failure-manifest.json",
+      "sha256": "d3ad01200b8a7cdc9a26faebf467877a93c837cfc389c56079eb1afadba1ddd3",
+      "size_bytes": 389
+    }
+  ],
+  "failure_evidence_index_sha256": "9054dcaea3e0fbbfd625832fc3dad72da322840fd14fcdc4c81fc78dc0f822f6",
+  "failure_evidence_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fg-step8b-build-e676a836.failure/failure-manifest.json",
+  "failure_evidence_root": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fg-step8b-build-e676a836.failure",
+  "failure_evidence_sha256": "d3ad01200b8a7cdc9a26faebf467877a93c837cfc389c56079eb1afadba1ddd3",
+  "failure_reason": "empty stale Step 8B scratch root with no compiled outputs",
+  "kind": "dxvk",
+  "last_heartbeat_unix": 1791335656.222444,
+  "lease_hmac_sha256": "ae398bf380424e0b262ac7ac0bff26ab412b4368cb8119fecd41fa83ce8523fb",
+  "legacy_source_path": "/private/tmp/fg-step8b-build",
+  "owner_experiment": "dxvk_macos_step8b",
+  "owner_pid": null,
+  "path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fg-step8b-build-e676a836",
+  "preserve_debug_expires_at_unix": null,
+  "preserve_debug_reason": null,
+  "purpose": "empty stale Step 8B scratch root with no compiled outputs",
+  "quarantine_name": ".retiring-legacy-fg-step8b-build-e676a836-b202e10ee8414d02aaa2baf39cad99ad",
+  "retired_at_unix": 1791335656.4075599,
+  "retirement_from_state": "FAILED",
+  "retirement_reason": "legacy-scratch-evidence-captured",
+  "retirement_started_unix": 1791335656.285346,
+  "retirement_tree_stats": {
+    "allocated_unique_inode_bytes": 0,
+    "best_recoverable_bytes_estimate": 0,
+    "file_count": 0,
+    "logical_bytes": 0
+  },
+  "return_code": null,
+  "schema_version": 1,
+  "source_tree_hash": "unknown-at-build-time",
+  "state": "COMPLETED"
+}

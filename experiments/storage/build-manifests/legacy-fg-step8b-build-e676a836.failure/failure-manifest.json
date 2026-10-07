@@ -1,0 +1,12 @@
+{
+  "build_id": "legacy-fg-step8b-build-e676a836",
+  "capture_paths": null,
+  "capture_policy": "full-small-root",
+  "captured_at_unix": 1791335656.2828941,
+  "classification": "FAILED_OR_SCRATCH",
+  "reason": "empty stale Step 8B scratch root with no compiled outputs",
+  "retained_files": [],
+  "schema_version": 1,
+  "source_estimated_allocated_bytes": 0,
+  "source_logical_bytes": 0
+}

@@ -1,0 +1,13 @@
+{
+  "name": "d2-15hz-30s",
+  "exit_status": 0,
+  "wall_seconds": 42.121667917002924,
+  "internal_wsi_enabled": true,
+  "duration_seconds": 30,
+  "sha256": {
+    "d3d9.dll": "ad0522bbffc9e8a12a5d362f90003a0b5b142ff6413e751aeea7c3d752526dd5",
+    "d3d11-semantics-15hz.exe": "c7d458f5ddd1d6d59fcb25eb7dc5c88e168cf1eb2945160550a6f7014a4f362c",
+    "d3d11.dll": "51ab23d86d77c591444ea301b123fa68a2d3a0408fbb5b8364a64dd0b31e8cf8",
+    "dxgi.dll": "6379512a4f4194b2078d87d145032bf673be2e808ffc008e0daf43d6e683bef9"
+  }
+}

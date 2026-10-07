@@ -5,6 +5,8 @@ FG_STEP8D_ENGINE_ROOT="${FG_STEP8D_ENGINE_ROOT:-$HOME/Library/Application Suppor
 FG_STEP8D_PREFIX="${FG_STEP8D_PREFIX:-$HOME/Library/Caches/FG-Metal-Step8D-20261002/transparent-prefix}"
 
 export WINEPREFIX="$FG_STEP8D_PREFIX"
+export WINELOADER="$FG_STEP8D_ENGINE_ROOT/engine/bin/wine"
+export WINESERVER="$FG_STEP8D_ENGINE_ROOT/engine/bin/wineserver"
 export WINEARCH=win64
 export WINEMSYNC=1
 export WINEESYNC=0
@@ -19,4 +21,8 @@ export DYLD_FALLBACK_LIBRARY_PATH="$FG_STEP8D_ENGINE_ROOT/renderers/d3dmetal/ext
 export GST_PLUGIN_PATH="$FG_STEP8D_ENGINE_ROOT/frameworks/GStreamer.framework/Versions/1.0/lib/gstreamer-1.0"
 export WINEDEBUG="${FG_STEP8D_WINEDEBUG:-+loaddll}"
 
-exec "$FG_STEP8D_ENGINE_ROOT/engine/bin/wine" "$@"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd -- "$SCRIPT_DIR/../.." && pwd)"
+python3 "$REPO_ROOT/experiments/storage/prefix_preflight.py" "$WINEPREFIX" "${BASH_SOURCE[0]}"
+
+exec "$WINELOADER" "$@"

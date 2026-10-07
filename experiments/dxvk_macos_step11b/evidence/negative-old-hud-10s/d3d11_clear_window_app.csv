@@ -1,0 +1,2 @@
+event,app_present_seq,elapsed_us,present_hr,requested_buffer_index,current_backbuffer_index_before,current_backbuffer_index_after,current_index_query_hr,buffer0_query_hr,color_id,static_texture_mode,window_visible,window_iconic,window_foreground
+present,1,21630,0x00000000,0,0,0,0x00000000,0x00000000,0,0,1,0,1

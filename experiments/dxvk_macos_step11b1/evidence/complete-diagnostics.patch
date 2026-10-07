@@ -1,0 +1,306 @@
+diff --git a/src/d3d11/d3d11_swapchain.cpp b/src/d3d11/d3d11_swapchain.cpp
+index 213fb0a5..3cb4e62b 100644
+--- a/src/d3d11/d3d11_swapchain.cpp
++++ b/src/d3d11/d3d11_swapchain.cpp
+@@ -6,6 +6,7 @@
+ #include "../dxvk/dxvk_shader_spirv.h"
+ 
+ #include "../util/util_win32_compat.h"
++#include "../util/util_env.h"
+ 
+ #include <d3d11_composition_vert.h>
+ #include <d3d11_composition_frag.h>
+@@ -491,11 +492,44 @@ namespace dxvk {
+     viewInfo.layerIndex = 0u;
+     viewInfo.layerCount = 1u;
+ 
++    // TEST ONLY, local downstream diagnostic. Default OFF.
++    const bool diagnosticWsiClear = env::getEnvVar("FG_STEP11B1_WSI_CLEAR") == "1";
++
++    const bool diagnosticKnownSource = env::getEnvVar("FG_STEP11B1_KNOWN_SOURCE") == "1";
++    Rc<DxvkImageView> presentSource = GetBackBufferView();
++    if (diagnosticKnownSource) {
++      const auto& appInfo = presentSource->image()->info();
++      if (!m_diagnosticSource || m_diagnosticSource->info().extent != appInfo.extent
++       || m_diagnosticSource->info().format != appInfo.format) {
++        DxvkImageCreateInfo imageInfo = { };
++        imageInfo.type = VK_IMAGE_TYPE_2D;
++        imageInfo.format = appInfo.format;
++        imageInfo.sampleCount = VK_SAMPLE_COUNT_1_BIT;
++        imageInfo.extent = appInfo.extent;
++        imageInfo.numLayers = 1; imageInfo.mipLevels = 1;
++        imageInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
++        imageInfo.stages = VK_PIPELINE_STAGE_TRANSFER_BIT | VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
++        imageInfo.access = VK_ACCESS_TRANSFER_WRITE_BIT | VK_ACCESS_SHADER_READ_BIT;
++        imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
++        imageInfo.layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
++        imageInfo.colorSpace = m_colorSpace;
++        m_diagnosticSource = m_device->createImage(imageInfo, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
++      }
++      DxvkImageViewKey key = { };
++      key.viewType = VK_IMAGE_VIEW_TYPE_2D; key.usage = VK_IMAGE_USAGE_SAMPLED_BIT;
++      key.format = m_diagnosticSource->info().format; key.aspects = VK_IMAGE_ASPECT_COLOR_BIT;
++      key.mipCount = 1; key.layerCount = 1;
++      presentSource = m_diagnosticSource->createView(key);
++    }
++
+     immediateContext->EmitCs([
++      cDiagnosticKnownSource = diagnosticKnownSource,
++      cDiagnosticWsiClear = diagnosticWsiClear,
++      cWsiImage       = backBuffer,
+       cDevice         = m_device,
+       cBlitter        = m_blitter,
+       cBackBuffer     = backBuffer->createView(viewInfo),
+-      cSwapImage      = GetBackBufferView(),
++      cSwapImage      = presentSource,
+       cSync           = sync,
+       cPresenter      = m_presenter,
+       cLatency        = m_latency,
+@@ -507,19 +541,93 @@ namespace dxvk {
+       cDstRect        = dstRect
+     ] (DxvkContext* ctx) {
+       // Update back buffer color space as necessary
+-      if (cSwapImage->image()->info().colorSpace != cColorSpace) {
++      if (!cDiagnosticWsiClear && cSwapImage->image()->info().colorSpace != cColorSpace) {
+         DxvkImageUsageInfo usage = { };
+         usage.colorSpace = cColorSpace;
+ 
+         ctx->ensureImageCompatibility(cSwapImage->image(), usage);
+       }
+ 
++      if (env::getEnvVar("FG_STEP11B1_TRACE_SOURCE") == "1" && cFrameId <= 32)
++        Logger::info(str::format("STEP11B1 PRESENT_SOURCE frame=", cFrameId,
++          " image=", cSwapImage->image()->handle(), " image_object=", cSwapImage->image(),
++          " storage=", cSwapImage->image()->storage().ptr(), " view=", cSwapImage->handle(),
++          " format=", cSwapImage->info().format, " layout=", cSwapImage->image()->info().layout));
+       // Blit the D3D back buffer onto the actual Vulkan
+       // swap chain and render the HUD if we have one.
+       auto contextObjects = ctx->beginExternalRendering();
+ 
+-      cBlitter->present(contextObjects, cClearColor,
+-        cBackBuffer, cDstRect, cSwapImage, cSrcRect);
++      if (cDiagnosticWsiClear) {
++        auto range = cWsiImage->getAvailableSubresources();
++        VkImageMemoryBarrier2 barrier = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2 };
++        barrier.dstAccessMask = VK_ACCESS_2_TRANSFER_WRITE_BIT;
++        barrier.dstStageMask = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
++        barrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
++        barrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
++        barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
++        barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
++        barrier.image = cWsiImage->handle();
++        barrier.subresourceRange = range;
++        VkDependencyInfo dependency = { VK_STRUCTURE_TYPE_DEPENDENCY_INFO };
++        dependency.imageMemoryBarrierCount = 1;
++        dependency.pImageMemoryBarriers = &barrier;
++        contextObjects->cmdPipelineBarrier(DxvkCmdBuffer::ExecBuffer, &dependency);
++        VkClearColorValue magenta = { };
++        magenta.float32[0] = 1.0f; magenta.float32[2] = 1.0f; magenta.float32[3] = 1.0f;
++        contextObjects->cmdClearColorImage(DxvkCmdBuffer::ExecBuffer,
++          cWsiImage->handle(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, &magenta, 1, &range);
++        barrier.srcAccessMask = VK_ACCESS_2_TRANSFER_WRITE_BIT;
++        barrier.srcStageMask = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
++        barrier.dstAccessMask = VK_ACCESS_2_MEMORY_READ_BIT;
++        barrier.dstStageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
++        barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
++        barrier.newLayout = cWsiImage->info().layout;
++        contextObjects->cmdPipelineBarrier(DxvkCmdBuffer::ExecBuffer, &dependency);
++        contextObjects->track(cWsiImage, DxvkAccess::Write);
++        if (cFrameId <= 32)
++          Logger::info(str::format("STEP11B1 WSI_CLEAR frame=", cFrameId,
++            " image=", cWsiImage->handle(), " range_aspect=", range.aspectMask,
++            " format=", cWsiImage->info().format, " usage=", cWsiImage->info().usage,
++            " final_layout=", cWsiImage->info().layout,
++            " acquire=", cSync.acquire, " present=", cSync.present));
++      } else {
++        if (cDiagnosticKnownSource) {
++          auto source = cSwapImage->image();
++          auto range = source->getAvailableSubresources();
++          VkImageMemoryBarrier2 barrier = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2 };
++          // Reused internal image: finish the previous frame's sample before overwriting.
++          barrier.srcAccessMask = VK_ACCESS_2_SHADER_SAMPLED_READ_BIT;
++          barrier.srcStageMask = VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT;
++          barrier.dstAccessMask = VK_ACCESS_2_TRANSFER_WRITE_BIT;
++          barrier.dstStageMask = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
++          barrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
++          barrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
++          barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
++          barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
++          barrier.image = source->handle(); barrier.subresourceRange = range;
++          VkDependencyInfo dependency = { VK_STRUCTURE_TYPE_DEPENDENCY_INFO };
++          dependency.imageMemoryBarrierCount = 1; dependency.pImageMemoryBarriers = &barrier;
++          contextObjects->cmdPipelineBarrier(DxvkCmdBuffer::ExecBuffer, &dependency);
++          VkClearColorValue green = { };
++          green.float32[1] = 1.0f; green.float32[3] = 1.0f;
++          contextObjects->cmdClearColorImage(DxvkCmdBuffer::ExecBuffer,
++            source->handle(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, &green, 1, &range);
++          barrier.srcAccessMask = VK_ACCESS_2_TRANSFER_WRITE_BIT;
++          barrier.srcStageMask = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
++          barrier.dstAccessMask = VK_ACCESS_2_SHADER_SAMPLED_READ_BIT;
++          barrier.dstStageMask = VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT;
++          barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
++          barrier.newLayout = source->info().layout;
++          contextObjects->cmdPipelineBarrier(DxvkCmdBuffer::ExecBuffer, &dependency);
++          contextObjects->track(source, DxvkAccess::Write);
++          if (cFrameId <= 32)
++            Logger::info(str::format("STEP11B1 KNOWN_SOURCE frame=", cFrameId,
++              " image=", source->handle(), " format=", source->info().format,
++              " view_format=", cSwapImage->info().format, " layout=", source->info().layout));
++        }
++        cBlitter->present(contextObjects, cClearColor,
++          cBackBuffer, cDstRect, cSwapImage, cSrcRect);
++      }
+ 
+       // Submit current command list and present
+       ctx->synchronizeWsi(cSync);
+diff --git a/src/d3d11/d3d11_swapchain.h b/src/d3d11/d3d11_swapchain.h
+index 13bc196e..3c301955 100644
+--- a/src/d3d11/d3d11_swapchain.h
++++ b/src/d3d11/d3d11_swapchain.h
+@@ -147,6 +147,9 @@ namespace dxvk {
+     bool                      m_hasHud = false;
+     Rc<hud::HudLatencyItem>   m_latencyHud;
+ 
++    // TEST ONLY, owned source for isolated normal-sampling diagnostics.
++    Rc<DxvkImage> m_diagnosticSource;
++
+     Rc<DxvkImageView> GetBackBufferView();
+ 
+     HRESULT PresentImage(
+diff --git a/src/dxvk/dxvk_context.cpp b/src/dxvk/dxvk_context.cpp
+index 7220b7be..2cc9261e 100644
+--- a/src/dxvk/dxvk_context.cpp
++++ b/src/dxvk/dxvk_context.cpp
+@@ -204,8 +204,27 @@ namespace dxvk {
+ 
+ 
+   Rc<DxvkCommandList> DxvkContext::beginExternalRendering() {
+-    // Flush and invalidate everything
++    // TEST ONLY: metadata, never image content readback.
++    const bool trace = env::getEnvVar("FG_STEP11B1_TRACE_SOURCE") == "1" && m_frameCount <= 16;
++    if (trace) {
++      Logger::info(str::format("STEP11B1 EXTERNAL_BEGIN frame=", m_frameCount,
++        " pending_clears=", m_deferredClears.size()));
++      for (const auto& clear : m_deferredClears)
++        Logger::info(str::format("STEP11B1 PENDING_CLEAR image=", clear.imageView->image()->handle(),
++          " image_object=", clear.imageView->image(),
++          " storage=", clear.imageView->image()->storage().ptr(),
++          " view=", clear.imageView->handle(), " format=", clear.imageView->info().format,
++          " declared_layout=", clear.imageView->image()->info().layout,
++          " color=", clear.clearValue.color.float32[0], ",", clear.clearValue.color.float32[1],
++          ",", clear.clearValue.color.float32[2], ",", clear.clearValue.color.float32[3]));
++    }
++    // Flush and invalidate everything. Opt-in probe of source materialization only.
++    if (env::getEnvVar("FG_STEP11B1_FLUSH_SOURCE") == "1")
++      endCurrentPass(false);
+     endCurrentCommands();
++    if (trace)
++      Logger::info(str::format("STEP11B1 EXTERNAL_READY frame=", m_frameCount,
++        " pending_clears=", m_deferredClears.size()));
+     beginCurrentCommands();
+ 
+     return m_cmd;
+diff --git a/src/dxvk/dxvk_presenter.cpp b/src/dxvk/dxvk_presenter.cpp
+index 643f7c5d..c4789f21 100644
+--- a/src/dxvk/dxvk_presenter.cpp
++++ b/src/dxvk/dxvk_presenter.cpp
+@@ -262,8 +262,15 @@ namespace dxvk {
+     if (m_hasIncrementalPresent && !m_presentRepaint && m_acquireStatus == VK_SUCCESS && rectCount)
+       regionInfo.pNext = const_cast<void*>(std::exchange(info.pNext, &regionInfo));
+ 
++    // TEST ONLY: correlate the exact written image with the existing present.
++    if (env::getEnvVar("FG_STEP11B1_WSI_CLEAR") == "1" && frameId <= 32)
++      Logger::info(str::format("STEP11B1 QUEUE_PRESENT frame=", frameId,
++        " index=", m_imageIndex, " image=", m_images.at(m_imageIndex)->handle(),
++        " semaphore=", currSync.present, " swapchain=", m_swapchain));
+     VkResult status = m_vkd->vkQueuePresentKHR(
+       m_device->queues().graphics.queueHandle, &info);
++    if (env::getEnvVar("FG_STEP11B1_WSI_CLEAR") == "1" && frameId <= 32)
++      Logger::info(str::format("STEP11B1 QUEUE_PRESENT_RESULT frame=", frameId, " status=", status));
+ 
+     // Treat a QUEUE_FULL error as a hint to recreate the swapchain with
+     // a larger queue size. This could probably be done more robustly,
+diff --git a/src/dxvk/dxvk_swapchain_blitter.cpp b/src/dxvk/dxvk_swapchain_blitter.cpp
+index 1bcdafad..7378a0dc 100644
+--- a/src/dxvk/dxvk_swapchain_blitter.cpp
++++ b/src/dxvk/dxvk_swapchain_blitter.cpp
+@@ -7,6 +7,7 @@
+ #include <dxvk_present_frag_ms.h>
+ #include <dxvk_present_frag_ms_blit.h>
+ #include <dxvk_present_vert.h>
++#include <dxvk_present_diagnostic_frag.h>
+ 
+ namespace dxvk {
+   
+@@ -301,6 +302,7 @@ namespace dxvk {
+     key.needsBlit = dstRect.extent != srcRect.extent;
+     key.compositeHud = composite && m_hudSrv;
+     key.compositeCursor = composite && m_cursorView;
++    key.diagnosticConstant = env::getEnvVar("FG_STEP11B1_CONSTANT_BLITTER") == "1";
+ 
+     VkPipeline pipeline = getBlitPipeline(key);
+ 
+@@ -766,6 +768,9 @@ namespace dxvk {
+         : util::DxvkBuiltInShaderStage(dxvk_present_frag_ms, &specInfo);
+     }
+ 
++    if (key.diagnosticConstant)
++      state.fs = util::DxvkBuiltInShaderStage(dxvk_present_diagnostic_frag, nullptr);
++
+     state.colorFormats[0] = key.dstFormat;
+     return m_device->createBuiltInGraphicsPipeline(m_blitLayout, state);
+   }
+diff --git a/src/dxvk/dxvk_swapchain_blitter.h b/src/dxvk/dxvk_swapchain_blitter.h
+index f5233ba8..6455f31c 100644
+--- a/src/dxvk/dxvk_swapchain_blitter.h
++++ b/src/dxvk/dxvk_swapchain_blitter.h
+@@ -50,6 +50,9 @@ namespace dxvk {
+     /// Bit indicating whether the software cursor needs to be composited
+     VkBool32 compositeCursor = VK_FALSE;
+ 
++    // TEST ONLY; included in the pipeline cache identity, default OFF.
++    VkBool32 diagnosticConstant = VK_FALSE;
++
+     size_t hash() const {
+       DxvkHashState hash;
+       hash.add(uint32_t(srcSpace));
+@@ -61,6 +64,7 @@ namespace dxvk {
+       hash.add(uint32_t(needsGamma));
+       hash.add(uint32_t(compositeHud));
+       hash.add(uint32_t(compositeCursor));
++      hash.add(uint32_t(diagnosticConstant));
+       return hash;
+     }
+ 
+@@ -73,7 +77,8 @@ namespace dxvk {
+           && needsBlit == other.needsBlit
+           && needsGamma == other.needsGamma
+           && compositeHud == other.compositeHud
+-          && compositeCursor == other.compositeCursor;
++          && compositeCursor == other.compositeCursor
++          && diagnosticConstant == other.diagnosticConstant;
+     }
+   };
+ 
+diff --git a/src/dxvk/meson.build b/src/dxvk/meson.build
+index 6b12f95c..bb3ed6a2 100644
+--- a/src/dxvk/meson.build
++++ b/src/dxvk/meson.build
+@@ -7,6 +7,7 @@ dxvk_shaders = files([
+   'shaders/dxvk_mipgen.comp',
+ 
+   'shaders/dxvk_present_frag.frag',
++  'shaders/dxvk_present_diagnostic_frag.frag',
+   'shaders/dxvk_present_frag_blit.frag',
+   'shaders/dxvk_present_frag_ms.frag',
+   'shaders/dxvk_present_frag_ms_blit.frag',
+diff --git a/src/dxvk/shaders/dxvk_present_diagnostic_frag.frag b/src/dxvk/shaders/dxvk_present_diagnostic_frag.frag
+new file mode 100644
+index 00000000..6e881b3c
+--- /dev/null
++++ b/src/dxvk/shaders/dxvk_present_diagnostic_frag.frag
+@@ -0,0 +1,4 @@
++#version 450
++// TEST ONLY: source-independent diagnostic; selected only by explicit environment.
++layout(location = 0) out vec4 o_color;
++void main() { o_color = vec4(1.0, 0.0, 1.0, 1.0); }

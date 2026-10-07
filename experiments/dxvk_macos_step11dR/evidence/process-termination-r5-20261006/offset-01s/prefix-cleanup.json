@@ -1,0 +1,11 @@
+{
+  "kill": {
+    "returncode": 0,
+    "output": "-5BD7-3491-AEFC-B4395F3DCF04> /usr/lib/system/libsystem_kernel.dylib\ndyld[69566]: <6D92CF2D-A008-36B6-B516-C960029E4960> /usr/lib/system/libsystem_platform.dylib\ndyld[69566]: <0BAFE0E7-F27F-363F-A13C-70619F985288> /usr/lib/system/libsystem_pthread.dylib\ndyld[69566]: <14B38348-6F43-316E-9559-4A5E077AFC52> /usr/lib/system/libsystem_symptoms.dylib\ndyld[69566]: <2AE5497B-628B-3027-B36D-AA62D9C95D20> /usr/lib/system/libsystem_trace.dylib\ndyld[69566]: <E9DCD1A4-A6F0-356D-89E0-CDB2D6E1E755> /usr/lib/system/libsystem_trial.dylib\ndyld[69566]: <F786DF52-020C-3CD4-85A4-42BBADA2E485> /usr/lib/system/libunwind.dylib\ndyld[69566]: <A44EE173-2555-3EA9-B836-0AF203AFBF46> /usr/lib/system/libxpc.dylib\ndyld[69566]: <AD71C77A-7D9F-3D67-AF76-A029629F8A52> /usr/lib/libc++abi.dylib\ndyld[69566]: <FA4B4D4D-4A72-301D-82E4-0415534FF26C> /usr/lib/libobjc.A.dylib\ndyld[69566]: <5E62C50D-63D5-3D91-8408-6175282185E7> /usr/lib/libRosetta.dylib\ndyld[69566]: <8DAA0737-BE5F-3F33-929E-DAD557873C98> /usr/lib/libc++.1.dylib\n"
+  },
+  "wait": {
+    "returncode": 0,
+    "output": "-5BD7-3491-AEFC-B4395F3DCF04> /usr/lib/system/libsystem_kernel.dylib\ndyld[69569]: <6D92CF2D-A008-36B6-B516-C960029E4960> /usr/lib/system/libsystem_platform.dylib\ndyld[69569]: <0BAFE0E7-F27F-363F-A13C-70619F985288> /usr/lib/system/libsystem_pthread.dylib\ndyld[69569]: <14B38348-6F43-316E-9559-4A5E077AFC52> /usr/lib/system/libsystem_symptoms.dylib\ndyld[69569]: <2AE5497B-628B-3027-B36D-AA62D9C95D20> /usr/lib/system/libsystem_trace.dylib\ndyld[69569]: <E9DCD1A4-A6F0-356D-89E0-CDB2D6E1E755> /usr/lib/system/libsystem_trial.dylib\ndyld[69569]: <F786DF52-020C-3CD4-85A4-42BBADA2E485> /usr/lib/system/libunwind.dylib\ndyld[69569]: <A44EE173-2555-3EA9-B836-0AF203AFBF46> /usr/lib/system/libxpc.dylib\ndyld[69569]: <AD71C77A-7D9F-3D67-AF76-A029629F8A52> /usr/lib/libc++abi.dylib\ndyld[69569]: <FA4B4D4D-4A72-301D-82E4-0415534FF26C> /usr/lib/libobjc.A.dylib\ndyld[69569]: <5E62C50D-63D5-3D91-8408-6175282185E7> /usr/lib/libRosetta.dylib\ndyld[69569]: <8DAA0737-BE5F-3F33-929E-DAD557873C98> /usr/lib/libc++.1.dylib\n"
+  },
+  "prefix_removed": true
+}

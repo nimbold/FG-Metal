@@ -1,0 +1,30 @@
+{
+  "experiment_id": "20261006T205149Z-step11d3-template-initialize-76363cc5",
+  "decision": "ALLOW",
+  "template_path": "/Users/nima/Library/Caches/FGMetal/prefixes/wine-11.17-mvk142-pristine",
+  "template_retained": false,
+  "template_certified": false,
+  "prefix_size": null,
+  "wineserver_shutdown": [],
+  "wineboot_process_reaped": true,
+  "prefix_removed_after_failure": true,
+  "cleanup_error": null,
+  "storage_watch_events": [],
+  "free_before_bytes": 67393327104,
+  "free_after_bytes": 67407757312,
+  "project_usage_after": {
+    "logical_bytes": 94550700207,
+    "allocated_inode_deduplicated_bytes": 41780490240,
+    "file_count": 121415,
+    "hardlinks_deduplicated": true,
+    "apfs_clone_awareness": false
+  },
+  "preserved_prefixes_after": [
+    "/Users/nima/Library/Caches/FGMetalStep11D-R/step11d2-diag-60s-07-submit-reclaim-split-prefix"
+  ],
+  "graphics_experiments_run": false,
+  "presentation_or_rendering_experiment_run": false,
+  "winevulkan_disabled": true,
+  "moltenvk_process_load_observed": false,
+  "storage_hygiene_status": "PASS_CLEANUP"
+}

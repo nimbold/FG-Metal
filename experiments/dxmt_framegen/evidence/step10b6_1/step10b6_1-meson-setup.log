@@ -1,0 +1,90 @@
+The Meson build system
+Version: 1.12.1
+Source dir: /private/tmp/fg-metal-step10b6_1-downstream
+Build dir: /private/tmp/fg-metal-step10b6_1-build
+Build type: cross build
+Project name: dxmt
+Project version: v0.1
+C compiler for the host machine: x86_64-w64-mingw32-gcc (gcc 16.2.0 "x86_64-w64-mingw32-gcc (GCC) 16.2.0")
+C linker for the host machine: x86_64-w64-mingw32-gcc ld.bfd 2.47.20260726
+C++ compiler for the host machine: x86_64-w64-mingw32-g++ (gcc 16.2.0 "x86_64-w64-mingw32-g++ (GCC) 16.2.0")
+C++ linker for the host machine: x86_64-w64-mingw32-g++ ld.bfd 2.47.20260726
+C compiler for the build machine: cc (clang 21.0.0 "Apple clang version 21.0.0 (clang-2100.3.34.2)")
+C linker for the build machine: cc ld64 27037.1
+C++ compiler for the build machine: c++ (clang 21.0.0 "Apple clang version 21.0.0 (clang-2100.3.34.2)")
+C++ linker for the build machine: c++ ld64 27037.1
+Build machine cpu family: aarch64
+Build machine cpu: aarch64
+Host machine cpu family: x86_64
+Host machine cpu: x86_64
+Target machine cpu family: x86_64
+Target machine cpu: x86_64
+Objective-C++ compiler for the build machine: clang++ (clang 21.0.0)
+Objective-C++ linker for the build machine: clang++ ld64 27037.1
+Program x86_64-w64-mingw32-windres found: YES
+Program xcrun found: YES (/usr/bin/xcrun)
+Program xxd found: YES (/usr/bin/xxd)
+Compiler for C++ supports arguments -Wimplicit-fallthrough: YES 
+Compiler for C++ supports arguments -Wno-missing-field-initializers: YES 
+Compiler for C++ supports arguments -Wno-unused-parameter: YES 
+Compiler for C++ supports arguments -Wno-cast-function-type: YES 
+Compiler for C++ supports arguments -Wno-unused-private-field: NO 
+Compiler for C++ supports arguments -Wno-microsoft-exception-spec: NO 
+Compiler for C++ supports arguments -Wno-extern-c-compat: NO 
+Compiler for C++ supports arguments -Wno-unused-const-variable: YES 
+Compiler for C++ supports arguments -Wno-missing-braces: YES 
+Compiler for C++ supports arguments -fblocks: NO 
+Compiler for C++ supports arguments -fmacro-prefix-map=../fg-metal-step10b6_1-downstream/=: YES 
+Compiler for C++ supports arguments -DNOMINMAX: YES 
+Compiler for C++ supports arguments -D_WIN32_WINNT=0xa00: YES 
+Compiler for C++ supports arguments -Wimplicit-fallthrough: YES 
+Compiler for C++ supports arguments -Wno-unused-parameter: YES 
+Compiler for C++ supports arguments -Wno-unused-private-field: YES 
+Compiler for C++ supports arguments -Wno-unused-const-variable: YES 
+Compiler for C++ supports arguments -Wno-missing-braces: YES 
+Compiler for C++ supports arguments -fblocks: YES 
+Compiler for C supports arguments -Wimplicit-fallthrough: YES 
+Compiler for C supports arguments -Wno-missing-field-initializers: YES 
+Compiler for C supports arguments -Wno-unused-parameter: YES 
+Compiler for C supports arguments -Wno-cast-function-type: YES 
+Compiler for C supports arguments -Wno-unused-private-field: NO 
+Compiler for C supports arguments -Wno-microsoft-exception-spec: NO 
+Compiler for C supports arguments -Wno-extern-c-compat: NO 
+Compiler for C supports arguments -Wno-unused-const-variable: YES 
+Compiler for C supports arguments -Wno-missing-braces: YES 
+Compiler for C supports arguments -fblocks: NO 
+Compiler for C supports arguments -fmacro-prefix-map=../fg-metal-step10b6_1-downstream/=: YES 
+Compiler for C supports arguments -DNOMINMAX: YES 
+Compiler for C supports arguments -D_WIN32_WINNT=0xa00: YES 
+Compiler for C supports arguments -Wimplicit-fallthrough: YES 
+Compiler for C supports arguments -Wno-unused-parameter: YES 
+Compiler for C supports arguments -Wno-unused-private-field: YES 
+Compiler for C supports arguments -Wno-unused-const-variable: YES 
+Compiler for C supports arguments -Wno-missing-braces: YES 
+Compiler for C supports arguments -fblocks: YES 
+Compiler for C++ supports link arguments -static: YES 
+Compiler for C++ supports link arguments -Wl,--file-alignment=4096: YES 
+Compiler for C supports link arguments -static: YES 
+Compiler for C supports link arguments -Wl,--file-alignment=4096: YES 
+Compiler for C++ supports arguments -Wno-unnecessary-virtual-specifier: YES 
+Library winecrt0 found: YES
+Library ntdll found: YES
+Library dbghelp found: YES
+Program /private/tmp/dxmt-fb451568-evidence.opkf8x/wine-install-v8.16-3shain/bin/winebuild found: YES (/private/tmp/dxmt-fb451568-evidence.opkf8x/wine-install-v8.16-3shain/bin/winebuild)
+Build targets in project: 16
+
+dxmt v0.1
+
+  User defined options
+    Cross files                    : /private/tmp/fg-metal-step10b6_1-downstream/build-win64.txt
+    buildtype                      : release
+    enable_d3d12                   : false
+    enable_dxmt_framegen_experiment: true
+    enable_nvapi                   : false
+    enable_nvngx                   : false
+    framegen_root                  : /Users/nima/Documents/Code/FG-Metal
+    framegen_static_library        : /Users/nima/Documents/Code/FG-Metal/build/step10b-synthetic-x86_64/framegen-core/src/libframegen.a
+    native_llvm_path               : /private/tmp/dxmt-fb451568-evidence.opkf8x/clang+llvm-15.0.7-x86_64-apple-darwin21.0
+    wine_install_path              : /private/tmp/dxmt-fb451568-evidence.opkf8x/wine-install-v8.16-3shain
+
+Found ninja-1.13.2 at /opt/homebrew/bin/ninja

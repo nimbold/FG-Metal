@@ -1,0 +1,10 @@
+{
+  "base": "8d348236e14a3db25ffbe528a83010b3dd69a3ef",
+  "d3d11_sha256": "b63c935e55a0854dc6857414fceaf7fde850da9f201e027b41a4cf97fed59352",
+  "dxgi_sha256": "17cbe8e84906ce9657493b1301e712cfc8123413034666fd9387dfe1bbf5b33c",
+  "patch_sha256": "4f4973000d0ce0783d05e11b7acae0efdff2d6bfe898bf49305408d72280e758",
+  "diagnostic_modes": "REMOVED FROM FINAL DLL",
+  "source_files_changed": [
+    "src/dxvk/dxvk_context.cpp"
+  ]
+}

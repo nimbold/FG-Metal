@@ -1,0 +1,3 @@
+event,tick_ms,requested,fullscreen_state,visible,iconic,foreground,window_style,window_ex_style,left,top,right,bottom,hr
+before_transition,478307587,0,0,1,0,1,0x14cf0000,0x100,0,33,648,427,0x00000000
+measurement_ready,478310603,0,0,1,0,1,0x14cf0000,0x100,0,35,648,429,0x00000000

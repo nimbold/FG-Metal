@@ -1,0 +1,38 @@
+{
+  "created_at_unix": 1791317360.188093,
+  "schema_version": 1,
+  "source_state_observations": [
+    {
+      "current_file_count": 1247,
+      "current_logical_bytes": 63721405,
+      "current_source_tree_sha256": "7f91e754914a7c0f15f0ce72a0bdf9b5ffd0cd56eae9857d7999019bdd724791",
+      "head_commit": "b4dbfad2e58d30a91c6513e899ff941f016de625",
+      "head_tree": "f07d21a13b78ee12c607920efbe7efe306bc92c8",
+      "identity_scope": "current observation only; not asserted to match build-time input",
+      "observed_at_unix": 1791317359.8676941,
+      "path": "/Users/nima/Library/Caches/FGMetalStep11C1R/DXVK-MacOS",
+      "staged_diff_bytes": 61697,
+      "staged_diff_sha256": "a8a9d41b562ae79eae9ee82e3aa1da97562c28a6e6f0c08c7419687d2730b46b",
+      "status_lines": 24,
+      "status_porcelain_v2_sha256": "023fcec9b225762d4f46e4818db015db013b8d1e109eb60a193b96ce06bd4ef0",
+      "unstaged_diff_bytes": 14062,
+      "unstaged_diff_sha256": "5d01c851abc32dd97ace580c6fba96d11757c7f62db70c1c77edd77d9e7404d1"
+    },
+    {
+      "current_file_count": 1247,
+      "current_logical_bytes": 63728929,
+      "current_source_tree_sha256": "d4c41b980b2a0f91b087c09fe88066fc0caf0c9021be3fa31bbe8dff7509a7ed",
+      "head_commit": "b4dbfad2e58d30a91c6513e899ff941f016de625",
+      "head_tree": "f07d21a13b78ee12c607920efbe7efe306bc92c8",
+      "identity_scope": "current observation only; not asserted to match build-time input",
+      "observed_at_unix": 1791317360.188044,
+      "path": "/private/tmp/fgmetal-step11d-r-cache-source",
+      "staged_diff_bytes": 61697,
+      "staged_diff_sha256": "a8a9d41b562ae79eae9ee82e3aa1da97562c28a6e6f0c08c7419687d2730b46b",
+      "status_lines": 28,
+      "status_porcelain_v2_sha256": "475152b0b839d15b9179aa01553e988f662514b39d31974b83f54c2927efebed",
+      "unstaged_diff_bytes": 29134,
+      "unstaged_diff_sha256": "294e1dfb9154a8b4321a46b96f115f95fe709157fe7d9f4d2534f95d4203b732"
+    }
+  ]
+}

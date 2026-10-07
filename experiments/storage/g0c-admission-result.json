@@ -1,0 +1,32 @@
+{
+  "attestation_sha256": "a9d892376db971f0f7775a199c08f663674b6eb4df15aef07fe5f212df88796c",
+  "authorized_runner_source_hashes": {
+    "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/runner-diagnostic.py": "852327da8bef1e417de1f5a11f3b31415c8bf3662c8e57ffa261fc9f3449e67a"
+  },
+  "build_retention_state": {
+    "active_build_count": 0,
+    "active_dxvk_count": 0,
+    "active_moltenvk_count": 0,
+    "completed_pending_retirement_count": 0,
+    "failed_or_retiring_count": 0,
+    "preserved_build_count": 0,
+    "retained_build_count": 0,
+    "retention_fingerprint_sha256": "904c14621f10b5f7fcbbd1330c67066db9b6f2f157b7b8d72b261f2758da1cb2",
+    "unknown_count": 0
+  },
+  "checked_at_unix": 1791381014.078709,
+  "gate0_blockers": [],
+  "graphics_experiments_run": false,
+  "measurements": {
+    "fgmetal_scoped_allocated_inode_bytes": 45583044608,
+    "free_bytes": 79835123712
+  },
+  "no_experiment_started": true,
+  "prefix_counts": {
+    "active_lease_count": 0,
+    "preserved_prefix_count": 2,
+    "uncertified_prefix_count": 0
+  },
+  "status": "PASS",
+  "worktree_count": 3
+}

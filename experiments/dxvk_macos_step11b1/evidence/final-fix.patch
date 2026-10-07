@@ -1,0 +1,14 @@
+diff --git a/src/dxvk/dxvk_context.cpp b/src/dxvk/dxvk_context.cpp
+index 7220b7be..c52d625b 100644
+--- a/src/dxvk/dxvk_context.cpp
++++ b/src/dxvk/dxvk_context.cpp
+@@ -204,6 +204,9 @@ namespace dxvk {
+ 
+ 
+   Rc<DxvkCommandList> DxvkContext::beginExternalRendering() {
++    // Materialize deferred clears and restore shader-readable layouts before
++    // external consumers bypass the context's normal resource preparation.
++    endCurrentPass(false);
+     // Flush and invalidate everything
+     endCurrentCommands();
+     beginCurrentCommands();

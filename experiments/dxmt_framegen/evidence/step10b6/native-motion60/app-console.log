@@ -1,0 +1,2 @@
+native_control_started mode=motion60 pid=53633 seconds=28 windowed=1
+native_control_result mode=motion60 callbacks=1677 positive_presented_time=1676 zero_presented_time=1 incomplete_gpu=0 incomplete_presented_handler=0 pending_gpu=0 pending_presented=0 csv=/private/tmp/step10b6-native/native-motion60/native-timing.csv config=/private/tmp/step10b6-native/native-motion60/native-config.txt

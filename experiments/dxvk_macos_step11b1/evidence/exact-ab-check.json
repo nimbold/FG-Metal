@@ -1,0 +1,13 @@
+{
+  "RGBA_lane": "rgba8-clean-replay",
+  "BGRA_lane": "bgra8",
+  "same_binary_DLLs": true,
+  "same_normalized_environment_except_format": true,
+  "both_fresh_prefixes": true,
+  "only_behavior_switch": "FG_AB_BGRA",
+  "visual_results": [
+    "BLACK",
+    "BLACK"
+  ],
+  "conclusion": "format alone rejected"
+}

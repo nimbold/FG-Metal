@@ -1,0 +1,53 @@
+{
+  "duration_seconds": 120,
+  "source_hz": 30,
+  "frames_per_color": 30,
+  "source_colors": [
+    "red",
+    "green",
+    "blue",
+    "white"
+  ],
+  "metal_invert_expected": [
+    "cyan",
+    "magenta",
+    "yellow",
+    "black"
+  ],
+  "internal_wsi_proof_override": false,
+  "slot_polling_change": "submission worker snapshots and polls every eligible terminal slot per pass; bridge and poll calls serialized",
+  "dxvk_enable_metal_interop": true,
+  "swap_effect": "DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL",
+  "dll_sha256": {
+    "d3d11.dll": "cc09178473bef9b6af9fec5821d9d56ad089d61b9daf0af139c132b379f46297",
+    "dxgi.dll": "2c90d3fc3f364a13d003c2dfe1a08ccdffe5bca9a9d6cde8408b65d6a5450f88",
+    "FGMetalBridge.dll": "7a4d53fbf6e4730c93119759d521d91bbf5bfa419bde6df7d63d2ca7b0d500e3",
+    "fgmetalbridge.so": "ecc9ce4c552f093a501ed1ac1186bbd086b2db4465830a07d119a6c4b49dd5d2"
+  },
+  "app_sha256": "f9e581029c215edc2ecad46f5c22cc1b0b0cfc8d17fbaec5f7d96667fc556169",
+  "wine_sha256": "946a7032484d02981182d59f82edda03f40f38c510e0208d48482c0830ef20e9",
+  "winevulkan_pe_sha256": "a18992aca34493aae325a5c1c6ddc78b905876fb65b2ca91fe7b1882b33fd2dc",
+  "winevulkan_unix_sha256": "6362dd64890738166dda79bdd9fcc94df55857c1f9756a3268ae91b8d3c38d88",
+  "moltenvk_sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+  "wine_runtime": "wine-11.17 (WineForge 0.6.0.5)",
+  "runtime": "/Users/nima/Library/Caches/FGMetalStep11D-R/runtime-vulkan-overlay/wine",
+  "wine_dll_search_path": [
+    "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-120s-09-low-candidate/overlay",
+    "/Users/nima/Library/Caches/FGMetalStep11D-R/runtime-vulkan-overlay/wine/lib/wine/x86_64-unix",
+    "/Users/nima/Library/Caches/FGMetalStep11D-R/runtime-vulkan-overlay/wine/lib/wine/x86_64-windows",
+    "/Users/nima/Library/Caches/FGMetalStep11D-R/runtime-vulkan-overlay/wine/lib/wine/i386-windows"
+  ],
+  "dyld_library_path": [
+    "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/bridge-gpu-proof/build/status-v3-current-20261006/mvk142-loader-override",
+    "/Users/nima/Library/Caches/FGMetalStep11D-R/runtime-vulkan-overlay/wine/lib/wine/x86_64-unix",
+    "/private/tmp/fgmetal-vulkan-link"
+  ],
+  "dxvk_config": "dxvk.enableMetalInterop = True\n",
+  "screen_capture": false,
+  "cpu_pixel_readback": false,
+  "source_build_id": "step11d2-diagnostic-c-20261006",
+  "frozen_r5_source_sha256": "044d03510e5b1c57fead0aed1a31f03105c78b17dcc303d7053b4811ab270c0b",
+  "diagnostic_provider_protocol_bytes": 560,
+  "native_provider_build_id": "step11d2-diagnostic-c-20261006",
+  "human_visual_confirmation": "pending"
+}

@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "certified_at_unix": 1791320189.135648,
+  "template_path": "/Users/nima/Library/Caches/FGMetal/prefixes/wine-11.17-mvk142-pristine",
+  "tree_identity": {
+    "tree_sha256": "ae988563274640344b546eaceba72a12d0e5f674b8d9b29ae196711331969155",
+    "file_count": 4916,
+    "logical_bytes": 2293361875
+  },
+  "runtime_identity": {
+    "wine_runtime_root": "/Users/nima/Library/Caches/FGMetalStep11D-R/runtime-vulkan-overlay/wine",
+    "wine_runtime_tree_manifest": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/runtime-manifests/step11d_r_active_runtime.json",
+    "wine_runtime_tree_sha256": "2fea825b205073bf011ce948ec4cbe6560d9d90e26982233ad05822a17a92bfe",
+    "wine_version": "wine-11.17 (WineForge 0.6.0.5)",
+    "wine_binary_sha256": "946a7032484d02981182d59f82edda03f40f38c510e0208d48482c0830ef20e9",
+    "moltenvk_path_for_subsequent_graphics_runs": "/Users/nima/Library/Caches/FGMetalStep11C1R/moltenvk-loader-override/libMoltenVK.1.dylib",
+    "moltenvk_sha256_for_subsequent_graphics_runs": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+    "moltenvk_icd_path": "/Users/nima/Library/Caches/FGMetalStep11C1R/moltenvk-1.4.2/MoltenVK/MoltenVK/dynamic/dylib/macOS/MoltenVK_icd.json",
+    "moltenvk_icd_sha256": "578ff08cd0d8734619357541771a5abc9c3470ca300030219a971a9e9dbbe466"
+  },
+  "initialization": {
+    "command": [
+      "/Users/nima/Library/Caches/FGMetalStep11D-R/runtime-vulkan-overlay/wine/bin/wine",
+      "wineboot",
+      "-u"
+    ],
+    "wineboot_returncode": 0,
+    "elapsed_seconds": 14.195,
+    "wineserver_shutdown": [
+      {
+        "flag": "-k",
+        "returncode": 0
+      },
+      {
+        "flag": "-w",
+        "returncode": 0
+      }
+    ],
+    "graphics_experiments_run": false,
+    "presentation_or_rendering_experiment_run": false,
+    "winevulkan_disable_override_requested": true,
+    "vulkan_icd_override": "/private/tmp/FGMetal-step11d3-no-vulkan-icd.json",
+    "vulkan_icd_override_path_existed": false,
+    "winevulkan_disabled_by_override": false,
+    "graphics_api_initialization_observed": true,
+    "moltenvk_process_load_observed": true,
+    "vulkan_device_enumeration_observed": true,
+    "graphics_initialization_log_sha256": "733e955535f09c32bdca2d2e80e25b4c6277281e44841e1797b2a7826a33e730",
+    "graphics_initialization_observation_lines": [
+      "[mvk-info] MoltenVK version 1.4.3, supporting Vulkan version 1.4.357.",
+      "[mvk-info] MoltenVK version 1.4.3, supporting Vulkan version 1.4.357.",
+      "[mvk-info] GPU device:",
+      "[mvk-info] Created VkInstance for Vulkan version 1.0.357, as requested by app, with the following 3 Vulkan extensions enabled:",
+      "[mvk-info] GPU device:",
+      "[mvk-info] Created VkInstance for Vulkan version 1.0.357, as requested by app, with the following 3 Vulkan extensions enabled:"
+    ],
+    "screen_capture": false
+  },
+  "graphics_experiments_run": false
+}

@@ -1,0 +1,86 @@
+{
+  "adopted_at_unix": 1791335656.610372,
+  "adopted_existing": true,
+  "allowed_external_symlink_roots": [
+    "/private/tmp/fgmetal-wine-11.17-vkmetal-source/wine-11.17"
+  ],
+  "approved_parent": "/Users/nima/Library/Caches/FGMetal/builds",
+  "approved_parent_identity": {
+    "device": 16777230,
+    "filesystem_id": 16777230,
+    "inode": 93094313,
+    "mode": 448,
+    "owner_uid": 501,
+    "sticky": false
+  },
+  "build_device": 16777230,
+  "build_filesystem_id": 16777230,
+  "build_id": "legacy-fgmetal-wine-11.17-vkmetal-build-x86-c6860482",
+  "build_inode": 92257229,
+  "cleanup_attempted": true,
+  "cleanup_free_before_bytes": 80123281408,
+  "cleanup_receipt_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-cleanup-receipts/legacy-fgmetal-wine-11.17-vkmetal-build-x86-c6860482.json",
+  "created_at_unix": 1791335656.6092968,
+  "estimated_bytes": 111394816,
+  "expected_bytes": 105066353,
+  "failed_at_unix": 1791335656.804105,
+  "failed_command": [
+    "legacy-root-reconciliation"
+  ],
+  "failure_evidence_files": [
+    {
+      "mode": "0o600",
+      "path": "failure-manifest.json",
+      "sha256": "1c03a98ebc881ea3e33fa3061794095816c9c1111d3af5b9511d0b753751d73a",
+      "size_bytes": 1936
+    },
+    {
+      "mode": "0o600",
+      "path": "configuration/config.log",
+      "sha256": "8b929ec38c292c713938cd180f70b1b66fe52aeac8249a1859553fb16d4aefa0",
+      "size_bytes": 29744
+    },
+    {
+      "mode": "0o600",
+      "path": "configuration/config.status",
+      "sha256": "a0900c3a3500c3a50e613b334592863dcdd011b0500d2a5586106195c4d2f791",
+      "size_bytes": 71807
+    },
+    {
+      "mode": "0o600",
+      "path": "configuration/nls__locale.nls.symlink.json",
+      "sha256": "5aa763fda13dbb47d389e21f8144fcae2a04504f86ede9fa91d09d99a749ccc6",
+      "size_bytes": 110
+    }
+  ],
+  "failure_evidence_index_sha256": "7a00254376544d8da7cfd54c08cd724e5dd74ee3cbd51277ab8b00c47bb129ad",
+  "failure_evidence_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-wine-11.17-vkmetal-build-x86-c6860482.failure/failure-manifest.json",
+  "failure_evidence_root": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-wine-11.17-vkmetal-build-x86-c6860482.failure",
+  "failure_evidence_sha256": "1c03a98ebc881ea3e33fa3061794095816c9c1111d3af5b9511d0b753751d73a",
+  "failure_reason": "Wine x86 configure failed because the available Bison is older than 3.0; later partial products are not a successful build. Preserve only config.log, config.status, and the declared nls/locale.nls symlink text; retire the bulk generated tree.",
+  "kind": "wine",
+  "last_heartbeat_unix": 1791335656.6092968,
+  "lease_hmac_sha256": "49e1d1888eb01716091fb117142fca9040c647df59198057d22bf8b32bf5bb6c",
+  "legacy_source_path": "/private/tmp/fgmetal-wine-11.17-vkmetal-build-x86",
+  "owner_experiment": "dxvk_macos_step11dR",
+  "owner_pid": null,
+  "path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-wine-11.17-vkmetal-build-x86-c6860482",
+  "preserve_debug_expires_at_unix": null,
+  "preserve_debug_reason": null,
+  "purpose": "Wine x86 configure failed because the available Bison is older than 3.0; later partial products are not a successful build. Preserve only config.log, config.status, and the declared nls/locale.nls symlink text; retire the bulk generated tree.",
+  "quarantine_name": ".retiring-legacy-fgmetal-wine-11.17-vkmetal-build-x86-c6860482-09c7a61c4723473ab7a14e6cf88596a1",
+  "retired_at_unix": 1791335657.4691122,
+  "retirement_from_state": "FAILED",
+  "retirement_reason": "legacy-scratch-evidence-captured",
+  "retirement_started_unix": 1791335656.854183,
+  "retirement_tree_stats": {
+    "allocated_unique_inode_bytes": 111394816,
+    "best_recoverable_bytes_estimate": 104509440,
+    "file_count": 1785,
+    "logical_bytes": 105066353
+  },
+  "return_code": null,
+  "schema_version": 1,
+  "source_tree_hash": "unknown-at-build-time",
+  "state": "COMPLETED"
+}

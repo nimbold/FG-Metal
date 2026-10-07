@@ -1,0 +1,1802 @@
+{
+  "actions": [
+    {
+      "canonical": {
+        "identity": {
+          "device": 16777230,
+          "flags": 0,
+          "gid": 20,
+          "inode": 92216249,
+          "mode": 33261,
+          "mtime_ns": 1791227961538805835,
+          "size": 372359594,
+          "uid": 501,
+          "xattrs": [
+            {
+              "name": "com.apple.provenance",
+              "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+            }
+          ]
+        },
+        "link_count": 2,
+        "manifest_sha256": "f1bd5dd405fcb41d43ebf990def9546b16595747b44c057e1e1fe9e497ada883"
+      },
+      "canonical_after": {
+        "identity": {
+          "device": 16777230,
+          "flags": 0,
+          "gid": 20,
+          "inode": 92216249,
+          "mode": 33261,
+          "mtime_ns": 1791227961538805835,
+          "size": 372359594,
+          "uid": 501,
+          "xattrs": [
+            {
+              "name": "com.apple.provenance",
+              "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+            }
+          ]
+        },
+        "link_count": 1,
+        "manifest_sha256": "f1bd5dd405fcb41d43ebf990def9546b16595747b44c057e1e1fe9e497ada883",
+        "original_paths": [
+          "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/source-built-11c-control-30s/flipseq-internal/d3d11.dll",
+          "/Users/nima/Library/Caches/FGMetalStep11C1R/build-d1-repro/src/d3d11/d3d11.dll"
+        ]
+      },
+      "canonical_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/531c71f02bc85b19b9788b7b5525a904779e4b0371cd47a5690ac676d97daded/d3d11.dll",
+      "certification": "PRESERVE_OR_HARDLINK_DEDUP",
+      "completed_at_unix": 1791380223.929155,
+      "copy_bytes": 0,
+      "operation_id": "45844230bc434e92ac07a642439fc881",
+      "original_identity": {
+        "device": 16777230,
+        "flags": 0,
+        "gid": 20,
+        "inode": 92216249,
+        "mode": 33261,
+        "mtime_ns": 1791227961538805835,
+        "size": 372359594,
+        "uid": 501,
+        "xattrs": [
+          {
+            "name": "com.apple.provenance",
+            "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+          }
+        ]
+      },
+      "original_inode_link_count_after": 1,
+      "original_inode_link_count_before": 2,
+      "original_link_count": 2,
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/source-built-11c-control-30s/flipseq-internal/d3d11.dll",
+      "result": "REFERENCE_INSTALLED_HASH_VERIFIED",
+      "sha256": "531c71f02bc85b19b9788b7b5525a904779e4b0371cd47a5690ac676d97daded"
+    },
+    {
+      "canonical": {
+        "identity": {
+          "device": 16777230,
+          "flags": 0,
+          "gid": 20,
+          "inode": 92216250,
+          "mode": 33261,
+          "mtime_ns": 1791227959789642203,
+          "size": 215179951,
+          "uid": 501,
+          "xattrs": [
+            {
+              "name": "com.apple.provenance",
+              "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+            }
+          ]
+        },
+        "link_count": 2,
+        "manifest_sha256": "f8a0d604e51fc471b82d1be6867421c50e3babe14bf43c2bb64064f2b44c6ef8"
+      },
+      "canonical_after": {
+        "identity": {
+          "device": 16777230,
+          "flags": 0,
+          "gid": 20,
+          "inode": 92216250,
+          "mode": 33261,
+          "mtime_ns": 1791227959789642203,
+          "size": 215179951,
+          "uid": 501,
+          "xattrs": [
+            {
+              "name": "com.apple.provenance",
+              "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+            }
+          ]
+        },
+        "link_count": 1,
+        "manifest_sha256": "f8a0d604e51fc471b82d1be6867421c50e3babe14bf43c2bb64064f2b44c6ef8",
+        "original_paths": [
+          "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/source-built-11c-control-30s/flipseq-internal/dxgi.dll",
+          "/Users/nima/Library/Caches/FGMetalStep11C1R/build-d1-repro/src/dxgi/dxgi.dll"
+        ]
+      },
+      "canonical_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/69f248484ab1fc9f6156e9a2a3b4ff9659a3484c65027e091a7b439eb382344f/dxgi.dll",
+      "certification": "PRESERVE_OR_HARDLINK_DEDUP",
+      "completed_at_unix": 1791380224.713668,
+      "copy_bytes": 0,
+      "operation_id": "a24f808962ff423f88930e09bcf9ed10",
+      "original_identity": {
+        "device": 16777230,
+        "flags": 0,
+        "gid": 20,
+        "inode": 92216250,
+        "mode": 33261,
+        "mtime_ns": 1791227959789642203,
+        "size": 215179951,
+        "uid": 501,
+        "xattrs": [
+          {
+            "name": "com.apple.provenance",
+            "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+          }
+        ]
+      },
+      "original_inode_link_count_after": 1,
+      "original_inode_link_count_before": 2,
+      "original_link_count": 2,
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/source-built-11c-control-30s/flipseq-internal/dxgi.dll",
+      "result": "REFERENCE_INSTALLED_HASH_VERIFIED",
+      "sha256": "69f248484ab1fc9f6156e9a2a3b4ff9659a3484c65027e091a7b439eb382344f"
+    },
+    {
+      "canonical": {
+        "identity": {
+          "device": 16777230,
+          "flags": 0,
+          "gid": 20,
+          "inode": 93204209,
+          "mode": 33261,
+          "mtime_ns": 1791346848310535870,
+          "size": 222273026,
+          "uid": 501,
+          "xattrs": [
+            {
+              "name": "com.apple.provenance",
+              "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+            }
+          ]
+        },
+        "link_count": 1,
+        "manifest_sha256": "09163a3b312489862acb6988878ddf97877337c45452ac339eb75ef5f9d7feaa"
+      },
+      "canonical_after": {
+        "identity": {
+          "device": 16777230,
+          "flags": 0,
+          "gid": 20,
+          "inode": 93204209,
+          "mode": 33261,
+          "mtime_ns": 1791346848310535870,
+          "size": 222273026,
+          "uid": 501,
+          "xattrs": [
+            {
+              "name": "com.apple.provenance",
+              "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+            }
+          ]
+        },
+        "link_count": 1,
+        "manifest_sha256": "09163a3b312489862acb6988878ddf97877337c45452ac339eb75ef5f9d7feaa",
+        "original_paths": [
+          "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-smoke-10s/dxgi.dll"
+        ]
+      },
+      "canonical_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/93a0bf3b847f07334bcbfb517014fc1868968f3352a7e04323aab6bfdd9692e5/dxgi.dll",
+      "certification": "PRESERVE_OR_HARDLINK_DEDUP",
+      "completed_at_unix": 1791380225.519825,
+      "copy_bytes": 0,
+      "operation_id": "f445e4eabf9d43a0a807ea75a89eb148",
+      "original_identity": {
+        "device": 16777230,
+        "flags": 0,
+        "gid": 0,
+        "inode": 92888063,
+        "mode": 33261,
+        "mtime_ns": 1791298592456187358,
+        "size": 222273026,
+        "uid": 501,
+        "xattrs": [
+          {
+            "name": "com.apple.provenance",
+            "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+          }
+        ]
+      },
+      "original_inode_link_count_after": 0,
+      "original_inode_link_count_before": 1,
+      "original_link_count": 1,
+      "path": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-smoke-10s/dxgi.dll",
+      "result": "REFERENCE_INSTALLED_HASH_VERIFIED",
+      "sha256": "93a0bf3b847f07334bcbfb517014fc1868968f3352a7e04323aab6bfdd9692e5"
+    },
+    {
+      "canonical": {
+        "identity": {
+          "device": 16777230,
+          "flags": 0,
+          "gid": 20,
+          "inode": 93204187,
+          "mode": 33261,
+          "mtime_ns": 1791346845827167937,
+          "size": 380705975,
+          "uid": 501,
+          "xattrs": [
+            {
+              "name": "com.apple.provenance",
+              "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+            }
+          ]
+        },
+        "link_count": 1,
+        "manifest_sha256": "4fc6f9a69b1d66b6bb73bff5e1f9506e967af40407922b326c053f852ca70625"
+      },
+      "canonical_after": {
+        "identity": {
+          "device": 16777230,
+          "flags": 0,
+          "gid": 20,
+          "inode": 93204187,
+          "mode": 33261,
+          "mtime_ns": 1791346845827167937,
+          "size": 380705975,
+          "uid": 501,
+          "xattrs": [
+            {
+              "name": "com.apple.provenance",
+              "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+            }
+          ]
+        },
+        "link_count": 1,
+        "manifest_sha256": "4fc6f9a69b1d66b6bb73bff5e1f9506e967af40407922b326c053f852ca70625",
+        "original_paths": [
+          "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-smoke-10s/d3d11.dll"
+        ]
+      },
+      "canonical_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/3fc5806851a8f805d84477f82dbd3cfd8d832ccf042003ff2cf3b5ca641ab307/d3d11.dll",
+      "certification": "PRESERVE_OR_HARDLINK_DEDUP",
+      "completed_at_unix": 1791380226.8834429,
+      "copy_bytes": 0,
+      "operation_id": "c7314a17863245e2915847b4fb02de84",
+      "original_identity": {
+        "device": 16777230,
+        "flags": 0,
+        "gid": 0,
+        "inode": 92888098,
+        "mode": 33261,
+        "mtime_ns": 1791298595022560992,
+        "size": 380705975,
+        "uid": 501,
+        "xattrs": [
+          {
+            "name": "com.apple.provenance",
+            "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+          }
+        ]
+      },
+      "original_inode_link_count_after": 0,
+      "original_inode_link_count_before": 1,
+      "original_link_count": 1,
+      "path": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-smoke-10s/d3d11.dll",
+      "result": "REFERENCE_INSTALLED_HASH_VERIFIED",
+      "sha256": "3fc5806851a8f805d84477f82dbd3cfd8d832ccf042003ff2cf3b5ca641ab307"
+    },
+    {
+      "canonical": {
+        "identity": {
+          "device": 16777230,
+          "flags": 0,
+          "gid": 20,
+          "inode": 93204237,
+          "mode": 33261,
+          "mtime_ns": 1791346850986713312,
+          "size": 222429361,
+          "uid": 501,
+          "xattrs": [
+            {
+              "name": "com.apple.provenance",
+              "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+            }
+          ]
+        },
+        "link_count": 1,
+        "manifest_sha256": "49d323b44928d7b9f208ad3b8e3fb1ff348d8920ae0e5e1d747ff9056a16fdd6"
+      },
+      "canonical_after": {
+        "identity": {
+          "device": 16777230,
+          "flags": 0,
+          "gid": 20,
+          "inode": 93204237,
+          "mode": 33261,
+          "mtime_ns": 1791346850986713312,
+          "size": 222429361,
+          "uid": 501,
+          "xattrs": [
+            {
+              "name": "com.apple.provenance",
+              "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+            }
+          ]
+        },
+        "link_count": 1,
+        "manifest_sha256": "49d323b44928d7b9f208ad3b8e3fb1ff348d8920ae0e5e1d747ff9056a16fdd6",
+        "original_paths": [
+          "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-60s-01/dxgi.dll",
+          "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-60s-02/dxgi.dll",
+          "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-120s-03/dxgi.dll"
+        ]
+      },
+      "canonical_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/eaacf82d8bc8e876b99230c4b7f87584b0dd9e7fb744fb53310d834e03941e63/dxgi.dll",
+      "certification": "PRESERVE_OR_HARDLINK_DEDUP",
+      "completed_at_unix": 1791380227.888032,
+      "copy_bytes": 0,
+      "operation_id": "6324a15a847e43dbae010b180858df89",
+      "original_identity": {
+        "device": 16777230,
+        "flags": 0,
+        "gid": 0,
+        "inode": 92894661,
+        "mode": 33261,
+        "mtime_ns": 1791299177671297604,
+        "size": 222429361,
+        "uid": 501,
+        "xattrs": [
+          {
+            "name": "com.apple.provenance",
+            "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+          }
+        ]
+      },
+      "original_inode_link_count_after": 2,
+      "original_inode_link_count_before": 3,
+      "original_link_count": 3,
+      "path": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-120s-03/dxgi.dll",
+      "result": "REFERENCE_INSTALLED_HASH_VERIFIED",
+      "sha256": "eaacf82d8bc8e876b99230c4b7f87584b0dd9e7fb744fb53310d834e03941e63"
+    },
+    {
+      "canonical": {
+        "identity": {
+          "device": 16777230,
+          "flags": 0,
+          "gid": 20,
+          "inode": 93204237,
+          "mode": 33261,
+          "mtime_ns": 1791346850986713312,
+          "size": 222429361,
+          "uid": 501,
+          "xattrs": [
+            {
+              "name": "com.apple.provenance",
+              "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+            }
+          ]
+        },
+        "link_count": 1,
+        "manifest_sha256": "49d323b44928d7b9f208ad3b8e3fb1ff348d8920ae0e5e1d747ff9056a16fdd6"
+      },
+      "canonical_after": {
+        "identity": {
+          "device": 16777230,
+          "flags": 0,
+          "gid": 20,
+          "inode": 93204237,
+          "mode": 33261,
+          "mtime_ns": 1791346850986713312,
+          "size": 222429361,
+          "uid": 501,
+          "xattrs": [
+            {
+              "name": "com.apple.provenance",
+              "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+            }
+          ]
+        },
+        "link_count": 1,
+        "manifest_sha256": "49d323b44928d7b9f208ad3b8e3fb1ff348d8920ae0e5e1d747ff9056a16fdd6",
+        "original_paths": [
+          "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-60s-01/dxgi.dll",
+          "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-60s-02/dxgi.dll",
+          "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-120s-03/dxgi.dll"
+        ]
+      },
+      "canonical_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/eaacf82d8bc8e876b99230c4b7f87584b0dd9e7fb744fb53310d834e03941e63/dxgi.dll",
+      "certification": "PRESERVE_OR_HARDLINK_DEDUP",
+      "completed_at_unix": 1791380228.476046,
+      "copy_bytes": 0,
+      "operation_id": "d32abe122a05420a80e78d1da33b0459",
+      "original_identity": {
+        "device": 16777230,
+        "flags": 0,
+        "gid": 0,
+        "inode": 92894661,
+        "mode": 33261,
+        "mtime_ns": 1791299177671297604,
+        "size": 222429361,
+        "uid": 501,
+        "xattrs": [
+          {
+            "name": "com.apple.provenance",
+            "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+          }
+        ]
+      },
+      "original_inode_link_count_after": 1,
+      "original_inode_link_count_before": 2,
+      "original_link_count": 3,
+      "path": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-60s-01/dxgi.dll",
+      "result": "REFERENCE_INSTALLED_HASH_VERIFIED",
+      "sha256": "eaacf82d8bc8e876b99230c4b7f87584b0dd9e7fb744fb53310d834e03941e63"
+    },
+    {
+      "canonical": {
+        "identity": {
+          "device": 16777230,
+          "flags": 0,
+          "gid": 20,
+          "inode": 93204237,
+          "mode": 33261,
+          "mtime_ns": 1791346850986713312,
+          "size": 222429361,
+          "uid": 501,
+          "xattrs": [
+            {
+              "name": "com.apple.provenance",
+              "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+            }
+          ]
+        },
+        "link_count": 1,
+        "manifest_sha256": "49d323b44928d7b9f208ad3b8e3fb1ff348d8920ae0e5e1d747ff9056a16fdd6"
+      },
+      "canonical_after": {
+        "identity": {
+          "device": 16777230,
+          "flags": 0,
+          "gid": 20,
+          "inode": 93204237,
+          "mode": 33261,
+          "mtime_ns": 1791346850986713312,
+          "size": 222429361,
+          "uid": 501,
+          "xattrs": [
+            {
+              "name": "com.apple.provenance",
+              "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+            }
+          ]
+        },
+        "link_count": 1,
+        "manifest_sha256": "49d323b44928d7b9f208ad3b8e3fb1ff348d8920ae0e5e1d747ff9056a16fdd6",
+        "original_paths": [
+          "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-60s-01/dxgi.dll",
+          "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-60s-02/dxgi.dll",
+          "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-120s-03/dxgi.dll"
+        ]
+      },
+      "canonical_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/eaacf82d8bc8e876b99230c4b7f87584b0dd9e7fb744fb53310d834e03941e63/dxgi.dll",
+      "certification": "PRESERVE_OR_HARDLINK_DEDUP",
+      "completed_at_unix": 1791380229.067709,
+      "copy_bytes": 0,
+      "operation_id": "5740b9c494f5420facf84736edaaa13c",
+      "original_identity": {
+        "device": 16777230,
+        "flags": 0,
+        "gid": 0,
+        "inode": 92894661,
+        "mode": 33261,
+        "mtime_ns": 1791299177671297604,
+        "size": 222429361,
+        "uid": 501,
+        "xattrs": [
+          {
+            "name": "com.apple.provenance",
+            "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+          }
+        ]
+      },
+      "original_inode_link_count_after": 0,
+      "original_inode_link_count_before": 1,
+      "original_link_count": 3,
+      "path": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-60s-02/dxgi.dll",
+      "result": "REFERENCE_INSTALLED_HASH_VERIFIED",
+      "sha256": "eaacf82d8bc8e876b99230c4b7f87584b0dd9e7fb744fb53310d834e03941e63"
+    },
+    {
+      "canonical": {
+        "identity": {
+          "device": 16777230,
+          "flags": 0,
+          "gid": 20,
+          "inode": 93204224,
+          "mode": 33261,
+          "mtime_ns": 1791346849438281120,
+          "size": 380862310,
+          "uid": 501,
+          "xattrs": [
+            {
+              "name": "com.apple.provenance",
+              "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+            }
+          ]
+        },
+        "link_count": 1,
+        "manifest_sha256": "136461dec68258fe2d1a0fd510bff95e3ec8138304142f2dd64e15654cb570e5"
+      },
+      "canonical_after": {
+        "identity": {
+          "device": 16777230,
+          "flags": 0,
+          "gid": 20,
+          "inode": 93204224,
+          "mode": 33261,
+          "mtime_ns": 1791346849438281120,
+          "size": 380862310,
+          "uid": 501,
+          "xattrs": [
+            {
+              "name": "com.apple.provenance",
+              "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+            }
+          ]
+        },
+        "link_count": 1,
+        "manifest_sha256": "136461dec68258fe2d1a0fd510bff95e3ec8138304142f2dd64e15654cb570e5",
+        "original_paths": [
+          "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-60s-01/d3d11.dll",
+          "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-60s-02/d3d11.dll",
+          "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-120s-03/d3d11.dll"
+        ]
+      },
+      "canonical_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/d88dbb08b37c57a068080cd18a1bae39ccb0b64717fd069e3ef6a93b83d1bb49/d3d11.dll",
+      "certification": "PRESERVE_OR_HARDLINK_DEDUP",
+      "completed_at_unix": 1791380230.785641,
+      "copy_bytes": 0,
+      "operation_id": "a952f605fd7d4a848b86ffb576415886",
+      "original_identity": {
+        "device": 16777230,
+        "flags": 0,
+        "gid": 0,
+        "inode": 92894667,
+        "mode": 33261,
+        "mtime_ns": 1791299178355300858,
+        "size": 380862310,
+        "uid": 501,
+        "xattrs": [
+          {
+            "name": "com.apple.provenance",
+            "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+          }
+        ]
+      },
+      "original_inode_link_count_after": 2,
+      "original_inode_link_count_before": 3,
+      "original_link_count": 3,
+      "path": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-120s-03/d3d11.dll",
+      "result": "REFERENCE_INSTALLED_HASH_VERIFIED",
+      "sha256": "d88dbb08b37c57a068080cd18a1bae39ccb0b64717fd069e3ef6a93b83d1bb49"
+    },
+    {
+      "canonical": {
+        "identity": {
+          "device": 16777230,
+          "flags": 0,
+          "gid": 20,
+          "inode": 93204224,
+          "mode": 33261,
+          "mtime_ns": 1791346849438281120,
+          "size": 380862310,
+          "uid": 501,
+          "xattrs": [
+            {
+              "name": "com.apple.provenance",
+              "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+            }
+          ]
+        },
+        "link_count": 1,
+        "manifest_sha256": "136461dec68258fe2d1a0fd510bff95e3ec8138304142f2dd64e15654cb570e5"
+      },
+      "canonical_after": {
+        "identity": {
+          "device": 16777230,
+          "flags": 0,
+          "gid": 20,
+          "inode": 93204224,
+          "mode": 33261,
+          "mtime_ns": 1791346849438281120,
+          "size": 380862310,
+          "uid": 501,
+          "xattrs": [
+            {
+              "name": "com.apple.provenance",
+              "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+            }
+          ]
+        },
+        "link_count": 1,
+        "manifest_sha256": "136461dec68258fe2d1a0fd510bff95e3ec8138304142f2dd64e15654cb570e5",
+        "original_paths": [
+          "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-60s-01/d3d11.dll",
+          "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-60s-02/d3d11.dll",
+          "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-120s-03/d3d11.dll"
+        ]
+      },
+      "canonical_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/d88dbb08b37c57a068080cd18a1bae39ccb0b64717fd069e3ef6a93b83d1bb49/d3d11.dll",
+      "certification": "PRESERVE_OR_HARDLINK_DEDUP",
+      "completed_at_unix": 1791380231.7975612,
+      "copy_bytes": 0,
+      "operation_id": "3f79332abe48495fb7d071aeaf2fdd83",
+      "original_identity": {
+        "device": 16777230,
+        "flags": 0,
+        "gid": 0,
+        "inode": 92894667,
+        "mode": 33261,
+        "mtime_ns": 1791299178355300858,
+        "size": 380862310,
+        "uid": 501,
+        "xattrs": [
+          {
+            "name": "com.apple.provenance",
+            "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+          }
+        ]
+      },
+      "original_inode_link_count_after": 1,
+      "original_inode_link_count_before": 2,
+      "original_link_count": 3,
+      "path": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-60s-01/d3d11.dll",
+      "result": "REFERENCE_INSTALLED_HASH_VERIFIED",
+      "sha256": "d88dbb08b37c57a068080cd18a1bae39ccb0b64717fd069e3ef6a93b83d1bb49"
+    },
+    {
+      "canonical": {
+        "identity": {
+          "device": 16777230,
+          "flags": 0,
+          "gid": 20,
+          "inode": 93204224,
+          "mode": 33261,
+          "mtime_ns": 1791346849438281120,
+          "size": 380862310,
+          "uid": 501,
+          "xattrs": [
+            {
+              "name": "com.apple.provenance",
+              "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+            }
+          ]
+        },
+        "link_count": 1,
+        "manifest_sha256": "136461dec68258fe2d1a0fd510bff95e3ec8138304142f2dd64e15654cb570e5"
+      },
+      "canonical_after": {
+        "identity": {
+          "device": 16777230,
+          "flags": 0,
+          "gid": 20,
+          "inode": 93204224,
+          "mode": 33261,
+          "mtime_ns": 1791346849438281120,
+          "size": 380862310,
+          "uid": 501,
+          "xattrs": [
+            {
+              "name": "com.apple.provenance",
+              "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+            }
+          ]
+        },
+        "link_count": 1,
+        "manifest_sha256": "136461dec68258fe2d1a0fd510bff95e3ec8138304142f2dd64e15654cb570e5",
+        "original_paths": [
+          "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-60s-01/d3d11.dll",
+          "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-60s-02/d3d11.dll",
+          "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-120s-03/d3d11.dll"
+        ]
+      },
+      "canonical_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/d88dbb08b37c57a068080cd18a1bae39ccb0b64717fd069e3ef6a93b83d1bb49/d3d11.dll",
+      "certification": "PRESERVE_OR_HARDLINK_DEDUP",
+      "completed_at_unix": 1791380232.806119,
+      "copy_bytes": 0,
+      "operation_id": "976d65a2924c4073b4e4386658bdeff9",
+      "original_identity": {
+        "device": 16777230,
+        "flags": 0,
+        "gid": 0,
+        "inode": 92894667,
+        "mode": 33261,
+        "mtime_ns": 1791299178355300858,
+        "size": 380862310,
+        "uid": 501,
+        "xattrs": [
+          {
+            "name": "com.apple.provenance",
+            "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+          }
+        ]
+      },
+      "original_inode_link_count_after": 0,
+      "original_inode_link_count_before": 1,
+      "original_link_count": 3,
+      "path": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-60s-02/d3d11.dll",
+      "result": "REFERENCE_INSTALLED_HASH_VERIFIED",
+      "sha256": "d88dbb08b37c57a068080cd18a1bae39ccb0b64717fd069e3ef6a93b83d1bb49"
+    },
+    {
+      "canonical": {
+        "identity": {
+          "device": 16777230,
+          "flags": 0,
+          "gid": 20,
+          "inode": 93204219,
+          "mode": 33261,
+          "mtime_ns": 1791346848850816696,
+          "size": 222588060,
+          "uid": 501,
+          "xattrs": [
+            {
+              "name": "com.apple.provenance",
+              "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+            }
+          ]
+        },
+        "link_count": 1,
+        "manifest_sha256": "d511026755ef3eaaee2fe40a3286150066e1af4bde6750f232e89473aa47c1c8"
+      },
+      "canonical_after": {
+        "identity": {
+          "device": 16777230,
+          "flags": 0,
+          "gid": 20,
+          "inode": 93204219,
+          "mode": 33261,
+          "mtime_ns": 1791346848850816696,
+          "size": 222588060,
+          "uid": 501,
+          "xattrs": [
+            {
+              "name": "com.apple.provenance",
+              "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+            }
+          ]
+        },
+        "link_count": 1,
+        "manifest_sha256": "d511026755ef3eaaee2fe40a3286150066e1af4bde6750f232e89473aa47c1c8",
+        "original_paths": [
+          "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-120s-04-present-split/dxgi.dll"
+        ]
+      },
+      "canonical_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/bba4554a92822bdac980777e58349d7ef2e2e53438ef0b7c872c246cd682ef89/dxgi.dll",
+      "certification": "PRESERVE_OR_HARDLINK_DEDUP",
+      "completed_at_unix": 1791380233.752609,
+      "copy_bytes": 0,
+      "operation_id": "b3299dc88d2f4c989b9ea0c1c5faa717",
+      "original_identity": {
+        "device": 16777230,
+        "flags": 0,
+        "gid": 0,
+        "inode": 92916243,
+        "mode": 33261,
+        "mtime_ns": 1791301686978699002,
+        "size": 222588060,
+        "uid": 501,
+        "xattrs": [
+          {
+            "name": "com.apple.provenance",
+            "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+          }
+        ]
+      },
+      "original_inode_link_count_after": 0,
+      "original_inode_link_count_before": 1,
+      "original_link_count": 1,
+      "path": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-120s-04-present-split/dxgi.dll",
+      "result": "REFERENCE_INSTALLED_HASH_VERIFIED",
+      "sha256": "bba4554a92822bdac980777e58349d7ef2e2e53438ef0b7c872c246cd682ef89"
+    },
+    {
+      "canonical": {
+        "identity": {
+          "device": 16777230,
+          "flags": 0,
+          "gid": 20,
+          "inode": 93204180,
+          "mode": 33261,
+          "mtime_ns": 1791346845115805764,
+          "size": 381021009,
+          "uid": 501,
+          "xattrs": [
+            {
+              "name": "com.apple.provenance",
+              "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+            }
+          ]
+        },
+        "link_count": 1,
+        "manifest_sha256": "097b69e65179a899b314aa5fa201f9319099062648e1322b2444c912901269e8"
+      },
+      "canonical_after": {
+        "identity": {
+          "device": 16777230,
+          "flags": 0,
+          "gid": 20,
+          "inode": 93204180,
+          "mode": 33261,
+          "mtime_ns": 1791346845115805764,
+          "size": 381021009,
+          "uid": 501,
+          "xattrs": [
+            {
+              "name": "com.apple.provenance",
+              "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+            }
+          ]
+        },
+        "link_count": 1,
+        "manifest_sha256": "097b69e65179a899b314aa5fa201f9319099062648e1322b2444c912901269e8",
+        "original_paths": [
+          "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-120s-04-present-split/d3d11.dll"
+        ]
+      },
+      "canonical_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/2fcdf22567df30a9f87d8f8745340e09f862a04d171d99a7adb7e5ffe5f8eef9/d3d11.dll",
+      "certification": "PRESERVE_OR_HARDLINK_DEDUP",
+      "completed_at_unix": 1791380235.4187362,
+      "copy_bytes": 0,
+      "operation_id": "fe97aba369384fd9aa5f4efb2c856917",
+      "original_identity": {
+        "device": 16777230,
+        "flags": 0,
+        "gid": 0,
+        "inode": 92916249,
+        "mode": 33261,
+        "mtime_ns": 1791301687947923247,
+        "size": 381021009,
+        "uid": 501,
+        "xattrs": [
+          {
+            "name": "com.apple.provenance",
+            "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+          }
+        ]
+      },
+      "original_inode_link_count_after": 0,
+      "original_inode_link_count_before": 1,
+      "original_link_count": 1,
+      "path": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-120s-04-present-split/d3d11.dll",
+      "result": "REFERENCE_INSTALLED_HASH_VERIFIED",
+      "sha256": "2fcdf22567df30a9f87d8f8745340e09f862a04d171d99a7adb7e5ffe5f8eef9"
+    },
+    {
+      "canonical": {
+        "identity": {
+          "device": 16777230,
+          "flags": 0,
+          "gid": 20,
+          "inode": 93204193,
+          "mode": 33261,
+          "mtime_ns": 1791346846387481493,
+          "size": 222686711,
+          "uid": 501,
+          "xattrs": [
+            {
+              "name": "com.apple.provenance",
+              "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+            }
+          ]
+        },
+        "link_count": 1,
+        "manifest_sha256": "093f2873a96c2a879027232d8f893ca6df37b32f23bd85526332266ecc5ece77"
+      },
+      "canonical_after": {
+        "identity": {
+          "device": 16777230,
+          "flags": 0,
+          "gid": 20,
+          "inode": 93204193,
+          "mode": 33261,
+          "mtime_ns": 1791346846387481493,
+          "size": 222686711,
+          "uid": 501,
+          "xattrs": [
+            {
+              "name": "com.apple.provenance",
+              "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+            }
+          ]
+        },
+        "link_count": 1,
+        "manifest_sha256": "093f2873a96c2a879027232d8f893ca6df37b32f23bd85526332266ecc5ece77",
+        "original_paths": [
+          "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-120s-05-submit-split/dxgi.dll"
+        ]
+      },
+      "canonical_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/5fd9a858a2221eab9638cf6e6413ef403e77bc92e417781c9613a72c13e56f11/dxgi.dll",
+      "certification": "PRESERVE_OR_HARDLINK_DEDUP",
+      "completed_at_unix": 1791380236.364029,
+      "copy_bytes": 0,
+      "operation_id": "91bf19fb044545b8afeb866e696818fb",
+      "original_identity": {
+        "device": 16777230,
+        "flags": 0,
+        "gid": 0,
+        "inode": 92923529,
+        "mode": 33261,
+        "mtime_ns": 1791302403597590338,
+        "size": 222686711,
+        "uid": 501,
+        "xattrs": [
+          {
+            "name": "com.apple.provenance",
+            "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+          }
+        ]
+      },
+      "original_inode_link_count_after": 0,
+      "original_inode_link_count_before": 1,
+      "original_link_count": 1,
+      "path": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-120s-05-submit-split/dxgi.dll",
+      "result": "REFERENCE_INSTALLED_HASH_VERIFIED",
+      "sha256": "5fd9a858a2221eab9638cf6e6413ef403e77bc92e417781c9613a72c13e56f11"
+    },
+    {
+      "canonical": {
+        "identity": {
+          "device": 16777230,
+          "flags": 0,
+          "gid": 20,
+          "inode": 93204203,
+          "mode": 33261,
+          "mtime_ns": 1791346847755593145,
+          "size": 381116336,
+          "uid": 501,
+          "xattrs": [
+            {
+              "name": "com.apple.provenance",
+              "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+            }
+          ]
+        },
+        "link_count": 1,
+        "manifest_sha256": "02aaeecd96a9c831595cf26cf00455ed25ff1b517d5c5de21973faf55bf5d793"
+      },
+      "canonical_after": {
+        "identity": {
+          "device": 16777230,
+          "flags": 0,
+          "gid": 20,
+          "inode": 93204203,
+          "mode": 33261,
+          "mtime_ns": 1791346847755593145,
+          "size": 381116336,
+          "uid": 501,
+          "xattrs": [
+            {
+              "name": "com.apple.provenance",
+              "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+            }
+          ]
+        },
+        "link_count": 1,
+        "manifest_sha256": "02aaeecd96a9c831595cf26cf00455ed25ff1b517d5c5de21973faf55bf5d793",
+        "original_paths": [
+          "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-120s-05-submit-split/d3d11.dll"
+        ]
+      },
+      "canonical_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/724a93176b1211533fbc18dedded7d71eaffb51708b034d65050e564fce762fd/d3d11.dll",
+      "certification": "PRESERVE_OR_HARDLINK_DEDUP",
+      "completed_at_unix": 1791380237.992919,
+      "copy_bytes": 0,
+      "operation_id": "77eba3fcfe384d5c9f1ebb727e54efbf",
+      "original_identity": {
+        "device": 16777230,
+        "flags": 0,
+        "gid": 0,
+        "inode": 92923535,
+        "mode": 33261,
+        "mtime_ns": 1791302404172936513,
+        "size": 381116336,
+        "uid": 501,
+        "xattrs": [
+          {
+            "name": "com.apple.provenance",
+            "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+          }
+        ]
+      },
+      "original_inode_link_count_after": 0,
+      "original_inode_link_count_before": 1,
+      "original_link_count": 1,
+      "path": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-120s-05-submit-split/d3d11.dll",
+      "result": "REFERENCE_INSTALLED_HASH_VERIFIED",
+      "sha256": "724a93176b1211533fbc18dedded7d71eaffb51708b034d65050e564fce762fd"
+    },
+    {
+      "canonical": {
+        "identity": {
+          "device": 16777230,
+          "flags": 0,
+          "gid": 20,
+          "inode": 93204198,
+          "mode": 33261,
+          "mtime_ns": 1791346846953003964,
+          "size": 222728734,
+          "uid": 501,
+          "xattrs": [
+            {
+              "name": "com.apple.provenance",
+              "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+            }
+          ]
+        },
+        "link_count": 1,
+        "manifest_sha256": "198712b4562744dbc349231ad04629f9ff996c66bb7ba2c3f72165a27766363b"
+      },
+      "canonical_after": {
+        "identity": {
+          "device": 16777230,
+          "flags": 0,
+          "gid": 20,
+          "inode": 93204198,
+          "mode": 33261,
+          "mtime_ns": 1791346846953003964,
+          "size": 222728734,
+          "uid": 501,
+          "xattrs": [
+            {
+              "name": "com.apple.provenance",
+              "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+            }
+          ]
+        },
+        "link_count": 1,
+        "manifest_sha256": "198712b4562744dbc349231ad04629f9ff996c66bb7ba2c3f72165a27766363b",
+        "original_paths": [
+          "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-120s-06-full-timeline/dxgi.dll"
+        ]
+      },
+      "canonical_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/68ae994819d2d50f92d1a49961a67dd404d06ee1f416cf0e20193a1343c18e5f/dxgi.dll",
+      "certification": "PRESERVE_OR_HARDLINK_DEDUP",
+      "completed_at_unix": 1791380239.076879,
+      "copy_bytes": 0,
+      "operation_id": "0e5d2c69d1bf43998367c915928806bf",
+      "original_identity": {
+        "device": 16777230,
+        "flags": 0,
+        "gid": 0,
+        "inode": 92929804,
+        "mode": 33261,
+        "mtime_ns": 1791302751489993513,
+        "size": 222728734,
+        "uid": 501,
+        "xattrs": [
+          {
+            "name": "com.apple.provenance",
+            "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+          }
+        ]
+      },
+      "original_inode_link_count_after": 0,
+      "original_inode_link_count_before": 1,
+      "original_link_count": 1,
+      "path": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-120s-06-full-timeline/dxgi.dll",
+      "result": "REFERENCE_INSTALLED_HASH_VERIFIED",
+      "sha256": "68ae994819d2d50f92d1a49961a67dd404d06ee1f416cf0e20193a1343c18e5f"
+    },
+    {
+      "canonical": {
+        "identity": {
+          "device": 16777230,
+          "flags": 0,
+          "gid": 20,
+          "inode": 93204230,
+          "mode": 33261,
+          "mtime_ns": 1791346850428813940,
+          "size": 381170647,
+          "uid": 501,
+          "xattrs": [
+            {
+              "name": "com.apple.provenance",
+              "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+            }
+          ]
+        },
+        "link_count": 1,
+        "manifest_sha256": "d86f85aec611956b06e05e16e1166154d33f19160a685f57e90d212a528556ad"
+      },
+      "canonical_after": {
+        "identity": {
+          "device": 16777230,
+          "flags": 0,
+          "gid": 20,
+          "inode": 93204230,
+          "mode": 33261,
+          "mtime_ns": 1791346850428813940,
+          "size": 381170647,
+          "uid": 501,
+          "xattrs": [
+            {
+              "name": "com.apple.provenance",
+              "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+            }
+          ]
+        },
+        "link_count": 1,
+        "manifest_sha256": "d86f85aec611956b06e05e16e1166154d33f19160a685f57e90d212a528556ad",
+        "original_paths": [
+          "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-120s-06-full-timeline/d3d11.dll"
+        ]
+      },
+      "canonical_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/da69a9a9d5a7eaacd5b31208be249dc565c136cb24612bc91e801ddefac49017/d3d11.dll",
+      "certification": "PRESERVE_OR_HARDLINK_DEDUP",
+      "completed_at_unix": 1791380240.7626529,
+      "copy_bytes": 0,
+      "operation_id": "8241d8e22fe74005a8543fbe7d83f5cf",
+      "original_identity": {
+        "device": 16777230,
+        "flags": 0,
+        "gid": 0,
+        "inode": 92929805,
+        "mode": 33261,
+        "mtime_ns": 1791302751936198815,
+        "size": 381170647,
+        "uid": 501,
+        "xattrs": [
+          {
+            "name": "com.apple.provenance",
+            "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+          }
+        ]
+      },
+      "original_inode_link_count_after": 0,
+      "original_inode_link_count_before": 1,
+      "original_link_count": 1,
+      "path": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-120s-06-full-timeline/d3d11.dll",
+      "result": "REFERENCE_INSTALLED_HASH_VERIFIED",
+      "sha256": "da69a9a9d5a7eaacd5b31208be249dc565c136cb24612bc91e801ddefac49017"
+    },
+    {
+      "canonical": {
+        "identity": {
+          "device": 16777230,
+          "flags": 0,
+          "gid": 20,
+          "inode": 93189227,
+          "mode": 33261,
+          "mtime_ns": 1791344873515575489,
+          "size": 223019236,
+          "uid": 501,
+          "xattrs": [
+            {
+              "name": "com.apple.provenance",
+              "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+            }
+          ]
+        },
+        "link_count": 1,
+        "manifest_sha256": "1d9aec981c2fd694e52c69277ce9d7a4a263555ebf80b03258ca1699fafc1c4b"
+      },
+      "canonical_after": {
+        "identity": {
+          "device": 16777230,
+          "flags": 0,
+          "gid": 20,
+          "inode": 93189227,
+          "mode": 33261,
+          "mtime_ns": 1791344873515575489,
+          "size": 223019236,
+          "uid": 501,
+          "xattrs": [
+            {
+              "name": "com.apple.provenance",
+              "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+            }
+          ]
+        },
+        "link_count": 1,
+        "manifest_sha256": "1d9aec981c2fd694e52c69277ce9d7a4a263555ebf80b03258ca1699fafc1c4b",
+        "original_paths": [
+          "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-120s-09-low-candidate/dxgi.dll",
+          "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-300s-10-low-candidate/dxgi.dll",
+          "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-60s-08-fast-candidate/dxgi.dll",
+          "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-60s-07-submit-reclaim-split/dxgi.dll",
+          "/private/tmp/fgmetal-step11d2-r5-diagnostic-build-c-20261006/src/dxgi/dxgi.dll"
+        ]
+      },
+      "canonical_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/2c90d3fc3f364a13d003c2dfe1a08ccdffe5bca9a9d6cde8408b65d6a5450f88/dxgi.dll",
+      "certification": "PRESERVE_OR_HARDLINK_DEDUP",
+      "completed_at_unix": 1791380241.970885,
+      "copy_bytes": 0,
+      "operation_id": "0987de611a2348e7aa0be2a8f357309c",
+      "original_identity": {
+        "device": 16777230,
+        "flags": 0,
+        "gid": 0,
+        "inode": 92938000,
+        "mode": 33261,
+        "mtime_ns": 1791304478496681981,
+        "size": 223019236,
+        "uid": 501,
+        "xattrs": [
+          {
+            "name": "com.apple.provenance",
+            "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+          }
+        ]
+      },
+      "original_inode_link_count_after": 3,
+      "original_inode_link_count_before": 4,
+      "original_link_count": 4,
+      "path": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-120s-09-low-candidate/dxgi.dll",
+      "result": "REFERENCE_INSTALLED_HASH_VERIFIED",
+      "sha256": "2c90d3fc3f364a13d003c2dfe1a08ccdffe5bca9a9d6cde8408b65d6a5450f88"
+    },
+    {
+      "canonical": {
+        "identity": {
+          "device": 16777230,
+          "flags": 0,
+          "gid": 20,
+          "inode": 93189227,
+          "mode": 33261,
+          "mtime_ns": 1791344873515575489,
+          "size": 223019236,
+          "uid": 501,
+          "xattrs": [
+            {
+              "name": "com.apple.provenance",
+              "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+            }
+          ]
+        },
+        "link_count": 1,
+        "manifest_sha256": "1d9aec981c2fd694e52c69277ce9d7a4a263555ebf80b03258ca1699fafc1c4b"
+      },
+      "canonical_after": {
+        "identity": {
+          "device": 16777230,
+          "flags": 0,
+          "gid": 20,
+          "inode": 93189227,
+          "mode": 33261,
+          "mtime_ns": 1791344873515575489,
+          "size": 223019236,
+          "uid": 501,
+          "xattrs": [
+            {
+              "name": "com.apple.provenance",
+              "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+            }
+          ]
+        },
+        "link_count": 1,
+        "manifest_sha256": "1d9aec981c2fd694e52c69277ce9d7a4a263555ebf80b03258ca1699fafc1c4b",
+        "original_paths": [
+          "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-120s-09-low-candidate/dxgi.dll",
+          "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-300s-10-low-candidate/dxgi.dll",
+          "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-60s-08-fast-candidate/dxgi.dll",
+          "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-60s-07-submit-reclaim-split/dxgi.dll",
+          "/private/tmp/fgmetal-step11d2-r5-diagnostic-build-c-20261006/src/dxgi/dxgi.dll"
+        ]
+      },
+      "canonical_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/2c90d3fc3f364a13d003c2dfe1a08ccdffe5bca9a9d6cde8408b65d6a5450f88/dxgi.dll",
+      "certification": "PRESERVE_OR_HARDLINK_DEDUP",
+      "completed_at_unix": 1791380242.5616782,
+      "copy_bytes": 0,
+      "operation_id": "484d619000d74599aed164c0d26bc7fb",
+      "original_identity": {
+        "device": 16777230,
+        "flags": 0,
+        "gid": 0,
+        "inode": 92938000,
+        "mode": 33261,
+        "mtime_ns": 1791304478496681981,
+        "size": 223019236,
+        "uid": 501,
+        "xattrs": [
+          {
+            "name": "com.apple.provenance",
+            "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+          }
+        ]
+      },
+      "original_inode_link_count_after": 2,
+      "original_inode_link_count_before": 3,
+      "original_link_count": 4,
+      "path": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-300s-10-low-candidate/dxgi.dll",
+      "result": "REFERENCE_INSTALLED_HASH_VERIFIED",
+      "sha256": "2c90d3fc3f364a13d003c2dfe1a08ccdffe5bca9a9d6cde8408b65d6a5450f88"
+    },
+    {
+      "canonical": {
+        "identity": {
+          "device": 16777230,
+          "flags": 0,
+          "gid": 20,
+          "inode": 93189227,
+          "mode": 33261,
+          "mtime_ns": 1791344873515575489,
+          "size": 223019236,
+          "uid": 501,
+          "xattrs": [
+            {
+              "name": "com.apple.provenance",
+              "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+            }
+          ]
+        },
+        "link_count": 1,
+        "manifest_sha256": "1d9aec981c2fd694e52c69277ce9d7a4a263555ebf80b03258ca1699fafc1c4b"
+      },
+      "canonical_after": {
+        "identity": {
+          "device": 16777230,
+          "flags": 0,
+          "gid": 20,
+          "inode": 93189227,
+          "mode": 33261,
+          "mtime_ns": 1791344873515575489,
+          "size": 223019236,
+          "uid": 501,
+          "xattrs": [
+            {
+              "name": "com.apple.provenance",
+              "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+            }
+          ]
+        },
+        "link_count": 1,
+        "manifest_sha256": "1d9aec981c2fd694e52c69277ce9d7a4a263555ebf80b03258ca1699fafc1c4b",
+        "original_paths": [
+          "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-120s-09-low-candidate/dxgi.dll",
+          "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-300s-10-low-candidate/dxgi.dll",
+          "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-60s-08-fast-candidate/dxgi.dll",
+          "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-60s-07-submit-reclaim-split/dxgi.dll",
+          "/private/tmp/fgmetal-step11d2-r5-diagnostic-build-c-20261006/src/dxgi/dxgi.dll"
+        ]
+      },
+      "canonical_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/2c90d3fc3f364a13d003c2dfe1a08ccdffe5bca9a9d6cde8408b65d6a5450f88/dxgi.dll",
+      "certification": "PRESERVE_OR_HARDLINK_DEDUP",
+      "completed_at_unix": 1791380243.153546,
+      "copy_bytes": 0,
+      "operation_id": "9539b5007c3743e0898c442f7da16499",
+      "original_identity": {
+        "device": 16777230,
+        "flags": 0,
+        "gid": 0,
+        "inode": 92938000,
+        "mode": 33261,
+        "mtime_ns": 1791304478496681981,
+        "size": 223019236,
+        "uid": 501,
+        "xattrs": [
+          {
+            "name": "com.apple.provenance",
+            "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+          }
+        ]
+      },
+      "original_inode_link_count_after": 1,
+      "original_inode_link_count_before": 2,
+      "original_link_count": 4,
+      "path": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-60s-07-submit-reclaim-split/dxgi.dll",
+      "result": "REFERENCE_INSTALLED_HASH_VERIFIED",
+      "sha256": "2c90d3fc3f364a13d003c2dfe1a08ccdffe5bca9a9d6cde8408b65d6a5450f88"
+    },
+    {
+      "canonical": {
+        "identity": {
+          "device": 16777230,
+          "flags": 0,
+          "gid": 20,
+          "inode": 93189227,
+          "mode": 33261,
+          "mtime_ns": 1791344873515575489,
+          "size": 223019236,
+          "uid": 501,
+          "xattrs": [
+            {
+              "name": "com.apple.provenance",
+              "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+            }
+          ]
+        },
+        "link_count": 1,
+        "manifest_sha256": "1d9aec981c2fd694e52c69277ce9d7a4a263555ebf80b03258ca1699fafc1c4b"
+      },
+      "canonical_after": {
+        "identity": {
+          "device": 16777230,
+          "flags": 0,
+          "gid": 20,
+          "inode": 93189227,
+          "mode": 33261,
+          "mtime_ns": 1791344873515575489,
+          "size": 223019236,
+          "uid": 501,
+          "xattrs": [
+            {
+              "name": "com.apple.provenance",
+              "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+            }
+          ]
+        },
+        "link_count": 1,
+        "manifest_sha256": "1d9aec981c2fd694e52c69277ce9d7a4a263555ebf80b03258ca1699fafc1c4b",
+        "original_paths": [
+          "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-120s-09-low-candidate/dxgi.dll",
+          "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-300s-10-low-candidate/dxgi.dll",
+          "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-60s-08-fast-candidate/dxgi.dll",
+          "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-60s-07-submit-reclaim-split/dxgi.dll",
+          "/private/tmp/fgmetal-step11d2-r5-diagnostic-build-c-20261006/src/dxgi/dxgi.dll"
+        ]
+      },
+      "canonical_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/2c90d3fc3f364a13d003c2dfe1a08ccdffe5bca9a9d6cde8408b65d6a5450f88/dxgi.dll",
+      "certification": "PRESERVE_OR_HARDLINK_DEDUP",
+      "completed_at_unix": 1791380243.739934,
+      "copy_bytes": 0,
+      "operation_id": "29f50279f85a4a5f8ac347d48b15caef",
+      "original_identity": {
+        "device": 16777230,
+        "flags": 0,
+        "gid": 0,
+        "inode": 92938000,
+        "mode": 33261,
+        "mtime_ns": 1791304478496681981,
+        "size": 223019236,
+        "uid": 501,
+        "xattrs": [
+          {
+            "name": "com.apple.provenance",
+            "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+          }
+        ]
+      },
+      "original_inode_link_count_after": 0,
+      "original_inode_link_count_before": 1,
+      "original_link_count": 4,
+      "path": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-60s-08-fast-candidate/dxgi.dll",
+      "result": "REFERENCE_INSTALLED_HASH_VERIFIED",
+      "sha256": "2c90d3fc3f364a13d003c2dfe1a08ccdffe5bca9a9d6cde8408b65d6a5450f88"
+    },
+    {
+      "canonical": {
+        "identity": {
+          "device": 16777230,
+          "flags": 0,
+          "gid": 20,
+          "inode": 93189242,
+          "mode": 33261,
+          "mtime_ns": 1791344874273941383,
+          "size": 381462800,
+          "uid": 501,
+          "xattrs": [
+            {
+              "name": "com.apple.provenance",
+              "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+            }
+          ]
+        },
+        "link_count": 1,
+        "manifest_sha256": "544b448e75e301bf0c57aee5c54c3389a670e070b81f5f415b460565d1d58e53"
+      },
+      "canonical_after": {
+        "identity": {
+          "device": 16777230,
+          "flags": 0,
+          "gid": 20,
+          "inode": 93189242,
+          "mode": 33261,
+          "mtime_ns": 1791344874273941383,
+          "size": 381462800,
+          "uid": 501,
+          "xattrs": [
+            {
+              "name": "com.apple.provenance",
+              "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+            }
+          ]
+        },
+        "link_count": 1,
+        "manifest_sha256": "544b448e75e301bf0c57aee5c54c3389a670e070b81f5f415b460565d1d58e53",
+        "original_paths": [
+          "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-120s-09-low-candidate/d3d11.dll",
+          "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-300s-10-low-candidate/d3d11.dll",
+          "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-60s-08-fast-candidate/d3d11.dll",
+          "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-60s-07-submit-reclaim-split/d3d11.dll",
+          "/private/tmp/fgmetal-step11d2-r5-diagnostic-build-c-20261006/src/d3d11/d3d11.dll"
+        ]
+      },
+      "canonical_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/cc09178473bef9b6af9fec5821d9d56ad089d61b9daf0af139c132b379f46297/d3d11.dll",
+      "certification": "PRESERVE_OR_HARDLINK_DEDUP",
+      "completed_at_unix": 1791380245.831222,
+      "copy_bytes": 0,
+      "operation_id": "c34bdcca28de4a3ea3f3ad3fa4b4aa7c",
+      "original_identity": {
+        "device": 16777230,
+        "flags": 0,
+        "gid": 0,
+        "inode": 92938006,
+        "mode": 33261,
+        "mtime_ns": 1791304479056999805,
+        "size": 381462800,
+        "uid": 501,
+        "xattrs": [
+          {
+            "name": "com.apple.provenance",
+            "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+          }
+        ]
+      },
+      "original_inode_link_count_after": 3,
+      "original_inode_link_count_before": 4,
+      "original_link_count": 4,
+      "path": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-120s-09-low-candidate/d3d11.dll",
+      "result": "REFERENCE_INSTALLED_HASH_VERIFIED",
+      "sha256": "cc09178473bef9b6af9fec5821d9d56ad089d61b9daf0af139c132b379f46297"
+    },
+    {
+      "canonical": {
+        "identity": {
+          "device": 16777230,
+          "flags": 0,
+          "gid": 20,
+          "inode": 93189242,
+          "mode": 33261,
+          "mtime_ns": 1791344874273941383,
+          "size": 381462800,
+          "uid": 501,
+          "xattrs": [
+            {
+              "name": "com.apple.provenance",
+              "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+            }
+          ]
+        },
+        "link_count": 1,
+        "manifest_sha256": "544b448e75e301bf0c57aee5c54c3389a670e070b81f5f415b460565d1d58e53"
+      },
+      "canonical_after": {
+        "identity": {
+          "device": 16777230,
+          "flags": 0,
+          "gid": 20,
+          "inode": 93189242,
+          "mode": 33261,
+          "mtime_ns": 1791344874273941383,
+          "size": 381462800,
+          "uid": 501,
+          "xattrs": [
+            {
+              "name": "com.apple.provenance",
+              "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+            }
+          ]
+        },
+        "link_count": 1,
+        "manifest_sha256": "544b448e75e301bf0c57aee5c54c3389a670e070b81f5f415b460565d1d58e53",
+        "original_paths": [
+          "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-120s-09-low-candidate/d3d11.dll",
+          "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-300s-10-low-candidate/d3d11.dll",
+          "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-60s-08-fast-candidate/d3d11.dll",
+          "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-60s-07-submit-reclaim-split/d3d11.dll",
+          "/private/tmp/fgmetal-step11d2-r5-diagnostic-build-c-20261006/src/d3d11/d3d11.dll"
+        ]
+      },
+      "canonical_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/cc09178473bef9b6af9fec5821d9d56ad089d61b9daf0af139c132b379f46297/d3d11.dll",
+      "certification": "PRESERVE_OR_HARDLINK_DEDUP",
+      "completed_at_unix": 1791380246.839516,
+      "copy_bytes": 0,
+      "operation_id": "3c7737e32363497c93437bd6eca2a6b0",
+      "original_identity": {
+        "device": 16777230,
+        "flags": 0,
+        "gid": 0,
+        "inode": 92938006,
+        "mode": 33261,
+        "mtime_ns": 1791304479056999805,
+        "size": 381462800,
+        "uid": 501,
+        "xattrs": [
+          {
+            "name": "com.apple.provenance",
+            "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+          }
+        ]
+      },
+      "original_inode_link_count_after": 2,
+      "original_inode_link_count_before": 3,
+      "original_link_count": 4,
+      "path": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-300s-10-low-candidate/d3d11.dll",
+      "result": "REFERENCE_INSTALLED_HASH_VERIFIED",
+      "sha256": "cc09178473bef9b6af9fec5821d9d56ad089d61b9daf0af139c132b379f46297"
+    },
+    {
+      "canonical": {
+        "identity": {
+          "device": 16777230,
+          "flags": 0,
+          "gid": 20,
+          "inode": 93189242,
+          "mode": 33261,
+          "mtime_ns": 1791344874273941383,
+          "size": 381462800,
+          "uid": 501,
+          "xattrs": [
+            {
+              "name": "com.apple.provenance",
+              "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+            }
+          ]
+        },
+        "link_count": 1,
+        "manifest_sha256": "544b448e75e301bf0c57aee5c54c3389a670e070b81f5f415b460565d1d58e53"
+      },
+      "canonical_after": {
+        "identity": {
+          "device": 16777230,
+          "flags": 0,
+          "gid": 20,
+          "inode": 93189242,
+          "mode": 33261,
+          "mtime_ns": 1791344874273941383,
+          "size": 381462800,
+          "uid": 501,
+          "xattrs": [
+            {
+              "name": "com.apple.provenance",
+              "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+            }
+          ]
+        },
+        "link_count": 1,
+        "manifest_sha256": "544b448e75e301bf0c57aee5c54c3389a670e070b81f5f415b460565d1d58e53",
+        "original_paths": [
+          "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-120s-09-low-candidate/d3d11.dll",
+          "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-300s-10-low-candidate/d3d11.dll",
+          "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-60s-08-fast-candidate/d3d11.dll",
+          "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-60s-07-submit-reclaim-split/d3d11.dll",
+          "/private/tmp/fgmetal-step11d2-r5-diagnostic-build-c-20261006/src/d3d11/d3d11.dll"
+        ]
+      },
+      "canonical_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/cc09178473bef9b6af9fec5821d9d56ad089d61b9daf0af139c132b379f46297/d3d11.dll",
+      "certification": "PRESERVE_OR_HARDLINK_DEDUP",
+      "completed_at_unix": 1791380247.8558989,
+      "copy_bytes": 0,
+      "operation_id": "8a837b962ea34b8b9f174f1ce4183ae7",
+      "original_identity": {
+        "device": 16777230,
+        "flags": 0,
+        "gid": 0,
+        "inode": 92938006,
+        "mode": 33261,
+        "mtime_ns": 1791304479056999805,
+        "size": 381462800,
+        "uid": 501,
+        "xattrs": [
+          {
+            "name": "com.apple.provenance",
+            "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+          }
+        ]
+      },
+      "original_inode_link_count_after": 1,
+      "original_inode_link_count_before": 2,
+      "original_link_count": 4,
+      "path": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-60s-07-submit-reclaim-split/d3d11.dll",
+      "result": "REFERENCE_INSTALLED_HASH_VERIFIED",
+      "sha256": "cc09178473bef9b6af9fec5821d9d56ad089d61b9daf0af139c132b379f46297"
+    },
+    {
+      "canonical": {
+        "identity": {
+          "device": 16777230,
+          "flags": 0,
+          "gid": 20,
+          "inode": 93189242,
+          "mode": 33261,
+          "mtime_ns": 1791344874273941383,
+          "size": 381462800,
+          "uid": 501,
+          "xattrs": [
+            {
+              "name": "com.apple.provenance",
+              "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+            }
+          ]
+        },
+        "link_count": 1,
+        "manifest_sha256": "544b448e75e301bf0c57aee5c54c3389a670e070b81f5f415b460565d1d58e53"
+      },
+      "canonical_after": {
+        "identity": {
+          "device": 16777230,
+          "flags": 0,
+          "gid": 20,
+          "inode": 93189242,
+          "mode": 33261,
+          "mtime_ns": 1791344874273941383,
+          "size": 381462800,
+          "uid": 501,
+          "xattrs": [
+            {
+              "name": "com.apple.provenance",
+              "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+            }
+          ]
+        },
+        "link_count": 1,
+        "manifest_sha256": "544b448e75e301bf0c57aee5c54c3389a670e070b81f5f415b460565d1d58e53",
+        "original_paths": [
+          "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-120s-09-low-candidate/d3d11.dll",
+          "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-300s-10-low-candidate/d3d11.dll",
+          "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-60s-08-fast-candidate/d3d11.dll",
+          "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-60s-07-submit-reclaim-split/d3d11.dll",
+          "/private/tmp/fgmetal-step11d2-r5-diagnostic-build-c-20261006/src/d3d11/d3d11.dll"
+        ]
+      },
+      "canonical_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/cc09178473bef9b6af9fec5821d9d56ad089d61b9daf0af139c132b379f46297/d3d11.dll",
+      "certification": "PRESERVE_OR_HARDLINK_DEDUP",
+      "completed_at_unix": 1791380248.87427,
+      "copy_bytes": 0,
+      "operation_id": "e16a0e9d5f794b10bf04eba5d952bb43",
+      "original_identity": {
+        "device": 16777230,
+        "flags": 0,
+        "gid": 0,
+        "inode": 92938006,
+        "mode": 33261,
+        "mtime_ns": 1791304479056999805,
+        "size": 381462800,
+        "uid": 501,
+        "xattrs": [
+          {
+            "name": "com.apple.provenance",
+            "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+          }
+        ]
+      },
+      "original_inode_link_count_after": 0,
+      "original_inode_link_count_before": 1,
+      "original_link_count": 4,
+      "path": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-60s-08-fast-candidate/d3d11.dll",
+      "result": "REFERENCE_INSTALLED_HASH_VERIFIED",
+      "sha256": "cc09178473bef9b6af9fec5821d9d56ad089d61b9daf0af139c132b379f46297"
+    }
+  ],
+  "active_operation": null,
+  "completed_at_unix": 1791380248.8806021,
+  "copy_bytes": 0,
+  "free_after": 79389536256,
+  "free_before": 76145860608,
+  "plan_sha256": "3c7a6caced2bd08c6899945f4d72be338684c7c23f956f588c7942f18c949dce",
+  "project_after": {
+    "allocated_inode_deduplicated_bytes": 44121722880,
+    "apfs_clone_awareness": false,
+    "file_count": 123680,
+    "hardlinks_deduplicated": true,
+    "logical_bytes": 89402296693
+  },
+  "project_before": {
+    "allocated_inode_deduplicated_bytes": 47743737856,
+    "apfs_clone_awareness": false,
+    "file_count": 123703,
+    "hardlinks_deduplicated": true,
+    "logical_bytes": 96631861546
+  },
+  "receipt_hmac_sha256": "e8bd980612c1936ad5e75a13e50b32154751efef5b104dd258e4398aaaf45c4a",
+  "schema_version": 2,
+  "started_at_unix": 1791380219.4008489,
+  "status": "PASS"
+}

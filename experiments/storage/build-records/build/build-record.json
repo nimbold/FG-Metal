@@ -1,0 +1,160 @@
+{
+  "associated_evidence_manifests": [
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/cleanup-superseded-clean-builds-20261006.json",
+      "sha256": "8115c6d09eea480f121801c2e19a56cec45e440ff844c47c3f826f5643348ced"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/cleanup-unused-debug-build-20261006.json",
+      "sha256": "c54b228ca65c8c7ea2d6c0a7f881a0dc7ada0fb83df52eeebbcc0c381e29d656"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/build-11d-source-result.json",
+      "sha256": "1159d9be91bed768f3504554a1b6903f7de512e5d8eeaead3846cd1f0b1f36af"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/build-11d-source-manifest.json",
+      "sha256": "a600da341dce7475af79e72282e9a0dd89c15136add105e10fe3faf2308aa2b7"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/cleanup-superseded-builds-diag1-final2-20261006.json",
+      "sha256": "6a977bff98392d1e60c4bb0b62d5f39e21c83ec239ea88f5c8390fce081e90d0"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/build-repro/current-tree-shaders-a-b.json",
+      "sha256": "9dd1c42f01fd5cc1885ac276890d06252dfdc5e21f66e297499dae7ac792b452"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/build-repro/pe-comparison.json",
+      "sha256": "1ffa8822d8a078087600459be9309e8833139186d011374cab3e3331c3e25f17"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/build-repro/source-toolchain-manifest.json",
+      "sha256": "ef3d960eb3b067ee56cfa17c72767d2819cf65093fc0206913162039573e3e3f"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/build-repro/current-r3-source-snapshot.json",
+      "sha256": "803d169b004df14c0ee86231cd5b8a424c09c6760a037533d9c053d424de3e0d"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/build-repro/11d-final-section-comparison.json",
+      "sha256": "2b183673003bc8beb9acfe34b4e56506eb63e2771c4c30cf2c39ea8e11beb070"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/build-repro/build-repro-pe-comparison.json",
+      "sha256": "4ae58bfc15ca1717ebe531e2c1a299f1c95b94c61da063d07d95cb0409aac5f9"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/build-repro/source-reconstruction-manifest.json",
+      "sha256": "8ac985e6c5a82ec2432014c8722cea5f0028e3e880866002ccd0e67f2f6987fd"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/build-repro/11d-final-source-snapshot.json",
+      "sha256": "445620abf4f3c79bbe5d9fb4aa72d5ea90e7b65715f5bb0da0fdd8d5cf13fc59"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/build-repro/exact-two-build-manifest.json",
+      "sha256": "2b6edeb758252413a2b44a1050db8f4c5dddbf8cef85ca35fc9df5e61f734e7e"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/build-repro/pe-comparison-exact-two-clean.json",
+      "sha256": "4ae58bfc15ca1717ebe531e2c1a299f1c95b94c61da063d07d95cb0409aac5f9"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/p0.2-r-source-build-no-trace/flipseq-source-only/result.json",
+      "sha256": "326a17a9290deeac880278f2adfbea3056f7015ebf33d9e17ec82fd782024927"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/p0.2-r-source-build-trace-v2/flipseq-source-only/result.json",
+      "sha256": "306c48464222901a302f0c0a7c03a774cde6c531d2d9925c057127db19fb7eb2"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/build-repro/current-r6/manifest.json",
+      "sha256": "df2119980527ce0417ff7ca9678e58ab197f2ccdefbc16af6319326897e2e9a7"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/build-repro/11d-final-b/result.json",
+      "sha256": "392e23da59c654115958faf689bcf6bf2a92b51d5bcf947508a6a2402df741f4"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/build-repro/11d-final-b/manifest.json",
+      "sha256": "3f5454e7d52be1c87762628b2fb374300f46702ef1f609f31e23ee7a6f8cdeb7"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/build-repro/current-r5/manifest.json",
+      "sha256": "d03d484d33cc4495616d3bcc0446acd7b3898e9979f82f6a90e66910ee528a44"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/build-repro/current-r3/current-r3-debug-metadata-analysis-20261006.json",
+      "sha256": "adb55de330e145201d5f5f30e4f66eb8c4ec2033ef15c2dc49f6873654b94da7"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/build-repro/current-r3/manifest.json",
+      "sha256": "7776a0899678b39f46d29b91d0cb109c530e2e13c95fdaebcab3ad7615ff7e7d"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/build-repro/current-r4/manifest.json",
+      "sha256": "740c2fd27b29d83d6ff7cb3ec67012f665b9cda52b19f5724e0302968428ee86"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/build-repro/11d-final-a/result.json",
+      "sha256": "f2428e37d20b13e3d5102a385beb37ecafbaddca211780dfff86d4ede369bf23"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/build-repro/11d-final-a/manifest.json",
+      "sha256": "827d2f0c029ab55e046abcf07d8f843302de361008b0ea032ccc122fb096d034"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/build-repro/current-r3/corrected-audit-v2-20261006/result.json",
+      "sha256": "fc6e1ca5bfc5b6f2e20df44a0b2def5e897beac5d2eb237df44013da42d4889d"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/build-repro/current-r3/corrected-audit-20261006/pe-comparison.json",
+      "sha256": "2031f69d83a2c505309c976ed94b4ac115136de73969ab0eaf122f81417feed7"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/build-repro/current-r3/corrected-audit-20261006/result.json",
+      "sha256": "3b965435b67acf84ab7a2e8a6abada3314c20830f4aa69f555a51df5bdfe85ec"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/build-repro/current-r3/corrected-audit-20261006/shader-comparison.json",
+      "sha256": "3e9c6a35dd6b99d645b777ae1569a0012a46803246258626a83db0f7d13c73ce"
+    },
+    {
+      "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/renderer-integration/fresh-source-built-11d-r-final2/cleanup-obsolete-incremental-build.json",
+      "sha256": "6ebcdc23da972a593c30093869a928bd807cd406905f2c512c3653dfa075412e"
+    }
+  ],
+  "binary_outputs": [
+    {
+      "allocated_bytes": 10420224,
+      "hard_link_count": 2,
+      "mode": "0o644",
+      "name": "libSPIRVCross.a",
+      "path": "/private/tmp/fgmetal-step11b/MoltenVK/External/build/Release/SPIRVCross.xcframework/macos-arm64_x86_64/libSPIRVCross.a",
+      "sha256": "12afb9158ddce092e6551aac55fda8ebe23e2a2644daa9eaeac8728ed8cfed8f",
+      "size_bytes": 10419904
+    },
+    {
+      "allocated_bytes": 31600640,
+      "hard_link_count": 2,
+      "mode": "0o644",
+      "name": "libSPIRVTools.a",
+      "path": "/private/tmp/fgmetal-step11b/MoltenVK/External/build/Release/SPIRVTools.xcframework/macos-arm64_x86_64/libSPIRVTools.a",
+      "sha256": "4a3c773a8ccbaddec4675fd8d36a8c3603b66d9adbc2949258474f22ffc5cf6f",
+      "size_bytes": 31596664
+    }
+  ],
+  "build_directory_category": "MIXED_SUBTREE_PENDING_REMOVAL",
+  "build_id": "build",
+  "build_path": "/private/tmp/fgmetal-step11b/MoltenVK/External/build",
+  "identity": {
+    "build_path": "/private/tmp/fgmetal-step11b/MoltenVK/External/build",
+    "kind": "non-meson-build-or-runtime"
+  },
+  "metadata_copies": [],
+  "recorded_at_unix": 1791314749.996195,
+  "result_and_manifest_copies": [],
+  "retention": "Build directory is removable after each binary hash resolves to the canonical artifact store and this record exists.",
+  "schema_version": 1
+}

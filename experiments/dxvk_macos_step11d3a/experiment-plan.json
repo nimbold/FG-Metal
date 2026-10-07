@@ -1,0 +1,80 @@
+{
+  "status": "PREPARATION_ONLY_NOT_RUN",
+  "origin": "NATIVE_SOURCE",
+  "moltenvk_commit": "db66022459ffb663aa2b50f6b018bc2e124f5edf",
+  "moltenvk_version": "1.4.2",
+  "source_root": "/private/tmp/fgmetal-step11b/MoltenVK",
+  "prior_configuration_evidence": "experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-60s-07-submit-reclaim-split/slow-visual_d3d11.log:287-292",
+  "expected_swapchain": {
+    "extent": [
+      640,
+      360
+    ],
+    "image_count": 3,
+    "format": "VK_FORMAT_B8G8R8A8_UNORM",
+    "present_mode": "VK_PRESENT_MODE_FIFO_KHR"
+  },
+  "unverified_prior_configuration": [
+    "display identity",
+    "refresh rate",
+    "contentsScale",
+    "window dimensions in points",
+    "maximumDrawableCount",
+    "allowsNextDrawableTimeout",
+    "displaySyncEnabled",
+    "framebufferOnly",
+    "fullscreen/windowed state"
+  ],
+  "procedure_seconds": [
+    30,
+    300,
+    300,
+    300
+  ],
+  "no_run_overlap": true,
+  "prohibited_behavior_changes": [
+    "maximumDrawableCount",
+    "allowsNextDrawableTimeout",
+    "displaySyncEnabled",
+    "MVK_CONFIG_SYNCHRONOUS_QUEUE_SUBMITS",
+    "acquire placement",
+    "nextDrawable placement",
+    "presentation offsets",
+    "Wine",
+    "DXVK",
+    "frame scheduler",
+    "interop"
+  ],
+  "histogram_edges_ms": [
+    0,
+    0.5,
+    2,
+    5,
+    10,
+    14,
+    18,
+    25,
+    50,
+    100,
+    250,
+    500,
+    900,
+    null
+  ],
+  "histogram_labels": [
+    "<0.5 ms",
+    "0.5\u20132 ms",
+    "2\u20135 ms",
+    "5\u201310 ms",
+    "10\u201314 ms",
+    "14\u201318 ms",
+    "18\u201325 ms",
+    "25\u201350 ms",
+    "50\u2013100 ms",
+    "100\u2013250 ms",
+    "250\u2013500 ms",
+    "500\u2013900 ms",
+    ">=900 ms"
+  ],
+  "storage_contract": "Must use verified PRE, BuildLease, immutable artifacts, supervised native process, POST receipt and next-run Gate0 validity; no launch until supported."
+}

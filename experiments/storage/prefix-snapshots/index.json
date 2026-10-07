@@ -1,0 +1,160 @@
+{
+  "created_at_unix": 1791313733.930464,
+  "prefix_count": 22,
+  "snapshots": [
+    {
+      "binary_identity_count": 35,
+      "decision": "SNAPSHOT_REGISTRY_THEN_DELETE",
+      "prefix": "/Users/nima/Library/Caches/FG-Metal-Step8C/validated-prefix-2",
+      "registry_archive_bytes": 366146,
+      "snapshot": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/prefix-snapshots/FG-Metal-Step8C__validated-prefix-2"
+    },
+    {
+      "binary_identity_count": 35,
+      "decision": "SNAPSHOT_REGISTRY_THEN_DELETE",
+      "prefix": "/Users/nima/Library/Caches/FG-Metal-Step8D-20261002/transparent-prefix",
+      "registry_archive_bytes": 366354,
+      "snapshot": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/prefix-snapshots/FG-Metal-Step8D-20261002__transparent-prefix"
+    },
+    {
+      "binary_identity_count": 376,
+      "decision": "SNAPSHOT_REGISTRY_THEN_DELETE",
+      "prefix": "/Users/nima/Library/Caches/FGMetalStep11C1R/prefix-normal",
+      "registry_archive_bytes": 414827,
+      "snapshot": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/prefix-snapshots/FGMetalStep11C1R__prefix-normal"
+    },
+    {
+      "binary_identity_count": 376,
+      "decision": "SNAPSHOT_REGISTRY_THEN_DELETE",
+      "prefix": "/Users/nima/Library/Caches/FGMetalStep11D/p0.1-p0.2-flip-internal-prefix",
+      "registry_archive_bytes": 415346,
+      "snapshot": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/prefix-snapshots/FGMetalStep11D__p0.1-p0.2-flip-internal-prefix"
+    },
+    {
+      "binary_identity_count": 376,
+      "decision": "SNAPSHOT_REGISTRY_THEN_DELETE",
+      "prefix": "/Users/nima/Library/Caches/FGMetalStep11D/p0.2-flip-source-only-prefix",
+      "registry_archive_bytes": 414878,
+      "snapshot": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/prefix-snapshots/FGMetalStep11D__p0.2-flip-source-only-prefix"
+    },
+    {
+      "binary_identity_count": 376,
+      "decision": "SNAPSHOT_REGISTRY_THEN_DELETE",
+      "prefix": "/Users/nima/Library/Caches/FGMetalStep11D/p0.3-current-final-waitable-off-prefix",
+      "registry_archive_bytes": 414739,
+      "snapshot": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/prefix-snapshots/FGMetalStep11D__p0.3-current-final-waitable-off-prefix"
+    },
+    {
+      "binary_identity_count": 376,
+      "decision": "SNAPSHOT_REGISTRY_THEN_DELETE",
+      "prefix": "/Users/nima/Library/Caches/FGMetalStep11D-R/p0.2-current-r5-flipseq-internal-prefix",
+      "registry_archive_bytes": 414359,
+      "snapshot": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/prefix-snapshots/FGMetalStep11D-R__p0.2-current-r5-flipseq-internal-prefix"
+    },
+    {
+      "binary_identity_count": 376,
+      "decision": "SNAPSHOT_REGISTRY_THEN_DELETE",
+      "prefix": "/Users/nima/Library/Caches/FGMetalStep11D-R/p0.2-current-r5-flipseq-source-only-prefix",
+      "registry_archive_bytes": 415337,
+      "snapshot": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/prefix-snapshots/FGMetalStep11D-R__p0.2-current-r5-flipseq-source-only-prefix"
+    },
+    {
+      "binary_identity_count": 376,
+      "decision": "SNAPSHOT_REGISTRY_THEN_DELETE",
+      "prefix": "/Users/nima/Library/Caches/FGMetalStep11D-R/step11d1-flipseq-flipseq-internal-20261006-prefix",
+      "registry_archive_bytes": 414614,
+      "snapshot": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/prefix-snapshots/FGMetalStep11D-R__step11d1-flipseq-flipseq-internal-20261006-prefix"
+    },
+    {
+      "binary_identity_count": 376,
+      "decision": "SNAPSHOT_REGISTRY_THEN_DELETE",
+      "prefix": "/Users/nima/Library/Caches/FGMetalStep11D-R/step11d1-flipseq-flipseq-source-only-20261006-prefix",
+      "registry_archive_bytes": 414934,
+      "snapshot": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/prefix-snapshots/FGMetalStep11D-R__step11d1-flipseq-flipseq-source-only-20261006-prefix"
+    },
+    {
+      "binary_identity_count": 376,
+      "decision": "SNAPSHOT_REGISTRY_THEN_DELETE",
+      "prefix": "/Users/nima/Library/Caches/FGMetalStep11D-R/step11d2-diag-120s-09-low-candidate-prefix",
+      "registry_archive_bytes": 399639,
+      "snapshot": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/prefix-snapshots/FGMetalStep11D-R__step11d2-diag-120s-09-low-candidate-prefix"
+    },
+    {
+      "binary_identity_count": 376,
+      "decision": "SNAPSHOT_REGISTRY_THEN_DELETE",
+      "prefix": "/Users/nima/Library/Caches/FGMetalStep11D-R/step11d2-diag-300s-10-low-candidate-prefix",
+      "registry_archive_bytes": 400177,
+      "snapshot": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/prefix-snapshots/FGMetalStep11D-R__step11d2-diag-300s-10-low-candidate-prefix"
+    },
+    {
+      "binary_identity_count": 376,
+      "decision": "PRESERVE_PREFIX",
+      "prefix": "/Users/nima/Library/Caches/FGMetalStep11D-R/step11d2-diag-60s-07-submit-reclaim-split-prefix",
+      "registry_archive_bytes": 401408,
+      "snapshot": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/prefix-snapshots/FGMetalStep11D-R__step11d2-diag-60s-07-submit-reclaim-split-prefix"
+    },
+    {
+      "binary_identity_count": 376,
+      "decision": "SNAPSHOT_REGISTRY_THEN_DELETE",
+      "prefix": "/Users/nima/Library/Caches/FGMetalStep11D-R/step11d2-diag-60s-08-fast-candidate-prefix",
+      "registry_archive_bytes": 401139,
+      "snapshot": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/prefix-snapshots/FGMetalStep11D-R__step11d2-diag-60s-08-fast-candidate-prefix"
+    },
+    {
+      "binary_identity_count": 338,
+      "decision": "SNAPSHOT_REGISTRY_THEN_DELETE",
+      "prefix": "/Users/nima/Library/Caches/fgmetal-step8b-final-60-prefix",
+      "registry_archive_bytes": 584211,
+      "snapshot": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/prefix-snapshots/Caches__fgmetal-step8b-final-60-prefix"
+    },
+    {
+      "binary_identity_count": 29,
+      "decision": "SNAPSHOT_REGISTRY_THEN_DELETE",
+      "prefix": "/Users/nima/Library/Caches/fgmetal-step8b-gptk4b2",
+      "registry_archive_bytes": 365751,
+      "snapshot": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/prefix-snapshots/Caches__fgmetal-step8b-gptk4b2"
+    },
+    {
+      "binary_identity_count": 338,
+      "decision": "SNAPSHOT_REGISTRY_THEN_DELETE",
+      "prefix": "/Users/nima/Library/Caches/fgmetal-step8b-prefix",
+      "registry_archive_bytes": 585734,
+      "snapshot": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/prefix-snapshots/Caches__fgmetal-step8b-prefix"
+    },
+    {
+      "binary_identity_count": 376,
+      "decision": "SNAPSHOT_REGISTRY_THEN_DELETE",
+      "prefix": "/private/tmp/fgmetal-dxvk-macos-audit-run/prefix",
+      "registry_archive_bytes": 413426,
+      "snapshot": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/prefix-snapshots/fgmetal-dxvk-macos-audit-run__prefix"
+    },
+    {
+      "binary_identity_count": 376,
+      "decision": "SNAPSHOT_REGISTRY_THEN_DELETE",
+      "prefix": "/private/tmp/fgmetal-step11b/prefix",
+      "registry_archive_bytes": 413430,
+      "snapshot": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/prefix-snapshots/fgmetal-step11b__prefix"
+    },
+    {
+      "binary_identity_count": 29,
+      "decision": "SNAPSHOT_REGISTRY_THEN_DELETE",
+      "prefix": "/private/tmp/step10a-resource-diagnostic/prefix",
+      "registry_archive_bytes": 357080,
+      "snapshot": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/prefix-snapshots/step10a-resource-diagnostic__prefix"
+    },
+    {
+      "binary_identity_count": 29,
+      "decision": "SNAPSHOT_REGISTRY_THEN_DELETE",
+      "prefix": "/private/tmp/step10a4-highball-V5DiZw/prefix-clean",
+      "registry_archive_bytes": 357085,
+      "snapshot": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/prefix-snapshots/step10a4-highball-V5DiZw__prefix-clean"
+    },
+    {
+      "binary_identity_count": 40,
+      "decision": "SNAPSHOT_REGISTRY_THEN_DELETE",
+      "prefix": "/private/tmp/step10a5-wine816-TorHDl/prefix",
+      "registry_archive_bytes": 178565,
+      "snapshot": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/prefix-snapshots/step10a5-wine816-TorHDl__prefix"
+    }
+  ]
+}

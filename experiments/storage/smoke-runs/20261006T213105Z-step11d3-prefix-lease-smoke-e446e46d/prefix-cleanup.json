@@ -1,0 +1,61 @@
+{
+  "active_lease_marker_removed_after_receipt": true,
+  "bytes_reclaimed": 2303463424,
+  "bytes_reclaimed_method": "prefix st_blocks estimate; APFS clone sharing is not observable here",
+  "cleanup_error": null,
+  "exception": null,
+  "expected_persistent_bytes": 33554432,
+  "experiment_id": "20261006T213105Z-step11d3-prefix-lease-smoke-e446e46d",
+  "free_after_bytes": 65026109440,
+  "free_before_bytes": 65032413184,
+  "free_peak_or_estimate_bytes": 61777633280,
+  "free_space_status": "PASS",
+  "interrupted_by_signal": null,
+  "net_free_space_delta_bytes": -6303744,
+  "persistent_retained_allocated_estimate_bytes": 12288,
+  "prefix_allocated_bytes_removed_estimate": 2303463424,
+  "prefix_created": true,
+  "prefix_deleted": true,
+  "prefix_path": "/Users/nima/Library/Caches/FGMetal/prefixes/smoke-20261006T213105Z-step11d3-prefix-lease-smoke-e446e46d",
+  "prefix_preserved": false,
+  "prefix_size_error": null,
+  "project_usage_after": {
+    "allocated_inode_deduplicated_bytes": 44084461568,
+    "apfs_clone_awareness": false,
+    "file_count": 126352,
+    "hardlinks_deduplicated": true,
+    "logical_bytes": 96844513354
+  },
+  "project_usage_before": {
+    "allocated_inode_deduplicated_bytes": 44084449280,
+    "apfs_clone_awareness": false,
+    "file_count": 126348,
+    "hardlinks_deduplicated": true,
+    "logical_bytes": 96844510694
+  },
+  "reason": "Wine server stopped; disposable prefix removed in finally",
+  "receipt_write_error": null,
+  "registry_snapshot_error": null,
+  "schema_version": 2,
+  "status": "PASS",
+  "storage_hygiene_status": "PASS",
+  "storage_watch_events": [
+    {
+      "action": "PROCESS_COMPLETED",
+      "elapsed_seconds": 0.65,
+      "free_bytes": 65029332992,
+      "sampled_at_unix": 1791322275.388524
+    }
+  ],
+  "temporary_created": true,
+  "temporary_created_allocated_estimate_bytes": 2303463424,
+  "temporary_created_logical_bytes": 2293362510,
+  "temporary_removed": true,
+  "temporary_removed_logical_bytes": 2293362510,
+  "unexpected_persistent_bytes": 0,
+  "wineserver_shutdown": [
+    {
+      "status": "SKIPPED_NO_WINE_PROCESS_STARTED"
+    }
+  ]
+}

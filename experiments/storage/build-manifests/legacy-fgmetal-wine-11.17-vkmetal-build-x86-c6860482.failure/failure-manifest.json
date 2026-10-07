@@ -1,0 +1,36 @@
+{
+  "build_id": "legacy-fgmetal-wine-11.17-vkmetal-build-x86-c6860482",
+  "capture_paths": [
+    "config.log",
+    "config.status",
+    "nls/locale.nls"
+  ],
+  "capture_policy": "exact-relative-path-allowlist",
+  "captured_at_unix": 1791335656.803295,
+  "classification": "FAILED_OR_SCRATCH",
+  "reason": "Wine x86 configure failed because the available Bison is older than 3.0; later partial products are not a successful build. Preserve only config.log, config.status, and the declared nls/locale.nls symlink text; retire the bulk generated tree.",
+  "retained_files": [
+    {
+      "mode": "0o644",
+      "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-wine-11.17-vkmetal-build-x86-c6860482.failure/configuration/config.log",
+      "sha256": "8b929ec38c292c713938cd180f70b1b66fe52aeac8249a1859553fb16d4aefa0",
+      "size_bytes": 29744,
+      "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-wine-11.17-vkmetal-build-x86-c6860482/config.log"
+    },
+    {
+      "mode": "0o755",
+      "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-wine-11.17-vkmetal-build-x86-c6860482.failure/configuration/config.status",
+      "sha256": "a0900c3a3500c3a50e613b334592863dcdd011b0500d2a5586106195c4d2f791",
+      "size_bytes": 71807,
+      "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-wine-11.17-vkmetal-build-x86-c6860482/config.status"
+    },
+    {
+      "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-wine-11.17-vkmetal-build-x86-c6860482.failure/configuration/nls__locale.nls.symlink.json",
+      "sha256": "5aa763fda13dbb47d389e21f8144fcae2a04504f86ede9fa91d09d99a749ccc6",
+      "size_bytes": 110
+    }
+  ],
+  "schema_version": 1,
+  "source_estimated_allocated_bytes": 111394816,
+  "source_logical_bytes": 105066353
+}

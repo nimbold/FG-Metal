@@ -1,0 +1,92 @@
+{
+  "repository-smoke": {
+    "visual": "BLACK",
+    "authority": "direct user observation",
+    "capture": false,
+    "pixel_readback": false
+  },
+  "rgba8": {
+    "visual": "BLACK",
+    "authority": "direct user observation",
+    "capture": false,
+    "pixel_readback": false
+  },
+  "bgra8": {
+    "visual": "BLACK",
+    "authority": "direct user observation",
+    "capture": false,
+    "pixel_readback": false
+  },
+  "direct-wsi": {
+    "visual": "VISIBLE MAGENTA",
+    "authority": "direct user observation",
+    "capture": false,
+    "pixel_readback": false
+  },
+  "constant-blitter": {
+    "visual": "VISIBLE MAGENTA",
+    "authority": "direct user observation",
+    "capture": false,
+    "pixel_readback": false
+  },
+  "known-source": {
+    "visual": "VISIBLE GREEN",
+    "authority": "direct user observation",
+    "capture": false,
+    "pixel_readback": false
+  },
+  "source-before": {
+    "visual": "BLACK",
+    "authority": "direct user observation",
+    "capture": false,
+    "pixel_readback": false
+  },
+  "source-after": {
+    "visual": "VISIBLE CHANGING COLOR",
+    "authority": "direct user observation",
+    "capture": false,
+    "pixel_readback": false
+  },
+  "final-original-30s": {
+    "visual": "VISIBLE CHANGING COLOR THROUGH SHUTDOWN",
+    "authority": "direct user observation",
+    "capture": false,
+    "pixel_readback": false
+  },
+  "final-original-60s": {
+    "visual": "VISIBLE CHANGING COLOR THROUGH SHUTDOWN",
+    "authority": "direct user observation",
+    "capture": false,
+    "pixel_readback": false
+  },
+  "final-bgra8-60s": {
+    "visual": "VISIBLE CHANGING COLOR THROUGH SHUTDOWN",
+    "authority": "direct user observation",
+    "capture": false,
+    "pixel_readback": false
+  },
+  "final-repository-smoke": {
+    "visual": "VISIBLE CHANGING COLOR THROUGH SHUTDOWN",
+    "authority": "direct user observation",
+    "capture": false,
+    "pixel_readback": false
+  },
+  "rgba8-clean-replay": {
+    "visual": "BLACK",
+    "authority": "direct user observation",
+    "capture": false,
+    "pixel_readback": false
+  },
+  "final-lifecycle-65s": {
+    "visual": "ALL LIFECYCLE TRANSITIONS VISIBLY HEALTHY",
+    "authority": "direct user observation after shutdown",
+    "capture": false,
+    "pixel_readback": false
+  },
+  "final-waitable-30s": {
+    "visual": "VISIBLE CHANGING COLOR THROUGH SHUTDOWN",
+    "authority": "direct user observation after shutdown",
+    "capture": false,
+    "pixel_readback": false
+  }
+}

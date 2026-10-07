@@ -1,0 +1,8 @@
+ninja: Entering directory `/tmp/fgmetal-step11b1/build'
+[1/7] Generating version.h with a custom command
+[2/7] Compiling C++ object src/dxvk/libdxvk.a.p/dxvk_instance.cpp.obj
+[3/7] Compiling C++ object src/dxvk/libdxvk.a.p/dxvk_shader_cache.cpp.obj
+[4/7] Compiling C++ object src/dxvk/libdxvk.a.p/hud_dxvk_hud_item.cpp.obj
+[5/7] Linking static target src/dxvk/libdxvk.a
+[6/7] Compiling C++ object src/d3d11/d3d11.dll.p/d3d11_swapchain.cpp.obj
+[7/7] Linking target src/d3d11/d3d11.dll

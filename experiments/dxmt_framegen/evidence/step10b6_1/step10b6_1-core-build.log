@@ -1,0 +1,7 @@
+[1/7] Building CXX object framegen-core/src/CMakeFiles/framegen.dir/core/texture.cpp.o
+[2/7] Building CXX object framegen-core/src/CMakeFiles/framegen.dir/core/frame_generator.cpp.o
+[3/7] Building CXX object framegen-core/src/CMakeFiles/framegen.dir/core/backend_registry.cpp.o
+[4/7] Building CXX object framegen-core/src/CMakeFiles/framegen.dir/quality/temporal_quality_controller.cpp.o
+[5/7] Building CXX object framegen-core/src/CMakeFiles/framegen.dir/pacing/presentation_scheduler.cpp.o
+[6/7] Building CXX object framegen-core/src/CMakeFiles/framegen.dir/core/c_api.cpp.o
+[7/7] Linking CXX static library framegen-core/src/libframegen.a

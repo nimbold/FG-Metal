@@ -1,0 +1,75 @@
+{
+  "active_process_action": "none",
+  "all_clear": true,
+  "created_at_unix": 1791317259.320431,
+  "items": [
+    {
+      "lsof_exit_code": 1,
+      "open_handle_count": 0,
+      "open_handle_rows": [],
+      "path": "/private/tmp/fgmetal-step11d-r-cleanbuild-diag2-20261006"
+    },
+    {
+      "lsof_exit_code": 1,
+      "open_handle_count": 0,
+      "open_handle_rows": [],
+      "path": "/private/tmp/fgmetal-step11d-r-current-r3-build-A-20261006"
+    },
+    {
+      "lsof_exit_code": 1,
+      "open_handle_count": 0,
+      "open_handle_rows": [],
+      "path": "/private/tmp/fgmetal-step11d-r-current-r3-build-B-20261006"
+    },
+    {
+      "lsof_exit_code": 1,
+      "open_handle_count": 0,
+      "open_handle_rows": [],
+      "path": "/private/tmp/fgmetal-step11d-r-current-r4-build-A-20261006"
+    },
+    {
+      "lsof_exit_code": 1,
+      "open_handle_count": 0,
+      "open_handle_rows": [],
+      "path": "/private/tmp/fgmetal-step11d-r-current-r5-build-A-20261006"
+    },
+    {
+      "lsof_exit_code": 1,
+      "open_handle_count": 0,
+      "open_handle_rows": [],
+      "path": "/private/tmp/fgmetal-step11d-r-current-r5-trace-only-build-20261006"
+    },
+    {
+      "lsof_exit_code": 1,
+      "open_handle_count": 0,
+      "open_handle_rows": [],
+      "path": "/private/tmp/fgmetal-step11d-r-current-r6-build-A-20261006"
+    },
+    {
+      "lsof_exit_code": 1,
+      "open_handle_count": 0,
+      "open_handle_rows": [],
+      "path": "/private/tmp/fgmetal-step11d-r-exact-build"
+    },
+    {
+      "lsof_exit_code": 1,
+      "open_handle_count": 0,
+      "open_handle_rows": [],
+      "path": "/private/tmp/fgmetal-step11d2-r5-diagnostic-build-c-20261006"
+    },
+    {
+      "lsof_exit_code": 1,
+      "open_handle_count": 0,
+      "open_handle_rows": [],
+      "path": "/Users/nima/Library/Caches/FGMetalStep11C1R/build-d1-repro"
+    },
+    {
+      "lsof_exit_code": 1,
+      "open_handle_count": 0,
+      "open_handle_rows": [],
+      "path": "/private/tmp/fgmetal-step11b/MoltenVK/External/build"
+    }
+  ],
+  "scope": "exact approved build-only cleanup paths",
+  "unrelated_wine_processes_terminated": false
+}

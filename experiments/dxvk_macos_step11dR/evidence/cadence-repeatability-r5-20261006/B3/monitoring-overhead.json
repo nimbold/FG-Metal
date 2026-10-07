@@ -1,0 +1,19 @@
+{
+  "sample_count": 318,
+  "sample_interval_seconds_nominal": 1,
+  "sample_loop_timer_wakeups": 318,
+  "sampling_command": "ps -axo pid=,ppid=,rss=,command=",
+  "sampling_process": "run_matrix.py; one full-host ps child per sample",
+  "ps_commands": 318,
+  "full_process_table_rows_scanned": 193614,
+  "process_tree_enumeration": "yes; all process rows read each sample, descendants selected by PPID; matching frozen-runtime wineserver added",
+  "wine_child_querying": "one full process-table query per second; no repeated per-Wine-child query",
+  "monitor_cpu_seconds_self_plus_ps_children": 14.361,
+  "monitor_cpu_percent_of_wall": 4.516,
+  "sampled_elapsed_seconds": 317.003,
+  "rss_mib_median": 109.82,
+  "rss_mib_max": 110.74,
+  "rss_mib_last": 110.73,
+  "wakeups_scope": "counts deliberate one-second sample-loop wakes; no kernel per-process wakeup counter was collected",
+  "monitor_csv": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/cadence-repeatability-r5-20261006/B3/memory-samples.csv"
+}

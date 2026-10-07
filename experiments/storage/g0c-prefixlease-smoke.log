@@ -1,0 +1,207 @@
+{"blockers": [], "decision": "ALLOW", "estimated_peak_new_bytes": 3254779904, "experiment_id": "step11d3-storage-policy-smoke-20261007-1b9d0f22399c43e2", "free_before_bytes": 79769305088, "manifest_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/manifests/step11d3-storage-policy-smoke-20261007-1b9d0f22399c43e2.json", "project_budget_bytes": 53687091200, "project_usage_before_bytes": 44121841664, "warnings": []}
+{"active_lease_marker_removed": true, "bytes_reclaimed": 2303463424, "cleanup_receipt": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/smoke-runs/step11d3-storage-policy-smoke-20261007-1b9d0f22399c43e2/prefix-cleanup.json", "experiment_id": "step11d3-storage-policy-smoke-20261007-1b9d0f22399c43e2", "free_space_status": "PASS", "net_free_space_delta_bytes": -1201020928, "prefix_created": true, "prefix_deleted": true, "prefix_preserved": false, "receipt_write_error": null, "status": "PASS", "storage_hygiene_status": "PASS"}
+{
+  "schema_version": 1,
+  "experiment_id": "step11d3-storage-policy-smoke-20261007-1b9d0f22399c43e2",
+  "manifest_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/manifests/step11d3-storage-policy-smoke-20261007-1b9d0f22399c43e2.json",
+  "manifest_sha256": "006f28583a912c054ccc7684b5dc11d746dddb6255e6b812ca1171484c59222f",
+  "created_at_unix": 1791380777.500929,
+  "preflight_attestation_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/smoke-runs/step11d3-storage-policy-smoke-20261007-1b9d0f22399c43e2/gate0-preflight-attestation.json",
+  "preflight_attestation_sha256": "051b95ade329691353c9e944ee7a992d75454bcb5bc02f175f2d3cc72444222f",
+  "smoke_nonce_claim_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/smoke-claims/step11d3-storage-policy-smoke-20261007-1b9d0f22399c43e2.json",
+  "smoke_nonce_claim_sha256": "11037ada6d4e7141136c6d5cc0822c31070f0e7864f7ef62bf7c4873d23e0621",
+  "cleanup_receipt": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/smoke-runs/step11d3-storage-policy-smoke-20261007-1b9d0f22399c43e2/prefix-cleanup.json",
+  "cleanup_receipt_sha256": "c68f1649898db4290cd20f06a79c7c0805b0661097392002825b4c5b728f03a8",
+  "prefix_created": true,
+  "prefix_deleted": true,
+  "bytes_reclaimed": 2303463424,
+  "storage_hygiene_status": "PASS",
+  "free_space_status": "PASS",
+  "status": "PASS",
+  "graphics_experiments_run": false,
+  "wine_app_launched": false,
+  "system_exit_zero_cleanup_precedence": true,
+  "failure_cleanup_test": "PASS",
+  "uncertified_prefix_rejection": "PASS",
+  "preserved_prefix_policy": "PASS",
+  "prefix_state_evidence": {
+    "baseline": {
+      "known_prefix_count": 2,
+      "known_prefix_paths": [
+        "/Users/nima/Library/Caches/FGMetal/prefixes/wine-11.17-mvk142-pristine",
+        "/Users/nima/Library/Caches/FGMetalStep11D-R/step11d2-diag-60s-07-submit-reclaim-split-prefix"
+      ],
+      "preserved_prefix_count": 2,
+      "preserved_prefix_paths": [
+        "/Users/nima/Library/Caches/FGMetal/prefixes/wine-11.17-mvk142-pristine",
+        "/Users/nima/Library/Caches/FGMetalStep11D-R/step11d2-diag-60s-07-submit-reclaim-split-prefix"
+      ],
+      "uncertified_prefix_count": 0,
+      "uncertified_prefix_paths": [],
+      "active_lease_count": 0,
+      "active_leases": [],
+      "leased_prefix_exists": false,
+      "leased_prefix_is_symlink": false,
+      "leased_prefix_device": null,
+      "leased_prefix_inode": null,
+      "leased_prefix_has_registry": false
+    },
+    "during": {
+      "known_prefix_count": 3,
+      "known_prefix_paths": [
+        "/Users/nima/Library/Caches/FGMetal/prefixes/storage-smoke-step11d3-storage-policy-smoke-20261007-1b9d0f22399c43e2",
+        "/Users/nima/Library/Caches/FGMetal/prefixes/wine-11.17-mvk142-pristine",
+        "/Users/nima/Library/Caches/FGMetalStep11D-R/step11d2-diag-60s-07-submit-reclaim-split-prefix"
+      ],
+      "preserved_prefix_count": 2,
+      "preserved_prefix_paths": [
+        "/Users/nima/Library/Caches/FGMetal/prefixes/wine-11.17-mvk142-pristine",
+        "/Users/nima/Library/Caches/FGMetalStep11D-R/step11d2-diag-60s-07-submit-reclaim-split-prefix"
+      ],
+      "uncertified_prefix_count": 0,
+      "uncertified_prefix_paths": [],
+      "active_lease_count": 1,
+      "active_leases": [
+        {
+          "experiment_id": "step11d3-storage-policy-smoke-20261007-1b9d0f22399c43e2",
+          "state": "MATERIALIZED",
+          "prefix_path": "/Users/nima/Library/Caches/FGMetal/prefixes/storage-smoke-step11d3-storage-policy-smoke-20261007-1b9d0f22399c43e2",
+          "marker_path": "/Users/nima/Library/Caches/FGMetal/prefixes/.active-leases/step11d3-storage-policy-smoke-20261007-1b9d0f22399c43e2.json"
+        }
+      ],
+      "leased_prefix_exists": true,
+      "leased_prefix_is_symlink": false,
+      "leased_prefix_device": 16777230,
+      "leased_prefix_inode": 93293067,
+      "leased_prefix_has_registry": true
+    },
+    "after_cleanup": {
+      "known_prefix_count": 2,
+      "known_prefix_paths": [
+        "/Users/nima/Library/Caches/FGMetal/prefixes/wine-11.17-mvk142-pristine",
+        "/Users/nima/Library/Caches/FGMetalStep11D-R/step11d2-diag-60s-07-submit-reclaim-split-prefix"
+      ],
+      "preserved_prefix_count": 2,
+      "preserved_prefix_paths": [
+        "/Users/nima/Library/Caches/FGMetal/prefixes/wine-11.17-mvk142-pristine",
+        "/Users/nima/Library/Caches/FGMetalStep11D-R/step11d2-diag-60s-07-submit-reclaim-split-prefix"
+      ],
+      "uncertified_prefix_count": 0,
+      "uncertified_prefix_paths": [],
+      "active_lease_count": 0,
+      "active_leases": [],
+      "leased_prefix_exists": false,
+      "leased_prefix_is_symlink": false,
+      "leased_prefix_device": null,
+      "leased_prefix_inode": null,
+      "leased_prefix_has_registry": false
+    },
+    "controlled_command": {
+      "command": [
+        "/usr/bin/true"
+      ],
+      "pid": 59458,
+      "returncode": 0,
+      "started_at_unix": 1791380753.647736,
+      "completed_at_unix": 1791380753.651615,
+      "managed_by_prefixlease_wait_process": true,
+      "wine_app_launched": false,
+      "state_before": {
+        "known_prefix_count": 3,
+        "known_prefix_paths": [
+          "/Users/nima/Library/Caches/FGMetal/prefixes/storage-smoke-step11d3-storage-policy-smoke-20261007-1b9d0f22399c43e2",
+          "/Users/nima/Library/Caches/FGMetal/prefixes/wine-11.17-mvk142-pristine",
+          "/Users/nima/Library/Caches/FGMetalStep11D-R/step11d2-diag-60s-07-submit-reclaim-split-prefix"
+        ],
+        "preserved_prefix_count": 2,
+        "preserved_prefix_paths": [
+          "/Users/nima/Library/Caches/FGMetal/prefixes/wine-11.17-mvk142-pristine",
+          "/Users/nima/Library/Caches/FGMetalStep11D-R/step11d2-diag-60s-07-submit-reclaim-split-prefix"
+        ],
+        "uncertified_prefix_count": 0,
+        "uncertified_prefix_paths": [],
+        "active_lease_count": 1,
+        "active_leases": [
+          {
+            "experiment_id": "step11d3-storage-policy-smoke-20261007-1b9d0f22399c43e2",
+            "state": "MATERIALIZED",
+            "prefix_path": "/Users/nima/Library/Caches/FGMetal/prefixes/storage-smoke-step11d3-storage-policy-smoke-20261007-1b9d0f22399c43e2",
+            "marker_path": "/Users/nima/Library/Caches/FGMetal/prefixes/.active-leases/step11d3-storage-policy-smoke-20261007-1b9d0f22399c43e2.json"
+          }
+        ],
+        "leased_prefix_exists": true,
+        "leased_prefix_is_symlink": false,
+        "leased_prefix_device": 16777230,
+        "leased_prefix_inode": 93293067,
+        "leased_prefix_has_registry": true
+      },
+      "state_after": {
+        "known_prefix_count": 3,
+        "known_prefix_paths": [
+          "/Users/nima/Library/Caches/FGMetal/prefixes/storage-smoke-step11d3-storage-policy-smoke-20261007-1b9d0f22399c43e2",
+          "/Users/nima/Library/Caches/FGMetal/prefixes/wine-11.17-mvk142-pristine",
+          "/Users/nima/Library/Caches/FGMetalStep11D-R/step11d2-diag-60s-07-submit-reclaim-split-prefix"
+        ],
+        "preserved_prefix_count": 2,
+        "preserved_prefix_paths": [
+          "/Users/nima/Library/Caches/FGMetal/prefixes/wine-11.17-mvk142-pristine",
+          "/Users/nima/Library/Caches/FGMetalStep11D-R/step11d2-diag-60s-07-submit-reclaim-split-prefix"
+        ],
+        "uncertified_prefix_count": 0,
+        "uncertified_prefix_paths": [],
+        "active_lease_count": 1,
+        "active_leases": [
+          {
+            "experiment_id": "step11d3-storage-policy-smoke-20261007-1b9d0f22399c43e2",
+            "state": "MATERIALIZED",
+            "prefix_path": "/Users/nima/Library/Caches/FGMetal/prefixes/storage-smoke-step11d3-storage-policy-smoke-20261007-1b9d0f22399c43e2",
+            "marker_path": "/Users/nima/Library/Caches/FGMetal/prefixes/.active-leases/step11d3-storage-policy-smoke-20261007-1b9d0f22399c43e2.json"
+          }
+        ],
+        "leased_prefix_exists": true,
+        "leased_prefix_is_symlink": false,
+        "leased_prefix_device": 16777230,
+        "leased_prefix_inode": 93293067,
+        "leased_prefix_has_registry": true
+      }
+    },
+    "exactly_one_temporary_prefix": true,
+    "baseline_restored": true
+  },
+  "synthetic_policy_suite": {
+    "status": "PASS",
+    "test_file": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/test_storage_policy.py",
+    "sha256": "cef1aec6b333641eea97f5c21fa9ac5d6b9e376cee472df12775c845f6bf9808",
+    "test_count": 52,
+    "skipped_count": 0,
+    "suite_output_sha256": "b8da0e79722f865297d078cca10e129adaaadf3d218c2450258612211dca5957",
+    "tests": [
+      "test_normal_cleanup_removes_prefix",
+      "test_original_failure_still_runs_and_finishes_cleanup",
+      "test_system_exit_zero_cannot_hide_cleanup_failure",
+      "test_uncertified_prefix_is_rejected",
+      "test_preservation_stays_within_configured_cap",
+      "test_full_preserved_cap_leaves_uncertified_prefix_for_gate_block"
+    ],
+    "focused_gate0_checks": {
+      "status": "PASS",
+      "test_file": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/test_g0c_checks.py",
+      "sha256": "16760afa087779de5823e50071a290c51ecff4846763c96d4ebc3070efc129b1",
+      "test_count": 15,
+      "skipped_count": 0,
+      "suite_output_sha256": "1f18dc2b0996fcb5fe9dd4f9fb1671ff168d9575a6065b9597deef14085db46c",
+      "tests": [
+        "test_stale_inventory_hash_rejects_admission",
+        "test_stale_cleanup_receipt_hash_rejects_admission",
+        "test_stale_control_hash_rejects_admission",
+        "test_cleanup_cannot_pass_below_gate0_free_or_project_threshold",
+        "test_threshold_cleanup_blocks_signed_gate_for_next_admission",
+        "test_smoke_evidence_requires_one_active_prefix_and_baseline_return",
+        "test_invalid_signed_gate_is_not_rewritten_during_threshold_failure",
+        "test_failed_initial_threshold_observation_cannot_be_overwritten_by_later_sample",
+        "test_wait_process_timeout_reaps_child_and_reports_timeout",
+        "test_unreaped_timeout_marks_lease_unsafe"
+      ]
+    }
+  }
+}

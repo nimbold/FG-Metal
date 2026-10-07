@@ -1,0 +1,21 @@
+{
+  "attestation": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/storage-gate0-attestation.json",
+  "build_retention_state": {
+    "active_build_count": 0,
+    "active_dxvk_count": 0,
+    "active_moltenvk_count": 0,
+    "completed_pending_retirement_count": 0,
+    "failed_or_retiring_count": 0,
+    "preserved_build_count": 0,
+    "retained_build_count": 0,
+    "retention_fingerprint_sha256": "904c14621f10b5f7fcbbd1330c67066db9b6f2f157b7b8d72b261f2758da1cb2",
+    "unknown_count": 0
+  },
+  "cleanup_receipt": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/storage-cleanup-receipt.json",
+  "fgmetal_scoped_allocated_inode_bytes": 45582823424,
+  "free_bytes": 79768526848,
+  "inventory": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/storage-inventory.json",
+  "preferred_free_space_met": true,
+  "prefixlease_smoke_status": "PENDING",
+  "status": "PREFLIGHT_PASS"
+}

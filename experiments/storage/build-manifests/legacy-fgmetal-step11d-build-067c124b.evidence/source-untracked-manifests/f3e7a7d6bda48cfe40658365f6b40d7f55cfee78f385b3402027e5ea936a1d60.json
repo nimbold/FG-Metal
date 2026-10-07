@@ -1,0 +1,19 @@
+{
+  "entries": [
+    {
+      "mode": "0o755",
+      "path": ".",
+      "type": "directory"
+    },
+    {
+      "path": ".git",
+      "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-step11d-build-067c124b.evidence/source-untracked/include/spirv-incomplete-20261005/.git",
+      "sha256": "49171ebe6c0dd2cb8cc7336a1d92527f19128c5a638c3d8f5ae1512deaad4bd0",
+      "size_bytes": 116,
+      "type": "regular"
+    }
+  ],
+  "path": "include/spirv-incomplete-20261005",
+  "tree_sha256": "732bdc11a19569f22484e95dae4de0871da50f1a0ce970fb6e68b55077252d11",
+  "type": "directory"
+}

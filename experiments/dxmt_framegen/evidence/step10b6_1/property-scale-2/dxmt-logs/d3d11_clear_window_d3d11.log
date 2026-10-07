@@ -1,0 +1,32 @@
+info:  Maximum supported feature level: D3D_FEATURE_LEVEL_11_1
+info:  Using feature level D3D_FEATURE_LEVEL_11_0
+info:  Setting display mode: 1470x956@60
+info:  DXMT framegen enablement inputs changed: requested=1 occluded=0 source_supported=1 layer_owner=0 source_sequence=0
+info:  DXMT framegen session reactivation: enabled=0 layer_owner=0 source_sequence=1
+info:  DXMT framegen session reactivation: enabled=1 layer_owner=1 source_sequence=2
+info:  DXMT framegen enablement inputs changed: requested=1 occluded=0 source_supported=1 layer_owner=1 source_sequence=3
+info:  DXMT framegen enablement inputs changed: requested=1 occluded=0 source_supported=1 layer_owner=0 source_sequence=1073
+info:  DXMT framegen session reactivation: enabled=0 layer_owner=0 source_sequence=1073
+info:  DXMT framegen session reactivation: enabled=0 layer_owner=0 source_sequence=1074
+info:  DXMT framegen session reactivation: enabled=1 layer_owner=1 source_sequence=1075
+info:  DXMT framegen enablement inputs changed: requested=1 occluded=0 source_supported=1 layer_owner=1 source_sequence=1076
+info:  DXMT framegen enablement inputs changed: requested=1 occluded=0 source_supported=1 layer_owner=0 source_sequence=1080
+info:  DXMT framegen session reactivation: enabled=0 layer_owner=0 source_sequence=1080
+info:  DXMT framegen session reactivation: enabled=0 layer_owner=0 source_sequence=1081
+info:  DXMT framegen session reactivation: enabled=1 layer_owner=1 source_sequence=1082
+info:  DXMT framegen enablement inputs changed: requested=1 occluded=0 source_supported=1 layer_owner=1 source_sequence=1083
+info:  DXMT framegen enablement inputs changed: requested=1 occluded=0 source_supported=1 layer_owner=0 source_sequence=1087
+info:  DXMT framegen session reactivation: enabled=0 layer_owner=0 source_sequence=1087
+info:  DXMT framegen session reactivation: enabled=0 layer_owner=0 source_sequence=1088
+info:  DXMT framegen session reactivation: enabled=1 layer_owner=1 source_sequence=1089
+info:  DXMT framegen enablement inputs changed: requested=1 occluded=0 source_supported=1 layer_owner=1 source_sequence=1090
+info:  DXMT framegen enablement inputs changed: requested=1 occluded=0 source_supported=1 layer_owner=0 source_sequence=1094
+info:  DXMT framegen session reactivation: enabled=0 layer_owner=0 source_sequence=1094
+info:  DXMT framegen session reactivation: enabled=0 layer_owner=0 source_sequence=1095
+info:  DXMT framegen session reactivation: enabled=1 layer_owner=1 source_sequence=1096
+info:  DXMT framegen enablement inputs changed: requested=1 occluded=0 source_supported=1 layer_owner=1 source_sequence=1097
+info:  DXMT framegen enablement inputs changed: requested=1 occluded=0 source_supported=1 layer_owner=0 source_sequence=1102
+info:  DXMT framegen session reactivation: enabled=0 layer_owner=0 source_sequence=1102
+info:  DXMT framegen session reactivation: enabled=0 layer_owner=0 source_sequence=1103
+info:  DXMT framegen session reactivation: enabled=1 layer_owner=1 source_sequence=1104
+info:  DXMT framegen enablement inputs changed: requested=1 occluded=0 source_supported=1 layer_owner=1 source_sequence=1105

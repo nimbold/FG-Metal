@@ -1,0 +1,12 @@
+{
+  "base_commit": "fb4515681daefb789a4d0f403c4bdbca88f3b3de",
+  "changed_files": [
+    "src/d3d11/d3d11_swapchain.cpp",
+    "src/winemetal/unix/dxmt_framegen_bridge.mm",
+    "src/winemetal/unix/winemetal_unix.c"
+  ],
+  "delta_sha256": "6a69545b928607cd6cf777ce230b58c77d4dde18bcb9f97a4f144ef53def3b17",
+  "rebuilt_core_archive_sha256": "43fd2e89199e9b22e758c2cc5d0e84fb8062c5a6060575bdc7809d608c8f91cf",
+  "frozen_core_archive_sha256": "dbed8452d8458641aee9ca6b58188ba5a3b4873ff2e0dfd357143fafade19d54",
+  "scope": "local experiment only; no upstream contribution; F scheduler SourceEscrow design generator unchanged"
+}

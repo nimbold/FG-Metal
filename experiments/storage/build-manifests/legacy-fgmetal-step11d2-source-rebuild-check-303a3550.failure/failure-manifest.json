@@ -1,0 +1,34 @@
+{
+  "build_id": "legacy-fgmetal-step11d2-source-rebuild-check-303a3550",
+  "capture_paths": null,
+  "capture_policy": "full-small-root",
+  "captured_at_unix": 1791335655.7970529,
+  "classification": "FAILED_OR_SCRATCH",
+  "reason": "partial source-rebuild check; retain its three object files as diagnostics then retire the scratch root",
+  "retained_files": [
+    {
+      "mode": "0o644",
+      "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-step11d2-source-rebuild-check-303a3550.failure/configuration/bridge_pe.o",
+      "sha256": "811c3f9a3b5c5e350cfb536a4a130b6108dee35726c3f25efd0a2f2d821445da",
+      "size_bytes": 6933,
+      "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-step11d2-source-rebuild-check-303a3550/bridge_pe.o"
+    },
+    {
+      "mode": "0o644",
+      "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-step11d2-source-rebuild-check-303a3550.failure/configuration/bridge_unix.o",
+      "sha256": "2ec596690e6b43012d0a9f59f545960b148e9c00774e8192477f32225f9e28cf",
+      "size_bytes": 1440,
+      "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-step11d2-source-rebuild-check-303a3550/bridge_unix.o"
+    },
+    {
+      "mode": "0o644",
+      "retained_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-step11d2-source-rebuild-check-303a3550.failure/configuration/metal_provider.o",
+      "sha256": "9d5fca2509a37ddbc1c0e2c895319214f77461a2954f734698b10a2650801447",
+      "size_bytes": 13544,
+      "source_path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-step11d2-source-rebuild-check-303a3550/metal_provider.o"
+    }
+  ],
+  "schema_version": 1,
+  "source_estimated_allocated_bytes": 28672,
+  "source_logical_bytes": 21917
+}

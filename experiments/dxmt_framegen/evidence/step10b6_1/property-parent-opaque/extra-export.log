@@ -1,0 +1,12 @@
+Finished export to the file: /Users/nima/Documents/Code/FG-Metal/experiments/dxmt_framegen/evidence/step10b6_1/property-parent-opaque/metal-command-buffer-completed-63.xml
+Finished export to the file: /Users/nima/Documents/Code/FG-Metal/experiments/dxmt_framegen/evidence/step10b6_1/property-parent-opaque/metal-command-buffer-error-72.xml
+Finished export to the file: /Users/nima/Documents/Code/FG-Metal/experiments/dxmt_framegen/evidence/step10b6_1/property-parent-opaque/os-signpost-arg-76.xml
+Finished export to the file: /Users/nima/Documents/Code/FG-Metal/experiments/dxmt_framegen/evidence/step10b6_1/property-parent-opaque/metal-application-command-buffer-submissions-88.xml
+Finished export to the file: /Users/nima/Documents/Code/FG-Metal/experiments/dxmt_framegen/evidence/step10b6_1/property-parent-opaque/os-signpost-106.xml
+Finished export to the file: /Users/nima/Documents/Code/FG-Metal/experiments/dxmt_framegen/evidence/step10b6_1/property-parent-opaque/os-signpost-107.xml
+metal-command-buffer-completed-63.xml rows= 5308
+metal-command-buffer-error-72.xml rows= 0
+os-signpost-arg-76.xml rows= 111393
+metal-application-command-buffer-submissions-88.xml rows= 2477
+os-signpost-106.xml rows= 12377
+os-signpost-107.xml rows= 12377

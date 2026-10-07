@@ -1,0 +1,67 @@
+{
+  "buildCommand" : {
+    "command" : "build",
+    "skipDependencies" : false,
+    "style" : "buildOnly"
+  },
+  "configuredTargets" : [
+    {
+      "guid" : "b3a0e15fe620597b4e24a5c0458adac0dca4a75742deee2abf927476a6a2463c"
+    }
+  ],
+  "containerPath" : "/tmp/fgmetal-step11b/MoltenVK/MoltenVKPackaging.xcodeproj",
+  "continueBuildingAfterErrors" : false,
+  "dependencyScope" : "workspace",
+  "enableIndexBuildArena" : false,
+  "hideShellScriptEnvironment" : false,
+  "parameters" : {
+    "action" : "build",
+    "activeArchitecture" : "undefined_arch",
+    "activeRunDestination" : {
+      "disableOnlyActiveArch" : true,
+      "hostTargetedPlatform" : null,
+      "platform" : "macosx",
+      "sdk" : "macosx27.0",
+      "sdkVariant" : "macos",
+      "supportedArchitectures" : [
+        "arm64",
+        "arm64e",
+        "arm64e.x1",
+        "x86_64",
+        "x86_64h"
+      ],
+      "targetArchitecture" : "undefined_arch"
+    },
+    "arenaInfo" : {
+      "buildIntermediatesPath" : "/Users/nima/Library/Developer/Xcode/DerivedData/MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd/Build/Intermediates.noindex",
+      "buildProductsPath" : "/Users/nima/Library/Developer/Xcode/DerivedData/MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd/Build/Products",
+      "derivedDataPath" : "/Users/nima/Library/Developer/Xcode/DerivedData",
+      "indexDataStoreFolderPath" : "/Users/nima/Library/Developer/Xcode/DerivedData/MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd/Index.noindex/DataStore",
+      "indexEnableDataStore" : true,
+      "indexPCHPath" : "/Users/nima/Library/Developer/Xcode/DerivedData/MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd/Index.noindex/PrecompiledHeaders",
+      "pchPath" : "/Users/nima/Library/Developer/Xcode/DerivedData/MoltenVKPackaging-edscuptxhvkrwkdsuetlfjuipmyd/Build/Intermediates.noindex/PrecompiledHeaders"
+    },
+    "configurationName" : "Release",
+    "overrides" : {
+      "commandLine" : {
+        "table" : {
+          "GCC_PREPROCESSOR_DEFINITIONS" : "${inherited} "
+        }
+      },
+      "synthesized" : {
+        "table" : {
+          "ACTION" : "build",
+          "ENABLE_PREVIEWS" : "NO",
+          "ENABLE_XOJIT_PREVIEWS" : "YES",
+          "TOOLCHAINS" : "com.apple.dt.toolchain.Metal.32023.921.5 $(inherited)"
+        }
+      }
+    }
+  },
+  "schemeCommand" : "launch",
+  "showNonLoggedProgress" : true,
+  "useDryRun" : false,
+  "useImplicitDependencies" : false,
+  "useLegacyBuildLocations" : false,
+  "useParallelTargets" : false
+}

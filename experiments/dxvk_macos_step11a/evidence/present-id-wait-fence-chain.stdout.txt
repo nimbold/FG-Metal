@@ -1,0 +1,191 @@
+driver=MoltenVK 1.4.3 device=Apple M3 api=1.3.357
+ext VK_KHR_swapchain 70
+ext VK_KHR_present_id 1
+ext VK_KHR_present_wait 1
+ext VK_KHR_swapchain_maintenance1 1
+ext VK_GOOGLE_display_timing 1
+ext VK_KHR_portability_subset 1
+features presentId=1 presentWait=1 maintenance1=1
+surface=640x360 images=3 mode=FIFO refresh_query=0 refresh_ns=16666666 presentId=yes presentWait=yes google=yes
+present id=1 class=source result=0 submit_ns=358132059951458 desired_ns=358132080434665 present_call_ns=1143083 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=3419542 wait_elapsed_ns=3631375
+present id=2 class=synthetic result=0 submit_ns=358132065440666 desired_ns=358132097101331 present_call_ns=13375 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=615084 wait_elapsed_ns=615459
+present id=3 class=source result=0 submit_ns=358132073749666 desired_ns=358132113767997 present_call_ns=9334 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=700375 wait_elapsed_ns=700541
+present id=4 class=synthetic result=0 submit_ns=358132081811125 desired_ns=358132130434663 present_call_ns=24625 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=762875 wait_elapsed_ns=763583
+present id=5 class=source result=0 submit_ns=358132090557833 desired_ns=358132147101329 present_call_ns=35875 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=620000 wait_elapsed_ns=620917
+present id=6 class=synthetic result=0 submit_ns=358132098415041 desired_ns=358132163767995 present_call_ns=9000 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=491834 wait_elapsed_ns=492042
+present id=7 class=source result=0 submit_ns=358132107619041 desired_ns=358132180434661 present_call_ns=22167 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=515208 wait_elapsed_ns=515708
+present id=8 class=synthetic result=0 submit_ns=358132116002125 desired_ns=358132197101327 present_call_ns=9500 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=496916 wait_elapsed_ns=497125
+present id=9 class=source result=0 submit_ns=358132123847375 desired_ns=358132213767993 present_call_ns=12708 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=533583 wait_elapsed_ns=533792
+present id=10 class=synthetic result=0 submit_ns=358132132116958 desired_ns=358132230434659 present_call_ns=7875 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=471958 wait_elapsed_ns=472125
+present id=11 class=source result=0 submit_ns=358132140253166 desired_ns=358132247101325 present_call_ns=9792 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=464583 wait_elapsed_ns=464833
+present id=12 class=synthetic result=0 submit_ns=358132148528125 desired_ns=358132263767991 present_call_ns=15125 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=695541 wait_elapsed_ns=696291
+present id=13 class=source result=0 submit_ns=358132157236000 desired_ns=358132280434657 present_call_ns=29625 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=588875 wait_elapsed_ns=589375
+present id=14 class=synthetic result=0 submit_ns=358132165631000 desired_ns=358132297101323 present_call_ns=14291 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=515959 wait_elapsed_ns=516417
+present id=15 class=source result=0 submit_ns=358132173933166 desired_ns=358132313767989 present_call_ns=12459 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=590958 wait_elapsed_ns=591250
+present id=16 class=synthetic result=0 submit_ns=358132182259333 desired_ns=358132330434655 present_call_ns=8750 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=626292 wait_elapsed_ns=626542
+present id=17 class=source result=0 submit_ns=358132190630791 desired_ns=358132347101321 present_call_ns=14584 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=610208 wait_elapsed_ns=610625
+present id=18 class=synthetic result=0 submit_ns=358132198980041 desired_ns=358132363767987 present_call_ns=7459 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=625958 wait_elapsed_ns=626166
+present id=19 class=source result=0 submit_ns=358132207313333 desired_ns=358132380434653 present_call_ns=13250 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=626208 wait_elapsed_ns=626500
+present id=20 class=synthetic result=0 submit_ns=358132215222791 desired_ns=358132397101319 present_call_ns=7167 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=458875 wait_elapsed_ns=459125
+present id=21 class=source result=0 submit_ns=358132223405458 desired_ns=358132413767985 present_call_ns=12542 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=565708 wait_elapsed_ns=566041
+present id=22 class=synthetic result=0 submit_ns=358132231674333 desired_ns=358132430434651 present_call_ns=9000 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=388750 wait_elapsed_ns=389083
+present id=23 class=source result=0 submit_ns=358132241232291 desired_ns=358132447101317 present_call_ns=10209 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=594083 wait_elapsed_ns=594500
+present id=24 class=synthetic result=0 submit_ns=358132249528000 desired_ns=358132463767983 present_call_ns=8708 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=718042 wait_elapsed_ns=718458
+present id=25 class=source result=0 submit_ns=358132257474125 desired_ns=358132480434649 present_call_ns=10166 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=822584 wait_elapsed_ns=822959
+present id=26 class=synthetic result=0 submit_ns=358132265999875 desired_ns=358132497101315 present_call_ns=8458 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=713375 wait_elapsed_ns=713708
+present id=27 class=source result=0 submit_ns=358132274406875 desired_ns=358132513767981 present_call_ns=9958 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=747167 wait_elapsed_ns=747583
+present id=28 class=synthetic result=0 submit_ns=358132282872541 desired_ns=358132530434647 present_call_ns=8459 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=773416 wait_elapsed_ns=773875
+present id=29 class=source result=0 submit_ns=358132291361333 desired_ns=358132547101313 present_call_ns=15667 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=745583 wait_elapsed_ns=746041
+present id=30 class=synthetic result=0 submit_ns=358132298316500 desired_ns=358132563767979 present_call_ns=11458 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=718375 wait_elapsed_ns=718875
+present id=31 class=source result=0 submit_ns=358132307089291 desired_ns=358132580434645 present_call_ns=47500 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=966750 wait_elapsed_ns=967542
+present id=32 class=synthetic result=0 submit_ns=358132316236875 desired_ns=358132597101311 present_call_ns=63708 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=892792 wait_elapsed_ns=894167
+present id=33 class=source result=0 submit_ns=358132323244083 desired_ns=358132613767977 present_call_ns=20833 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=780792 wait_elapsed_ns=781292
+present id=34 class=synthetic result=0 submit_ns=358132331613833 desired_ns=358132630434643 present_call_ns=20542 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=742125 wait_elapsed_ns=742583
+present id=35 class=source result=0 submit_ns=358132340515958 desired_ns=358132647101309 present_call_ns=71167 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=972291 wait_elapsed_ns=973708
+present id=36 class=synthetic result=0 submit_ns=358132350033083 desired_ns=358132663767975 present_call_ns=73333 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=940084 wait_elapsed_ns=941500
+present id=37 class=source result=0 submit_ns=358132357532750 desired_ns=358132680434641 present_call_ns=54708 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=1230750 wait_elapsed_ns=1232125
+present id=38 class=synthetic result=0 submit_ns=358132365693333 desired_ns=358132697101307 present_call_ns=76708 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=1198250 wait_elapsed_ns=1199750
+present id=39 class=source result=0 submit_ns=358132373515375 desired_ns=358132713767973 present_call_ns=44541 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=1342000 wait_elapsed_ns=1343375
+present id=40 class=synthetic result=0 submit_ns=358132383229250 desired_ns=358132730434639 present_call_ns=43291 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=1280417 wait_elapsed_ns=1281917
+present id=41 class=source result=0 submit_ns=358132391151125 desired_ns=358132747101305 present_call_ns=35375 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=4378125 wait_elapsed_ns=4379500
+present id=42 class=synthetic result=0 submit_ns=358132399268541 desired_ns=358132763767971 present_call_ns=29625 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=1164125 wait_elapsed_ns=1165250
+present id=43 class=source result=0 submit_ns=358132407223083 desired_ns=358132780434637 present_call_ns=27042 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=1325583 wait_elapsed_ns=1327041
+present id=44 class=synthetic result=0 submit_ns=358132415637166 desired_ns=358132797101303 present_call_ns=38084 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=1083333 wait_elapsed_ns=1084625
+present id=45 class=source result=0 submit_ns=358132425117375 desired_ns=358132813767969 present_call_ns=159083 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=1138750 wait_elapsed_ns=1140333
+present id=46 class=synthetic result=0 submit_ns=358132433012000 desired_ns=358132830434635 present_call_ns=33791 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=1121209 wait_elapsed_ns=1122667
+present id=47 class=source result=0 submit_ns=358132440995208 desired_ns=358132847101301 present_call_ns=34542 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=1445958 wait_elapsed_ns=1447666
+present id=48 class=synthetic result=0 submit_ns=358132449225166 desired_ns=358132863767967 present_call_ns=121917 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=1180958 wait_elapsed_ns=1182625
+present id=49 class=source result=0 submit_ns=358132457424500 desired_ns=358132880434633 present_call_ns=33000 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=1217958 wait_elapsed_ns=1219416
+present id=50 class=synthetic result=0 submit_ns=358132465472000 desired_ns=358132897101299 present_call_ns=46291 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=1056459 wait_elapsed_ns=1057500
+present id=51 class=source result=0 submit_ns=358132474617208 desired_ns=358132913767965 present_call_ns=130000 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=1353292 wait_elapsed_ns=1355292
+present id=52 class=synthetic result=0 submit_ns=358132482992208 desired_ns=358132930434631 present_call_ns=37500 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=1108208 wait_elapsed_ns=1110125
+present id=53 class=source result=0 submit_ns=358132491006291 desired_ns=358132947101297 present_call_ns=34125 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=1302875 wait_elapsed_ns=1304459
+present id=54 class=synthetic result=0 submit_ns=358132499087583 desired_ns=358132963767963 present_call_ns=37917 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=1217916 wait_elapsed_ns=1218833
+present id=55 class=source result=0 submit_ns=358132507119083 desired_ns=358132980434629 present_call_ns=35458 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=1241209 wait_elapsed_ns=1242000
+present id=56 class=synthetic result=0 submit_ns=358132515193333 desired_ns=358132997101295 present_call_ns=59167 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=1031458 wait_elapsed_ns=1032333
+present id=57 class=source result=0 submit_ns=358132524633750 desired_ns=358133013767961 present_call_ns=30541 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=1407709 wait_elapsed_ns=1408959
+present id=58 class=synthetic result=0 submit_ns=358132532720625 desired_ns=358133030434627 present_call_ns=32541 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=1143375 wait_elapsed_ns=1144500
+present id=59 class=source result=0 submit_ns=358132540738958 desired_ns=358133047101293 present_call_ns=36458 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=1342667 wait_elapsed_ns=1344000
+present id=60 class=synthetic result=0 submit_ns=358132549074500 desired_ns=358133063767959 present_call_ns=44875 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=1278416 wait_elapsed_ns=1280333
+present id=61 class=source result=0 submit_ns=358132557279333 desired_ns=358133080434625 present_call_ns=41708 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=1292084 wait_elapsed_ns=1293292
+present id=62 class=synthetic result=0 submit_ns=358132565753333 desired_ns=358133097101291 present_call_ns=63458 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=1277125 wait_elapsed_ns=1278459
+present id=63 class=source result=0 submit_ns=358132573868875 desired_ns=358133113767957 present_call_ns=33791 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=1506209 wait_elapsed_ns=1507459
+present id=64 class=synthetic result=0 submit_ns=358132582364416 desired_ns=358133130434623 present_call_ns=44084 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=1211041 wait_elapsed_ns=1212083
+present id=65 class=source result=0 submit_ns=358132590236541 desired_ns=358133147101289 present_call_ns=43000 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=1287875 wait_elapsed_ns=1289084
+present id=66 class=synthetic result=0 submit_ns=358132599912625 desired_ns=358133163767955 present_call_ns=44416 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=1206000 wait_elapsed_ns=1207250
+present id=67 class=source result=0 submit_ns=358132608001208 desired_ns=358133180434621 present_call_ns=47375 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=2285458 wait_elapsed_ns=2286875
+present id=68 class=synthetic result=0 submit_ns=358132623485791 desired_ns=358133197101287 present_call_ns=292542 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=5784333 wait_elapsed_ns=5785750
+present id=69 class=source result=0 submit_ns=358132631110125 desired_ns=358133213767953 present_call_ns=45458 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=6111292 wait_elapsed_ns=6111750
+present id=70 class=synthetic result=0 submit_ns=358132638961166 desired_ns=358133230434619 present_call_ns=32417 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=836167 wait_elapsed_ns=836583
+present id=71 class=source result=0 submit_ns=358132647621125 desired_ns=358133247101285 present_call_ns=19916 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=794542 wait_elapsed_ns=795250
+present id=72 class=synthetic result=0 submit_ns=358132656231833 desired_ns=358133263767951 present_call_ns=14333 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=796042 wait_elapsed_ns=796459
+present id=73 class=source result=0 submit_ns=358132664316416 desired_ns=358133280434617 present_call_ns=11667 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=733875 wait_elapsed_ns=734292
+present id=74 class=synthetic result=0 submit_ns=358132672766833 desired_ns=358133297101283 present_call_ns=11583 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=798667 wait_elapsed_ns=799209
+present id=75 class=source result=0 submit_ns=358132681323625 desired_ns=358133313767949 present_call_ns=20875 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=803125 wait_elapsed_ns=803541
+present id=76 class=synthetic result=0 submit_ns=358132749708666 desired_ns=358133330434615 present_call_ns=62459 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=1490791 wait_elapsed_ns=1491541
+present id=77 class=source result=0 submit_ns=358132751546791 desired_ns=358133347101281 present_call_ns=10875 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=705167 wait_elapsed_ns=706125
+present id=78 class=synthetic result=0 submit_ns=358132759998625 desired_ns=358133363767947 present_call_ns=13208 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=778708 wait_elapsed_ns=779292
+present id=79 class=source result=0 submit_ns=358132768521041 desired_ns=358133380434613 present_call_ns=11667 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=775583 wait_elapsed_ns=775958
+present id=80 class=synthetic result=0 submit_ns=358132776999041 desired_ns=358133397101279 present_call_ns=6000 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=751834 wait_elapsed_ns=752209
+present id=81 class=source result=0 submit_ns=358132785431291 desired_ns=358133413767945 present_call_ns=8917 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=608125 wait_elapsed_ns=608417
+present id=82 class=synthetic result=0 submit_ns=358132793750291 desired_ns=358133430434611 present_call_ns=6834 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=712458 wait_elapsed_ns=713583
+present id=83 class=source result=0 submit_ns=358132801489458 desired_ns=358133447101277 present_call_ns=10000 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=639792 wait_elapsed_ns=640417
+present id=84 class=synthetic result=0 submit_ns=358132811517791 desired_ns=358133463767943 present_call_ns=50125 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=1060000 wait_elapsed_ns=1060834
+present id=85 class=source result=0 submit_ns=358132819560541 desired_ns=358133480434609 present_call_ns=69334 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=1202083 wait_elapsed_ns=1203625
+present id=86 class=synthetic result=0 submit_ns=358132827746875 desired_ns=358133497101275 present_call_ns=48125 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=1284166 wait_elapsed_ns=1286041
+present id=87 class=source result=0 submit_ns=358132836066000 desired_ns=358133513767941 present_call_ns=45458 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=1466167 wait_elapsed_ns=1467375
+present id=88 class=synthetic result=0 submit_ns=358132844484166 desired_ns=358133530434607 present_call_ns=42542 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=1322208 wait_elapsed_ns=1323417
+present id=89 class=source result=0 submit_ns=358132852977458 desired_ns=358133547101273 present_call_ns=48875 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=1157500 wait_elapsed_ns=1158583
+present id=90 class=synthetic result=0 submit_ns=358132861066166 desired_ns=358133563767939 present_call_ns=45209 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=1288833 wait_elapsed_ns=1290541
+present id=91 class=source result=0 submit_ns=358132869354083 desired_ns=358133580434605 present_call_ns=45292 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=1264125 wait_elapsed_ns=1265708
+present id=92 class=synthetic result=0 submit_ns=358132877608750 desired_ns=358133597101271 present_call_ns=43166 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=1258084 wait_elapsed_ns=1259584
+present id=93 class=source result=0 submit_ns=358132885849875 desired_ns=358133613767937 present_call_ns=42458 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=1346375 wait_elapsed_ns=1347583
+present id=94 class=synthetic result=0 submit_ns=358132894010666 desired_ns=358133630434603 present_call_ns=52875 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=1586959 wait_elapsed_ns=1588334
+present id=95 class=source result=0 submit_ns=358132902576208 desired_ns=358133647101269 present_call_ns=43208 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=1168834 wait_elapsed_ns=1170125
+present id=96 class=synthetic result=0 submit_ns=358132910466291 desired_ns=358133663767935 present_call_ns=35000 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=1418792 wait_elapsed_ns=1420417
+present id=97 class=source result=0 submit_ns=358132918932208 desired_ns=358133680434601 present_call_ns=40000 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=1378583 wait_elapsed_ns=1380083
+present id=98 class=synthetic result=0 submit_ns=358132927320916 desired_ns=358133697101267 present_call_ns=37292 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=1269375 wait_elapsed_ns=1271000
+present id=99 class=source result=0 submit_ns=358132935190500 desired_ns=358133713767933 present_call_ns=50166 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=1127584 wait_elapsed_ns=1128875
+present id=100 class=synthetic result=0 submit_ns=358132944880458 desired_ns=358133730434599 present_call_ns=229458 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=1108209 wait_elapsed_ns=1109875
+present id=101 class=source result=0 submit_ns=358132953210333 desired_ns=358133747101265 present_call_ns=967458 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=640750 wait_elapsed_ns=642250
+present id=102 class=synthetic result=0 submit_ns=358132961758875 desired_ns=358133763767931 present_call_ns=48791 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=1236375 wait_elapsed_ns=1237917
+present id=103 class=source result=0 submit_ns=358132969274875 desired_ns=358133780434597 present_call_ns=33208 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=1077667 wait_elapsed_ns=1078833
+present id=104 class=synthetic result=0 submit_ns=358132977138958 desired_ns=358133797101263 present_call_ns=32750 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=1158667 wait_elapsed_ns=1159917
+present id=105 class=source result=0 submit_ns=358132986722458 desired_ns=358133813767929 present_call_ns=57250 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=1021792 wait_elapsed_ns=1023375
+present id=106 class=synthetic result=0 submit_ns=358132994546541 desired_ns=358133830434595 present_call_ns=56500 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=1017959 wait_elapsed_ns=1019375
+present id=107 class=source result=0 submit_ns=358133002109375 desired_ns=358133847101261 present_call_ns=33833 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=1060167 wait_elapsed_ns=1061083
+present id=108 class=synthetic result=0 submit_ns=358133011099083 desired_ns=358133863767927 present_call_ns=32542 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=1167875 wait_elapsed_ns=1168666
+present id=109 class=source result=0 submit_ns=358133018930833 desired_ns=358133880434593 present_call_ns=31833 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=1179209 wait_elapsed_ns=1180042
+present id=110 class=synthetic result=0 submit_ns=358133026786166 desired_ns=358133897101259 present_call_ns=29375 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=1166167 wait_elapsed_ns=1166959
+present id=111 class=source result=0 submit_ns=358133036225916 desired_ns=358133913767925 present_call_ns=22500 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=936625 wait_elapsed_ns=937459
+present id=112 class=synthetic result=0 submit_ns=358133043336458 desired_ns=358133930434591 present_call_ns=20833 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=1086334 wait_elapsed_ns=1086959
+present id=113 class=source result=0 submit_ns=358133052248166 desired_ns=358133947101257 present_call_ns=20000 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=1007917 wait_elapsed_ns=1008542
+present id=114 class=synthetic result=0 submit_ns=358133061279833 desired_ns=358133963767923 present_call_ns=26000 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=1013917 wait_elapsed_ns=1014458
+present id=115 class=source result=0 submit_ns=358133068758916 desired_ns=358133980434589 present_call_ns=17792 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=923083 wait_elapsed_ns=923583
+present id=116 class=synthetic result=0 submit_ns=358133077788333 desired_ns=358133997101255 present_call_ns=32583 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=1051250 wait_elapsed_ns=1052000
+present id=117 class=source result=0 submit_ns=358133085534916 desired_ns=358134013767921 present_call_ns=50334 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=1087416 wait_elapsed_ns=1087958
+present id=118 class=synthetic result=0 submit_ns=358133094800875 desired_ns=358134030434587 present_call_ns=27583 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=1020875 wait_elapsed_ns=1021583
+present id=119 class=source result=0 submit_ns=358133102469833 desired_ns=358134047101253 present_call_ns=25417 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=1060666 wait_elapsed_ns=1061250
+present id=120 class=synthetic result=0 submit_ns=358133110126833 desired_ns=358134063767919 present_call_ns=24208 submit_fence=0 present_fence=0 present_wait=0 fence_elapsed_ns=1040417 wait_elapsed_ns=1041250
+summary attempted=120 presented=120 timing_result=0 actual_count=60 refresh_ns=16666666 avg_present_fence_ns=1124608 avg_present_wait_ns=1127305
+actual id=61 desired_ns=358133080434625 actual_ns=358132558615083 earliest_ns=358132558615083 margin_ns=890083 delta_ns=-521819542
+actual id=62 desired_ns=358133097101291 actual_ns=358132567043458 earliest_ns=358132567043458 margin_ns=715917 delta_ns=-530057833
+actual id=63 desired_ns=358133113767957 actual_ns=358132575371791 earliest_ns=358132575371791 margin_ns=1031041 delta_ns=-538396166
+actual id=64 desired_ns=358133130434623 actual_ns=358132583626500 earliest_ns=358132583626500 margin_ns=755959 delta_ns=-546808123
+actual id=65 desired_ns=358133147101289 actual_ns=358132591584000 earliest_ns=358132591584000 margin_ns=870042 delta_ns=-555517289
+actual id=66 desired_ns=358133163767955 actual_ns=358132601094875 earliest_ns=358132601094875 margin_ns=667209 delta_ns=-562673080
+actual id=67 desired_ns=358133180434621 actual_ns=358132610258541 earliest_ns=358132610258541 margin_ns=1782500 delta_ns=-570176080
+actual id=68 desired_ns=358133197101287 actual_ns=358132627912666 earliest_ns=358132627912666 margin_ns=3581375 delta_ns=-569188621
+actual id=69 desired_ns=358133213767953 actual_ns=358132637252500 earliest_ns=358132637252500 margin_ns=5489667 delta_ns=-576515453
+actual id=70 desired_ns=358133230434619 actual_ns=358132639841875 earliest_ns=358132639841875 margin_ns=750709 delta_ns=-590592744
+actual id=71 desired_ns=358133247101285 actual_ns=358132648432875 earliest_ns=358132648432875 margin_ns=682709 delta_ns=-598668410
+actual id=72 desired_ns=358133263767951 actual_ns=358132657047666 earliest_ns=358132657047666 margin_ns=700000 delta_ns=-606720285
+actual id=73 desired_ns=358133280434617 actual_ns=358132665086458 earliest_ns=358132665086458 margin_ns=631167 delta_ns=-615348159
+actual id=74 desired_ns=358133297101283 actual_ns=358132673565583 earliest_ns=358132673565583 margin_ns=688750 delta_ns=-623535700
+actual id=75 desired_ns=358133313767949 actual_ns=358132682163625 earliest_ns=358132682163625 margin_ns=734167 delta_ns=-631604324
+actual id=76 desired_ns=358133330434615 actual_ns=358132751266375 earliest_ns=358132751266375 margin_ns=687625 delta_ns=-579168240
+actual id=77 desired_ns=358133347101281 actual_ns=358132752261916 earliest_ns=358132752261916 margin_ns=456791 delta_ns=-594839365
+actual id=78 desired_ns=358133363767947 actual_ns=358132760780916 earliest_ns=358132760780916 margin_ns=660833 delta_ns=-602987031
+actual id=79 desired_ns=358133380434613 actual_ns=358132769304000 earliest_ns=358132769304000 margin_ns=658959 delta_ns=-611130613
+actual id=80 desired_ns=358133397101279 actual_ns=358132777756916 earliest_ns=358132777756916 margin_ns=675250 delta_ns=-619344363
+actual id=81 desired_ns=358133413767945 actual_ns=358132786066875 earliest_ns=358132786066875 margin_ns=542209 delta_ns=-627701070
+actual id=82 desired_ns=358133430434611 actual_ns=358132794493791 earliest_ns=358132794493791 margin_ns=673041 delta_ns=-635940820
+actual id=83 desired_ns=358133447101277 actual_ns=358132802137083 earliest_ns=358132802137083 margin_ns=554000 delta_ns=-644964194
+actual id=84 desired_ns=358133463767943 actual_ns=358132812598791 earliest_ns=358132812598791 margin_ns=718375 delta_ns=-651169152
+actual id=85 desired_ns=358133480434609 actual_ns=358132820747625 earliest_ns=358132820747625 margin_ns=581042 delta_ns=-659686984
+actual id=86 desired_ns=358133497101275 actual_ns=358132829014916 earliest_ns=358132829014916 margin_ns=680666 delta_ns=-668086359
+actual id=87 desired_ns=358133513767941 actual_ns=358132837417041 earliest_ns=358132837417041 margin_ns=609291 delta_ns=-676350900
+actual id=88 desired_ns=358133530434607 actual_ns=358132845786583 earliest_ns=358132845786583 margin_ns=759750 delta_ns=-684648024
+actual id=89 desired_ns=358133547101273 actual_ns=358132854143666 earliest_ns=358132854143666 margin_ns=668166 delta_ns=-692957607
+actual id=90 desired_ns=358133563767939 actual_ns=358132862348875 earliest_ns=358132862348875 margin_ns=693250 delta_ns=-701419064
+actual id=91 desired_ns=358133580434605 actual_ns=358132870589541 earliest_ns=358132870589541 margin_ns=661166 delta_ns=-709845064
+actual id=92 desired_ns=358133597101271 actual_ns=358132878920916 earliest_ns=358132878920916 margin_ns=694875 delta_ns=-718180355
+actual id=93 desired_ns=358133613767937 actual_ns=358132887213541 earliest_ns=358132887213541 margin_ns=768541 delta_ns=-726554396
+actual id=94 desired_ns=358133630434603 actual_ns=358132895608541 earliest_ns=358132895608541 margin_ns=810791 delta_ns=-734826062
+actual id=95 desired_ns=358133647101269 actual_ns=358132903724500 earliest_ns=358132903724500 margin_ns=603375 delta_ns=-743376769
+actual id=96 desired_ns=358133663767935 actual_ns=358132911695583 earliest_ns=358132911695583 margin_ns=711667 delta_ns=-752072352
+actual id=97 desired_ns=358133680434601 actual_ns=358132920189083 earliest_ns=358132920189083 margin_ns=736417 delta_ns=-760245518
+actual id=98 desired_ns=358133697101267 actual_ns=358132928571916 earliest_ns=358132928571916 margin_ns=729375 delta_ns=-768529351
+actual id=99 desired_ns=358133713767933 actual_ns=358132936438791 earliest_ns=358132936438791 margin_ns=794083 delta_ns=-777329142
+actual id=100 desired_ns=358133730434599 actual_ns=358132946232250 earliest_ns=358132946232250 margin_ns=843084 delta_ns=-784202349
+actual id=101 desired_ns=358133747101265 actual_ns=358132954626458 earliest_ns=358132954626458 margin_ns=290625 delta_ns=-792474807
+actual id=102 desired_ns=358133763767931 actual_ns=358132963049958 earliest_ns=358132963049958 margin_ns=748000 delta_ns=-800717973
+actual id=103 desired_ns=358133780434597 actual_ns=358132970325875 earliest_ns=358132970325875 margin_ns=632709 delta_ns=-810108722
+actual id=104 desired_ns=358133797101263 actual_ns=358132978258375 earliest_ns=358132978258375 margin_ns=649000 delta_ns=-818842888
+actual id=105 desired_ns=358133813767929 actual_ns=358132987771416 earliest_ns=358132987771416 margin_ns=659333 delta_ns=-825996513
+actual id=106 desired_ns=358133830434595 actual_ns=358132995617458 earliest_ns=358132995617458 margin_ns=678625 delta_ns=-834817137
+actual id=107 desired_ns=358133847101261 actual_ns=358133003110750 earliest_ns=358133003110750 margin_ns=573667 delta_ns=-843990511
+actual id=108 desired_ns=358133863767927 actual_ns=358133012248625 earliest_ns=358133012248625 margin_ns=643625 delta_ns=-851519302
+actual id=109 desired_ns=358133880434593 actual_ns=358133020099083 earliest_ns=358133020099083 margin_ns=666792 delta_ns=-860335510
+actual id=110 desired_ns=358133897101259 actual_ns=358133028065625 earliest_ns=358133028065625 margin_ns=827542 delta_ns=-869035634
+actual id=111 desired_ns=358133913767925 actual_ns=358133037146000 earliest_ns=358133037146000 margin_ns=529000 delta_ns=-876621925
+actual id=112 desired_ns=358133930434591 actual_ns=358133044471958 earliest_ns=358133044471958 margin_ns=695208 delta_ns=-885962633
+actual id=113 desired_ns=358133947101257 actual_ns=358133053211291 earliest_ns=358133053211291 margin_ns=527291 delta_ns=-893889966
+actual id=114 desired_ns=358133963767923 actual_ns=358133062238208 earliest_ns=358133062238208 margin_ns=611750 delta_ns=-901529715
+actual id=115 desired_ns=358133980434589 actual_ns=358133069706625 earliest_ns=358133069706625 margin_ns=572000 delta_ns=-910727964
+actual id=116 desired_ns=358133997101255 actual_ns=358133078880875 earliest_ns=358133078880875 margin_ns=606250 delta_ns=-918220380
+actual id=117 desired_ns=358134013767921 actual_ns=358133086539791 earliest_ns=358133086539791 margin_ns=328208 delta_ns=-927228130
+actual id=118 desired_ns=358134030434587 actual_ns=358133095899875 earliest_ns=358133095899875 margin_ns=648334 delta_ns=-934534712
+actual id=119 desired_ns=358134047101253 actual_ns=358133103542541 earliest_ns=358133103542541 margin_ns=652666 delta_ns=-943558712
+actual id=120 desired_ns=358134063767919 actual_ns=358133111224541 earliest_ns=358133111224541 margin_ns=635291 delta_ns=-952543378
+elapsed_ns=1066385958

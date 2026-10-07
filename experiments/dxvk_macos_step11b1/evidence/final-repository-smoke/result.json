@@ -1,0 +1,24 @@
+{
+  "name": "final-repository-smoke",
+  "exit_status": 0,
+  "wall_seconds": 57.381857500004116,
+  "visual": "VISIBLE CHANGING COLOR THROUGH SHUTDOWN",
+  "environment": {
+    "WINEPREFIX": "/tmp/fgmetal-step11b1/prefix-final-repository-smoke",
+    "WINEDLLOVERRIDES": "d3d11,dxgi=n,b",
+    "WINEDEBUG": "+loaddll",
+    "DXVK_LOG_LEVEL": "info",
+    "DXVK_LOG_PATH": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11b1/evidence/final-repository-smoke",
+    "DXVK_HUD": "",
+    "DYLD_PRINT_LIBRARIES": "1",
+    "FG_AUDIT_ENABLE": "1",
+    "FG_AUDIT_RUN_SECONDS": "60",
+    "FG_AUDIT_SKIP_RESIZE": "1",
+    "FG_AB_BGRA": "0"
+  },
+  "hashes": {
+    "repo-smoke.exe": "a4414cf011f9102deb3d35eafddb81c1180fe940cd00b9f7f0fffcac70fda8d9",
+    "d3d11.dll": "b63c935e55a0854dc6857414fceaf7fde850da9f201e027b41a4cf97fed59352",
+    "dxgi.dll": "17cbe8e84906ce9657493b1301e712cfc8123413034666fd9387dfe1bbf5b33c"
+  }
+}

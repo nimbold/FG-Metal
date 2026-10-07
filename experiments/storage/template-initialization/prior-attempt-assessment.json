@@ -1,0 +1,19 @@
+{
+  "attempt_id": "20261006T203912Z-step11d3-template-initialize-7e5bd015",
+  "assessment_time_unix": 1791319837.8071418,
+  "disposition": "NOT_CERTIFIABLE_AS_GRAPHICS_FREE_TEMPLATE",
+  "wineboot_structure_failure": "The prior attempt pre-created an empty WINEPREFIX directory before invoking wineboot; required registry and prefix structure were not produced.",
+  "runtime_observation": "MoltenVK 1.4.3 loaded and enumerated Vulkan extensions, GPU device, and VkInstance during prefix bootstrap. No DXVK/D3D experiment, drawable acquisition, swapchain, presentation, rendering, or screen capture occurred.",
+  "wineboot_log_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/template-initialization/wineboot.log",
+  "wineboot_log_sha256": "f3eefd6c5e60ee8cc2bee0c06ba94dc353b170a8e968f23794adf9ae1f5fda40",
+  "relevant_log_lines": [
+    "[mvk-info] MoltenVK version 1.4.3, supporting Vulkan version 1.4.357.",
+    "[mvk-info] MoltenVK version 1.4.3, supporting Vulkan version 1.4.357.",
+    "[mvk-info] GPU device:",
+    "[mvk-info] GPU device:",
+    "[mvk-info] Created VkInstance for Vulkan version 1.0.357, as requested by app, with the following 3 Vulkan extensions enabled:",
+    "[mvk-info] Created VkInstance for Vulkan version 1.0.357, as requested by app, with the following 3 Vulkan extensions enabled:"
+  ],
+  "template_certified": false,
+  "retry_controls": "Let wineboot create the prefix path; disable winevulkan in WINEDLLOVERRIDES; reject certification if MoltenVK/VkInstance initialization appears in the log."
+}

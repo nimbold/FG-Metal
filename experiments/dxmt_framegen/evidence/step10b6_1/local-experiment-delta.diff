@@ -1,0 +1,183 @@
+--- frozen/src/d3d11/d3d11_swapchain.cpp
++++ local-experiment/src/d3d11/d3d11_swapchain.cpp
+@@ -1455,10 +1455,15 @@
+   bool framegenSourceSupported(WMT::Texture source, UINT sync_interval,
+                                UINT present_flags,
+                                const DXGI_PRESENT_PARAMETERS *parameters) {
++    // LOCAL DOWNSTREAM EXPERIMENT ONLY. Fullscreen remains disabled by default;
++    // the opt-in retains every existing D3D11/SDR/source/Present restriction.
+     if constexpr (EnableMetalFX)
+       return false;
+     if (sync_interval != 1 || present_flags != 0 || parameters != nullptr ||
+-        !fullscreen_desc_.Windowed || desc_.SampleDesc.Count != 1 ||
++        (!fullscreen_desc_.Windowed &&
++         (env::getEnvVar("DXMT_FRAMEGEN_EXPERIMENT_ALLOW_FULLSCREEN") != "1" ||
++          env::getEnvVar("DXMT_FRAMEGEN_EXPERIMENT_CONTROLLED_HARNESS") != "step10b6_1")) ||
++        desc_.SampleDesc.Count != 1 ||
+         colorspace_ != DXGI_COLOR_SPACE_RGB_FULL_G22_NONE_P709)
+       return false;
+     const auto format = source.pixelFormat();
+--- frozen/src/winemetal/unix/dxmt_framegen_bridge.mm
++++ local-experiment/src/winemetal/unix/dxmt_framegen_bridge.mm
+@@ -714,6 +714,11 @@
+   state->backend = std::move(*backend);
+   state->generator.emplace(std::move(*generator));
+   _native_state = state.release();
++  // LOCAL DOWNSTREAM EXPERIMENT ONLY: cold-entry sessions start a fresh epoch
++  // before either ordinary priming source is admitted. No scheduling change.
++  if (const char *experiment = std::getenv("DXMT_FRAMEGEN_EXPERIMENT_ALLOW_FULLSCREEN");
++      experiment != nullptr && std::strcmp(experiment, "1") == 0)
++    static_cast<NativeState *>(_native_state)->reset();
+   if (@available(macOS 14.0, *)) {
+     // NORMAL owns this layer through DXMT's Presenter. Do not even construct
+     // CAMetalDisplayLink until a primed escrow source reaches the activation
+@@ -2296,6 +2301,41 @@
+       state->draining.load(std::memory_order_acquire))
+     return STATUS_SUCCESS;
+   if (!state->layer_owned.load(std::memory_order_acquire)) {
++    // LOCAL DOWNSTREAM EXPERIMENT ONLY. Applied identically in both A/B modes.
++    // Count actual completed current-epoch escrow, never the lifetime sequence.
++    if (const char *experiment = std::getenv("DXMT_FRAMEGEN_EXPERIMENT_ALLOW_FULLSCREEN");
++        experiment != nullptr && std::strcmp(experiment, "1") == 0) {
++      std::scoped_lock lock(state->mutex);
++      bool primed = false;
++      uint64_t first = 0, second = 0;
++      for (size_t i = 1; i < state->history.size(); ++i) {
++        const auto &a = state->history[i - 1];
++        const auto &b = state->history[i];
++        auto ready = [&](const auto &record) {
++          return record->epoch == state->epoch.load(std::memory_order_acquire) &&
++              record->committed && !record->cancelled &&
++              record->snapshot_complete && !record->snapshot_failed &&
++              record->history_copy_complete && !record->history_copy_failed &&
++              record->history != nil;
++        };
++        if (ready(a) && ready(b) && a->source_id + 1 == b->source_id &&
++            a->history.device == b->history.device &&
++            a->history.width == b->history.width &&
++            a->history.height == b->history.height &&
++            a->history.pixelFormat == b->history.pixelFormat &&
++            a->history.sampleCount == 1 && b->history.sampleCount == 1) {
++          primed = true;
++          first = a->source_id;
++          second = b->source_id;
++          break;
++        }
++      }
++      if (!primed)
++        return STATUS_SUCCESS;
++      state->write("experiment_two_fresh_sources", second, 0, 0,
++                   first, second, 0, 0, 0, 0, 0, 0, 0, 0, 0,
++                   "two adjacent compatible committed GPU-complete current-epoch sources precede layer claim");
++    }
+     state->callbacks_stopped.store(false, std::memory_order_release);
+     state->enabled.store(true, std::memory_order_release);
+     if (![session resumeDelivery]) {
+--- frozen/src/winemetal/unix/winemetal_unix.c
++++ local-experiment/src/winemetal/unix/winemetal_unix.c
+@@ -1636,6 +1636,97 @@
+   return STATUS_SUCCESS;
+ }
+ 
++
++/* LOCAL DOWNSTREAM EXPERIMENT ONLY. Public, read-only diagnostics on the actual
++ * WineMetal layer. Snapshots run on AppKit's main thread outside measurement
++ * callback work. No property is mutated. */
++static void
++framegen_log_layer_snapshot(CAMetalLayer *layer, const char *phase) {
++  const char *path = getenv("DXMT_FRAMEGEN_LAYER_LOG");
++  if (!path || !*path) return;
++  NSView *view = [layer.delegate isKindOfClass:NSView.class] ? (NSView *)layer.delegate : nil;
++  NSWindow *window = view.window;
++  NSScreen *screen = window.screen;
++  CFStringRef color_name = layer.colorspace ? CGColorSpaceCopyName(layer.colorspace) : NULL;
++  CFStringRef color_description = layer.colorspace ? CFCopyDescription(layer.colorspace) : NULL;
++  NSMutableDictionary *values = [NSMutableDictionary dictionaryWithDictionary:@{
++    @"phase": [NSString stringWithUTF8String:phase],
++    @"ca_time": @(CACurrentMediaTime()),
++    @"layer_identity": [NSString stringWithFormat:@"%p", layer],
++    @"device_identity": [NSString stringWithFormat:@"%p", layer.device],
++    @"device_name": layer.device.name ?: @"nil",
++    @"device_registry_id": @(layer.device.registryID),
++    @"pixel_format": @(layer.pixelFormat),
++    @"drawable_width": @(layer.drawableSize.width),
++    @"drawable_height": @(layer.drawableSize.height),
++    @"contents_scale": @(layer.contentsScale),
++    @"layer_frame": NSStringFromRect(layer.frame),
++    @"layer_bounds": NSStringFromRect(layer.bounds),
++    @"opaque": @(layer.opaque),
++    @"framebuffer_only": @(layer.framebufferOnly),
++    @"display_sync_enabled": @(layer.displaySyncEnabled),
++    @"maximum_drawable_count": @(layer.maximumDrawableCount),
++    @"allows_next_drawable_timeout": @(layer.allowsNextDrawableTimeout),
++    @"presents_with_transaction": @(layer.presentsWithTransaction),
++    @"colorspace_name": color_name ? (NSString *)color_name : @"nil",
++    @"colorspace_description": color_description ? (NSString *)color_description : @"nil",
++    @"wants_edr": @(layer.wantsExtendedDynamicRangeContent),
++    @"view_class": view ? NSStringFromClass(view.class) : @"nil",
++    @"view_frame": NSStringFromRect(view.frame),
++    @"view_bounds": NSStringFromRect(view.bounds),
++    @"view_opaque": @(view.opaque),
++    @"superview_class": view.superview ? NSStringFromClass(view.superview.class) : @"nil",
++    @"parent_layer_opaque": @(view.superview.layer.opaque),
++    @"window_identity": [NSString stringWithFormat:@"%p", window],
++    @"window_class": window ? NSStringFromClass(window.class) : @"nil",
++    @"window_style_mask": @(window.styleMask),
++    @"window_frame": NSStringFromRect(window.frame),
++    @"content_rect": NSStringFromRect([window contentRectForFrameRect:window.frame]),
++    @"content_view_bounds": NSStringFromRect(window.contentView.bounds),
++    @"window_backing_scale": @(window.backingScaleFactor),
++    @"window_backing_type": @(window.backingType),
++    @"window_opaque": @(window.opaque),
++    @"window_background": window.backgroundColor.description ?: @"nil",
++    @"window_visible": @(window.visible),
++    @"window_miniaturized": @(window.miniaturized),
++    @"window_key": @(window.keyWindow),
++    @"window_occlusion_state": @(window.occlusionState),
++    @"screen_name": screen.localizedName ?: @"nil",
++    @"screen_frame": NSStringFromRect(screen.frame),
++    @"display_id": [screen.deviceDescription objectForKey:@"NSScreenNumber"] ?: @0,
++    @"screen_max_edr": @(screen.maximumExtendedDynamicRangeColorComponentValue),
++    @"screen_potential_edr": @(screen.maximumPotentialExtendedDynamicRangeColorComponentValue)
++  }];
++  NSError *error = nil;
++  NSData *data = [NSJSONSerialization dataWithJSONObject:values options:NSJSONWritingSortedKeys error:&error];
++  FILE *log = fopen(path, "a");
++  if (log && data) { fwrite(data.bytes, 1, data.length, log); fputc('\n', log); }
++  if (log) fclose(log);
++  if (color_name) CFRelease(color_name);
++  if (color_description) CFRelease(color_description);
++}
++
++static void
++framegen_schedule_layer_snapshots(CAMetalLayer *layer) {
++  const char *path = getenv("DXMT_FRAMEGEN_LAYER_LOG");
++  if (!path || !*path) return;
++  static NSMutableSet *scheduled_layers;
++  if (!scheduled_layers) scheduled_layers = [[NSMutableSet alloc] init];
++  NSValue *key = [NSValue valueWithPointer:layer];
++  if ([scheduled_layers containsObject:key]) return;
++  [scheduled_layers addObject:key];
++  framegen_log_layer_snapshot(layer, "first_set_props");
++  dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 6 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
++    framegen_log_layer_snapshot(layer, "settled_6s");
++  });
++  dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 15 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
++    framegen_log_layer_snapshot(layer, "measurement_15s");
++  });
++  dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 25 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
++    framegen_log_layer_snapshot(layer, "measurement_25s");
++  });
++}
++
+ static NTSTATUS
+ _MetalLayer_setProps(void *obj) {
+   struct unixcall_generic_obj_constptr_noret *params = obj;
+@@ -1649,6 +1740,7 @@
+     layer.displaySyncEnabled = props->display_sync_enabled;
+     layer.drawableSize = CGSizeMake(props->drawable_width, props->drawable_height);
+     layer.pixelFormat = to_metal_pixel_format(props->pixel_format);
++    framegen_schedule_layer_snapshots(layer);
+   });
+   return STATUS_SUCCESS;
+ }

@@ -1,0 +1,10 @@
+engine=/private/tmp/step10b6_1-matched-fullscreen-final/engine
+prefix=/private/tmp/step10b6_1-matched-fullscreen-final/prefix
+app=/Users/nima/Documents/Code/FG-Metal/experiments/dxmt_framegen/evidence/step10b6_1/matched-fullscreen-final/d3d11_clear_window.exe
+app_sha256=b682fd40608816be004f9ea2476d2147a8e1e244a392dc709966e1e200450d74
+seconds=50
+generation=1
+static_texture=0
+lifecycle_test=0
+skip_resize_test=1
+failure_injection=none

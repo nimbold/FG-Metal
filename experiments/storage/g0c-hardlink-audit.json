@@ -1,0 +1,148 @@
+{
+  "copy_required_bytes_if_legacy_CAS_copy_gate_enforced": 587539545,
+  "inventory_sha256": "828d5c64078d3302bd8e4e780d768d62c2bb04416ea4a89130437b772790ddb3",
+  "mutations_performed": false,
+  "objects": [
+    {
+      "alias_closure_proven_by_link_count": true,
+      "all_live_hardlinks": [
+        "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/531c71f02bc85b19b9788b7b5525a904779e4b0371cd47a5690ac676d97daded/d3d11.dll",
+        "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/source-built-11c-control-30s/flipseq-internal/d3d11.dll"
+      ],
+      "canonical_manifest_sha256": "f1bd5dd405fcb41d43ebf990def9546b16595747b44c057e1e1fe9e497ada883",
+      "canonical_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/531c71f02bc85b19b9788b7b5525a904779e4b0371cd47a5690ac676d97daded/d3d11.dll",
+      "copy_required_bytes_if_CAS_inode_must_be_isolated": 372359594,
+      "disposition": "retain both paths; replace only evidence alias with absolute CAS symlink after explicit review",
+      "evidence_identity_matches_canonical": true,
+      "evidence_link_count": 2,
+      "evidence_path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/source-built-11c-control-30s/flipseq-internal/d3d11.dll",
+      "filename": "d3d11.dll",
+      "hash_verified": true,
+      "manifest_original_paths": [
+        "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/source-built-11c-control-30s/flipseq-internal/d3d11.dll",
+        "/Users/nima/Library/Caches/FGMetalStep11C1R/build-d1-repro/src/d3d11/d3d11.dll"
+      ],
+      "manifest_schema_version": 1,
+      "metadata_verified_from_signed_plan": true,
+      "path_identity": {
+        "allocated_bytes": 372363264,
+        "device": 16777230,
+        "flags": 0,
+        "gid": 20,
+        "inode": 92216249,
+        "link_count": 2,
+        "mode": 33261,
+        "mtime_ns": 1791227961538805835,
+        "size_bytes": 372359594,
+        "uid": 501,
+        "xattrs": [
+          {
+            "name": "com.apple.provenance",
+            "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+          }
+        ]
+      },
+      "post_cleanup_canonical_identity": {
+        "identity": {
+          "device": 16777230,
+          "flags": 0,
+          "gid": 20,
+          "inode": 92216249,
+          "mode": 33261,
+          "mtime_ns": 1791227961538805835,
+          "size": 372359594,
+          "uid": 501,
+          "xattrs": [
+            {
+              "name": "com.apple.provenance",
+              "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+            }
+          ]
+        },
+        "link_count": 1,
+        "manifest_sha256": "f1bd5dd405fcb41d43ebf990def9546b16595747b44c057e1e1fe9e497ada883",
+        "original_paths": [
+          "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/source-built-11c-control-30s/flipseq-internal/d3d11.dll",
+          "/Users/nima/Library/Caches/FGMetalStep11C1R/build-d1-repro/src/d3d11/d3d11.dll"
+        ]
+      },
+      "post_cleanup_evidence_reference": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/531c71f02bc85b19b9788b7b5525a904779e4b0371cd47a5690ac676d97daded/d3d11.dll",
+      "rehash_sha256": "531c71f02bc85b19b9788b7b5525a904779e4b0371cd47a5690ac676d97daded",
+      "sha256": "531c71f02bc85b19b9788b7b5525a904779e4b0371cd47a5690ac676d97daded"
+    },
+    {
+      "alias_closure_proven_by_link_count": true,
+      "all_live_hardlinks": [
+        "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/69f248484ab1fc9f6156e9a2a3b4ff9659a3484c65027e091a7b439eb382344f/dxgi.dll",
+        "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/source-built-11c-control-30s/flipseq-internal/dxgi.dll"
+      ],
+      "canonical_manifest_sha256": "f8a0d604e51fc471b82d1be6867421c50e3babe14bf43c2bb64064f2b44c6ef8",
+      "canonical_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/69f248484ab1fc9f6156e9a2a3b4ff9659a3484c65027e091a7b439eb382344f/dxgi.dll",
+      "copy_required_bytes_if_CAS_inode_must_be_isolated": 215179951,
+      "disposition": "retain both paths; replace only evidence alias with absolute CAS symlink after explicit review",
+      "evidence_identity_matches_canonical": true,
+      "evidence_link_count": 2,
+      "evidence_path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/source-built-11c-control-30s/flipseq-internal/dxgi.dll",
+      "filename": "dxgi.dll",
+      "hash_verified": true,
+      "manifest_original_paths": [
+        "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/source-built-11c-control-30s/flipseq-internal/dxgi.dll",
+        "/Users/nima/Library/Caches/FGMetalStep11C1R/build-d1-repro/src/dxgi/dxgi.dll"
+      ],
+      "manifest_schema_version": 1,
+      "metadata_verified_from_signed_plan": true,
+      "path_identity": {
+        "allocated_bytes": 215183360,
+        "device": 16777230,
+        "flags": 0,
+        "gid": 20,
+        "inode": 92216250,
+        "link_count": 2,
+        "mode": 33261,
+        "mtime_ns": 1791227959789642203,
+        "size_bytes": 215179951,
+        "uid": 501,
+        "xattrs": [
+          {
+            "name": "com.apple.provenance",
+            "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+          }
+        ]
+      },
+      "post_cleanup_canonical_identity": {
+        "identity": {
+          "device": 16777230,
+          "flags": 0,
+          "gid": 20,
+          "inode": 92216250,
+          "mode": 33261,
+          "mtime_ns": 1791227959789642203,
+          "size": 215179951,
+          "uid": 501,
+          "xattrs": [
+            {
+              "name": "com.apple.provenance",
+              "sha256": "b0675af133fe0ce413029823cea5b501971eef1a9da31f9d3233e53fbbbc4f42"
+            }
+          ]
+        },
+        "link_count": 1,
+        "manifest_sha256": "f8a0d604e51fc471b82d1be6867421c50e3babe14bf43c2bb64064f2b44c6ef8",
+        "original_paths": [
+          "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/source-built-11c-control-30s/flipseq-internal/dxgi.dll",
+          "/Users/nima/Library/Caches/FGMetalStep11C1R/build-d1-repro/src/dxgi/dxgi.dll"
+        ]
+      },
+      "post_cleanup_evidence_reference": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/69f248484ab1fc9f6156e9a2a3b4ff9659a3484c65027e091a7b439eb382344f/dxgi.dll",
+      "rehash_sha256": "69f248484ab1fc9f6156e9a2a3b4ff9659a3484c65027e091a7b439eb382344f",
+      "sha256": "69f248484ab1fc9f6156e9a2a3b4ff9659a3484c65027e091a7b439eb382344f"
+    }
+  ],
+  "post_cleanup_receipt_sha256": "91a2e959bee1565eb560e23d09c5b8db4ecace1610feb465c48524ac4cf9cae6",
+  "reason_copy_was_demanded": "Legacy Gate 0 runner requires each CAS canonical payload to have link_count 1. The retained evidence pathname is currently a hardlink to that canonical inode (nlink 2), so prior isolation logic demanded a second full payload copy. Replacing that evidence directory entry with an absolute symlink preserves its path and resolves to the same verified bytes while leaving the CAS canonical as the sole hardlink.",
+  "safe_alias_action": "After reviewing the signed plan and revalidating the path, digest, complete alias closure, and CAS manifest, atomically exchange the evidence entry for an absolute symlink to the canonical CAS path; retain the CAS regular file and all evidence directories/manifests.",
+  "schema_version": 1,
+  "scope": "Read-only hardlink identity audit for Gate 0 request A/B",
+  "xattr_verification_method": "descriptor-bound Darwin flistxattr/fgetxattr in signed schema-2 plan",
+  "zero_copy_consolidation_result": "PASS"
+}

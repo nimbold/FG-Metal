@@ -1,0 +1,19 @@
+[
+  "/Users/nima/Library/Caches/FGMetalStep11C1R/DXVK-MacOS/meson.build",
+  "/Users/nima/Library/Caches/FGMetalStep11C1R/DXVK-MacOS/meson_options.txt",
+  "/Users/nima/Library/Caches/FGMetalStep11C1R/DXVK-MacOS/subprojects/libdisplay-info/meson.build",
+  "/Users/nima/Library/Caches/FGMetalStep11C1R/DXVK-MacOS/subprojects/dxbc-spirv/meson.build",
+  "/Users/nima/Library/Caches/FGMetalStep11C1R/DXVK-MacOS/subprojects/dxbc-spirv/meson_options.txt",
+  "/Users/nima/Library/Caches/FGMetalStep11C1R/DXVK-MacOS/buildenv.h.in",
+  "/Users/nima/Library/Caches/FGMetalStep11C1R/DXVK-MacOS/src/meson.build",
+  "/Users/nima/Library/Caches/FGMetalStep11C1R/DXVK-MacOS/src/wsi/meson.build",
+  "/Users/nima/Library/Caches/FGMetalStep11C1R/DXVK-MacOS/src/util/meson.build",
+  "/Users/nima/Library/Caches/FGMetalStep11C1R/DXVK-MacOS/src/spirv/meson.build",
+  "/Users/nima/Library/Caches/FGMetalStep11C1R/DXVK-MacOS/src/vulkan/meson.build",
+  "/Users/nima/Library/Caches/FGMetalStep11C1R/DXVK-MacOS/src/dxvk/meson.build",
+  "/Users/nima/Library/Caches/FGMetalStep11C1R/DXVK-MacOS/src/dxgi/meson.build",
+  "/Users/nima/Library/Caches/FGMetalStep11C1R/DXVK-MacOS/src/d3d11/meson.build",
+  "/Users/nima/Library/Caches/FGMetalStep11C1R/DXVK-MacOS/src/d3d10/meson.build",
+  "/Users/nima/Library/Caches/FGMetalStep11C1R/DXVK-MacOS/src/d3d9/meson.build",
+  "/Users/nima/Library/Caches/FGMetalStep11C1R/DXVK-MacOS/src/d3d8/meson.build"
+]

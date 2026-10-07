@@ -1,0 +1,33 @@
+instance_extensions=18
+instance_ext VK_KHR_surface specVersion=25
+instance_ext VK_EXT_metal_surface specVersion=1
+instance_ext VK_KHR_portability_enumeration specVersion=0
+instance_ext VK_EXT_metal_objects specVersion=0
+device=Apple M3 vendor=0x106b deviceId=0x1b000209 api=1.3.357 driverId=14 driver=MoltenVK driverInfo=1.4.3
+device_ext VK_KHR_swapchain specVersion=70
+device_ext VK_KHR_present_id specVersion=1
+device_ext VK_KHR_present_wait specVersion=1
+device_ext VK_KHR_present_wait2 specVersion=1
+device_ext VK_KHR_present_id2 specVersion=1
+device_ext VK_EXT_swapchain_maintenance1 specVersion=1
+device_ext VK_KHR_swapchain_maintenance1 specVersion=1
+device_ext VK_GOOGLE_display_timing specVersion=1
+device_ext VK_EXT_metal_objects specVersion=2
+device_ext VK_KHR_portability_subset specVersion=1
+device_ext VK_EXT_present_timing specVersion=0
+queue_family=0 flags=0xf count=1 present=yes result=0
+features presentId=1 presentWait=1 presentWait2=1 swapchainMaintenance1=1 timelineSemaphore=1
+surface imageCount min=2 max=3 extent=640x360 minExtent=1x1 maxExtent=16384x16384 usage=0x1f transforms=0x1 compositeAlpha=0xd
+present_modes=2 FIFO(2) IMMEDIATE(0)
+surface_formats=60 format=44 colorspace=0 format=50 colorspace=0 format=97 colorspace=0 format=64 colorspace=0 format=58 colorspace=0 format=44 colorspace=1000104001 format=50 colorspace=1000104001 format=97 colorspace=1000104001 format=64 colorspace=1000104001 format=58 colorspace=1000104001 format=44 colorspace=1000104004 format=50 colorspace=1000104004 format=97 colorspace=1000104004 format=64 colorspace=1000104004 format=58 colorspace=1000104004 format=44 colorspace=1000104006 format=50 colorspace=1000104006 format=97 colorspace=1000104006 format=64 colorspace=1000104006 format=58 colorspace=1000104006 format=44 colorspace=1000104012 format=50 colorspace=1000104012 format=97 colorspace=1000104012 format=64 colorspace=1000104012 format=58 colorspace=1000104012 format=44 colorspace=1000104013 format=50 colorspace=1000104013 format=97 colorspace=1000104013 format=64 colorspace=1000104013 format=58 colorspace=1000104013 format=44 colorspace=1000104002 format=50 colorspace=1000104002 format=97 colorspace=1000104002 format=64 colorspace=1000104002 format=58 colorspace=1000104002 format=44 colorspace=1000104014 format=50 colorspace=1000104014 format=97 colorspace=1000104014 format=64 colorspace=1000104014 format=58 colorspace=1000104014 format=44 colorspace=1000104007 format=50 colorspace=1000104007 format=97 colorspace=1000104007 format=64 colorspace=1000104007 format=58 colorspace=1000104007 format=44 colorspace=1000104010 format=50 colorspace=1000104010 format=97 colorspace=1000104010 format=64 colorspace=1000104010 format=58 colorspace=1000104010 format=44 colorspace=1000104008 format=50 colorspace=1000104008 format=97 colorspace=1000104008 format=64 colorspace=1000104008 format=58 colorspace=1000104008 format=44 colorspace=1000104003 format=50 colorspace=1000104003 format=97 colorspace=1000104003 format=64 colorspace=1000104003 format=58 colorspace=1000104003
+swapchain mode=FIFO requested=3 actual_images=3 extent=640x360 format=44
+metal_device=Apple M3 same_default=yes metal_queue=present queue_device_match=yes
+exportable_image_create=0 format=VK_FORMAT_B8G8R8A8_UNORM extent=256x144
+image_memory_allocate=0 allocation_size=198656 memory_type=0
+texture_export=present device_match=yes size=256x144 pixelFormat=80 sampleCount=1 type=2 identity_stable=yes
+exportable_timeline_semaphore_create=0
+shared_event_export=present initial=0
+metal_to_vulkan_signal result=0 value=7 event_value=7
+vulkan_to_metal_signal result=0 event_value=9
+import_shared_event_semaphore_create=0
+metal_to_imported_vulkan_wait result=0 value=11 event_value=11

@@ -1,0 +1,64 @@
+info:  STEP11B1 PRESENT_SOURCE frame=17 image=0x7ff2da156670 image_object=0x8c85c0 storage=0x9c1600 view=0x7ff2e94e5840 format=VK_FORMAT_R8G8B8A8_UNORM layout=VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+info:  STEP11B1 EXTERNAL_BEGIN frame=1 pending_clears=1
+info:  STEP11B1 PENDING_CLEAR image=0x7ff2da156670 image_object=0x8c85c0 storage=0x9c1600 view=0x7ff2e94e56e0 format=VK_FORMAT_R8G8B8A8_UNORM declared_layout=VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL color=1,0,0,1
+info:  STEP11B1 EXTERNAL_READY frame=1 pending_clears=1
+info:  STEP11B1 PRESENT_SOURCE frame=18 image=0x7ff2da156670 image_object=0x8c85c0 storage=0x9c1600 view=0x7ff2e94e5840 format=VK_FORMAT_R8G8B8A8_UNORM layout=VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+info:  STEP11B1 EXTERNAL_BEGIN frame=2 pending_clears=1
+info:  STEP11B1 PENDING_CLEAR image=0x7ff2da156670 image_object=0x8c85c0 storage=0x9c1600 view=0x7ff2e94e56e0 format=VK_FORMAT_R8G8B8A8_UNORM declared_layout=VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL color=1,0,0,1
+info:  STEP11B1 EXTERNAL_READY frame=2 pending_clears=1
+info:  STEP11B1 PRESENT_SOURCE frame=19 image=0x7ff2da156670 image_object=0x8c85c0 storage=0x9c1600 view=0x7ff2e94e5840 format=VK_FORMAT_R8G8B8A8_UNORM layout=VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+info:  STEP11B1 EXTERNAL_BEGIN frame=3 pending_clears=1
+info:  STEP11B1 PENDING_CLEAR image=0x7ff2da156670 image_object=0x8c85c0 storage=0x9c1600 view=0x7ff2e94e56e0 format=VK_FORMAT_R8G8B8A8_UNORM declared_layout=VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL color=1,0,0,1
+info:  STEP11B1 EXTERNAL_READY frame=3 pending_clears=1
+info:  STEP11B1 PRESENT_SOURCE frame=20 image=0x7ff2da156670 image_object=0x8c85c0 storage=0x9c1600 view=0x7ff2e94e5840 format=VK_FORMAT_R8G8B8A8_UNORM layout=VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+info:  STEP11B1 EXTERNAL_BEGIN frame=4 pending_clears=1
+info:  STEP11B1 PENDING_CLEAR image=0x7ff2da156670 image_object=0x8c85c0 storage=0x9c1600 view=0x7ff2e94e56e0 format=VK_FORMAT_R8G8B8A8_UNORM declared_layout=VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL color=1,0,0,1
+info:  STEP11B1 EXTERNAL_READY frame=4 pending_clears=1
+info:  STEP11B1 PRESENT_SOURCE frame=21 image=0x7ff2da156670 image_object=0x8c85c0 storage=0x9c1600 view=0x7ff2e94e5840 format=VK_FORMAT_R8G8B8A8_UNORM layout=VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+info:  STEP11B1 EXTERNAL_BEGIN frame=5 pending_clears=1
+info:  STEP11B1 PENDING_CLEAR image=0x7ff2da156670 image_object=0x8c85c0 storage=0x9c1600 view=0x7ff2e94e56e0 format=VK_FORMAT_R8G8B8A8_UNORM declared_layout=VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL color=1,0,0,1
+info:  STEP11B1 EXTERNAL_READY frame=5 pending_clears=1
+info:  STEP11B1 PRESENT_SOURCE frame=22 image=0x7ff2da156670 image_object=0x8c85c0 storage=0x9c1600 view=0x7ff2e94e5840 format=VK_FORMAT_R8G8B8A8_UNORM layout=VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+info:  STEP11B1 EXTERNAL_BEGIN frame=6 pending_clears=1
+info:  STEP11B1 PENDING_CLEAR image=0x7ff2da156670 image_object=0x8c85c0 storage=0x9c1600 view=0x7ff2e94e56e0 format=VK_FORMAT_R8G8B8A8_UNORM declared_layout=VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL color=1,0,0,1
+info:  STEP11B1 EXTERNAL_READY frame=6 pending_clears=1
+info:  STEP11B1 PRESENT_SOURCE frame=23 image=0x7ff2da156670 image_object=0x8c85c0 storage=0x9c1600 view=0x7ff2e94e5840 format=VK_FORMAT_R8G8B8A8_UNORM layout=VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+info:  STEP11B1 EXTERNAL_BEGIN frame=7 pending_clears=1
+info:  STEP11B1 PENDING_CLEAR image=0x7ff2da156670 image_object=0x8c85c0 storage=0x9c1600 view=0x7ff2e94e56e0 format=VK_FORMAT_R8G8B8A8_UNORM declared_layout=VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL color=1,0,0,1
+info:  STEP11B1 EXTERNAL_READY frame=7 pending_clears=1
+info:  STEP11B1 PRESENT_SOURCE frame=24 image=0x7ff2da156670 image_object=0x8c85c0 storage=0x9c1600 view=0x7ff2e94e5840 format=VK_FORMAT_R8G8B8A8_UNORM layout=VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+info:  STEP11B1 EXTERNAL_BEGIN frame=8 pending_clears=1
+info:  STEP11B1 PENDING_CLEAR image=0x7ff2da156670 image_object=0x8c85c0 storage=0x9c1600 view=0x7ff2e94e56e0 format=VK_FORMAT_R8G8B8A8_UNORM declared_layout=VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL color=1,0,0,1
+info:  STEP11B1 EXTERNAL_READY frame=8 pending_clears=1
+info:  STEP11B1 PRESENT_SOURCE frame=25 image=0x7ff2da156670 image_object=0x8c85c0 storage=0x9c1600 view=0x7ff2e94e5840 format=VK_FORMAT_R8G8B8A8_UNORM layout=VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+info:  STEP11B1 EXTERNAL_BEGIN frame=9 pending_clears=1
+info:  STEP11B1 PENDING_CLEAR image=0x7ff2da156670 image_object=0x8c85c0 storage=0x9c1600 view=0x7ff2e94e56e0 format=VK_FORMAT_R8G8B8A8_UNORM declared_layout=VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL color=1,0,0,1
+info:  STEP11B1 EXTERNAL_READY frame=9 pending_clears=1
+info:  STEP11B1 PRESENT_SOURCE frame=26 image=0x7ff2da156670 image_object=0x8c85c0 storage=0x9c1600 view=0x7ff2e94e5840 format=VK_FORMAT_R8G8B8A8_UNORM layout=VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+info:  STEP11B1 EXTERNAL_BEGIN frame=10 pending_clears=1
+info:  STEP11B1 PENDING_CLEAR image=0x7ff2da156670 image_object=0x8c85c0 storage=0x9c1600 view=0x7ff2e94e56e0 format=VK_FORMAT_R8G8B8A8_UNORM declared_layout=VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL color=1,0,0,1
+info:  STEP11B1 EXTERNAL_READY frame=10 pending_clears=1
+info:  STEP11B1 PRESENT_SOURCE frame=27 image=0x7ff2da156670 image_object=0x8c85c0 storage=0x9c1600 view=0x7ff2e94e5840 format=VK_FORMAT_R8G8B8A8_UNORM layout=VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+info:  STEP11B1 EXTERNAL_BEGIN frame=11 pending_clears=1
+info:  STEP11B1 PENDING_CLEAR image=0x7ff2da156670 image_object=0x8c85c0 storage=0x9c1600 view=0x7ff2e94e56e0 format=VK_FORMAT_R8G8B8A8_UNORM declared_layout=VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL color=1,0,0,1
+info:  STEP11B1 EXTERNAL_READY frame=11 pending_clears=1
+info:  STEP11B1 PRESENT_SOURCE frame=28 image=0x7ff2da156670 image_object=0x8c85c0 storage=0x9c1600 view=0x7ff2e94e5840 format=VK_FORMAT_R8G8B8A8_UNORM layout=VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+info:  STEP11B1 EXTERNAL_BEGIN frame=12 pending_clears=1
+info:  STEP11B1 PENDING_CLEAR image=0x7ff2da156670 image_object=0x8c85c0 storage=0x9c1600 view=0x7ff2e94e56e0 format=VK_FORMAT_R8G8B8A8_UNORM declared_layout=VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL color=1,0,0,1
+info:  STEP11B1 EXTERNAL_READY frame=12 pending_clears=1
+info:  STEP11B1 PRESENT_SOURCE frame=29 image=0x7ff2da156670 image_object=0x8c85c0 storage=0x9c1600 view=0x7ff2e94e5840 format=VK_FORMAT_R8G8B8A8_UNORM layout=VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+info:  STEP11B1 EXTERNAL_BEGIN frame=13 pending_clears=1
+info:  STEP11B1 PENDING_CLEAR image=0x7ff2da156670 image_object=0x8c85c0 storage=0x9c1600 view=0x7ff2e94e56e0 format=VK_FORMAT_R8G8B8A8_UNORM declared_layout=VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL color=1,0,0,1
+info:  STEP11B1 EXTERNAL_READY frame=13 pending_clears=1
+info:  STEP11B1 PRESENT_SOURCE frame=30 image=0x7ff2da156670 image_object=0x8c85c0 storage=0x9c1600 view=0x7ff2e94e5840 format=VK_FORMAT_R8G8B8A8_UNORM layout=VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+info:  STEP11B1 EXTERNAL_BEGIN frame=14 pending_clears=1
+info:  STEP11B1 PENDING_CLEAR image=0x7ff2da156670 image_object=0x8c85c0 storage=0x9c1600 view=0x7ff2e94e56e0 format=VK_FORMAT_R8G8B8A8_UNORM declared_layout=VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL color=1,0,0,1
+info:  STEP11B1 EXTERNAL_READY frame=14 pending_clears=1
+info:  STEP11B1 PRESENT_SOURCE frame=31 image=0x7ff2da156670 image_object=0x8c85c0 storage=0x9c1600 view=0x7ff2e94e5840 format=VK_FORMAT_R8G8B8A8_UNORM layout=VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+info:  STEP11B1 EXTERNAL_BEGIN frame=15 pending_clears=1
+info:  STEP11B1 PENDING_CLEAR image=0x7ff2da156670 image_object=0x8c85c0 storage=0x9c1600 view=0x7ff2e94e56e0 format=VK_FORMAT_R8G8B8A8_UNORM declared_layout=VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL color=1,0,0,1
+info:  STEP11B1 EXTERNAL_READY frame=15 pending_clears=1
+info:  STEP11B1 PRESENT_SOURCE frame=32 image=0x7ff2da156670 image_object=0x8c85c0 storage=0x9c1600 view=0x7ff2e94e5840 format=VK_FORMAT_R8G8B8A8_UNORM layout=VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+info:  STEP11B1 EXTERNAL_BEGIN frame=16 pending_clears=1
+info:  STEP11B1 PENDING_CLEAR image=0x7ff2da156670 image_object=0x8c85c0 storage=0x9c1600 view=0x7ff2e94e56e0 format=VK_FORMAT_R8G8B8A8_UNORM declared_layout=VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL color=1,0,0,1
+info:  STEP11B1 EXTERNAL_READY frame=16 pending_clears=1

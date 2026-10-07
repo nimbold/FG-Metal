@@ -1,0 +1,15 @@
+ninja: Entering directory `/Users/nima/Library/Caches/FGMetalStep11C1R/build-d1'
+[1/17] Generating version.h with a custom command
+[2/13] Compiling C++ object src/d3d9/d3d9.dll.p/d3d9_names.cpp.obj
+[3/13] Compiling C++ object src/d3d9/d3d9.dll.p/d3d9_format_helpers.cpp.obj
+[4/13] Compiling C++ object src/d3d9/d3d9.dll.p/d3d9_shader.cpp.obj
+FAILED: [code=1] src/d3d9/d3d9.dll.p/d3d9_shader.cpp.obj 
+x86_64-w64-mingw32-g++ -Isrc/d3d9/d3d9.dll.p -Isrc/d3d9 -I../DXVK-MacOS/src/d3d9 -I../DXVK-MacOS/include -I../DXVK-MacOS/include/vulkan/include -I../DXVK-MacOS/include/spirv/include -Isubprojects/dxbc-spirv -I../DXVK-MacOS/subprojects/dxbc-spirv -fdiagnostics-color=always -D_GLIBCXX_ASSERTIONS=1 -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -std=c++17 -O0 -g -msse -msse2 -msse3 -mfpmath=sse -Wimplicit-fallthrough -Wno-missing-field-initializers -Wno-unused-parameter -Wno-misleading-indentation -Wno-cast-function-type -Wno-unused-const-variable -Wno-missing-braces -DNOMINMAX -D_WIN32_WINNT=0xa00 -gdwarf-4 -DDXVK_WSI_WIN32 -MD -MQ src/d3d9/d3d9.dll.p/d3d9_shader.cpp.obj -MF src/d3d9/d3d9.dll.p/d3d9_shader.cpp.obj.d -o src/d3d9/d3d9.dll.p/d3d9_shader.cpp.obj -c ../DXVK-MacOS/src/d3d9/d3d9_shader.cpp
+../DXVK-MacOS/src/d3d9/d3d9_shader.cpp: In member function 'virtual void dxvk::D3D9ShaderConverter::convertShader(dxbc_spv::ir::Builder&)':
+../DXVK-MacOS/src/d3d9/d3d9_shader.cpp:1121:15: error: 'struct dxbc_spv::sm3::Converter::Options' has no member named 'deAliasedSamplers'
+ 1121 |       options.deAliasedSamplers = m_options.deAliasedSamplers;
+      |               ^~~~~~~~~~~~~~~~~
+[5/13] Compiling C++ object src/d3d9/d3d9.dll.p/d3d9_swvp_emu.cpp.obj
+[6/13] Compiling C++ object src/d3d9/d3d9.dll.p/d3d9_hud.cpp.obj
+[7/13] Compiling C++ object src/d3d9/d3d9.dll.p/d3d9_annotation.cpp.obj
+ninja: build stopped: subcommand failed.

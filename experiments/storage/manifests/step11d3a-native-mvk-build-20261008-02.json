@@ -1,0 +1,254 @@
+{
+  "authorized_runner_paths": [
+    "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11d3a/build_native_moltenvk.py"
+  ],
+  "authorized_runner_sha256": {
+    "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11d3a/build_native_moltenvk.py": "44f4290134ea1a3bd9427d5c0e402b6f958eb33f183f2a489beaee343fd72e36"
+  },
+  "blockers": [],
+  "build_configuration_key_sha256": "04ba2d369146be8eaf30c49ec05c8802174f3eb4bcafc6839b626321c00215cd",
+  "build_id": "step11d3a-mvk-x86_64-20261008-02",
+  "build_kind": "moltenvk",
+  "build_source_tree_hash": "2a51f319d33f6e554a2d5e073ac86a1968f35a5746d298d46f6614b6dcd3f3f5",
+  "build_type": "release",
+  "candidate_hashes": {
+    "build_runner": "44f4290134ea1a3bd9427d5c0e402b6f958eb33f183f2a489beaee343fd72e36",
+    "instrumentation_patch": "64645b52ecbaf4be617533b01ea794b4f7ecb13c1a54bcd57b3c0701b1264f47",
+    "native_control_source": "f4e8e87cc2653360021b5b802ced745748d081d9b08065bb2deaa2592a15d501",
+    "pinned_source_tree": "2a51f319d33f6e554a2d5e073ac86a1968f35a5746d298d46f6614b6dcd3f3f5",
+    "prepared_source_identity": "2b79d797a556cbec663f40a1bc39f03b94b9a56c6f527b534fd2693914851c51"
+  },
+  "cleanup_policy": "NativeRunLease finally cleanup; preserve logs and telemetry",
+  "created_at_unix": 1791408132.404901,
+  "decision": "ALLOW",
+  "dependency_state": {
+    "architecture": "x86_64",
+    "external_revisions": {
+      "SPIRV-Cross": "6c09849fe88c48eaed08413aa022aaa136a3a057",
+      "SPIRV-Tools": "0d6fd73ca73830ccab5fa1f00ed5ed40124e2c55",
+      "Volk": "776893306c5d3b22b6185b5d4a258b81d94572bf",
+      "Vulkan-Headers": "e3b1eec08173d6b825cd3ac88c885a63b621504a",
+      "Vulkan-Tools": "8c66b352925cb771f793a4d3220b1321ae0febf1",
+      "cereal": "a56bad8bbb770ee266e930c95d37fff2a5be7fea"
+    },
+    "identity_sha256": "2b79d797a556cbec663f40a1bc39f03b94b9a56c6f527b534fd2693914851c51",
+    "patch_sha256": "64645b52ecbaf4be617533b01ea794b4f7ecb13c1a54bcd57b3c0701b1264f47",
+    "source_seed_path": "/private/tmp/fgmetal-step11b/MoltenVK",
+    "source_tree_sha256": "2a51f319d33f6e554a2d5e073ac86a1968f35a5746d298d46f6614b6dcd3f3f5",
+    "status": "pinned_source_and_external_revisions"
+  },
+  "estimated_debug_bytes": null,
+  "estimated_max_new_disk_bytes": 4634217728,
+  "estimated_persistent_bytes": 134217728,
+  "expected_build_bytes": 4500000000,
+  "expected_build_requirement": true,
+  "expected_duration_seconds": 1800,
+  "expected_prefix_bytes": 0,
+  "expected_prefix_requirement": false,
+  "experiment_id": "step11d3a-native-mvk-build-20261008-02",
+  "failure_capture_paths": [],
+  "free_before_bytes": 86995156992,
+  "gate0_attestation_sha256": "08c837a3dcb05f916bfcbdc451e2fd6a16e0620e2d198ecb526367429888ebf1",
+  "internal_storage_setup": false,
+  "manifest_hmac_sha256": "a2040e24cb727aa8d59e99f1e70999b95cae2641786bb1ec069c522adb165dda",
+  "manifest_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/manifests/step11d3a-native-mvk-build-20261008-02.json",
+  "native_architecture": "x86_64",
+  "native_moltenvk_build_request": {
+    "architectures": [
+      "x86_64"
+    ],
+    "build_system": "xcode_native",
+    "clang_binary_sha256": "1590ac950a3d627817d09ade5cb60b2115f17a72182a3141e010b4bcc482a0c9",
+    "clang_version_string": "Apple clang version 21.0.0 (clang-2100.3.34.2)\nTarget: arm64-apple-darwin27.0.0\nThread model: posix\nInstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin",
+    "configuration": "Release",
+    "declared_outputs": [
+      {
+        "artifact_name": "libMoltenVK.dylib",
+        "expected_architectures": [
+          "x86_64"
+        ],
+        "is_macho": true,
+        "mandatory": true,
+        "relative_path": "Build/Products/Release/libMoltenVK.dylib",
+        "role": "moltenvk_dylib"
+      },
+      {
+        "artifact_name": "FGMetalNativeControl",
+        "expected_architectures": [
+          "x86_64"
+        ],
+        "is_macho": true,
+        "mandatory": true,
+        "relative_path": "Build/Products/Release/FGMetalNativeControl",
+        "role": "native_control"
+      },
+      {
+        "artifact_name": "libMoltenVK.a",
+        "expected_architectures": [],
+        "is_macho": false,
+        "mandatory": false,
+        "relative_path": "Build/Products/Release/libMoltenVK.a",
+        "role": "moltenvk_static_archive"
+      },
+      {
+        "artifact_name": "libMoltenVKShaderConverter.a",
+        "expected_architectures": [],
+        "is_macho": false,
+        "mandatory": false,
+        "relative_path": "Build/Products/Release/libMoltenVKShaderConverter.a",
+        "role": "shader_converter_static_archive"
+      },
+      {
+        "artifact_name": "MoltenVKShaderConverter",
+        "expected_architectures": [
+          "x86_64"
+        ],
+        "is_macho": true,
+        "mandatory": false,
+        "relative_path": "Build/Products/Release/MoltenVKShaderConverter",
+        "role": "shader_converter_executable"
+      }
+    ],
+    "deployment_target": "12.0",
+    "external_revisions": {
+      "SPIRV-Cross": "6c09849fe88c48eaed08413aa022aaa136a3a057",
+      "SPIRV-Tools": "0d6fd73ca73830ccab5fa1f00ed5ed40124e2c55",
+      "Volk": "776893306c5d3b22b6185b5d4a258b81d94572bf",
+      "Vulkan-Headers": "e3b1eec08173d6b825cd3ac88c885a63b621504a",
+      "Vulkan-Tools": "8c66b352925cb771f793a4d3220b1321ae0febf1",
+      "cereal": "a56bad8bbb770ee266e930c95d37fff2a5be7fea"
+    },
+    "linker_version_string": "@(#)PROGRAM:ld PROJECT:ld-27037.1\nBUILD 21:17:51 Aug 25 2026\nconfigured to support archs: armv6 armv7 armv7s arm64 arm64e arm64_32 i386 x86_64 x86_64h armv6m armv7k armv7m armv7em armv8m.main armv8.1m.main\nLTO support using: LLVM version 21.0.0 (static support for 30, runtime is 30)\nTAPI support using: Apple TAPI version 21.0.0 (tapi-2100.3.8.1)",
+    "modified_files": [
+      [
+        "MoltenVK/MoltenVK.xcodeproj/project.pbxproj",
+        "4187ee0ed93828a576fa0b8f5550f11f64a1a9a276db3fcd492eb8f94b276bc3",
+        "84b88f60a39af6f3af848337d7b33da4b70de72e8aa49848321587b332f67dfa"
+      ],
+      [
+        "MoltenVK/MoltenVK/GPUObjects/MVKImage.h",
+        "24e4fdaf440642c0fe4d9d04d436c89f603411349cf84288dd54878a34cb5c4b",
+        "28a7b86af23466ef25ed32a4015a7336516eaa790e7c9c1a70bc24ca6a4c9ca7"
+      ],
+      [
+        "MoltenVK/MoltenVK/GPUObjects/MVKImage.mm",
+        "55639a1dd7c55a58f26c3ed4cab6f461dd12f8ef18fee2954712361f7c428adf",
+        "c98c37f31538ace23e214726a4c5c281b46ec4a19f8ab0c267e307012e713272"
+      ],
+      [
+        "MoltenVK/MoltenVK/GPUObjects/MVKNativeTrace.h",
+        "ABSENT",
+        "a42bb7eea1aa6e485dcc77ae7b1cbe5a9bff89951cf2ad254001f7dd774baeb3"
+      ],
+      [
+        "MoltenVK/MoltenVK/GPUObjects/MVKNativeTraceRing.hpp",
+        "ABSENT",
+        "fd51bd23c088f109f046d3b5dff2c6d7499781fb986e992111b16070f52825d8"
+      ],
+      [
+        "MoltenVK/MoltenVK/GPUObjects/MVKNativeTraceRuntime.inc",
+        "ABSENT",
+        "8db51a96f8fd297c5c40f14e89a42f5da4921d9051a63f50db1afadc2dd43aed"
+      ],
+      [
+        "MoltenVK/MoltenVK/GPUObjects/MVKSwapchain.h",
+        "d70ef4295685e93ce4596e202d7b900282f9a1ffce4eb47572dd4ed2db16f1b5",
+        "216009b4acab6bdb1ab309640781211057f9723bd758e7d8d1c42747c157d9e6"
+      ],
+      [
+        "MoltenVK/MoltenVK/GPUObjects/MVKSwapchain.mm",
+        "3615c9417827b1777e5dd0dc7391950065af657155887793f98b31358a770582",
+        "42d6d2a192fedc25d2d6c4562b13b999aa9c2854cfeeb5dbfb733b64b26add9d"
+      ],
+      [
+        "MoltenVK/MoltenVK/Vulkan/vulkan.mm",
+        "f7e2be05f062c1944cf89253de826c6ef5928d4ba3ca856cab60ceae66bd8294",
+        "7d2039ce264a48dfef34b2d369be542cba458b6b96af232f137a7e6587cde336"
+      ],
+      [
+        "NativeControl/build_native_control.sh",
+        "ABSENT",
+        "1caab9693c8e4008bbb6f1886a7e444c07fad1444b9900476430ab8c93831c89"
+      ],
+      [
+        "NativeControl/native_control.mm",
+        "ABSENT",
+        "f4e8e87cc2653360021b5b802ced745748d081d9b08065bb2deaa2592a15d501"
+      ],
+      [
+        "NativeControl/native_trace_api.h",
+        "ABSENT",
+        "00804a69f85ecab9370f708546bff04595999eea013db9f41b8e45ec6c183c87"
+      ]
+    ],
+    "normalized_arguments": [
+      "/Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild",
+      "-project",
+      "/Users/nima/Library/Caches/FGMetal/builds/step11d3a-mvk-x86_64-20261008-02/MoltenVKSource/MoltenVK/MoltenVK.xcodeproj",
+      "-scheme",
+      "MoltenVK-macOS-dylib",
+      "-configuration",
+      "Release",
+      "-sdk",
+      "macosx",
+      "-destination",
+      "platform=macOS,arch=x86_64",
+      "-derivedDataPath",
+      "/Users/nima/Library/Caches/FGMetal/builds/step11d3a-mvk-x86_64-20261008-02/DerivedData",
+      "SYMROOT=/Users/nima/Library/Caches/FGMetal/builds/step11d3a-mvk-x86_64-20261008-02/Build/Products",
+      "OBJROOT=/Users/nima/Library/Caches/FGMetal/builds/step11d3a-mvk-x86_64-20261008-02/Build/Intermediates.noindex",
+      "CLANG_MODULE_CACHE_PATH=/Users/nima/Library/Caches/FGMetal/builds/step11d3a-mvk-x86_64-20261008-02/ModuleCache",
+      "COMPILATION_CACHE_CAS_PATH=/Users/nima/Library/Caches/FGMetal/builds/step11d3a-mvk-x86_64-20261008-02/CompilationCache",
+      "COMPILER_INDEX_STORE_ENABLE=NO",
+      "SDK_STAT_CACHE_ENABLE=NO",
+      "ARCHS=x86_64",
+      "ONLY_ACTIVE_ARCH=NO",
+      "CODE_SIGNING_ALLOWED=NO",
+      "MACOSX_DEPLOYMENT_TARGET=12.0",
+      "DEBUG_INFORMATION_FORMAT=dwarf",
+      "build"
+    ],
+    "normalized_environment": {
+      "DEVELOPER_DIR": "/Applications/Xcode.app/Contents/Developer",
+      "HOME": "/Users/nima/Library/Caches/FGMetal/builds/step11d3a-mvk-x86_64-20261008-02/.tmp/home",
+      "LANG": "en_US.UTF-8",
+      "PATH": "/usr/bin:/bin:/usr/sbin:/sbin"
+    },
+    "patch_sha256": "64645b52ecbaf4be617533b01ea794b4f7ecb13c1a54bcd57b3c0701b1264f47",
+    "patch_size_bytes": 156654,
+    "prepared_source_root_relative_path": "MoltenVKSource",
+    "pristine_git_commit": "db66022459ffb663aa2b50f6b018bc2e124f5edf",
+    "pristine_git_tree": "efebd918bbe772eead074100c0a18789ad39606d",
+    "project_file_sha256": "84b88f60a39af6f3af848337d7b33da4b70de72e8aa49848321587b332f67dfa",
+    "project_relative_path": "MoltenVKSource/MoltenVK/MoltenVK.xcodeproj",
+    "sdk_name": "macosx",
+    "sdk_version_string": "27.0",
+    "source_tree_sha256": "2a51f319d33f6e554a2d5e073ac86a1968f35a5746d298d46f6614b6dcd3f3f5",
+    "target_or_scheme": "MoltenVK-macOS-dylib",
+    "toolchain_identity_sha256": "78fafd3b8b8c5dae0efde94e80072ec9d0cc0dee939292d9bbac11e22609916a",
+    "vulkan_headers_revision": "e3b1eec08173d6b825cd3ac88c885a63b621504a",
+    "vulkan_headers_tree_sha256": "e1af281c6f8eded7271a48474fbba1199ef6a77c24aa01911a60915d12dafbb0",
+    "xcode_version_string": "Xcode 27.0\nBuild version 27A266a"
+  },
+  "output_dir": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11d3a/evidence/native-build-contract-20261008-02",
+  "persistent_growth_over_2g_approval_reason": null,
+  "persistent_growth_over_2g_approved": false,
+  "preserve_debug_reason": null,
+  "project_budget_bytes": 53687091200,
+  "project_budget_remaining_before_bytes": 11136606208,
+  "project_estimated_peak_bytes": 47184702720,
+  "project_usage_before": {
+    "allocated_inode_deduplicated_bytes": 42550484992,
+    "apfs_clone_awareness": false,
+    "file_count": 107571,
+    "hardlinks_deduplicated": true,
+    "logical_bytes": 87860700537
+  },
+  "purpose": "Fresh leased x86_64 MoltenVK v1.4.2 instrumentation build and linked native control",
+  "retention_policy": "canonical binaries by SHA-256; one clean template plus at most one failure reproduction",
+  "source_identity_path": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11d3a/prepared-source-identity.json",
+  "source_identity_sha256": "2b79d797a556cbec663f40a1bc39f03b94b9a56c6f527b534fd2693914851c51",
+  "storage_justification": "One serialized native diagnostic build; all temporary products are retired by BuildLease and only declared CAS artifacts and compact provenance are retained.",
+  "storage_policy_smoke": false,
+  "warnings": []
+}

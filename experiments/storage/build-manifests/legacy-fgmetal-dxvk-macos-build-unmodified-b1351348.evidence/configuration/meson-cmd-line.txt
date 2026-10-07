@@ -1,0 +1,7 @@
+[options]
+buildtype = release
+prefix = /tmp/fgmetal-dxvk-macos-stage-unmodified
+
+[properties]
+cross_file = ['/private/tmp/fgmetal-dxvk-macos-audit-20261004/build-win64.txt']
+

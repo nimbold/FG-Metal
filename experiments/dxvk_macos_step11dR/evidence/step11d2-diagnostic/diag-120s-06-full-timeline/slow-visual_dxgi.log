@@ -1,0 +1,21 @@
+info:  Game: slow-visual.exe
+info:  DXVK: 3.1.1
+info:  Build: x86_64 gcc 16.2.0
+info:  Found config file: /Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-120s-06-full-timeline/dxvk.conf
+info:  Effective configuration:
+info:    dxvk.enableMetalInterop = True
+info:  Vulkan: Found vkGetInstanceProcAddr in winevulkan.dll @ 0x6ffffba67a30
+info:  Extension providers:
+info:    Platform WSI
+info:    OpenVR
+info:  OpenVR: could not open registry key, status 2
+info:  OpenVR: Failed to locate module
+info:    OpenXR
+info:  Enabled instance extensions:
+info:    VK_KHR_get_surface_capabilities2
+info:    VK_KHR_surface
+info:    VK_KHR_surface_maintenance1
+info:    VK_KHR_win32_surface
+info:  MetalInterop: Vulkan instance accepted MTLDevice/MTLCommandQueue export intent
+info:  Found device: Apple M3 (MoltenVK 0.2.2210)
+warn:  DxgiSwapChain::GetFrameStatistics: Frame statistics may be inaccurate

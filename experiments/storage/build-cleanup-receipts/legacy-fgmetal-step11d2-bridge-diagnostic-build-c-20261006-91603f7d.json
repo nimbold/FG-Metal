@@ -1,0 +1,32 @@
+{
+  "action": "AUTO_RETIRED_AFTER_ARTIFACT_VERIFICATION",
+  "allocated_unique_inode_bytes": 155648,
+  "apfs_clone_note": "APFS shared extents are unknown; disk free-space delta is authoritative",
+  "artifact_hashes_preserved": [
+    "7a4d53fbf6e4730c93119759d521d91bbf5bfa419bde6df7d63d2ca7b0d500e3",
+    "ecc9ce4c552f093a501ed1ac1186bbd086b2db4465830a07d119a6c4b49dd5d2"
+  ],
+  "best_recoverable_bytes_estimate": 155648,
+  "build_device": 16777230,
+  "build_filesystem_id": 16777230,
+  "build_id": "legacy-fgmetal-step11d2-bridge-diagnostic-build-c-20261006-91603f7d",
+  "build_inode": 92888360,
+  "build_manifest_id": "66e8867390644bbfd7ad21322c5a0baa0135b4d399ecc2c775b480f5f0cf74a7",
+  "build_manifest_sha256": "5b20bbba0784e242473c357b59975fe1839695635fd10f2ed600379a1376e44e",
+  "category": "COMPLETED BUILD DIRECTORY",
+  "completed_at_unix": 1791335640.047483,
+  "created_at_unix": 1791335640.0446012,
+  "failure_evidence_index_sha256": null,
+  "filesystem_free_after_bytes": 80124661760,
+  "filesystem_free_before_bytes": 80124514304,
+  "hardlink_note": "only inodes whose full link count was inside the tree are counted recoverable",
+  "lease_hmac_sha256": "06f416dde32e83c3765087e3cfc7e85b907773b0d9c60e864257e5ba65f2d2cd",
+  "logical_bytes": 144758,
+  "measured_free_delta_bytes": 147456,
+  "path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-step11d2-bridge-diagnostic-build-c-20261006-91603f7d",
+  "quarantine_path": "/Users/nima/Library/Caches/FGMetal/builds/.retiring-legacy-fgmetal-step11d2-bridge-diagnostic-build-c-20261006-91603f7d-fa770401c2374e43b59715d89daffc8b",
+  "result": "REMOVED",
+  "schema_version": 2,
+  "state": "REMOVED",
+  "state_before": "COMPLETED"
+}

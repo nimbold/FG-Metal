@@ -1,0 +1,6 @@
+[options]
+buildtype = release
+
+[properties]
+cross_file = ['/private/tmp/fgmetal-step11d-dxvk-source/build-win64.txt']
+

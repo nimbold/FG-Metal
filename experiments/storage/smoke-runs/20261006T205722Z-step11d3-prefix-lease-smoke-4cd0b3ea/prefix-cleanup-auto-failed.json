@@ -1,0 +1,60 @@
+{
+  "active_lease_marker_removed_after_receipt": false,
+  "bytes_reclaimed": 0,
+  "bytes_reclaimed_method": "prefix st_blocks estimate; APFS clone sharing is not observable here",
+  "cleanup_error": null,
+  "exception": null,
+  "expected_persistent_bytes": 33554432,
+  "experiment_id": "20261006T205722Z-step11d3-prefix-lease-smoke-4cd0b3ea",
+  "free_after_bytes": 65090048000,
+  "free_before_bytes": 65082609664,
+  "free_peak_or_estimate_bytes": 61827829760,
+  "free_space_status": "FAIL_PREFIX_CLEANUP",
+  "interrupted_by_signal": null,
+  "net_free_space_delta_bytes": 7323648,
+  "persistent_retained_allocated_estimate_bytes": 2294620160,
+  "prefix_allocated_bytes_removed_estimate": 0,
+  "prefix_created": true,
+  "prefix_deleted": false,
+  "prefix_path": "/Users/nima/Library/Caches/FGMetal/prefixes/smoke-20261006T205722Z-step11d3-prefix-lease-smoke-4cd0b3ea",
+  "prefix_preserved": false,
+  "prefix_size_error": null,
+  "project_usage_after": {
+    "allocated_inode_deduplicated_bytes": 46387535872,
+    "apfs_clone_awareness": false,
+    "file_count": 131246,
+    "hardlinks_deduplicated": true,
+    "logical_bytes": 99137516864
+  },
+  "project_usage_before": {
+    "allocated_inode_deduplicated_bytes": 44092915712,
+    "apfs_clone_awareness": false,
+    "file_count": 126335,
+    "hardlinks_deduplicated": true,
+    "logical_bytes": 96844120054
+  },
+  "reason": "automatic cleanup could not verify wineserver shutdown; retention limit reached, prefix left for explicit cleanup",
+  "receipt_write_error": null,
+  "registry_snapshot_error": null,
+  "schema_version": 2,
+  "storage_hygiene_status": "FAIL_STORAGE_HYGIENE",
+  "storage_watch_events": [],
+  "temporary_created": true,
+  "temporary_created_allocated_estimate_bytes": 2303463424,
+  "temporary_created_logical_bytes": 2293362510,
+  "temporary_removed": false,
+  "temporary_removed_logical_bytes": 0,
+  "unexpected_persistent_bytes": 2261065728,
+  "wineserver_shutdown": [
+    {
+      "flag": "-k",
+      "output_tail": "",
+      "returncode": 1
+    },
+    {
+      "flag": "-w",
+      "output_tail": "",
+      "returncode": 0
+    }
+  ]
+}

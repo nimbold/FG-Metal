@@ -1,0 +1,17 @@
+[
+  {
+    "path": "/tmp/fgmetal-step11b/runtime-candidate/wine/lib/moltenvk-vkmt/libMoltenVK.1.dylib",
+    "before": "8249d81ebf2d46f82b16ca166c2e5cca5d76d91d0a412cd6d3db1aaa6e8430bf",
+    "after": "df43b3a65b67efb06f673fc8f0e5cedf7f54276f5911f479c17050c04b1fd12e"
+  },
+  {
+    "path": "/tmp/fgmetal-step11b/runtime-candidate/wine/lib/wine/x86_64-unix/libvulkan.dylib",
+    "before": "1d57a14b4a0d380420ab566884018fd83ba57381aa44e464f79472a77273b6bc",
+    "after": "df43b3a65b67efb06f673fc8f0e5cedf7f54276f5911f479c17050c04b1fd12e"
+  },
+  {
+    "path": "/tmp/fgmetal-step11b/runtime-candidate/wine/lib/wine/x86_64-unix/libMoltenVK.1.dylib",
+    "before": "8249d81ebf2d46f82b16ca166c2e5cca5d76d91d0a412cd6d3db1aaa6e8430bf",
+    "after": "df43b3a65b67efb06f673fc8f0e5cedf7f54276f5911f479c17050c04b1fd12e"
+  }
+]

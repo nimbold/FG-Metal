@@ -1,0 +1,84 @@
+{
+  "adopted_at_unix": 1791335655.7300942,
+  "adopted_existing": true,
+  "allowed_external_symlink_roots": [],
+  "approved_parent": "/Users/nima/Library/Caches/FGMetal/builds",
+  "approved_parent_identity": {
+    "device": 16777230,
+    "filesystem_id": 16777230,
+    "inode": 93094313,
+    "mode": 448,
+    "owner_uid": 501,
+    "sticky": false
+  },
+  "build_device": 16777230,
+  "build_filesystem_id": 16777230,
+  "build_id": "legacy-fgmetal-step11d2-source-rebuild-check-303a3550",
+  "build_inode": 92879819,
+  "cleanup_attempted": true,
+  "cleanup_free_before_bytes": 80123437056,
+  "cleanup_receipt_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-cleanup-receipts/legacy-fgmetal-step11d2-source-rebuild-check-303a3550.json",
+  "created_at_unix": 1791335655.716526,
+  "estimated_bytes": 28672,
+  "expected_bytes": 21917,
+  "failed_at_unix": 1791335655.797544,
+  "failed_command": [
+    "legacy-root-reconciliation"
+  ],
+  "failure_evidence_files": [
+    {
+      "mode": "0o600",
+      "path": "failure-manifest.json",
+      "sha256": "d183fbfd36c1a4a5ed805ee06c605d26ec3c705cf7de69c0e6650262cb70c21d",
+      "size_bytes": 1871
+    },
+    {
+      "mode": "0o600",
+      "path": "configuration/bridge_pe.o",
+      "sha256": "811c3f9a3b5c5e350cfb536a4a130b6108dee35726c3f25efd0a2f2d821445da",
+      "size_bytes": 6933
+    },
+    {
+      "mode": "0o600",
+      "path": "configuration/bridge_unix.o",
+      "sha256": "2ec596690e6b43012d0a9f59f545960b148e9c00774e8192477f32225f9e28cf",
+      "size_bytes": 1440
+    },
+    {
+      "mode": "0o600",
+      "path": "configuration/metal_provider.o",
+      "sha256": "9d5fca2509a37ddbc1c0e2c895319214f77461a2954f734698b10a2650801447",
+      "size_bytes": 13544
+    }
+  ],
+  "failure_evidence_index_sha256": "44a87c5d1c6a15bc1016c7ce7d3341e18d61238eee6a409cda86a01676be3103",
+  "failure_evidence_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-step11d2-source-rebuild-check-303a3550.failure/failure-manifest.json",
+  "failure_evidence_root": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-manifests/legacy-fgmetal-step11d2-source-rebuild-check-303a3550.failure",
+  "failure_evidence_sha256": "d183fbfd36c1a4a5ed805ee06c605d26ec3c705cf7de69c0e6650262cb70c21d",
+  "failure_reason": "partial source-rebuild check; retain its three object files as diagnostics then retire the scratch root",
+  "kind": "dxvk",
+  "last_heartbeat_unix": 1791335655.716526,
+  "lease_hmac_sha256": "164030da7996db27b110de0c92e6b18729fd481e9d555db4a12307014f1ddc7a",
+  "legacy_source_path": "/private/tmp/fgmetal-step11d2-source-rebuild-check",
+  "owner_experiment": "dxvk_macos_step11dR",
+  "owner_pid": null,
+  "path": "/Users/nima/Library/Caches/FGMetal/builds/legacy-fgmetal-step11d2-source-rebuild-check-303a3550",
+  "preserve_debug_expires_at_unix": null,
+  "preserve_debug_reason": null,
+  "purpose": "partial source-rebuild check; retain its three object files as diagnostics then retire the scratch root",
+  "quarantine_name": ".retiring-legacy-fgmetal-step11d2-source-rebuild-check-303a3550-188805a38fad466f80a09f2b3d2cf93d",
+  "retired_at_unix": 1791335655.9195929,
+  "retirement_from_state": "FAILED",
+  "retirement_reason": "legacy-scratch-evidence-captured",
+  "retirement_started_unix": 1791335655.7994182,
+  "retirement_tree_stats": {
+    "allocated_unique_inode_bytes": 28672,
+    "best_recoverable_bytes_estimate": 28672,
+    "file_count": 3,
+    "logical_bytes": 21917
+  },
+  "return_code": null,
+  "schema_version": 1,
+  "source_tree_hash": "unknown-at-build-time",
+  "state": "COMPLETED"
+}

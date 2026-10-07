@@ -1,0 +1,174 @@
+diff --git a/src/d3d11/d3d11_swapchain.cpp b/src/d3d11/d3d11_swapchain.cpp
+index 213fb0a5..a3da9478 100644
+--- a/src/d3d11/d3d11_swapchain.cpp
++++ b/src/d3d11/d3d11_swapchain.cpp
+@@ -6,6 +6,7 @@
+ #include "../dxvk/dxvk_shader_spirv.h"
+ 
+ #include "../util/util_win32_compat.h"
++#include "../util/util_env.h"
+ 
+ #include <d3d11_composition_vert.h>
+ #include <d3d11_composition_frag.h>
+@@ -491,7 +492,12 @@ namespace dxvk {
+     viewInfo.layerIndex = 0u;
+     viewInfo.layerCount = 1u;
+ 
++    // TEST ONLY, local downstream diagnostic. Default OFF.
++    const bool diagnosticWsiClear = env::getEnvVar("FG_STEP11B1_WSI_CLEAR") == "1";
++
+     immediateContext->EmitCs([
++      cDiagnosticWsiClear = diagnosticWsiClear,
++      cWsiImage       = backBuffer,
+       cDevice         = m_device,
+       cBlitter        = m_blitter,
+       cBackBuffer     = backBuffer->createView(viewInfo),
+@@ -507,7 +513,7 @@ namespace dxvk {
+       cDstRect        = dstRect
+     ] (DxvkContext* ctx) {
+       // Update back buffer color space as necessary
+-      if (cSwapImage->image()->info().colorSpace != cColorSpace) {
++      if (!cDiagnosticWsiClear && cSwapImage->image()->info().colorSpace != cColorSpace) {
+         DxvkImageUsageInfo usage = { };
+         usage.colorSpace = cColorSpace;
+ 
+@@ -518,8 +524,43 @@ namespace dxvk {
+       // swap chain and render the HUD if we have one.
+       auto contextObjects = ctx->beginExternalRendering();
+ 
+-      cBlitter->present(contextObjects, cClearColor,
+-        cBackBuffer, cDstRect, cSwapImage, cSrcRect);
++      if (cDiagnosticWsiClear) {
++        auto range = cWsiImage->getAvailableSubresources();
++        VkImageMemoryBarrier2 barrier = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2 };
++        barrier.dstAccessMask = VK_ACCESS_2_TRANSFER_WRITE_BIT;
++        barrier.dstStageMask = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
++        barrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
++        barrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
++        barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
++        barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
++        barrier.image = cWsiImage->handle();
++        barrier.subresourceRange = range;
++        VkDependencyInfo dependency = { VK_STRUCTURE_TYPE_DEPENDENCY_INFO };
++        dependency.imageMemoryBarrierCount = 1;
++        dependency.pImageMemoryBarriers = &barrier;
++        contextObjects->cmdPipelineBarrier(DxvkCmdBuffer::ExecBuffer, &dependency);
++        VkClearColorValue magenta = { };
++        magenta.float32[0] = 1.0f; magenta.float32[2] = 1.0f; magenta.float32[3] = 1.0f;
++        contextObjects->cmdClearColorImage(DxvkCmdBuffer::ExecBuffer,
++          cWsiImage->handle(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, &magenta, 1, &range);
++        barrier.srcAccessMask = VK_ACCESS_2_TRANSFER_WRITE_BIT;
++        barrier.srcStageMask = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
++        barrier.dstAccessMask = VK_ACCESS_2_MEMORY_READ_BIT;
++        barrier.dstStageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
++        barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
++        barrier.newLayout = cWsiImage->info().layout;
++        contextObjects->cmdPipelineBarrier(DxvkCmdBuffer::ExecBuffer, &dependency);
++        contextObjects->track(cWsiImage, DxvkAccess::Write);
++        if (cFrameId <= 32)
++          Logger::info(str::format("STEP11B1 WSI_CLEAR frame=", cFrameId,
++            " image=", cWsiImage->handle(), " range_aspect=", range.aspectMask,
++            " format=", cWsiImage->info().format, " usage=", cWsiImage->info().usage,
++            " final_layout=", cWsiImage->info().layout,
++            " acquire=", cSync.acquire, " present=", cSync.present));
++      } else {
++        cBlitter->present(contextObjects, cClearColor,
++          cBackBuffer, cDstRect, cSwapImage, cSrcRect);
++      }
+ 
+       // Submit current command list and present
+       ctx->synchronizeWsi(cSync);
+diff --git a/src/dxvk/dxvk_presenter.cpp b/src/dxvk/dxvk_presenter.cpp
+index 643f7c5d..c4789f21 100644
+--- a/src/dxvk/dxvk_presenter.cpp
++++ b/src/dxvk/dxvk_presenter.cpp
+@@ -262,8 +262,15 @@ namespace dxvk {
+     if (m_hasIncrementalPresent && !m_presentRepaint && m_acquireStatus == VK_SUCCESS && rectCount)
+       regionInfo.pNext = const_cast<void*>(std::exchange(info.pNext, &regionInfo));
+ 
++    // TEST ONLY: correlate the exact written image with the existing present.
++    if (env::getEnvVar("FG_STEP11B1_WSI_CLEAR") == "1" && frameId <= 32)
++      Logger::info(str::format("STEP11B1 QUEUE_PRESENT frame=", frameId,
++        " index=", m_imageIndex, " image=", m_images.at(m_imageIndex)->handle(),
++        " semaphore=", currSync.present, " swapchain=", m_swapchain));
+     VkResult status = m_vkd->vkQueuePresentKHR(
+       m_device->queues().graphics.queueHandle, &info);
++    if (env::getEnvVar("FG_STEP11B1_WSI_CLEAR") == "1" && frameId <= 32)
++      Logger::info(str::format("STEP11B1 QUEUE_PRESENT_RESULT frame=", frameId, " status=", status));
+ 
+     // Treat a QUEUE_FULL error as a hint to recreate the swapchain with
+     // a larger queue size. This could probably be done more robustly,
+diff --git a/src/dxvk/dxvk_swapchain_blitter.cpp b/src/dxvk/dxvk_swapchain_blitter.cpp
+index 1bcdafad..7378a0dc 100644
+--- a/src/dxvk/dxvk_swapchain_blitter.cpp
++++ b/src/dxvk/dxvk_swapchain_blitter.cpp
+@@ -7,6 +7,7 @@
+ #include <dxvk_present_frag_ms.h>
+ #include <dxvk_present_frag_ms_blit.h>
+ #include <dxvk_present_vert.h>
++#include <dxvk_present_diagnostic_frag.h>
+ 
+ namespace dxvk {
+   
+@@ -301,6 +302,7 @@ namespace dxvk {
+     key.needsBlit = dstRect.extent != srcRect.extent;
+     key.compositeHud = composite && m_hudSrv;
+     key.compositeCursor = composite && m_cursorView;
++    key.diagnosticConstant = env::getEnvVar("FG_STEP11B1_CONSTANT_BLITTER") == "1";
+ 
+     VkPipeline pipeline = getBlitPipeline(key);
+ 
+@@ -766,6 +768,9 @@ namespace dxvk {
+         : util::DxvkBuiltInShaderStage(dxvk_present_frag_ms, &specInfo);
+     }
+ 
++    if (key.diagnosticConstant)
++      state.fs = util::DxvkBuiltInShaderStage(dxvk_present_diagnostic_frag, nullptr);
++
+     state.colorFormats[0] = key.dstFormat;
+     return m_device->createBuiltInGraphicsPipeline(m_blitLayout, state);
+   }
+diff --git a/src/dxvk/dxvk_swapchain_blitter.h b/src/dxvk/dxvk_swapchain_blitter.h
+index f5233ba8..6455f31c 100644
+--- a/src/dxvk/dxvk_swapchain_blitter.h
++++ b/src/dxvk/dxvk_swapchain_blitter.h
+@@ -50,6 +50,9 @@ namespace dxvk {
+     /// Bit indicating whether the software cursor needs to be composited
+     VkBool32 compositeCursor = VK_FALSE;
+ 
++    // TEST ONLY; included in the pipeline cache identity, default OFF.
++    VkBool32 diagnosticConstant = VK_FALSE;
++
+     size_t hash() const {
+       DxvkHashState hash;
+       hash.add(uint32_t(srcSpace));
+@@ -61,6 +64,7 @@ namespace dxvk {
+       hash.add(uint32_t(needsGamma));
+       hash.add(uint32_t(compositeHud));
+       hash.add(uint32_t(compositeCursor));
++      hash.add(uint32_t(diagnosticConstant));
+       return hash;
+     }
+ 
+@@ -73,7 +77,8 @@ namespace dxvk {
+           && needsBlit == other.needsBlit
+           && needsGamma == other.needsGamma
+           && compositeHud == other.compositeHud
+-          && compositeCursor == other.compositeCursor;
++          && compositeCursor == other.compositeCursor
++          && diagnosticConstant == other.diagnosticConstant;
+     }
+   };
+ 
+diff --git a/src/dxvk/meson.build b/src/dxvk/meson.build
+index 6b12f95c..bb3ed6a2 100644
+--- a/src/dxvk/meson.build
++++ b/src/dxvk/meson.build
+@@ -7,6 +7,7 @@ dxvk_shaders = files([
+   'shaders/dxvk_mipgen.comp',
+ 
+   'shaders/dxvk_present_frag.frag',
++  'shaders/dxvk_present_diagnostic_frag.frag',
+   'shaders/dxvk_present_frag_blit.frag',
+   'shaders/dxvk_present_frag_ms.frag',
+   'shaders/dxvk_present_frag_ms_blit.frag',

@@ -1,0 +1,136 @@
+{
+  "active_build_count": 0,
+  "active_lease_count": 0,
+  "artifact_store_size": {
+    "file_count": 2086,
+    "logical_bytes": 28217482001,
+    "unique_inode_allocated_bytes": 28226011136
+  },
+  "authorized_runner_source_hashes_required": true,
+  "automatic_post_run_disk_checks": true,
+  "automatic_pre_run_disk_checks": true,
+  "automatic_retention_controls_installed": true,
+  "build_retention_fingerprint_sha256": "904c14621f10b5f7fcbbd1330c67066db9b6f2f157b7b8d72b261f2758da1cb2",
+  "build_retention_state": {
+    "active_build_count": 0,
+    "active_dxvk_count": 0,
+    "active_moltenvk_count": 0,
+    "completed_pending_retirement_count": 0,
+    "failed_or_retiring_count": 0,
+    "preserved_build_count": 0,
+    "retained_build_count": 0,
+    "retention_fingerprint_sha256": "904c14621f10b5f7fcbbd1330c67066db9b6f2f157b7b8d72b261f2758da1cb2",
+    "unknown_count": 0
+  },
+  "build_retention_test_report_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-retention-tests.log",
+  "build_retention_test_report_sha256": "5f5ccc45dbd1a18f98383181946521f91bd9a6b56cf88852143b772050d09f41",
+  "canonical_artifact_store_audit": {
+    "artifact_count": 1043,
+    "sha256": "16986c096db6ad093a9554a546c7e7bed1d17c63514361fa828f81c817df978e",
+    "shared_or_recovering_payload_count": 827,
+    "shared_payload_logical_bytes": 18369387929
+  },
+  "certified_template": true,
+  "cleanup_receipt_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/storage-cleanup-receipt.json",
+  "cleanup_receipt_sha256": "5e4fc7e77611bf17173feb12fcc6d9efc0985a865e515f200a5e00e046882ad2",
+  "created_at_unix": 1791380575.221458,
+  "evidence_logical_bytes": 36266069,
+  "evidence_size": {
+    "file_count": 479,
+    "logical_bytes": 36266069,
+    "unique_inode_allocated_bytes": 37457920
+  },
+  "evidence_unique_inode_bytes": 37457920,
+  "gate0_hmac_sha256": "a9233975b0055d36572e3c41ca913d0e309e115b8a75a59219c6e3d799de1115",
+  "global_inode_deduplicated_bytes": 53673299968,
+  "global_inode_deduplicated_bytes_including_unlinked_mount_upper_bound": 55109406720,
+  "inventory_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/storage-inventory.json",
+  "inventory_sha256": "39b47bb723358b8e9b9031b217aecfd58a3d323e2dc818f6b7e12745279b0ff7",
+  "manifest_signing_key_sha256": "274cc29bb5bc904224bad3d0c65e0e2516beb69107a870563e0bff1a6e60aaf3",
+  "measurements": {
+    "fgmetal_scoped_allocated_inode_bytes": 45582823424,
+    "free_bytes": 79768526848
+  },
+  "mode": "preflight",
+  "permitted_smoke_experiment_id": "step11d3-storage-policy-smoke-20261007-1b9d0f22399c43e2",
+  "preferred_free_space_met": true,
+  "prefix_count": 2,
+  "prefix_state_fingerprint_sha256": "0e19a3b62cca84597a6f9a92b743e8b06cb3a2fcf7fb403dde866aec539b9a23",
+  "prefixlease_smoke": null,
+  "prefixlease_smoke_status": "PENDING",
+  "preserved_build_count": 0,
+  "preserved_prefix_count": 2,
+  "retained_build_count": 0,
+  "retention_control_sha256": {
+    "artifactize_builds.py": "80b123ccc19442ea5f883523222d2db67e45df8e7ad0693ec8535b5129895740",
+    "build_retention.py": "00d4546c31089a8a37caf2356c638a9d72b951435638d44b7a44b56b7765e9b2",
+    "consolidate_evidence.py": "ba9b0214225b6c90015ceb6cca2b0df2b2aee83bd5314dd4c1abe5e8cf8d2491",
+    "prefix_preflight.py": "888afd7ac36aa528bdb1548bee5449a688b25824ba7625101f10aea76562233b",
+    "smoke_prefix_lease.py": "2793ba4b952d284f741681e33b443b3dda55b3178d86ea0659831d214722e406",
+    "storage_gate0.py": "791e539862214610c65bdd0453eae8fcd96de37693f87d681246d15822eb4b8a",
+    "storage_inventory.py": "245e6b7ce314791d3542c1f439dbd3ca7a44bca8a12f7684e4ad249d6c747f02",
+    "storage_policy.py": "d19ce94784e989a28148e3a06a9f5ca459688977ac2ac679d482fef9aab05896",
+    "test_build_retention.py": "b434c177611d54c564b05915f07e329d2b9654a788d26882ced10c8e03fef626",
+    "test_evidence_consolidation.py": "89e510178c9d200dc17eeed737d352fe00c5aa45dc9fc449aa97fcd7821ef4d2",
+    "test_g0c_checks.py": "16760afa087779de5823e50071a290c51ecff4846763c96d4ebc3070efc129b1",
+    "test_storage_policy.py": "cef1aec6b333641eea97f5c21fa9ac5d6b9e376cee472df12775c845f6bf9808",
+    "test_wine_launcher_policy.py": "46e20bd1c495e45170bd4bb383df5e115c44fb2b63c76e353e6122d1907c8a00"
+  },
+  "runner_admission_contract": "prefixlease-scoped-managed-process-v16",
+  "schema_version": 1,
+  "state_fingerprint": {
+    "active_prefix_lease_count": 0,
+    "artifact_store_size": {
+      "file_count": 2086,
+      "logical_bytes": 28217482001,
+      "unique_inode_allocated_bytes": 28226011136
+    },
+    "build_retention_fingerprint_sha256": "904c14621f10b5f7fcbbd1330c67066db9b6f2f157b7b8d72b261f2758da1cb2",
+    "build_retention_state": {
+      "active_build_count": 0,
+      "active_dxvk_count": 0,
+      "active_moltenvk_count": 0,
+      "completed_pending_retirement_count": 0,
+      "failed_or_retiring_count": 0,
+      "preserved_build_count": 0,
+      "retained_build_count": 0,
+      "retention_fingerprint_sha256": "904c14621f10b5f7fcbbd1330c67066db9b6f2f157b7b8d72b261f2758da1cb2",
+      "unknown_count": 0
+    },
+    "canonical_artifact_store_audit": {
+      "artifact_count": 1043,
+      "sha256": "16986c096db6ad093a9554a546c7e7bed1d17c63514361fa828f81c817df978e",
+      "shared_or_recovering_payload_count": 827,
+      "shared_payload_logical_bytes": 18369387929
+    },
+    "evidence_size": {
+      "file_count": 479,
+      "logical_bytes": 36266069,
+      "unique_inode_allocated_bytes": 37457920
+    },
+    "fgmetal_scoped_allocated_inode_bytes": 45582823424,
+    "fgmetal_scoped_unlinked_mount_backing_upper_bound_bytes": 1436106752,
+    "free_bytes": 79768526848,
+    "global_inode_deduplicated_bytes_including_unlinked_mount_upper_bound": 55109406720,
+    "inventory_sha256": "39b47bb723358b8e9b9031b217aecfd58a3d323e2dc818f6b7e12745279b0ff7",
+    "prefix_state_fingerprint_sha256": "0e19a3b62cca84597a6f9a92b743e8b06cb3a2fcf7fb403dde866aec539b9a23",
+    "preserved_prefix_count": 2,
+    "uncertified_prefix_count": 0,
+    "worktree_count": 3
+  },
+  "status": "PREFLIGHT_PASS",
+  "supplemental_evidence_sha256": {
+    "g0c-checks-tests.log": "f798d503503066d670d1417718899cb626dedbd1c816b38e0a5654e998e71829",
+    "g0c-consolidation-tests.log": "4a0d3f93452294970f7f24514736e2b4d692bc488bc699c600dec72a71ed2d71",
+    "g0c-evidence-consolidation-plan.json": "3c7a6caced2bd08c6899945f4d72be338684c7c23f956f588c7942f18c949dce",
+    "g0c-evidence-consolidation-receipt.json": "91a2e959bee1565eb560e23d09c5b8db4ecace1610feb465c48524ac4cf9cae6",
+    "g0c-hardlink-audit.json": "7087de7cb91a58dd716e9ca265b2e3e0c9900f52fa03822e7127f7625f6b4395",
+    "g0c-launcher-independent-review.json": "c02ba34697c6f8e59a98d4912f83a41c9d5124c3d7efa35cbeb8f914fa880758",
+    "g0c-launcher-tests.log": "5554d8f83ec0e4d673dc8e09bd18ad6ba336b3fd88b4fbd8fec088e998fbaf92"
+  },
+  "template_file_count": 4916,
+  "template_marker_sha256": "0fc02b464ab0a395d96afa5b354e138c6bba4a151e697e21cb7e13d62342f267",
+  "template_tree_sha256": "ae988563274640344b546eaceba72a12d0e5f674b8d9b29ae196711331969155",
+  "uncertified_prefix_count": 0,
+  "worktree_count": 3
+}

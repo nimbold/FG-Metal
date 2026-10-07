@@ -1,0 +1,19 @@
+[
+  "/private/tmp/fgmetal-step11d-r-work/meson.build",
+  "/private/tmp/fgmetal-step11d-r-work/meson_options.txt",
+  "/private/tmp/fgmetal-step11d-r-work/subprojects/libdisplay-info/meson.build",
+  "/private/tmp/fgmetal-step11d-r-work/subprojects/dxbc-spirv/meson.build",
+  "/private/tmp/fgmetal-step11d-r-work/subprojects/dxbc-spirv/meson_options.txt",
+  "/private/tmp/fgmetal-step11d-r-work/buildenv.h.in",
+  "/private/tmp/fgmetal-step11d-r-work/src/meson.build",
+  "/private/tmp/fgmetal-step11d-r-work/src/wsi/meson.build",
+  "/private/tmp/fgmetal-step11d-r-work/src/util/meson.build",
+  "/private/tmp/fgmetal-step11d-r-work/src/spirv/meson.build",
+  "/private/tmp/fgmetal-step11d-r-work/src/vulkan/meson.build",
+  "/private/tmp/fgmetal-step11d-r-work/src/dxvk/meson.build",
+  "/private/tmp/fgmetal-step11d-r-work/src/dxgi/meson.build",
+  "/private/tmp/fgmetal-step11d-r-work/src/d3d11/meson.build",
+  "/private/tmp/fgmetal-step11d-r-work/src/d3d10/meson.build",
+  "/private/tmp/fgmetal-step11d-r-work/src/d3d9/meson.build",
+  "/private/tmp/fgmetal-step11d-r-work/src/d3d8/meson.build"
+]

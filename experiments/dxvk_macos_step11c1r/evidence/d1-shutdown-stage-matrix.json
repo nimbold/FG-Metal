@@ -1,0 +1,108 @@
+{
+  "cases": [
+    {
+      "index": 0,
+      "stage": "empty",
+      "exit_status": 0,
+      "wall_seconds": 0.533,
+      "stage_result": "stage=empty phase=presenter-shutdown-entered wait=0\nstage=empty phase=stopped wait=0\nstage=empty phase=presenter-shutdown-entered wait=0\nstage=empty phase=stopped wait=0\nstage=empty phase=presenter-shutdown-entered wait=0\nstage=empty phase=stopped wait=0\nstage=empty phase=presenter-shutdown-entered wait=0\nstage=empty phase=stopped wait=0\nstage=empty phase=presenter-shutdown-entered wait=0\nstage=empty phase=stopped wait=0\nstage=empty phase=presenter-shutdown-entered wait=0\nstage=empty phase=stopped wait=0\nstage=empty phase=presenter-shutdown-entered wait=0\nstage=empty phase=stopped wait=0",
+      "stage_gate_entered": true,
+      "presenter_shutdown_reached": true,
+      "normal_shutdown_invariants": 1,
+      "loaded_pinned_mvk": true
+    },
+    {
+      "index": 1,
+      "stage": "armed",
+      "exit_status": 0,
+      "wall_seconds": 0.597,
+      "stage_result": "stage=armed phase=presenter-shutdown-entered wait=0\nstage=armed phase=stopped wait=0\nstage=armed phase=presenter-shutdown-entered wait=0\nstage=armed phase=stopped wait=0\nstage=armed phase=presenter-shutdown-entered wait=0\nstage=armed phase=stopped wait=0\nstage=armed phase=presenter-shutdown-entered wait=0\nstage=armed phase=stopped wait=0\nstage=armed phase=presenter-shutdown-entered wait=0\nstage=armed phase=stopped wait=0\nstage=armed phase=presenter-shutdown-entered wait=0\nstage=armed phase=stopped wait=0\nstage=armed phase=presenter-shutdown-entered wait=0\nstage=armed phase=stopped wait=0",
+      "stage_gate_entered": true,
+      "presenter_shutdown_reached": true,
+      "normal_shutdown_invariants": 1,
+      "loaded_pinned_mvk": true
+    },
+    {
+      "index": 2,
+      "stage": "claimed",
+      "exit_status": 0,
+      "wall_seconds": 0.658,
+      "stage_result": "stage=claimed phase=presenter-shutdown-entered wait=0\nstage=claimed phase=stopped wait=0\nstage=claimed phase=presenter-shutdown-entered wait=0\nstage=claimed phase=stopped wait=0\nstage=claimed phase=presenter-shutdown-entered wait=0\nstage=claimed phase=stopped wait=0\nstage=claimed phase=presenter-shutdown-entered wait=0\nstage=claimed phase=stopped wait=0\nstage=claimed phase=presenter-shutdown-entered wait=0\nstage=claimed phase=stopped wait=0\nstage=claimed phase=presenter-shutdown-entered wait=0\nstage=claimed phase=stopped wait=0\nstage=claimed phase=presenter-shutdown-entered wait=0\nstage=claimed phase=stopped wait=0",
+      "stage_gate_entered": true,
+      "presenter_shutdown_reached": true,
+      "normal_shutdown_invariants": 1,
+      "loaded_pinned_mvk": true
+    },
+    {
+      "index": 3,
+      "stage": "image-acquired",
+      "exit_status": 0,
+      "wall_seconds": 0.655,
+      "stage_result": "stage=image-acquired phase=presenter-shutdown-entered wait=0\nstage=image-acquired phase=stopped wait=0\nstage=image-acquired phase=presenter-shutdown-entered wait=0\nstage=image-acquired phase=stopped wait=0\nstage=image-acquired phase=presenter-shutdown-entered wait=0\nstage=image-acquired phase=stopped wait=0\nstage=image-acquired phase=presenter-shutdown-entered wait=0\nstage=image-acquired phase=stopped wait=0\nstage=image-acquired phase=presenter-shutdown-entered wait=0\nstage=image-acquired phase=stopped wait=0\nstage=image-acquired phase=presenter-shutdown-entered wait=0\nstage=image-acquired phase=stopped wait=0\nstage=image-acquired phase=presenter-shutdown-entered wait=0\nstage=image-acquired phase=stopped wait=0",
+      "stage_gate_entered": true,
+      "presenter_shutdown_reached": true,
+      "normal_shutdown_invariants": 1,
+      "loaded_pinned_mvk": true
+    },
+    {
+      "index": 4,
+      "stage": "command-recording",
+      "exit_status": 0,
+      "wall_seconds": 0.592,
+      "stage_result": "stage=command-recording phase=presenter-shutdown-entered wait=0\nstage=command-recording phase=stopped wait=0\nstage=command-recording phase=presenter-shutdown-entered wait=0\nstage=command-recording phase=stopped wait=0\nstage=command-recording phase=presenter-shutdown-entered wait=0\nstage=command-recording phase=stopped wait=0\nstage=command-recording phase=presenter-shutdown-entered wait=0\nstage=command-recording phase=stopped wait=0\nstage=command-recording phase=presenter-shutdown-entered wait=0\nstage=command-recording phase=stopped wait=0\nstage=command-recording phase=presenter-shutdown-entered wait=0\nstage=command-recording phase=stopped wait=0\nstage=command-recording phase=presenter-shutdown-entered wait=0\nstage=command-recording phase=stopped wait=0",
+      "stage_gate_entered": true,
+      "presenter_shutdown_reached": true,
+      "normal_shutdown_invariants": 1,
+      "loaded_pinned_mvk": true
+    },
+    {
+      "index": 5,
+      "stage": "submission-queued",
+      "exit_status": 0,
+      "wall_seconds": 0.599,
+      "stage_result": "stage=submission-queued phase=presenter-shutdown-entered wait=0\nstage=submission-queued phase=stopped wait=0\nstage=submission-queued phase=presenter-shutdown-entered wait=0\nstage=submission-queued phase=stopped wait=0\nstage=submission-queued phase=presenter-shutdown-entered wait=0\nstage=submission-queued phase=stopped wait=0\nstage=submission-queued phase=presenter-shutdown-entered wait=0\nstage=submission-queued phase=stopped wait=0\nstage=submission-queued phase=presenter-shutdown-entered wait=0\nstage=submission-queued phase=stopped wait=0\nstage=submission-queued phase=presenter-shutdown-entered wait=0\nstage=submission-queued phase=stopped wait=0\nstage=submission-queued phase=presenter-shutdown-entered wait=0\nstage=submission-queued phase=stopped wait=0",
+      "stage_gate_entered": true,
+      "presenter_shutdown_reached": true,
+      "normal_shutdown_invariants": 1,
+      "loaded_pinned_mvk": true
+    },
+    {
+      "index": 6,
+      "stage": "gpu-pending",
+      "exit_status": 0,
+      "wall_seconds": 0.633,
+      "stage_result": "stage=gpu-pending phase=presenter-shutdown-entered wait=0\nstage=gpu-pending phase=stopped wait=0\nstage=gpu-pending phase=presenter-shutdown-entered wait=0\nstage=gpu-pending phase=stopped wait=0\nstage=gpu-pending phase=presenter-shutdown-entered wait=0\nstage=gpu-pending phase=stopped wait=0\nstage=gpu-pending phase=presenter-shutdown-entered wait=0\nstage=gpu-pending phase=stopped wait=0\nstage=gpu-pending phase=presenter-shutdown-entered wait=0\nstage=gpu-pending phase=stopped wait=0\nstage=gpu-pending phase=presenter-shutdown-entered wait=0\nstage=gpu-pending phase=stopped wait=0\nstage=gpu-pending phase=presenter-shutdown-entered wait=0\nstage=gpu-pending phase=stopped wait=0",
+      "stage_gate_entered": true,
+      "presenter_shutdown_reached": true,
+      "normal_shutdown_invariants": 1,
+      "loaded_pinned_mvk": true
+    },
+    {
+      "index": 7,
+      "stage": "present-pending",
+      "exit_status": 0,
+      "wall_seconds": 0.865,
+      "stage_result": "stage=present-pending phase=presenter-shutdown-entered wait=0\nstage=present-pending phase=stopped wait=0\nstage=present-pending phase=presenter-shutdown-entered wait=0\nstage=present-pending phase=stopped wait=0\nstage=present-pending phase=presenter-shutdown-entered wait=0\nstage=present-pending phase=stopped wait=0\nstage=present-pending phase=presenter-shutdown-entered wait=0\nstage=present-pending phase=stopped wait=0\nstage=present-pending phase=presenter-shutdown-entered wait=0\nstage=present-pending phase=stopped wait=0\nstage=present-pending phase=presenter-shutdown-entered wait=0\nstage=present-pending phase=stopped wait=0\nstage=present-pending phase=presenter-shutdown-entered wait=0\nstage=present-pending phase=stopped wait=0",
+      "stage_gate_entered": true,
+      "presenter_shutdown_reached": true,
+      "normal_shutdown_invariants": 1,
+      "loaded_pinned_mvk": true
+    },
+    {
+      "index": 8,
+      "stage": "retirement-pending",
+      "exit_status": 0,
+      "wall_seconds": 0.603,
+      "stage_result": "stage=retirement-pending phase=presenter-shutdown-entered wait=0\nstage=retirement-pending phase=stopped wait=0\nstage=retirement-pending phase=presenter-shutdown-entered wait=0\nstage=retirement-pending phase=stopped wait=0\nstage=retirement-pending phase=presenter-shutdown-entered wait=0\nstage=retirement-pending phase=stopped wait=0\nstage=retirement-pending phase=presenter-shutdown-entered wait=0\nstage=retirement-pending phase=stopped wait=0\nstage=retirement-pending phase=presenter-shutdown-entered wait=0\nstage=retirement-pending phase=stopped wait=0\nstage=retirement-pending phase=presenter-shutdown-entered wait=0\nstage=retirement-pending phase=stopped wait=0\nstage=retirement-pending phase=presenter-shutdown-entered wait=0\nstage=retirement-pending phase=stopped wait=0",
+      "stage_gate_entered": true,
+      "presenter_shutdown_reached": true,
+      "normal_shutdown_invariants": 1,
+      "loaded_pinned_mvk": true
+    }
+  ],
+  "all_exited_zero": true,
+  "all_stage_gates_reached": true,
+  "all_presenter_shutdowns_reached": true,
+  "all_normal_shutdown_invariants": true,
+  "all_loaded_pinned_mvk": true
+}

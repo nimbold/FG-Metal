@@ -1,0 +1,61 @@
+2026-10-08 00:52:51.660 xcodebuild[96131:9117030]  DVTFilePathFSEvents: Failed to start fs event stream.
+2026-10-08 00:52:51.820 xcodebuild[96131:9117028] [MT] DVTDeveloperPaths: Failed to get length of DARWIN_USER_CACHE_DIR from confstr(3), error = Error Domain=NSPOSIXErrorDomain Code=5 "Input/output error". Using NSCachesDirectory instead.
+2026-10-08 00:52:52.177 xcodebuild[96131:9117030] CoreSimulatorService connection became invalid.  Simulator services will no longer be available.
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild -project /Users/nima/Library/Caches/FGMetal/builds/step11d3a-mvk-x86_64-20261008-02/MoltenVKSource/MoltenVK/MoltenVK.xcodeproj -scheme MoltenVK-macOS-dylib -configuration Release -sdk macosx -destination platform=macOS,arch=x86_64 -derivedDataPath /Users/nima/Library/Caches/FGMetal/builds/step11d3a-mvk-x86_64-20261008-02/DerivedData SYMROOT=/Users/nima/Library/Caches/FGMetal/builds/step11d3a-mvk-x86_64-20261008-02/Build/Products OBJROOT=/Users/nima/Library/Caches/FGMetal/builds/step11d3a-mvk-x86_64-20261008-02/Build/Intermediates.noindex CLANG_MODULE_CACHE_PATH=/Users/nima/Library/Caches/FGMetal/builds/step11d3a-mvk-x86_64-20261008-02/ModuleCache COMPILATION_CACHE_CAS_PATH=/Users/nima/Library/Caches/FGMetal/builds/step11d3a-mvk-x86_64-20261008-02/CompilationCache COMPILER_INDEX_STORE_ENABLE=NO SDK_STAT_CACHE_ENABLE=NO ARCHS=x86_64 ONLY_ACTIVE_ARCH=NO CODE_SIGNING_ALLOWED=NO MACOSX_DEPLOYMENT_TARGET=12.0 DEBUG_INFORMATION_FORMAT=dwarf build
+
+Build settings from command line:
+    ARCHS = x86_64
+    CLANG_MODULE_CACHE_PATH = /Users/nima/Library/Caches/FGMetal/builds/step11d3a-mvk-x86_64-20261008-02/ModuleCache
+    CODE_SIGNING_ALLOWED = NO
+    COMPILATION_CACHE_CAS_PATH = /Users/nima/Library/Caches/FGMetal/builds/step11d3a-mvk-x86_64-20261008-02/CompilationCache
+    COMPILER_INDEX_STORE_ENABLE = NO
+    DEBUG_INFORMATION_FORMAT = dwarf
+    MACOSX_DEPLOYMENT_TARGET = 12.0
+    OBJROOT = /Users/nima/Library/Caches/FGMetal/builds/step11d3a-mvk-x86_64-20261008-02/Build/Intermediates.noindex
+    ONLY_ACTIVE_ARCH = NO
+    SDK_STAT_CACHE_ENABLE = NO
+    SDKROOT = macosx27.0
+    SYMROOT = /Users/nima/Library/Caches/FGMetal/builds/step11d3a-mvk-x86_64-20261008-02/Build/Products
+
+2026-10-08 00:52:52.283 xcodebuild[96131:9117028] [MT] DVTAssertions: Warning in DVTFrameworks/DVTFoundation/FileTypes/DVTFileDataTypeDetection.m:80
+Details:  detectedTypeIdentifier (com.apple.binary-property-list) does not conform to matchedTypeIdentifier in MagicFileDataTypeDetector extenson com.apple.property-list. When both are specified, this conformance is required unless overridden by setting allowNonInheritance. extension.identifier:Xcode.MagicFileDataTypeDetector.BinaryPlist
+Object:   <DVTFileDataTypeDetectionMagicCache: 0x76b26b5980>
+Method:   -initWithExtension:
+Thread:   <_NSMainThread: 0x104def210>{number = 1, name = main}
+Please file a bug at https://feedbackassistant.apple.com with this warning message and any useful information you can provide.
+2026-10-08 00:52:52.283 xcodebuild[96131:9117028] [MT] DVTAssertions: Warning in DVTFrameworks/DVTFoundation/FileTypes/DVTFileDataTypeDetection.m:80
+Details:  detectedTypeIdentifier (com.apple.xml-property-list) does not conform to matchedTypeIdentifier in MagicFileDataTypeDetector extenson com.apple.property-list. When both are specified, this conformance is required unless overridden by setting allowNonInheritance. extension.identifier:Xcode.MagicFileDataTypeDetector.XMLPlist
+Object:   <DVTFileDataTypeDetectionMagicCache: 0x76b26b5980>
+Method:   -initWithExtension:
+Thread:   <_NSMainThread: 0x104def210>{number = 1, name = main}
+Please file a bug at https://feedbackassistant.apple.com with this warning message and any useful information you can provide.
+2026-10-08 00:52:52.310 xcodebuild[96131:9117028] *** -[NSString fileSystemRepresentation]: Cannot form file system representation of empty string
+2026-10-08 00:52:52.313 xcodebuild[96131:9117067] Logging connecton invalid: <OS_xpc_error: <dictionary: 0x1e96dcb60> { count = 1, transaction: 0, voucher = 0x0, contents =
+	"XPCErrorDescription" => <string: 0x1e96dcca0> { string cache = 0x0, length = 18, contents = "Connection invalid" }
+}>
+[-[SimServiceContext initWithDeveloperDir:connectionType:error:]:499] WARN  : Unable to discover any Simulator runtimes. Developer Directory is /Applications/Xcode.app/Contents/Developer.
+[-[SimDiskImageManager init]:175] ERROR : Could not kickstart simdiskimaged; SimDiskImageManager services will not be available: Error Domain=NSPOSIXErrorDomain Code=53 "Software caused connection abort" UserInfo={NSLocalizedDescription=Error returned in reply from CoreSimulatorService: Connection invalid}
+[-[SimServiceContext initWithDeveloperDir:connectionType:error:]_block_invoke:556] ERROR : Could not get list of trusted mount directories: Error Domain=com.apple.CoreSimulator.SimError Code=409 "Cannot talk to the service used to manage runtime disk images (simdiskimaged) because its launchd job is not registered or was unloaded" UserInfo={NSLocalizedDescription=Cannot talk to the service used to manage runtime disk images (simdiskimaged) because its launchd job is not registered or was unloaded}
+[-[SimDiskImageManager _onQueue_checkConnection:]:239] ERROR : simdiskimaged returned error (invalid), marking disconnected.
+[-[SimDiskImageManager _onQueue_checkConnection:]:219] ERROR : simdiskimaged connection is currently unavailable because connection became invalid
+[-[SimServiceContext sendRequest:reply:error:]:1982] ERROR : Unable to deliver request ({
+    request = "notification_subscription";
+    "set_path" = "~/Library/Developer/CoreSimulator/Devices";
+}) because we are not connected to CoreSimulatorService.
+2026-10-08 00:52:52.314 xcodebuild[96131:9117062] Error Domain=NSPOSIXErrorDomain Code=61 "Connection refused" UserInfo={NSLocalizedDescription=CoreSimulatorService connection became invalid.  Simulator services will no longer be available.}
+2026-10-08 00:52:52.314 xcodebuild[96131:9117028] Writing error result bundle to /Users/nima/Library/Caches/FGMetal/builds/step11d3a-mvk-x86_64-20261008-02/.tmp/ResultBundle_2026-08-10_00-52-0052.xcresult
+[-[SimServiceContext sendRequest:reply:error:]:1982] ERROR : Unable to deliver request ({
+    request = "notification_subscription";
+    "set_path" = "~/Library/Developer/CoreSimulator/Devices";
+}) because we are not connected to CoreSimulatorService.
+2026-10-08 00:52:52.315 xcodebuild[96131:9117062]  iOSSimulator: [SimServiceContext defaultDeviceSetWithError:] returned nil (Error Domain=NSPOSIXErrorDomain Code=61 "Connection refused" UserInfo={NSLocalizedFailureReason=Failed to subscribe to notifications from CoreSimulatorService., NSLocalizedDescription=Failed to initialize simulator device set., NSUnderlyingError=0x76b26d0660 {Error Domain=NSPOSIXErrorDomain Code=61 "Connection refused" UserInfo={NSLocalizedDescription=CoreSimulatorService connection became invalid.  Simulator services will no longer be available.}}}). Simulator device support disabled.
+2026-10-08 00:52:52.315 xcodebuild[96131:9117029] Error Domain=NSPOSIXErrorDomain Code=61 "Connection refused" UserInfo={NSLocalizedDescription=CoreSimulatorService connection became invalid.  Simulator services will no longer be available.}
+2026-10-08 00:52:52.315 xcodebuild[96131:9117029]  IDESimulatorAvailability: startObservingSimulatorUpdates() FAILED to register SimDeviceSet observer
+xcodebuild: error: Unable to read project 'MoltenVK.xcodeproj' from folder '/Users/nima/Library/Caches/FGMetal/builds/step11d3a-mvk-x86_64-20261008-02/MoltenVKSource/MoltenVK'.
+	Reason: The project “MoltenVK” is damaged and cannot be opened. Examine the project file for invalid edits or unresolved source control conflicts.
+
+Path: /Users/nima/Library/Caches/FGMetal/builds/step11d3a-mvk-x86_64-20261008-02/MoltenVKSource/MoltenVK/MoltenVK.xcodeproj
+Exception: *** -[NSString fileSystemRepresentation]: Cannot form file system representation of empty string
+
+

@@ -1,0 +1,57 @@
+{
+  "changed_registry_files": {},
+  "dosdevices": {
+    "c:": "../drive_c",
+    "z:": "/"
+  },
+  "dosdevices_changed": false,
+  "prefix": {
+    "dosdevices": {
+      "c:": "../drive_c",
+      "z:": "/"
+    },
+    "files": {
+      "system.reg": {
+        "sha256": "8bce468e3905ac28ce97a9ad1b89f363e0897bb963652998aaceaf7b71d27326",
+        "size_bytes": 3460218
+      },
+      "user.reg": {
+        "sha256": "12633aaf37c4dc52c1c166f05ee879b57ca339e82d0bdd94361015c5b560491c",
+        "size_bytes": 22428
+      },
+      "userdef.reg": {
+        "sha256": "bede419f3e7f5a2cc732bba441b4505f8a6e6220dc4bfee092d8daeed0d87a8b",
+        "size_bytes": 4026
+      }
+    },
+    "path": "/Users/nima/Library/Caches/FGMetal/prefixes/smoke-20261006T205847Z-step11d3-prefix-lease-smoke-c84c87f7"
+  },
+  "registry_diff": {
+    "compressed_bytes": 0,
+    "path": null,
+    "sha256": null,
+    "uncompressed_bytes": 0
+  },
+  "template": {
+    "dosdevices": {
+      "c:": "../drive_c",
+      "z:": "/"
+    },
+    "files": {
+      "system.reg": {
+        "sha256": "8bce468e3905ac28ce97a9ad1b89f363e0897bb963652998aaceaf7b71d27326",
+        "size_bytes": 3460218
+      },
+      "user.reg": {
+        "sha256": "12633aaf37c4dc52c1c166f05ee879b57ca339e82d0bdd94361015c5b560491c",
+        "size_bytes": 22428
+      },
+      "userdef.reg": {
+        "sha256": "bede419f3e7f5a2cc732bba441b4505f8a6e6220dc4bfee092d8daeed0d87a8b",
+        "size_bytes": 4026
+      }
+    },
+    "path": "/Users/nima/Library/Caches/FGMetal/prefixes/wine-11.17-mvk142-pristine"
+  },
+  "template_tree_sha256": "ae988563274640344b546eaceba72a12d0e5f674b8d9b29ae196711331969155"
+}

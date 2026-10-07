@@ -1,0 +1,19 @@
+[
+  "/private/tmp/fgmetal-step11d-r-cache-source/meson.build",
+  "/private/tmp/fgmetal-step11d-r-cache-source/meson_options.txt",
+  "/private/tmp/fgmetal-step11d-r-cache-source/subprojects/libdisplay-info/meson.build",
+  "/private/tmp/fgmetal-step11d-r-cache-source/subprojects/dxbc-spirv/meson.build",
+  "/private/tmp/fgmetal-step11d-r-cache-source/subprojects/dxbc-spirv/meson_options.txt",
+  "/private/tmp/fgmetal-step11d-r-cache-source/buildenv.h.in",
+  "/private/tmp/fgmetal-step11d-r-cache-source/src/meson.build",
+  "/private/tmp/fgmetal-step11d-r-cache-source/src/wsi/meson.build",
+  "/private/tmp/fgmetal-step11d-r-cache-source/src/util/meson.build",
+  "/private/tmp/fgmetal-step11d-r-cache-source/src/spirv/meson.build",
+  "/private/tmp/fgmetal-step11d-r-cache-source/src/vulkan/meson.build",
+  "/private/tmp/fgmetal-step11d-r-cache-source/src/dxvk/meson.build",
+  "/private/tmp/fgmetal-step11d-r-cache-source/src/dxgi/meson.build",
+  "/private/tmp/fgmetal-step11d-r-cache-source/src/d3d11/meson.build",
+  "/private/tmp/fgmetal-step11d-r-cache-source/src/d3d10/meson.build",
+  "/private/tmp/fgmetal-step11d-r-cache-source/src/d3d9/meson.build",
+  "/private/tmp/fgmetal-step11d-r-cache-source/src/d3d8/meson.build"
+]

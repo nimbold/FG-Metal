@@ -1,0 +1,133 @@
+{
+  "run": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11dR/evidence/cadence-repeatability-r5-20261006/B1",
+  "source_hz_requested": 30,
+  "duration_seconds_requested": 300,
+  "duration_seconds_app_measured": 300.059442,
+  "source_present_rows": 8999,
+  "source_hz_measured": 29.9907,
+  "source_wsi_presents": 8999,
+  "metal_jobs_committed": 7012,
+  "vulkan_consumer_attempts": 4749,
+  "vulkan_done_wait_submits": 4647,
+  "metal_internal_wsi_present_attempts": 4647,
+  "internal_wsi_successful_retirements": 4647,
+  "internal_wsi_present_records": 4647,
+  "combined_wsi_present_records": 13646,
+  "combined_wsi_hz": 45.4777,
+  "internal_opportunity_drops": 2364,
+  "metal_drop_records": 1987,
+  "internal_drop_reasons": {
+    "queue-full": 2203,
+    "lease-validation-before-submit generation=2": 99,
+    "source-queue-nonempty generation=2": 5,
+    "source-pending generation=2": 52,
+    "presenter-busy generation=2": 2,
+    "source-or-swapchain-conflict-before-submit generation=2": 3
+  },
+  "internal_drop_reason_classes": {
+    "queue-full": 2203,
+    "lease-validation-before-submit": 99,
+    "source-queue-nonempty": 5,
+    "source-pending": 52,
+    "presenter-busy": 2,
+    "source-or-swapchain-conflict-before-submit": 3
+  },
+  "internal_failed_retirements": 99,
+  "internal_failed_retirement_statuses": {
+    "VK_ERROR_VALIDATION_FAILED_EXT": 99
+  },
+  "metal_drop_examples": [
+    "info:  MetalInterop: dropped AppFrameId=19 reason=no-free-history-output-slot generation=2",
+    "info:  MetalInterop: dropped AppFrameId=43 reason=no-free-history-output-slot generation=2",
+    "info:  MetalInterop: dropped AppFrameId=103 reason=no-free-history-output-slot generation=2",
+    "info:  MetalInterop: dropped AppFrameId=106 reason=no-free-history-output-slot generation=2",
+    "info:  MetalInterop: dropped AppFrameId=193 reason=no-free-history-output-slot generation=2",
+    "info:  MetalInterop: dropped AppFrameId=224 reason=no-free-history-output-slot generation=2",
+    "info:  MetalInterop: dropped AppFrameId=227 reason=no-free-history-output-slot generation=2",
+    "info:  MetalInterop: dropped AppFrameId=230 reason=no-free-history-output-slot generation=2",
+    "info:  MetalInterop: dropped AppFrameId=283 reason=no-free-history-output-slot generation=2",
+    "info:  MetalInterop: dropped AppFrameId=286 reason=no-free-history-output-slot generation=2",
+    "info:  MetalInterop: dropped AppFrameId=289 reason=no-free-history-output-slot generation=2",
+    "info:  MetalInterop: dropped AppFrameId=313 reason=no-free-history-output-slot generation=2",
+    "info:  MetalInterop: dropped AppFrameId=316 reason=no-free-history-output-slot generation=2",
+    "info:  MetalInterop: dropped AppFrameId=363 reason=no-free-history-output-slot generation=2",
+    "info:  MetalInterop: dropped AppFrameId=366 reason=no-free-history-output-slot generation=2",
+    "info:  MetalInterop: dropped AppFrameId=369 reason=no-free-history-output-slot generation=2",
+    "info:  MetalInterop: dropped AppFrameId=463 reason=no-free-history-output-slot generation=2",
+    "info:  MetalInterop: dropped AppFrameId=466 reason=no-free-history-output-slot generation=2",
+    "info:  MetalInterop: dropped AppFrameId=553 reason=no-free-history-output-slot generation=2",
+    "info:  MetalInterop: dropped AppFrameId=556 reason=no-free-history-output-slot generation=2"
+  ],
+  "error_records": [],
+  "latency_us_or_ns": {
+    "source_present_cpu_us": {
+      "count": 8999,
+      "p50": 273,
+      "p95": 4457,
+      "p99": 16616,
+      "max": 43962
+    },
+    "source_copy_record_us": {
+      "count": 7012,
+      "p50": 46,
+      "p95": 225,
+      "p99": 387,
+      "max": 2090
+    },
+    "ready_to_metal_commit_us": {
+      "count": 7012,
+      "p50": 2416,
+      "p95": 12912,
+      "p99": 17737,
+      "max": 39667
+    },
+    "capture_to_retire_us": {
+      "count": 7011,
+      "p50": 35234,
+      "p95": 114346,
+      "p99": 188776,
+      "max": 248639
+    },
+    "terminal_to_retire_us": {
+      "count": 7011,
+      "p50": 10235,
+      "p95": 65102,
+      "p99": 114332,
+      "max": 166006
+    },
+    "internal_created_to_record_end_ns": {
+      "count": 0,
+      "p50": null,
+      "p95": null,
+      "p99": null,
+      "max": null
+    },
+    "internal_record_end_to_submit_ns": {
+      "count": 0,
+      "p50": null,
+      "p95": null,
+      "p99": null,
+      "max": null
+    },
+    "internal_submit_to_retire_ns": {
+      "count": 0,
+      "p50": null,
+      "p95": null,
+      "p99": null,
+      "max": null
+    }
+  },
+  "moltenvk_1_4_2_reported": true,
+  "moltenvk_loaded_paths": [
+    "/Users/nima/Library/Caches/FGMetalStep11C1R/moltenvk-loader-override/libMoltenVK.1.dylib"
+  ],
+  "dll_sha256": {
+    "d3d11.dll": "e747ca5a5c2087d1f788762a5c4bae13939593a2cb89dedf2f7c04999ab94de5",
+    "dxgi.dll": "58e972688c739ee8444c8efa7a175503ff8dd0774ceb63e9b8526168054d9132",
+    "FGMetalBridge.dll": "44cdaa3ff503a1beb3afd735620c3b33eac4bca17377fa78e5c3be5f852c18cf",
+    "fgmetalbridge.so": "033e3a8cbd957b1e16131fc690256aba8684d51b17688514a5ff7eaa351c2fe2"
+  },
+  "app_sha256": "f9e581029c215edc2ecad46f5c22cc1b0b0cfc8d17fbaec5f7d96667fc556169",
+  "screen_capture": false,
+  "cpu_pixel_readback": false
+}

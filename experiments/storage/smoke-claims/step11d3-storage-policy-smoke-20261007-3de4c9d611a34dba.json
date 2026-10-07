@@ -1,0 +1,12 @@
+{
+  "claim_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/smoke-claims/step11d3-storage-policy-smoke-20261007-3de4c9d611a34dba.json",
+  "claim_reason": "PrefixLease smoke allocation",
+  "claimed_at_unix": 1791408907.516814,
+  "experiment_id": "step11d3-storage-policy-smoke-20261007-3de4c9d611a34dba",
+  "pid": 97501,
+  "preflight_attestation_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/storage-gate0-attestation.json",
+  "preflight_attestation_sha256": "0c1c7f84f6d1c769e0cabc4c4709c02f5cacbb3e1eb51e2089337a490ddfaa2d",
+  "preflight_created_at_unix": 1791408841.4268138,
+  "schema_version": 1,
+  "smoke_claim_hmac_sha256": "efa50f0980dfad85cd1fbc91b929551a2e9102fc3ede7e2bc5cf338254dd0dda"
+}

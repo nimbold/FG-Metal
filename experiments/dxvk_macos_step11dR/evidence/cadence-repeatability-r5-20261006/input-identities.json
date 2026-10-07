@@ -1,0 +1,18 @@
+{
+  "d3d11.dll": {
+    "path": "/private/tmp/fgmetal-step11d-r-current-r5-build-A-20261006/src/d3d11/d3d11.dll",
+    "sha256": "e747ca5a5c2087d1f788762a5c4bae13939593a2cb89dedf2f7c04999ab94de5"
+  },
+  "dxgi.dll": {
+    "path": "/private/tmp/fgmetal-step11d-r-current-r5-build-A-20261006/src/dxgi/dxgi.dll",
+    "sha256": "58e972688c739ee8444c8efa7a175503ff8dd0774ceb63e9b8526168054d9132"
+  },
+  "FGMetalBridge.dll": {
+    "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/bridge-gpu-proof/build/status-v3-current-20261006/overlay/x86_64-windows/FGMetalBridge.dll",
+    "sha256": "44cdaa3ff503a1beb3afd735620c3b33eac4bca17377fa78e5c3be5f852c18cf"
+  },
+  "fgmetalbridge.so": {
+    "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/bridge-gpu-proof/build/status-v3-current-20261006/overlay/x86_64-unix/fgmetalbridge.so",
+    "sha256": "033e3a8cbd957b1e16131fc690256aba8684d51b17688514a5ff7eaa351c2fe2"
+  }
+}

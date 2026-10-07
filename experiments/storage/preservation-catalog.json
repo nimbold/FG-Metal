@@ -1,0 +1,109 @@
+{
+  "created_at_unix": 1791315963.025501,
+  "patches": [
+    {
+      "path": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11b1/evidence/complete-diagnostics.patch",
+      "sha256": "d0fc1cd22554d7eb63bf3126b4010fc5ecfa8335ef3cb78e58cbc535b3e3344b",
+      "size_bytes": 15077
+    },
+    {
+      "path": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11b1/evidence/constant-diagnostic.patch",
+      "sha256": "89934dc8feb12acce0459f06e1251bd5f0dcb0333d5ac05de2356a659a88a648",
+      "size_bytes": 7793
+    },
+    {
+      "path": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11b1/evidence/final-fix.patch",
+      "sha256": "4f4973000d0ce0783d05e11b7acae0efdff2d6bfe898bf49305408d72280e758",
+      "size_bytes": 547
+    },
+    {
+      "path": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11b1/evidence/source-diagnostic.patch",
+      "sha256": "47202b3b8f07e52ee947d70d604e160575e9d83fdf48fc5db2696d8915dffc06",
+      "size_bytes": 14635
+    },
+    {
+      "path": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11b1/evidence/wsi-diagnostic.patch",
+      "sha256": "ea63f9a01cfbc1ffb5483074699560996f192a2c80e1dba5c4d783742492e389",
+      "size_bytes": 5122
+    },
+    {
+      "path": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11c/patches/internal-presentation-experiment.patch",
+      "sha256": "4df3af55c9491a44d5e8cec79d458bf7cecc18d71b61312b19e80b461023d352",
+      "size_bytes": 108978
+    },
+    {
+      "path": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11c/patches/prerequisite-step11b1.patch",
+      "sha256": "4f4973000d0ce0783d05e11b7acae0efdff2d6bfe898bf49305408d72280e758",
+      "size_bytes": 547
+    },
+    {
+      "path": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11c1r/patches/BC-reconstructed.patch",
+      "sha256": "9f6aa65b3a7fed0b16ed9b2fa50b8361d7ac89c00f52629ccf819867360b0ea2",
+      "size_bytes": 109503
+    },
+    {
+      "path": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11c1r/patches/D1-shutdown-lifetime.patch",
+      "sha256": "a8a9d41b562ae79eae9ee82e3aa1da97562c28a6e6f0c08c7419687d2730b46b",
+      "size_bytes": 61697
+    },
+    {
+      "path": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11c1r/patches/D4-resize-extent.patch",
+      "sha256": "07b460c16b6c7ae670658be2ed24071e4127835543ac4983ae96dcac5170d7b8",
+      "size_bytes": 959
+    },
+    {
+      "path": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11c1r2/patches/D1-shutdown-lifetime.patch",
+      "sha256": "a8a9d41b562ae79eae9ee82e3aa1da97562c28a6e6f0c08c7419687d2730b46b",
+      "size_bytes": 61697
+    },
+    {
+      "path": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11c1r2/patches/D2-condition-variable.patch",
+      "sha256": "3ed09bdbb36dc4ae85dff2ab8a40d5e9d69c1136a8977917a7e6064ac082cc3a",
+      "size_bytes": 3041
+    },
+    {
+      "path": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11c1r2/patches/D4-resize-extent.patch",
+      "sha256": "07b460c16b6c7ae670658be2ed24071e4127835543ac4983ae96dcac5170d7b8",
+      "size_bytes": 959
+    },
+    {
+      "path": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11c1r2/patches/dxbc-spirv-moltenvk.patch",
+      "sha256": "758fa7f7aa2d382fd6b1757d8d8ea68e743ebbda5d7fdc7023f1031de4f166aa",
+      "size_bytes": 1712
+    }
+  ],
+  "r5_source_manifest": {
+    "parsed_top_level_keys": [
+      "base_snapshot_manifest_sha256",
+      "base_source_snapshot",
+      "base_source_tree_sha256",
+      "build_directory",
+      "changed_source_paths",
+      "commands",
+      "created_local",
+      "cross_file",
+      "cross_file_sha256",
+      "dependency_snapshots",
+      "dlls",
+      "environment",
+      "files",
+      "generated_shader_inputs_in_source_tree",
+      "inherited_toolchain_evidence",
+      "meson_options",
+      "source_file_count",
+      "source_patch",
+      "source_patch_sha256",
+      "source_path",
+      "source_total_bytes",
+      "source_tree_hash_algorithm",
+      "source_tree_sha256",
+      "symlink_count",
+      "targets",
+      "tools"
+    ],
+    "path": "/Users/nima/.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/build-repro/current-r5/manifest.json",
+    "sha256": "d03d484d33cc4495616d3bcc0446acd7b3898e9979f82f6a90e66910ee528a44",
+    "source_tree_sha256": "044d03510e5b1c57fead0aed1a31f03105c78b17dcc303d7053b4811ab270c0b"
+  },
+  "schema_version": 1
+}

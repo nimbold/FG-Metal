@@ -1,0 +1,16 @@
+{
+  "canonical_artifact_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f/libvulkan.dylib",
+  "completed_at_unix": 1791344873.807869,
+  "isolated_inode": 93189236,
+  "isolated_link_count": 1,
+  "lease_hmac_sha256": "6e04bd0ffd8aabb65d2cdf41130ab5249a396df7d5f6b3f7f1b52ea34157ff4b",
+  "prepared_at_unix": 1791344873.802311,
+  "previous_inode": 91959023,
+  "previous_link_count": 4,
+  "reason": "Step 11D.3 Gate 0 isolates schema-v1 CAS payloads from mutable build-tree hardlink aliases",
+  "receipt_type": "LEGACY_CAS_HARDLINK_ISOLATION",
+  "result": "DETACHED_WITH_HASH_PRESERVED",
+  "schema_version": 1,
+  "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+  "size_bytes": 10925552
+}
