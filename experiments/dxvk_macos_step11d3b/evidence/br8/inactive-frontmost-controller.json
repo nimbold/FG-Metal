@@ -1,0 +1,67 @@
+[
+  {
+    "run_id": "step11d3b-br8-state-02-20261011-005208-590fa5da",
+    "origin_mach_ns": 890013250091959,
+    "target_pid": 9014,
+    "condition_index": 2
+  },
+  {
+    "requested_loop_second": 1,
+    "start_mach_ns": 890014277144625,
+    "end_mach_ns": 890014358528625,
+    "actor_pid": 9014,
+    "returncode": 0,
+    "stdout": "{\n  \"pid\": 9014,\n  \"mode\": \"frontmost\",\n  \"start_mach_ns\": 890014326312916,\n  \"window_attribute_error\": 0,\n  \"windows\": [\n    {\n      \"AXTitle\": {\n        \"error\": 0,\n        \"value\": \"FG-Metal Step 11D.3-B Bare Vulkan\"\n      },\n      \"AXRole\": {\n        \"error\": 0,\n        \"value\": \"AXWindow\"\n      },\n      \"AXSubrole\": {\n        \"error\": 0,\n        \"value\": \"AXStandardWindow\"\n      },\n      \"AXMain\": {\n        \"error\": 0,\n        \"value\": true\n      },\n      \"AXFocused\": {\n        \"error\": 0,\n        \"value\": true\n      },\n      \"AXMinimized\": {\n        \"error\": 0,\n        \"value\": false\n      }\n    }\n  ],\n  \"frontmost_settable\": {\n    \"error\": 0,\n    \"value\": true\n  },\n  \"action_error\": 0,\n  \"end_mach_ns\": 890014355226625\n}\n",
+    "stderr": ""
+  },
+  {
+    "requested_loop_second": 10,
+    "start_mach_ns": 890023287835125,
+    "end_mach_ns": 890023379322833,
+    "actor_pid": null,
+    "returncode": 0,
+    "stdout": "{\n  \"start_mach_ns\": 890023334909708,\n  \"end_mach_ns\": 890023375258166,\n  \"target_pid\": 9014,\n  \"active_displays\": [\n    1\n  ],\n  \"windows\": [\n    {\n      \"front_to_back_rank\": 1,\n      \"kCGWindowName\": \"FG-Metal Step 11D.3-B Bare Vulkan\",\n      \"kCGWindowLayer\": 0,\n      \"kCGWindowMemoryUsage\": 2432,\n      \"kCGWindowIsOnscreen\": true,\n      \"kCGWindowSharingState\": 1,\n      \"kCGWindowOwnerPID\": 9014,\n      \"kCGWindowOwnerName\": \"wine\",\n      \"kCGWindowNumber\": 27911,\n      \"kCGWindowStoreType\": 1,\n      \"kCGWindowBounds\": {\n        \"X\": 68.0,\n        \"Height\": 392.0,\n        \"Y\": 62.0,\n        \"Width\": 640.0\n      },\n      \"kCGWindowAlpha\": 1.0\n    },\n    {\n      \"front_to_back_rank\": 2,\n      \"kCGWindowName\": \"Recents\",\n      \"kCGWindowLayer\": 0,\n      \"kCGWindowMemoryUsage\": 2432,\n      \"kCGWindowIsOnscreen\": true,\n      \"kCGWindowSharingState\": 1,\n      \"kCGWindowOwnerPID\": 867,\n      \"kCGWindowOwnerName\": \"Finder\",\n      \"kCGWindowNumber\": 27754,\n      \"kCGWindowStoreType\": 1,\n      \"kCGWindowBounds\": {\n        \"X\": 734.0,\n        \"Height\": 697.0,\n        \"Y\": 33.0,\n        \"Width\": 920.0\n      },\n      \"kCGWindowAlpha\": 1.0\n    }\n  ],\n  \"state_mutated\": false,\n  \"extent_note\": \"CG window rectangles and rank do not alone prove opaque per-pixel coverage; pair with external UI visual observation.\"\n}\n",
+    "stderr": ""
+  },
+  {
+    "requested_loop_second": 20,
+    "start_mach_ns": 890033306939625,
+    "end_mach_ns": 890033400224166,
+    "actor_pid": 867,
+    "returncode": 0,
+    "stdout": "{\n  \"pid\": 867,\n  \"mode\": \"frontmost\",\n  \"start_mach_ns\": 890033348685833,\n  \"window_attribute_error\": 0,\n  \"windows\": [\n    {\n      \"AXTitle\": {\n        \"error\": 0,\n        \"value\": \"Recents\"\n      },\n      \"AXRole\": {\n        \"error\": 0,\n        \"value\": \"AXWindow\"\n      },\n      \"AXSubrole\": {\n        \"error\": 0,\n        \"value\": \"AXStandardWindow\"\n      },\n      \"AXMain\": {\n        \"error\": 0,\n        \"value\": true\n      },\n      \"AXFocused\": {\n        \"error\": 0,\n        \"value\": false\n      },\n      \"AXMinimized\": {\n        \"error\": 0,\n        \"value\": false\n      }\n    },\n    {\n      \"AXTitle\": {\n        \"error\": -25212,\n        \"value\": null\n      },\n      \"AXRole\": {\n        \"error\": 0,\n        \"value\": \"AXScrollArea\"\n      },\n      \"AXSubrole\": {\n        \"error\": -25212,\n        \"value\": null\n      },\n      \"AXMain\": {\n        \"error\": 0,\n        \"value\": false\n      },\n      \"AXFocused\": {\n        \"error\": 0,\n        \"value\": false\n      },\n      \"AXMinimized\": {\n        \"error\": 0,\n        \"value\": false\n      }\n    }\n  ],\n  \"frontmost_settable\": {\n    \"error\": 0,\n    \"value\": true\n  },\n  \"action_error\": 0,\n  \"end_mach_ns\": 890033394762500\n}\n",
+    "stderr": ""
+  },
+  {
+    "requested_loop_second": 25,
+    "start_mach_ns": 890038278141458,
+    "end_mach_ns": 890038379388875,
+    "actor_pid": null,
+    "returncode": 0,
+    "stdout": "{\n  \"start_mach_ns\": 890038328981041,\n  \"end_mach_ns\": 890038374589208,\n  \"target_pid\": 9014,\n  \"active_displays\": [\n    1\n  ],\n  \"windows\": [\n    {\n      \"front_to_back_rank\": 1,\n      \"kCGWindowName\": \"Recents\",\n      \"kCGWindowLayer\": 0,\n      \"kCGWindowMemoryUsage\": 2432,\n      \"kCGWindowIsOnscreen\": true,\n      \"kCGWindowSharingState\": 1,\n      \"kCGWindowOwnerPID\": 867,\n      \"kCGWindowOwnerName\": \"Finder\",\n      \"kCGWindowNumber\": 27754,\n      \"kCGWindowStoreType\": 1,\n      \"kCGWindowBounds\": {\n        \"X\": 734.0,\n        \"Height\": 697.0,\n        \"Y\": 33.0,\n        \"Width\": 920.0\n      },\n      \"kCGWindowAlpha\": 1.0\n    },\n    {\n      \"front_to_back_rank\": 2,\n      \"kCGWindowName\": \"FG-Metal Step 11D.3-B Bare Vulkan\",\n      \"kCGWindowLayer\": 0,\n      \"kCGWindowMemoryUsage\": 2432,\n      \"kCGWindowIsOnscreen\": true,\n      \"kCGWindowSharingState\": 1,\n      \"kCGWindowOwnerPID\": 9014,\n      \"kCGWindowOwnerName\": \"wine\",\n      \"kCGWindowNumber\": 27911,\n      \"kCGWindowStoreType\": 1,\n      \"kCGWindowBounds\": {\n        \"X\": 68.0,\n        \"Height\": 392.0,\n        \"Y\": 62.0,\n        \"Width\": 640.0\n      },\n      \"kCGWindowAlpha\": 1.0\n    }\n  ],\n  \"state_mutated\": false,\n  \"extent_note\": \"CG window rectangles and rank do not alone prove opaque per-pixel coverage; pair with external UI visual observation.\"\n}\n",
+    "stderr": ""
+  },
+  {
+    "requested_loop_second": 60,
+    "start_mach_ns": 890073283062625,
+    "end_mach_ns": 890073356120500,
+    "actor_pid": 9014,
+    "returncode": 0,
+    "stdout": "{\n  \"pid\": 9014,\n  \"mode\": \"frontmost\",\n  \"start_mach_ns\": 890073323399541,\n  \"window_attribute_error\": 0,\n  \"windows\": [\n    {\n      \"AXTitle\": {\n        \"error\": 0,\n        \"value\": \"FG-Metal Step 11D.3-B Bare Vulkan\"\n      },\n      \"AXRole\": {\n        \"error\": 0,\n        \"value\": \"AXWindow\"\n      },\n      \"AXSubrole\": {\n        \"error\": 0,\n        \"value\": \"AXStandardWindow\"\n      },\n      \"AXMain\": {\n        \"error\": 0,\n        \"value\": true\n      },\n      \"AXFocused\": {\n        \"error\": 0,\n        \"value\": true\n      },\n      \"AXMinimized\": {\n        \"error\": 0,\n        \"value\": false\n      }\n    }\n  ],\n  \"frontmost_settable\": {\n    \"error\": 0,\n    \"value\": true\n  },\n  \"action_error\": 0,\n  \"end_mach_ns\": 890073348425416\n}\n",
+    "stderr": ""
+  },
+  {
+    "requested_loop_second": 65,
+    "start_mach_ns": 890078275958166,
+    "end_mach_ns": 890078361296416,
+    "actor_pid": null,
+    "returncode": 0,
+    "stdout": "{\n  \"start_mach_ns\": 890078318553958,\n  \"end_mach_ns\": 890078357244125,\n  \"target_pid\": 9014,\n  \"active_displays\": [\n    1\n  ],\n  \"windows\": [\n    {\n      \"front_to_back_rank\": 1,\n      \"kCGWindowName\": \"FG-Metal Step 11D.3-B Bare Vulkan\",\n      \"kCGWindowLayer\": 0,\n      \"kCGWindowMemoryUsage\": 2432,\n      \"kCGWindowIsOnscreen\": true,\n      \"kCGWindowSharingState\": 1,\n      \"kCGWindowOwnerPID\": 9014,\n      \"kCGWindowOwnerName\": \"wine\",\n      \"kCGWindowNumber\": 27911,\n      \"kCGWindowStoreType\": 1,\n      \"kCGWindowBounds\": {\n        \"X\": 68.0,\n        \"Height\": 392.0,\n        \"Y\": 62.0,\n        \"Width\": 640.0\n      },\n      \"kCGWindowAlpha\": 1.0\n    },\n    {\n      \"front_to_back_rank\": 2,\n      \"kCGWindowName\": \"Recents\",\n      \"kCGWindowLayer\": 0,\n      \"kCGWindowMemoryUsage\": 2432,\n      \"kCGWindowIsOnscreen\": true,\n      \"kCGWindowSharingState\": 1,\n      \"kCGWindowOwnerPID\": 867,\n      \"kCGWindowOwnerName\": \"Finder\",\n      \"kCGWindowNumber\": 27754,\n      \"kCGWindowStoreType\": 1,\n      \"kCGWindowBounds\": {\n        \"X\": 734.0,\n        \"Height\": 697.0,\n        \"Y\": 33.0,\n        \"Width\": 920.0\n      },\n      \"kCGWindowAlpha\": 1.0\n    }\n  ],\n  \"state_mutated\": false,\n  \"extent_note\": \"CG window rectangles and rank do not alone prove opaque per-pixel coverage; pair with external UI visual observation.\"\n}\n",
+    "stderr": ""
+  },
+  {
+    "run_id": "step11d3b-br8-state-02-20261011-005208-590fa5da",
+    "runner_returncode": 0,
+    "finished_mach_ns": 890144128674166
+  }
+]

@@ -17,6 +17,7 @@ REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "experiments/storage"))
 from storage_policy import (  # noqa: E402
     FREE_HARD_STOP,
+    FREE_MINIMUM,
     FREE_WARNING,
     GIB,
     PREFIX_ROOT,
@@ -200,8 +201,8 @@ def main() -> int:
 
     PREFIX_ROOT.mkdir(parents=True, exist_ok=True)
     before = disk_free_bytes(PREFIX_ROOT)
-    if before < 45 * GIB:
-        raise RuntimeError(f"free space dropped below 45 GiB before template initialization: {before}")
+    if before < FREE_MINIMUM:
+        raise RuntimeError(f"free space dropped below {FREE_MINIMUM // GIB} GiB before template initialization: {before}")
     start = time.monotonic()
     watcher: list[dict[str, Any]] = []
     process: subprocess.Popen[str] | None = None

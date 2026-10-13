@@ -1,0 +1,13 @@
+{"blockers": [], "decision": "ALLOW", "estimated_peak_new_bytes": 3326083072, "experiment_id": "step11d3b-smoke-20261011-122913-9bb97862", "free_before_bytes": 69608239104, "manifest_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/manifests/step11d3b-smoke-20261011-122913-9bb97862.json", "project_budget_bytes": 59055800320, "project_usage_before_bytes": 48288296960, "projected_free_bytes": 65949547724, "projected_peak_new_bytes": 3658691380, "projected_scoped_project_bytes": 51946988340, "uncertainty_margin_bytes": 332608308, "warnings": []}
+{
+  "exception": null,
+  "experiment_id": "step11d3b-smoke-20261011-122913-9bb97862",
+  "gate0_post": "PASS",
+  "gate0_pre": "PASS",
+  "next_drawable_max_ns": 32227584,
+  "presented_fps": 58.47522677525924,
+  "report": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11d3b/runs/step11d3b-smoke-20261011-122913-9bb97862/run-result.json",
+  "smoke_authorization": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11d3b/runs/step11d3b-smoke-20261011-122913-9bb97862/smoke-authorization.json",
+  "status": "PASS",
+  "trace_validation": true
+}

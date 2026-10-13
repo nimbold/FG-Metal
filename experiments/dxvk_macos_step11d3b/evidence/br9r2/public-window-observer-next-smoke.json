@@ -1,0 +1,22 @@
+{
+  "activation" : {
+    "attempted" : false
+  },
+  "error" : "target window title not found before observer deadline",
+  "observer" : "public CGWindowListCopyWindowInfo plus NSRunningApplication activation",
+  "preconditionPass" : false,
+  "sampleCount" : 0,
+  "samples" : [
+
+  ],
+  "samplesWithActiveApp" : 0,
+  "samplesWithAlphaOpaqueFullCoverCandidate" : 0,
+  "samplesWithDisplayAssociation" : 0,
+  "samplesWithNeutralCovererProcess" : 0,
+  "samplesWithNeutralCovererWindow" : 0,
+  "schemaVersion" : 1,
+  "startedAtUTC" : "2026-10-11T15:29:15Z",
+  "targetPID" : null,
+  "targetTitle" : "FG-Metal Step 11D.3-B Bare Vulkan",
+  "targetWindowID" : null
+}

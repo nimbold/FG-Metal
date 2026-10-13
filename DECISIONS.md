@@ -118,10 +118,17 @@ This log records decisions that constrain implementation. Pending items are not 
 
 ### D-017 — Native MoltenVK baseline readiness (Step 11D.3-A)
 
-**Status:** **CASE A3 — INCONCLUSIVE**; Gate 0 PASS; graphics not run<br>
+**Status:** Superseded by D-018; Gate 0 PASS<br>
 **Decision:** Keep x86_64 as the primary control architecture to match the translated STEP 11D.2 Wine/MoltenVK path. Do not classify native health or begin Step 11D.3-B until a fresh provenance-bound x86_64 MoltenVK build and NativeRunLease loader probe succeed.<br>
 **Rationale:** STEP 11D.2 evidence shows the relevant `vkQueueSubmit2` and `CAMetalLayer nextDrawable` stack in an x86_64-translated process. The trace ring and correlation validator pass their synthetic, normal stress, and ThreadSanitizer checks. The current Xcode command reached project loading but failed under the leased Seatbelt build profile before compiler output; no native dylib or executable exists. Gate 0 is current and passing after the required PrefixLease certification smoke.<br>
 **Consequence:** Preserve BuildLease write confinement and storage admission while resolving Xcode's project-load/service failure. Do not start graphics before the native build and loader checkpoint; do not start Step 11D.3-B from this A3 result. See the [Step 11D.3-A1 report](experiments/dxvk_macos_step11d3a/STEP-11D3-A1-REPORT.md).
+
+### D-018 — Native MoltenVK baseline classification (Step 11D.3-A)
+
+**Status:** Accepted — **CASE A2 (Divergent / Healthy Native Baseline)**<br>
+**Decision:** Conclude that the severe `nextDrawable` presentation starvation, throughput collapse (44.9–45.6 WSI/s), and tail latency spikes (326–723 ms) observed in the STEP 11D.2 integrated Wine/MoltenVK stack are entirely absent from native MoltenVK v1.4.2 under Rosetta translation. Isolate the presentation defect to upstream layers (Wine window integration, DXVK presentation thread, or interop synchronization). Do not advance to STEP 11D.3-B without explicit user authorization.<br>
+**Rationale:** BuildLease 12 produced thin x86_64 artifacts under least-privilege Seatbelt confinement, which were promoted to CAS (`libMoltenVK.dylib` SHA-256 `1e6d12acea36...`, `FGMetalNativeControl` SHA-256 `fa39c374ae...`). Native loader probe 06 confirmed `sysctl.proc_translated == 1`. Smoke 06 and three independent 5-minute baselines ran with 100% valid offline traces and 0 errors. In steady state (Baselines 02 & 03), native control achieved 59.99–60.01 FPS, 99.98% presentation rate, mean `nextDrawable` 16.04–16.05 ms (std 0.40–0.48 ms), >99.79% in the 14–18 ms bucket, and exactly 0 waits $\ge 50\text{ ms}$. This conclusively diverges from STEP 11D.2's starvation under identical swapchain parameters (640x360 BGRA8 FIFO, 3 images). See the [Step 11D.3-A3 report](experiments/dxvk_macos_step11d3a/STEP-11D3-A3-REPORT.md).<br>
+**Consequence:** Native MoltenVK v1.4.2 and CAMetalLayer are confirmed healthy. STEP 11D.3-A is complete. Bare Wine Vulkan reproduced drawable instability (CASE B1), but BR9R remains N3 inconclusive because the frozen-coverer calibration did not verify full coverage or restoration. Diagnose the coverer window's on-screen/stacking failure before a fresh Gate 0 → authorization → calibration sequence. Keep Native follow-up and STEP 11D.3-C gated.
 
 ## Open decisions
 
@@ -139,8 +146,8 @@ This log records decisions that constrain implementation. Pending items are not 
 ### O-005 — Renderer adapter feasibility and order
 
 **Question:** Which public/documented integration route and renderer should be validated first?<br>
-**Status:** The transparent D3DMetal route remains blocked; the current DXMT presentation architecture is stopped at Step 10B.6.1; DXVK-MacOS Step 11C is partial; Step 11D.3-A is A3 because the native build has not completed.<br>
-**Need:** Select the next renderer strategy from evidence. Resume Step 11D.3-A only by resolving the Xcode/BuildLease failure while preserving storage controls. Do not start Step 11D.3-B or RIFE without the required evidence and explicit authorization. Do not modify Highball or reverse engineer D3DMetal.
+**Status:** The transparent D3DMetal route remains blocked; the current DXMT presentation architecture is stopped at Step 10B.6.1; DXVK-MacOS Step 11C is partial; Step 11D.3-A is complete with CASE A2; Step 11D.3-B is CASE B1 with BR9R-N3 inconclusive.<br>
+**Need:** Resolve why the frozen coverer window was not on-screen in front of the Wine target. Repeat the BR9R differential only after a fresh Gate 0 chain, lifecycle-bound authorization, and verified 20/40/20 calibration; Native runs and STEP 11D.3-C remain gated. Do not modify Highball or reverse engineer D3DMetal.
 
 ### O-006 — Quality datasets and redistribution
 

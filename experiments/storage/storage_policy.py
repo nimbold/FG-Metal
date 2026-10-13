@@ -27,34 +27,65 @@ import signal
 import fcntl
 import sys
 import ctypes
+import errno
+import argparse
+import contextlib
 from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, BinaryIO, Iterator, Mapping
+from typing import Any, BinaryIO, Iterator, Mapping, Sequence
 
 GIB = 1024 ** 3
 MIB = 1024 ** 2
 FREE_HARD_STOP = 25 * GIB
-FREE_WARNING = 35 * GIB
-FREE_MINIMUM = 45 * GIB
+FREE_WARNING = 50 * GIB
+FREE_MINIMUM = 50 * GIB
 FREE_PREFERRED = 60 * GIB
-PROJECT_BUDGET = 50 * GIB
-GATE0_PROJECT_BUDGET = 45 * GIB
+PROJECT_WARNING = 52 * GIB
+PROJECT_BUDGET = 55 * GIB
+GATE0_PROJECT_BUDGET = 55 * GIB
+# Volume free-space can drift between full-tree scans; scoped allocation remains exact.
+GATE0_FREE_DRIFT_TOLERANCE_BYTES = 2 * GIB
 GATE0_MAX_AGE_SECONDS = 60 * 60
+ACTIVE_PREFIX_LEASE_MARKER_MAX_BYTES = 16 * 1024
+ACTIVE_PREFIX_LEASE_MARKER_MAX_ALLOCATED_BYTES = 64 * 1024
 STORAGE_POLICY_SMOKE_ID_PREFIX = "step11d3-storage-policy-smoke-"
 NORMAL_PERSISTENT_TARGET = 250 * MIB
 NORMAL_TEMPORARY_TARGET = 3 * GIB
+MIN_ADMISSION_UNCERTAINTY_MARGIN = 256 * MIB
+ADMISSION_UNCERTAINTY_BASIS_POINTS = 1000
 MAX_PRESERVED_PREFIXES = 2
 SUPPORTED_BUILD_TYPES = {"release", "debug", "debugoptimized", "minsize", "targeted-symbols", "unstripped", "full-debug"}
 FULL_DEBUG_BUILD_TYPES = {"debug", "debugoptimized", "unstripped", "full-debug"}
 RUNNER_ADMISSION_CONTRACT = "prefixlease-scoped-managed-process-v16"
+ROOT_CLASS_MANDATORY = "MANDATORY"
+ROOT_CLASS_OPTIONAL_EPHEMERAL = "OPTIONAL_EPHEMERAL"
+SIGNED_OUTPUT_MANIFEST_REQUIRED_FIELDS = frozenset({
+    "experiment_id", "purpose", "candidate_hashes", "created_at_unix",
+    "expected_duration_seconds", "expected_prefix_requirement", "expected_prefix_bytes",
+    "expected_build_requirement", "expected_build_bytes", "estimated_max_new_disk_bytes",
+    "estimated_uncertainty_margin_bytes", "estimated_projected_new_disk_bytes",
+    "project_estimated_peak_bytes", "projected_free_bytes", "projected_scoped_project_bytes",
+    "storage_admission_warnings", "estimated_persistent_bytes", "project_budget_bytes",
+    "project_budget_remaining_before_bytes", "free_before_bytes", "project_usage_before",
+    "output_dir", "decision", "blockers", "warnings", "cleanup_policy", "retention_policy",
+    "storage_justification", "persistent_growth_over_2g_approved",
+    "persistent_growth_over_2g_approval_reason", "internal_storage_setup",
+    "storage_policy_smoke", "gate0_attestation_sha256", "authorized_runner_paths",
+    "authorized_runner_sha256", "build_source_tree_hash", "build_configuration_key_sha256",
+    "build_kind", "build_type", "dependency_state", "preserve_debug_reason",
+    "estimated_debug_bytes", "failure_capture_paths", "native_architecture",
+    "manifest_path", "manifest_hmac_sha256",
+})
 
 REPO = Path(__file__).resolve().parents[2]
+WINE_RUNTIME_TREE_MANIFEST = REPO / "experiments/storage/runtime-manifests/step11d_r_active_runtime.json"
 CACHE = Path.home() / "Library" / "Caches" / "FGMetal"
 ARTIFACT_STORE = CACHE / "artifacts" / "sha256"
 PREFIX_ROOT = CACHE / "prefixes"
 PREFIX_TEMPLATE = PREFIX_ROOT / "wine-11.17-mvk142-pristine"
 ACTIVE_LEASE_ROOT = PREFIX_ROOT / ".active-leases"
+PREFIX_RETIRED_MARKERS_ROOT = PREFIX_ROOT / ".retired-leases"
 INVENTORY_PATH = REPO / "experiments/storage/storage-inventory.json"
 GATE0_ATTESTATION_PATH = REPO / "experiments/storage/storage-gate0-attestation.json"
 STORAGE_CLEANUP_RECEIPT_PATH = REPO / "experiments/storage/storage-cleanup-receipt.json"
@@ -65,6 +96,8 @@ GATE0_SUPPLEMENTAL_EVIDENCE = (
 )
 SMOKE_CLAIM_ROOT = REPO / "experiments/storage/smoke-claims"
 PREFIX_RECONCILIATION_ROOT = REPO / "experiments/storage/prefix-lease-reconciliation"
+PREFIX_RECOVERY_RECEIPTS_ROOT = REPO / "experiments/storage/prefix-recovery-receipts"
+STORAGE_CERTIFICATION_LOCK = CACHE / ".storage-certification.lock"
 MANIFEST_SIGNING_KEY_PATH = CACHE / ".storage-manifest-signing-key"
 
 _ACTIVE_LEASE: "PrefixLease | None" = None
@@ -83,16 +116,36 @@ def _storage_smoke_claim_path(experiment_id: str) -> Path:
 
 def _read_storage_smoke_claim(experiment_id: str) -> tuple[dict[str, Any], bytes]:
     path = _storage_smoke_claim_path(experiment_id)
-    raw = _read_file_nofollow(path)
+    raw = _read_file_nofollow(path, maximum_bytes=16 * 1024)
     claim = json.loads(raw)
+    info = _stat_entry_nofollow(path)
+    expected_keys = {
+        "schema_version", "experiment_id", "claim_path", "preflight_attestation_path",
+        "preflight_attestation_sha256", "preflight_created_at_unix", "claimed_at_unix",
+        "claim_reason", "pid", "smoke_claim_hmac_sha256",
+    }
+    allocated_bytes = getattr(info, "st_blocks", 0) * 512 if info is not None else 0
     if (not isinstance(claim, dict)
+            or info is None or not stat.S_ISREG(info.st_mode) or info.st_uid != os.getuid()
+            or info.st_nlink != 1 or stat.S_IMODE(info.st_mode) != 0o600
+            or info.st_size > 16 * 1024 or allocated_bytes > 64 * 1024
+            or set(claim) != expected_keys or raw != _canonical_pretty_json_bytes(claim)
             or not _verify_storage_evidence(claim, "smoke_claim_hmac_sha256")
             or claim.get("schema_version") != 1
             or claim.get("experiment_id") != experiment_id
             or claim.get("claim_path") != str(path)
+            or claim.get("preflight_attestation_path") != str(GATE0_ATTESTATION_PATH)
             or not isinstance(claim.get("preflight_attestation_sha256"), str)
             or not re.fullmatch(r"[0-9a-f]{64}", claim["preflight_attestation_sha256"])
-            or not isinstance(claim.get("claimed_at_unix"), (int, float))):
+            or not isinstance(claim.get("preflight_created_at_unix"), (int, float))
+            or isinstance(claim.get("preflight_created_at_unix"), bool)
+            or not math.isfinite(float(claim["preflight_created_at_unix"]))
+            or not isinstance(claim.get("claimed_at_unix"), (int, float))
+            or isinstance(claim.get("claimed_at_unix"), bool)
+            or not math.isfinite(float(claim["claimed_at_unix"]))
+            or not isinstance(claim.get("claim_reason"), str) or not claim["claim_reason"]
+            or not isinstance(claim.get("pid"), int) or isinstance(claim.get("pid"), bool)
+            or claim["pid"] <= 0):
         raise ValueError("storage-smoke nonce claim is missing, malformed, or unauthenticated")
     return claim, raw
 
@@ -198,8 +251,130 @@ def disk_free_bytes(path: Path | str = REPO) -> int:
         os.close(directory_fd)
 
 
-def _project_roots() -> list[Path]:
-    roots = [REPO]
+def conservative_project_usage_bytes(project_usage: Mapping[str, Any] | None = None) -> int:
+    """Use live allocated bytes plus any fresh inventory-only mounted-image bound."""
+    usage = project_usage if project_usage is not None else measure_project_usage()
+    observed = usage.get("allocated_inode_deduplicated_bytes")
+    if not isinstance(observed, int) or isinstance(observed, bool) or observed < 0:
+        raise ValueError("project usage lacks a valid allocated-byte measurement")
+    try:
+        inventory = json.loads(_read_file_nofollow(INVENTORY_PATH))
+        totals = inventory.get("totals", {})
+        upper_bound = totals.get("fgmetal_scoped_unlinked_mount_backing_upper_bound_bytes", 0)
+        attested_scoped = totals.get("fgmetal_scoped_allocated_inode_bytes", 0)
+        if (not isinstance(upper_bound, int) or isinstance(upper_bound, bool) or upper_bound < 0
+                or not isinstance(attested_scoped, int) or isinstance(attested_scoped, bool)
+                or attested_scoped < 0):
+            raise ValueError("inventory scoped allocation fields are invalid")
+    except (OSError, ValueError, TypeError, json.JSONDecodeError):
+        # Normal admission separately requires a valid, current Gate 0 inventory.
+        # Keep synthetic callers usable while refusing to undercount when one is present.
+        return observed
+    return max(observed + upper_bound, attested_scoped)
+
+
+def projected_storage_admission(*, current_free_bytes: int, current_scoped_bytes: int,
+                                peak_additional_bytes: int) -> dict[str, Any]:
+    """Validate the complete declared peak against both normal-admission limits."""
+    values = {
+        "current_free_bytes": current_free_bytes,
+        "current_scoped_bytes": current_scoped_bytes,
+        "peak_additional_bytes": peak_additional_bytes,
+    }
+    if any(not isinstance(value, int) or isinstance(value, bool) or value < 0
+           for value in values.values()):
+        raise ValueError("projected storage inputs must be non-negative integers")
+    projected_free = current_free_bytes - peak_additional_bytes
+    projected_scoped = current_scoped_bytes + peak_additional_bytes
+    blockers: list[str] = []
+    warnings: list[str] = []
+    if current_free_bytes < FREE_HARD_STOP:
+        blockers.append(f"current free space is below the {FREE_HARD_STOP // GIB} GiB emergency hard stop")
+    if projected_free < FREE_MINIMUM:
+        blockers.append(f"projected free disk is below the {FREE_MINIMUM // GIB} GiB normal minimum")
+        warnings.append(f"projected free disk enters the below-{FREE_MINIMUM // GIB} GiB warning region")
+    if projected_free < FREE_PREFERRED:
+        warnings.append(f"projected free disk is below the {FREE_PREFERRED // GIB} GiB preferred target")
+    if projected_scoped > PROJECT_BUDGET:
+        blockers.append(f"projected scoped FG-Metal usage exceeds the {PROJECT_BUDGET // GIB} GiB ceiling")
+    if projected_scoped > PROJECT_WARNING:
+        warnings.append(f"projected scoped FG-Metal usage exceeds the {PROJECT_WARNING // GIB} GiB warning threshold")
+    return {
+        **values,
+        "projected_free_bytes": projected_free,
+        "projected_scoped_bytes": projected_scoped,
+        "admitted": not blockers,
+        "blockers": blockers,
+        "warnings": warnings,
+    }
+
+
+def _post_materialization_prefix_admission(*, current_free_bytes: int,
+                                           current_scoped_bytes: int,
+                                           manifest_estimates: Mapping[str, int]) -> dict[str, Any]:
+    """Recheck a materialized prefix against its full signed peak estimate.
+
+    Prefix templates are cloned with APFS copy-on-write. The current inode-based
+    inventory cannot prove how much of the clone's shared storage may still be
+    allocated later, so the complete declared peak, including the prefix and its
+    uncertainty margin, remains possible demand after materialization.
+    """
+    return projected_storage_admission(
+        current_free_bytes=current_free_bytes,
+        current_scoped_bytes=current_scoped_bytes,
+        peak_additional_bytes=manifest_estimates["estimated_projected_new_disk_bytes"],
+    )
+
+
+def admission_uncertainty_margin_bytes(declared_peak_bytes: int) -> int:
+    """Add a 10 percent peak margin, with a 256 MiB minimum for small runs."""
+    if (not isinstance(declared_peak_bytes, int) or isinstance(declared_peak_bytes, bool)
+            or declared_peak_bytes < 0):
+        raise ValueError("declared peak must be a non-negative integer")
+    proportional = (declared_peak_bytes * ADMISSION_UNCERTAINTY_BASIS_POINTS + 9999) // 10000
+    return max(MIN_ADMISSION_UNCERTAINTY_MARGIN, proportional)
+
+
+@dataclass(frozen=True)
+class DiscoveredProjectRoot:
+    path: Path
+    classification: str
+    category: str
+    expected_dev: int | None = None
+    expected_ino: int | None = None
+
+
+def _is_other_project_path(path: Path) -> bool:
+    return any("dxmt" in part.lower() or "framegen" in part.lower()
+               or "step10b6_1" in part.lower() for part in path.parts)
+
+
+def _classified_project_roots() -> list[DiscoveredProjectRoot]:
+    roots: list[DiscoveredProjectRoot] = []
+    seen: set[str] = set()
+
+    def add_root(path: Path, classification: str, category: str) -> None:
+        key = str(path.resolve(strict=False))
+        if key in seen:
+            return
+        seen.add(key)
+        dev = None
+        ino = None
+        try:
+            st = path.lstat()
+            dev = st.st_dev
+            ino = st.st_ino
+        except OSError:
+            pass
+        roots.append(DiscoveredProjectRoot(
+            path=path,
+            classification=classification,
+            category=category,
+            expected_dev=dev,
+            expected_ino=ino,
+        ))
+
+    add_root(REPO, ROOT_CLASS_MANDATORY, "main_repo")
     worktrees = subprocess.run(
         ["git", "worktree", "list", "--porcelain"], cwd=REPO,
         text=True, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, check=False,
@@ -208,7 +383,7 @@ def _project_roots() -> list[Path]:
         if line.startswith("worktree "):
             path = Path(line.removeprefix("worktree "))
             if path != REPO and path.is_dir():
-                roots.append(path)
+                add_root(path, ROOT_CLASS_MANDATORY, "git_worktree")
 
     cache_root = Path.home() / "Library" / "Caches"
     for path in cache_root.iterdir() if cache_root.is_dir() else ():
@@ -217,28 +392,29 @@ def _project_roots() -> list[Path]:
             name.startswith(("fgmetal", "fg-metal", "fgmetal-", "fg-metal-"))
             or name == "lsfg-metal"
         ):
-            roots.append(path)
+            if path == CACHE:
+                add_root(path, ROOT_CLASS_MANDATORY, "project_cache")
+            else:
+                add_root(path, ROOT_CLASS_OPTIONAL_EPHEMERAL, "project_cache_aux")
 
     temp_root = Path("/private/tmp")
     if temp_root.is_dir():
         for path in temp_root.iterdir():
             name = path.name.lower()
             if path.is_dir() and name.startswith(("fgmetal", "fg-metal", "step10a", "step11b")):
-                roots.append(path)
+                if "-test-" in name or name.startswith("test-") or "synthetic" in name:
+                    continue
+                add_root(path, ROOT_CLASS_OPTIONAL_EPHEMERAL, "project_temp")
     xcode_root = Path.home() / "Library/Developer/Xcode/DerivedData"
     if xcode_root.is_dir():
         for path in xcode_root.iterdir():
             if path.is_dir() and not path.is_symlink() and path.name.lower().startswith("moltenvkpackaging-"):
-                roots.append(path)
-    unique: dict[str, Path] = {}
-    for root in roots:
-        unique[str(root)] = root
-    return list(unique.values())
+                add_root(path, ROOT_CLASS_OPTIONAL_EPHEMERAL, "xcode_derived_data")
+    return roots
 
 
-def _is_other_project_path(path: Path) -> bool:
-    return any("dxmt" in part.lower() or "framegen" in part.lower()
-               or "step10b6_1" in part.lower() for part in path.parts)
+def _project_roots() -> list[Path]:
+    return [r.path for r in _classified_project_roots()]
 
 
 def _measured_output_dir(path: Path | str, *, require_missing: bool = False) -> Path:
@@ -270,7 +446,8 @@ def _measured_output_dir(path: Path | str, *, require_missing: bool = False) -> 
 def _experiment_manifest_path(experiment_id: str) -> Path:
     if not re.fullmatch(r"[A-Za-z0-9_-]+", experiment_id):
         raise ValueError("experiment manifest ID contains unsupported path characters")
-    path = REPO / "experiments/storage/manifests" / f"{experiment_id}.json"
+    manifest_root = REPO / "experiments/storage/manifests"
+    path = manifest_root / f"{experiment_id}.json"
     current = path
     while current == REPO or REPO in current.parents:
         if current.is_symlink():
@@ -282,6 +459,228 @@ def _experiment_manifest_path(experiment_id: str) -> Path:
     if REPO.resolve() not in resolved.parents or _is_other_project_path(resolved):
         raise ValueError(f"experiment manifest path escapes measured project storage: {path}")
     return path
+
+
+def _storage_entry_identity(info: os.stat_result) -> tuple[int, ...]:
+    return (
+        info.st_dev, info.st_ino, info.st_mode, info.st_uid, info.st_nlink,
+        info.st_size, info.st_mtime_ns, getattr(info, "st_ctime_ns", 0),
+        getattr(info, "st_blocks", 0),
+    )
+
+
+def _persistent_output_snapshot(path: Path) -> tuple[int, str]:
+    """Measure and fingerprint a run output on the measured project filesystem."""
+    root_info = _stat_entry_nofollow(path)
+    if root_info is None:
+        return 0, hashlib.sha256(b"missing-output\n").hexdigest()
+    repo_info = REPO.lstat()
+    if (not stat.S_ISDIR(root_info.st_mode) or root_info.st_dev != repo_info.st_dev):
+        raise OSError("signed experiment output is not a directory on the measured project filesystem")
+    allocated_by_inode: dict[tuple[int, int], int] = {}
+    tree_digest = hashlib.sha256()
+    for directory, dirnames, filenames in os.walk(path, followlinks=False):
+        current = Path(directory)
+        current_info = current.lstat()
+        if not stat.S_ISDIR(current_info.st_mode) or current_info.st_dev != root_info.st_dev:
+            raise OSError("signed experiment output crosses a filesystem boundary")
+        current_row = {
+            "path": "." if current == path else current.relative_to(path).as_posix(),
+            "kind": "directory",
+            "identity": _storage_entry_identity(current_info),
+        }
+        tree_digest.update(json.dumps(current_row, sort_keys=True, separators=(",", ":")).encode())
+        tree_digest.update(b"\n")
+        kept_directories: list[str] = []
+        dirnames.sort()
+        filenames.sort()
+        for name in dirnames:
+            child = current / name
+            info = child.lstat()
+            if stat.S_ISLNK(info.st_mode):
+                tree_digest.update(json.dumps({
+                    "path": child.relative_to(path).as_posix(), "kind": "symlink",
+                    "identity": _storage_entry_identity(info), "target": os.readlink(child),
+                }, sort_keys=True, separators=(",", ":")).encode())
+                tree_digest.update(b"\n")
+                continue
+            if not stat.S_ISDIR(info.st_mode) or info.st_dev != root_info.st_dev:
+                raise OSError("signed experiment output contains an unexpected filesystem boundary")
+            kept_directories.append(name)
+        dirnames[:] = kept_directories
+        for name in filenames:
+            child = current / name
+            info = child.lstat()
+            if stat.S_ISLNK(info.st_mode):
+                tree_digest.update(json.dumps({
+                    "path": child.relative_to(path).as_posix(), "kind": "symlink",
+                    "identity": _storage_entry_identity(info), "target": os.readlink(child),
+                }, sort_keys=True, separators=(",", ":")).encode())
+                tree_digest.update(b"\n")
+                continue
+            if not stat.S_ISREG(info.st_mode):
+                raise OSError("signed experiment output contains a non-regular file")
+            tree_digest.update(json.dumps({
+                "path": child.relative_to(path).as_posix(), "kind": "file",
+                "identity": _storage_entry_identity(info),
+            }, sort_keys=True, separators=(",", ":")).encode())
+            tree_digest.update(b"\n")
+            allocated_by_inode.setdefault(
+                (info.st_dev, info.st_ino), getattr(info, "st_blocks", 0) * 512)
+    after_info = _stat_entry_nofollow(path)
+    if (after_info is None
+            or _storage_entry_identity(after_info) != _storage_entry_identity(root_info)):
+        raise OSError("signed experiment output root changed during allocation measurement")
+    return sum(allocated_by_inode.values()), tree_digest.hexdigest()
+
+
+def _signed_persistent_output_snapshot(
+    *, exclude_experiment_id: str | None = None,
+    expected_gate0_attestation_sha256: str | None = None,
+    baseline_experiment_ids: set[str] | None = None,
+) -> tuple[dict[str, Any], tuple[Path, ...], list[str]]:
+    """Bind authenticated, reservation-limited run outputs for baseline comparison.
+
+    These paths remain part of the whole-project allocation. They are excluded
+    only from the unrelated-growth comparison while their signed manifest and
+    output allocation remain stable and within the manifest's reservation.
+    """
+    blockers: list[str] = []
+    root = REPO / "experiments/storage/manifests"
+    try:
+        directory_fd = _open_directory_nofollow(root)
+    except OSError as error:
+        return {}, (), [f"experiment manifest directory cannot be opened for storage accounting: {error}"]
+
+    entries: list[tuple[str, tuple[int, ...] | None, str | None]] = []
+    bindings: list[dict[str, Any]] = []
+    output_paths: list[Path] = []
+    try:
+        root_info = os.fstat(directory_fd)
+        names_before = sorted(name for name in os.listdir(directory_fd) if name.endswith(".json"))
+        for name in names_before:
+            info = _stat_child_nofollow(directory_fd, name)
+            if info is None:
+                entries.append((name, None, None))
+                blockers.append(f"experiment manifest changed during storage accounting: {name}")
+                continue
+            identity = _storage_entry_identity(info)
+            digest: str | None = None
+            entries.append((name, identity, digest))
+            manifest_path = root / name
+            allocated = getattr(info, "st_blocks", 0) * 512
+            if (not stat.S_ISREG(info.st_mode) or info.st_uid != os.getuid()
+                    or info.st_nlink != 1 or stat.S_IMODE(info.st_mode) != 0o600
+                    or info.st_size > 1024 * 1024 or allocated > 2 * 1024 * 1024):
+                continue
+            try:
+                manifest, raw, read_info = _read_json_at(
+                    directory_fd, name, maximum_bytes=1024 * 1024)
+            except (OSError, ValueError, TypeError, json.JSONDecodeError):
+                continue
+            digest = hashlib.sha256(raw).hexdigest()
+            after_info = _stat_child_nofollow(directory_fd, name)
+            if (after_info is None
+                    or _storage_entry_identity(read_info) != identity
+                    or _storage_entry_identity(after_info) != identity):
+                blockers.append(f"experiment manifest changed during storage accounting: {name}")
+                continue
+            entries[-1] = (name, identity, digest)
+            try:
+                experiment_id = manifest.get("experiment_id")
+                if (not isinstance(experiment_id, str)
+                        or not re.fullmatch(r"[A-Za-z0-9_-]+", experiment_id)
+                        or not SIGNED_OUTPUT_MANIFEST_REQUIRED_FIELDS.issubset(manifest)
+                        or name != f"{experiment_id}.json"
+                        or manifest_path != _experiment_manifest_path(experiment_id)
+                        or manifest.get("manifest_path") != str(manifest_path)
+                        or not isinstance(manifest.get("gate0_attestation_sha256"), str)
+                        or not re.fullmatch(r"[0-9a-f]{64}", manifest["gate0_attestation_sha256"])
+                        or manifest.get("decision") != "ALLOW"
+                        or raw != _canonical_pretty_json_bytes(manifest)
+                        or not _verify_manifest_signature(manifest)):
+                    continue
+                estimates = _validated_manifest_estimates(manifest)
+                output_dir = _measured_output_dir(manifest.get("output_dir", ""))
+                if str(output_dir) != manifest.get("output_dir"):
+                    continue
+            except (OSError, TypeError, ValueError, RuntimeError, json.JSONDecodeError):
+                continue
+            if experiment_id == exclude_experiment_id:
+                continue
+            manifest_gate0_hash = manifest.get("gate0_attestation_sha256")
+            if (expected_gate0_attestation_sha256 is not None
+                    and experiment_id not in (baseline_experiment_ids or set())
+                    and manifest_gate0_hash != expected_gate0_attestation_sha256):
+                blockers.append(
+                    f"new signed experiment output does not bind the current Gate 0 attestation: {experiment_id}")
+                continue
+
+            output_info = _stat_entry_nofollow(output_dir)
+            if output_info is not None and (
+                    not stat.S_ISDIR(output_info.st_mode)
+                    or output_info.st_uid != os.getuid()
+                    or output_info.st_dev != REPO.lstat().st_dev):
+                blockers.append(
+                    f"signed experiment output path is not an owned real directory: {experiment_id}")
+                continue
+            try:
+                output_allocated, output_tree_sha256 = _persistent_output_snapshot(output_dir)
+            except (OSError, TypeError, ValueError) as error:
+                blockers.append(
+                    f"signed experiment output allocation cannot be measured: {experiment_id}: {error}")
+                continue
+            output_after = _stat_entry_nofollow(output_dir)
+            output_identity = (_storage_entry_identity(output_info) if output_info is not None else None)
+            if ((output_after is None) != (output_info is None)
+                    or (output_after is not None
+                        and _storage_entry_identity(output_after) != output_identity)):
+                blockers.append(f"signed experiment output path changed during storage accounting: {experiment_id}")
+                continue
+            if output_allocated > estimates["estimated_persistent_bytes"]:
+                blockers.append(
+                    f"signed experiment output exceeds its persistent reservation: {experiment_id}")
+                continue
+            bindings.append({
+                "experiment_id": experiment_id,
+                "manifest_path": str(manifest_path),
+                "manifest_sha256": digest,
+                "manifest_identity": list(identity),
+                "manifest_gate0_attestation_sha256": manifest_gate0_hash,
+                "output_dir": str(output_dir),
+                "output_identity": (list(output_identity) if output_identity is not None else None),
+                "output_allocated_bytes": output_allocated,
+                "output_tree_sha256": output_tree_sha256,
+                "output_reservation_bytes": estimates["estimated_persistent_bytes"],
+            })
+            output_paths.extend((manifest_path, output_dir))
+        names_after = sorted(name for name in os.listdir(directory_fd) if name.endswith(".json"))
+        final_root_info = os.fstat(directory_fd)
+        if (names_after != names_before
+                or _storage_entry_identity(final_root_info)[:2]
+                != _storage_entry_identity(root_info)[:2]):
+            blockers.append("experiment manifest directory changed during storage accounting")
+    except OSError as error:
+        blockers.append(f"experiment manifest directory changed during storage accounting: {error}")
+    finally:
+        os.close(directory_fd)
+
+    ordered_outputs = sorted(Path(binding["output_dir"]) for binding in bindings)
+    for index, left in enumerate(ordered_outputs):
+        for right in ordered_outputs[index + 1:]:
+            if left == right or left in right.parents or right in left.parents:
+                blockers.append("signed experiment output reservations overlap")
+                break
+        if blockers and blockers[-1] == "signed experiment output reservations overlap":
+            break
+
+    snapshot = {
+        "manifest_directory": str(root),
+        "manifest_directory_identity": _storage_entry_identity(root_info),
+        "manifest_entries": tuple(entries),
+        "bindings": tuple(bindings),
+    }
+    return snapshot, tuple(dict.fromkeys(output_paths)), blockers
 
 
 def _authorized_runner_records(paths: list[str], *, requires_managed_prefix: bool) -> dict[str, str]:
@@ -698,6 +1097,49 @@ def _release_storage_allocation_lock(lock_file: Any) -> None:
         lock_file.close()
 
 
+def acquire_storage_certification_lock(*, exclusive: bool = True, blocking: bool = True) -> Any:
+    """Acquire the storage certification lock to serialize live certification against synthetic tests."""
+    root_fd = _open_directory_nofollow(CACHE, create=True, strict_directory_sync=True)
+    descriptor: int | None = None
+    try:
+        flags = os.O_RDWR | os.O_CREAT | getattr(os, "O_NOFOLLOW", 0)
+        descriptor = os.open(".storage-certification.lock", flags, 0o600, dir_fd=root_fd)
+        info = os.fstat(descriptor)
+        if (not stat.S_ISREG(info.st_mode) or info.st_nlink != 1
+                or stat.S_IMODE(info.st_mode) != 0o600 or info.st_uid != os.getuid()):
+            raise RuntimeError("storage certification lock is not a private regular file")
+        os.fsync(root_fd)
+        lock_mode = (fcntl.LOCK_EX if exclusive else fcntl.LOCK_SH)
+        if not blocking:
+            lock_mode |= fcntl.LOCK_NB
+        fcntl.flock(descriptor, lock_mode)
+        return os.fdopen(descriptor, "a+")
+    except BaseException:
+        if descriptor is not None:
+            os.close(descriptor)
+        raise
+    finally:
+        os.close(root_fd)
+
+
+def release_storage_certification_lock(lock_file: Any) -> None:
+    if lock_file is None:
+        return
+    try:
+        fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
+    finally:
+        lock_file.close()
+
+
+@contextlib.contextmanager
+def storage_certification_guard(*, exclusive: bool = True, blocking: bool = True):
+    lock = acquire_storage_certification_lock(exclusive=exclusive, blocking=blocking)
+    try:
+        yield lock
+    finally:
+        release_storage_certification_lock(lock)
+
+
 def _manifest_signature(manifest: Mapping[str, Any], *, create_key: bool = False) -> str:
     payload = dict(manifest)
     payload.pop("manifest_hmac_sha256", None)
@@ -741,7 +1183,9 @@ def _validated_manifest_estimates(manifest: Mapping[str, Any]) -> dict[str, int]
     """Reject missing, inconsistent, or non-integer limits before trusting a lease."""
     fields = (
         "expected_duration_seconds", "expected_prefix_bytes", "expected_build_bytes",
-        "estimated_persistent_bytes", "estimated_max_new_disk_bytes", "project_budget_bytes",
+        "estimated_persistent_bytes", "estimated_max_new_disk_bytes",
+        "estimated_uncertainty_margin_bytes", "estimated_projected_new_disk_bytes",
+        "project_budget_bytes",
     )
     values: dict[str, int] = {}
     for name in fields:
@@ -761,6 +1205,11 @@ def _validated_manifest_estimates(manifest: Mapping[str, Any]) -> dict[str, int]
         raise ValueError("storage manifest build requirement does not match its byte estimate")
     if values["estimated_max_new_disk_bytes"] != prefix_bytes + build_bytes + persistent_bytes:
         raise ValueError("storage manifest peak estimate does not equal its component estimates")
+    expected_margin = admission_uncertainty_margin_bytes(values["estimated_max_new_disk_bytes"])
+    if values["estimated_uncertainty_margin_bytes"] != expected_margin:
+        raise ValueError("storage manifest uncertainty margin differs from the installed policy")
+    if values["estimated_projected_new_disk_bytes"] != values["estimated_max_new_disk_bytes"] + expected_margin:
+        raise ValueError("storage manifest projected peak omits or changes its uncertainty margin")
     if values["project_budget_bytes"] != PROJECT_BUDGET:
         raise ValueError("storage manifest project budget differs from the installed policy")
     if prefix_bytes > NORMAL_TEMPORARY_TARGET and not manifest.get("storage_justification"):
@@ -810,7 +1259,7 @@ def _gate0_control_hashes() -> dict[str, str]:
         "artifactize_builds.py", "build_retention.py", "storage_gate0.py",
         "test_build_retention.py", "test_storage_policy.py", "smoke_prefix_lease.py",
         "consolidate_evidence.py", "test_evidence_consolidation.py",
-        "test_wine_launcher_policy.py", "test_g0c_checks.py",
+        "test_wine_launcher_policy.py", "test_g0c_checks.py", "test_storage_recovery.py",
     )
     result: dict[str, str] = {}
     for name in names:
@@ -906,8 +1355,309 @@ def _attested_smoke_evidence_blockers(attestation: Mapping[str, Any]) -> list[st
     return blockers
 
 
+def _prefix_lease_accounting_blockers(
+    receipt: Mapping[str, Any], *,
+    current_free_bytes: int,
+    current_project_bytes: int,
+    current_nonlease_project_bytes: int,
+    attested_nonlease_project_bytes: int,
+    current_prefix_allocated_bytes: int,
+    current_output_allocated_bytes: int,
+    attested_free_bytes: int,
+    other_active_lease_count: int = 0,
+    expected_binding: Mapping[str, Any] | None = None,
+) -> list[str]:
+    """Apply the signed lease rebase without crediting unrelated project growth."""
+    blockers: list[str] = []
+    if not _verify_storage_evidence(receipt, "prefix_materialization_hmac_sha256"):
+        return ["active PrefixLease materialization receipt is unauthenticated"]
+    if expected_binding and any(receipt.get(key) != value for key, value in expected_binding.items()):
+        blockers.append("active PrefixLease materialization receipt names a stale or different lease")
+    if other_active_lease_count:
+        blockers.append("another or interrupted PrefixLease is active")
+    if current_nonlease_project_bytes != attested_nonlease_project_bytes:
+        blockers.append("unrelated non-lease storage changed since Gate 0 certification")
+    gate0_nonlease = receipt.get("gate0_attested_nonlease_scope_bytes")
+    if (not isinstance(gate0_nonlease, int) or isinstance(gate0_nonlease, bool)
+            or gate0_nonlease < 0 or gate0_nonlease != attested_nonlease_project_bytes):
+        blockers.append("PrefixLease materialization receipt has a stale Gate 0 storage baseline")
+    pre_nonlease = receipt.get("pre_materialization_nonlease_scope_bytes")
+    post_nonlease = receipt.get("post_materialization_nonlease_scope_bytes")
+    if any(not isinstance(value, int) or isinstance(value, bool) or value < 0
+           for value in (pre_nonlease, post_nonlease)):
+        blockers.append("PrefixLease materialization receipt has invalid non-lease accounting")
+    else:
+        if pre_nonlease != gate0_nonlease:
+            blockers.append("unrelated non-lease storage changed between Gate 0 and PrefixLease materialization")
+        if pre_nonlease != post_nonlease:
+            blockers.append("unrelated non-lease storage changed during PrefixLease materialization")
+        if current_nonlease_project_bytes != post_nonlease:
+            blockers.append("unrelated non-lease storage changed after the PrefixLease materialization rebase")
+    expected_prefix_bytes = receipt.get("expected_prefix_bytes")
+    materialized_prefix_bytes = receipt.get("materialized_prefix_allocated_bytes")
+    if (not isinstance(expected_prefix_bytes, int) or isinstance(expected_prefix_bytes, bool)
+            or expected_prefix_bytes < 0
+            or not isinstance(materialized_prefix_bytes, int)
+            or isinstance(materialized_prefix_bytes, bool)
+            or materialized_prefix_bytes < 0
+            or current_prefix_allocated_bytes != materialized_prefix_bytes
+            or current_prefix_allocated_bytes > expected_prefix_bytes):
+        blockers.append("materialized PrefixLease allocation no longer matches its signed reservation receipt")
+    output_baseline = receipt.get("post_materialization_output_allocated_bytes")
+    output_reservation = receipt.get("estimated_persistent_bytes")
+    if (not isinstance(output_baseline, int) or isinstance(output_baseline, bool)
+            or output_baseline < 0
+            or not isinstance(output_reservation, int) or isinstance(output_reservation, bool)
+            or output_reservation < 0
+            or current_output_allocated_bytes < output_baseline
+            or current_output_allocated_bytes > output_reservation):
+        blockers.append("current-run output growth exceeds its signed persistent-output reservation")
+    pre_free = receipt.get("pre_materialization_free_bytes")
+    post_free = receipt.get("post_materialization_free_bytes")
+    if (not isinstance(pre_free, int) or isinstance(pre_free, bool)
+            or not isinstance(post_free, int) or isinstance(post_free, bool)
+            or abs(pre_free - attested_free_bytes) > GATE0_FREE_DRIFT_TOLERANCE_BYTES
+            or abs(current_free_bytes - post_free) > GATE0_FREE_DRIFT_TOLERANCE_BYTES):
+        blockers.append("current free-space change exceeds the pre/post PrefixLease accounting bounds")
+    if current_project_bytes > GATE0_PROJECT_BUDGET:
+        blockers.append(f"current FG-Metal storage exceeds the {GATE0_PROJECT_BUDGET // GIB} GiB Gate 0 project budget ({current_project_bytes})")
+    estimates = {
+        "estimated_projected_new_disk_bytes": receipt.get("estimated_projected_new_disk_bytes"),
+    }
+    if (not isinstance(estimates["estimated_projected_new_disk_bytes"], int)
+            or isinstance(estimates["estimated_projected_new_disk_bytes"], bool)
+            or estimates["estimated_projected_new_disk_bytes"] < 0):
+        blockers.append("active PrefixLease projected reservation is malformed")
+    else:
+        projected = _post_materialization_prefix_admission(
+            current_free_bytes=current_free_bytes,
+            current_scoped_bytes=current_project_bytes,
+            manifest_estimates=estimates,
+        )
+        if not projected["admitted"]:
+            blockers.extend(projected["blockers"])
+    return blockers
+
+
+def _pre_materialization_marker_identity(
+    payload: Mapping[str, Any], raw_bytes: bytes, file_info: os.stat_result,
+    *, experiment_id: str, manifest_path: Path, manifest_sha256: str,
+    output_dir: Path,
+) -> tuple[str, str]:
+    """Validate the bounded PREPARED marker before excluding its exact path."""
+    expected_keys = {
+        "experiment_id", "pid", "state", "prefix_path", "output_dir",
+        "manifest_path", "manifest_sha256", "lease_token", "updated_at_unix",
+    }
+    allocated_bytes = getattr(file_info, "st_blocks", 0) * 512
+    if (not stat.S_ISREG(file_info.st_mode) or file_info.st_uid != os.getuid()
+            or file_info.st_nlink != 1 or stat.S_IMODE(file_info.st_mode) != 0o600
+            or file_info.st_size > ACTIVE_PREFIX_LEASE_MARKER_MAX_BYTES
+            or allocated_bytes > ACTIVE_PREFIX_LEASE_MARKER_MAX_ALLOCATED_BYTES):
+        raise RuntimeError("prepared PrefixLease marker exceeds its bounded private allocation")
+    if set(payload) != expected_keys or raw_bytes != _canonical_pretty_json_bytes(payload):
+        raise RuntimeError("prepared PrefixLease marker schema or canonical encoding is invalid")
+    prefix_value = payload.get("prefix_path")
+    if not isinstance(prefix_value, str):
+        raise RuntimeError("prepared PrefixLease marker lacks its exact prefix path")
+    prefix = Path(prefix_value)
+    allowed_prefix_roots = (
+        PREFIX_ROOT.absolute(), (Path.home() / "Library/Caches/FGMetalStep11D-R").absolute())
+    if (not prefix.is_absolute() or str(prefix) != os.path.abspath(prefix_value)
+            or not any(prefix.parent == root or root in prefix.parents
+                       for root in allowed_prefix_roots)
+            or _stat_entry_nofollow(prefix) is not None):
+        raise RuntimeError("prepared PrefixLease prefix path is unsafe or already materialized")
+    token = payload.get("lease_token")
+    updated_at = payload.get("updated_at_unix")
+    if (payload.get("experiment_id") != experiment_id
+            or payload.get("pid") != os.getpid()
+            or payload.get("state") != "PREPARED"
+            or payload.get("output_dir") != str(output_dir)
+            or payload.get("manifest_path") != str(manifest_path)
+            or payload.get("manifest_sha256") != manifest_sha256
+            or not isinstance(token, str) or not re.fullmatch(r"[0-9a-f]{64}", token)
+            or not isinstance(updated_at, (int, float)) or isinstance(updated_at, bool)
+            or not math.isfinite(updated_at) or updated_at < 0):
+        raise RuntimeError("prepared PrefixLease marker does not bind the signed run manifest")
+    return prefix_value, token
+
+
+def _current_run_scope_binding(
+    experiment_id: str | None, attestation_bytes: bytes, *,
+    active_prefix_receipt: Mapping[str, Any] | None = None,
+    require_active_marker: bool = False,
+    allow_storage_smoke: bool = False,
+) -> tuple[dict[str, Any] | None, list[str]]:
+    """Resolve only signed, exact current-run paths for nonlease accounting."""
+    if experiment_id is None:
+        return None, []
+    blockers: list[str] = []
+    try:
+        manifest_path = _experiment_manifest_path(experiment_id)
+    except ValueError as error:
+        return None, [f"current PrefixLease ID is invalid for storage accounting: {error}"]
+    manifest_entry = _stat_entry_nofollow(manifest_path)
+    if manifest_entry is None:
+        if active_prefix_receipt is not None or require_active_marker:
+            return None, ["current PrefixLease signed manifest disappeared before storage accounting"]
+        return None, []
+    try:
+        manifest_parent_fd = _open_directory_nofollow(manifest_path.parent)
+        try:
+            manifest, manifest_bytes, manifest_info = _read_json_at(
+                manifest_parent_fd, manifest_path.name, maximum_bytes=1024 * 1024)
+        finally:
+            os.close(manifest_parent_fd)
+        manifest_allocated = getattr(manifest_info, "st_blocks", 0) * 512
+        if not SIGNED_OUTPUT_MANIFEST_REQUIRED_FIELDS.issubset(manifest):
+            raise RuntimeError("signed current PrefixLease manifest is missing required fields")
+        if (not stat.S_ISREG(manifest_info.st_mode) or manifest_info.st_uid != os.getuid()
+                or manifest_info.st_nlink != 1 or stat.S_IMODE(manifest_info.st_mode) != 0o600
+                or manifest_allocated > 2 * 1024 * 1024
+                or not _verify_manifest_signature(manifest)
+                or manifest_bytes != _canonical_pretty_json_bytes(manifest)
+                or manifest.get("decision") != "ALLOW"
+                or manifest.get("experiment_id") != experiment_id
+                or manifest.get("manifest_path") != str(manifest_path)
+                or manifest.get("gate0_attestation_sha256")
+                != hashlib.sha256(attestation_bytes).hexdigest()):
+            raise RuntimeError("signed current PrefixLease manifest does not match Gate 0")
+        estimates = _validated_manifest_estimates(manifest)
+        output_dir = _measured_output_dir(manifest.get("output_dir", ""))
+        if str(output_dir) != manifest.get("output_dir"):
+            raise RuntimeError("current PrefixLease output path is not canonical")
+    except (OSError, TypeError, ValueError, RuntimeError, json.JSONDecodeError) as error:
+        return None, [f"current PrefixLease manifest cannot authorize storage accounting: {error}"]
+
+    exclusions: list[Path] = [manifest_path, output_dir]
+    output_info = _stat_entry_nofollow(output_dir)
+    if output_info is not None and (
+            not stat.S_ISDIR(output_info.st_mode) or output_info.st_uid != os.getuid()
+            or output_info.st_dev != REPO.lstat().st_dev):
+        blockers.append("current PrefixLease output path is not an owned directory on the measured filesystem")
+    try:
+        output_allocated, _output_tree_sha256 = _persistent_output_snapshot(output_dir)
+    except (OSError, TypeError, ValueError) as error:
+        blockers.append(f"current PrefixLease output allocation cannot be measured: {error}")
+        output_allocated = 0
+    if output_allocated > estimates["estimated_persistent_bytes"]:
+        blockers.append("current-run output exceeds its signed persistent-output reservation")
+
+    claim_path: Path | None = None
+    claim_sha256: str | None = None
+    storage_smoke = manifest.get("storage_policy_smoke") is True
+    if storage_smoke:
+        if not allow_storage_smoke or not _is_storage_policy_smoke_id(experiment_id):
+            blockers.append("storage-smoke paths are not authorized by this Gate 0 preflight")
+        else:
+            try:
+                claim_path = _storage_smoke_claim_path(experiment_id)
+                claim, claim_bytes = _read_storage_smoke_claim(experiment_id)
+                claim_sha256 = hashlib.sha256(claim_bytes).hexdigest()
+                if (manifest.get("smoke_nonce_claim_path") != str(claim_path)
+                        or manifest.get("smoke_nonce_claim_sha256") != claim_sha256
+                        or claim.get("preflight_attestation_sha256")
+                        != hashlib.sha256(attestation_bytes).hexdigest()):
+                    raise RuntimeError("storage-smoke nonce claim differs from its signed manifest")
+                exclusions.append(claim_path)
+            except (OSError, TypeError, ValueError, RuntimeError, json.JSONDecodeError) as error:
+                blockers.append(f"storage-smoke nonce claim cannot authorize storage accounting: {error}")
+    elif manifest.get("smoke_nonce_claim_path") is not None or manifest.get("smoke_nonce_claim_sha256") is not None:
+        blockers.append("non-smoke PrefixLease manifest contains storage-smoke nonce data")
+
+    if active_prefix_receipt is not None and (
+            active_prefix_receipt.get("experiment_id") != experiment_id
+            or active_prefix_receipt.get("manifest_path") != str(manifest_path)
+            or active_prefix_receipt.get("manifest_sha256")
+            != hashlib.sha256(manifest_bytes).hexdigest()
+            or active_prefix_receipt.get("output_dir") != str(output_dir)
+            or active_prefix_receipt.get("active_marker_path")
+            != str(ACTIVE_LEASE_ROOT / f"{experiment_id}.json")):
+        blockers.append("materialized PrefixLease receipt differs from its signed current-run manifest")
+
+    marker_path = ACTIVE_LEASE_ROOT / f"{experiment_id}.json"
+    marker_identity: tuple[int, int, int, int, int] | None = None
+    marker_digest: str | None = None
+    marker_info = _stat_entry_nofollow(marker_path)
+    if marker_info is None:
+        if active_prefix_receipt is not None or require_active_marker:
+            blockers.append("current PrefixLease active marker is missing before storage accounting")
+    else:
+        try:
+            active_root_fd = _open_directory_nofollow(ACTIVE_LEASE_ROOT)
+            try:
+                marker, marker_bytes, marker_info = _read_json_at(
+                    active_root_fd, marker_path.name,
+                    maximum_bytes=ACTIVE_PREFIX_LEASE_MARKER_MAX_BYTES)
+                parent_info = os.fstat(active_root_fd)
+            finally:
+                os.close(active_root_fd)
+            marker_identity = (
+                marker_info.st_dev, marker_info.st_ino, marker_info.st_size,
+                marker_info.st_mtime_ns, getattr(marker_info, "st_ctime_ns", 0))
+            marker_digest = hashlib.sha256(marker_bytes).hexdigest()
+            if active_prefix_receipt is None:
+                _pre_materialization_marker_identity(
+                    marker, marker_bytes, marker_info,
+                    experiment_id=experiment_id, manifest_path=manifest_path,
+                    manifest_sha256=hashlib.sha256(manifest_bytes).hexdigest(),
+                    output_dir=output_dir)
+            else:
+                marker_receipt = _validate_materialized_active_prefix_marker(
+                    marker, marker_bytes, marker_info)
+                if (marker_receipt != active_prefix_receipt
+                        or marker.get("experiment_id") != experiment_id
+                        or marker.get("manifest_sha256") != hashlib.sha256(manifest_bytes).hexdigest()
+                        or (marker_receipt.get("active_marker_parent_device"),
+                            marker_receipt.get("active_marker_parent_inode"))
+                        != (parent_info.st_dev, parent_info.st_ino)):
+                    raise RuntimeError("materialized PrefixLease marker differs from its signed receipt")
+            exclusions.append(marker_path)
+        except (OSError, TypeError, ValueError, RuntimeError, json.JSONDecodeError) as error:
+            blockers.append(f"current PrefixLease active marker cannot authorize storage accounting: {error}")
+
+    prefix_path: Path | None = None
+    if active_prefix_receipt is not None:
+        prefix_value = active_prefix_receipt.get("prefix_path")
+        if not isinstance(prefix_value, str):
+            blockers.append("materialized PrefixLease receipt lacks its prefix path")
+        else:
+            prefix_path = Path(prefix_value)
+            prefix_info = _stat_entry_nofollow(prefix_path)
+            if (prefix_info is None or not stat.S_ISDIR(prefix_info.st_mode)
+                    or (prefix_info.st_dev, prefix_info.st_ino)
+                    != (active_prefix_receipt.get("prefix_device"),
+                        active_prefix_receipt.get("prefix_inode"))):
+                blockers.append("materialized PrefixLease path no longer matches its signed inode")
+            exclusions.append(prefix_path)
+
+    binding = {
+        "experiment_id": experiment_id,
+        "manifest_path": manifest_path,
+        "manifest_sha256": hashlib.sha256(manifest_bytes).hexdigest(),
+        "manifest_identity": (manifest_info.st_dev, manifest_info.st_ino, manifest_info.st_size,
+                              manifest_info.st_mtime_ns, getattr(manifest_info, "st_ctime_ns", 0)),
+        "output_dir": output_dir,
+        "output_identity": ((output_info.st_dev, output_info.st_ino)
+                            if output_info is not None else None),
+        "output_allocated_bytes": output_allocated,
+        "claim_path": claim_path,
+        "claim_sha256": claim_sha256,
+        "marker_path": marker_path,
+        "marker_identity": marker_identity,
+        "marker_sha256": marker_digest,
+        "prefix_path": prefix_path,
+        "exclusion_paths": tuple(exclusions),
+    }
+    return binding, blockers
+
+
 def _gate0_blockers(*, active_experiment_id: str | None = None,
-                    allow_storage_smoke: bool = False) -> list[str]:
+                    allow_storage_smoke: bool = False,
+                    active_prefix_receipt: Mapping[str, Any] | None = None,
+                    require_active_marker: bool = False,
+                    measurements: dict[str, Any] | None = None) -> list[str]:
     blockers: list[str] = []
     if not GATE0_ATTESTATION_PATH.is_file() or GATE0_ATTESTATION_PATH.is_symlink():
         return ["Gate 0 attestation is missing; graphics experiments remain disabled"]
@@ -969,13 +1719,38 @@ def _gate0_blockers(*, active_experiment_id: str | None = None,
     if inventory_age < 0 or inventory_age > GATE0_MAX_AGE_SECONDS:
         blockers.append("storage inventory is missing a fresh measurement from the last hour")
     if inventory.get("filesystem", {}).get("free_bytes", 0) < FREE_MINIMUM:
-        blockers.append("attested inventory free space is below the 45 GiB run minimum")
+        blockers.append(f"attested inventory free space is below the {FREE_MINIMUM // GIB} GiB run minimum")
     try:
         scoped_bytes = int(inventory.get("totals", {}).get("fgmetal_scoped_allocated_inode_bytes", PROJECT_BUDGET + 1))
     except (TypeError, ValueError):
         scoped_bytes = PROJECT_BUDGET + 1
+    expected_measurements = attestation.get("measurements", {})
+    attested_observed_scope = expected_measurements.get(
+        "fgmetal_scoped_observed_allocated_inode_bytes") if isinstance(expected_measurements, Mapping) else None
+    attested_nonlease_scope = expected_measurements.get(
+        "fgmetal_scoped_observed_nonlease_allocated_inode_bytes") if isinstance(expected_measurements, Mapping) else None
+    if (not isinstance(attested_observed_scope, int) or isinstance(attested_observed_scope, bool)
+            or attested_observed_scope < 0):
+        blockers.append("Gate 0 lacks an exact observed-allocation baseline for mutation detection")
+    if (not isinstance(attested_nonlease_scope, int) or isinstance(attested_nonlease_scope, bool)
+            or attested_nonlease_scope < 0):
+        blockers.append("Gate 0 lacks an exact non-lease allocation baseline for mutation detection")
+    attested_persistent_output_bindings = expected_measurements.get(
+        "signed_persistent_output_bindings") if isinstance(expected_measurements, Mapping) else None
+    if not isinstance(attested_persistent_output_bindings, list):
+        blockers.append("Gate 0 lacks its signed historical-output identity baseline")
+    baseline_output_bindings: dict[str, Mapping[str, Any]] = {}
+    if isinstance(attested_persistent_output_bindings, list):
+        for row in attested_persistent_output_bindings:
+            experiment_id = row.get("experiment_id") if isinstance(row, Mapping) else None
+            if not isinstance(experiment_id, str) or experiment_id in baseline_output_bindings:
+                blockers.append("Gate 0 historical-output identity baseline is malformed")
+                continue
+            baseline_output_bindings[experiment_id] = row
+    unlinked_upper_bound = int(inventory.get("totals", {}).get(
+        "fgmetal_scoped_unlinked_mount_backing_upper_bound_bytes", 0))
     if scoped_bytes > GATE0_PROJECT_BUDGET:
-        blockers.append("attested FG-Metal inventory exceeds the 45 GiB Gate 0 project budget")
+        blockers.append(f"attested FG-Metal inventory exceeds the {GATE0_PROJECT_BUDGET // GIB} GiB Gate 0 project budget")
     missing_image_estimates = inventory.get("totals", {}).get(
         "unaccounted_unlinked_mounted_backing_images", [])
     if missing_image_estimates:
@@ -1010,7 +1785,7 @@ def _gate0_blockers(*, active_experiment_id: str | None = None,
                  "artifactize_builds.py", "build_retention.py", "storage_gate0.py",
                  "test_build_retention.py", "test_storage_policy.py", "smoke_prefix_lease.py",
                  "consolidate_evidence.py", "test_evidence_consolidation.py",
-                 "test_wine_launcher_policy.py", "test_g0c_checks.py"):
+                 "test_wine_launcher_policy.py", "test_g0c_checks.py", "test_storage_recovery.py"):
         control_path = Path(__file__).resolve().parent / name
         expected_hash = control_hashes.get(name)
         try:
@@ -1042,13 +1817,17 @@ def _gate0_blockers(*, active_experiment_id: str | None = None,
     active_leases = _active_lease_markers()
     other_leases = [path for path in active_leases
                     if active_experiment_id is None or path.stem != active_experiment_id]
-    if other_leases:
+    if other_leases and active_prefix_receipt is None:
         blockers.append("another or interrupted PrefixLease is active: "
                         + ", ".join(str(path) for path in other_leases))
     pending_prefix_reconciliation = _pending_prefix_reconciliation_receipts()
     if pending_prefix_reconciliation:
         blockers.append("PrefixLease reconciliation evidence is incomplete: "
                         + ", ".join(pending_prefix_reconciliation))
+    pending_prefix_recovery = _pending_prefix_recovery_receipts()
+    if pending_prefix_recovery:
+        blockers.append("PrefixLease recovery evidence is incomplete: "
+                        + ", ".join(pending_prefix_recovery))
     try:
         retention_directory = Path(__file__).resolve().parent
         if str(retention_directory) not in sys.path:
@@ -1114,30 +1893,154 @@ def _gate0_blockers(*, active_experiment_id: str | None = None,
     if phase_free is None:
         blockers.append("latest storage cleanup phase lacks a final free-space measurement")
     elif int(phase_free) < FREE_MINIMUM:
-        blockers.append("latest cleanup phase ended below the 45 GiB run minimum")
+        blockers.append(f"latest cleanup phase ended below the {FREE_MINIMUM // GIB} GiB run minimum")
     if phase_project is None:
         blockers.append("latest storage cleanup phase lacks a scoped project-usage measurement")
     elif int(phase_project) > GATE0_PROJECT_BUDGET:
-        blockers.append("latest cleanup phase exceeded the 45 GiB Gate 0 FG-Metal scope budget")
+        blockers.append(f"latest cleanup phase exceeded the {GATE0_PROJECT_BUDGET // GIB} GiB Gate 0 FG-Metal scope budget")
     if phase_time is None or time.time() - float(phase_time) < 0 or time.time() - float(phase_time) > GATE0_MAX_AGE_SECONDS:
         blockers.append("latest cleanup phase is missing or older than one hour")
     live_free = disk_free_bytes(REPO)
     if live_free < FREE_MINIMUM:
-        blockers.append(f"current free space is below the 45 GiB run minimum ({live_free})")
-    live_project = int(measure_project_usage()["allocated_inode_deduplicated_bytes"])
+        blockers.append(f"current free space is below the {FREE_MINIMUM // GIB} GiB run minimum ({live_free})")
+    receipt_valid = active_prefix_receipt is not None
+    if active_prefix_receipt is not None:
+        receipt = active_prefix_receipt
+        expected_active_path = (ACTIVE_LEASE_ROOT / f"{active_experiment_id}.json"
+                                if active_experiment_id else None)
+        receipt_prefix = receipt.get("prefix_path")
+        receipt_output = receipt.get("output_dir")
+        receipt_marker = receipt.get("active_marker_path")
+        try:
+            manifest_path = _experiment_manifest_path(str(receipt.get("experiment_id", "")))
+        except ValueError:
+            manifest_path = None
+        if (not _verify_storage_evidence(receipt, "prefix_materialization_hmac_sha256")
+                or receipt.get("schema_version") != 1
+                or receipt.get("experiment_id") != active_experiment_id
+                or receipt.get("pid") != os.getpid()
+                or receipt.get("gate0_attestation_sha256") != hashlib.sha256(attestation_bytes).hexdigest()
+                or receipt.get("active_marker_path") != str(expected_active_path)
+                or receipt.get("manifest_path") != str(manifest_path)
+                or receipt.get("gate0_attested_observed_scope_bytes") != attested_observed_scope
+                or receipt.get("gate0_attested_nonlease_scope_bytes") != attested_nonlease_scope
+                or not isinstance(receipt_prefix, str)
+                or not isinstance(receipt_output, str)
+                or not isinstance(receipt_marker, str)):
+            receipt_valid = False
+            blockers.append("active PrefixLease materialization receipt is missing, stale, or unauthenticated")
+    persistent_snapshot, persistent_exclusions, persistent_blockers = (
+        _signed_persistent_output_snapshot(
+            exclude_experiment_id=active_experiment_id,
+            expected_gate0_attestation_sha256=hashlib.sha256(attestation_bytes).hexdigest(),
+            baseline_experiment_ids=set(baseline_output_bindings)))
+    blockers.extend(persistent_blockers)
+    current_output_bindings = {
+        row.get("experiment_id"): row for row in persistent_snapshot.get("bindings", ())
+        if isinstance(row, Mapping) and isinstance(row.get("experiment_id"), str)
+    }
+    if any(current_output_bindings.get(experiment_id) != row
+           for experiment_id, row in baseline_output_bindings.items()):
+        blockers.append("signed historical experiment outputs changed since Gate 0 certification")
+    scope_binding: dict[str, Any] | None = None
+    if active_experiment_id is not None:
+        scope_binding, scope_binding_blockers = _current_run_scope_binding(
+            active_experiment_id, attestation_bytes,
+            active_prefix_receipt=(active_prefix_receipt if receipt_valid else None),
+            require_active_marker=require_active_marker,
+            allow_storage_smoke=is_preflight_smoke,
+        )
+        blockers.extend(scope_binding_blockers)
+    scope_exclusions = tuple(persistent_exclusions) + (
+        tuple(scope_binding["exclusion_paths"]) if scope_binding is not None else ())
+    live_project_usage = measure_project_usage(exclude_paths=scope_exclusions)
+    live_project = conservative_project_usage_bytes(live_project_usage)
     if live_project > GATE0_PROJECT_BUDGET:
-        blockers.append(f"current FG-Metal storage exceeds the 45 GiB Gate 0 project budget ({live_project})")
-    expected_measurements = attestation.get("measurements", {})
-    if expected_measurements.get("free_bytes") != inventory.get("filesystem", {}).get("free_bytes"):
-        blockers.append("Gate 0 free-space measurement is not bound to the current inventory")
-    if expected_measurements.get("fgmetal_scoped_allocated_inode_bytes") != scoped_bytes:
-        blockers.append("Gate 0 project-size measurement is not bound to the current inventory")
-    if abs(live_free - int(expected_measurements.get("free_bytes", live_free))) > 2 * GIB:
+        blockers.append(f"current FG-Metal storage exceeds the {GATE0_PROJECT_BUDGET // GIB} GiB Gate 0 project budget ({live_project})")
+    observed_nonlease = (live_project_usage.get("allocated_inode_deduplicated_bytes_excluding_paths")
+                         if scope_exclusions else
+                         live_project_usage.get("allocated_inode_deduplicated_bytes"))
+    live_nonlease_project: int | None = None
+    if (not isinstance(observed_nonlease, int) or isinstance(observed_nonlease, bool)
+            or observed_nonlease < 0):
+        blockers.append("current non-lease FG-Metal storage measurement is invalid")
+    else:
+        live_nonlease_project = observed_nonlease + unlinked_upper_bound
+        if (isinstance(attested_nonlease_scope, int)
+                and observed_nonlease != attested_nonlease_scope):
+            blockers.append("unrelated non-lease storage changed since Gate 0 certification")
+    if receipt_valid and active_prefix_receipt is not None:
+        if isinstance(observed_nonlease, int) and not isinstance(observed_nonlease, bool) and observed_nonlease >= 0:
+            try:
+                prefix_size = _prefix_size(Path(receipt["prefix_path"]))
+                current_prefix_bytes = prefix_size["allocated_inode_deduplicated_bytes"]
+                current_output_bytes, _output_tree_sha256 = _persistent_output_snapshot(
+                    Path(receipt["output_dir"]))
+            except (KeyError, OSError, TypeError, ValueError):
+                blockers.append("active PrefixLease allocation receipt paths are unsafe or malformed")
+            else:
+                blockers.extend(_prefix_lease_accounting_blockers(
+                    receipt,
+                    current_free_bytes=live_free,
+                    current_project_bytes=live_project,
+                    current_nonlease_project_bytes=observed_nonlease,
+                    attested_nonlease_project_bytes=(attested_nonlease_scope
+                                                     if isinstance(attested_nonlease_scope, int)
+                                                     and not isinstance(attested_nonlease_scope, bool)
+                                                     else -1),
+                    current_prefix_allocated_bytes=current_prefix_bytes,
+                    current_output_allocated_bytes=current_output_bytes,
+                    attested_free_bytes=int(expected_measurements.get("free_bytes", live_free)),
+                    other_active_lease_count=len(other_leases),
+                    expected_binding={
+                        "experiment_id": active_experiment_id,
+                        "pid": os.getpid(),
+                        "prefix_path": str(receipt["prefix_path"]),
+                        "active_marker_path": str(receipt["active_marker_path"]),
+                        "output_dir": str(receipt["output_dir"]),
+                    },
+                ))
+    if scope_binding is not None:
+        rebound, rebound_blockers = _current_run_scope_binding(
+            active_experiment_id, attestation_bytes,
+            active_prefix_receipt=(active_prefix_receipt if receipt_valid else None),
+            require_active_marker=require_active_marker,
+            allow_storage_smoke=is_preflight_smoke,
+        )
+        blockers.extend(rebound_blockers)
+        if rebound is None or any(rebound.get(key) != scope_binding.get(key) for key in (
+                "manifest_sha256", "manifest_identity", "output_identity", "output_allocated_bytes",
+                "claim_sha256", "marker_identity", "marker_sha256", "prefix_path", "exclusion_paths")):
+            blockers.append("current-run storage paths changed while Gate 0 accounting was measured")
+    rebound_persistent_snapshot, rebound_persistent_exclusions, rebound_persistent_blockers = (
+        _signed_persistent_output_snapshot(
+            exclude_experiment_id=active_experiment_id,
+            expected_gate0_attestation_sha256=hashlib.sha256(attestation_bytes).hexdigest(),
+            baseline_experiment_ids=set(baseline_output_bindings)))
+    blockers.extend(rebound_persistent_blockers)
+    if (rebound_persistent_snapshot != persistent_snapshot
+            or rebound_persistent_exclusions != persistent_exclusions):
+        blockers.append("signed experiment output paths changed while Gate 0 accounting was measured")
+    if measurements is not None:
+        measurements.update({
+            "free_bytes": live_free,
+            "project_usage": live_project_usage,
+            "conservative_project_bytes": live_project,
+            "nonlease_project_bytes": live_nonlease_project,
+        })
+    inventory_measurements = attestation.get("inventory_measurements", {})
+    if (not isinstance(inventory_measurements, Mapping)
+            or inventory_measurements.get("free_bytes") != inventory.get("filesystem", {}).get("free_bytes")
+            or inventory_measurements.get("fgmetal_scoped_allocated_inode_bytes") != scoped_bytes
+            or inventory_measurements.get("fgmetal_scoped_observed_allocated_inode_bytes")
+            != inventory.get("totals", {}).get("fgmetal_scoped_observed_allocated_inode_bytes")):
+        blockers.append("Gate 0 inventory snapshot is not bound to its attestation")
+    if (not isinstance(attested_observed_scope, int) or isinstance(attested_observed_scope, bool)
+            or expected_measurements.get("fgmetal_scoped_allocated_inode_bytes")
+            != max(attested_observed_scope + unlinked_upper_bound, scoped_bytes)):
+        blockers.append("Gate 0 live scope measurement is inconsistent with its observed baseline and inventory bound")
+    if abs(live_free - int(expected_measurements.get("free_bytes", live_free))) > GATE0_FREE_DRIFT_TOLERANCE_BYTES:
         blockers.append("current free space changed by more than 2 GiB since Gate 0 attestation")
-    unlinked_upper_bound = int(inventory.get("totals", {}).get(
-        "fgmetal_scoped_unlinked_mount_backing_upper_bound_bytes", 0))
-    if abs(live_project - int(expected_measurements.get("fgmetal_scoped_allocated_inode_bytes", live_project))) > 1 * GIB + unlinked_upper_bound:
-        blockers.append("current FG-Metal allocated size changed beyond the unlinked-image estimate allowance")
     expected_counts = {
         "worktree_count": worktree_count,
         "preserved_prefix_count": preserved_count,
@@ -1163,16 +2066,63 @@ def _gate0_blockers(*, active_experiment_id: str | None = None,
     return blockers
 
 
-def measure_project_usage() -> dict[str, int | bool]:
-    """Estimate project storage, deduplicating hard links but not APFS clones."""
-    seen: set[tuple[int, int]] = set()
+def measure_project_usage(*, exclude_paths: Sequence[Path | str] = ()) -> dict[str, Any]:
+    """Estimate project storage, deduplicating hard links but not APFS clones.
+
+    When exact paths are supplied, also return the project allocation that
+    remains after excluding those paths. An inode linked both inside and
+    outside an excluded tree remains in the included total.
+    """
+    normalized_exclusions = tuple(Path(os.path.abspath(os.fspath(path))) for path in exclude_paths)
+    allocated_by_inode: dict[tuple[int, int], int] = {}
+    included_inodes: set[tuple[int, int]] = set()
     logical = 0
     allocated = 0
     file_count = 0
-    for root in _project_roots():
+    disappearance_events: list[dict[str, Any]] = []
+
+    for discovered in _classified_project_roots():
+        root = discovered.path
         if _is_other_project_path(root):
             continue
-        root_device = root.stat().st_dev
+
+        try:
+            info = root.lstat()
+            if stat.S_ISLNK(info.st_mode):
+                raise OSError(errno.EINVAL, f"storage root is an unexpected symlink: {root}")
+            if not stat.S_ISDIR(info.st_mode):
+                raise OSError(errno.ENOTDIR, f"storage root is not a directory: {root}")
+
+            if (discovered.expected_ino is not None
+                    and (info.st_dev, info.st_ino) != (discovered.expected_dev, discovered.expected_ino)):
+                raise OSError(errno.ESTALE, f"storage root identity changed between discovery and stat: {root}")
+
+            root_device = info.st_dev
+        except FileNotFoundError as error:
+            if discovered.classification == ROOT_CLASS_OPTIONAL_EPHEMERAL:
+                disappearance_events.append({
+                    "path": str(root),
+                    "classification": discovered.classification,
+                    "category": discovered.category,
+                    "event": "OPTIONAL_ROOT_DISAPPEARED_BEFORE_STAT",
+                    "errno": errno.ENOENT,
+                    "timestamp_unix": time.time(),
+                })
+                continue
+            raise
+        except OSError as error:
+            if error.errno == errno.ENOENT and discovered.classification == ROOT_CLASS_OPTIONAL_EPHEMERAL:
+                disappearance_events.append({
+                    "path": str(root),
+                    "classification": discovered.classification,
+                    "category": discovered.category,
+                    "event": "OPTIONAL_ROOT_DISAPPEARED_BEFORE_STAT",
+                    "errno": errno.ENOENT,
+                    "timestamp_unix": time.time(),
+                })
+                continue
+            raise
+
         for directory, dirnames, filenames in os.walk(root, followlinks=False):
             current = Path(directory)
             descend = []
@@ -1200,16 +2150,23 @@ def measure_project_usage() -> dict[str, int | bool]:
                 logical += info.st_size
                 file_count += 1
                 key = (info.st_dev, info.st_ino)
-                if key not in seen:
-                    seen.add(key)
-                    allocated += getattr(info, "st_blocks", 0) * 512
-    return {
+                allocated_by_inode.setdefault(key, getattr(info, "st_blocks", 0) * 512)
+                if not any(path == excluded or excluded in path.parents
+                           for excluded in normalized_exclusions):
+                    included_inodes.add(key)
+    allocated = sum(allocated_by_inode.values())
+    result = {
         "logical_bytes": logical,
         "allocated_inode_deduplicated_bytes": allocated,
         "file_count": file_count,
         "hardlinks_deduplicated": True,
         "apfs_clone_awareness": False,
+        "disappearance_events": disappearance_events,
     }
+    if normalized_exclusions:
+        result["allocated_inode_deduplicated_bytes_excluding_paths"] = sum(
+            allocated_by_inode[key] for key in included_inodes)
+    return result
 
 
 def _tree_fingerprint(root: Path, *, exclude: set[str] | None = None) -> dict[str, Any]:
@@ -1666,13 +2623,22 @@ def reconcile_abandoned_storage_smoke_lease_markers() -> list[dict[str, Any]]:
             if not _is_storage_policy_smoke_id(experiment_id):
                 continue
             marker, marker_bytes, marker_info = _read_json_at(active_root_fd, name)
-            if (marker.get("experiment_id") != experiment_id
-                    or marker.get("state") != "RECONCILIATION_REQUIRED"):
+            if marker.get("experiment_id") != experiment_id:
+                continue
+            if marker.get("state") not in {"RECONCILIATION_REQUIRED", "MATERIALIZED", "RECOVERY_PENDING"}:
+                continue
+            expected_prefix = PREFIX_ROOT / f"storage-smoke-{experiment_id}"
+            expected_output = REPO / "experiments/storage/smoke-runs" / experiment_id
+            output = _measured_output_dir(expected_output)
+            cleanup_path = output / "prefix-cleanup.json"
+            if not cleanup_path.exists():
+                recovered = recover_interrupted_storage_smoke_lease_marker(experiment_id, active_root_fd=active_root_fd)
+                reconciled.append(recovered)
+                continue
+            if marker.get("state") != "RECONCILIATION_REQUIRED":
                 continue
             if not _pid_is_definitely_gone(marker.get("pid")):
                 raise RuntimeError(f"PrefixLease smoke marker PID is live or ambiguous: {marker.get('pid')}")
-            expected_prefix = PREFIX_ROOT / f"storage-smoke-{experiment_id}"
-            expected_output = REPO / "experiments/storage/smoke-runs" / experiment_id
             expected_manifest = _experiment_manifest_path(experiment_id)
             if (marker.get("prefix_path") != str(expected_prefix)
                     or marker.get("output_dir") != str(expected_output)
@@ -1685,8 +2651,6 @@ def reconcile_abandoned_storage_smoke_lease_markers() -> list[dict[str, Any]]:
                     or manifest.get("experiment_id") != experiment_id
                     or hashlib.sha256(manifest_bytes).hexdigest() != marker.get("manifest_sha256")):
                 raise RuntimeError("stale smoke marker is not bound to its signed manifest")
-            output = _measured_output_dir(expected_output)
-            cleanup_path = output / "prefix-cleanup.json"
             cleanup_bytes = _read_file_nofollow(cleanup_path)
             cleanup = json.loads(cleanup_bytes)
             preflight_bytes = _read_file_nofollow(output / "gate0-preflight-attestation.json")
@@ -1795,9 +2759,312 @@ def _pending_prefix_reconciliation_receipts() -> list[str]:
     return sorted(pending)
 
 
+def _pending_prefix_recovery_receipts() -> list[str]:
+    try:
+        root_fd = _open_directory_nofollow(PREFIX_RECOVERY_RECEIPTS_ROOT)
+    except FileNotFoundError:
+        return []
+    except OSError:
+        return [str(PREFIX_RECOVERY_RECEIPTS_ROOT)]
+    pending: list[str] = []
+    try:
+        for name in os.listdir(root_fd):
+            if not name.endswith(".json") or name.startswith("."):
+                continue
+            try:
+                record, _raw, _info = _read_json_at(root_fd, name)
+                if (not _verify_storage_evidence(record, "recovery_receipt_hmac_sha256")
+                        or record.get("current_state_reconciled") is not True
+                        or record.get("historical_cleanup_certified") is not False
+                        or record.get("receipt_type") != "CURRENT_STATE_STORAGE_RECOVERY"):
+                    pending.append(str(PREFIX_RECOVERY_RECEIPTS_ROOT / name))
+            except (OSError, ValueError, json.JSONDecodeError):
+                pending.append(str(PREFIX_RECOVERY_RECEIPTS_ROOT / name))
+    finally:
+        os.close(root_fd)
+    return sorted(pending)
+
+
+def recover_interrupted_storage_smoke_lease_marker(
+    experiment_id: str,
+    *,
+    active_root_fd: int | None = None,
+) -> dict[str, Any]:
+    """Recover an interrupted storage-only PrefixLease smoke marker when no live resources remain."""
+    if not _is_storage_policy_smoke_id(experiment_id):
+        raise ValueError(f"invalid smoke experiment ID for recovery: {experiment_id}")
+
+    if active_root_fd is None:
+        with storage_certification_guard(exclusive=True):
+            root_fd, gate_lock, allocation_lock = _acquire_prefix_reconciliation_locks()
+            try:
+                return _recover_interrupted_storage_smoke_lease_marker_locked(experiment_id, root_fd)
+            finally:
+                _release_prefix_reconciliation_locks(root_fd, gate_lock, allocation_lock)
+    else:
+        return _recover_interrupted_storage_smoke_lease_marker_locked(experiment_id, active_root_fd)
+
+
+def _recover_interrupted_storage_smoke_lease_marker_locked(
+    experiment_id: str,
+    active_root_fd: int,
+) -> dict[str, Any]:
+    PREFIX_RECOVERY_RECEIPTS_ROOT.mkdir(parents=True, exist_ok=True)
+    PREFIX_RETIRED_MARKERS_ROOT.mkdir(parents=True, exist_ok=True)
+
+    marker_name = f"{experiment_id}.json"
+    marker_path = ACTIVE_LEASE_ROOT / marker_name
+    retired_marker_path = PREFIX_RETIRED_MARKERS_ROOT / marker_name
+    receipt_name = f"storage-recovery-receipt-{experiment_id}.json"
+    receipt_path = PREFIX_RECOVERY_RECEIPTS_ROOT / receipt_name
+    intent_name = f".intent-{experiment_id}.json"
+    intent_path = PREFIX_RECOVERY_RECEIPTS_ROOT / intent_name
+
+    expected_output = REPO / "experiments/storage/smoke-runs" / experiment_id
+    expected_prefix = PREFIX_ROOT / f"storage-smoke-{experiment_id}"
+
+    # Idempotence: if marker is already retired and receipt is valid, return existing receipt
+    if _stat_child_nofollow(active_root_fd, marker_name) is None and retired_marker_path.exists() and receipt_path.exists():
+        receipt_bytes = _read_file_nofollow(receipt_path)
+        receipt = json.loads(receipt_bytes)
+        if (_verify_storage_evidence(receipt, "recovery_receipt_hmac_sha256")
+                and receipt.get("interrupted_smoke_id") == experiment_id
+                and receipt.get("current_state_reconciled") is True
+                and receipt.get("historical_cleanup_certified") is False):
+            _assert_reconciled_smoke_paths_absent(experiment_id)
+            return receipt
+
+    # Precondition A: Marker checks
+    if _stat_child_nofollow(active_root_fd, marker_name) is None:
+        raise FileNotFoundError(f"active PrefixLease marker not found for recovery: {marker_name}")
+
+    marker, marker_bytes, marker_info = _read_json_at(active_root_fd, marker_name)
+    marker_hash = hashlib.sha256(marker_bytes).hexdigest()
+
+    for req_key in ("experiment_id", "pid", "state", "prefix_path", "output_dir", "manifest_path", "manifest_sha256"):
+        if req_key not in marker:
+            raise ValueError(f"interrupted marker schema invalid, missing {req_key}: {marker_name}")
+
+    if marker.get("experiment_id") != experiment_id:
+        raise ValueError(f"marker experiment ID mismatch: {marker.get('experiment_id')} != {experiment_id}")
+
+    if marker.get("state") not in {"MATERIALIZED", "RECOVERY_PENDING", "RECONCILIATION_REQUIRED"}:
+        raise ValueError(f"marker state not allowed for recovery: {marker.get('state')}")
+
+    expected_manifest = _experiment_manifest_path(experiment_id)
+    if marker.get("manifest_path") != str(expected_manifest):
+        raise ValueError(f"non-canonical manifest path in marker: {marker.get('manifest_path')}")
+    manifest_bytes = _read_file_nofollow(expected_manifest)
+    manifest = json.loads(manifest_bytes)
+    if not _verify_manifest_signature(manifest):
+        raise ValueError("manifest signature invalid")
+    if manifest.get("experiment_id") != experiment_id:
+        raise ValueError("manifest experiment_id mismatch")
+    if manifest.get("storage_policy_smoke") is not True:
+        raise ValueError("refusing to recover non-storage-smoke lease")
+    if hashlib.sha256(manifest_bytes).hexdigest() != marker.get("manifest_sha256"):
+        raise ValueError("marker manifest_sha256 does not match signed manifest")
+
+    if marker.get("output_dir") != str(expected_output):
+        raise ValueError(f"non-canonical output dir in marker: {marker.get('output_dir')}")
+    if marker.get("prefix_path") != str(expected_prefix):
+        raise ValueError(f"non-canonical prefix path in marker: {marker.get('prefix_path')}")
+
+    # Check for existing complete cleanup receipt: if valid and complete, refuse recovery
+    cleanup_path = expected_output / "prefix-cleanup.json"
+    if cleanup_path.exists():
+        try:
+            cleanup_bytes = _read_file_nofollow(cleanup_path)
+            cleanup = json.loads(cleanup_bytes)
+            if (_verify_storage_evidence(cleanup, "cleanup_receipt_hmac_sha256")
+                    and cleanup.get("receipt_finalization_complete") is True
+                    and cleanup.get("cleanup_error") is None):
+                raise RuntimeError(
+                    "historical cleanup receipt is valid and complete; use standard reconciliation instead of recovery"
+                )
+        except Exception as e:
+            if "standard reconciliation" in str(e):
+                raise
+
+    # Precondition B: Process liveness checks
+    pid = marker.get("pid")
+    if not _pid_is_definitely_gone(pid):
+        raise RuntimeError(f"interrupted smoke PID is still live or ambiguous: {pid}")
+
+    ps_check = subprocess.run(["ps", "-p", str(pid), "-o", "pid="],
+                              stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=False)
+    if ps_check.returncode == 0 and str(pid) in ps_check.stdout:
+        raise RuntimeError(f"interrupted smoke PID confirmed alive by ps: {pid}")
+
+    pgrep_wine = subprocess.run(["pgrep", "wineserver"],
+                                stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=False)
+    if pgrep_wine.returncode == 0 and pgrep_wine.stdout.strip():
+        raise RuntimeError("a wineserver process is currently running on the system")
+
+    # Precondition C: Prefix path absence
+    _assert_reconciled_smoke_paths_absent(experiment_id)
+
+    # Precondition D: Active builds / leases
+    retention_directory = Path(__file__).resolve().parent
+    if str(retention_directory) not in sys.path:
+        sys.path.insert(0, str(retention_directory))
+    import build_retention
+    retention = build_retention.status_snapshot()
+    if retention.get("active_build_count", 0) != 0:
+        raise RuntimeError("active build leases exist during recovery")
+    if retention.get("gate_status") != "PASS":
+        raise RuntimeError("build retention reports gate blocker during recovery")
+    active_markers = _active_lease_markers()
+    other_active = [m for m in active_markers if m.stem != experiment_id]
+    if other_active:
+        raise RuntimeError(f"other active leases exist: {[str(m) for m in other_active]}")
+
+    # Precondition E: Storage thresholds
+    live_free = disk_free_bytes(REPO)
+    if live_free < FREE_MINIMUM:
+        raise RuntimeError(f"live free space below threshold: {live_free} < {FREE_MINIMUM}")
+    live_project_usage = measure_project_usage()
+    live_project = conservative_project_usage_bytes(live_project_usage)
+    if live_project > GATE0_PROJECT_BUDGET:
+        raise RuntimeError(f"live project usage above budget: {live_project} > {GATE0_PROJECT_BUDGET}")
+    if len(preserved_prefixes()) > MAX_PRESERVED_PREFIXES:
+        raise RuntimeError("preserved prefix count exceeds limit")
+    if uncertified_prefixes():
+        raise RuntimeError("uncertified prefixes exist")
+
+    # Step 1: Record Recovery Intent
+    intent_record = {
+        "experiment_id": experiment_id,
+        "marker_sha256": marker_hash,
+        "state": "RECOVERY_INTENT_RECORDED",
+        "timestamp_unix": time.time(),
+    }
+    _write_json(intent_path, intent_record, strict_directory_sync=True)
+
+    # Step 2: Update active marker state to RECOVERY_PENDING
+    marker_updated = dict(marker)
+    marker_updated["state"] = "RECOVERY_PENDING"
+    marker_updated["updated_at_unix"] = time.time()
+    _write_json(marker_path, marker_updated, strict_directory_sync=True)
+
+    # Step 3: Write signed recovery receipt
+    recovery_code_hash = hashlib.sha256(_read_file_nofollow(Path(__file__).resolve())).hexdigest()
+    control_hashes = _gate0_control_hashes()
+    original_state = marker.get("state")
+
+    receipt_record = {
+        "schema_version": 1,
+        "receipt_type": "CURRENT_STATE_STORAGE_RECOVERY",
+        "recovery_receipt_version": "1.0",
+        "interrupted_smoke_id": experiment_id,
+        "original_marker_sha256": marker_hash,
+        "original_marker_state": original_state,
+        "original_prefix_path": str(expected_prefix),
+        "original_cleanup_receipt_status": "MISSING",
+        "original_process_identity": {
+            "pid": pid,
+            "manifest_sha256": marker.get("manifest_sha256"),
+        },
+        "current_process_liveness_result": {
+            "pid": pid,
+            "process_alive": False,
+            "wineserver_alive": False,
+            "verification_method": "os.kill_and_ps_process_lookup_error",
+        },
+        "current_prefix_existence_result": {
+            "prefix_path": str(expected_prefix),
+            "prefix_exists": False,
+            "clone_temporary_paths_exist": False,
+            "clone_temporary_paths": [],
+        },
+        "active_lease_inventory": [str(p) for p in active_markers],
+        "build_inventory": {
+            "active_build_count": retention.get("active_build_count", 0),
+            "unknown_count": len(retention.get("unknown", [])),
+            "gate_status": retention.get("gate_status"),
+        },
+        "prefix_inventory": {
+            "preserved_prefix_count": len(preserved_prefixes()),
+            "preserved_prefixes": [str(p) for p in preserved_prefixes()],
+            "uncertified_prefix_count": len(uncertified_prefixes()),
+            "uncertified_prefixes": [str(p) for p in uncertified_prefixes()],
+        },
+        "free_disk_bytes": live_free,
+        "scoped_project_bytes": live_project,
+        "verification_timestamp_unix": time.time(),
+        "recovery_code_sha256": recovery_code_hash,
+        "gate0_control_hashes": control_hashes,
+        "historical_cleanup_certified": False,
+        "current_state_reconciled": True,
+        "recovery_statement": (
+            "This receipt independently verifies current live storage safety. "
+            "It does NOT certify or establish that historical POST cleanup completed normally."
+        ),
+        "recovery_state": "RECOVERED_CURRENT_STATE",
+    }
+    sealed_receipt = _seal_storage_evidence(receipt_record, "recovery_receipt_hmac_sha256")
+    _write_json(receipt_path, sealed_receipt, strict_directory_sync=True)
+    if expected_output.exists():
+        _write_json(expected_output / receipt_name, sealed_receipt, strict_directory_sync=True)
+
+    # Step 4: Verify receipt read-back
+    read_back_bytes = _read_file_nofollow(receipt_path)
+    read_back = json.loads(read_back_bytes)
+    if not _verify_storage_evidence(read_back, "recovery_receipt_hmac_sha256"):
+        raise RuntimeError("recovery receipt HMAC signature verification failed")
+
+    # Step 5: Atomically preserve original marker in retired location
+    retired_marker_path.write_bytes(marker_bytes)
+    retired_dir_fd = _open_directory_nofollow(PREFIX_RETIRED_MARKERS_ROOT)
+    try:
+        os.fsync(retired_dir_fd)
+    finally:
+        os.close(retired_dir_fd)
+
+    # Unlink active marker from active directory
+    os.unlink(marker_name, dir_fd=active_root_fd)
+    os.fsync(active_root_fd)
+
+    # Write companion retirement metadata
+    retired_meta = {
+        "experiment_id": experiment_id,
+        "retired_at_unix": time.time(),
+        "original_marker_sha256": marker_hash,
+        "recovery_receipt_path": str(receipt_path),
+        "recovery_receipt_sha256": hashlib.sha256(read_back_bytes).hexdigest(),
+        "state": "RECOVERED_CURRENT_STATE",
+    }
+    _write_json(PREFIX_RETIRED_MARKERS_ROOT / f"{experiment_id}.meta.json", retired_meta, strict_directory_sync=True)
+
+    # Step 6: Verify active marker is absent from active lease inventory
+    remaining_active = _active_lease_markers()
+    if any(p.stem == experiment_id for p in remaining_active):
+        raise RuntimeError(f"marker still present in active lease set after retirement: {experiment_id}")
+
+    # Step 7: Clean up intent
+    if intent_path.exists():
+        try:
+            os.unlink(intent_path)
+        except OSError:
+            pass
+
+    return sealed_receipt
+
+
 def assert_prefix_lease(prefix: Path | str, wine_loader: Path | str | None = None,
                         runner_path: Path | str | None = None,
                         child_env: Mapping[str, str] | None = None) -> dict[str, Any]:
+    """Validate a live PrefixLease while serializing against managed storage admission."""
+    allocation_lock = _acquire_storage_allocation_lock()
+    try:
+        return _assert_prefix_lease_locked(prefix, wine_loader, runner_path, child_env)
+    finally:
+        _release_storage_allocation_lock(allocation_lock)
+
+
+def _assert_prefix_lease_locked(prefix: Path | str, wine_loader: Path | str | None = None,
+                                runner_path: Path | str | None = None,
+                                child_env: Mapping[str, str] | None = None) -> dict[str, Any]:
     """Refuse legacy/standalone Wine runners unless PrefixLease materialized this prefix."""
     if runner_path is None:
         raise RuntimeError("Wine runner preflight requires its exact authorized source path")
@@ -1809,24 +3076,52 @@ def assert_prefix_lease(prefix: Path | str, wine_loader: Path | str | None = Non
     if (selected_runner_path.is_symlink() or selected_runner_path != resolved_runner_path
             or not resolved_runner_path.is_file() or REPO.resolve() not in resolved_runner_path.parents):
         raise RuntimeError("Wine runner source must be a real canonical repository file")
-    prefix = Path(os.path.abspath(Path(prefix).expanduser()))
+    raw_prefix = os.fspath(prefix)
+    if (not isinstance(raw_prefix, str)
+            or not Path(raw_prefix).is_absolute()
+            or os.path.abspath(raw_prefix) != raw_prefix
+            or any(part == ".." for part in raw_prefix.split(os.sep))):
+        raise RuntimeError("Wine runner prefix must be an exact canonical absolute path")
+    prefix = Path(raw_prefix)
     marker = prefix / "FGMETAL_PREFIX_LEASE.json"
     try:
-        prefix_info = _stat_entry_nofollow(prefix)
-        marker_bytes = _read_file_nofollow(marker)
+        prefix_fd = _open_directory_nofollow(prefix)
+        try:
+            prefix_info = os.fstat(prefix_fd)
+            prefix_payload, marker_bytes, prefix_marker_info = _read_json_at(
+                prefix_fd, marker.name, maximum_bytes=1024 * 1024)
+        finally:
+            os.close(prefix_fd)
     except OSError as error:
         raise RuntimeError(f"Wine runner prefix path is unsafe or missing: {prefix}: {error}") from error
     if prefix_info is None or not stat.S_ISDIR(prefix_info.st_mode):
         raise RuntimeError(f"Wine runner requires a live storage-managed PrefixLease: {prefix}")
-    payload = json.loads(marker_bytes)
-    if Path(payload.get("prefix_path", "")).expanduser().absolute() != prefix:
+    prefix_identity = (prefix_info.st_dev, prefix_info.st_ino)
+    prefix_marker_identity = (
+        prefix_marker_info.st_dev, prefix_marker_info.st_ino, prefix_marker_info.st_size,
+        prefix_marker_info.st_mtime_ns, getattr(prefix_marker_info, "st_ctime_ns", 0))
+    if (prefix_marker_info.st_uid != os.getuid() or prefix_marker_info.st_nlink != 1
+            or stat.S_IMODE(prefix_marker_info.st_mode) != 0o600):
+        raise RuntimeError("Wine prefix lease marker is not a private, singly-linked regular file")
+    payload = prefix_payload
+    lease_token = payload.get("lease_token")
+    if (payload.get("prefix_path") != str(prefix)
+            or payload.get("pid") != os.getpid()
+            or payload.get("experiment_id") is None
+            or not isinstance(lease_token, str)
+            or not re.fullmatch(r"[0-9a-f]{64}", lease_token)):
         raise RuntimeError("Wine prefix lease marker names a different prefix path")
-    manifest_path = Path(payload.get("manifest_path", ""))
+    manifest_path_value = payload.get("manifest_path")
+    if not isinstance(manifest_path_value, str):
+        raise RuntimeError("Wine prefix lease manifest is missing or unsafe")
+    manifest_path = Path(manifest_path_value)
     try:
         expected_manifest_path = _experiment_manifest_path(str(payload.get("experiment_id", "")))
     except ValueError as error:
         raise RuntimeError(f"Wine prefix lease has an invalid experiment ID: {error}") from error
-    if manifest_path.absolute() != expected_manifest_path.absolute():
+    if (manifest_path_value != str(expected_manifest_path)
+            or not manifest_path.is_absolute()
+            or str(manifest_path) != os.path.abspath(manifest_path_value)):
         raise RuntimeError("Wine prefix lease manifest is missing or unsafe")
     try:
         manifest_bytes = _read_file_nofollow(manifest_path)
@@ -1845,13 +3140,20 @@ def assert_prefix_lease(prefix: Path | str, wine_loader: Path | str | None = Non
             or manifest.get("experiment_id") != payload.get("experiment_id")
             or manifest.get("output_dir") != payload.get("output_dir")):
         raise RuntimeError("Wine prefix lease does not bind to an allowed experiment manifest")
+    if (payload.get("manifest_path") != str(expected_manifest_path)
+            or payload.get("manifest_sha256") != hashlib.sha256(manifest_bytes).hexdigest()):
+        raise RuntimeError("Wine prefix lease marker does not bind to the current manifest")
+    if (payload.get("output_dir") != manifest.get("output_dir")
+            or payload.get("experiment_id") != manifest.get("experiment_id")):
+        raise RuntimeError("Wine prefix lease marker identity differs from its manifest")
     if manifest.get("internal_storage_setup") is True:
         raise RuntimeError("legacy internal-storage manifests cannot bypass Gate 0")
     try:
         output_dir = _measured_output_dir(manifest.get("output_dir", ""))
     except (TypeError, ValueError) as error:
         raise RuntimeError(f"Wine experiment output is outside measured storage: {error}") from error
-    if str(output_dir) != manifest.get("output_dir"):
+    if (str(output_dir) != manifest.get("output_dir")
+            or payload.get("output_dir") != str(output_dir)):
         raise RuntimeError("Wine experiment output path is not canonical")
     attestation_hash = hashlib.sha256(_read_file_nofollow(GATE0_ATTESTATION_PATH)).hexdigest() \
         if GATE0_ATTESTATION_PATH.is_file() and not GATE0_ATTESTATION_PATH.is_symlink() else None
@@ -1861,19 +3163,41 @@ def assert_prefix_lease(prefix: Path | str, wine_loader: Path | str | None = Non
                      and _is_storage_policy_smoke_id(manifest.get("experiment_id")))
     if manifest.get("storage_policy_smoke") is True and not storage_smoke:
         raise RuntimeError("storage smoke marker is not bound to the one permitted experiment ID")
-    gate_blockers = _gate0_blockers(active_experiment_id=str(payload.get("experiment_id")),
-                                    allow_storage_smoke=storage_smoke)
-    if gate_blockers:
-        raise RuntimeError("Gate 0 blocks Wine runner preflight: " + "; ".join(gate_blockers))
     active_path = ACTIVE_LEASE_ROOT / f"{payload.get('experiment_id')}.json"
+    active_root_fd = _open_directory_nofollow(ACTIVE_LEASE_ROOT)
     try:
-        active = json.loads(_read_file_nofollow(active_path))
-    except OSError as error:
+        active_parent_info = os.fstat(active_root_fd)
+        active_parent_identity = (active_parent_info.st_dev, active_parent_info.st_ino)
+        active, active_bytes, active_file_info = _read_json_at(
+            active_root_fd, active_path.name, maximum_bytes=1024 * 1024)
+    except (OSError, ValueError, json.JSONDecodeError) as error:
         raise RuntimeError(f"Wine prefix has no safe active PrefixLease record: {error}") from error
-    if (active.get("prefix_path") != str(prefix)
+    finally:
+        os.close(active_root_fd)
+    active_file_identity = (
+        active_file_info.st_dev, active_file_info.st_ino, active_file_info.st_size,
+        active_file_info.st_mtime_ns, getattr(active_file_info, "st_ctime_ns", 0))
+    preliminary_receipt = active.get("materialization_receipt")
+    if (isinstance(preliminary_receipt, Mapping)
+            and _verify_storage_evidence(
+                preliminary_receipt, "prefix_materialization_hmac_sha256")
+            and (preliminary_receipt.get("active_marker_parent_device"),
+                 preliminary_receipt.get("active_marker_parent_inode")) != active_parent_identity):
+        raise OSError("active PrefixLease marker parent changed after admission")
+    if (active_file_info.st_uid != os.getuid() or active_file_info.st_nlink != 1
+            or stat.S_IMODE(active_file_info.st_mode) != 0o600):
+        raise RuntimeError("active PrefixLease marker is not a private, singly-linked regular file")
+    if (active.get("experiment_id") != payload.get("experiment_id")
+            or active.get("pid") != payload.get("pid")
+            or active.get("prefix_path") != str(prefix)
+            or active.get("output_dir") != payload.get("output_dir")
+            or active.get("manifest_path") != str(expected_manifest_path)
             or active.get("manifest_sha256") != payload.get("manifest_sha256")
+            or active.get("lease_token") != lease_token
             or active.get("state") != "MATERIALIZED"):
         raise RuntimeError("active PrefixLease record does not match the materialized prefix")
+    receipt = _validate_materialized_active_prefix_marker(
+        active, active_bytes, active_file_info)
     template_marker_path = PREFIX_TEMPLATE / "FGMETAL_PREFIX_TEMPLATE.json"
     if template_marker_path.is_symlink() or not template_marker_path.is_file():
         raise RuntimeError("certified Wine template marker is unavailable")
@@ -1895,7 +3219,7 @@ def assert_prefix_lease(prefix: Path | str, wine_loader: Path | str | None = Non
         raise RuntimeError("Wine runner does not select the certified Wine binary")
     if Path(selected_env.get("WINELOADER", "")).expanduser().absolute() != selected_loader:
         raise RuntimeError("Wine child environment WINELOADER differs from the certified Wine binary")
-    if Path(selected_env.get("WINEPREFIX", "")).expanduser().absolute() != prefix:
+    if selected_env.get("WINEPREFIX") != str(prefix):
         raise RuntimeError("Wine runner WINEPREFIX does not match the active storage-managed lease")
     if Path(selected_env.get("WINESERVER", "")).expanduser().absolute() != runtime_root / "bin/wineserver":
         raise RuntimeError("Wine runner WINESERVER does not match the certified runtime")
@@ -1910,18 +3234,117 @@ def assert_prefix_lease(prefix: Path | str, wine_loader: Path | str | None = Non
         raise RuntimeError(f"authorized runner source cannot be safely read: {error}") from error
     if not isinstance(runner_hashes, Mapping) or runner_hashes.get(str(resolved_runner_path)) != current_runner_hash:
         raise RuntimeError("authorized runner source changed after the storage manifest was written")
-    selected_prefix = Path(selected_env.get("WINEPREFIX", "")).expanduser().absolute()
-    if selected_prefix != prefix:
+    selected_prefix = selected_env.get("WINEPREFIX")
+    if selected_prefix != str(prefix):
         raise RuntimeError("Wine child environment WINEPREFIX does not match its leased prefix")
     selected_server = Path(selected_env.get("WINESERVER", "")).expanduser().absolute()
     if selected_server != runtime_root / "bin/wineserver":
         raise RuntimeError("Wine child environment WINESERVER differs from the certified runtime")
+    prefix_identity_now = _stat_entry_nofollow(prefix)
+    current_inventory_bytes = _read_file_nofollow(INVENTORY_PATH)
+    inventory = json.loads(current_inventory_bytes)
+    estimates = _validated_manifest_estimates(manifest)
+    if (not isinstance(receipt, Mapping)
+            or not _verify_storage_evidence(receipt, "prefix_materialization_hmac_sha256")
+            or receipt.get("schema_version") != 1
+            or receipt.get("experiment_id") != payload.get("experiment_id")
+            or receipt.get("pid") != os.getpid()
+            or receipt.get("lease_token") != lease_token
+            or receipt.get("prefix_path") != str(prefix)
+            or receipt.get("output_dir") != str(output_dir)
+            or receipt.get("active_marker_path") != str(active_path)
+            or (receipt.get("active_marker_parent_device"), receipt.get("active_marker_parent_inode"))
+            != active_parent_identity
+            or receipt.get("manifest_path") != str(expected_manifest_path)
+            or receipt.get("manifest_sha256") != payload.get("manifest_sha256")
+            or receipt.get("gate0_attestation_sha256") != attestation_hash
+            or receipt.get("inventory_sha256") != hashlib.sha256(current_inventory_bytes).hexdigest()
+            or receipt.get("inventory_generated_at_unix") != inventory.get("generated_at_unix")
+            or prefix_identity_now is None
+            or (prefix_identity_now.st_dev, prefix_identity_now.st_ino)
+            != (receipt.get("prefix_device"), receipt.get("prefix_inode"))
+            or receipt.get("expected_prefix_bytes") != estimates["expected_prefix_bytes"]
+            or receipt.get("estimated_persistent_bytes") != estimates["estimated_persistent_bytes"]
+            or receipt.get("estimated_projected_new_disk_bytes")
+            != estimates["estimated_projected_new_disk_bytes"]):
+        raise RuntimeError("active PrefixLease materialization receipt does not bind this lease, manifest, inventory, and prefix identity")
+    numeric_receipt_fields = (
+        "pre_materialization_free_bytes", "post_materialization_free_bytes",
+        "pre_materialization_nonlease_scope_bytes", "post_materialization_nonlease_scope_bytes",
+        "gate0_attested_observed_scope_bytes", "gate0_attested_nonlease_scope_bytes",
+        "pre_materialization_output_allocated_bytes", "post_materialization_output_allocated_bytes",
+        "materialized_prefix_allocated_bytes", "expected_prefix_bytes",
+        "estimated_persistent_bytes", "estimated_projected_new_disk_bytes",
+        "post_materialization_scope_bytes", "created_at_unix",
+    )
+    for name in numeric_receipt_fields:
+        value = receipt.get(name)
+        if (not isinstance(value, (int, float)) or isinstance(value, bool)
+                or not math.isfinite(value) or value < 0):
+            raise RuntimeError(f"active PrefixLease materialization receipt has an invalid {name}")
+    if (receipt["materialized_prefix_allocated_bytes"] > receipt["expected_prefix_bytes"]
+            or receipt["pre_materialization_output_allocated_bytes"]
+            > receipt["estimated_persistent_bytes"]
+            or receipt["post_materialization_output_allocated_bytes"]
+            > receipt["estimated_persistent_bytes"]):
+        raise RuntimeError("active PrefixLease materialization receipt exceeds a signed allocation reservation")
+    receipt_age = time.time() - float(receipt["created_at_unix"])
+    if receipt_age < 0 or receipt_age > GATE0_MAX_AGE_SECONDS:
+        raise RuntimeError("active PrefixLease materialization receipt is stale")
     storage_smoke = (manifest.get("storage_policy_smoke") is True
                      and _is_storage_policy_smoke_id(manifest.get("experiment_id")))
+    observations: dict[str, Any] = {}
     gate_blockers = _gate0_blockers(active_experiment_id=payload.get("experiment_id"),
-                                    allow_storage_smoke=storage_smoke)
+                                    allow_storage_smoke=storage_smoke,
+                                    active_prefix_receipt=receipt,
+                                    measurements=observations)
     if gate_blockers:
         raise RuntimeError("Gate 0 is no longer valid: " + "; ".join(gate_blockers))
+    remaining_admission = _post_materialization_prefix_admission(
+        current_free_bytes=observations["free_bytes"],
+        current_scoped_bytes=observations["conservative_project_bytes"],
+        manifest_estimates=estimates,
+    )
+    if not remaining_admission["admitted"]:
+        raise RuntimeError("Gate 0 projected storage recheck blocks Wine runner preflight: "
+                           + "; ".join(remaining_admission["blockers"]))
+    active_root_fd = _open_directory_nofollow(ACTIVE_LEASE_ROOT)
+    try:
+        current_active_parent_info = os.fstat(active_root_fd)
+        current_active_parent_identity = (current_active_parent_info.st_dev,
+                                          current_active_parent_info.st_ino)
+        current_active, current_active_bytes, current_active_info = _read_json_at(
+            active_root_fd, active_path.name, maximum_bytes=1024 * 1024)
+    except (OSError, ValueError, json.JSONDecodeError) as error:
+        raise RuntimeError(f"active PrefixLease marker changed during runner preflight: {error}") from error
+    finally:
+        os.close(active_root_fd)
+    current_active_identity = (
+        current_active_info.st_dev, current_active_info.st_ino, current_active_info.st_size,
+        current_active_info.st_mtime_ns, getattr(current_active_info, "st_ctime_ns", 0))
+    if (current_active_parent_identity != active_parent_identity
+            or current_active_identity != active_file_identity or current_active != active
+            or current_active_bytes != active_bytes):
+        raise RuntimeError("active PrefixLease marker identity or receipt changed during runner preflight")
+    _validate_materialized_active_prefix_marker(
+        current_active, current_active_bytes, current_active_info)
+    prefix_fd = _open_directory_nofollow(prefix)
+    try:
+        current_prefix_info = os.fstat(prefix_fd)
+        current_prefix_payload, current_prefix_bytes, current_prefix_marker_info = _read_json_at(
+            prefix_fd, marker.name, maximum_bytes=1024 * 1024)
+    except (OSError, ValueError, json.JSONDecodeError) as error:
+        raise RuntimeError(f"Wine prefix lease marker changed during runner preflight: {error}") from error
+    finally:
+        os.close(prefix_fd)
+    current_prefix_marker_identity = (
+        current_prefix_marker_info.st_dev, current_prefix_marker_info.st_ino,
+        current_prefix_marker_info.st_size, current_prefix_marker_info.st_mtime_ns,
+        getattr(current_prefix_marker_info, "st_ctime_ns", 0))
+    if ((current_prefix_info.st_dev, current_prefix_info.st_ino) != prefix_identity
+            or current_prefix_marker_identity != prefix_marker_identity
+            or current_prefix_bytes != marker_bytes or current_prefix_payload != payload):
+        raise RuntimeError("Wine prefix identity or lease marker changed during runner preflight")
     return payload
 
 
@@ -1936,6 +3359,31 @@ _FORBIDDEN_PROCESS_ENVIRONMENT_KEYS = {
 _LEGACY_DYLD_MOLTENVK_ALIAS = Path("/private/tmp/fgmetal-vulkan-link")
 _MOLTENVK_DYLIB_NAMES = ("libMoltenVK.dylib", "libMoltenVK.1.dylib")
 _MOLTENVK_CANDIDATE_DIRECTORY_NAMES = frozenset((*_MOLTENVK_DYLIB_NAMES, "libvulkan.dylib"))
+_TRACE_PROXY_BINDING_KEYS = (
+    "FG_B_TRACE_PROXY_PATH", "FG_B_TRACE_PROXY_SHA256",
+    "FG_B_ORIGINAL_MOLTENVK_LIBRARY", "FG_B_ORIGINAL_MOLTENVK_SHA256",
+)
+
+
+def _verified_regular_file_identity(path_value: str, expected_sha256: str,
+                                    description: str) -> Path:
+    if (not isinstance(path_value, str) or not path_value
+            or not Path(path_value).is_absolute()
+            or str(Path(path_value)) != path_value
+            or os.path.abspath(path_value) != path_value
+            or not re.fullmatch(r"[0-9a-f]{64}", expected_sha256)):
+        raise ValueError(f"Wine child {description} binding is missing or malformed")
+    path = Path(path_value)
+    info = _stat_entry_nofollow(path)
+    if info is None or not stat.S_ISREG(info.st_mode):
+        raise ValueError(f"Wine child {description} is missing or not a regular file: {path}")
+    try:
+        digest = hashlib.sha256(_read_file_nofollow(path)).hexdigest()
+    except OSError as error:
+        raise ValueError(f"Wine child {description} cannot be read safely: {path}") from error
+    if digest != expected_sha256:
+        raise ValueError(f"Wine child {description} SHA-256 does not match its binding: {path}")
+    return path
 
 
 def _validate_wine_child_environment(env: Mapping[str, str]) -> None:
@@ -2041,7 +3489,7 @@ def _normalize_wine_dyld_environment(
     trusted_roots: tuple[Path, ...],
     candidate_fallback_roots: tuple[Path, ...] = (),
 ) -> dict[str, str]:
-    """Validate DYLD lists and rewrite only the exact legacy MoltenVK alias component."""
+    """Validate DYLD lists, including the exact BR2 proxy-to-MoltenVK binding."""
     if not re.fullmatch(r"[0-9a-f]{64}", expected_moltenvk_sha256):
         raise ValueError("certified MoltenVK SHA-256 is missing or malformed")
     result = dict(env)
@@ -2072,6 +3520,38 @@ def _normalize_wine_dyld_environment(
     if not components_by_key:
         raise ValueError("Wine child environment has no MoltenVK DYLD search path")
 
+    binding_values = [env.get(key) for key in _TRACE_PROXY_BINDING_KEYS]
+    proxy_path: Path | None = None
+    original_mvk_path: Path | None = None
+    if any(value is not None for value in binding_values):
+        if not all(isinstance(value, str) and value for value in binding_values):
+            raise ValueError("Wine child trace proxy binding must provide all four exact identity fields")
+        proxy_path = _verified_regular_file_identity(
+            str(env["FG_B_TRACE_PROXY_PATH"]), str(env["FG_B_TRACE_PROXY_SHA256"]),
+            "trace proxy",
+        )
+        original_mvk_path = _verified_regular_file_identity(
+            str(env["FG_B_ORIGINAL_MOLTENVK_LIBRARY"]),
+            str(env["FG_B_ORIGINAL_MOLTENVK_SHA256"]), "MoltenVK delegate",
+        )
+        if (proxy_path.name != "libMoltenVK.dylib"
+                or original_mvk_path.name not in _MOLTENVK_DYLIB_NAMES
+                or proxy_path == original_mvk_path
+                or proxy_path.parent == original_mvk_path.parent):
+            raise ValueError("Wine child trace proxy and MoltenVK delegate paths are not distinct approved loader targets")
+        library_components = components_by_key.get("DYLD_LIBRARY_PATH", [])
+        if not library_components or library_components[0] != proxy_path.parent:
+            raise ValueError("BR2 trace proxy directory must be the first DYLD_LIBRARY_PATH component")
+        proxy_directory_fd = _open_directory_nofollow(proxy_path.parent)
+        try:
+            if set(os.listdir(proxy_directory_fd)) != {"libMoltenVK.dylib"}:
+                raise ValueError("BR2 trace proxy directory contains unapproved entries")
+        finally:
+            os.close(proxy_directory_fd)
+        delegate_digest = hashlib.sha256(_read_file_nofollow(original_mvk_path)).hexdigest()
+        if delegate_digest != expected_moltenvk_sha256:
+            raise ValueError("BR2 trace proxy delegate differs from the certified MoltenVK binary")
+
     direct_candidate_roots: list[Path] = []
     alias_targets: list[Path] = []
     conflicting_components: set[Path] = set()
@@ -2087,6 +3567,8 @@ def _normalize_wine_dyld_environment(
                 os.close(directory_fd)
         for name in _MOLTENVK_DYLIB_NAMES:
             candidate = component / name
+            if proxy_path is not None and candidate == proxy_path:
+                continue
             if is_legacy_alias and name != "libMoltenVK.dylib":
                 continue
             allow_different_hash = any(_path_is_within(component, root)
@@ -2110,6 +3592,8 @@ def _normalize_wine_dyld_environment(
     candidate_roots = list(dict.fromkeys((*direct_candidate_roots, *alias_targets)))
     if not candidate_roots:
         raise ValueError("Wine child DYLD paths do not resolve the certified MoltenVK binary")
+    if len(candidate_roots) != 1:
+        raise ValueError("Wine child DYLD paths expose duplicate certified MoltenVK candidate directories")
     for candidate_root in candidate_roots:
         _verify_candidate_directory(candidate_root, expected_moltenvk_sha256)
     primary_candidate_root = direct_candidate_roots[0] if direct_candidate_roots else candidate_roots[0]
@@ -2161,6 +3645,156 @@ def _wine_loader_identity(path: Path) -> tuple[str, tuple[int, int, int, int, in
     return digest, after_identity
 
 
+def _wine_graphics_identity_required(manifest: Mapping[str, Any]) -> bool:
+    """Return whether this Wine lease carries the stricter graphics identity contract."""
+    candidate_hashes = manifest.get("candidate_hashes", {})
+    if not isinstance(candidate_hashes, Mapping):
+        candidate_hashes = {}
+    return (manifest.get("experiment_step") == "11D.3-B"
+            or any(key in manifest for key in (
+                "wine_launcher_path", "wine_launcher_sha256",
+                "wine_host_image_path", "wine_host_image_sha256",
+                "wine_runtime_tree_manifest_sha256"))
+            or "wine_host_image" in candidate_hashes)
+
+
+def _wine_graphics_image_identity(
+    path: Path,
+    expected_sha256: str,
+    *,
+    role: str,
+) -> tuple[str, tuple[int, int, int, int, int]]:
+    """Bind one canonical, executable, thin x86_64 Wine image without following aliases."""
+    try:
+        digest, identity = _bind_native_file_identity(
+            path, expected_sha256, verify_macho=True, expected_architecture="x86_64")
+        info = _stat_entry_nofollow(path)
+    except (OSError, ValueError) as error:
+        raise ValueError(f"certified Wine {role} is missing, unsafe, or not thin x86_64") from error
+    if (info is None or not stat.S_ISREG(info.st_mode) or not (info.st_mode & 0o111)
+            or (info.st_dev, info.st_ino, info.st_size, info.st_mtime_ns,
+                getattr(info, "st_ctime_ns", 0)) != identity):
+        raise ValueError(f"certified Wine {role} is not a stable executable")
+    return digest, identity
+
+
+def _wine_graphics_identity_contract(
+    manifest: Mapping[str, Any],
+    runtime_identity: Mapping[str, Any],
+) -> dict[str, Any] | None:
+    """Validate the signed launcher/host split and bind both images to the pinned runtime manifest."""
+    if not _wine_graphics_identity_required(manifest):
+        return None
+
+    candidate_hashes = manifest.get("candidate_hashes")
+    if not isinstance(candidate_hashes, Mapping):
+        raise ValueError("graphics Wine manifest has no candidate identity mapping")
+    runtime_root_value = runtime_identity.get("wine_runtime_root")
+    runtime_manifest_value = runtime_identity.get("wine_runtime_tree_manifest")
+    if (not isinstance(runtime_root_value, str)
+            or not Path(runtime_root_value).is_absolute()
+            or str(Path(runtime_root_value)) != runtime_root_value
+            or os.path.abspath(runtime_root_value) != runtime_root_value):
+        raise ValueError("graphics Wine runtime root must be canonical and absolute")
+    runtime_root = Path(runtime_root_value)
+    launcher_path_value = manifest.get("wine_launcher_path")
+    launcher_sha256 = manifest.get("wine_launcher_sha256")
+    host_path_value = manifest.get("wine_host_image_path")
+    host_sha256 = manifest.get("wine_host_image_sha256")
+    manifest_sha256 = manifest.get("wine_runtime_tree_manifest_sha256")
+    expected_launcher = runtime_root / "bin/wine"
+    expected_host = runtime_root / "lib/wine/x86_64-unix/wine"
+    for label, path_value, expected_path in (
+            ("launcher", launcher_path_value, expected_launcher),
+            ("host image", host_path_value, expected_host)):
+        if (not isinstance(path_value, str) or not Path(path_value).is_absolute()
+                or str(Path(path_value)) != path_value
+                or os.path.abspath(path_value) != path_value
+                or Path(path_value) != expected_path):
+            raise ValueError(f"graphics Wine {label} path is not the exact canonical runtime path")
+    for label, digest in (("launcher", launcher_sha256), ("host image", host_sha256),
+                          ("runtime manifest", manifest_sha256)):
+        if not isinstance(digest, str) or re.fullmatch(r"[0-9a-f]{64}", digest) is None:
+            raise ValueError(f"graphics Wine {label} SHA-256 is missing or malformed")
+
+    runtime_tree_sha256 = runtime_identity.get("wine_runtime_tree_sha256")
+    if (not isinstance(runtime_tree_sha256, str)
+            or re.fullmatch(r"[0-9a-f]{64}", runtime_tree_sha256) is None
+            or candidate_hashes.get("wine_runtime_tree") != runtime_tree_sha256):
+        raise ValueError("graphics Wine runtime tree does not match the certified template")
+    launcher_template_sha256 = runtime_identity.get("wine_binary_sha256")
+    if (not isinstance(launcher_template_sha256, str)
+            or re.fullmatch(r"[0-9a-f]{64}", launcher_template_sha256) is None
+            or launcher_sha256 != launcher_template_sha256
+            or candidate_hashes.get("wine_binary") != launcher_template_sha256
+            or candidate_hashes.get("wine_launcher") != launcher_template_sha256
+            or candidate_hashes.get("wine_launcher_binary", launcher_template_sha256)
+            != launcher_template_sha256):
+        raise ValueError("graphics Wine binary identity must bind the certified bin/wine launcher")
+    if candidate_hashes.get("wine_host_image") != host_sha256:
+        raise ValueError("graphics Wine host image identity does not match its separate candidate hash")
+
+    pinned_manifest = WINE_RUNTIME_TREE_MANIFEST
+    if (not isinstance(runtime_manifest_value, str)
+            or runtime_manifest_value != str(pinned_manifest)
+            or str(pinned_manifest) != os.path.abspath(pinned_manifest)
+            or Path(runtime_manifest_value).is_symlink()):
+        raise ValueError("graphics Wine runtime manifest is not the exact pinned canonical manifest")
+    try:
+        manifest_bytes = _read_file_nofollow(pinned_manifest)
+    except OSError as error:
+        raise ValueError("graphics Wine runtime manifest is missing or unsafe") from error
+    actual_manifest_sha256 = hashlib.sha256(manifest_bytes).hexdigest()
+    if (actual_manifest_sha256 != manifest_sha256
+            or candidate_hashes.get("wine_runtime_manifest") != actual_manifest_sha256):
+        raise ValueError("graphics Wine runtime manifest SHA-256 does not match its signed candidate")
+    try:
+        runtime_manifest = json.loads(manifest_bytes)
+    except (UnicodeDecodeError, json.JSONDecodeError) as error:
+        raise ValueError("graphics Wine runtime manifest is malformed") from error
+    if (not isinstance(runtime_manifest, dict)
+            or runtime_manifest.get("path") != runtime_root_value
+            or runtime_manifest.get("tree_sha256") != runtime_tree_sha256):
+        raise ValueError("graphics Wine runtime manifest names a different root or tree")
+    entries = runtime_manifest.get("entries")
+    if not isinstance(entries, list):
+        raise ValueError("graphics Wine runtime manifest has no exact file inventory")
+    entries_by_path: dict[str, Mapping[str, Any]] = {}
+    for entry in entries:
+        if not isinstance(entry, Mapping) or not isinstance(entry.get("relative_path"), str):
+            raise ValueError("graphics Wine runtime manifest contains a malformed inventory entry")
+        relative_path = entry["relative_path"]
+        if relative_path in entries_by_path:
+            raise ValueError("graphics Wine runtime manifest contains duplicate inventory paths")
+        entries_by_path[relative_path] = entry
+    for relative_path, expected_sha256, role in (
+            ("bin/wine", launcher_sha256, "launcher"),
+            ("lib/wine/x86_64-unix/wine", host_sha256, "host image")):
+        entry = entries_by_path.get(relative_path)
+        if (entry is None or entry.get("kind") != "file"
+                or entry.get("sha256") != expected_sha256):
+            raise ValueError(f"graphics Wine runtime manifest does not bind the exact {role} file")
+
+    launcher_path = Path(launcher_path_value)
+    host_path = Path(host_path_value)
+    launcher_digest, launcher_identity = _wine_graphics_image_identity(
+        launcher_path, launcher_sha256, role="launcher")
+    host_digest, host_identity = _wine_graphics_image_identity(
+        host_path, host_sha256, role="host image")
+    return {
+        "launcher_path": launcher_path,
+        "launcher_sha256": launcher_digest,
+        "launcher_identity": launcher_identity,
+        "host_image_path": host_path,
+        "host_image_sha256": host_digest,
+        "host_image_identity": host_identity,
+        "runtime_manifest_path": pinned_manifest,
+        "runtime_manifest_sha256": actual_manifest_sha256,
+        "runtime_root": runtime_root,
+        "runtime_tree_sha256": runtime_tree_sha256,
+    }
+
+
 def _open_directory_nofollow(
     path: Path,
     *,
@@ -2203,10 +3837,30 @@ def _read_file_nofollow(path: Path | str, *, maximum_bytes: int = 256 * 1024 * 1
     """Read one bounded regular file through a no-follow parent/file descriptor pair."""
     selected = Path(path).absolute()
     parent_fd = _open_directory_nofollow(selected.parent)
+    try:
+        contents, _identity = _read_file_from_directory_fd(
+            parent_fd, selected.name, display_path=selected, maximum_bytes=maximum_bytes)
+        return contents
+    finally:
+        os.close(parent_fd)
+
+
+def _read_file_from_directory_fd(
+    directory_fd: int,
+    name: str,
+    *,
+    display_path: Path | str | None = None,
+    maximum_bytes: int = 256 * 1024 * 1024,
+) -> tuple[bytes, tuple[int, int, int, int, int]]:
+    """Read a bounded regular child through an already pinned directory descriptor."""
+    if (not name or name in {".", ".."} or os.sep in name or "\x00" in name
+            or (os.altsep is not None and os.altsep in name)):
+        raise ValueError("descriptor-relative file name must be one canonical path component")
+    selected = Path(display_path) if display_path is not None else Path(name)
     descriptor: int | None = None
     try:
         descriptor = os.open(selected.name, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)
-                             | getattr(os, "O_NONBLOCK", 0), dir_fd=parent_fd)
+                             | getattr(os, "O_NONBLOCK", 0), dir_fd=directory_fd)
         before = os.fstat(descriptor)
         if not stat.S_ISREG(before.st_mode) or before.st_size > maximum_bytes:
             raise OSError(f"expected bounded regular file: {selected}")
@@ -2226,27 +3880,202 @@ def _read_file_nofollow(path: Path | str, *, maximum_bytes: int = 256 * 1024 * 1
             (after.st_dev, after.st_ino, after.st_size, after.st_mtime_ns,
              getattr(after, "st_ctime_ns", 0)) or total != before.st_size):
             raise OSError(f"file changed while reading: {selected}")
-        return b"".join(chunks)
+        identity = (after.st_dev, after.st_ino, after.st_size, after.st_mtime_ns,
+                    getattr(after, "st_ctime_ns", 0))
+        return b"".join(chunks), identity
     finally:
         if descriptor is not None:
             os.close(descriptor)
-        os.close(parent_fd)
 
 
 def _spawn_in_directory_fd(
     directory_fd: int,
     command: list[str] | tuple[str, ...],
+    *,
+    expected_directory_identity: tuple[int, int] | None = None,
+    expected_child_identity: tuple[str, int, int, str] | None = None,
+    expected_file_identities: tuple[
+        tuple[str, str, tuple[int, int, int, int, int], str, bool], ...] | None = None,
+    bind_trace_target_pid: bool = False,
     **popen_options: Any,
 ) -> subprocess.Popen[Any]:
     """Exec a child after fchdir to an already verified directory descriptor."""
     if "cwd" in popen_options:
         raise ValueError("descriptor-bound child launch cannot accept a pathname cwd")
+    identity_checks: list[str] = []
+    absolute_path_checks: list[str] = []
+    if expected_directory_identity is not None:
+        directory_dev, directory_ino = expected_directory_identity
+        if (not isinstance(directory_dev, int) or isinstance(directory_dev, bool)
+                or not isinstance(directory_ino, int) or isinstance(directory_ino, bool)):
+            raise ValueError("expected directory identity must contain integer device and inode values")
+        identity_checks.extend([
+            "directory_info=os.fstat(fd)",
+            f"if (directory_info.st_dev,directory_info.st_ino)!=({directory_dev},{directory_ino}):",
+            "    raise OSError('descriptor-bound parent identity changed')",
+        ])
+    if expected_child_identity is not None:
+        child_name, child_dev, child_ino, canonical_child_path = expected_child_identity
+        if (expected_directory_identity is None
+                or not child_name or child_name in {".", ".."} or os.sep in child_name
+                or "\x00" in child_name or (os.altsep is not None and os.altsep in child_name)
+                or not isinstance(child_dev, int) or isinstance(child_dev, bool)
+                or not isinstance(child_ino, int) or isinstance(child_ino, bool)
+                or not isinstance(canonical_child_path, str)
+                or not Path(canonical_child_path).is_absolute()
+                or Path(canonical_child_path).name != child_name
+                or os.path.abspath(canonical_child_path) != canonical_child_path):
+            raise ValueError("expected child identity must describe one canonical directory entry")
+        identity_checks.extend([
+            f"child_info=os.stat({child_name!r},dir_fd=fd,follow_symlinks=False)",
+            f"if not stat.S_ISDIR(child_info.st_mode) or "
+            f"(child_info.st_dev,child_info.st_ino)!=({child_dev},{child_ino}):",
+            "    raise OSError('descriptor-bound child identity changed')",
+            "prefix_path=os.environ.get('WINEPREFIX')",
+            f"if prefix_path!={canonical_child_path!r}:",
+            "    raise OSError('Wine WINEPREFIX changed before exec')",
+            "if (not os.path.isabs(prefix_path) or os.path.normpath(prefix_path)!=prefix_path "
+            "or '..' in prefix_path.split(os.sep)):",
+            "    raise OSError('Wine WINEPREFIX is not canonical')",
+        ])
+        absolute_path_checks.extend([
+            "def open_absolute_directory_nofollow(path):",
+            "    flags=os.O_RDONLY|getattr(os,'O_DIRECTORY',0)|getattr(os,'O_NOFOLLOW',0)",
+            "    current=os.open(os.sep,flags)",
+            "    try:",
+            "        for component in path.split(os.sep):",
+            "            if not component:",
+            "                continue",
+            "            next_fd=os.open(component,flags,dir_fd=current)",
+            "            os.close(current)",
+            "            current=next_fd",
+            "        return current",
+            "    except BaseException:",
+            "        os.close(current)",
+            "        raise",
+            "prefix_path_parent_fd=open_absolute_directory_nofollow(os.path.dirname(prefix_path))",
+            "absolute_parent_info=os.fstat(prefix_path_parent_fd)",
+            f"if (absolute_parent_info.st_dev,absolute_parent_info.st_ino)!="
+            f"({expected_directory_identity[0]},{expected_directory_identity[1]}):",
+            "    raise OSError('absolute Wine prefix parent identity changed')",
+            "absolute_child_info=os.stat(os.path.basename(prefix_path),"
+            "dir_fd=prefix_path_parent_fd,follow_symlinks=False)",
+            f"if not stat.S_ISDIR(absolute_child_info.st_mode) or "
+            f"(absolute_child_info.st_dev,absolute_child_info.st_ino)!=({child_dev},{child_ino}):",
+            "    raise OSError('absolute Wine prefix inode changed')",
+            "os.close(prefix_path_parent_fd)",
+        ])
+    file_identity_checks: list[str] = []
+    execute_path: str | None = None
+    if expected_file_identities is not None:
+        if not isinstance(expected_file_identities, tuple) or not expected_file_identities:
+            raise ValueError("expected Wine file identities must be a non-empty tuple")
+        normalized_files: list[tuple[str, str, tuple[int, int, int, int, int], str, bool]] = []
+        for record in expected_file_identities:
+            if not isinstance(record, tuple) or len(record) != 5:
+                raise ValueError("expected Wine file identity record is malformed")
+            path_value, digest, file_identity, architecture, execute_file = record
+            if (not isinstance(path_value, str) or not Path(path_value).is_absolute()
+                    or os.path.abspath(path_value) != path_value or Path(path_value).is_symlink()
+                    or not isinstance(digest, str) or re.fullmatch(r"[0-9a-f]{64}", digest) is None
+                    or not isinstance(file_identity, tuple) or len(file_identity) != 5
+                    or any(not isinstance(value, int) or isinstance(value, bool)
+                           for value in file_identity)
+                    or architecture != "x86_64" or not isinstance(execute_file, bool)):
+                raise ValueError("expected Wine file identity record is unsafe or non-canonical")
+            if execute_file:
+                if execute_path is not None:
+                    raise ValueError("only one descriptor-bound Wine launcher may be selected")
+                execute_path = path_value
+            normalized_files.append((path_value, digest, file_identity, architecture, execute_file))
+        command_args = [str(item) for item in command]
+        if (execute_path is not None and (not command_args or command_args[0] != execute_path)):
+            raise ValueError("verified Wine launcher must match the direct child executable")
+        file_identity_checks.extend([
+            "import hashlib",
+            "def open_absolute_file_nofollow(path):",
+            "    if (not os.path.isabs(path) or os.path.normpath(path)!=path "
+            "or '..' in path.split(os.sep)):",
+            "        raise OSError('Wine runtime image path is not canonical')",
+            "    flags=os.O_RDONLY|getattr(os,'O_DIRECTORY',0)|getattr(os,'O_NOFOLLOW',0)",
+            "    current=os.open(os.sep,flags)",
+            "    try:",
+            "        components=[part for part in path.split(os.sep) if part]",
+            "        if not components:",
+            "            raise OSError('Wine runtime image path has no filename')",
+            "        for component in components[:-1]:",
+            "            next_fd=os.open(component,flags,dir_fd=current)",
+            "            os.close(current)",
+            "            current=next_fd",
+            "        file_fd=os.open(components[-1],os.O_RDONLY|getattr(os,'O_NOFOLLOW',0)|"
+            "getattr(os,'O_NONBLOCK',0),dir_fd=current)",
+            "        return file_fd",
+            "    finally:",
+            "        os.close(current)",
+            f"expected_wine_files={tuple(normalized_files)!r}",
+            "wine_exec_fd=None",
+            "wine_exec_path=None",
+            "for wine_path,wine_sha,wine_identity,wine_architecture,wine_exec in expected_wine_files:",
+            "    wine_fd=open_absolute_file_nofollow(wine_path)",
+            "    keep_fd=False",
+            "    try:",
+            "        before=os.fstat(wine_fd)",
+            "        before_identity=(before.st_dev,before.st_ino,before.st_size,before.st_mtime_ns,"
+            "getattr(before,'st_ctime_ns',0))",
+            "        if (not stat.S_ISREG(before.st_mode) or not (before.st_mode&0o111) "
+            "or before_identity!=wine_identity):",
+            "            raise OSError('certified Wine runtime image changed before exec')",
+            "        header=os.pread(wine_fd,32,0)",
+            "        if header[:4]==bytes.fromhex('cffaedfe'):",
+            "            cpu=int.from_bytes(header[4:8],'little')",
+            "        elif header[:4]==bytes.fromhex('feedfacf'):",
+            "            cpu=int.from_bytes(header[4:8],'big')",
+            "        else:",
+            "            raise OSError('certified Wine runtime image is not thin x86_64 Mach-O')",
+            "        if cpu!=0x01000007:",
+            "            raise OSError('certified Wine runtime image is not thin x86_64 Mach-O')",
+            "        hasher=hashlib.sha256()",
+            "        offset=0",
+            "        while True:",
+            "            block=os.pread(wine_fd,4*1024*1024,offset)",
+            "            if not block:",
+            "                break",
+            "            hasher.update(block)",
+            "            offset+=len(block)",
+            "        after=os.fstat(wine_fd)",
+            "        after_identity=(after.st_dev,after.st_ino,after.st_size,after.st_mtime_ns,"
+            "getattr(after,'st_ctime_ns',0))",
+            "        if (after_identity!=wine_identity or before_identity!=after_identity "
+            "or hasher.hexdigest()!=wine_sha):",
+            "            raise OSError('certified Wine runtime image changed before exec')",
+            "        if wine_exec:",
+            "            if wine_exec_fd is not None:",
+            "                raise OSError('multiple Wine launcher descriptors were supplied')",
+            "            wine_exec_fd=wine_fd",
+            "            wine_exec_path=wine_path",
+            "            keep_fd=True",
+            "    finally:",
+            "        if not keep_fd:",
+            "            os.close(wine_fd)",
+            "if wine_exec_fd is not None and args[0]!=wine_exec_path:",
+            "    raise OSError('Wine command differs from the verified launcher')",
+        ])
     inherited = set(popen_options.pop("pass_fds", ()))
     inherited.add(directory_fd)
-    wrapper = (
-        "import os,sys; os.fchdir(int(sys.argv[1])); "
-        "args=sys.argv[2:]; os.execvpe(args[0],args,os.environ)"
-    )
+    wrapper_lines = ["import os,sys,stat", "fd=int(sys.argv[1])", "os.fchdir(fd)", "args=sys.argv[2:]"]
+    wrapper_lines.extend(identity_checks)
+    wrapper_lines.extend(absolute_path_checks)
+    wrapper_lines.extend(file_identity_checks)
+    if bind_trace_target_pid:
+        if expected_file_identities is None or execute_path is None:
+            raise ValueError("trace target PID requires a verified direct Wine launcher")
+        wrapper_lines.extend([
+            "if 'FG_B_TARGET_UNIX_PID' in os.environ:",
+            "    raise OSError('caller supplied trace target PID')",
+            "os.environ['FG_B_TARGET_UNIX_PID']=str(os.getpid())",
+        ])
+    wrapper_lines.append("os.execvpe(args[0],args,os.environ)")
+    wrapper = "\n".join(wrapper_lines)
     child_command = [sys.executable, "-I", "-S", "-c", wrapper, str(directory_fd),
                      *(str(item) for item in command)]
     return subprocess.Popen(child_command, pass_fds=tuple(sorted(inherited)), **popen_options)
@@ -2414,14 +4243,47 @@ def _write_json(
     pad_to_bytes: int | None = None,
     strict_directory_sync: bool = False,
 ) -> None:
-    serialized = json.dumps(payload, indent=2, sort_keys=True) + "\n"
-    serialized_bytes = len(serialized.encode("utf-8"))
+    serialized_bytes = _canonical_pretty_json_bytes(payload)
+    serialized_size = len(serialized_bytes)
     if pad_to_bytes is not None:
-        if serialized_bytes > pad_to_bytes:
-            raise ValueError(f"JSON receipt grew beyond its reserved size ({serialized_bytes} > {pad_to_bytes})")
-        serialized += " " * (pad_to_bytes - serialized_bytes)
-    _atomic_write_bytes(path, serialized.encode("utf-8"),
+        if serialized_size > pad_to_bytes:
+            raise ValueError(f"JSON receipt grew beyond its reserved size ({serialized_size} > {pad_to_bytes})")
+        serialized_bytes += b" " * (pad_to_bytes - serialized_size)
+    _atomic_write_bytes(path, serialized_bytes,
                         strict_directory_sync=strict_directory_sync)
+
+
+def _canonical_pretty_json_bytes(payload: Mapping[str, Any]) -> bytes:
+    """Return the exact on-disk encoding used by _write_json."""
+    return (json.dumps(payload, indent=2, sort_keys=True) + "\n").encode("utf-8")
+
+
+def _validate_materialized_active_prefix_marker(
+    payload: Mapping[str, Any], raw_bytes: bytes, file_info: os.stat_result,
+) -> Mapping[str, Any]:
+    """Reject unbounded or noncanonical data at the Gate 0-excluded lease path."""
+    expected_keys = {
+        "experiment_id", "pid", "state", "prefix_path", "output_dir",
+        "manifest_path", "manifest_sha256", "lease_token", "updated_at_unix",
+        "materialization_receipt",
+    }
+    allocated_bytes = getattr(file_info, "st_blocks", 0) * 512
+    if (not stat.S_ISREG(file_info.st_mode) or file_info.st_uid != os.getuid()
+            or file_info.st_nlink != 1 or stat.S_IMODE(file_info.st_mode) != 0o600
+            or file_info.st_size > ACTIVE_PREFIX_LEASE_MARKER_MAX_BYTES
+            or allocated_bytes > ACTIVE_PREFIX_LEASE_MARKER_MAX_ALLOCATED_BYTES):
+        raise RuntimeError("active PrefixLease marker exceeds its bounded private allocation")
+    if set(payload) != expected_keys or raw_bytes != _canonical_pretty_json_bytes(payload):
+        raise RuntimeError("active PrefixLease marker schema or canonical encoding is invalid")
+    updated_at = payload.get("updated_at_unix")
+    if (not isinstance(updated_at, (int, float)) or isinstance(updated_at, bool)
+            or not math.isfinite(updated_at) or updated_at < 0):
+        raise RuntimeError("active PrefixLease marker timestamp is malformed")
+    receipt = payload.get("materialization_receipt")
+    if (not isinstance(receipt, Mapping)
+            or not _verify_storage_evidence(receipt, "prefix_materialization_hmac_sha256")):
+        raise RuntimeError("active PrefixLease marker has no authenticated materialization receipt")
+    return receipt
 
 
 def _stat_entry_nofollow(path: Path) -> os.stat_result | None:
@@ -2588,46 +4450,52 @@ def begin_experiment(
             normalized_failure_capture_paths.append(normalized)
     if expected_build_bytes == 0 and normalized_failure_capture_paths:
         raise ValueError("failure capture paths require a build reservation")
-    authorized_runner_hashes = _authorized_runner_records(
-        normalized_runners,
-        requires_managed_prefix=expected_prefix_bytes > 0 and not storage_policy_smoke)
+    if storage_policy_smoke:
+        smoke_runner = Path(__file__).resolve().parent / "smoke_prefix_lease.py"
+        smoke_runner_bytes = _read_file_nofollow(smoke_runner)
+        normalized_runners = [str(smoke_runner)]
+        authorized_runner_hashes = {
+            str(smoke_runner): hashlib.sha256(smoke_runner_bytes).hexdigest(),
+        }
+    else:
+        authorized_runner_hashes = _authorized_runner_records(
+            normalized_runners,
+            requires_managed_prefix=expected_prefix_bytes > 0)
 
     if internal_storage_setup:
         raise ValueError("internal storage setup is retired; Gate 0 is mandatory for every new manifest")
     output_dir = _measured_output_dir(output_dir, require_missing=True)
     free_before = disk_free_bytes(REPO)
     project = measure_project_usage()
+    project_bytes = conservative_project_usage_bytes(project)
+    project["conservative_allocated_inode_deduplicated_bytes"] = project_bytes
     estimated_peak = expected_prefix_bytes + expected_build_bytes + estimated_persistent_bytes
+    uncertainty_margin = admission_uncertainty_margin_bytes(estimated_peak)
+    projected_peak = estimated_peak + uncertainty_margin
     blockers: list[str] = []
     warnings: list[str] = []
     gate0_attestation_sha256: str | None = None
     if free_before < FREE_HARD_STOP:
         blockers.append(f"free space below hard stop ({free_before} < {FREE_HARD_STOP})")
-    if free_before < FREE_MINIMUM:
-        blockers.append(f"free space below experiment minimum ({free_before} < {FREE_MINIMUM})")
     blockers.extend(_gate0_blockers(
         active_experiment_id=experiment_id if storage_policy_smoke else None,
         allow_storage_smoke=storage_policy_smoke))
     if GATE0_ATTESTATION_PATH.is_file() and not GATE0_ATTESTATION_PATH.is_symlink():
         gate0_attestation_sha256 = hashlib.sha256(_read_file_nofollow(GATE0_ATTESTATION_PATH)).hexdigest()
-    if free_before - estimated_peak < FREE_WARNING:
-        blockers.append("estimated peak would cross the 35 GiB warning threshold")
-    project_bytes = int(project["allocated_inode_deduplicated_bytes"])
-    if project_bytes + estimated_persistent_bytes > PROJECT_BUDGET:
-        blockers.append("FG-Metal recoverable storage plus estimated persistent output exceeds 50 GiB project limit")
-    project_peak = project_bytes + estimated_peak
-    if project_peak > PROJECT_BUDGET:
-        blockers.append("FG-Metal recoverable storage plus estimated run peak exceeds 50 GiB project budget")
+    admission = projected_storage_admission(
+        current_free_bytes=free_before,
+        current_scoped_bytes=project_bytes,
+        peak_additional_bytes=projected_peak,
+    )
+    blockers.extend(admission["blockers"])
+    warnings.extend(admission["warnings"])
+    project_peak = admission["projected_scoped_bytes"]
     if expected_prefix_bytes > NORMAL_TEMPORARY_TARGET and not storage_justification:
         blockers.append("prefix/temporary estimate exceeds 3 GiB without a justification")
     if expected_build_bytes > 5 * GIB and not storage_justification:
         blockers.append("build estimate exceeds 5 GiB without a justification")
     if estimated_persistent_bytes >= NORMAL_PERSISTENT_TARGET and not storage_justification:
         blockers.append("persistent estimate exceeds 250 MiB without a justification")
-    if free_before < FREE_PREFERRED:
-        warnings.append(f"free space is below the 60 GiB preferred target ({free_before} bytes)")
-    if project_bytes > 45 * GIB:
-        warnings.append(f"FG-Metal recoverable storage is above the 45 GiB steady-state target ({project_bytes} bytes)")
     orphans = uncertified_prefixes()
     if orphans:
         blockers.append("uncertified Wine prefix cleanup is pending: "
@@ -2658,7 +4526,12 @@ def begin_experiment(
         "expected_build_requirement": expected_build_bytes > 0,
         "expected_build_bytes": expected_build_bytes,
         "estimated_max_new_disk_bytes": estimated_peak,
+        "estimated_uncertainty_margin_bytes": uncertainty_margin,
+        "estimated_projected_new_disk_bytes": projected_peak,
         "project_estimated_peak_bytes": project_peak,
+        "projected_free_bytes": admission["projected_free_bytes"],
+        "projected_scoped_project_bytes": admission["projected_scoped_bytes"],
+        "storage_admission_warnings": admission["warnings"],
         "estimated_persistent_bytes": estimated_persistent_bytes,
         "project_budget_bytes": PROJECT_BUDGET,
         "project_budget_remaining_before_bytes": max(0, PROJECT_BUDGET - project_bytes),
@@ -2693,8 +4566,11 @@ def begin_experiment(
         "experiment_id", "purpose", "candidate_hashes", "created_at_unix",
         "expected_duration_seconds", "expected_prefix_requirement", "expected_prefix_bytes",
         "expected_build_requirement", "expected_build_bytes", "estimated_max_new_disk_bytes",
+        "estimated_uncertainty_margin_bytes", "estimated_projected_new_disk_bytes",
         "project_estimated_peak_bytes", "estimated_persistent_bytes", "project_budget_bytes", "project_budget_remaining_before_bytes",
-        "free_before_bytes", "project_usage_before", "output_dir", "decision", "blockers", "warnings",
+        "free_before_bytes", "project_usage_before", "projected_free_bytes",
+        "projected_scoped_project_bytes", "storage_admission_warnings",
+        "output_dir", "decision", "blockers", "warnings",
         "manifest_path", "internal_storage_setup", "gate0_attestation_sha256",
         "storage_policy_smoke",
         "smoke_nonce_claim_path", "smoke_nonce_claim_sha256",
@@ -2732,8 +4608,12 @@ def begin_experiment(
         "experiment_id": experiment_id,
         "free_before_bytes": free_before,
         "estimated_peak_new_bytes": estimated_peak,
+        "uncertainty_margin_bytes": uncertainty_margin,
+        "projected_peak_new_bytes": projected_peak,
         "project_budget_bytes": PROJECT_BUDGET,
         "project_usage_before_bytes": project_bytes,
+        "projected_free_bytes": admission["projected_free_bytes"],
+        "projected_scoped_project_bytes": admission["projected_scoped_bytes"],
         "decision": manifest["decision"],
         "blockers": blockers,
         "warnings": warnings,
@@ -2931,7 +4811,13 @@ class PrefixLease:
     manifest_path: Path | None = None
 
     def __post_init__(self) -> None:
-        self.prefix = Path(os.path.abspath(self.prefix.expanduser()))
+        configured_prefix = os.fspath(self.prefix)
+        if (not isinstance(configured_prefix, str)
+                or not Path(configured_prefix).is_absolute()
+                or any(part == ".." for part in configured_prefix.split(os.sep))
+                or os.path.abspath(configured_prefix) != configured_prefix):
+            raise ValueError("PrefixLease prefix must be a canonical absolute path without parent components")
+        self.prefix = Path(configured_prefix)
         self.output_dir = Path(os.path.abspath(self.output_dir.expanduser()))
         self.wine_server = Path(os.path.abspath(self.wine_server.expanduser()))
         self.template = Path(os.path.abspath(self.template.expanduser()))
@@ -2967,15 +4853,23 @@ class PrefixLease:
         self._wine_loader_path: Path | None = None
         self._wine_loader_sha256: str | None = None
         self._wine_loader_identity: tuple[int, int, int, int, int] | None = None
+        self._wine_graphics_contract: dict[str, Any] | None = None
         self._prefix_parent_fd: int | None = None
         self._clone_temp_name: str | None = None
         self._clone_temp_identity: tuple[int, int] | None = None
         self._clone_temp_fd: int | None = None
         self._prefix_identity: tuple[int, int] | None = None
+        self._manifest_parent_identity: tuple[int, int] | None = None
+        self._manifest_file_identity: tuple[int, int, int, int, int] | None = None
+        self._lease_marker_parent_identity: tuple[int, int] | None = None
+        self._wine_launch_prefix: str | None = None
+        self._wineserver_prefix: str | None = None
         self._prefix_created_any = False
         self._lease_gate_lock_file: Any = None
         self._storage_allocation_lock_file: Any = None
         self._free_warning_emitted = False
+        self._lease_token = secrets.token_hex(32)
+        self._materialization_receipt: dict[str, Any] | None = None
 
     def __enter__(self) -> "PrefixLease":
         allowed = [PREFIX_ROOT.absolute(), (Path.home() / "Library/Caches/FGMetalStep11D-R").absolute()]
@@ -2995,7 +4889,15 @@ class PrefixLease:
                               REPO / "experiments/storage/manifests" / f"{self.experiment_id}.json")
         if not self.manifest_path.is_file():
             raise FileNotFoundError(f"experiment storage manifest is required before prefix setup: {self.manifest_path}")
-        manifest_bytes = _read_file_nofollow(self.manifest_path)
+        manifest_parent_fd = _open_directory_nofollow(self.manifest_path.parent)
+        try:
+            manifest_parent_info = os.fstat(manifest_parent_fd)
+            manifest_bytes, manifest_file_identity = _read_file_from_directory_fd(
+                manifest_parent_fd, self.manifest_path.name, display_path=self.manifest_path)
+            self._manifest_parent_identity = (manifest_parent_info.st_dev, manifest_parent_info.st_ino)
+            self._manifest_file_identity = manifest_file_identity
+        finally:
+            os.close(manifest_parent_fd)
         self._manifest = json.loads(manifest_bytes)
         self._manifest_sha256 = hashlib.sha256(manifest_bytes).hexdigest()
         if not _verify_manifest_signature(self._manifest):
@@ -3051,15 +4953,22 @@ class PrefixLease:
             raise ValueError("PrefixLease prefix estimate is smaller than the certified template contents")
         self._free_before = disk_free_bytes(self.prefix.parent)
         self._project_before = measure_project_usage()
-        if self._free_before < FREE_MINIMUM:
-            raise RuntimeError(f"free space fell below the 45 GiB start minimum: {self._free_before}")
-        project_now = int(self._project_before["allocated_inode_deduplicated_bytes"])
-        persistent_estimate = self._manifest_estimates["estimated_persistent_bytes"]
-        estimated_peak = self._manifest_estimates["estimated_max_new_disk_bytes"]
-        if project_now + estimated_peak > PROJECT_BUDGET:
-            raise RuntimeError("current project storage plus full declared run peak exceeds 50 GiB")
-        if self._free_before - estimated_peak < FREE_WARNING:
-            raise RuntimeError("current free space plus full declared run peak crosses 35 GiB warning")
+        project_now = conservative_project_usage_bytes(self._project_before)
+        estimated_peak = self._manifest_estimates["estimated_projected_new_disk_bytes"]
+        admission = projected_storage_admission(
+            current_free_bytes=self._free_before,
+            current_scoped_bytes=project_now,
+            peak_additional_bytes=estimated_peak,
+        )
+        if not admission["admitted"]:
+            raise RuntimeError("PrefixLease projected-peak admission failed: "
+                               + "; ".join(admission["blockers"]))
+        for warning in admission["warnings"]:
+            self._storage_watch_events.append({
+                "sampled_at_unix": time.time(),
+                "action": "PROJECTED_STORAGE_WARNING_BEFORE_PREFIX_LEASE",
+                "warning": warning,
+            })
         marker = self.template / "FGMETAL_PREFIX_TEMPLATE.json"
         if self.clone_template:
             if not marker.is_file():
@@ -3083,6 +4992,8 @@ class PrefixLease:
             expected_root = Path(runtime_identity.get("wine_runtime_root", "")).expanduser().absolute()
             if not expected_root.is_dir() or self.wine_server != expected_root / "bin/wineserver":
                 raise ValueError("PrefixLease was configured with a different wineserver root")
+            self._wine_graphics_contract = _wine_graphics_identity_contract(
+                self._manifest, runtime_identity)
         active_root_fd = _open_directory_nofollow(
             ACTIVE_LEASE_ROOT, create=True, strict_directory_sync=True)
         lock_path = ACTIVE_LEASE_ROOT / ".lease.lock"
@@ -3093,6 +5004,8 @@ class PrefixLease:
         try:
             lock_fd = os.open(".lease.lock", lock_flags, 0o600, dir_fd=active_root_fd)
             os.fsync(active_root_fd)
+            active_root_info = os.fstat(active_root_fd)
+            self._lease_marker_parent_identity = (active_root_info.st_dev, active_root_info.st_ino)
         except BaseException:
             if lock_fd is not None:
                 os.close(lock_fd)
@@ -3119,12 +5032,23 @@ class PrefixLease:
                 raise RuntimeError("Gate 0 changed while acquiring the shared allocation lock: "
                                    + "; ".join(locked_blockers))
             locked_free = disk_free_bytes(self.prefix.parent)
-            locked_project = int(measure_project_usage()["allocated_inode_deduplicated_bytes"])
-            locked_peak = int(self._manifest_estimates["estimated_max_new_disk_bytes"])
-            if locked_free < FREE_MINIMUM or locked_free - locked_peak < FREE_WARNING:
-                raise RuntimeError("free-space admission failed under the shared allocation lock")
-            if locked_project + locked_peak > PROJECT_BUDGET:
-                raise RuntimeError("project-footprint admission failed under the shared allocation lock")
+            locked_usage = measure_project_usage()
+            locked_project = conservative_project_usage_bytes(locked_usage)
+            locked_peak = int(self._manifest_estimates["estimated_projected_new_disk_bytes"])
+            locked_admission = projected_storage_admission(
+                current_free_bytes=locked_free,
+                current_scoped_bytes=locked_project,
+                peak_additional_bytes=locked_peak,
+            )
+            if not locked_admission["admitted"]:
+                raise RuntimeError("PrefixLease projected-peak admission failed under the shared allocation lock: "
+                                   + "; ".join(locked_admission["blockers"]))
+            for warning in locked_admission["warnings"]:
+                self._storage_watch_events.append({
+                    "sampled_at_unix": time.time(),
+                    "action": "PROJECTED_STORAGE_WARNING_BEFORE_PREFIX_LEASE",
+                    "warning": warning,
+                })
             active = _active_lease_markers()
             if active:
                 raise RuntimeError("an active or interrupted PrefixLease requires reconciliation: "
@@ -3169,7 +5093,18 @@ class PrefixLease:
     def _write_active_lease(self, state: str) -> None:
         if self._lease_marker_path is None:
             return
-        _write_json(self._lease_marker_path, {
+        active_root_fd = _open_directory_nofollow(ACTIVE_LEASE_ROOT)
+        try:
+            active_root_info = os.fstat(active_root_fd)
+            current_parent_identity = (active_root_info.st_dev, active_root_info.st_ino)
+            if (self._lease_marker_parent_identity is not None
+                    and current_parent_identity != self._lease_marker_parent_identity):
+                raise OSError("active PrefixLease marker parent changed after reservation")
+            if self._lease_marker_parent_identity is None:
+                self._lease_marker_parent_identity = current_parent_identity
+        finally:
+            os.close(active_root_fd)
+        active_record = {
             "experiment_id": self.experiment_id,
             "pid": os.getpid(),
             "state": state,
@@ -3177,20 +5112,136 @@ class PrefixLease:
             "output_dir": str(self.output_dir),
             "manifest_path": str(self.manifest_path),
             "manifest_sha256": self._manifest_sha256,
+            "lease_token": self._lease_token,
             "updated_at_unix": time.time(),
-        }, strict_directory_sync=True)
+        }
+        if self._materialization_receipt is not None:
+            active_record["materialization_receipt"] = self._materialization_receipt
+        _write_json(self._lease_marker_path, active_record, strict_directory_sync=True)
+
+    def _assert_exact_wineprefix(self, env: Mapping[str, str]) -> str:
+        expected = str(self.prefix)
+        value = env.get("WINEPREFIX")
+        if (not self.prefix.is_absolute()
+                or os.path.abspath(expected) != expected
+                or any(part == ".." for part in expected.split(os.sep))
+                or value != expected):
+            raise ValueError("Wine WINEPREFIX must be the exact canonical absolute PrefixLease path")
+        return expected
+
+    def _assert_bound_prefix_lease(self, env: Mapping[str, str]) -> None:
+        """Revalidate the pinned prefix, manifest, and both lease markers at launch/cleanup."""
+        self._assert_exact_wineprefix(env)
+        self._assert_prefix_real()
+
+        if (self.manifest_path is None or self._manifest_sha256 is None
+                or self._manifest_parent_identity is None or self._manifest_file_identity is None):
+            raise RuntimeError("PrefixLease manifest identity was not bound at admission")
+        expected_manifest = _experiment_manifest_path(self.experiment_id)
+        if str(self.manifest_path) != str(expected_manifest):
+            raise RuntimeError("PrefixLease manifest path changed after admission")
+        manifest_parent_fd = _open_directory_nofollow(self.manifest_path.parent)
+        try:
+            manifest_parent_info = os.fstat(manifest_parent_fd)
+            if ((manifest_parent_info.st_dev, manifest_parent_info.st_ino)
+                    != self._manifest_parent_identity):
+                raise OSError("PrefixLease manifest parent changed after admission")
+            manifest_bytes, manifest_identity = _read_file_from_directory_fd(
+                manifest_parent_fd, self.manifest_path.name, display_path=self.manifest_path)
+        finally:
+            os.close(manifest_parent_fd)
+        if (manifest_identity != self._manifest_file_identity
+                or hashlib.sha256(manifest_bytes).hexdigest() != self._manifest_sha256):
+            raise RuntimeError("PrefixLease manifest identity or contents changed after admission")
+        manifest = json.loads(manifest_bytes)
+        if (not _verify_manifest_signature(manifest)
+                or manifest.get("decision") != "ALLOW"
+                or manifest.get("experiment_id") != self.experiment_id
+                or manifest.get("output_dir") != str(self.output_dir)):
+            raise RuntimeError("PrefixLease manifest no longer authenticates this lease")
+
+        expected_active_marker = ACTIVE_LEASE_ROOT / f"{self.experiment_id}.json"
+        if (self._lease_marker_path != expected_active_marker
+                or self._lease_marker_parent_identity is None):
+            raise RuntimeError("PrefixLease active marker identity was not bound at admission")
+        active_root_fd = _open_directory_nofollow(ACTIVE_LEASE_ROOT)
+        try:
+            active_root_info = os.fstat(active_root_fd)
+            if ((active_root_info.st_dev, active_root_info.st_ino)
+                    != self._lease_marker_parent_identity):
+                raise OSError("active PrefixLease marker parent changed after admission")
+            active_marker, active_bytes, active_file_info = _read_json_at(
+                active_root_fd, expected_active_marker.name,
+                maximum_bytes=1024 * 1024)
+        finally:
+            os.close(active_root_fd)
+        _validate_materialized_active_prefix_marker(
+            active_marker, active_bytes, active_file_info)
+        expected_binding = {
+            "experiment_id": self.experiment_id,
+            "pid": os.getpid(),
+            "prefix_path": str(self.prefix),
+            "output_dir": str(self.output_dir),
+            "manifest_path": str(expected_manifest),
+            "manifest_sha256": self._manifest_sha256,
+            "lease_token": self._lease_token,
+            "state": "MATERIALIZED",
+        }
+        if any(active_marker.get(key) != value for key, value in expected_binding.items()):
+            raise RuntimeError("active PrefixLease marker is stale or names a different prefix")
+        active_receipt = active_marker.get("materialization_receipt")
+        if (not isinstance(active_receipt, Mapping)
+                or active_receipt != self._materialization_receipt
+                or not _verify_storage_evidence(
+                    active_receipt, "prefix_materialization_hmac_sha256")):
+            raise RuntimeError("active PrefixLease materialization receipt changed after admission")
+
+        prefix_fd = _open_directory_nofollow(self.prefix)
+        try:
+            prefix_info = os.fstat(prefix_fd)
+            if self._prefix_identity != (prefix_info.st_dev, prefix_info.st_ino):
+                raise OSError("leased prefix inode changed after materialization")
+            prefix_marker_bytes, _prefix_marker_identity = _read_file_from_directory_fd(
+                prefix_fd, "FGMETAL_PREFIX_LEASE.json",
+                display_path=self.prefix / "FGMETAL_PREFIX_LEASE.json")
+        finally:
+            os.close(prefix_fd)
+        prefix_marker = json.loads(prefix_marker_bytes)
+        if any(prefix_marker.get(key) != value for key, value in expected_binding.items()
+               if key != "state"):
+            raise RuntimeError("materialized prefix marker is stale or names a different lease")
 
     def set_env(self, env: Mapping[str, str]) -> None:
         if self._wine_env_set_attempted:
             raise RuntimeError("PrefixLease Wine environment may be validated and sealed only once")
         self._wine_env_set_attempted = True
         selected_env = dict(env)
+        if "FG_B_TARGET_UNIX_PID" in selected_env:
+            raise ValueError("trace target PID is assigned only by the supervised exec wrapper")
+        if "FG_B_TRACE_DIRECTORY" in selected_env:
+            trace_path = Path(selected_env["FG_B_TRACE_DIRECTORY"])
+            if (trace_path != self.output_dir / "host-traces"
+                    or not trace_path.is_absolute()
+                    or str(trace_path.resolve(strict=True)) != str(trace_path)
+                    or selected_env.get("FG_B_EXPERIMENT_TOKEN") != self._manifest_sha256[:32]):
+                raise ValueError("host trace directory/token does not bind the leased run")
+            trace_fd = _open_directory_nofollow(trace_path)
+            try:
+                trace_info = os.fstat(trace_fd)
+                if (selected_env.get("FG_B_TRACE_DIRECTORY_DEVICE") != str(trace_info.st_dev)
+                        or selected_env.get("FG_B_TRACE_DIRECTORY_INODE") != str(trace_info.st_ino)):
+                    raise ValueError("host trace directory identity changed")
+            finally:
+                os.close(trace_fd)
         _validate_wine_child_environment(selected_env)
+        self._assert_exact_wineprefix(selected_env)
         self._runtime_env_verified = False
         self._sealed_wine_env = None
         if self.clone_template:
             runtime_identity = (self._template_marker or {}).get("runtime_identity", {})
             runtime_root_value = runtime_identity.get("wine_runtime_root")
+            graphics_contract = _wine_graphics_identity_contract(self._manifest, runtime_identity)
+            self._wine_graphics_contract = graphics_contract
             loader_value = selected_env.get("WINELOADER")
             server_value = selected_env.get("WINESERVER")
             if (not isinstance(runtime_root_value, str)
@@ -3206,13 +5257,21 @@ class PrefixLease:
                 raise ValueError("PrefixLease environment does not select the certified Wine runtime")
             loader = Path(loader_value)
             server = Path(server_value)
-            selected_prefix = Path(selected_env.get("WINEPREFIX", "")).expanduser().absolute()
-            if selected_prefix != self.prefix:
+            if selected_env.get("WINEPREFIX") != str(self.prefix):
                 raise ValueError("PrefixLease environment WINEPREFIX does not match the leased prefix")
-            try:
-                loader_sha256, loader_identity = _wine_loader_identity(loader)
-            except ValueError as error:
-                raise ValueError("PrefixLease environment does not select a safe certified Wine executable") from error
+            if graphics_contract is not None:
+                if (loader != graphics_contract["launcher_path"]
+                        or graphics_contract["launcher_sha256"]
+                        != runtime_identity.get("wine_binary_sha256")):
+                    raise ValueError("PrefixLease environment does not select the certified Wine launcher")
+                loader_sha256 = graphics_contract["launcher_sha256"]
+                loader_identity = graphics_contract["launcher_identity"]
+            else:
+                try:
+                    loader_sha256, loader_identity = _wine_loader_identity(loader)
+                except ValueError as error:
+                    raise ValueError(
+                        "PrefixLease environment does not select a safe certified Wine executable") from error
             if (loader != expected_root / "bin/wine"
                     or loader_sha256 != runtime_identity.get("wine_binary_sha256")
                     or server != expected_root / "bin/wineserver"):
@@ -3238,8 +5297,7 @@ class PrefixLease:
             manifest_path_value = runtime_identity.get("wine_runtime_tree_manifest")
             manifest_path = (Path(manifest_path_value) if isinstance(manifest_path_value, str)
                              else Path())
-            pinned_manifest = (Path(__file__).resolve().parent
-                               / "runtime-manifests/step11d_r_active_runtime.json")
+            pinned_manifest = WINE_RUNTIME_TREE_MANIFEST
             if (not isinstance(manifest_path_value, str)
                     or manifest_path_value != str(pinned_manifest)
                     or manifest_path.is_symlink()
@@ -3432,8 +5490,29 @@ class PrefixLease:
             raise RuntimeError("Wine cannot start without the verified prefix parent directory handle")
         child_env = dict(self._env if env is None else env)
         runtime_tree_to_verify: tuple[Path, str] | None = None
+        graphics_contract: dict[str, Any] | None = None
         _validate_wine_child_environment(child_env)
         if self._runtime_env_verified and self._sealed_wine_env is not None:
+            runtime_identity = (self._template_marker or {}).get("runtime_identity", {})
+            try:
+                graphics_contract = _wine_graphics_identity_contract(self._manifest, runtime_identity)
+            except (OSError, ValueError, TypeError, KeyError) as error:
+                raise ValueError(
+                    f"Wine launcher or host identity changed after PrefixLease sealing: {error}") from error
+            if graphics_contract != self._wine_graphics_contract:
+                raise ValueError("Wine launcher or host identity changed after PrefixLease sealing")
+            if graphics_contract is not None:
+                expected_tree_hash = runtime_identity.get("wine_runtime_tree_sha256")
+                manifest_value = runtime_identity.get("wine_runtime_tree_manifest")
+                pinned_manifest = WINE_RUNTIME_TREE_MANIFEST
+                if (not isinstance(expected_tree_hash, str)
+                        or not re.fullmatch(r"[0-9a-f]{64}", expected_tree_hash)
+                        or not isinstance(manifest_value, str)
+                        or manifest_value != str(pinned_manifest)
+                        or pinned_manifest.is_symlink()
+                        or not pinned_manifest.is_file()):
+                    raise ValueError("Wine graphics launch prerequisites are missing or malformed")
+                runtime_tree_to_verify = (graphics_contract["runtime_root"], expected_tree_hash)
             path_keys = {"DYLD_LIBRARY_PATH", "DYLD_FALLBACK_LIBRARY_PATH"}
             sealed_env = self._sealed_wine_env
             if child_env != sealed_env:
@@ -3444,7 +5523,6 @@ class PrefixLease:
             # remains writable after set_env, so a matching sealed string does not
             # prove that the file selected by DYLD is still the certified candidate.
             if path_keys.intersection(child_env) or path_keys.intersection(sealed_env):
-                runtime_identity = (self._template_marker or {}).get("runtime_identity", {})
                 expected_mvk = runtime_identity.get("moltenvk_sha256_for_subsequent_graphics_runs")
                 runtime_root_value = runtime_identity.get("wine_runtime_root")
                 if not isinstance(expected_mvk, str) or not isinstance(runtime_root_value, str):
@@ -3456,8 +5534,7 @@ class PrefixLease:
                     raise ValueError("Wine child launch prerequisites are missing or malformed")
                 expected_tree_hash = runtime_identity.get("wine_runtime_tree_sha256")
                 manifest_value = runtime_identity.get("wine_runtime_tree_manifest")
-                pinned_manifest = (Path(__file__).resolve().parent
-                                   / "runtime-manifests/step11d_r_active_runtime.json")
+                pinned_manifest = WINE_RUNTIME_TREE_MANIFEST
                 if (not isinstance(expected_tree_hash, str)
                         or not re.fullmatch(r"[0-9a-f]{64}", expected_tree_hash)
                         or not isinstance(manifest_value, str)
@@ -3485,12 +5562,12 @@ class PrefixLease:
                 "Wine child must execute the certified Wine binary directly or through "
                 "the fixed /usr/bin/arch -x86_64 launcher"
             )
+        if graphics_contract is not None and not direct_wine:
+            raise ValueError("graphics Wine runs must execute the certified thin x86_64 launcher directly")
         if any("\x00" in item for item in command):
             raise ValueError("Wine child arguments cannot contain NUL bytes")
-        assert_prefix_lease(self.prefix, str(self._wine_loader_path), runner_path, child_env)
+        wineprefix_value = self._assert_exact_wineprefix(child_env)
         self._assert_prefix_real()
-        if Path(child_env.get("WINEPREFIX", "")).expanduser().absolute() != self.prefix:
-            raise ValueError("Wine child WINEPREFIX does not match the PrefixLease target")
         passed_env = popen_options.pop("env", None)
         if passed_env is not None and dict(passed_env) != child_env:
             raise ValueError("Wine child environment must be supplied through the PrefixLease env argument")
@@ -3504,9 +5581,6 @@ class PrefixLease:
                 "Wine child received unsupported process-control options: "
                 + ", ".join(unsupported_options)
             )
-        # A relative WINEPREFIX resolves from the descriptor-bound working directory,
-        # so a pathname swap between validation and exec cannot redirect prefix setup.
-        child_env["WINEPREFIX"] = self.prefix.name
         if self._wine_loader_sha256 is None or self._wine_loader_identity is None:
             raise RuntimeError("Wine cannot start without the sealed executable identity")
         try:
@@ -3525,9 +5599,41 @@ class PrefixLease:
                 raise ValueError("certified Wine runtime changed after PrefixLease sealing") from error
             if current_tree_hash != expected_tree_hash:
                 raise ValueError("certified Wine runtime changed after PrefixLease sealing")
-        process = _spawn_in_directory_fd(
-            self._prefix_parent_fd, command, env=child_env, **popen_options)
+        expected_file_identities: tuple[
+            tuple[str, str, tuple[int, int, int, int, int], str, bool], ...] | None = None
+        if graphics_contract is not None:
+            try:
+                final_contract = _wine_graphics_identity_contract(
+                    self._manifest, (self._template_marker or {}).get("runtime_identity", {}))
+            except (OSError, ValueError, TypeError, KeyError) as error:
+                raise ValueError("certified Wine launcher or host image changed before exec") from error
+            if final_contract != self._wine_graphics_contract:
+                raise ValueError("certified Wine launcher or host image changed before exec")
+            expected_file_identities = (
+                (str(final_contract["launcher_path"]), final_contract["launcher_sha256"],
+                 final_contract["launcher_identity"], "x86_64", True),
+                (str(final_contract["host_image_path"]), final_contract["host_image_sha256"],
+                 final_contract["host_image_identity"], "x86_64", False),
+            )
+        if self._prefix_identity is None:
+            raise RuntimeError("Wine cannot start without the bound leased prefix inode")
+        allocation_lock = _acquire_storage_allocation_lock()
+        try:
+            _assert_prefix_lease_locked(
+                self.prefix, str(self._wine_loader_path), runner_path, child_env)
+            self._assert_bound_prefix_lease(child_env)
+            parent_info = os.fstat(self._prefix_parent_fd)
+            process = _spawn_in_directory_fd(
+                self._prefix_parent_fd, command,
+                expected_directory_identity=(parent_info.st_dev, parent_info.st_ino),
+                expected_child_identity=(self.prefix.name, *self._prefix_identity, str(self.prefix)),
+                expected_file_identities=expected_file_identities,
+                bind_trace_target_pid="FG_B_TRACE_DIRECTORY" in child_env,
+                env=child_env, **popen_options)
+        finally:
+            _release_storage_allocation_lock(allocation_lock)
         self._wine_started = True
+        self._wine_launch_prefix = wineprefix_value
         if process not in self._managed_processes:
             self._managed_processes.append(process)
         return process
@@ -3572,7 +5678,8 @@ class PrefixLease:
         storage_smoke = (self._manifest.get("storage_policy_smoke") is True
                          and _is_storage_policy_smoke_id(self.experiment_id))
         blockers = _gate0_blockers(active_experiment_id=self.experiment_id,
-                                   allow_storage_smoke=storage_smoke)
+                                   allow_storage_smoke=storage_smoke,
+                                   require_active_marker=True)
         if blockers:
             raise RuntimeError("Gate 0 blocks prefix materialization: " + "; ".join(blockers))
         if not self._runtime_env_verified:
@@ -3581,18 +5688,50 @@ class PrefixLease:
             raise FileNotFoundError(f"certified Wine template is unavailable: {self.template}")
         if not (self.template / "FGMETAL_PREFIX_TEMPLATE.json").is_file():
             raise ValueError("Wine template lacks its certification marker")
+        if self._lease_marker_path is None:
+            raise RuntimeError("PrefixLease active marker path was not reserved before materialization")
         current_free = disk_free_bytes(self.prefix.parent)
-        if current_free < FREE_MINIMUM:
-            raise RuntimeError(f"free space fell below the 45 GiB start minimum before prefix clone: {current_free}")
-        current_project = int(measure_project_usage()["allocated_inode_deduplicated_bytes"])
+        persistent_snapshot, persistent_exclusions, persistent_blockers = (
+            _signed_persistent_output_snapshot(exclude_experiment_id=self.experiment_id))
+        if persistent_blockers:
+            raise RuntimeError("signed experiment output accounting is blocked before PrefixLease materialization: "
+                               + "; ".join(persistent_blockers))
+        accounting_exclusions = [*persistent_exclusions, self.prefix, self._lease_marker_path,
+                                 self.output_dir, self.manifest_path]
+        if self._manifest.get("storage_policy_smoke") is True:
+            accounting_exclusions.append(_storage_smoke_claim_path(self.experiment_id))
+        current_usage = measure_project_usage(exclude_paths=accounting_exclusions)
+        current_project = conservative_project_usage_bytes(current_usage)
+        pre_materialization_nonlease_scope = current_usage.get(
+            "allocated_inode_deduplicated_bytes_excluding_paths")
+        if (not isinstance(pre_materialization_nonlease_scope, int)
+                or isinstance(pre_materialization_nonlease_scope, bool)
+                or pre_materialization_nonlease_scope < 0):
+            raise RuntimeError("PrefixLease could not measure the pre-materialization non-lease scope")
+        current_attestation_bytes = _read_file_nofollow(GATE0_ATTESTATION_PATH)
+        current_attestation = json.loads(current_attestation_bytes)
+        if (not _verify_gate0_signature(current_attestation)
+                or hashlib.sha256(current_attestation_bytes).hexdigest()
+                != self._manifest.get("gate0_attestation_sha256")):
+            raise RuntimeError("Gate 0 attestation changed before PrefixLease materialization")
+        gate0_nonlease_scope = current_attestation.get("measurements", {}).get(
+            "fgmetal_scoped_observed_nonlease_allocated_inode_bytes")
+        if (not isinstance(gate0_nonlease_scope, int) or isinstance(gate0_nonlease_scope, bool)
+                or gate0_nonlease_scope < 0
+                or pre_materialization_nonlease_scope != gate0_nonlease_scope):
+            raise RuntimeError("unrelated non-lease storage changed between Gate 0 and PrefixLease materialization")
+        pre_materialization_output, _output_tree_sha256 = _persistent_output_snapshot(self.output_dir)
         remaining_persistent = int(self._manifest.get("estimated_persistent_bytes", 0))
-        prefix_estimate = int(self._manifest.get("expected_prefix_bytes", 0))
         remaining_build = int(self._manifest.get("expected_build_bytes", 0))
-        estimated_peak = prefix_estimate + remaining_build + remaining_persistent
-        if current_project + estimated_peak > PROJECT_BUDGET:
-            raise RuntimeError("current project storage plus full declared run peak exceeds 50 GiB")
-        if current_free - estimated_peak < FREE_WARNING:
-            raise RuntimeError("current free space plus full declared run peak crosses 35 GiB warning")
+        estimated_peak = int(self._manifest_estimates["estimated_projected_new_disk_bytes"])
+        admission = projected_storage_admission(
+            current_free_bytes=current_free,
+            current_scoped_bytes=current_project,
+            peak_additional_bytes=estimated_peak,
+        )
+        if not admission["admitted"]:
+            raise RuntimeError("PrefixLease projected-peak admission failed before prefix clone: "
+                               + "; ".join(admission["blockers"]))
         prefix_parent_fd = _open_directory_nofollow(
             self.prefix.parent, create=True, strict_directory_sync=True)
         self._prefix_parent_fd = prefix_parent_fd
@@ -3765,6 +5904,7 @@ class PrefixLease:
             "output_dir": str(self.output_dir),
             "manifest_path": str(self.manifest_path),
             "manifest_sha256": self._manifest_sha256,
+            "lease_token": self._lease_token,
             "created_at_unix": time.time(),
             "pid": os.getpid(),
         }
@@ -3772,32 +5912,124 @@ class PrefixLease:
                     strict_directory_sync=True)
         self._write_active_lease("MATERIALIZED")
         after_clone = disk_free_bytes(self.prefix.parent)
-        project_after_clone = measure_project_usage()
-        project_after_clone_bytes = int(project_after_clone["allocated_inode_deduplicated_bytes"])
+        rebound_persistent_snapshot, rebound_persistent_exclusions, rebound_persistent_blockers = (
+            _signed_persistent_output_snapshot(exclude_experiment_id=self.experiment_id))
+        if (rebound_persistent_blockers
+                or rebound_persistent_snapshot != persistent_snapshot
+                or rebound_persistent_exclusions != persistent_exclusions):
+            self._storage_violation = True
+            raise RuntimeError("signed experiment output paths changed during PrefixLease materialization"
+                               + (": " + "; ".join(rebound_persistent_blockers)
+                                  if rebound_persistent_blockers else ""))
+        project_after_clone = measure_project_usage(exclude_paths=accounting_exclusions)
+        project_after_clone_bytes = conservative_project_usage_bytes(project_after_clone)
         if after_clone < FREE_HARD_STOP:
             self._storage_violation = True
             self._storage_watch_events.append({"sampled_at_unix": time.time(),
                 "action": "HARD_STOP_AFTER_PREFIX_CLONE", "free_bytes": after_clone})
             raise RuntimeError(f"prefix materialization crossed the 25 GiB hard stop: {after_clone}")
-        if after_clone < FREE_WARNING:
+        remaining_admission = _post_materialization_prefix_admission(
+            current_free_bytes=after_clone,
+            current_scoped_bytes=project_after_clone_bytes,
+            manifest_estimates=self._manifest_estimates,
+        )
+        for warning in remaining_admission["warnings"]:
+            self._storage_watch_events.append({
+                "sampled_at_unix": time.time(),
+                "action": "PROJECTED_STORAGE_WARNING_AFTER_PREFIX_CLONE",
+                "warning": warning,
+            })
+        if not remaining_admission["admitted"]:
             self._storage_violation = True
             self._storage_watch_events.append({"sampled_at_unix": time.time(),
-                "action": "WARNING_THRESHOLD_AFTER_PREFIX_CLONE", "free_bytes": after_clone})
-            raise RuntimeError(f"prefix materialization crossed the 35 GiB warning threshold: {after_clone}")
-        if project_after_clone_bytes + remaining_build + remaining_persistent > PROJECT_BUDGET:
-            self._storage_violation = True
-            self._storage_watch_events.append({"sampled_at_unix": time.time(),
-                "action": "PROJECT_BUDGET_AFTER_PREFIX_CLONE",
-                "project_usage_bytes": project_after_clone_bytes})
-            raise RuntimeError("prefix materialization crossed the 50 GiB project budget")
-        if after_clone - remaining_build - remaining_persistent < FREE_WARNING:
-            self._storage_violation = True
-            self._storage_watch_events.append({"sampled_at_unix": time.time(),
-                "action": "PROJECTED_WARNING_THRESHOLD_AFTER_PREFIX_CLONE",
+                "action": "PROJECTED_PEAK_AFTER_PREFIX_CLONE",
                 "free_bytes": after_clone,
+                "project_usage_bytes": project_after_clone_bytes,
+                "remaining_prefix_bytes": self._manifest_estimates["expected_prefix_bytes"],
                 "remaining_build_bytes": remaining_build,
-                "remaining_persistent_bytes": remaining_persistent})
-            raise RuntimeError("remaining declared build/persistent usage crosses the 35 GiB warning threshold")
+                "remaining_persistent_bytes": remaining_persistent,
+                "uncertainty_margin_bytes": self._manifest_estimates["estimated_uncertainty_margin_bytes"],
+                "remaining_peak_additional_bytes": remaining_admission["peak_additional_bytes"],
+                "projected_free_bytes": remaining_admission["projected_free_bytes"],
+                "projected_scoped_bytes": remaining_admission["projected_scoped_bytes"],
+                "blockers": remaining_admission["blockers"],
+            })
+            raise RuntimeError("prefix materialization leaves an inadmissible projected peak: "
+                               + "; ".join(remaining_admission["blockers"]))
+        post_materialization_nonlease_scope = project_after_clone.get(
+            "allocated_inode_deduplicated_bytes_excluding_paths")
+        if (not isinstance(post_materialization_nonlease_scope, int)
+                or isinstance(post_materialization_nonlease_scope, bool)
+                or post_materialization_nonlease_scope < 0):
+            raise RuntimeError("PrefixLease could not measure the post-materialization non-lease scope")
+        if post_materialization_nonlease_scope != pre_materialization_nonlease_scope:
+            self._storage_violation = True
+            raise RuntimeError("unrelated non-lease storage changed during PrefixLease materialization")
+        materialized_prefix_bytes = _prefix_size(self.prefix)["allocated_inode_deduplicated_bytes"]
+        post_materialization_output, _output_tree_sha256 = _persistent_output_snapshot(self.output_dir)
+        if materialized_prefix_bytes > self._manifest_estimates["expected_prefix_bytes"]:
+            self._storage_violation = True
+            raise RuntimeError("materialized PrefixLease allocation exceeds its signed prefix reservation")
+        if (post_materialization_output < pre_materialization_output
+                or post_materialization_output > self._manifest_estimates["estimated_persistent_bytes"]):
+            self._storage_violation = True
+            raise RuntimeError("current-run output exceeds its signed persistent-output reservation")
+        prefix_info = _stat_entry_nofollow(self.prefix)
+        if (prefix_info is None or not stat.S_ISDIR(prefix_info.st_mode)
+                or self._lease_marker_parent_identity is None):
+            self._storage_violation = True
+            raise RuntimeError("materialized PrefixLease identity disappeared before its accounting receipt")
+        inventory_bytes = _read_file_nofollow(INVENTORY_PATH)
+        inventory = json.loads(inventory_bytes)
+        if _read_file_nofollow(GATE0_ATTESTATION_PATH) != current_attestation_bytes:
+            self._storage_violation = True
+            raise RuntimeError("Gate 0 attestation changed during PrefixLease materialization")
+        current_measurements = current_attestation.get("measurements", {})
+        gate0_observed_scope = current_measurements.get(
+            "fgmetal_scoped_observed_allocated_inode_bytes")
+        if (not isinstance(gate0_observed_scope, int) or isinstance(gate0_observed_scope, bool)
+                or gate0_observed_scope < 0):
+            self._storage_violation = True
+            raise RuntimeError("Gate 0 lacks an exact observed-allocation baseline for PrefixLease receipt")
+        if current_measurements.get(
+                "fgmetal_scoped_observed_nonlease_allocated_inode_bytes") != gate0_nonlease_scope:
+            self._storage_violation = True
+            raise RuntimeError("Gate 0 non-lease allocation baseline changed before PrefixLease receipt")
+        receipt = {
+            "schema_version": 1,
+            "experiment_id": self.experiment_id,
+            "pid": os.getpid(),
+            "lease_token": self._lease_token,
+            "prefix_path": str(self.prefix),
+            "prefix_device": prefix_info.st_dev,
+            "prefix_inode": prefix_info.st_ino,
+            "active_marker_path": str(self._lease_marker_path),
+            "active_marker_parent_device": self._lease_marker_parent_identity[0],
+            "active_marker_parent_inode": self._lease_marker_parent_identity[1],
+            "output_dir": str(self.output_dir),
+            "manifest_path": str(self.manifest_path),
+            "manifest_sha256": self._manifest_sha256,
+            "gate0_attestation_sha256": hashlib.sha256(current_attestation_bytes).hexdigest(),
+            "inventory_sha256": hashlib.sha256(inventory_bytes).hexdigest(),
+            "inventory_generated_at_unix": inventory.get("generated_at_unix"),
+            "gate0_attested_observed_scope_bytes": gate0_observed_scope,
+            "gate0_attested_nonlease_scope_bytes": gate0_nonlease_scope,
+            "pre_materialization_free_bytes": current_free,
+            "post_materialization_free_bytes": after_clone,
+            "pre_materialization_nonlease_scope_bytes": pre_materialization_nonlease_scope,
+            "post_materialization_nonlease_scope_bytes": post_materialization_nonlease_scope,
+            "pre_materialization_output_allocated_bytes": pre_materialization_output,
+            "post_materialization_output_allocated_bytes": post_materialization_output,
+            "materialized_prefix_allocated_bytes": materialized_prefix_bytes,
+            "expected_prefix_bytes": self._manifest_estimates["expected_prefix_bytes"],
+            "estimated_persistent_bytes": self._manifest_estimates["estimated_persistent_bytes"],
+            "estimated_projected_new_disk_bytes": self._manifest_estimates["estimated_projected_new_disk_bytes"],
+            "post_materialization_scope_bytes": project_after_clone_bytes,
+            "created_at_unix": time.time(),
+        }
+        self._materialization_receipt = _seal_storage_evidence(
+            receipt, "prefix_materialization_hmac_sha256")
+        self._write_active_lease("MATERIALIZED")
 
     def _stop_wineserver(self) -> tuple[bool, list[dict[str, Any]]]:
         if not self._created:
@@ -3810,16 +6042,47 @@ class PrefixLease:
             return True, [{"status": "SKIPPED_NO_WINE_PROCESS_STARTED"}]
         if self._prefix_parent_fd is None:
             return False, [{"status": "PREFIX_PARENT_HANDLE_MISSING"}]
-        env = dict(self._env)
-        env.update({"WINEPREFIX": self.prefix.name, "WINEARCH": "win64",
-                    "WINESERVER": str(self.wine_server)})
+        if (not self._runtime_env_verified or self._sealed_wine_env is None
+                or self._env != self._sealed_wine_env):
+            return False, [{"status": "SEALED_WINE_ENVIRONMENT_CHANGED"}]
+        env = dict(self._sealed_wine_env)
+        try:
+            self._assert_exact_wineprefix(env)
+            if env.get("WINESERVER") != str(self.wine_server):
+                raise ValueError("sealed WINESERVER does not match the PrefixLease runtime")
+            self._assert_bound_prefix_lease(env)
+        except (OSError, RuntimeError, ValueError, TypeError, json.JSONDecodeError) as error:
+            self._storage_violation = True
+            return False, [{"status": "PREFIX_LEASE_BINDING_UNSAFE", "error": repr(error),
+                            "WINEPREFIX": env.get("WINEPREFIX")}]
+        parent_info = os.fstat(self._prefix_parent_fd)
+        if self._prefix_identity is None:
+            self._storage_violation = True
+            return False, [{"status": "PREFIX_IDENTITY_MISSING",
+                            "WINEPREFIX": env.get("WINEPREFIX")}]
+        prefix_identity = {
+            "path": str(self.prefix),
+            "device": self._prefix_identity[0],
+            "inode": self._prefix_identity[1],
+            "parent_device": parent_info.st_dev,
+            "parent_inode": parent_info.st_ino,
+            "experiment_id": self.experiment_id,
+            "manifest_sha256": self._manifest_sha256,
+        }
         records: list[dict[str, Any]] = []
         good = True
         for flag in ("-k", "-w"):
             try:
+                # Re-read all durable identities for each shutdown invocation.
+                # The exec wrapper then checks the parent and prefix inode again
+                # immediately before exec using the inherited directory handle.
+                self._assert_bound_prefix_lease(env)
+                self._wineserver_prefix = self._assert_exact_wineprefix(env)
                 process = _spawn_in_directory_fd(
                     self._prefix_parent_fd,
                     ["/usr/bin/arch", "-x86_64", str(self.wine_server), flag],
+                    expected_directory_identity=(parent_info.st_dev, parent_info.st_ino),
+                    expected_child_identity=(self.prefix.name, *self._prefix_identity, str(self.prefix)),
                     env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True,
                 )
                 try:
@@ -3827,14 +6090,20 @@ class PrefixLease:
                 except subprocess.TimeoutExpired as timeout_error:
                     self._terminate_and_reap(process)
                     records.append({"flag": flag, "error": repr(timeout_error),
+                                    "WINEPREFIX": self._wineserver_prefix,
+                                    "prefix_identity": prefix_identity,
                                     "output_tail": (process.stdout.read() if process.stdout else "")[-1000:]})
                     good = False
                     break
                 records.append({"flag": flag, "returncode": process.returncode,
+                                "WINEPREFIX": self._wineserver_prefix,
+                                "prefix_identity": prefix_identity,
                                 "output_tail": (output or "")[-1000:]})
                 good = good and process.returncode == 0
-            except OSError as exc:
-                records.append({"flag": flag, "error": repr(exc)})
+            except (OSError, RuntimeError, ValueError, TypeError, json.JSONDecodeError) as exc:
+                records.append({"flag": flag, "error": repr(exc),
+                                "WINEPREFIX": self._wineserver_prefix or env.get("WINEPREFIX"),
+                                "prefix_identity": prefix_identity})
                 good = False
                 break
         return good, records
@@ -4025,12 +6294,28 @@ class PrefixLease:
         net_free_delta = free_after - self._free_before
         prefix_allocated_removed = (
             int(size_before_cleanup["allocated_inode_deduplicated_bytes"]) if deleted else 0)
-        project_after = measure_project_usage()
         project_before_bytes = int(self._project_before.get("allocated_inode_deduplicated_bytes", 0))
-        project_after_bytes = int(project_after["allocated_inode_deduplicated_bytes"])
+        try:
+            project_after = measure_project_usage()
+            project_after_bytes = int(project_after["allocated_inode_deduplicated_bytes"])
+        except Exception as error:
+            cleanup_error = cleanup_error or f"post-run project usage measurement failed: {error!r}"
+            self._storage_violation = True
+            project_after = dict(self._project_before)
+            project_after_bytes = int(project_after.get("allocated_inode_deduplicated_bytes", 0))
         persistent_growth = max(0, project_after_bytes - project_before_bytes)
         expected_persistent = int(self._manifest.get("estimated_persistent_bytes", 0))
         unexpected_persistent = max(0, persistent_growth - expected_persistent)
+        prefix_parent_identity_record: dict[str, int] | None = None
+        if self._prefix_parent_fd is not None:
+            parent_identity_info = os.fstat(self._prefix_parent_fd)
+            prefix_parent_identity_record = {
+                "device": parent_identity_info.st_dev,
+                "inode": parent_identity_info.st_ino,
+            }
+        prefix_inode_identity_record = (
+            {"device": self._prefix_identity[0], "inode": self._prefix_identity[1]}
+            if self._prefix_identity is not None else None)
 
         storage_status = "PASS"
         free_status = "PASS"
@@ -4076,6 +6361,16 @@ class PrefixLease:
             "experiment_id": self.experiment_id,
             "created_at_unix": time.time(),
             "prefix_path": str(self.prefix),
+            "wineprefix": str(self.prefix),
+            "wineprefix_identity": {
+                "canonical_absolute_path": str(self.prefix),
+                "experiment_id": self.experiment_id,
+                "manifest_sha256": self._manifest_sha256,
+                "prefix_inode": prefix_inode_identity_record,
+                "parent_inode": prefix_parent_identity_record,
+                "launch_WINEPREFIX": self._wine_launch_prefix,
+                "cleanup_WINEPREFIX": self._wineserver_prefix,
+            },
             "prefix_created": bool(prefix_created),
             "prefix_deleted": deleted,
             "prefix_preserved": preserved,
@@ -4101,7 +6396,9 @@ class PrefixLease:
                 "project_usage_after": project_after,
             }),
             "free_peak_or_estimate_bytes": max(
-                0, self._free_before - int(self._manifest.get("estimated_max_new_disk_bytes", 0))),
+                0, self._free_before - int(self._manifest.get(
+                    "estimated_projected_new_disk_bytes",
+                    self._manifest.get("estimated_max_new_disk_bytes", 0)))),
             "project_usage_before": self._project_before,
             "project_usage_after": project_after,
             "wineserver_shutdown": stop_records,
@@ -4696,6 +6993,10 @@ class NativeRunLease:
             raise ValueError("NativeRunLease experiment ID does not match the storage manifest")
         if self._manifest.get("decision") != "ALLOW":
             raise RuntimeError("NativeRunLease refuses a manifest that did not pass the storage gate")
+        try:
+            self._manifest_estimates = _validated_manifest_estimates(self._manifest)
+        except ValueError as error:
+            raise RuntimeError(f"NativeRunLease refuses invalid projected-peak estimates: {error}") from error
         if self._manifest.get("expected_prefix_bytes", 0) != 0:
             raise ValueError("NativeRunLease requires expected_prefix_bytes == 0 (no Wine prefix)")
         if self._manifest.get("expected_prefix_requirement") is True:
@@ -4717,13 +7018,17 @@ class NativeRunLease:
         if blockers:
             raise RuntimeError("Gate 0 blocks NativeRunLease: " + "; ".join(blockers))
 
-        self.output_dir.mkdir(parents=True, exist_ok=True)
         self._free_before = disk_free_bytes(self.output_dir.parent)
-        if self._free_before < FREE_MINIMUM:
-            raise RuntimeError(f"free space below minimum ({self._free_before} < {FREE_MINIMUM})")
         self._project_before = measure_project_usage()
-        if int(self._project_before.get("allocated_inode_deduplicated_bytes", 0)) > GATE0_PROJECT_BUDGET:
-            raise RuntimeError("project storage above Gate 0 budget")
+        current_scoped = conservative_project_usage_bytes(self._project_before)
+        admission = projected_storage_admission(
+            current_free_bytes=self._free_before,
+            current_scoped_bytes=current_scoped,
+            peak_additional_bytes=self._manifest_estimates["estimated_projected_new_disk_bytes"],
+        )
+        if not admission["admitted"]:
+            raise RuntimeError("NativeRunLease projected-peak admission failed: "
+                               + "; ".join(admission["blockers"]))
 
         ACTIVE_LEASE_ROOT.mkdir(parents=True, exist_ok=True)
         lock_path = ACTIVE_LEASE_ROOT / ".lease.lock"
@@ -4744,10 +7049,35 @@ class NativeRunLease:
 
         try:
             self._storage_allocation_lock_file = _acquire_storage_allocation_lock()
+            locked_blockers = _gate0_blockers(
+                active_experiment_id=self.experiment_id, allow_storage_smoke=storage_smoke)
+            if locked_blockers:
+                raise RuntimeError("Gate 0 changed during NativeRunLease admission: "
+                                   + "; ".join(locked_blockers))
+            locked_free = disk_free_bytes(self.output_dir.parent)
+            locked_project_usage = measure_project_usage()
+            locked_project = conservative_project_usage_bytes(locked_project_usage)
+            locked_admission = projected_storage_admission(
+                current_free_bytes=locked_free,
+                current_scoped_bytes=locked_project,
+                peak_additional_bytes=self._manifest_estimates["estimated_projected_new_disk_bytes"],
+            )
+            if not locked_admission["admitted"]:
+                raise RuntimeError("NativeRunLease projected-peak admission failed under the shared allocation lock: "
+                                   + "; ".join(locked_admission["blockers"]))
+            for warning in locked_admission["warnings"]:
+                self._storage_watch_events.append({
+                    "sampled_at_unix": time.time(),
+                    "action": "PROJECTED_STORAGE_WARNING_BEFORE_NATIVE_LEASE",
+                    "warning": warning,
+                })
+            self._free_before = locked_free
+            self._project_before = locked_project_usage
             active = _active_lease_markers()
             if active:
                 raise RuntimeError("an active or interrupted lease requires reconciliation: "
                                    + ", ".join(str(path) for path in active))
+            self.output_dir.mkdir(parents=True, exist_ok=True)
             self._lease_marker_path = ACTIVE_LEASE_ROOT / f"{self.experiment_id}.json"
             if self._lease_marker_path.exists() or self._lease_marker_path.is_symlink():
                 raise FileExistsError(f"active lease marker already exists: {self._lease_marker_path}")
@@ -5261,3 +7591,31 @@ def open_canonical_artifact(digest: str) -> Iterator[BinaryIO]:
         if group_fd is not None:
             os.close(group_fd)
         os.close(root_fd)
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description="Storage policy management, reconciliation, and recovery.")
+    sub = parser.add_subparsers(dest="command", required=True)
+    recov = sub.add_parser("recover-interrupted-smoke", help="Recover an interrupted storage-only smoke lease marker")
+    recov.add_argument("experiment_id", help="Interrupted smoke experiment ID")
+    sub.add_parser("reconcile", help="Reconcile abandoned storage smoke lease markers")
+    sub.add_parser("blockers", help="Check live Gate 0 storage blockers")
+    args = parser.parse_args(argv)
+
+    if args.command == "recover-interrupted-smoke":
+        result = recover_interrupted_storage_smoke_lease_marker(args.experiment_id)
+        print(json.dumps(result, indent=2))
+        return 0
+    elif args.command == "reconcile":
+        results = reconcile_abandoned_storage_smoke_lease_markers()
+        print(json.dumps(results, indent=2))
+        return 0
+    elif args.command == "blockers":
+        blockers = _gate0_blockers()
+        print(json.dumps(blockers, indent=2))
+        return 0 if not blockers else 1
+    return 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

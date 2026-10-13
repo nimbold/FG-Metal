@@ -8,7 +8,8 @@ Framegen remains an experimental library with a draft C ABI and no supported ada
 
 - DXMT Step 10B.6.1: **STOP** the current CAMetalDisplayLink architecture; matched windowed and fullscreen runs failed presentation health. RIFE is not cleared. See the [report](experiments/dxmt_framegen/evidence/step10b6_1/report.md).
 - DXVK-MacOS Step 11C: **PARTIAL PASS** for a low-rate windowed experiment; user-observed magenta/cyan flashes remain a defect, and doubled cadence plus lifecycle coverage are incomplete. See the [report](experiments/dxvk_macos_step11c/REPORT.md).
-- Native MoltenVK Step 11D.3-A: **CASE A3 — INCONCLUSIVE**. x86_64 is the architecture-matched primary control, but the leased Xcode build failed before compilation. Gate 0 is current and passing; no native executable, loader probe, or graphics trace exists. See the [A1 report](experiments/dxvk_macos_step11d3a/STEP-11D3-A1-REPORT.md).
+- Native MoltenVK Step 11D.3-A: **CASE A2 — DIVERGENT / HEALTHY NATIVE BASELINE**. Thin x86_64 MoltenVK under Rosetta achieves 59.99–60.01 FPS with >99.79% of nextDrawable calls locked in 14–18 ms and 0 waits >= 50 ms. The presentation starvation of STEP 11D.2 does not reproduce in native control. See the [Step 11D.3-A3 report](experiments/dxvk_macos_step11d3a/STEP-11D3-A3-REPORT.md).
+- Bare Wine Vulkan Step 11D.3-B: **CASE B1**; BR9R remains **N3 — INCONCLUSIVE**. Fresh Wine authorization passed, but the frozen-coverer calibration did not verify full coverage or restoration; Native runs remain gated. See the [BR9R2 report](experiments/dxvk_macos_step11d3b/STEP-11D3-BR9R2-REPORT.md).
 
 ## Roadmap checklist
 
@@ -22,7 +23,7 @@ Framegen remains an experimental library with a draft C ABI and no supported ada
 - [ ] Select an inference backend after quality, latency, licensing, and redistribution review.
 - [ ] Pass lifecycle, failure, sustained-soak, and clean-machine packaging checks before declaring any adapter supported.
 
-The detailed phases below describe prerequisites and boundaries. Step 11D.3-B and RIFE implementation remain gated; the current A3 result does not authorize either.
+The detailed phases below describe prerequisites and boundaries. BR9R remains inconclusive, STEP 11D.3-C has not started, and RIFE implementation remains gated. A future differential run requires verified Wine coverer coverage before Native runs.
 
 ## Phase 0 — Bootstrap and boundaries
 

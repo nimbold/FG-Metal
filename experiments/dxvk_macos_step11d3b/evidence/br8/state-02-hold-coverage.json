@@ -1,0 +1,31 @@
+{
+  "start_mach_ns": 875627389920458,
+  "end_mach_ns": 875627425830791,
+  "target_pid": 2627,
+  "active_displays": [
+    1
+  ],
+  "windows": [
+    {
+      "front_to_back_rank": 3,
+      "kCGWindowName": "FG-Metal Step 11D.3-B Bare Vulkan",
+      "kCGWindowLayer": 0,
+      "kCGWindowMemoryUsage": 2432,
+      "kCGWindowIsOnscreen": true,
+      "kCGWindowSharingState": 1,
+      "kCGWindowOwnerPID": 2627,
+      "kCGWindowOwnerName": "wine",
+      "kCGWindowNumber": 27746,
+      "kCGWindowStoreType": 1,
+      "kCGWindowBounds": {
+        "X": 68.0,
+        "Height": 392.0,
+        "Y": 62.0,
+        "Width": 640.0
+      },
+      "kCGWindowAlpha": 1.0
+    }
+  ],
+  "state_mutated": false,
+  "extent_note": "CG window rectangles and rank do not alone prove opaque per-pixel coverage; pair with external UI visual observation."
+}

@@ -111,7 +111,7 @@ int ProcessTranslationStatus() {
   return translated;
 }
 
-constexpr size_t kTraceLineCapacity = 2048;
+constexpr size_t kTraceLineCapacity = 16384;
 struct TraceRecord {
   uint32_t len = 0;
   char data[kTraceLineCapacity]{};
@@ -215,8 +215,15 @@ class JsonObject {
 
   void raw(const char *key, const char *json) {
     prefix(key);
-    append_bytes(json == nullptr ? "null" : json,
-                 json == nullptr ? 4 : std::strlen(json));
+    if (json == nullptr) {
+      append_bytes("null", 4);
+      return;
+    }
+    for (const char *cursor = json; *cursor != '\0'; ++cursor) {
+      if (*cursor != '\n' && *cursor != '\r') {
+        append_char(*cursor);
+      }
+    }
   }
 
   bool finish(TraceRecord &record) {
@@ -565,7 +572,7 @@ class Renderer {
     }
     cleanup();
 
-    const uint64_t callbackDrainDeadline = MachAbsoluteNanoseconds() + 3000000000ULL;
+    const uint64_t callbackDrainDeadline = MachAbsoluteNanoseconds() + 5000000000ULL;
     uint64_t pendingPresentationCallbacks =
         mvkNativeTracePendingPresentedCallbacks();
     while (pendingPresentationCallbacks != 0 &&
@@ -596,7 +603,17 @@ class Renderer {
 
     finished_.store(true, std::memory_order_relaxed);
     dispatch_async(dispatch_get_main_queue(), ^{
-      [NSApp terminate:nil];
+      [NSApp stop:nil];
+      NSEvent *event = [NSEvent otherEventWithType:NSEventTypeApplicationDefined
+                                          location:NSMakePoint(0, 0)
+                                     modifierFlags:0
+                                         timestamp:0
+                                      windowNumber:0
+                                           context:nil
+                                           subtype:0
+                                             data1:0
+                                             data2:0];
+      [NSApp postEvent:event atStart:YES];
     });
   }
 
@@ -1841,9 +1858,17 @@ NSString *LayerSignature(CAMetalLayer *layer, NSWindow *window,
   }
   self.metalView.layer = self.metalLayer;
   self.window.contentView = self.metalView;
+  self.window.level = NSFloatingWindowLevel;
+  [self.window setHidesOnDeactivate:NO];
+  [self.window setCanHide:NO];
   [self.window center];
   [self.window makeKeyAndOrderFront:nil];
+  [self.window orderFrontRegardless];
   [NSApp activateIgnoringOtherApps:YES];
+  [[NSProcessInfo processInfo]
+      beginActivityWithOptions:(NSActivityUserInitiated |
+                                NSActivityLatencyCritical)
+                        reason:@"STEP 11D.3-A Graphics Benchmark"];
 
   // Let AppKit attach the view to its window and establish the target screen
   // before setting the requested drawable dimensions.
@@ -1888,20 +1913,19 @@ NSString *LayerSignature(CAMetalLayer *layer, NSWindow *window,
       "[\"maximumDrawableCount\",\"allowsNextDrawableTimeout\",\"displaySyncEnabled\"]");
   metadata.string("layer_change_observation",
       "startup snapshots, window display/backing/resize delegate callbacks, and 100ms main-run-loop polling");
-  metadata.raw("comparison_reference", R"json({
-    "step11d2_wsi_log":"experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-60s-07-submit-reclaim-split/slow-visual_d3d11.log",
-    "step11d2_run_manifest":"experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-60s-07-submit-reclaim-split/manifest.json",
-    "recorded_format":"VK_FORMAT_B8G8R8A8_UNORM",
-    "recorded_color_space":"VK_COLOR_SPACE_SRGB_NONLINEAR_KHR",
-    "recorded_present_mode":"VK_PRESENT_MODE_FIFO_KHR",
-    "recorded_buffer_size":{"width":640,"height":360},
-    "recorded_image_count":3,
-    "recorded_timing_extension":"unavailable",
-    "window_content_points":"not recorded",
-    "layer_contents_scale":"not recorded",
-    "target_display_identity":"not recorded",
-    "requested_refresh_hz":{"value":null,"status":"UNVERIFIED_NOT_RECORDED"}
-  })json");
+  metadata.raw("comparison_reference",
+      "{\"step11d2_wsi_log\":\"experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-60s-07-submit-reclaim-split/slow-visual_d3d11.log\","
+      "\"step11d2_run_manifest\":\"experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-60s-07-submit-reclaim-split/manifest.json\","
+      "\"recorded_format\":\"VK_FORMAT_B8G8R8A8_UNORM\","
+      "\"recorded_color_space\":\"VK_COLOR_SPACE_SRGB_NONLINEAR_KHR\","
+      "\"recorded_present_mode\":\"VK_PRESENT_MODE_FIFO_KHR\","
+      "\"recorded_buffer_size\":{\"width\":640,\"height\":360},"
+      "\"recorded_image_count\":3,"
+      "\"recorded_timing_extension\":\"unavailable\","
+      "\"window_content_points\":\"not recorded\","
+      "\"layer_contents_scale\":\"not recorded\","
+      "\"target_display_identity\":\"not recorded\","
+      "\"requested_refresh_hz\":{\"value\":null,\"status\":\"UNVERIFIED_NOT_RECORDED\"}}");
   metadata.raw("known_comparison_mismatches",
       "[\"step11d2 evidence does not record window content point dimensions, CAMetalLayer contentsScale, display identity, or requested refresh rate\"]");
   metadata.string("acquisition_trace_correlation",
@@ -1911,6 +1935,7 @@ NSString *LayerSignature(CAMetalLayer *layer, NSWindow *window,
   self.stateTimer = [NSTimer scheduledTimerWithTimeInterval:0.1
       target:self selector:@selector(pollLayerState:)
       userInfo:nil repeats:YES];
+  [[NSRunLoop currentRunLoop] addTimer:self.stateTimer forMode:NSRunLoopCommonModes];
   stateMonitoringStarted_ = true;
   [self recordLayerState:@"monitoring_started" force:YES];
   renderer_->start(self.metalLayer);
@@ -1923,7 +1948,17 @@ NSString *LayerSignature(CAMetalLayer *layer, NSWindow *window,
   std::fprintf(stderr, "ERROR %s\n", [message UTF8String]);
   self.exitCode = 1;
   dispatch_async(dispatch_get_main_queue(), ^{
-    [NSApp terminate:nil];
+    [NSApp stop:nil];
+    NSEvent *event = [NSEvent otherEventWithType:NSEventTypeApplicationDefined
+                                        location:NSMakePoint(0, 0)
+                                   modifierFlags:0
+                                       timestamp:0
+                                    windowNumber:0
+                                         context:nil
+                                         subtype:0
+                                           data1:0
+                                           data2:0];
+    [NSApp postEvent:event atStart:YES];
   });
 }
 
@@ -2024,6 +2059,9 @@ NSString *LayerSignature(CAMetalLayer *layer, NSWindow *window,
     renderer_->requestStop("application_terminating");
     renderer_->join();
     self.exitCode = renderer_->result();
+  }
+  if (trace_ != nullptr) {
+    trace_->shutdown();
   }
 }
 

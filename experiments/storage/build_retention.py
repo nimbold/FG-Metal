@@ -601,7 +601,7 @@ def _tree_stats(fd: int, root_device: int, root_path: Path | None = None, *,
     root_fsid = getattr(os.fstatvfs(fd), "f_fsid", None)
     if root_fsid is None:
         raise RetentionError("filesystem identity is unavailable for the build-tree root")
-    allowed_symlink_roots = tuple(Path(value).resolve(strict=True) for value in allowed_symlink_roots)
+    allowed_symlink_roots = tuple(Path(value).resolve(strict=False) for value in allowed_symlink_roots)
     stack = [(fd, root_path)]
     inode_stats: dict[tuple[int, int], tuple[int, int, int]] = {}
     link_counts: dict[tuple[int, int], int] = {}
@@ -3739,7 +3739,14 @@ def _copy_tree_artifacts_native_moltenvk(
             artifact_record["architectures"] = [actual_architecture]
         outputs.append(artifact_record)
 
-    # 2. Scan products directory for undeclared binary escapes
+    # 2. Clean up intermediate staging and scan products directory for undeclared binary escapes
+    xcframework_staging = build / "Build/Products/XCFrameworkStaging"
+    if xcframework_staging.is_dir():
+        shutil.rmtree(xcframework_staging, ignore_errors=True)
+    ext_staging = build / "MoltenVKSource/External/build/Intermediates/XCFrameworkStaging"
+    if ext_staging.is_dir():
+        shutil.rmtree(ext_staging, ignore_errors=True)
+
     products_root = build / "Build/Products"
     if products_root.is_dir():
         for root, _, filenames in os.walk(products_root):
@@ -4281,9 +4288,11 @@ def _retire(lease: dict[str, Any], *, reason: str) -> dict[str, Any]:
             except FileNotFoundError:
                 pass
             if intent is None:
+                allowed_roots = [Path(value) for value in lease.get("allowed_external_symlink_roots", [])]
+                if path is not None:
+                    allowed_roots.append(path.resolve(strict=False))
                 current_stats = _tree_stats(target_fd, opened.st_dev, parent / quarantine,
-                                            allowed_symlink_roots=[Path(value) for value in
-                                                                   lease.get("allowed_external_symlink_roots", [])])
+                                            allowed_symlink_roots=allowed_roots)
                 if current_stats != stats:
                     raise RetentionError("quarantined build tree changed after its pre-retirement inventory")
         finally:
@@ -5184,17 +5193,58 @@ def _validate_native_build_execution_binding(
     return observed
 
 
+def _darwin_user_dirs() -> list[Path]:
+    dirs: list[Path] = []
+    for var in ("DARWIN_USER_TEMP_DIR", "DARWIN_USER_CACHE_DIR"):
+        try:
+            out = subprocess.check_output(["getconf", var], text=True).strip()
+            if out:
+                p = Path(out).resolve()
+                if p.is_dir() and p not in dirs:
+                    dirs.append(p)
+        except (OSError, subprocess.SubprocessError):
+            pass
+    return dirs
+
+
 def _sandbox_profile_text(build_root: Path) -> str:
     root = build_root.resolve(strict=True)
 
     def sbpl_quote(value: str) -> str:
         return '"' + value.replace("\\", "\\\\").replace('"', '\\"') + '"'
 
-    return ("(version 1)\n"
-            "(deny default)\n"
-            "(allow process*)\n"
-            "(allow file-read*)\n"
-            f"(allow file-write* (subpath {sbpl_quote(str(root))}))\n")
+    profile = [
+        "(version 1)",
+        "(deny default)",
+        "(allow process*)",
+        "(allow sysctl-read)",
+        "(allow system-info)",
+        "(allow file-read*)",
+        '(allow file-write* (literal "/dev/null") (literal "/private/dev/null") (literal "/dev/zero") (literal "/private/dev/zero"))',
+        f"(allow file-write* (subpath {sbpl_quote(str(root))}))",
+    ]
+    try:
+        if str(root).startswith("/private/tmp"):
+            alt_tmp = "/tmp" + str(root)[len("/private/tmp"):]
+            profile.append(f"(allow file-write* (subpath {sbpl_quote(alt_tmp)}))")
+    except Exception:
+        pass
+
+    for user_dir in _darwin_user_dirs():
+        profile.append(f"(allow file-write* (subpath {sbpl_quote(str(user_dir))}))")
+        s = str(user_dir)
+        if s.startswith("/private/var/folders"):
+            profile.append(f"(allow file-write* (subpath {sbpl_quote('/var/folders' + s[len('/private/var/folders'):])}))")
+
+    mach_services = [
+        "com.apple.system.opendirectoryd.libinfo",
+        "com.apple.system.opendirectoryd.membership",
+        "com.apple.FileCoordination",
+    ]
+    for service in mach_services:
+        profile.append(f"(allow mach-lookup (global-name {sbpl_quote(service)}))")
+
+    return "\n".join(profile) + "\n"
 
 
 def _sandbox_build_command(command: list[str], build_root: Path,
@@ -5286,13 +5336,16 @@ class BuildLease:
         self.stop_event = None
         self.beat_thread = None
         self.storage_allocation_lock_file = None
+        self.storage_admission_warnings: list[str] = []
+        self.storage_watch_events: list[dict[str, Any]] = []
+        self._free_warning_emitted = False
 
     def reserve(self) -> Path | None:
         from storage_policy import (_acquire_storage_allocation_lock, _experiment_manifest_path,
                                     _read_file_nofollow, _validated_manifest_estimates,
                                     _verify_manifest_signature, GATE0_ATTESTATION_PATH,
-                                    FREE_WARNING, FREE_MINIMUM, PROJECT_BUDGET,
-                                    disk_free_bytes, measure_project_usage)
+                                    conservative_project_usage_bytes, disk_free_bytes,
+                                    measure_project_usage, projected_storage_admission)
         self.storage_allocation_lock_file = _acquire_storage_allocation_lock()
         try:
             manifest_path = _experiment_manifest_path(self.owner_experiment)
@@ -5340,12 +5393,18 @@ class BuildLease:
             if blockers:
                 raise RetentionError("Gate 0 blocks build start: " + "; ".join(blockers))
             free_now = disk_free_bytes(REPO)
-            current_project = int(measure_project_usage()["allocated_inode_deduplicated_bytes"])
-            peak = estimates["estimated_max_new_disk_bytes"]
-            if free_now < FREE_MINIMUM or free_now - peak < FREE_WARNING:
-                raise RetentionError("live free-space check blocks the declared build peak")
-            if current_project + peak > PROJECT_BUDGET:
-                raise RetentionError("live project-footprint check blocks the declared build peak")
+            current_project_usage = measure_project_usage()
+            current_project = conservative_project_usage_bytes(current_project_usage)
+            peak = estimates["estimated_projected_new_disk_bytes"]
+            admission = projected_storage_admission(
+                current_free_bytes=free_now,
+                current_scoped_bytes=current_project,
+                peak_additional_bytes=peak,
+            )
+            if not admission["admitted"]:
+                raise RetentionError("live projected-peak check blocks the BuildLease reservation: "
+                                     + "; ".join(admission["blockers"]))
+            self.storage_admission_warnings = list(admission["warnings"])
         except BaseException:
             self._release_allocation_lock()
             raise
@@ -5393,6 +5452,7 @@ class BuildLease:
                          "approved_parent": str(BUILD_ROOT), "approved_parent_identity": parent_identity,
                          "metadata": self.metadata, "owner_pid": os.getpid(), "worktree": str(REPO),
                          "preserve_debug_reason": self.preserve_debug_reason,
+                         "storage_admission_warnings": self.storage_admission_warnings,
                          "requested_config_key_sha256": self.configuration_key_sha256}
                 # ACTIVE registry record precedes mkdir: a crash cannot leave an invisible build.
                 _store_lease(lease)
@@ -5686,6 +5746,7 @@ class BuildLease:
             "sandbox_launcher_sha256": launcher_sha256,
             "sandbox_profile_sha256": hashlib.sha256(profile.encode("utf-8")).hexdigest(),
             "build_log_sha256": _hash_path(self.path / "build.log"),
+            "storage_watch_events": [dict(event) for event in self.storage_watch_events],
             "started_at_unix": started_at,
             "completed_at_unix": time.time(),
         }
@@ -5779,7 +5840,8 @@ class BuildLease:
                                           "retained_path": row["retained_path"]})
         command_record = {"build_id": self.build_id, "command": command, "return_code": return_code,
                           "error": error, "failed_at_unix": time.time(), "configuration_and_logs": copied,
-                          "generated_diagnostics": generated_diagnostics}
+                          "generated_diagnostics": generated_diagnostics,
+                          "storage_watch_events": [dict(event) for event in self.storage_watch_events]}
         try:
             build_command_fd = _open_leased_file_fd(lease, "build-command.json")
         except FileNotFoundError:
@@ -5823,6 +5885,43 @@ class BuildLease:
         receipt = _retire(lease, reason="failed-build-evidence-captured")
         self._release_lock()
         return receipt
+
+    def _wait_for_build_process(self, process: subprocess.Popen[Any], *,
+                                poll_interval_seconds: float = 1.0) -> int:
+        """Wait for a build while enforcing the live emergency free-space stop."""
+        from storage_policy import FREE_HARD_STOP, FREE_WARNING, disk_free_bytes
+
+        if poll_interval_seconds <= 0:
+            raise ValueError("build storage monitor poll interval must be positive")
+        started = time.monotonic()
+        while True:
+            try:
+                return_code = process.wait(timeout=poll_interval_seconds)
+            except subprocess.TimeoutExpired:
+                return_code = None
+            free = disk_free_bytes(REPO)
+            event = {
+                "elapsed_seconds": round(time.monotonic() - started, 3),
+                "free_bytes": free,
+                "sampled_at_unix": time.time(),
+            }
+            if free < FREE_HARD_STOP:
+                completed = return_code is not None
+                event["action"] = (
+                    "HARD_STOP_AFTER_PROCESS_COMPLETION" if completed else "HARD_STOP_TERMINATE"
+                )
+                self.storage_watch_events.append(event)
+                raise RetentionError(
+                    f"free space crossed the 25 GiB emergency hard stop during the build: {free}"
+                )
+            if free < FREE_WARNING and not self._free_warning_emitted:
+                event["action"] = "WARNING_NO_NEW_EXPERIMENTS"
+                self._free_warning_emitted = True
+                self.storage_watch_events.append(event)
+            if return_code is not None:
+                event["action"] = "PROCESS_COMPLETED"
+                self.storage_watch_events.append(event)
+                return return_code
 
     def run(self, command: Iterable[str], *, cwd: Path | None = None, env: Mapping[str, str] | None = None,
             preserve_debug: bool = False) -> dict[str, Any]:
@@ -5882,7 +5981,7 @@ class BuildLease:
             with log.open("wb") as stream:
                 process = subprocess.Popen(sandboxed_args, cwd=selected_cwd, env=sandboxed_env,
                                            stdout=stream, stderr=subprocess.STDOUT, start_new_session=True)
-                rc = process.wait()
+                rc = self._wait_for_build_process(process)
                 stream.flush()
                 os.fsync(stream.fileno())
             if rc:

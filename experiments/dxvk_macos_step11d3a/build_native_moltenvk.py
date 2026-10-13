@@ -74,13 +74,22 @@ def toolchain_environment(build_root: Path) -> dict[str, str]:
     }
 
 
-def command_for(build_root: Path, project: Path) -> tuple[str, ...]:
+def resolve_canonical_sdk_path() -> Path:
+    cmd = ["/usr/bin/xcrun", "--sdk", "macosx", "--show-sdk-path"]
+    out = subprocess.check_output(cmd, text=True).strip()
+    sdk = Path(out).resolve(strict=True)
+    if not sdk.is_dir():
+        raise RuntimeError(f"canonical SDK path does not exist: {sdk}")
+    return sdk
+
+
+def command_for(build_root: Path, project: Path, sdk_path: Path | str) -> tuple[str, ...]:
     return (
         str(DEVELOPER_DIR / "usr/bin/xcodebuild"),
         "-project", str(project),
         "-scheme", "MoltenVK-macOS-dylib",
         "-configuration", "Release",
-        "-sdk", "macosx",
+        "-sdk", str(sdk_path),
         "-destination", "platform=macOS,arch=x86_64",
         "-derivedDataPath", str(build_root / "DerivedData"),
         f"SYMROOT={build_root / 'Build/Products'}",
@@ -125,6 +134,16 @@ def declared_outputs() -> tuple[build_retention.DeclaredOutputRole, ...]:
             artifact_name="MoltenVKShaderConverter", mandatory=False, is_macho=True,
             expected_architectures=(ARCHITECTURE,),
         ),
+        build_retention.DeclaredOutputRole(
+            role="spirv_cross_static_archive",
+            relative_path="Build/Products/Release/libSPIRVCross.a",
+            artifact_name="libSPIRVCross.a", mandatory=False, is_macho=False,
+        ),
+        build_retention.DeclaredOutputRole(
+            role="spirv_tools_static_archive",
+            relative_path="Build/Products/Release/libSPIRVTools.a",
+            artifact_name="libSPIRVTools.a", mandatory=False, is_macho=False,
+        ),
     )
 
 
@@ -166,10 +185,10 @@ def make_request(build_id: str) -> tuple[build_retention.NativeMoltenVKBuildRequ
         (row["path"], row["pristine_sha256"], row["prepared_sha256"])
         for row in identity["changed_files"]
     ))
+    canonical_sdk = resolve_canonical_sdk_path()
     environment = toolchain_environment(build_root)
-    command = command_for(build_root, build_root / project_relative)
+    command = command_for(build_root, build_root / project_relative, canonical_sdk)
     capture_environment = dict(environment)
-    capture_environment["HOME"] = str(Path.home())
     toolchain = build_retention._capture_native_xcode_toolchain(capture_environment)
     request = build_retention.NativeMoltenVKBuildRequest(
         pristine_git_commit=identity["base_git_commit"],
@@ -188,7 +207,7 @@ def make_request(build_id: str) -> tuple[build_retention.NativeMoltenVKBuildRequ
         configuration="Release",
         architectures=(ARCHITECTURE,),
         deployment_target="12.0",
-        sdk_name="macosx",
+        sdk_name=str(canonical_sdk),
         xcode_version_string=toolchain["xcode_version_string"],
         clang_version_string=toolchain["clang_version_string"],
         clang_binary_sha256=toolchain["clang_binary_sha256"],
@@ -203,12 +222,77 @@ def make_request(build_id: str) -> tuple[build_retention.NativeMoltenVKBuildRequ
     return request, identity, build_root
 
 
+def prepare_external_dependencies(build_root: Path, project_root: Path, environment: Mapping[str, str], sdk_path: Path | str) -> None:
+    """Build SPIRV-Cross and SPIRV-Tools dependencies and package xcframeworks under confinement."""
+    ext_project = project_root / "ExternalDependencies.xcodeproj"
+    derived_data = build_root / "DerivedData"
+    symroot = build_root / "Build/Products"
+    objroot = build_root / "Build/Intermediates.noindex"
+    module_cache = build_root / "ModuleCache"
+    compilation_cache = build_root / "CompilationCache"
+
+    base_args = [
+        "-configuration", "Release",
+        "-sdk", str(sdk_path),
+        "-destination", "platform=macOS,arch=x86_64",
+        "-derivedDataPath", str(derived_data),
+        f"SYMROOT={symroot}",
+        f"OBJROOT={objroot}",
+        f"CLANG_MODULE_CACHE_PATH={module_cache}",
+        f"COMPILATION_CACHE_CAS_PATH={compilation_cache}",
+        "COMPILER_INDEX_STORE_ENABLE=NO",
+        "SDK_STAT_CACHE_ENABLE=NO",
+        "ARCHS=x86_64",
+        "ONLY_ACTIVE_ARCH=NO",
+        "CODE_SIGNING_ALLOWED=NO",
+        "MACOSX_DEPLOYMENT_TARGET=12.0",
+        "DEBUG_INFORMATION_FORMAT=dwarf",
+        "build",
+    ]
+
+    cmd1 = [str(DEVELOPER_DIR / "usr/bin/xcodebuild"), "-project", str(ext_project), "-scheme", "SPIRV-Cross-macOS", *base_args]
+    s_cmd1, s_env1 = build_retention._sandbox_build_command(cmd1, build_root, environment)
+    res1 = subprocess.run(s_cmd1, env=s_env1, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, check=False)
+    if res1.returncode != 0:
+        raise RuntimeError(f"SPIRV-Cross-macOS build failed (exit {res1.returncode}):\n{res1.stdout[-2000:]}")
+
+    cmd2 = [str(DEVELOPER_DIR / "usr/bin/xcodebuild"), "-project", str(ext_project), "-scheme", "SPIRV-Tools-macOS", *base_args]
+    s_cmd2, s_env2 = build_retention._sandbox_build_command(cmd2, build_root, environment)
+    res2 = subprocess.run(s_cmd2, env=s_env2, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, check=False)
+    if res2.returncode != 0:
+        raise RuntimeError(f"SPIRV-Tools-macOS build failed (exit {res2.returncode}):\n{res2.stdout[-2000:]}")
+
+    pkg_env = dict(environment)
+    pkg_env.update({
+        "PROJECT_DIR": str(project_root),
+        "CONFIGURATION": "Release",
+        "ACTION": "build",
+        "BUILD_DIR": str(symroot),
+        "BUILT_PRODUCTS_DIR": str(symroot / "Release"),
+        "OBJROOT": str(objroot),
+        "TARGET_BUILD_DIR": str(symroot / "Release"),
+        "SDKROOT": str(sdk_path),
+    })
+    cmd3 = ["/bin/bash", str(project_root / "Scripts/create_ext_lib_xcframeworks.sh")]
+    s_cmd3, s_env3 = build_retention._sandbox_build_command(cmd3, build_root, pkg_env)
+    res3 = subprocess.run(s_cmd3, env=s_env3, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, check=False)
+    if res3.returncode != 0:
+        raise RuntimeError(f"create_ext_lib_xcframeworks.sh failed (exit {res3.returncode}):\n{res3.stdout[-2000:]}")
+
+    latest_link = project_root / "External/build/Latest"
+    latest_link.parent.mkdir(parents=True, exist_ok=True)
+    if latest_link.is_symlink() or latest_link.exists():
+        latest_link.unlink()
+    latest_link.symlink_to("Release")
+    shutil.rmtree(project_root / "External/build/Intermediates/XCFrameworkStaging", ignore_errors=True)
+
+
 def main() -> int:
     if len(sys.argv) != 1:
         print("usage: build_native_moltenvk.py", file=sys.stderr)
         return 2
-    build_id = "step11d3a-mvk-x86_64-20261008-02"
-    output_dir = EXPERIMENT_DIR / "evidence/native-build-contract-20261008-02"
+    build_id = "step11d3a-mvk-x86_64-20261008-12"
+    output_dir = EXPERIMENT_DIR / "evidence/native-build-contract-20261008-12"
     request, identity, build_root = make_request(build_id)
     config_key = build_retention.compute_native_moltenvk_config_key(request)
     dependency_state = {
@@ -222,7 +306,7 @@ def main() -> int:
     }
     runner_path = Path(__file__).resolve()
     manifest = storage_policy.begin_experiment(
-        experiment_id="step11d3a-native-mvk-build-20261008-02",
+        experiment_id="step11d3a-native-mvk-build-20261008-12",
         purpose="Fresh leased x86_64 MoltenVK v1.4.2 instrumentation build and linked native control",
         candidate_hashes={
             "prepared_source_identity": sha256_file(IDENTITY_PATH),
@@ -312,6 +396,8 @@ def main() -> int:
                 rows.append((os.fsdecode(record[3:]), os.fsdecode(record[:2])))
         require(sorted(rows) == expected_status,
                 f"prepared source Git status differs from exact patch file set: {sorted(rows)!r}")
+
+        prepare_external_dependencies(build_root, source_root, request.normalized_environment, resolve_canonical_sdk_path())
 
         result = lease.run(list(request.normalized_arguments), cwd=build_root,
                            env=dict(request.normalized_environment))

@@ -1,0 +1,10 @@
+{
+  "captured_unix": 1791679928.266786,
+  "stage": "before first AXFrontmost admission",
+  "files": {
+    "window_sequence.py": "31e3d29c5125a38a9d2d22567262dc50e96f9134348c3035f8f4515eca77f049",
+    "state_sequence.py": "a346d461dffcd2490b4bb8a2a57a99b2b06cd7ab4acaa96b279b155da4a1f2df",
+    "ax_window.py": "9401bfc1c998609584b27a6499c8a8e631ec6acf6cabba8518d08cfed00f50c5",
+    "coverage_snapshot.py": "141ec219c88a3c22a916c8edd0549ee3846911effd23f4e1321c1755fb883144"
+  }
+}

@@ -58,6 +58,18 @@ LEGACY_STANDALONE_DXVK_ROOTS = (
     },
 )
 
+G0C_REVIEW_REQUIRED_FILES = {
+    "source": "storage_policy.py",
+    "tests": "test_wine_launcher_policy.py",
+    "storage_policy_tests": "test_storage_policy.py",
+    "build_retention_control": "build_retention.py",
+    "build_retention_tests": "test_build_retention.py",
+    "prefix_preflight_control": "prefix_preflight.py",
+    "prefixlease_contract_tests": "test_prefixlease_wineprefix_contract.py",
+    "gate0_control": "storage_gate0.py",
+    "gate0_checks_tests": "test_g0c_checks.py",
+}
+
 
 def _sha(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
@@ -97,6 +109,113 @@ def _write_atomic(path: Path, value: dict[str, Any]) -> bytes:
     finally:
         os.close(parent_fd)
     return raw
+
+
+def _write_exact_live_storage_baseline(attestation: dict[str, Any]) -> dict[str, Any]:
+    """Bind mutation checks to the stable live scope after Gate 0 writes finish."""
+    key = storage_policy._manifest_signing_key()
+    upper_bound = int(attestation.get("state_fingerprint", {}).get(
+        "fgmetal_scoped_unlinked_mount_backing_upper_bound_bytes", 0))
+    inventory_scope = int(attestation.get("inventory_measurements", {}).get(
+        "fgmetal_scoped_allocated_inode_bytes", storage_policy.GATE0_PROJECT_BUDGET + 1))
+    last_mismatch: dict[str, Any] = {}
+    for attempt in range(8):
+        persistent_snapshot, persistent_exclusions, persistent_blockers = (
+            storage_policy._signed_persistent_output_snapshot())
+        if persistent_blockers:
+            raise RuntimeError("signed experiment output accounting is blocked: "
+                               + "; ".join(persistent_blockers))
+        usage = storage_policy.measure_project_usage(exclude_paths=persistent_exclusions)
+        observed = usage.get("allocated_inode_deduplicated_bytes")
+        if not isinstance(observed, int) or isinstance(observed, bool) or observed < 0:
+            raise RuntimeError("Gate 0 could not measure the exact live observed allocation")
+        observed_nonlease = (
+            usage.get("allocated_inode_deduplicated_bytes_excluding_paths")
+            if persistent_exclusions else observed)
+        if (not isinstance(observed_nonlease, int) or isinstance(observed_nonlease, bool)
+                or observed_nonlease < 0):
+            raise RuntimeError("Gate 0 could not measure the exact live non-lease allocation")
+        current_scope = max(observed + upper_bound, inventory_scope)
+        free = storage_policy.disk_free_bytes(REPO)
+        if free < storage_policy.FREE_MINIMUM or current_scope > storage_policy.GATE0_PROJECT_BUDGET:
+            raise RuntimeError("post-write Gate 0 storage measurement exceeds its free-space or scope policy")
+        attestation["measurements"] = {
+            "free_bytes": free,
+            "fgmetal_scoped_allocated_inode_bytes": current_scope,
+            "fgmetal_scoped_observed_allocated_inode_bytes": observed,
+            "fgmetal_scoped_observed_nonlease_allocated_inode_bytes": observed_nonlease,
+            "signed_persistent_output_bindings": list(persistent_snapshot.get("bindings", ())),
+        }
+        attestation["storage_warnings"] = (
+            ([f"free disk is below the {storage_policy.FREE_PREFERRED // storage_policy.GIB} GiB preferred target"]
+             if free < storage_policy.FREE_PREFERRED else [])
+            + ([f"scoped project allocation exceeds {storage_policy.PROJECT_WARNING // storage_policy.GIB} GiB warning threshold"]
+               if current_scope > storage_policy.PROJECT_WARNING else []))
+        attestation["preferred_free_space_met"] = free >= storage_policy.FREE_PREFERRED
+        attestation.pop("gate0_hmac_sha256", None)
+        attestation["gate0_hmac_sha256"] = hmac.new(
+            key,
+            json.dumps(attestation, sort_keys=True, separators=(",", ":"),
+                       ensure_ascii=False).encode(),
+            hashlib.sha256).hexdigest()
+        _write_atomic(ATTESTATION, attestation)
+
+        verified_snapshot, verified_exclusions, verified_blockers = (
+            storage_policy._signed_persistent_output_snapshot())
+        if verified_blockers:
+            raise RuntimeError("signed experiment output accounting changed after the Gate 0 write: "
+                               + "; ".join(verified_blockers))
+        verify_usage = storage_policy.measure_project_usage(exclude_paths=verified_exclusions)
+        verify_observed = verify_usage.get("allocated_inode_deduplicated_bytes")
+        verify_observed_nonlease = (
+            verify_usage.get("allocated_inode_deduplicated_bytes_excluding_paths")
+            if verified_exclusions else verify_observed)
+        verify_scope = max(int(verify_observed) + upper_bound, inventory_scope) \
+            if isinstance(verify_observed, int) and not isinstance(verify_observed, bool) else -1
+        verify_free = storage_policy.disk_free_bytes(REPO)
+        free_drift = abs(verify_free - free)
+        if (verify_observed == observed and verify_scope == current_scope
+                and verify_observed_nonlease == observed_nonlease
+                and verified_snapshot == persistent_snapshot
+                and verified_exclusions == persistent_exclusions
+                and free_drift <= storage_policy.GATE0_FREE_DRIFT_TOLERANCE_BYTES):
+            readback = _read_json(ATTESTATION)
+            if (readback == attestation
+                    and storage_policy._verify_gate0_signature(readback)):
+                return dict(attestation["measurements"])
+        last_mismatch = {
+            "attempt": attempt + 1,
+            "observed_allocation_delta_bytes": (
+                verify_observed - observed if isinstance(verify_observed, int) else None),
+            "nonlease_allocation_delta_bytes": (
+                verify_observed_nonlease - observed_nonlease
+                if isinstance(verify_observed_nonlease, int) else None),
+            "conservative_scope_delta_bytes": verify_scope - current_scope,
+            "free_space_delta_bytes": verify_free - free,
+            "free_space_drift_tolerance_bytes": storage_policy.GATE0_FREE_DRIFT_TOLERANCE_BYTES,
+            "persistent_output_bindings_stable": verified_snapshot == persistent_snapshot,
+            "exclusion_paths_stable": verified_exclusions == persistent_exclusions,
+        }
+    raise RuntimeError("Gate 0 storage baseline did not stabilize after its attestation write: "
+                       + json.dumps(last_mismatch, sort_keys=True))
+
+
+def _mark_attestation_blocked(attestation: dict[str, Any], blockers: list[str]) -> None:
+    """Replace an incomplete signed PASS with durable fail-closed evidence."""
+    attestation["status"] = "BLOCKED"
+    attestation["gate0_blockers"] = list(blockers)
+    attestation.pop("gate0_hmac_sha256", None)
+    attestation["gate0_hmac_sha256"] = storage_policy._gate0_signature(attestation)
+    _write_atomic(ATTESTATION, attestation)
+
+
+def _write_baseline_or_fail_closed(attestation: dict[str, Any]) -> dict[str, Any]:
+    try:
+        return _write_exact_live_storage_baseline(attestation)
+    except BaseException as error:
+        _mark_attestation_blocked(
+            attestation, [f"Gate 0 exact storage baseline failed: {error}"])
+        raise
 
 
 def _run_test_suite() -> str:
@@ -861,11 +980,21 @@ def _verify_g0c_completion_evidence() -> None:
     """Do not attest around a failed migration, stale review, or partial tests."""
     review = _read_json(HERE / "g0c-launcher-independent-review.json")
     reviewed_files = review.get("reviewed_files", {})
-    if (review.get("status") != "PASS"
-            or reviewed_files.get("source", {}).get("sha256") != _sha(storage_policy._read_file_nofollow(HERE / "storage_policy.py"))
-            or reviewed_files.get("tests", {}).get("sha256") != _sha(storage_policy._read_file_nofollow(HERE / "test_wine_launcher_policy.py"))
-            or review.get("findings")):
+    if (review.get("status") != "PASS" or review.get("findings") != []
+            or not isinstance(reviewed_files, dict)):
         raise RuntimeError("launcher independent review is failed or does not bind the current source")
+    # Bind every file that implements or tests the admission and retention
+    # controls this review is expected to cover.  A PASS review that omits one
+    # of these records is incomplete, even when the policy module hash matches.
+    for field, relative_path in G0C_REVIEW_REQUIRED_FILES.items():
+        record = reviewed_files.get(field)
+        expected_path = str((HERE / relative_path).relative_to(REPO))
+        if (not isinstance(record, dict)
+                or record.get("path") != expected_path
+                or record.get("sha256") != _sha(
+                    storage_policy._read_file_nofollow(HERE / relative_path))):
+            raise RuntimeError(
+                f"launcher independent review does not bind current {expected_path}")
     consolidation = _read_json(HERE / "g0c-evidence-consolidation-receipt.json")
     if (not storage_policy._verify_storage_evidence(consolidation, "receipt_hmac_sha256")
             or consolidation.get("status") != "PASS"
@@ -915,10 +1044,17 @@ def _refresh(mode: str, smoke_report_path: Path | None = None) -> dict[str, Any]
 
     _verify_g0c_completion_evidence()
 
-    prefix_reconciliation = (storage_policy.reconcile_abandoned_storage_smoke_lease_markers()
-                             if mode == "preflight" else [])
     test_report_sha = _run_test_suite()
     smoke = _test_smoke_report(smoke_report_path) if smoke_report_path else None
+
+    with storage_policy.storage_certification_guard(exclusive=True):
+        return _refresh_locked(mode, smoke_report_path, test_report_sha, smoke)
+
+
+def _refresh_locked(mode: str, smoke_report_path: Path | None, test_report_sha: str,
+                    smoke: Any) -> dict[str, Any]:
+    prefix_reconciliation = (storage_policy.reconcile_abandoned_storage_smoke_lease_markers()
+                             if mode == "preflight" else [])
     artifact_store_audit: dict[str, Any] = {}
     preflight_cas_audit_sha256: str | None = None
     if mode == "final":
@@ -947,16 +1083,15 @@ def _refresh(mode: str, smoke_report_path: Path | None = None) -> dict[str, Any]
                                       if row.get("copy_required", True))
             free_before_copy = storage_policy.disk_free_bytes(REPO)
             project_before_copy = storage_policy.measure_project_usage()
-            project_bytes_before_copy = int(project_before_copy["allocated_inode_deduplicated_bytes"])
-            if free_before_copy - hardlink_copy_bytes < storage_policy.FREE_MINIMUM:
-                reason = "legacy CAS hardlink isolation would cross Gate 0's 45 GiB free-space minimum"
-                _record_blocked_storage_preflight(
-                    reason, free_bytes=free_before_copy, project_usage=project_before_copy,
-                    hardlink_copy_estimate=hardlink_copy_estimate,
-                    hardlink_copy_bytes=hardlink_copy_bytes)
-                raise RuntimeError(reason)
-            if project_bytes_before_copy + hardlink_copy_bytes > storage_policy.GATE0_PROJECT_BUDGET:
-                reason = "legacy CAS hardlink isolation would cross Gate 0's scoped project budget"
+            project_bytes_before_copy = storage_policy.conservative_project_usage_bytes(project_before_copy)
+            copy_admission = storage_policy.projected_storage_admission(
+                current_free_bytes=free_before_copy,
+                current_scoped_bytes=project_bytes_before_copy,
+                peak_additional_bytes=hardlink_copy_bytes,
+            )
+            if not copy_admission["admitted"]:
+                reason = "legacy CAS hardlink isolation projected peak is not admissible: " + "; ".join(
+                    copy_admission["blockers"])
                 _record_blocked_storage_preflight(
                     reason, free_bytes=free_before_copy, project_usage=project_before_copy,
                     hardlink_copy_estimate=hardlink_copy_estimate,
@@ -1009,7 +1144,8 @@ def _refresh(mode: str, smoke_report_path: Path | None = None) -> dict[str, Any]
     # post-cleanup signal on APFS, where clones cannot be attributed exactly.
     free = storage_policy.disk_free_bytes(REPO)
     project = storage_policy.measure_project_usage()
-    project_bytes = int(project["allocated_inode_deduplicated_bytes"])
+    project_bytes = storage_policy.conservative_project_usage_bytes(project)
+    project["conservative_allocated_inode_deduplicated_bytes"] = project_bytes
     build_actions = _new_cleanup_actions(previous_updated)
     if RECEIPT.exists() and not RECEIPT.is_symlink():
         receipt = _read_json(RECEIPT)
@@ -1023,6 +1159,18 @@ def _refresh(mode: str, smoke_report_path: Path | None = None) -> dict[str, Any]
         "storage_policy_reconciliation": mode == "preflight",
         "final_free_bytes": free,
         "fgmetal_scoped_allocated_bytes": project_bytes,
+        "storage_thresholds": {
+            "emergency_hard_stop_free_bytes": storage_policy.FREE_HARD_STOP,
+            "normal_minimum_free_bytes": storage_policy.FREE_MINIMUM,
+            "preferred_free_bytes": storage_policy.FREE_PREFERRED,
+            "scoped_project_warning_bytes": storage_policy.PROJECT_WARNING,
+            "scoped_project_ceiling_bytes": storage_policy.GATE0_PROJECT_BUDGET,
+        },
+        "storage_warnings": (
+            ([f"free disk is below the {storage_policy.FREE_PREFERRED // storage_policy.GIB} GiB preferred target"]
+             if free < storage_policy.FREE_PREFERRED else [])
+            + ([f"scoped project allocation exceeds {storage_policy.PROJECT_WARNING // storage_policy.GIB} GiB warning threshold"]
+               if project_bytes > storage_policy.PROJECT_WARNING else [])),
         "global_inode_deduplicated_bytes": None,
         "worktree_count": worktree_count,
         **{key: prefix[key] for key in ("preserved_prefix_count", "uncertified_prefix_count")},
@@ -1053,9 +1201,9 @@ def _refresh(mode: str, smoke_report_path: Path | None = None) -> dict[str, Any]
         "project_usage_after": project,
     }
     if free < storage_policy.FREE_MINIMUM:
-        raise RuntimeError(f"free disk is below 45 GiB ({free} bytes)")
+        raise RuntimeError(f"free disk is below {storage_policy.FREE_MINIMUM // storage_policy.GIB} GiB ({free} bytes)")
     if project_bytes > storage_policy.GATE0_PROJECT_BUDGET:
-        raise RuntimeError(f"scoped project usage exceeds 45 GiB ({project_bytes} bytes)")
+        raise RuntimeError(f"scoped project usage exceeds {storage_policy.GATE0_PROJECT_BUDGET // storage_policy.GIB} GiB ({project_bytes} bytes)")
     if _sha(storage_policy._read_file_nofollow(RECEIPT)) != previous_receipt_sha256:
         raise RuntimeError("cleanup receipt changed before the fresh reconciliation phase could be committed")
     receipt.setdefault("phases", []).append(phase)
@@ -1175,7 +1323,28 @@ def _refresh(mode: str, smoke_report_path: Path | None = None) -> dict[str, Any]
                 "totals", {}).get("allocated_bytes_unique_inode_estimate_including_unlinked_mount_upper_bound"),
             "evidence_logical_bytes": (metrics.get("evidence_size") or {}).get("logical_bytes"),
             "evidence_unique_inode_bytes": (metrics.get("evidence_size") or {}).get("unique_inode_allocated_bytes"),
-            "measurements": {"free_bytes": free, "fgmetal_scoped_allocated_inode_bytes": scoped},
+            "inventory_measurements": {
+                "free_bytes": free,
+                "fgmetal_scoped_allocated_inode_bytes": scoped,
+                "fgmetal_scoped_observed_allocated_inode_bytes": inventory.get(
+                    "totals", {}).get("fgmetal_scoped_observed_allocated_inode_bytes"),
+            },
+            "measurements": {"free_bytes": free,
+                             "fgmetal_scoped_allocated_inode_bytes": scoped,
+                             "fgmetal_scoped_observed_allocated_inode_bytes": inventory.get(
+                                 "totals", {}).get("fgmetal_scoped_observed_allocated_inode_bytes")},
+            "storage_thresholds": {
+                "emergency_hard_stop_free_bytes": storage_policy.FREE_HARD_STOP,
+                "normal_minimum_free_bytes": storage_policy.FREE_MINIMUM,
+                "preferred_free_bytes": storage_policy.FREE_PREFERRED,
+                "scoped_project_warning_bytes": storage_policy.PROJECT_WARNING,
+                "scoped_project_ceiling_bytes": storage_policy.GATE0_PROJECT_BUDGET,
+            },
+            "storage_warnings": (
+                ([f"free disk is below the {storage_policy.FREE_PREFERRED // storage_policy.GIB} GiB preferred target"]
+                 if free < storage_policy.FREE_PREFERRED else [])
+                + ([f"scoped project allocation exceeds {storage_policy.PROJECT_WARNING // storage_policy.GIB} GiB warning threshold"]
+                   if scoped > storage_policy.PROJECT_WARNING else [])),
             "state_fingerprint": state_fingerprint,
             "build_retention_test_report_path": str(TEST_REPORT),
             "build_retention_test_report_sha256": test_report_sha,
@@ -1184,28 +1353,22 @@ def _refresh(mode: str, smoke_report_path: Path | None = None) -> dict[str, Any]
             "permitted_smoke_experiment_id": permitted_smoke_id,
             "preferred_free_space_met": free >= storage_policy.FREE_PREFERRED,
         }
-        attestation["gate0_hmac_sha256"] = hmac.new(
-            storage_policy._manifest_signing_key(),
-            json.dumps(attestation, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode(),
-            hashlib.sha256).hexdigest()
-        _write_atomic(ATTESTATION, attestation)
+        exact_measurements = _write_baseline_or_fail_closed(attestation)
+        free = exact_measurements["free_bytes"]
+        scoped = exact_measurements["fgmetal_scoped_allocated_inode_bytes"]
         blockers = storage_policy._gate0_blockers(
             active_experiment_id=permitted_smoke_id,
             allow_storage_smoke=mode == "preflight")
         if blockers:
             # Never leave a signed PASS on disk when the live read-back disagrees.
-            attestation["status"] = "BLOCKED"
-            attestation["gate0_hmac_sha256"] = hmac.new(
-                storage_policy._manifest_signing_key(),
-                json.dumps(attestation, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode(),
-                hashlib.sha256).hexdigest()
-            _write_atomic(ATTESTATION, attestation)
+            _mark_attestation_blocked(attestation, blockers)
             raise RuntimeError("new Gate 0 attestation failed read-back: " + "; ".join(blockers))
         return {"status": attestation["status"], "attestation": str(ATTESTATION),
                 "inventory": str(INVENTORY), "cleanup_receipt": str(RECEIPT),
                 "free_bytes": free, "fgmetal_scoped_allocated_inode_bytes": scoped,
                 "build_retention_state": retention_state, "prefixlease_smoke_status": attestation["prefixlease_smoke_status"],
-                "preferred_free_space_met": attestation["preferred_free_space_met"]}
+                "preferred_free_space_met": attestation["preferred_free_space_met"],
+                "storage_warnings": attestation["storage_warnings"]}
 
 
 def main(argv: list[str] | None = None) -> int:

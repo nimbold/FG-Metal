@@ -1,0 +1,11 @@
+{
+  "start_mach_ns": 875672947921708,
+  "end_mach_ns": 875672984732916,
+  "target_pid": 2627,
+  "active_displays": [
+    1
+  ],
+  "windows": [],
+  "state_mutated": false,
+  "extent_note": "CG window rectangles and rank do not alone prove opaque per-pixel coverage; pair with external UI visual observation."
+}

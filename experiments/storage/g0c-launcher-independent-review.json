@@ -1,54 +1,615 @@
 {
-  "schema_version": 1,
-  "review_type": "independent_read_only_wine_launcher_review",
-  "status": "PASS",
-  "reviewer": "independent Codex reviewer",
+  "accounting_review": {
+    "authorized_exclusions": {
+      "active_marker": "Exact schema and canonical encoding, finite timestamp, owner/private/single-link checks, 16 KiB file and 64 KiB allocated caps; materialized marker binds an authenticated receipt.",
+      "manifest": "Fixed ID-derived path, nofollow read, signature and canonical encoding, owner/private/single-link checks, 2 MiB allocation cap.",
+      "output": "Canonical experiment output directory; allocated bytes capped by the signed persistent-output reservation.",
+      "prefix": "Excluded only with authenticated receipt and matching directory device/inode; prefix allocation remains capped by the signed reservation.",
+      "smoke_claim": "Fixed one-use HMAC-authenticated claim, exact schema, canonical encoding, 16 KiB file and 64 KiB allocated caps."
+    },
+    "gate0_baseline": "Gate0 measures after its attestation write, then verifies stable observed allocation, free space, and signed readback. Live checks compare raw nonlease allocation exactly to the attested observed value.",
+    "historical_evidence_limit": "The retained Wine run does not contain the failed assertion-time raw scope and receipt. The exact Z3 fixture demonstrates the old-guard arithmetic and legitimate-prefix model, but not independent provenance for the historical assertion-time measurement.",
+    "outcome": "PASS",
+    "policy_thresholds_unchanged": {
+      "hard_stop_free_gib": 25,
+      "minimum_projected_free_gib": 50,
+      "preferred_free_gib": 60,
+      "project_ceiling_gib": 55,
+      "project_warning_gib": 52,
+      "uncertainty_margin": "max(256 MiB, ceil(10% of raw prefix + build + persistent peak))"
+    },
+    "race_and_link_handling": "Gate0 rebinds manifest, output, claim, marker, prefix, and exclusion set after scanning. Persistent unrelated growth during materialization is rejected by exact pre/post/current comparisons. Hardlinks remain counted when any link is outside the excluded paths. APFS clone sharing remains unobservable; the full projected peak and uncertainty margin remain charged.",
+    "summary": "No remaining code blocker found. Gate0 records raw full allocation separately from exact nonlease allocation. Current raw nonlease allocation, conservative scope, signed output bindings, and exclusions remain exact across the post-write recheck. Volume free-space samples use only the existing 2 GiB bound, and failed stabilization persists signed BLOCKED evidence. The active-run manifest requires the complete signed field set before it can authorize accounting exclusions.",
+    "test_review": "A-I threshold and lifecycle matrix, byte-exact Z3 regression, 64 MiB unrelated-growth checks, hardlink boundary behavior, and storage-only smoke path were reviewed. The follow-up regression re-signs a canonical current-Gate0 manifest with a required field removed and confirms that current-run scope binding rejects it. Follow-up regressions cover valid-HMAC/current-Gate0 missing-field rejection, bounded free drift, over-bound rejection with exact delta, and signed fail-close."
+  },
+  "executed_test_results": {
+    "focused_command": "/opt/homebrew/bin/python3.14 -m unittest test_g0c_checks.Gate0EvidenceBindingTests (from experiments/storage)",
+    "focused_result": "PASS: 4 focused baseline stability tests; full Gate0 checks included in suite",
+    "full_command": "/opt/homebrew/bin/python3.14 -m unittest discover -q -s experiments/storage -p 'test_*.py' (from repository root)",
+    "full_result": "PASS: 449 tests",
+    "git_diff_check": "PASS",
+    "py_compile": "PASS"
+  },
+  "findings": [],
+  "follow_up_reviews": [
+    {
+      "finding": "The active-run manifest omitted the required-field check used for historical outputs.",
+      "model_identity": "GPT-6 Luna (Max)",
+      "nine_point_review": "All prior accounting and lifecycle conclusions remain unchanged; the schema omission was the sole blocker.",
+      "other_findings": [],
+      "regression": "A canonical manifest with valid HMAC and current Gate0 hash is re-signed after removing purpose; binding is denied with a missing-required-fields blocker.",
+      "resolution": "The active-run binding now rejects missing required fields before any exclusion is authorized.",
+      "reviewed_at_utc": "2026-10-12T18:24:10Z",
+      "reviewer_identity": "Codex independent read-only reviewer /root/z4_independent_review",
+      "status": "PASS"
+    },
+    {
+      "finding": "Exact free-space equality across two full scans prevented Gate0 stabilization and could leave a signed PASS after a failed command.",
+      "model_identity": "GPT-6 Luna (Max)",
+      "nine_point_review": "The prior accounting conclusions remain unchanged; reviewer found no new accounting or TOCTOU weakening and approved fresh Gate0.",
+      "other_findings": [],
+      "regression": "Tests accept 1 GiB free drift, reject 2 GiB plus one byte with a byte delta, verify signed fail-close, and pin the shared tolerance at 2 GiB.",
+      "resolution": "The verifier now uses the existing 2 GiB volume-free drift bound while retaining exact allocation, nonlease, output, and exclusion checks; failed verification persists a signed BLOCKED attestation.",
+      "reviewed_at_utc": "2026-10-12T18:43:56Z",
+      "reviewer_identity": "Codex independent read-only reviewer /root/z4_independent_review",
+      "status": "PASS"
+    }
+  ],
+  "model_identity": "GPT-6 Luna (Max)",
+  "prior_review": {
+    "br9r2_sequence_assessment": {
+      "assessment_status": "STATIC_PROJECTION_PASS_REQUIRES_FRESH_GATE0_AND_LIVE_LEASE_CHECKS",
+      "current_inventory_baseline": {
+        "conservative_scope_bytes": 48481857536,
+        "conservative_scope_gib": 45.152,
+        "free_bytes": 69046431744,
+        "free_gib": 64.305,
+        "generated_at_utc": "2026-10-11T12:58:01.628352+00:00",
+        "inventory_sha256": "1d9706f5476e121b3bc10bb1bd8f8453ae1d86b4bfdbc09806f22790b0810490",
+        "observed_inode_deduplicated_scope_bytes": 47045750784,
+        "unlinked_mount_upper_bound_bytes": 1436106752
+      },
+      "existing_coverer_artifact": {
+        "binary_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/1f6e6ade1d852825084b317031eae3cb3edb2de19b77f4c1e5a7ca85aad48fbc/neutral-coverer",
+        "binary_sha256": "1f6e6ade1d852825084b317031eae3cb3edb2de19b77f4c1e5a7ca85aad48fbc",
+        "binary_size_bytes": 147888,
+        "build_helper_note": "The helper contains an earlier controller digest pin and would fail closed if asked to compile against the changed controller. Recompilation is not part of the resumed route because the current verified binary and provenance already exist and are reused.",
+        "compile_manifest_decision": "ALLOW",
+        "compile_manifest_path": "experiments/storage/manifests/step11d3b-br9r2-coverer-20261011-115232-8d4fe3d2.json",
+        "compile_manifest_sha256": "6d1d8b3fbad40d73e1f05588f0ab126e6e0637ed8c194663ba8e07171b97c00d",
+        "new_compile_required": false,
+        "provenance_path": "experiments/dxvk_macos_step11d3b/evidence/br9r2/coverer-build-step11d3b-br9r2-coverer-20261011-115232-8d4fe3d2/coverer-build-provenance.json",
+        "provenance_sha256": "cf7ab7bf96ead4e33d05e1f24a3ea1e49a0beac516bf07af73e1554d599d1ba3",
+        "provenance_status": "PASS",
+        "reuse_existing_artifact": true,
+        "source_sha256": "8618bfa139df18d7da6c4db46518b8cf690c8c42bb568aa8470d118c8c6c0b82"
+      },
+      "limitations": "Projection assumes serialized execution, stated lease peaks, prior outputs present in the measured starting inventory, no unmodeled external allocation, and successful cleanup. Each phase must still pass fresh Gate 0 and its own live projected-peak admission.",
+      "no_experiment_started_by_reviewer": true,
+      "planned_peaks": {
+        "conservative_sum_of_full_projected_peaks_bytes": 6306345780,
+        "final_report_reserve_bytes": 1048576,
+        "native_phase_count": 3,
+        "native_projected_peak_bytes_each": 805306368,
+        "native_raw_persistent_bytes_each": 536870912,
+        "native_uncertainty_bytes_each": 268435456,
+        "wine_state5_projected_peak_bytes": 3889378100,
+        "wine_state5_raw_bytes": 3535798272,
+        "wine_state5_uncertainty_bytes": 353579828
+      },
+      "projected_serial_final": {
+        "projected_free_bytes": 62740085964,
+        "projected_free_gib": 58.431,
+        "projected_scope_bytes": 54788203316,
+        "projected_scope_gib": 51.025,
+        "threshold_result": "Above 50 GiB projected free and below 55 GiB projected scope; below-60-GiB free advisory only; below 52 GiB scope warning."
+      },
+      "sequence": [
+        "fresh Wine state-5 PrefixLease",
+        "Native foreground NativeRunLease",
+        "Native occlusion NativeRunLease 1",
+        "Native occlusion NativeRunLease 2"
+      ]
+    },
+    "canonical_thresholds": {
+      "emergency_hard_stop_free_bytes": 26843545600,
+      "equality_semantics": "Exactly 50 GiB projected free and exactly 55 GiB projected scope are admitted.",
+      "gib_bytes": 1073741824,
+      "normal_projected_free_minimum_bytes": 53687091200,
+      "preferred_free_advisory_bytes": 64424509440,
+      "project_scope_warning_above_bytes": 55834574848,
+      "scoped_project_ceiling_bytes": 59055800320,
+      "uncertainty_margin": {
+        "formula": "max(256 MiB, ceil(10% of raw prefix + build + persistent peak))",
+        "minimum_bytes": 268435456,
+        "proportional_basis_points": 1000,
+        "rounding": "ceiling to whole byte"
+      }
+    },
+    "current_gate0_state": {
+      "attested_inventory_sha256": "3ed08f54d2104739b97d8cacd51efdf11706f0a3a9a5d99c851f101e610b43f8",
+      "current_inventory_generated_at_utc": "2026-10-11T12:58:01.628352+00:00",
+      "current_inventory_path": "experiments/storage/storage-inventory.json",
+      "current_inventory_sha256": "1d9706f5476e121b3bc10bb1bd8f8453ae1d86b4bfdbc09806f22790b0810490",
+      "experiment_result_implication": "Readiness only: the old stored attestation cannot admit a new lease. This review does not claim a Gate 0 or BR9R2 experiment result.",
+      "inventory_hash_matches_attestation": false,
+      "readiness_status": "STALE_REQUIRES_FRESH_GATE0",
+      "required_control_hashes_stale_against_attestation": [
+        {
+          "attested_sha256": "61b28e46917069188ff53ab1a113d172f1d8bd3a046ce594c0543633173d65cd",
+          "current_sha256": "2d1ad68df26148d1fc7236e4b0ffd0d6fb7babb5cc047512b120bceaff38d962",
+          "field": "build_retention_control",
+          "path": "experiments/storage/build_retention.py"
+        },
+        {
+          "attested_sha256": "0f2f4d9edddf2b2be440bf50264b2612af6b43663cb73aba3c7ced22727e8c26",
+          "current_sha256": "3614b4d476743bb816d54935838c2b9de387e239bf8292334480dda853d8db3c",
+          "field": "build_retention_tests",
+          "path": "experiments/storage/test_build_retention.py"
+        },
+        {
+          "attested_sha256": "d93786117fa1cbbfd5d4a94504a49cb9e4ecc2460b01712929dee745fe406c6e",
+          "current_sha256": "57c075e1054223b891dd83738d7ea5958f7026292a504977e65ed32d1f6be066",
+          "field": "gate0_control",
+          "path": "experiments/storage/storage_gate0.py"
+        },
+        {
+          "attested_sha256": "91e27ed0a2b27bf871db467b0fa545943e6ac71948227c18bc9acf9be25f739f",
+          "current_sha256": "71ae6240883365ed7f43187b6801a05d3b6b8e4c9af6dc0f7caaed989a4483ad",
+          "field": "gate0_checks_tests",
+          "path": "experiments/storage/test_g0c_checks.py"
+        }
+      ],
+      "stored_attestation_mode": "final",
+      "stored_attestation_path": "experiments/storage/storage-gate0-attestation.json",
+      "stored_attestation_sha256": "7f34a5514d108781894211c2a7c3ed4524b3011d47f0ce3f3d6c737a16caf2c4",
+      "stored_attestation_status": "PASS"
+    },
+    "findings": [],
+    "gate0_artifact_contract": {
+      "complete_suite_log": {
+        "path": "experiments/dxvk_macos_step11d3b/evidence/br9r2/storage-suite-post-gate0-binding-fix.log",
+        "reviewer_reran_tests": false,
+        "sha256": "46851c09e5de97a1297b4b64d619cbc1ecd2588829aa6305dcbd17bac8a2372f",
+        "summary": "Ran 408 tests in 6.739s; OK"
+      },
+      "parser": "storage_gate0._verify_g0c_completion_evidence",
+      "parser_behavior": "For every field in G0C_REVIEW_REQUIRED_FILES, require the exact repo-relative path and SHA-256 of the current nofollow-read source bytes; also require status PASS and findings [].",
+      "regression_test_behavior": "The test constructs the exact current required field/path/hash map, then verifies stale required hashes for every field and missing required fields are rejected. The parser source separately checks exact path equality.",
+      "required_fields": [
+        "source",
+        "tests",
+        "storage_policy_tests",
+        "build_retention_control",
+        "build_retention_tests",
+        "prefix_preflight_control",
+        "prefixlease_contract_tests",
+        "gate0_control",
+        "gate0_checks_tests"
+      ],
+      "required_file_bindings": [
+        {
+          "field": "source",
+          "path": "experiments/storage/storage_policy.py",
+          "sha256": "97ee17a5ae6a4b81496f03f6cf6e4c630a4239eaa08a5e1bcbeb65fc2a2b7ec7"
+        },
+        {
+          "field": "tests",
+          "path": "experiments/storage/test_wine_launcher_policy.py",
+          "sha256": "d2ad7086077e9d50f80428b41a759c537e93912c229b6085d78a8b6f1cc0d3ae"
+        },
+        {
+          "field": "storage_policy_tests",
+          "path": "experiments/storage/test_storage_policy.py",
+          "sha256": "4eff8bcfa34eac88c4bdd0aa0bd535aefa6484f1d469bc6526d1a2675084bc20"
+        },
+        {
+          "field": "build_retention_control",
+          "path": "experiments/storage/build_retention.py",
+          "sha256": "2d1ad68df26148d1fc7236e4b0ffd0d6fb7babb5cc047512b120bceaff38d962"
+        },
+        {
+          "field": "build_retention_tests",
+          "path": "experiments/storage/test_build_retention.py",
+          "sha256": "3614b4d476743bb816d54935838c2b9de387e239bf8292334480dda853d8db3c"
+        },
+        {
+          "field": "prefix_preflight_control",
+          "path": "experiments/storage/prefix_preflight.py",
+          "sha256": "888afd7ac36aa528bdb1548bee5449a688b25824ba7625101f10aea76562233b"
+        },
+        {
+          "field": "prefixlease_contract_tests",
+          "path": "experiments/storage/test_prefixlease_wineprefix_contract.py",
+          "sha256": "6b6db2be3b3a9e08dbd52767b14c5d29251deb6741be4b987f92a27ba1d002f2"
+        },
+        {
+          "field": "gate0_control",
+          "path": "experiments/storage/storage_gate0.py",
+          "sha256": "57c075e1054223b891dd83738d7ea5958f7026292a504977e65ed32d1f6be066"
+        },
+        {
+          "field": "gate0_checks_tests",
+          "path": "experiments/storage/test_g0c_checks.py",
+          "sha256": "71ae6240883365ed7f43187b6801a05d3b6b8e4c9af6dc0f7caaed989a4483ad"
+        }
+      ],
+      "source_evidence": [
+        {
+          "lines": "61-71; 872-890",
+          "path": "experiments/storage/storage_gate0.py"
+        },
+        {
+          "lines": "258-297",
+          "path": "experiments/storage/test_g0c_checks.py"
+        }
+      ],
+      "status": "PASS"
+    },
+    "model_identity": "GPT-6 Luna (Max)",
+    "questions": [
+      {
+        "answer": "YES. Admission computes projected scope as current conservative scope plus the full projected peak and projected free as current free minus that peak. It blocks only scope above 55 GiB or projected free below 50 GiB; exact equality at both boundaries passes.",
+        "evidence": [
+          {
+            "lines": "38-46; 235-268",
+            "path": "experiments/storage/storage_policy.py"
+          },
+          {
+            "lines": "24-71",
+            "path": "experiments/storage/test_storage_policy.py"
+          }
+        ],
+        "number": 1,
+        "question": "Does current code enforce scoped usage <=55 GiB and projected free >=50 GiB against the complete declared peak, with equality permitted?"
+      },
+      {
+        "answer": "YES. Projected free below 60 GiB emits a warning; only projected free below 50 GiB blocks normal admission.",
+        "evidence": [
+          {
+            "lines": "38-46; 250-260",
+            "path": "experiments/storage/storage_policy.py"
+          },
+          {
+            "lines": "24-43",
+            "path": "experiments/storage/test_storage_policy.py"
+          }
+        ],
+        "number": 2,
+        "question": "Is 60 GiB only a preferred/advisory free-space target?"
+      },
+      {
+        "answer": "YES. Current free below 25 GiB blocks admission. Managed BuildLease, PrefixLease, and NativeRunLease work also monitor live free space and trigger emergency stop handling below 25 GiB; normal new-run projected admission still requires at least 50 GiB.",
+        "evidence": [
+          {
+            "lines": "235-260; 4487-4554; 4952-4960; 6154-6165",
+            "path": "experiments/storage/storage_policy.py"
+          },
+          {
+            "lines": "5892-5919",
+            "path": "experiments/storage/build_retention.py"
+          },
+          {
+            "lines": "932-975",
+            "path": "experiments/storage/test_build_retention.py"
+          }
+        ],
+        "number": 3,
+        "question": "Does 25 GiB remain an emergency hard stop rather than the normal admission threshold?"
+      },
+      {
+        "answer": "YES. BuildLease, PrefixLease, and NativeRunLease consume the validated signed estimated_projected_new_disk_bytes. Each repeats its live projected check while holding the shared allocation lock, preventing concurrent leases from using the same headroom. The resumed BR9R2 route has no new BuildLease because it reuses the already artifactized coverer.",
+        "evidence": [
+          {
+            "lines": "5389-5405",
+            "path": "experiments/storage/build_retention.py"
+          },
+          {
+            "lines": "4042-4053; 4122-4133; 4760-4773; 5976-6028",
+            "path": "experiments/storage/storage_policy.py"
+          }
+        ],
+        "number": 4,
+        "question": "Does every relevant lease use the full projected peak, rather than only current allocation?"
+      },
+      {
+        "answer": "YES. After clone publication it remeasures free space and conservative scoped usage, then checks the complete signed projected peak again. The code explicitly retains the full prefix plus uncertainty as possible future APFS COW allocation after materialization.",
+        "evidence": [
+          {
+            "lines": "271-285; 4952-4987",
+            "path": "experiments/storage/storage_policy.py"
+          },
+          {
+            "lines": "73-125",
+            "path": "experiments/storage/test_storage_policy.py"
+          }
+        ],
+        "number": 5,
+        "question": "Does PrefixLease recheck the remaining projected peak after materialization, including residual APFS copy-on-write demand and uncertainty?"
+      },
+      {
+        "answer": "YES for validated signed manifests. The margin is max(256 MiB, ceiling(10% of prefix + build + persistent raw peak)); manifest validation rejects missing or inconsistent components/margins, and all lease admission paths use the resulting full projected peak.",
+        "evidence": [
+          {
+            "lines": "286-294; 918-949; 3562-3565",
+            "path": "experiments/storage/storage_policy.py"
+          },
+          {
+            "lines": "5389-5405",
+            "path": "experiments/storage/build_retention.py"
+          }
+        ],
+        "number": 6,
+        "question": "Are uncertainty margins applied consistently?"
+      },
+      {
+        "answer": "NO. The shared helper blocks projected scope above 55 GiB, and the regression test rejects a 54 GiB current scope plus a peak that crosses the ceiling.",
+        "evidence": [
+          {
+            "lines": "246-260",
+            "path": "experiments/storage/storage_policy.py"
+          },
+          {
+            "lines": "54-61",
+            "path": "experiments/storage/test_storage_policy.py"
+          }
+        ],
+        "number": 7,
+        "question": "Can current scope below the ceiling but projected scope above 55 GiB incorrectly pass?"
+      },
+      {
+        "answer": "NO. The shared helper blocks projected free below 50 GiB, and tests cover both the helper and NativeRunLease rejecting an under-50-GiB projected result.",
+        "evidence": [
+          {
+            "lines": "246-256",
+            "path": "experiments/storage/storage_policy.py"
+          },
+          {
+            "lines": "63-71; 1435-1450",
+            "path": "experiments/storage/test_storage_policy.py"
+          }
+        ],
+        "number": 8,
+        "question": "Can projected free below 50 GiB incorrectly pass?"
+      },
+      {
+        "answer": "NO in the current BR9R2 route. The active Wine runner uses the current Gate 0 thresholds and PrefixLease; the Native runner uses NativeRunLease; the BR9R2 controller invokes those paths. The archived br7 runner source still contains old 45 GiB PRE/POST checks, but the current controller does not invoke it.",
+        "evidence": [
+          {
+            "lines": "542-569",
+            "path": "experiments/dxvk_macos_step11d3b/runner_b.py"
+          },
+          {
+            "lines": "305-360",
+            "path": "experiments/dxvk_macos_step11d3a/run_native_control.py"
+          },
+          {
+            "lines": "188-198; 350-385",
+            "path": "experiments/dxvk_macos_step11d3b/evidence/br9r2/coverer_sequence.py"
+          },
+          {
+            "lines": "520-521; 816-817",
+            "path": "experiments/dxvk_macos_step11d3b/evidence/br7/runner-br6.py"
+          }
+        ],
+        "number": 9,
+        "question": "Is any active BR9R2 executable path still using the old 45 GiB scoped ceiling?"
+      },
+      {
+        "answer": "YES. The old executable checks remain only in an archived historical runner; other references describe the prior limit in regression tests and historical reports. Current BR9R2 runner/controller sources do not use that ceiling.",
+        "evidence": [
+          {
+            "lines": "520-521; 816-817",
+            "path": "experiments/dxvk_macos_step11d3b/evidence/br7/runner-br6.py"
+          },
+          {
+            "lines": "46-51",
+            "path": "experiments/storage/test_storage_policy.py"
+          },
+          {
+            "lines": "23-29; 125-145",
+            "path": "experiments/dxvk_macos_step11d3b/STEP-11D3-BR9R2-REPORT.md"
+          }
+        ],
+        "number": 10,
+        "question": "Are remaining old 45 GiB references confined to historical or regression material?"
+      },
+      {
+        "answer": "NO concrete weakening found. Build termination still polls and terminates at the 25 GiB emergency stop. Prefix and Native leases retain exact manifest, path/inode, executable/environment, bounded process supervision, cleanup receipt, and fail-closed cleanup checks. The full suite log reports 408 tests / OK; this reviewer inspected the log but did not run tests.",
+        "evidence": [
+          {
+            "lines": "5389-5405; 5892-5919",
+            "path": "experiments/storage/build_retention.py"
+          },
+          {
+            "lines": "4213-4256; 4476-4554; 4949-4987; 5940-6028; 6154-6165; 6264-6285; 6360-6374",
+            "path": "experiments/storage/storage_policy.py"
+          },
+          {
+            "lines": "932-1003",
+            "path": "experiments/storage/test_build_retention.py"
+          },
+          {
+            "lines": "final unittest summary",
+            "path": "experiments/dxvk_macos_step11d3b/evidence/br9r2/storage-suite-post-gate0-binding-fix.log"
+          }
+        ],
+        "number": 11,
+        "question": "Did the changes weaken cleanup, retention, lease identity, or anti-runaway controls?"
+      },
+      {
+        "answer": "YES, for the serialized declared peaks, subject to fresh Gate 0 and each live lease check. The current inventory snapshot starts at 69,046,431,744 free bytes and 48,481,857,536 conservative scoped bytes. A 3 GiB + 300 MiB Wine state-5 PrefixLease projects 3,889,378,100 bytes including 353,579,828 uncertainty. Three 512 MiB Native phases each project 805,306,368 bytes including the 256 MiB minimum uncertainty; adding a 1 MiB report reserve gives a deliberately conservative cumulative full-peak projection of 6,306,345,780 bytes, ending at 62,740,085,964 free (58.431 GiB) and 54,788,203,316 scoped (51.025 GiB). That remains above the 50 GiB free minimum and below the 55 GiB scope ceiling; it crosses only the preferred below-60-GiB free advisory, and remains below the 52 GiB scope warning. The existing coverer binary and PASS provenance/manifest hash chain are present and verified, so a new compile is not part of the resumed sequence. This is a static projection, not an experiment result; current stored Gate 0 state is stale and must be refreshed before any phase starts.",
+        "evidence": [
+          {
+            "lines": "filesystem.free_bytes; totals.fgmetal_scoped_observed_allocated_inode_bytes; totals.fgmetal_scoped_unlinked_mount_backing_upper_bound_bytes; totals.fgmetal_scoped_allocated_inode_bytes",
+            "path": "experiments/storage/storage-inventory.json"
+          },
+          {
+            "lines": "559-569",
+            "path": "experiments/dxvk_macos_step11d3b/runner_b.py"
+          },
+          {
+            "lines": "278-355",
+            "path": "experiments/dxvk_macos_step11d3a/run_native_control.py"
+          },
+          {
+            "lines": "188-198; 208-240; 350-385",
+            "path": "experiments/dxvk_macos_step11d3b/evidence/br9r2/coverer_sequence.py"
+          },
+          {
+            "lines": "174-215",
+            "path": "experiments/dxvk_macos_step11d3b/evidence/br9r2/build_neutral_coverer.py"
+          },
+          {
+            "lines": "status; binary_sha256; manifest_sha256",
+            "path": "experiments/dxvk_macos_step11d3b/evidence/br9r2/coverer-build-step11d3b-br9r2-coverer-20261011-115232-8d4fe3d2/coverer-build-provenance.json"
+          }
+        ],
+        "number": 12,
+        "question": "Is the amended policy safe for the BR9R2 sequence of a fresh Wine PrefixLease followed by NativeRunLease runs, including each live projected admission?"
+      }
+    ],
+    "review_type": "fresh_independent_read_only_storage_policy_and_BR9R2_sequence_review",
+    "reviewed_at_utc": "2026-10-11T13:22:20Z",
+    "reviewed_files": {
+      "archived_45_gib_runner": {
+        "path": "experiments/dxvk_macos_step11d3b/evidence/br7/runner-br6.py",
+        "sha256": "48c77c58dbd74a2f0c3d0bbf7954a94f94958a0eba238708dd67c677f090bb9e"
+      },
+      "br9r2_controller": {
+        "path": "experiments/dxvk_macos_step11d3b/evidence/br9r2/coverer_sequence.py",
+        "sha256": "0d5c7870948df33a4df1630bf6132ddd44bdfd6bcc0893a96c356a806077611c"
+      },
+      "br9r2_coverer_build_helper": {
+        "path": "experiments/dxvk_macos_step11d3b/evidence/br9r2/build_neutral_coverer.py",
+        "sha256": "30c30684ec546dc075efb459d6d99975f436ddf957773776123d11b07c9324b3"
+      },
+      "br9r2_coverer_source": {
+        "path": "experiments/dxvk_macos_step11d3b/neutral_coverer.swift",
+        "sha256": "8618bfa139df18d7da6c4db46518b8cf690c8c42bb568aa8470d118c8c6c0b82"
+      },
+      "br9r2_native_runner": {
+        "path": "experiments/dxvk_macos_step11d3a/run_native_control.py",
+        "sha256": "52fcfad1ce2655d95d5ef1ea1d54dab05fe74eba55fd0f75397cd8e38a44c563"
+      },
+      "br9r2_report": {
+        "path": "experiments/dxvk_macos_step11d3b/STEP-11D3-BR9R2-REPORT.md",
+        "sha256": "10ce420b19b7d5bfc7c2aa947e30d76e686bf4eafc8708ce6da5705023659f9e"
+      },
+      "br9r2_storage_suite_log": {
+        "path": "experiments/dxvk_macos_step11d3b/evidence/br9r2/storage-suite-post-gate0-binding-fix.log",
+        "sha256": "46851c09e5de97a1297b4b64d619cbc1ecd2588829aa6305dcbd17bac8a2372f"
+      },
+      "br9r2_wine_runner": {
+        "path": "experiments/dxvk_macos_step11d3b/runner_b.py",
+        "sha256": "a8229134df685e293ca8bba8b7e109e9a77a5b59bc3f6f8f04ca2a25b0812b51"
+      },
+      "build_retention_control": {
+        "path": "experiments/storage/build_retention.py",
+        "sha256": "2d1ad68df26148d1fc7236e4b0ffd0d6fb7babb5cc047512b120bceaff38d962"
+      },
+      "build_retention_tests": {
+        "path": "experiments/storage/test_build_retention.py",
+        "sha256": "3614b4d476743bb816d54935838c2b9de387e239bf8292334480dda853d8db3c"
+      },
+      "coverer_build_provenance": {
+        "path": "experiments/dxvk_macos_step11d3b/evidence/br9r2/coverer-build-step11d3b-br9r2-coverer-20261011-115232-8d4fe3d2/coverer-build-provenance.json",
+        "sha256": "cf7ab7bf96ead4e33d05e1f24a3ea1e49a0beac516bf07af73e1554d599d1ba3"
+      },
+      "coverer_compile_manifest": {
+        "path": "experiments/storage/manifests/step11d3b-br9r2-coverer-20261011-115232-8d4fe3d2.json",
+        "sha256": "6d1d8b3fbad40d73e1f05588f0ab126e6e0637ed8c194663ba8e07171b97c00d"
+      },
+      "current_inventory_snapshot": {
+        "path": "experiments/storage/storage-inventory.json",
+        "sha256": "1d9706f5476e121b3bc10bb1bd8f8453ae1d86b4bfdbc09806f22790b0810490"
+      },
+      "gate0_checks_tests": {
+        "path": "experiments/storage/test_g0c_checks.py",
+        "sha256": "71ae6240883365ed7f43187b6801a05d3b6b8e4c9af6dc0f7caaed989a4483ad"
+      },
+      "gate0_control": {
+        "path": "experiments/storage/storage_gate0.py",
+        "sha256": "57c075e1054223b891dd83738d7ea5958f7026292a504977e65ed32d1f6be066"
+      },
+      "prefix_preflight_control": {
+        "path": "experiments/storage/prefix_preflight.py",
+        "sha256": "888afd7ac36aa528bdb1548bee5449a688b25824ba7625101f10aea76562233b"
+      },
+      "prefixlease_contract_tests": {
+        "path": "experiments/storage/test_prefixlease_wineprefix_contract.py",
+        "sha256": "6b6db2be3b3a9e08dbd52767b14c5d29251deb6741be4b987f92a27ba1d002f2"
+      },
+      "source": {
+        "path": "experiments/storage/storage_policy.py",
+        "sha256": "97ee17a5ae6a4b81496f03f6cf6e4c630a4239eaa08a5e1bcbeb65fc2a2b7ec7"
+      },
+      "storage_policy_tests": {
+        "path": "experiments/storage/test_storage_policy.py",
+        "sha256": "4eff8bcfa34eac88c4bdd0aa0bd535aefa6484f1d469bc6526d1a2675084bc20"
+      },
+      "stored_gate0_attestation": {
+        "path": "experiments/storage/storage-gate0-attestation.json",
+        "sha256": "7f34a5514d108781894211c2a7c3ed4524b3011d47f0ce3f3d6c737a16caf2c4"
+      },
+      "tests": {
+        "path": "experiments/storage/test_wine_launcher_policy.py",
+        "sha256": "d2ad7086077e9d50f80428b41a759c537e93912c229b6085d78a8b6f1cc0d3ae"
+      }
+    },
+    "reviewer_identity": "Codex independent read-only audit agent /root/final_storage_review_v2",
+    "reviewer_status": "PASS",
+    "schema_version": 1,
+    "scope": "Fresh source-based review of storage admission, BuildLease/PrefixLease/NativeRunLease, required tests, Gate 0 completion binding, BR9R2 runner/controller/build sources, existing coverer provenance, current inventory and the named full-suite log. No tests, Gate 0, builds, Wine, Native, or graphics actions were run by this reviewer. Only this review artifact was refreshed.",
+    "status": "PASS"
+  },
+  "review_type": "independent_prefixlease_post_materialization_accounting_review",
+  "reviewed_at_utc": "2026-10-12T18:43:56Z",
   "reviewed_files": {
+    "build_retention_control": {
+      "path": "experiments/storage/build_retention.py",
+      "sha256": "2d1ad68df26148d1fc7236e4b0ffd0d6fb7babb5cc047512b120bceaff38d962"
+    },
+    "build_retention_tests": {
+      "path": "experiments/storage/test_build_retention.py",
+      "sha256": "3614b4d476743bb816d54935838c2b9de387e239bf8292334480dda853d8db3c"
+    },
+    "gate0_checks_tests": {
+      "path": "experiments/storage/test_g0c_checks.py",
+      "sha256": "8bc1f5e196480109aa450c9c59b169402b8f8e340826d0227d8cf26d6eed6323"
+    },
+    "gate0_control": {
+      "path": "experiments/storage/storage_gate0.py",
+      "sha256": "d4a42335f1ab7b8bc805796c9df62ed6a0747032a15a24c969c1a8f3331c9142"
+    },
+    "prefix_preflight_control": {
+      "path": "experiments/storage/prefix_preflight.py",
+      "sha256": "888afd7ac36aa528bdb1548bee5449a688b25824ba7625101f10aea76562233b"
+    },
+    "prefixlease_contract_tests": {
+      "path": "experiments/storage/test_prefixlease_wineprefix_contract.py",
+      "sha256": "9ed18d5d0ebe0332f5f012ce1ebcc50a808fea38525572d0f870e6e405d2768e"
+    },
     "source": {
       "path": "experiments/storage/storage_policy.py",
-      "sha256": "5885dd97e4e5fb7fa767a43a4063465ca354ffc18724a5f0846638086507dc9f"
+      "sha256": "7ce9bfc8143a527ef05bc1b0610fa8c7dc2afdb7b6dbad55183f7243e5a86313"
+    },
+    "storage_policy_tests": {
+      "path": "experiments/storage/test_storage_policy.py",
+      "sha256": "524bed3ba141e6d9f8be87d29a618e177b684b9fbf3caff0e72a22aee3a0c68c"
+    },
+    "storage_smoke_runner": {
+      "path": "experiments/storage/smoke_prefix_lease.py",
+      "sha256": "fc654e3f431c81bea3bf0b604d57341b8109dbe1d094bb68ee793bbdbf639028"
     },
     "tests": {
       "path": "experiments/storage/test_wine_launcher_policy.py",
-      "sha256": "46e20bd1c495e45170bd4bb383df5e115c44fb2b63c76e353e6122d1907c8a00"
+      "sha256": "004e7e33cac1d1288aec2392d3303601d4efd1c65a0d75a40f326bd29baa4faf"
     }
   },
-  "coverage": [
-    {
-      "area": "Gate 0 admission and evidence freshness",
-      "result": "PASS",
-      "evidence": "Admission checks signed Gate 0 evidence, current inventory and cleanup hashes, supplemental/control-file hashes, storage budgets, retention state, certified template identity, and active or unreconciled leases. begin_experiment rejects invalid estimates, unauthorized runner paths, identity overrides, and noncanonical output paths."
-    },
-    {
-      "area": "Wine executable, PATH, and DYLD selection",
-      "result": "PASS",
-      "evidence": "Launch accepts only the certified absolute Wine executable or fixed /usr/bin/arch -x86_64 form, rechecks executable/candidate/runtime identity before spawn, restricts DYLD components to canonical roots, rewrites only the exact legacy alias, and constrains differing-hash fallback to the certified runtime path and order."
-    },
-    {
-      "area": "PrefixLease lifecycle and cleanup",
-      "result": "PASS",
-      "evidence": "PrefixLease rechecks admission and storage limits under shared locks, binds clone and published-prefix directory identities, supervises managed processes, and deletes only the bound prefix after Wine shutdown. Uncertain identity, incomplete cleanup, or an unreaped process preserves reconciliation evidence and keeps admission blocked."
-    },
-    {
-      "area": "NativeRunLease architecture and integrity",
-      "result": "PASS",
-      "evidence": "NativeRunLease binds the signed architecture and manifest, hashes thin Mach-O files through no-follow descriptors, rejects mismatches, and rechecks executable and dylib identities before spawn. Runner authentication checks the authorized path and hash."
-    }
-  ],
-  "findings": [],
-  "validation": {
-    "focused_launcher_tests": {
-      "command": "python3 -m unittest -v test_wine_launcher_policy",
-      "passed": 17,
-      "failed": 0
-    },
-    "full_storage_suite": {
-      "command": "python3 -m unittest discover -s experiments/storage -p 'test_*.py' -v",
-      "passed": 265,
-      "failed": 0
-    }
-  },
-  "limitations": [
-    "Lease and launcher tests use synthetic files and mocked process launches; they do not demonstrate a real Wine process, real prefix run, or loader resolution."
-  ]
+  "reviewer_identity": "Codex independent read-only reviewer /root/z4_independent_review",
+  "reviewer_status": "PASS",
+  "schema_version": 1,
+  "scope": "Fresh source-based review of Gate0 baseline exactness, current-run accounting exclusions and identity, lease materialization accounting, A-I and Z3 regressions, relevant storage controls, and the BR9R2 runner. Two read-only follow-ups verified the active-manifest required-field check and the bounded Gate0 free-space stability/fail-closed behavior. Scoped-allocation, nonlease, output, and exclusion binding remain exact. No reviewer tests, Gate0, Wine, Native, or graphics actions were run.",
+  "status": "PASS"
 }

@@ -243,169 +243,187 @@ def run_synthetic_policy_suite() -> dict[str, object]:
 
 
 def main() -> int:
-    policy_suite = run_synthetic_policy_suite()
-    preflight_bytes = storage_policy._read_file_nofollow(GATE0_ATTESTATION_PATH)
-    preflight = json.loads(preflight_bytes)
-    experiment_id = preflight.get("permitted_smoke_experiment_id")
-    preflight_age = time.time() - float(preflight.get("created_at_unix", 0))
-    if (not storage_policy._is_storage_policy_smoke_id(experiment_id)
-            or preflight.get("status") != "PREFLIGHT_PASS"
-            or preflight.get("mode") != "preflight"
-            or preflight.get("prefixlease_smoke_status") != "PENDING"
-            or not storage_policy._verify_gate0_signature(preflight)
-            or preflight_age < 0 or preflight_age > storage_policy.GATE0_MAX_AGE_SECONDS):
-        raise RuntimeError("storage smoke requires a fresh signed preflight with a nonce-bound run ID")
-    runtime_manifest = json.loads(RUNTIME_MANIFEST.read_text(encoding="utf-8"))
-    output = REPO / "experiments/storage/smoke-runs" / experiment_id
-    prefix = PREFIX_ROOT / f"storage-smoke-{experiment_id}"
-    manifest = begin_experiment(
-        experiment_id=experiment_id,
-        purpose="Storage-only validation of the certified prefix clone and finally cleanup; no Wine app or graphics experiment",
-        candidate_hashes={
-            "wine_runtime_tree": runtime_manifest["tree_sha256"],
-            "wine_binary": sha(RUNTIME / "bin/wine"),
-            "moltenvk": sha(MOLTENVK),
-        },
-        expected_duration_seconds=300,
-        expected_prefix_bytes=3 * GIB,
-        expected_build_bytes=0,
-        estimated_persistent_bytes=32 * MIB,
-        storage_justification="Storage-only check of one APFS template clone; the clone is removed in finally and no application is launched.",
-        internal_storage_setup=False,
-        storage_policy_smoke=True,
-        output_dir=output,
-        additional={
-            "graphics_experiments_run": False,
-            "presentation_or_rendering_experiment_run": False,
-            "wine_app_launched": False,
-            "retention_policy": "Keep only the template and one failure reproduction; remove this smoke clone in finally.",
-        },
-    )
-    output.mkdir(mode=0o700, parents=True, exist_ok=False)
-    preflight_copy = output / "gate0-preflight-attestation.json"
-    descriptor = os.open(preflight_copy, os.O_WRONLY | os.O_CREAT | os.O_EXCL
-                         | getattr(os, "O_NOFOLLOW", 0), 0o600)
-    try:
-        view = memoryview(preflight_bytes)
-        while view:
-            written = os.write(descriptor, view)
-            if written <= 0:
-                raise OSError("short retained preflight attestation write")
-            view = view[written:]
-        os.fsync(descriptor)
-    finally:
-        os.close(descriptor)
-    output_fd = os.open(output, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0)
-                        | getattr(os, "O_NOFOLLOW", 0))
-    try:
-        os.fsync(output_fd)
-    finally:
-        os.close(output_fd)
-    env = os.environ.copy()
-    for key in list(env):
-        if key.startswith(("WINE", "DXVK_", "FG_", "MVK_", "MTL_", "VK_", "DYLD_")):
-            env.pop(key, None)
-    runtime_paths = [
-        RUNTIME / "lib/wine/x86_64-unix",
-        RUNTIME / "lib/wine/x86_64-windows",
-        RUNTIME / "lib/wine/i386-windows",
-    ]
-    dyld = ":".join((str(MOLTENVK.parent), str(runtime_paths[0])))
-    env.update({
-        "WINEPREFIX": str(prefix),
-        "WINEARCH": "win64",
-        "WINELOADER": str(RUNTIME / "bin/wine"),
-        "WINESERVER": str(RUNTIME / "bin/wineserver"),
-        "WINEDATADIR": str(RUNTIME / "share"),
-        "WINEDLLPATH": ":".join(str(path) for path in runtime_paths),
-        "WINEDLLOVERRIDES": "d3d11,dxgi=n,b;winemenubuilder.exe=d",
-        "WINEDEBUG": "-all",
-        "VK_DRIVER_FILES": str(ICD),
-        "VK_ICD_FILENAMES": str(ICD),
-        "DYLD_LIBRARY_PATH": dyld,
-        "DYLD_FALLBACK_LIBRARY_PATH": dyld + ":" + str(RUNTIME / "lib") + ":/usr/local/lib:/usr/lib",
-    })
-    lease = PrefixLease(prefix, output, experiment_id, RUNTIME / "bin/wineserver",
-                        env=env, template=PREFIX_TEMPLATE, manifest_path=Path(manifest["manifest_path"]))
-    baseline_state = prefix_state_snapshot(prefix)
-    if (baseline_state["active_lease_count"] != 0
-            or baseline_state["leased_prefix_exists"]
-            or str(prefix) in baseline_state["known_prefix_paths"]):
-        raise RuntimeError("storage smoke baseline already contains its lease or prefix")
-    with scoped_lease(lease):
-        lease.set_env(env)
-        lease.materialize()
-        if not (prefix / "system.reg").is_file():
-            raise RuntimeError("materialized prefix did not retain the initialized registry files")
-        if not (prefix / "FGMETAL_PREFIX_LEASE.json").is_file():
-            raise RuntimeError("materialized prefix lacks its active lease marker")
-        during_state = prefix_state_snapshot(prefix)
-        control_command = run_storage_control_command(lease)
-        if control_command["state_before"] != during_state:
-            raise RuntimeError("controlled command did not start from the materialized ACTIVE lease state")
-        output.mkdir(parents=True, exist_ok=True)
-        if not (output / "prefix-smoke-started.json").exists():
-            (output / "prefix-smoke-started.json").write_text(json.dumps({
-                "experiment_id": experiment_id,
-                "prefix_path": str(prefix),
-                "template_tree_sha256": json.loads((PREFIX_TEMPLATE / "FGMETAL_PREFIX_TEMPLATE.json").read_text())["tree_identity"]["tree_sha256"],
+    with storage_policy.storage_certification_guard(exclusive=True):
+        policy_suite = run_synthetic_policy_suite()
+        preflight_bytes = storage_policy._read_file_nofollow(GATE0_ATTESTATION_PATH)
+        preflight = json.loads(preflight_bytes)
+        experiment_id = preflight.get("permitted_smoke_experiment_id")
+        preflight_age = time.time() - float(preflight.get("created_at_unix", 0))
+        if (not storage_policy._is_storage_policy_smoke_id(experiment_id)
+                or preflight.get("status") != "PREFLIGHT_PASS"
+                or preflight.get("mode") != "preflight"
+                or preflight.get("prefixlease_smoke_status") != "PENDING"
+                or not storage_policy._verify_gate0_signature(preflight)
+                or preflight_age < 0 or preflight_age > storage_policy.GATE0_MAX_AGE_SECONDS):
+            raise RuntimeError("storage smoke requires a fresh signed preflight with a nonce-bound run ID")
+        runtime_manifest = json.loads(RUNTIME_MANIFEST.read_text(encoding="utf-8"))
+        output = REPO / "experiments/storage/smoke-runs" / experiment_id
+        prefix = PREFIX_ROOT / f"storage-smoke-{experiment_id}"
+        manifest = begin_experiment(
+            experiment_id=experiment_id,
+            purpose="Storage-only validation of the certified prefix clone and finally cleanup; no Wine app or graphics experiment",
+            candidate_hashes={
+                "wine_runtime_tree": runtime_manifest["tree_sha256"],
+                "wine_binary": sha(RUNTIME / "bin/wine"),
+                "moltenvk": sha(MOLTENVK),
+            },
+            expected_duration_seconds=300,
+            expected_prefix_bytes=3 * GIB,
+            expected_build_bytes=0,
+            estimated_persistent_bytes=32 * MIB,
+            storage_justification="Storage-only check of one APFS template clone; the clone is removed in finally and no application is launched.",
+            internal_storage_setup=False,
+            storage_policy_smoke=True,
+            output_dir=output,
+            additional={
                 "graphics_experiments_run": False,
+                "presentation_or_rendering_experiment_run": False,
                 "wine_app_launched": False,
-            }, indent=2) + "\n", encoding="utf-8")
-    after_cleanup_state = prefix_state_snapshot(prefix)
-    prefix_state_evidence = {
-        "baseline": baseline_state,
-        "during": during_state,
-        "after_cleanup": after_cleanup_state,
-        "controlled_command": control_command,
-        "exactly_one_temporary_prefix": True,
-        "baseline_restored": after_cleanup_state == baseline_state,
-    }
-    if not validate_prefix_state_evidence(prefix_state_evidence, experiment_id, prefix):
-        raise RuntimeError("storage smoke prefix count/state evidence did not prove one-prefix baseline return")
-    cleanup = json.loads((output / "prefix-cleanup.json").read_text(encoding="utf-8"))
-    claim, claim_bytes = storage_policy._read_storage_smoke_claim(experiment_id)
-    preflight_sha256 = hashlib.sha256(preflight_bytes).hexdigest()
-    if claim.get("preflight_attestation_sha256") != preflight_sha256:
-        raise RuntimeError("storage-smoke nonce claim does not bind the retained preflight")
-    report = {
-        "schema_version": 1,
-        "experiment_id": experiment_id,
-        "manifest_path": manifest["manifest_path"],
-        "manifest_sha256": sha(Path(manifest["manifest_path"])),
-        "created_at_unix": time.time(),
-        "preflight_attestation_path": str(preflight_copy),
-        "preflight_attestation_sha256": preflight_sha256,
-        "smoke_nonce_claim_path": str(storage_policy._storage_smoke_claim_path(experiment_id)),
-        "smoke_nonce_claim_sha256": hashlib.sha256(claim_bytes).hexdigest(),
-        "cleanup_receipt": str(output / "prefix-cleanup.json"),
-        "cleanup_receipt_sha256": sha(output / "prefix-cleanup.json"),
-        "prefix_created": cleanup.get("prefix_created"),
-        "prefix_deleted": cleanup.get("prefix_deleted"),
-        "bytes_reclaimed": cleanup.get("bytes_reclaimed"),
-        "storage_hygiene_status": cleanup.get("storage_hygiene_status"),
-        "free_space_status": cleanup.get("free_space_status"),
-        "status": cleanup.get("status"),
-        "graphics_experiments_run": False,
-        "wine_app_launched": False,
-        "system_exit_zero_cleanup_precedence": True,
-        "failure_cleanup_test": "PASS",
-        "uncertified_prefix_rejection": "PASS",
-        "preserved_prefix_policy": "PASS",
-        "prefix_state_evidence": prefix_state_evidence,
-        "synthetic_policy_suite": policy_suite,
-    }
-    report_path = output / "prefix-smoke-report.json"
-    _write_json(report_path, _seal_storage_evidence(report, "smoke_report_hmac_sha256"),
-                strict_directory_sync=True)
-    print(json.dumps(report, indent=2))
-    return 0 if (
-        cleanup.get("prefix_created") is True
-        and cleanup.get("prefix_deleted") is True
-        and cleanup.get("storage_hygiene_status") == "PASS"
-        and cleanup.get("free_space_status") == "PASS"
-        and cleanup.get("status") == "PASS"
-    ) else 1
+                "retention_policy": "Keep only the template and one failure reproduction; remove this smoke clone in finally.",
+            },
+        )
+        output.mkdir(mode=0o700, parents=True, exist_ok=False)
+        preflight_copy = output / "gate0-preflight-attestation.json"
+        descriptor = os.open(preflight_copy, os.O_WRONLY | os.O_CREAT | os.O_EXCL
+                             | getattr(os, "O_NOFOLLOW", 0), 0o600)
+        try:
+            view = memoryview(preflight_bytes)
+            while view:
+                written = os.write(descriptor, view)
+                if written <= 0:
+                    raise OSError("short retained preflight attestation write")
+                view = view[written:]
+            os.fsync(descriptor)
+        finally:
+            os.close(descriptor)
+        output_fd = os.open(output, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0)
+                            | getattr(os, "O_NOFOLLOW", 0))
+        try:
+            os.fsync(output_fd)
+        finally:
+            os.close(output_fd)
+        env = os.environ.copy()
+        for key in list(env):
+            if key.startswith(("WINE", "DXVK_", "FG_", "MVK_", "MTL_", "VK_", "DYLD_")):
+                env.pop(key, None)
+        runtime_paths = [
+            RUNTIME / "lib/wine/x86_64-unix",
+            RUNTIME / "lib/wine/x86_64-windows",
+            RUNTIME / "lib/wine/i386-windows",
+        ]
+        dyld = ":".join((str(MOLTENVK.parent), str(runtime_paths[0])))
+        env.update({
+            "WINEPREFIX": str(prefix),
+            "WINEARCH": "win64",
+            "WINELOADER": str(RUNTIME / "bin/wine"),
+            "WINESERVER": str(RUNTIME / "bin/wineserver"),
+            "WINEDATADIR": str(RUNTIME / "share"),
+            "WINEDLLPATH": ":".join(str(path) for path in runtime_paths),
+            "WINEDLLOVERRIDES": "d3d11,dxgi=n,b;winemenubuilder.exe=d",
+            "WINEDEBUG": "-all",
+            "VK_DRIVER_FILES": str(ICD),
+            "VK_ICD_FILENAMES": str(ICD),
+            "DYLD_LIBRARY_PATH": dyld,
+            "DYLD_FALLBACK_LIBRARY_PATH": dyld + ":" + str(RUNTIME / "lib") + ":/usr/local/lib:/usr/lib",
+        })
+        lease = PrefixLease(prefix, output, experiment_id, RUNTIME / "bin/wineserver",
+                            env=env, template=PREFIX_TEMPLATE, manifest_path=Path(manifest["manifest_path"]))
+        baseline_state = prefix_state_snapshot(prefix)
+        if (baseline_state["active_lease_count"] != 0
+                or baseline_state["leased_prefix_exists"]
+                or str(prefix) in baseline_state["known_prefix_paths"]):
+            raise RuntimeError("storage smoke baseline already contains its lease or prefix")
+        with scoped_lease(lease):
+            lease.set_env(env)
+            lease.materialize()
+            assertion = storage_policy.assert_prefix_lease(
+                prefix, str(RUNTIME / "bin/wine"), Path(__file__).resolve(),
+                lease._sealed_wine_env,
+            )
+            active_payload = json.loads(storage_policy._read_file_nofollow(
+                storage_policy.ACTIVE_LEASE_ROOT / f"{experiment_id}.json"))
+            materialization_receipt = active_payload.get("materialization_receipt")
+            if (assertion.get("experiment_id") != experiment_id
+                    or not isinstance(materialization_receipt, dict)
+                    or not storage_policy._verify_storage_evidence(
+                        materialization_receipt, "prefix_materialization_hmac_sha256")):
+                raise RuntimeError("storage-only PrefixLease assertion did not retain a valid materialization receipt")
+            if not (prefix / "system.reg").is_file():
+                raise RuntimeError("materialized prefix did not retain the initialized registry files")
+            if not (prefix / "FGMETAL_PREFIX_LEASE.json").is_file():
+                raise RuntimeError("materialized prefix lacks its active lease marker")
+            during_state = prefix_state_snapshot(prefix)
+            control_command = run_storage_control_command(lease)
+            if control_command["state_before"] != during_state:
+                raise RuntimeError("controlled command did not start from the materialized ACTIVE lease state")
+            output.mkdir(parents=True, exist_ok=True)
+            if not (output / "prefix-smoke-started.json").exists():
+                (output / "prefix-smoke-started.json").write_text(json.dumps({
+                    "experiment_id": experiment_id,
+                    "prefix_path": str(prefix),
+                    "template_tree_sha256": json.loads((PREFIX_TEMPLATE / "FGMETAL_PREFIX_TEMPLATE.json").read_text())["tree_identity"]["tree_sha256"],
+                    "graphics_experiments_run": False,
+                    "wine_app_launched": False,
+                }, indent=2) + "\n", encoding="utf-8")
+        after_cleanup_state = prefix_state_snapshot(prefix)
+        prefix_state_evidence = {
+            "baseline": baseline_state,
+            "during": during_state,
+            "after_cleanup": after_cleanup_state,
+            "controlled_command": control_command,
+            "exactly_one_temporary_prefix": True,
+            "baseline_restored": after_cleanup_state == baseline_state,
+        }
+        if not validate_prefix_state_evidence(prefix_state_evidence, experiment_id, prefix):
+            raise RuntimeError("storage smoke prefix count/state evidence did not prove one-prefix baseline return")
+        cleanup = json.loads((output / "prefix-cleanup.json").read_text(encoding="utf-8"))
+        claim, claim_bytes = storage_policy._read_storage_smoke_claim(experiment_id)
+        preflight_sha256 = hashlib.sha256(preflight_bytes).hexdigest()
+        if claim.get("preflight_attestation_sha256") != preflight_sha256:
+            raise RuntimeError("storage-smoke nonce claim does not bind the retained preflight")
+        report = {
+            "schema_version": 1,
+            "experiment_id": experiment_id,
+            "manifest_path": manifest["manifest_path"],
+            "manifest_sha256": sha(Path(manifest["manifest_path"])),
+            "created_at_unix": time.time(),
+            "preflight_attestation_path": str(preflight_copy),
+            "preflight_attestation_sha256": preflight_sha256,
+            "smoke_nonce_claim_path": str(storage_policy._storage_smoke_claim_path(experiment_id)),
+            "smoke_nonce_claim_sha256": hashlib.sha256(claim_bytes).hexdigest(),
+            "cleanup_receipt": str(output / "prefix-cleanup.json"),
+            "cleanup_receipt_sha256": sha(output / "prefix-cleanup.json"),
+            "prefix_created": cleanup.get("prefix_created"),
+            "prefix_deleted": cleanup.get("prefix_deleted"),
+            "prefix_lease_assertion_status": "PASS",
+            "prefix_lease_materialization_receipt_sha256": hashlib.sha256(
+                json.dumps(materialization_receipt, sort_keys=True,
+                           separators=(",", ":")).encode()).hexdigest(),
+            "bytes_reclaimed": cleanup.get("bytes_reclaimed"),
+            "storage_hygiene_status": cleanup.get("storage_hygiene_status"),
+            "free_space_status": cleanup.get("free_space_status"),
+            "status": cleanup.get("status"),
+            "graphics_experiments_run": False,
+            "wine_app_launched": False,
+            "system_exit_zero_cleanup_precedence": True,
+            "failure_cleanup_test": "PASS",
+            "uncertified_prefix_rejection": "PASS",
+            "preserved_prefix_policy": "PASS",
+            "prefix_state_evidence": prefix_state_evidence,
+            "synthetic_policy_suite": policy_suite,
+        }
+        report_path = output / "prefix-smoke-report.json"
+        _write_json(report_path, _seal_storage_evidence(report, "smoke_report_hmac_sha256"),
+                    strict_directory_sync=True)
+        print(json.dumps(report, indent=2))
+        return 0 if (
+            cleanup.get("prefix_created") is True
+            and cleanup.get("prefix_deleted") is True
+            and cleanup.get("storage_hygiene_status") == "PASS"
+            and cleanup.get("free_space_status") == "PASS"
+            and cleanup.get("status") == "PASS"
+            and assertion.get("experiment_id") == experiment_id
+        ) else 1
 
 
 if __name__ == "__main__":

@@ -1,0 +1,3114 @@
+{
+  "analysis_kind": "offline_notification_transition_analysis",
+  "analysis_script_sha256": "e423871b6f1daf94e2b1a04e04bf59d528e9f53c6f4018df452d2e24edd71ea8",
+  "controller_action_log": {
+    "clock_join_performed": false,
+    "path": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11d3b/evidence/br8/inactive-frontmost-controller.json",
+    "records": [
+      {
+        "condition_index": 2,
+        "origin_mach_ns": 890013250091959,
+        "run_id": "step11d3b-br8-state-02-20261011-005208-590fa5da",
+        "target_pid": 9014
+      },
+      {
+        "actor_pid": 9014,
+        "end_mach_ns": 890014358528625,
+        "requested_loop_second": 1,
+        "returncode": 0,
+        "start_mach_ns": 890014277144625,
+        "stderr": "",
+        "stdout": "{\n  \"pid\": 9014,\n  \"mode\": \"frontmost\",\n  \"start_mach_ns\": 890014326312916,\n  \"window_attribute_error\": 0,\n  \"windows\": [\n    {\n      \"AXTitle\": {\n        \"error\": 0,\n        \"value\": \"FG-Metal Step 11D.3-B Bare Vulkan\"\n      },\n      \"AXRole\": {\n        \"error\": 0,\n        \"value\": \"AXWindow\"\n      },\n      \"AXSubrole\": {\n        \"error\": 0,\n        \"value\": \"AXStandardWindow\"\n      },\n      \"AXMain\": {\n        \"error\": 0,\n        \"value\": true\n      },\n      \"AXFocused\": {\n        \"error\": 0,\n        \"value\": true\n      },\n      \"AXMinimized\": {\n        \"error\": 0,\n        \"value\": false\n      }\n    }\n  ],\n  \"frontmost_settable\": {\n    \"error\": 0,\n    \"value\": true\n  },\n  \"action_error\": 0,\n  \"end_mach_ns\": 890014355226625\n}\n"
+      },
+      {
+        "actor_pid": null,
+        "end_mach_ns": 890023379322833,
+        "requested_loop_second": 10,
+        "returncode": 0,
+        "start_mach_ns": 890023287835125,
+        "stderr": "",
+        "stdout": "{\n  \"start_mach_ns\": 890023334909708,\n  \"end_mach_ns\": 890023375258166,\n  \"target_pid\": 9014,\n  \"active_displays\": [\n    1\n  ],\n  \"windows\": [\n    {\n      \"front_to_back_rank\": 1,\n      \"kCGWindowName\": \"FG-Metal Step 11D.3-B Bare Vulkan\",\n      \"kCGWindowLayer\": 0,\n      \"kCGWindowMemoryUsage\": 2432,\n      \"kCGWindowIsOnscreen\": true,\n      \"kCGWindowSharingState\": 1,\n      \"kCGWindowOwnerPID\": 9014,\n      \"kCGWindowOwnerName\": \"wine\",\n      \"kCGWindowNumber\": 27911,\n      \"kCGWindowStoreType\": 1,\n      \"kCGWindowBounds\": {\n        \"X\": 68.0,\n        \"Height\": 392.0,\n        \"Y\": 62.0,\n        \"Width\": 640.0\n      },\n      \"kCGWindowAlpha\": 1.0\n    },\n    {\n      \"front_to_back_rank\": 2,\n      \"kCGWindowName\": \"Recents\",\n      \"kCGWindowLayer\": 0,\n      \"kCGWindowMemoryUsage\": 2432,\n      \"kCGWindowIsOnscreen\": true,\n      \"kCGWindowSharingState\": 1,\n      \"kCGWindowOwnerPID\": 867,\n      \"kCGWindowOwnerName\": \"Finder\",\n      \"kCGWindowNumber\": 27754,\n      \"kCGWindowStoreType\": 1,\n      \"kCGWindowBounds\": {\n        \"X\": 734.0,\n        \"Height\": 697.0,\n        \"Y\": 33.0,\n        \"Width\": 920.0\n      },\n      \"kCGWindowAlpha\": 1.0\n    }\n  ],\n  \"state_mutated\": false,\n  \"extent_note\": \"CG window rectangles and rank do not alone prove opaque per-pixel coverage; pair with external UI visual observation.\"\n}\n"
+      },
+      {
+        "actor_pid": 867,
+        "end_mach_ns": 890033400224166,
+        "requested_loop_second": 20,
+        "returncode": 0,
+        "start_mach_ns": 890033306939625,
+        "stderr": "",
+        "stdout": "{\n  \"pid\": 867,\n  \"mode\": \"frontmost\",\n  \"start_mach_ns\": 890033348685833,\n  \"window_attribute_error\": 0,\n  \"windows\": [\n    {\n      \"AXTitle\": {\n        \"error\": 0,\n        \"value\": \"Recents\"\n      },\n      \"AXRole\": {\n        \"error\": 0,\n        \"value\": \"AXWindow\"\n      },\n      \"AXSubrole\": {\n        \"error\": 0,\n        \"value\": \"AXStandardWindow\"\n      },\n      \"AXMain\": {\n        \"error\": 0,\n        \"value\": true\n      },\n      \"AXFocused\": {\n        \"error\": 0,\n        \"value\": false\n      },\n      \"AXMinimized\": {\n        \"error\": 0,\n        \"value\": false\n      }\n    },\n    {\n      \"AXTitle\": {\n        \"error\": -25212,\n        \"value\": null\n      },\n      \"AXRole\": {\n        \"error\": 0,\n        \"value\": \"AXScrollArea\"\n      },\n      \"AXSubrole\": {\n        \"error\": -25212,\n        \"value\": null\n      },\n      \"AXMain\": {\n        \"error\": 0,\n        \"value\": false\n      },\n      \"AXFocused\": {\n        \"error\": 0,\n        \"value\": false\n      },\n      \"AXMinimized\": {\n        \"error\": 0,\n        \"value\": false\n      }\n    }\n  ],\n  \"frontmost_settable\": {\n    \"error\": 0,\n    \"value\": true\n  },\n  \"action_error\": 0,\n  \"end_mach_ns\": 890033394762500\n}\n"
+      },
+      {
+        "actor_pid": null,
+        "end_mach_ns": 890038379388875,
+        "requested_loop_second": 25,
+        "returncode": 0,
+        "start_mach_ns": 890038278141458,
+        "stderr": "",
+        "stdout": "{\n  \"start_mach_ns\": 890038328981041,\n  \"end_mach_ns\": 890038374589208,\n  \"target_pid\": 9014,\n  \"active_displays\": [\n    1\n  ],\n  \"windows\": [\n    {\n      \"front_to_back_rank\": 1,\n      \"kCGWindowName\": \"Recents\",\n      \"kCGWindowLayer\": 0,\n      \"kCGWindowMemoryUsage\": 2432,\n      \"kCGWindowIsOnscreen\": true,\n      \"kCGWindowSharingState\": 1,\n      \"kCGWindowOwnerPID\": 867,\n      \"kCGWindowOwnerName\": \"Finder\",\n      \"kCGWindowNumber\": 27754,\n      \"kCGWindowStoreType\": 1,\n      \"kCGWindowBounds\": {\n        \"X\": 734.0,\n        \"Height\": 697.0,\n        \"Y\": 33.0,\n        \"Width\": 920.0\n      },\n      \"kCGWindowAlpha\": 1.0\n    },\n    {\n      \"front_to_back_rank\": 2,\n      \"kCGWindowName\": \"FG-Metal Step 11D.3-B Bare Vulkan\",\n      \"kCGWindowLayer\": 0,\n      \"kCGWindowMemoryUsage\": 2432,\n      \"kCGWindowIsOnscreen\": true,\n      \"kCGWindowSharingState\": 1,\n      \"kCGWindowOwnerPID\": 9014,\n      \"kCGWindowOwnerName\": \"wine\",\n      \"kCGWindowNumber\": 27911,\n      \"kCGWindowStoreType\": 1,\n      \"kCGWindowBounds\": {\n        \"X\": 68.0,\n        \"Height\": 392.0,\n        \"Y\": 62.0,\n        \"Width\": 640.0\n      },\n      \"kCGWindowAlpha\": 1.0\n    }\n  ],\n  \"state_mutated\": false,\n  \"extent_note\": \"CG window rectangles and rank do not alone prove opaque per-pixel coverage; pair with external UI visual observation.\"\n}\n"
+      },
+      {
+        "actor_pid": 9014,
+        "end_mach_ns": 890073356120500,
+        "requested_loop_second": 60,
+        "returncode": 0,
+        "start_mach_ns": 890073283062625,
+        "stderr": "",
+        "stdout": "{\n  \"pid\": 9014,\n  \"mode\": \"frontmost\",\n  \"start_mach_ns\": 890073323399541,\n  \"window_attribute_error\": 0,\n  \"windows\": [\n    {\n      \"AXTitle\": {\n        \"error\": 0,\n        \"value\": \"FG-Metal Step 11D.3-B Bare Vulkan\"\n      },\n      \"AXRole\": {\n        \"error\": 0,\n        \"value\": \"AXWindow\"\n      },\n      \"AXSubrole\": {\n        \"error\": 0,\n        \"value\": \"AXStandardWindow\"\n      },\n      \"AXMain\": {\n        \"error\": 0,\n        \"value\": true\n      },\n      \"AXFocused\": {\n        \"error\": 0,\n        \"value\": true\n      },\n      \"AXMinimized\": {\n        \"error\": 0,\n        \"value\": false\n      }\n    }\n  ],\n  \"frontmost_settable\": {\n    \"error\": 0,\n    \"value\": true\n  },\n  \"action_error\": 0,\n  \"end_mach_ns\": 890073348425416\n}\n"
+      },
+      {
+        "actor_pid": null,
+        "end_mach_ns": 890078361296416,
+        "requested_loop_second": 65,
+        "returncode": 0,
+        "start_mach_ns": 890078275958166,
+        "stderr": "",
+        "stdout": "{\n  \"start_mach_ns\": 890078318553958,\n  \"end_mach_ns\": 890078357244125,\n  \"target_pid\": 9014,\n  \"active_displays\": [\n    1\n  ],\n  \"windows\": [\n    {\n      \"front_to_back_rank\": 1,\n      \"kCGWindowName\": \"FG-Metal Step 11D.3-B Bare Vulkan\",\n      \"kCGWindowLayer\": 0,\n      \"kCGWindowMemoryUsage\": 2432,\n      \"kCGWindowIsOnscreen\": true,\n      \"kCGWindowSharingState\": 1,\n      \"kCGWindowOwnerPID\": 9014,\n      \"kCGWindowOwnerName\": \"wine\",\n      \"kCGWindowNumber\": 27911,\n      \"kCGWindowStoreType\": 1,\n      \"kCGWindowBounds\": {\n        \"X\": 68.0,\n        \"Height\": 392.0,\n        \"Y\": 62.0,\n        \"Width\": 640.0\n      },\n      \"kCGWindowAlpha\": 1.0\n    },\n    {\n      \"front_to_back_rank\": 2,\n      \"kCGWindowName\": \"Recents\",\n      \"kCGWindowLayer\": 0,\n      \"kCGWindowMemoryUsage\": 2432,\n      \"kCGWindowIsOnscreen\": true,\n      \"kCGWindowSharingState\": 1,\n      \"kCGWindowOwnerPID\": 867,\n      \"kCGWindowOwnerName\": \"Finder\",\n      \"kCGWindowNumber\": 27754,\n      \"kCGWindowStoreType\": 1,\n      \"kCGWindowBounds\": {\n        \"X\": 734.0,\n        \"Height\": 697.0,\n        \"Y\": 33.0,\n        \"Width\": 920.0\n      },\n      \"kCGWindowAlpha\": 1.0\n    }\n  ],\n  \"state_mutated\": false,\n  \"extent_note\": \"CG window rectangles and rank do not alone prove opaque per-pixel coverage; pair with external UI visual observation.\"\n}\n"
+      },
+      {
+        "finished_mach_ns": 890144128674166,
+        "run_id": "step11d3b-br8-state-02-20261011-005208-590fa5da",
+        "runner_returncode": 0
+      }
+    ],
+    "sha256": "6caa671b736bf1d5870e2fbc3799c5bfba78f74c9b443a2f17b4153ae24d62b0",
+    "used_as_notification_anchor": false
+  },
+  "generated_at_utc": "2026-10-11T00:58:25.909121+00:00",
+  "method_limits": [
+    "Each raw run is accepted through br7_analysis.analyze_run, which requires PASS/is_valid and one explicitly owned, complete target trace.",
+    "Frame outcomes and durations use BR7's unique acquisition and lifecycle joins; ambiguous chains do not count as displayed or latency samples.",
+    "Acquisition-cohort outcome rates use the successful target acquisition timestamp; request-phase latency uses the unique request timestamp and a complete exact chain.",
+    "Per-phase request refresh quartiles use only BR7's full-run reference period and first positive presentedTime; zero-only phase data never supplies a local phase origin.",
+    "The refresh phase reference is descriptive and run-wide; it may not represent local refresh phase during a notification transition.",
+    "Per-phase nextDrawable stall counts use unique acquisition-cohort events and inclusive >=100ms and >=900ms thresholds.",
+    "Phase intervals are half-open [start,end); rates use observed coverage and incomplete edge windows are marked.",
+    "Target notifications are exact target telemetry timestamps. Controller action logs, when supplied, are retained separately and never time-joined.",
+    "No causal relationship is inferred from temporal proximity, and app and host clock domains are not aligned.",
+    "A pathology segment requires five contiguous full seconds at >=max(75 FPS, 1.25x highest target-reported refresh), at least 50% raw-zero callbacks and exact-zero share, at most 30 displayed cohort FPS, and at least 90% exact outcome coverage.",
+    "No process is launched, no live display is read, and no source trace is changed by this analysis."
+  ],
+  "runs": [
+    {
+      "causal_inference": false,
+      "host_interval": {
+        "clock": "mach_absolute_time_ns",
+        "duration_ns": 79338862625,
+        "end_ns": 890092588954584,
+        "start_ns": 890013250091959
+      },
+      "method_note": "Notification timestamps and controller actions are descriptive anchors. No causal relationship is inferred; host and app clocks are not aligned. Outcome and timing metrics reuse BR7's validated target-owned frame chains.",
+      "notification_transitions": [
+        {
+          "elapsed_from_host_start_ns": 20146512833,
+          "next_state_change_timestamp_ns": 890073349439459,
+          "notification_name": "NSWindowDidResignKeyNotification",
+          "phases": {
+            "before_10s": {
+              "acquisition_cohort": {
+                "acquired_count": 600,
+                "acquired_fps": 60.0,
+                "basis": "successful target acquisitions timestamped in the phase",
+                "displayed_cohort_fps": 60.0,
+                "exact_displayed_count": 600,
+                "exact_outcome_coverage_of_acquisitions": 1.0,
+                "exact_zero_count": 0,
+                "host_submit_duration_ns": {
+                  "count": 600,
+                  "max_ns": 38327750,
+                  "median_ns": 15833646.0,
+                  "p99_ns": 17441151.839999996
+                },
+                "next_drawable_duration_ns": {
+                  "count": 600,
+                  "max_ns": 19223875,
+                  "median_ns": 15329396.0,
+                  "p99_ns": 16887645.08
+                },
+                "next_drawable_ge_100ms_count": 0,
+                "next_drawable_ge_900ms_count": 0,
+                "raw_zero_callback_count": 0,
+                "raw_zero_not_displayed_count": 0,
+                "raw_zero_share_of_acquisitions": 0.0
+              },
+              "interval": {
+                "complete": true,
+                "observed_coverage_ns": 10000000000,
+                "observed_end_ns": 890033396604792,
+                "observed_start_ns": 890023396604792,
+                "requested_duration_ns": 10000000000,
+                "requested_end_ns": 890033396604792,
+                "requested_start_ns": 890023396604792
+              },
+              "request_phase": {
+                "basis": "unique target request timestamps in the phase; latency requires an exact BR7 chain",
+                "callback_latency_ge_100ms_count": 0,
+                "callback_latency_ge_900ms_count": 0,
+                "refresh_phase": {
+                  "phase_fraction_stats": {
+                    "count": 600,
+                    "max": 0.504505846142843,
+                    "mean": 0.12116835855774763,
+                    "min": 0.06106138082480508,
+                    "p50": 0.12017438737286668,
+                    "p90": 0.1507057557937172,
+                    "p99": 0.3263170617105889
+                  },
+                  "quartiles": [
+                    {
+                      "count": 590,
+                      "percent": 98.33333333333333,
+                      "quartile": 1
+                    },
+                    {
+                      "count": 9,
+                      "percent": 1.5,
+                      "quartile": 2
+                    },
+                    {
+                      "count": 1,
+                      "percent": 0.16666666666666666,
+                      "quartile": 3
+                    },
+                    {
+                      "count": 0,
+                      "percent": 0.0,
+                      "quartile": 4
+                    }
+                  ],
+                  "reference_period_ns": 16666459,
+                  "reference_presented_time_mach_ns": 890013334716041,
+                  "reference_scope": "fixed full-run BR7 reference; never re-estimated within a notification phase",
+                  "reference_uncertainty": "Descriptive only: a run-wide first displayed presentedTime may not represent local refresh phase during this notification interval or state transition.",
+                  "request_count": 600,
+                  "status": "valid_run_wide_reference"
+                },
+                "request_fps": 60.0,
+                "request_to_callback_latency_ns": {
+                  "count": 600,
+                  "max_ns": 50158083,
+                  "median_ns": 48506458.0,
+                  "p99_ns": 49312566.66
+                },
+                "unique_request_count": 600
+              },
+              "window_state_observation": {
+                "acquisition_context": "no consistent minimized/no-visible-pixels sample state",
+                "associated_sample_count": 10,
+                "classification": "AT_LEAST_SOME_VISIBLE_PIXELS_REPORTED",
+                "miniaturized_sample_count": 0,
+                "no_visible_pixels_reported_sample_count": 0,
+                "observed_display_suppression_state": false,
+                "occlusion_semantics": "window_occluded is the inverse of NSWindowOcclusionStateVisible. The bit reports whether AppKit sees any visible pixels; it does not identify a physical coverage extent or the reason pixels are not visible.",
+                "sample_count": 10,
+                "sampling_interpretation": "discrete target-owned telemetry samples; not continuous state proof",
+                "unassociated_sample_count": 0,
+                "visible_pixels_reported_sample_count": 10,
+                "window_not_visible_sample_count": 0
+              }
+            },
+            "first_10s_after": {
+              "acquisition_cohort": {
+                "acquired_count": 600,
+                "acquired_fps": 60.0,
+                "basis": "successful target acquisitions timestamped in the phase",
+                "displayed_cohort_fps": 60.0,
+                "exact_displayed_count": 600,
+                "exact_outcome_coverage_of_acquisitions": 1.0,
+                "exact_zero_count": 0,
+                "host_submit_duration_ns": {
+                  "count": 600,
+                  "max_ns": 18250333,
+                  "median_ns": 15914229.0,
+                  "p99_ns": 17298357.589999996
+                },
+                "next_drawable_duration_ns": {
+                  "count": 600,
+                  "max_ns": 17812500,
+                  "median_ns": 15458645.5,
+                  "p99_ns": 16692686.25
+                },
+                "next_drawable_ge_100ms_count": 0,
+                "next_drawable_ge_900ms_count": 0,
+                "raw_zero_callback_count": 0,
+                "raw_zero_not_displayed_count": 0,
+                "raw_zero_share_of_acquisitions": 0.0
+              },
+              "interval": {
+                "complete": true,
+                "observed_coverage_ns": 10000000000,
+                "observed_end_ns": 890043396604792,
+                "observed_start_ns": 890033396604792,
+                "requested_duration_ns": 10000000000,
+                "requested_end_ns": 890043396604792,
+                "requested_start_ns": 890033396604792
+              },
+              "request_phase": {
+                "basis": "unique target request timestamps in the phase; latency requires an exact BR7 chain",
+                "callback_latency_ge_100ms_count": 0,
+                "callback_latency_ge_900ms_count": 0,
+                "refresh_phase": {
+                  "phase_fraction_stats": {
+                    "count": 600,
+                    "max": 0.3402601596415891,
+                    "mean": 0.17551956517378206,
+                    "min": 0.09185304448893433,
+                    "p50": 0.17845899359906026,
+                    "p90": 0.1980066011622505,
+                    "p99": 0.27155028971660977
+                  },
+                  "quartiles": [
+                    {
+                      "count": 587,
+                      "percent": 97.83333333333333,
+                      "quartile": 1
+                    },
+                    {
+                      "count": 13,
+                      "percent": 2.1666666666666665,
+                      "quartile": 2
+                    },
+                    {
+                      "count": 0,
+                      "percent": 0.0,
+                      "quartile": 3
+                    },
+                    {
+                      "count": 0,
+                      "percent": 0.0,
+                      "quartile": 4
+                    }
+                  ],
+                  "reference_period_ns": 16666459,
+                  "reference_presented_time_mach_ns": 890013334716041,
+                  "reference_scope": "fixed full-run BR7 reference; never re-estimated within a notification phase",
+                  "reference_uncertainty": "Descriptive only: a run-wide first displayed presentedTime may not represent local refresh phase during this notification interval or state transition.",
+                  "request_count": 600,
+                  "status": "valid_run_wide_reference"
+                },
+                "request_fps": 60.0,
+                "request_to_callback_latency_ns": {
+                  "count": 600,
+                  "max_ns": 48843292,
+                  "median_ns": 47551292.0,
+                  "p99_ns": 48560604.67
+                },
+                "unique_request_count": 600
+              },
+              "window_state_observation": {
+                "acquisition_context": "no consistent minimized/no-visible-pixels sample state",
+                "associated_sample_count": 13,
+                "classification": "AT_LEAST_SOME_VISIBLE_PIXELS_REPORTED",
+                "miniaturized_sample_count": 0,
+                "no_visible_pixels_reported_sample_count": 0,
+                "observed_display_suppression_state": false,
+                "occlusion_semantics": "window_occluded is the inverse of NSWindowOcclusionStateVisible. The bit reports whether AppKit sees any visible pixels; it does not identify a physical coverage extent or the reason pixels are not visible.",
+                "sample_count": 13,
+                "sampling_interpretation": "discrete target-owned telemetry samples; not continuous state proof",
+                "unassociated_sample_count": 0,
+                "visible_pixels_reported_sample_count": 13,
+                "window_not_visible_sample_count": 0
+              }
+            },
+            "restoration_10s_after": null,
+            "steady_hold": {
+              "acquisition_cohort": {
+                "acquired_count": 1797,
+                "acquired_fps": 59.99432173876393,
+                "basis": "successful target acquisitions timestamped in the phase",
+                "displayed_cohort_fps": 59.99432173876393,
+                "exact_displayed_count": 1797,
+                "exact_outcome_coverage_of_acquisitions": 1.0,
+                "exact_zero_count": 0,
+                "host_submit_duration_ns": {
+                  "count": 1797,
+                  "max_ns": 19522250,
+                  "median_ns": 15839166.0,
+                  "p99_ns": 16773144.36
+                },
+                "next_drawable_duration_ns": {
+                  "count": 1797,
+                  "max_ns": 17046500,
+                  "median_ns": 15368500.0,
+                  "p99_ns": 16314330.32
+                },
+                "next_drawable_ge_100ms_count": 0,
+                "next_drawable_ge_900ms_count": 0,
+                "raw_zero_callback_count": 0,
+                "raw_zero_not_displayed_count": 0,
+                "raw_zero_share_of_acquisitions": 0.0
+              },
+              "interval": {
+                "complete": true,
+                "observed_coverage_ns": 29952834667,
+                "observed_end_ns": 890073349439459,
+                "observed_start_ns": 890043396604792,
+                "requested_duration_ns": 29952834667,
+                "requested_end_ns": 890073349439459,
+                "requested_start_ns": 890043396604792
+              },
+              "request_phase": {
+                "basis": "unique target request timestamps in the phase; latency requires an exact BR7 chain",
+                "callback_latency_ge_100ms_count": 0,
+                "callback_latency_ge_900ms_count": 0,
+                "refresh_phase": {
+                  "phase_fraction_stats": {
+                    "count": 1797,
+                    "max": 0.4002220267664535,
+                    "mean": 0.18550879013735483,
+                    "min": 0.09488224223273822,
+                    "p50": 0.1833173441341079,
+                    "p90": 0.20453755653795447,
+                    "p99": 0.2686234574482797
+                  },
+                  "quartiles": [
+                    {
+                      "count": 1762,
+                      "percent": 98.05230940456316,
+                      "quartile": 1
+                    },
+                    {
+                      "count": 35,
+                      "percent": 1.947690595436839,
+                      "quartile": 2
+                    },
+                    {
+                      "count": 0,
+                      "percent": 0.0,
+                      "quartile": 3
+                    },
+                    {
+                      "count": 0,
+                      "percent": 0.0,
+                      "quartile": 4
+                    }
+                  ],
+                  "reference_period_ns": 16666459,
+                  "reference_presented_time_mach_ns": 890013334716041,
+                  "reference_scope": "fixed full-run BR7 reference; never re-estimated within a notification phase",
+                  "reference_uncertainty": "Descriptive only: a run-wide first displayed presentedTime may not represent local refresh phase during this notification interval or state transition.",
+                  "request_count": 1797,
+                  "status": "valid_run_wide_reference"
+                },
+                "request_fps": 59.99432173876393,
+                "request_to_callback_latency_ns": {
+                  "count": 1797,
+                  "max_ns": 48873166,
+                  "median_ns": 47491625.0,
+                  "p99_ns": 48428018.64
+                },
+                "unique_request_count": 1797
+              },
+              "window_state_observation": {
+                "acquisition_context": "no consistent minimized/no-visible-pixels sample state",
+                "associated_sample_count": 29,
+                "classification": "AT_LEAST_SOME_VISIBLE_PIXELS_REPORTED",
+                "miniaturized_sample_count": 0,
+                "no_visible_pixels_reported_sample_count": 0,
+                "observed_display_suppression_state": false,
+                "occlusion_semantics": "window_occluded is the inverse of NSWindowOcclusionStateVisible. The bit reports whether AppKit sees any visible pixels; it does not identify a physical coverage extent or the reason pixels are not visible.",
+                "sample_count": 29,
+                "sampling_interpretation": "discrete target-owned telemetry samples; not continuous state proof",
+                "unassociated_sample_count": 0,
+                "visible_pixels_reported_sample_count": 29,
+                "window_not_visible_sample_count": 0
+              }
+            }
+          },
+          "state_changed_fields": [
+            "window_key",
+            "window_main",
+            "app_active"
+          ],
+          "state_signature": {
+            "app_active": false,
+            "window_key": false,
+            "window_main": false,
+            "window_miniaturized": false,
+            "window_occluded": false,
+            "window_visible": true
+          },
+          "telemetry_sequence": 22,
+          "timestamp_ns": 890033396604792,
+          "transition_direction": "change_away_from_initial_observed_state",
+          "trigger": "window_notification"
+        },
+        {
+          "elapsed_from_host_start_ns": 20146616750,
+          "next_state_change_timestamp_ns": 890073349439459,
+          "notification_name": "NSWindowDidResignMainNotification",
+          "phases": {
+            "before_10s": {
+              "acquisition_cohort": {
+                "acquired_count": 600,
+                "acquired_fps": 60.0,
+                "basis": "successful target acquisitions timestamped in the phase",
+                "displayed_cohort_fps": 60.0,
+                "exact_displayed_count": 600,
+                "exact_outcome_coverage_of_acquisitions": 1.0,
+                "exact_zero_count": 0,
+                "host_submit_duration_ns": {
+                  "count": 600,
+                  "max_ns": 38327750,
+                  "median_ns": 15833646.0,
+                  "p99_ns": 17441151.839999996
+                },
+                "next_drawable_duration_ns": {
+                  "count": 600,
+                  "max_ns": 19223875,
+                  "median_ns": 15329396.0,
+                  "p99_ns": 16887645.08
+                },
+                "next_drawable_ge_100ms_count": 0,
+                "next_drawable_ge_900ms_count": 0,
+                "raw_zero_callback_count": 0,
+                "raw_zero_not_displayed_count": 0,
+                "raw_zero_share_of_acquisitions": 0.0
+              },
+              "interval": {
+                "complete": true,
+                "observed_coverage_ns": 10000000000,
+                "observed_end_ns": 890033396708709,
+                "observed_start_ns": 890023396708709,
+                "requested_duration_ns": 10000000000,
+                "requested_end_ns": 890033396708709,
+                "requested_start_ns": 890023396708709
+              },
+              "request_phase": {
+                "basis": "unique target request timestamps in the phase; latency requires an exact BR7 chain",
+                "callback_latency_ge_100ms_count": 0,
+                "callback_latency_ge_900ms_count": 0,
+                "refresh_phase": {
+                  "phase_fraction_stats": {
+                    "count": 600,
+                    "max": 0.504505846142843,
+                    "mean": 0.12116835855774763,
+                    "min": 0.06106138082480508,
+                    "p50": 0.12017438737286668,
+                    "p90": 0.1507057557937172,
+                    "p99": 0.3263170617105889
+                  },
+                  "quartiles": [
+                    {
+                      "count": 590,
+                      "percent": 98.33333333333333,
+                      "quartile": 1
+                    },
+                    {
+                      "count": 9,
+                      "percent": 1.5,
+                      "quartile": 2
+                    },
+                    {
+                      "count": 1,
+                      "percent": 0.16666666666666666,
+                      "quartile": 3
+                    },
+                    {
+                      "count": 0,
+                      "percent": 0.0,
+                      "quartile": 4
+                    }
+                  ],
+                  "reference_period_ns": 16666459,
+                  "reference_presented_time_mach_ns": 890013334716041,
+                  "reference_scope": "fixed full-run BR7 reference; never re-estimated within a notification phase",
+                  "reference_uncertainty": "Descriptive only: a run-wide first displayed presentedTime may not represent local refresh phase during this notification interval or state transition.",
+                  "request_count": 600,
+                  "status": "valid_run_wide_reference"
+                },
+                "request_fps": 60.0,
+                "request_to_callback_latency_ns": {
+                  "count": 600,
+                  "max_ns": 50158083,
+                  "median_ns": 48506458.0,
+                  "p99_ns": 49312566.66
+                },
+                "unique_request_count": 600
+              },
+              "window_state_observation": {
+                "acquisition_context": "no consistent minimized/no-visible-pixels sample state",
+                "associated_sample_count": 11,
+                "classification": "AT_LEAST_SOME_VISIBLE_PIXELS_REPORTED",
+                "miniaturized_sample_count": 0,
+                "no_visible_pixels_reported_sample_count": 0,
+                "observed_display_suppression_state": false,
+                "occlusion_semantics": "window_occluded is the inverse of NSWindowOcclusionStateVisible. The bit reports whether AppKit sees any visible pixels; it does not identify a physical coverage extent or the reason pixels are not visible.",
+                "sample_count": 11,
+                "sampling_interpretation": "discrete target-owned telemetry samples; not continuous state proof",
+                "unassociated_sample_count": 0,
+                "visible_pixels_reported_sample_count": 11,
+                "window_not_visible_sample_count": 0
+              }
+            },
+            "first_10s_after": {
+              "acquisition_cohort": {
+                "acquired_count": 600,
+                "acquired_fps": 60.0,
+                "basis": "successful target acquisitions timestamped in the phase",
+                "displayed_cohort_fps": 60.0,
+                "exact_displayed_count": 600,
+                "exact_outcome_coverage_of_acquisitions": 1.0,
+                "exact_zero_count": 0,
+                "host_submit_duration_ns": {
+                  "count": 600,
+                  "max_ns": 18250333,
+                  "median_ns": 15914229.0,
+                  "p99_ns": 17298357.589999996
+                },
+                "next_drawable_duration_ns": {
+                  "count": 600,
+                  "max_ns": 17812500,
+                  "median_ns": 15458645.5,
+                  "p99_ns": 16692686.25
+                },
+                "next_drawable_ge_100ms_count": 0,
+                "next_drawable_ge_900ms_count": 0,
+                "raw_zero_callback_count": 0,
+                "raw_zero_not_displayed_count": 0,
+                "raw_zero_share_of_acquisitions": 0.0
+              },
+              "interval": {
+                "complete": true,
+                "observed_coverage_ns": 10000000000,
+                "observed_end_ns": 890043396708709,
+                "observed_start_ns": 890033396708709,
+                "requested_duration_ns": 10000000000,
+                "requested_end_ns": 890043396708709,
+                "requested_start_ns": 890033396708709
+              },
+              "request_phase": {
+                "basis": "unique target request timestamps in the phase; latency requires an exact BR7 chain",
+                "callback_latency_ge_100ms_count": 0,
+                "callback_latency_ge_900ms_count": 0,
+                "refresh_phase": {
+                  "phase_fraction_stats": {
+                    "count": 600,
+                    "max": 0.3402601596415891,
+                    "mean": 0.17551956517378206,
+                    "min": 0.09185304448893433,
+                    "p50": 0.17845899359906026,
+                    "p90": 0.1980066011622505,
+                    "p99": 0.27155028971660977
+                  },
+                  "quartiles": [
+                    {
+                      "count": 587,
+                      "percent": 97.83333333333333,
+                      "quartile": 1
+                    },
+                    {
+                      "count": 13,
+                      "percent": 2.1666666666666665,
+                      "quartile": 2
+                    },
+                    {
+                      "count": 0,
+                      "percent": 0.0,
+                      "quartile": 3
+                    },
+                    {
+                      "count": 0,
+                      "percent": 0.0,
+                      "quartile": 4
+                    }
+                  ],
+                  "reference_period_ns": 16666459,
+                  "reference_presented_time_mach_ns": 890013334716041,
+                  "reference_scope": "fixed full-run BR7 reference; never re-estimated within a notification phase",
+                  "reference_uncertainty": "Descriptive only: a run-wide first displayed presentedTime may not represent local refresh phase during this notification interval or state transition.",
+                  "request_count": 600,
+                  "status": "valid_run_wide_reference"
+                },
+                "request_fps": 60.0,
+                "request_to_callback_latency_ns": {
+                  "count": 600,
+                  "max_ns": 48843292,
+                  "median_ns": 47551292.0,
+                  "p99_ns": 48560604.67
+                },
+                "unique_request_count": 600
+              },
+              "window_state_observation": {
+                "acquisition_context": "no consistent minimized/no-visible-pixels sample state",
+                "associated_sample_count": 12,
+                "classification": "AT_LEAST_SOME_VISIBLE_PIXELS_REPORTED",
+                "miniaturized_sample_count": 0,
+                "no_visible_pixels_reported_sample_count": 0,
+                "observed_display_suppression_state": false,
+                "occlusion_semantics": "window_occluded is the inverse of NSWindowOcclusionStateVisible. The bit reports whether AppKit sees any visible pixels; it does not identify a physical coverage extent or the reason pixels are not visible.",
+                "sample_count": 12,
+                "sampling_interpretation": "discrete target-owned telemetry samples; not continuous state proof",
+                "unassociated_sample_count": 0,
+                "visible_pixels_reported_sample_count": 12,
+                "window_not_visible_sample_count": 0
+              }
+            },
+            "restoration_10s_after": null,
+            "steady_hold": null
+          },
+          "state_changed_fields": [],
+          "state_signature": {
+            "app_active": false,
+            "window_key": false,
+            "window_main": false,
+            "window_miniaturized": false,
+            "window_occluded": false,
+            "window_visible": true
+          },
+          "telemetry_sequence": 23,
+          "timestamp_ns": 890033396708709,
+          "transition_direction": "notification_without_observed_state_change",
+          "trigger": "window_notification"
+        },
+        {
+          "elapsed_from_host_start_ns": 20151303791,
+          "next_state_change_timestamp_ns": 890073349439459,
+          "notification_name": "NSApplicationDidResignActiveNotification",
+          "phases": {
+            "before_10s": {
+              "acquisition_cohort": {
+                "acquired_count": 600,
+                "acquired_fps": 60.0,
+                "basis": "successful target acquisitions timestamped in the phase",
+                "displayed_cohort_fps": 60.0,
+                "exact_displayed_count": 600,
+                "exact_outcome_coverage_of_acquisitions": 1.0,
+                "exact_zero_count": 0,
+                "host_submit_duration_ns": {
+                  "count": 600,
+                  "max_ns": 38327750,
+                  "median_ns": 15833646.0,
+                  "p99_ns": 17441151.839999996
+                },
+                "next_drawable_duration_ns": {
+                  "count": 600,
+                  "max_ns": 19223875,
+                  "median_ns": 15329396.0,
+                  "p99_ns": 16887645.08
+                },
+                "next_drawable_ge_100ms_count": 0,
+                "next_drawable_ge_900ms_count": 0,
+                "raw_zero_callback_count": 0,
+                "raw_zero_not_displayed_count": 0,
+                "raw_zero_share_of_acquisitions": 0.0
+              },
+              "interval": {
+                "complete": true,
+                "observed_coverage_ns": 10000000000,
+                "observed_end_ns": 890033401395750,
+                "observed_start_ns": 890023401395750,
+                "requested_duration_ns": 10000000000,
+                "requested_end_ns": 890033401395750,
+                "requested_start_ns": 890023401395750
+              },
+              "request_phase": {
+                "basis": "unique target request timestamps in the phase; latency requires an exact BR7 chain",
+                "callback_latency_ge_100ms_count": 0,
+                "callback_latency_ge_900ms_count": 0,
+                "refresh_phase": {
+                  "phase_fraction_stats": {
+                    "count": 600,
+                    "max": 0.504505846142843,
+                    "mean": 0.12116835855774763,
+                    "min": 0.06106138082480508,
+                    "p50": 0.12017438737286668,
+                    "p90": 0.1507057557937172,
+                    "p99": 0.3263170617105889
+                  },
+                  "quartiles": [
+                    {
+                      "count": 590,
+                      "percent": 98.33333333333333,
+                      "quartile": 1
+                    },
+                    {
+                      "count": 9,
+                      "percent": 1.5,
+                      "quartile": 2
+                    },
+                    {
+                      "count": 1,
+                      "percent": 0.16666666666666666,
+                      "quartile": 3
+                    },
+                    {
+                      "count": 0,
+                      "percent": 0.0,
+                      "quartile": 4
+                    }
+                  ],
+                  "reference_period_ns": 16666459,
+                  "reference_presented_time_mach_ns": 890013334716041,
+                  "reference_scope": "fixed full-run BR7 reference; never re-estimated within a notification phase",
+                  "reference_uncertainty": "Descriptive only: a run-wide first displayed presentedTime may not represent local refresh phase during this notification interval or state transition.",
+                  "request_count": 600,
+                  "status": "valid_run_wide_reference"
+                },
+                "request_fps": 60.0,
+                "request_to_callback_latency_ns": {
+                  "count": 600,
+                  "max_ns": 50158083,
+                  "median_ns": 48506458.0,
+                  "p99_ns": 49312566.66
+                },
+                "unique_request_count": 600
+              },
+              "window_state_observation": {
+                "acquisition_context": "no consistent minimized/no-visible-pixels sample state",
+                "associated_sample_count": 12,
+                "classification": "AT_LEAST_SOME_VISIBLE_PIXELS_REPORTED",
+                "miniaturized_sample_count": 0,
+                "no_visible_pixels_reported_sample_count": 0,
+                "observed_display_suppression_state": false,
+                "occlusion_semantics": "window_occluded is the inverse of NSWindowOcclusionStateVisible. The bit reports whether AppKit sees any visible pixels; it does not identify a physical coverage extent or the reason pixels are not visible.",
+                "sample_count": 12,
+                "sampling_interpretation": "discrete target-owned telemetry samples; not continuous state proof",
+                "unassociated_sample_count": 0,
+                "visible_pixels_reported_sample_count": 12,
+                "window_not_visible_sample_count": 0
+              }
+            },
+            "first_10s_after": {
+              "acquisition_cohort": {
+                "acquired_count": 600,
+                "acquired_fps": 60.0,
+                "basis": "successful target acquisitions timestamped in the phase",
+                "displayed_cohort_fps": 60.0,
+                "exact_displayed_count": 600,
+                "exact_outcome_coverage_of_acquisitions": 1.0,
+                "exact_zero_count": 0,
+                "host_submit_duration_ns": {
+                  "count": 600,
+                  "max_ns": 18250333,
+                  "median_ns": 15914229.0,
+                  "p99_ns": 17298357.589999996
+                },
+                "next_drawable_duration_ns": {
+                  "count": 600,
+                  "max_ns": 17812500,
+                  "median_ns": 15458645.5,
+                  "p99_ns": 16692686.25
+                },
+                "next_drawable_ge_100ms_count": 0,
+                "next_drawable_ge_900ms_count": 0,
+                "raw_zero_callback_count": 0,
+                "raw_zero_not_displayed_count": 0,
+                "raw_zero_share_of_acquisitions": 0.0
+              },
+              "interval": {
+                "complete": true,
+                "observed_coverage_ns": 10000000000,
+                "observed_end_ns": 890043401395750,
+                "observed_start_ns": 890033401395750,
+                "requested_duration_ns": 10000000000,
+                "requested_end_ns": 890043401395750,
+                "requested_start_ns": 890033401395750
+              },
+              "request_phase": {
+                "basis": "unique target request timestamps in the phase; latency requires an exact BR7 chain",
+                "callback_latency_ge_100ms_count": 0,
+                "callback_latency_ge_900ms_count": 0,
+                "refresh_phase": {
+                  "phase_fraction_stats": {
+                    "count": 600,
+                    "max": 0.3402601596415891,
+                    "mean": 0.17551956517378206,
+                    "min": 0.09185304448893433,
+                    "p50": 0.17845899359906026,
+                    "p90": 0.1980066011622505,
+                    "p99": 0.27155028971660977
+                  },
+                  "quartiles": [
+                    {
+                      "count": 587,
+                      "percent": 97.83333333333333,
+                      "quartile": 1
+                    },
+                    {
+                      "count": 13,
+                      "percent": 2.1666666666666665,
+                      "quartile": 2
+                    },
+                    {
+                      "count": 0,
+                      "percent": 0.0,
+                      "quartile": 3
+                    },
+                    {
+                      "count": 0,
+                      "percent": 0.0,
+                      "quartile": 4
+                    }
+                  ],
+                  "reference_period_ns": 16666459,
+                  "reference_presented_time_mach_ns": 890013334716041,
+                  "reference_scope": "fixed full-run BR7 reference; never re-estimated within a notification phase",
+                  "reference_uncertainty": "Descriptive only: a run-wide first displayed presentedTime may not represent local refresh phase during this notification interval or state transition.",
+                  "request_count": 600,
+                  "status": "valid_run_wide_reference"
+                },
+                "request_fps": 60.0,
+                "request_to_callback_latency_ns": {
+                  "count": 600,
+                  "max_ns": 48843292,
+                  "median_ns": 47551292.0,
+                  "p99_ns": 48560604.67
+                },
+                "unique_request_count": 600
+              },
+              "window_state_observation": {
+                "acquisition_context": "no consistent minimized/no-visible-pixels sample state",
+                "associated_sample_count": 11,
+                "classification": "AT_LEAST_SOME_VISIBLE_PIXELS_REPORTED",
+                "miniaturized_sample_count": 0,
+                "no_visible_pixels_reported_sample_count": 0,
+                "observed_display_suppression_state": false,
+                "occlusion_semantics": "window_occluded is the inverse of NSWindowOcclusionStateVisible. The bit reports whether AppKit sees any visible pixels; it does not identify a physical coverage extent or the reason pixels are not visible.",
+                "sample_count": 11,
+                "sampling_interpretation": "discrete target-owned telemetry samples; not continuous state proof",
+                "unassociated_sample_count": 0,
+                "visible_pixels_reported_sample_count": 11,
+                "window_not_visible_sample_count": 0
+              }
+            },
+            "restoration_10s_after": null,
+            "steady_hold": null
+          },
+          "state_changed_fields": [],
+          "state_signature": {
+            "app_active": false,
+            "window_key": false,
+            "window_main": false,
+            "window_miniaturized": false,
+            "window_occluded": false,
+            "window_visible": true
+          },
+          "telemetry_sequence": 24,
+          "timestamp_ns": 890033401395750,
+          "transition_direction": "notification_without_observed_state_change",
+          "trigger": "app_notification"
+        },
+        {
+          "elapsed_from_host_start_ns": 60099347500,
+          "next_state_change_timestamp_ns": 890073349666084,
+          "notification_name": "NSWindowDidBecomeMainNotification",
+          "phases": {
+            "before_10s": {
+              "acquisition_cohort": {
+                "acquired_count": 600,
+                "acquired_fps": 60.0,
+                "basis": "successful target acquisitions timestamped in the phase",
+                "displayed_cohort_fps": 60.0,
+                "exact_displayed_count": 600,
+                "exact_outcome_coverage_of_acquisitions": 1.0,
+                "exact_zero_count": 0,
+                "host_submit_duration_ns": {
+                  "count": 600,
+                  "max_ns": 18318000,
+                  "median_ns": 15826604.0,
+                  "p99_ns": 16729283.75
+                },
+                "next_drawable_duration_ns": {
+                  "count": 600,
+                  "max_ns": 17046500,
+                  "median_ns": 15360312.5,
+                  "p99_ns": 16137203.84
+                },
+                "next_drawable_ge_100ms_count": 0,
+                "next_drawable_ge_900ms_count": 0,
+                "raw_zero_callback_count": 0,
+                "raw_zero_not_displayed_count": 0,
+                "raw_zero_share_of_acquisitions": 0.0
+              },
+              "interval": {
+                "complete": true,
+                "observed_coverage_ns": 10000000000,
+                "observed_end_ns": 890073349439459,
+                "observed_start_ns": 890063349439459,
+                "requested_duration_ns": 10000000000,
+                "requested_end_ns": 890073349439459,
+                "requested_start_ns": 890063349439459
+              },
+              "request_phase": {
+                "basis": "unique target request timestamps in the phase; latency requires an exact BR7 chain",
+                "callback_latency_ge_100ms_count": 0,
+                "callback_latency_ge_900ms_count": 0,
+                "refresh_phase": {
+                  "phase_fraction_stats": {
+                    "count": 600,
+                    "max": 0.35619869823578004,
+                    "mean": 0.1850746496301344,
+                    "min": 0.09488224223273822,
+                    "p50": 0.1831542021013582,
+                    "p90": 0.19848862316824467,
+                    "p99": 0.26030825924091006
+                  },
+                  "quartiles": [
+                    {
+                      "count": 591,
+                      "percent": 98.5,
+                      "quartile": 1
+                    },
+                    {
+                      "count": 9,
+                      "percent": 1.5,
+                      "quartile": 2
+                    },
+                    {
+                      "count": 0,
+                      "percent": 0.0,
+                      "quartile": 3
+                    },
+                    {
+                      "count": 0,
+                      "percent": 0.0,
+                      "quartile": 4
+                    }
+                  ],
+                  "reference_period_ns": 16666459,
+                  "reference_presented_time_mach_ns": 890013334716041,
+                  "reference_scope": "fixed full-run BR7 reference; never re-estimated within a notification phase",
+                  "reference_uncertainty": "Descriptive only: a run-wide first displayed presentedTime may not represent local refresh phase during this notification interval or state transition.",
+                  "request_count": 600,
+                  "status": "valid_run_wide_reference"
+                },
+                "request_fps": 60.0,
+                "request_to_callback_latency_ns": {
+                  "count": 600,
+                  "max_ns": 48873166,
+                  "median_ns": 47504562.5,
+                  "p99_ns": 48138628.33
+                },
+                "unique_request_count": 600
+              },
+              "window_state_observation": {
+                "acquisition_context": "no consistent minimized/no-visible-pixels sample state",
+                "associated_sample_count": 10,
+                "classification": "AT_LEAST_SOME_VISIBLE_PIXELS_REPORTED",
+                "miniaturized_sample_count": 0,
+                "no_visible_pixels_reported_sample_count": 0,
+                "observed_display_suppression_state": false,
+                "occlusion_semantics": "window_occluded is the inverse of NSWindowOcclusionStateVisible. The bit reports whether AppKit sees any visible pixels; it does not identify a physical coverage extent or the reason pixels are not visible.",
+                "sample_count": 10,
+                "sampling_interpretation": "discrete target-owned telemetry samples; not continuous state proof",
+                "unassociated_sample_count": 0,
+                "visible_pixels_reported_sample_count": 10,
+                "window_not_visible_sample_count": 0
+              }
+            },
+            "first_10s_after": {
+              "acquisition_cohort": {
+                "acquired_count": 600,
+                "acquired_fps": 60.0,
+                "basis": "successful target acquisitions timestamped in the phase",
+                "displayed_cohort_fps": 60.0,
+                "exact_displayed_count": 600,
+                "exact_outcome_coverage_of_acquisitions": 1.0,
+                "exact_zero_count": 0,
+                "host_submit_duration_ns": {
+                  "count": 600,
+                  "max_ns": 19862166,
+                  "median_ns": 15884541.5,
+                  "p99_ns": 17961661.25
+                },
+                "next_drawable_duration_ns": {
+                  "count": 600,
+                  "max_ns": 18975292,
+                  "median_ns": 15379479.0,
+                  "p99_ns": 16895511.34
+                },
+                "next_drawable_ge_100ms_count": 0,
+                "next_drawable_ge_900ms_count": 0,
+                "raw_zero_callback_count": 0,
+                "raw_zero_not_displayed_count": 0,
+                "raw_zero_share_of_acquisitions": 0.0
+              },
+              "interval": {
+                "complete": true,
+                "observed_coverage_ns": 10000000000,
+                "observed_end_ns": 890083349439459,
+                "observed_start_ns": 890073349439459,
+                "requested_duration_ns": 10000000000,
+                "requested_end_ns": 890083349439459,
+                "requested_start_ns": 890073349439459
+              },
+              "request_phase": {
+                "basis": "unique target request timestamps in the phase; latency requires an exact BR7 chain",
+                "callback_latency_ge_100ms_count": 0,
+                "callback_latency_ge_900ms_count": 0,
+                "refresh_phase": {
+                  "phase_fraction_stats": {
+                    "count": 600,
+                    "max": 0.42403008341483933,
+                    "mean": 0.12185075806044543,
+                    "min": 0.06468098592508463,
+                    "p50": 0.12185689833695328,
+                    "p90": 0.15519331970876357,
+                    "p99": 0.29148129725696337
+                  },
+                  "quartiles": [
+                    {
+                      "count": 588,
+                      "percent": 98.0,
+                      "quartile": 1
+                    },
+                    {
+                      "count": 12,
+                      "percent": 2.0,
+                      "quartile": 2
+                    },
+                    {
+                      "count": 0,
+                      "percent": 0.0,
+                      "quartile": 3
+                    },
+                    {
+                      "count": 0,
+                      "percent": 0.0,
+                      "quartile": 4
+                    }
+                  ],
+                  "reference_period_ns": 16666459,
+                  "reference_presented_time_mach_ns": 890013334716041,
+                  "reference_scope": "fixed full-run BR7 reference; never re-estimated within a notification phase",
+                  "reference_uncertainty": "Descriptive only: a run-wide first displayed presentedTime may not represent local refresh phase during this notification interval or state transition.",
+                  "request_count": 600,
+                  "status": "valid_run_wide_reference"
+                },
+                "request_fps": 60.0,
+                "request_to_callback_latency_ns": {
+                  "count": 600,
+                  "max_ns": 66032083,
+                  "median_ns": 65128458.5,
+                  "p99_ns": 65991672.25
+                },
+                "unique_request_count": 600
+              },
+              "window_state_observation": {
+                "acquisition_context": "no consistent minimized/no-visible-pixels sample state",
+                "associated_sample_count": 13,
+                "classification": "AT_LEAST_SOME_VISIBLE_PIXELS_REPORTED",
+                "miniaturized_sample_count": 0,
+                "no_visible_pixels_reported_sample_count": 0,
+                "observed_display_suppression_state": false,
+                "occlusion_semantics": "window_occluded is the inverse of NSWindowOcclusionStateVisible. The bit reports whether AppKit sees any visible pixels; it does not identify a physical coverage extent or the reason pixels are not visible.",
+                "sample_count": 13,
+                "sampling_interpretation": "discrete target-owned telemetry samples; not continuous state proof",
+                "unassociated_sample_count": 0,
+                "visible_pixels_reported_sample_count": 13,
+                "window_not_visible_sample_count": 0
+              }
+            },
+            "restoration_10s_after": null,
+            "steady_hold": null
+          },
+          "state_changed_fields": [
+            "window_main",
+            "app_active"
+          ],
+          "state_signature": {
+            "app_active": true,
+            "window_key": false,
+            "window_main": true,
+            "window_miniaturized": false,
+            "window_occluded": false,
+            "window_visible": true
+          },
+          "telemetry_sequence": 64,
+          "timestamp_ns": 890073349439459,
+          "transition_direction": "other_observed_state_change",
+          "trigger": "window_notification"
+        },
+        {
+          "elapsed_from_host_start_ns": 60099574125,
+          "next_state_change_timestamp_ns": null,
+          "notification_name": "NSWindowDidBecomeKeyNotification",
+          "phases": {
+            "before_10s": {
+              "acquisition_cohort": {
+                "acquired_count": 600,
+                "acquired_fps": 60.0,
+                "basis": "successful target acquisitions timestamped in the phase",
+                "displayed_cohort_fps": 60.0,
+                "exact_displayed_count": 600,
+                "exact_outcome_coverage_of_acquisitions": 1.0,
+                "exact_zero_count": 0,
+                "host_submit_duration_ns": {
+                  "count": 600,
+                  "max_ns": 18318000,
+                  "median_ns": 15826604.0,
+                  "p99_ns": 16729283.75
+                },
+                "next_drawable_duration_ns": {
+                  "count": 600,
+                  "max_ns": 17046500,
+                  "median_ns": 15360312.5,
+                  "p99_ns": 16137203.84
+                },
+                "next_drawable_ge_100ms_count": 0,
+                "next_drawable_ge_900ms_count": 0,
+                "raw_zero_callback_count": 0,
+                "raw_zero_not_displayed_count": 0,
+                "raw_zero_share_of_acquisitions": 0.0
+              },
+              "interval": {
+                "complete": true,
+                "observed_coverage_ns": 10000000000,
+                "observed_end_ns": 890073349666084,
+                "observed_start_ns": 890063349666084,
+                "requested_duration_ns": 10000000000,
+                "requested_end_ns": 890073349666084,
+                "requested_start_ns": 890063349666084
+              },
+              "request_phase": {
+                "basis": "unique target request timestamps in the phase; latency requires an exact BR7 chain",
+                "callback_latency_ge_100ms_count": 0,
+                "callback_latency_ge_900ms_count": 0,
+                "refresh_phase": {
+                  "phase_fraction_stats": {
+                    "count": 600,
+                    "max": 0.35619869823578004,
+                    "mean": 0.1850746496301344,
+                    "min": 0.09488224223273822,
+                    "p50": 0.1831542021013582,
+                    "p90": 0.19848862316824467,
+                    "p99": 0.26030825924091006
+                  },
+                  "quartiles": [
+                    {
+                      "count": 591,
+                      "percent": 98.5,
+                      "quartile": 1
+                    },
+                    {
+                      "count": 9,
+                      "percent": 1.5,
+                      "quartile": 2
+                    },
+                    {
+                      "count": 0,
+                      "percent": 0.0,
+                      "quartile": 3
+                    },
+                    {
+                      "count": 0,
+                      "percent": 0.0,
+                      "quartile": 4
+                    }
+                  ],
+                  "reference_period_ns": 16666459,
+                  "reference_presented_time_mach_ns": 890013334716041,
+                  "reference_scope": "fixed full-run BR7 reference; never re-estimated within a notification phase",
+                  "reference_uncertainty": "Descriptive only: a run-wide first displayed presentedTime may not represent local refresh phase during this notification interval or state transition.",
+                  "request_count": 600,
+                  "status": "valid_run_wide_reference"
+                },
+                "request_fps": 60.0,
+                "request_to_callback_latency_ns": {
+                  "count": 600,
+                  "max_ns": 48873166,
+                  "median_ns": 47504562.5,
+                  "p99_ns": 48138628.33
+                },
+                "unique_request_count": 600
+              },
+              "window_state_observation": {
+                "acquisition_context": "no consistent minimized/no-visible-pixels sample state",
+                "associated_sample_count": 11,
+                "classification": "AT_LEAST_SOME_VISIBLE_PIXELS_REPORTED",
+                "miniaturized_sample_count": 0,
+                "no_visible_pixels_reported_sample_count": 0,
+                "observed_display_suppression_state": false,
+                "occlusion_semantics": "window_occluded is the inverse of NSWindowOcclusionStateVisible. The bit reports whether AppKit sees any visible pixels; it does not identify a physical coverage extent or the reason pixels are not visible.",
+                "sample_count": 11,
+                "sampling_interpretation": "discrete target-owned telemetry samples; not continuous state proof",
+                "unassociated_sample_count": 0,
+                "visible_pixels_reported_sample_count": 11,
+                "window_not_visible_sample_count": 0
+              }
+            },
+            "first_10s_after": {
+              "acquisition_cohort": {
+                "acquired_count": 600,
+                "acquired_fps": 60.0,
+                "basis": "successful target acquisitions timestamped in the phase",
+                "displayed_cohort_fps": 60.0,
+                "exact_displayed_count": 600,
+                "exact_outcome_coverage_of_acquisitions": 1.0,
+                "exact_zero_count": 0,
+                "host_submit_duration_ns": {
+                  "count": 600,
+                  "max_ns": 19862166,
+                  "median_ns": 15884541.5,
+                  "p99_ns": 17961661.25
+                },
+                "next_drawable_duration_ns": {
+                  "count": 600,
+                  "max_ns": 18975292,
+                  "median_ns": 15379479.0,
+                  "p99_ns": 16895511.34
+                },
+                "next_drawable_ge_100ms_count": 0,
+                "next_drawable_ge_900ms_count": 0,
+                "raw_zero_callback_count": 0,
+                "raw_zero_not_displayed_count": 0,
+                "raw_zero_share_of_acquisitions": 0.0
+              },
+              "interval": {
+                "complete": true,
+                "observed_coverage_ns": 10000000000,
+                "observed_end_ns": 890083349666084,
+                "observed_start_ns": 890073349666084,
+                "requested_duration_ns": 10000000000,
+                "requested_end_ns": 890083349666084,
+                "requested_start_ns": 890073349666084
+              },
+              "request_phase": {
+                "basis": "unique target request timestamps in the phase; latency requires an exact BR7 chain",
+                "callback_latency_ge_100ms_count": 0,
+                "callback_latency_ge_900ms_count": 0,
+                "refresh_phase": {
+                  "phase_fraction_stats": {
+                    "count": 600,
+                    "max": 0.42403008341483933,
+                    "mean": 0.12185075806044543,
+                    "min": 0.06468098592508463,
+                    "p50": 0.12185689833695328,
+                    "p90": 0.15519331970876357,
+                    "p99": 0.29148129725696337
+                  },
+                  "quartiles": [
+                    {
+                      "count": 588,
+                      "percent": 98.0,
+                      "quartile": 1
+                    },
+                    {
+                      "count": 12,
+                      "percent": 2.0,
+                      "quartile": 2
+                    },
+                    {
+                      "count": 0,
+                      "percent": 0.0,
+                      "quartile": 3
+                    },
+                    {
+                      "count": 0,
+                      "percent": 0.0,
+                      "quartile": 4
+                    }
+                  ],
+                  "reference_period_ns": 16666459,
+                  "reference_presented_time_mach_ns": 890013334716041,
+                  "reference_scope": "fixed full-run BR7 reference; never re-estimated within a notification phase",
+                  "reference_uncertainty": "Descriptive only: a run-wide first displayed presentedTime may not represent local refresh phase during this notification interval or state transition.",
+                  "request_count": 600,
+                  "status": "valid_run_wide_reference"
+                },
+                "request_fps": 60.0,
+                "request_to_callback_latency_ns": {
+                  "count": 600,
+                  "max_ns": 66032083,
+                  "median_ns": 65128458.5,
+                  "p99_ns": 65991672.25
+                },
+                "unique_request_count": 600
+              },
+              "window_state_observation": {
+                "acquisition_context": "no consistent minimized/no-visible-pixels sample state",
+                "associated_sample_count": 12,
+                "classification": "AT_LEAST_SOME_VISIBLE_PIXELS_REPORTED",
+                "miniaturized_sample_count": 0,
+                "no_visible_pixels_reported_sample_count": 0,
+                "observed_display_suppression_state": false,
+                "occlusion_semantics": "window_occluded is the inverse of NSWindowOcclusionStateVisible. The bit reports whether AppKit sees any visible pixels; it does not identify a physical coverage extent or the reason pixels are not visible.",
+                "sample_count": 12,
+                "sampling_interpretation": "discrete target-owned telemetry samples; not continuous state proof",
+                "unassociated_sample_count": 0,
+                "visible_pixels_reported_sample_count": 12,
+                "window_not_visible_sample_count": 0
+              }
+            },
+            "restoration_10s_after": {
+              "acquisition_cohort": {
+                "acquired_count": 600,
+                "acquired_fps": 60.0,
+                "basis": "successful target acquisitions timestamped in the phase",
+                "displayed_cohort_fps": 60.0,
+                "exact_displayed_count": 600,
+                "exact_outcome_coverage_of_acquisitions": 1.0,
+                "exact_zero_count": 0,
+                "host_submit_duration_ns": {
+                  "count": 600,
+                  "max_ns": 19862166,
+                  "median_ns": 15884541.5,
+                  "p99_ns": 17961661.25
+                },
+                "next_drawable_duration_ns": {
+                  "count": 600,
+                  "max_ns": 18975292,
+                  "median_ns": 15379479.0,
+                  "p99_ns": 16895511.34
+                },
+                "next_drawable_ge_100ms_count": 0,
+                "next_drawable_ge_900ms_count": 0,
+                "raw_zero_callback_count": 0,
+                "raw_zero_not_displayed_count": 0,
+                "raw_zero_share_of_acquisitions": 0.0
+              },
+              "interval": {
+                "complete": true,
+                "observed_coverage_ns": 10000000000,
+                "observed_end_ns": 890083349666084,
+                "observed_start_ns": 890073349666084,
+                "requested_duration_ns": 10000000000,
+                "requested_end_ns": 890083349666084,
+                "requested_start_ns": 890073349666084
+              },
+              "request_phase": {
+                "basis": "unique target request timestamps in the phase; latency requires an exact BR7 chain",
+                "callback_latency_ge_100ms_count": 0,
+                "callback_latency_ge_900ms_count": 0,
+                "refresh_phase": {
+                  "phase_fraction_stats": {
+                    "count": 600,
+                    "max": 0.42403008341483933,
+                    "mean": 0.12185075806044543,
+                    "min": 0.06468098592508463,
+                    "p50": 0.12185689833695328,
+                    "p90": 0.15519331970876357,
+                    "p99": 0.29148129725696337
+                  },
+                  "quartiles": [
+                    {
+                      "count": 588,
+                      "percent": 98.0,
+                      "quartile": 1
+                    },
+                    {
+                      "count": 12,
+                      "percent": 2.0,
+                      "quartile": 2
+                    },
+                    {
+                      "count": 0,
+                      "percent": 0.0,
+                      "quartile": 3
+                    },
+                    {
+                      "count": 0,
+                      "percent": 0.0,
+                      "quartile": 4
+                    }
+                  ],
+                  "reference_period_ns": 16666459,
+                  "reference_presented_time_mach_ns": 890013334716041,
+                  "reference_scope": "fixed full-run BR7 reference; never re-estimated within a notification phase",
+                  "reference_uncertainty": "Descriptive only: a run-wide first displayed presentedTime may not represent local refresh phase during this notification interval or state transition.",
+                  "request_count": 600,
+                  "status": "valid_run_wide_reference"
+                },
+                "request_fps": 60.0,
+                "request_to_callback_latency_ns": {
+                  "count": 600,
+                  "max_ns": 66032083,
+                  "median_ns": 65128458.5,
+                  "p99_ns": 65991672.25
+                },
+                "unique_request_count": 600
+              },
+              "window_state_observation": {
+                "acquisition_context": "no consistent minimized/no-visible-pixels sample state",
+                "associated_sample_count": 12,
+                "classification": "AT_LEAST_SOME_VISIBLE_PIXELS_REPORTED",
+                "miniaturized_sample_count": 0,
+                "no_visible_pixels_reported_sample_count": 0,
+                "observed_display_suppression_state": false,
+                "occlusion_semantics": "window_occluded is the inverse of NSWindowOcclusionStateVisible. The bit reports whether AppKit sees any visible pixels; it does not identify a physical coverage extent or the reason pixels are not visible.",
+                "sample_count": 12,
+                "sampling_interpretation": "discrete target-owned telemetry samples; not continuous state proof",
+                "unassociated_sample_count": 0,
+                "visible_pixels_reported_sample_count": 12,
+                "window_not_visible_sample_count": 0
+              }
+            },
+            "steady_hold": {
+              "acquisition_cohort": {
+                "acquired_count": 554,
+                "acquired_fps": 59.96132710868375,
+                "basis": "successful target acquisitions timestamped in the phase",
+                "displayed_cohort_fps": 59.52839333894596,
+                "exact_displayed_count": 550,
+                "exact_outcome_coverage_of_acquisitions": 1.0,
+                "exact_zero_count": 4,
+                "host_submit_duration_ns": {
+                  "count": 554,
+                  "max_ns": 18803125,
+                  "median_ns": 15716333.0,
+                  "p99_ns": 17163453.270000003
+                },
+                "next_drawable_duration_ns": {
+                  "count": 554,
+                  "max_ns": 18261916,
+                  "median_ns": 15190937.5,
+                  "p99_ns": 16058302.28
+                },
+                "next_drawable_ge_100ms_count": 0,
+                "next_drawable_ge_900ms_count": 0,
+                "raw_zero_callback_count": 4,
+                "raw_zero_not_displayed_count": 4,
+                "raw_zero_share_of_acquisitions": 0.007220216606498195
+              },
+              "interval": {
+                "complete": true,
+                "observed_coverage_ns": 9239288500,
+                "observed_end_ns": 890092588954584,
+                "observed_start_ns": 890083349666084,
+                "requested_duration_ns": 9239288500,
+                "requested_end_ns": 890092588954584,
+                "requested_start_ns": 890083349666084
+              },
+              "request_phase": {
+                "basis": "unique target request timestamps in the phase; latency requires an exact BR7 chain",
+                "callback_latency_ge_100ms_count": 0,
+                "callback_latency_ge_900ms_count": 0,
+                "refresh_phase": {
+                  "phase_fraction_stats": {
+                    "count": 555,
+                    "max": 0.3988384695273303,
+                    "mean": 0.1313381175540258,
+                    "min": 0.08826181974227398,
+                    "p50": 0.12848038086554558,
+                    "p90": 0.1559381269890623,
+                    "p99": 0.2869525686290055
+                  },
+                  "quartiles": [
+                    {
+                      "count": 547,
+                      "percent": 98.55855855855856,
+                      "quartile": 1
+                    },
+                    {
+                      "count": 8,
+                      "percent": 1.4414414414414414,
+                      "quartile": 2
+                    },
+                    {
+                      "count": 0,
+                      "percent": 0.0,
+                      "quartile": 3
+                    },
+                    {
+                      "count": 0,
+                      "percent": 0.0,
+                      "quartile": 4
+                    }
+                  ],
+                  "reference_period_ns": 16666459,
+                  "reference_presented_time_mach_ns": 890013334716041,
+                  "reference_scope": "fixed full-run BR7 reference; never re-estimated within a notification phase",
+                  "reference_uncertainty": "Descriptive only: a run-wide first displayed presentedTime may not represent local refresh phase during this notification interval or state transition.",
+                  "request_count": 555,
+                  "status": "valid_run_wide_reference"
+                },
+                "request_fps": 60.069560551118194,
+                "request_to_callback_latency_ns": {
+                  "count": 555,
+                  "max_ns": 65741250,
+                  "median_ns": 65102041.0,
+                  "p99_ns": 65705626.54
+                },
+                "unique_request_count": 555
+              },
+              "window_state_observation": {
+                "acquisition_context": "no consistent minimized/no-visible-pixels sample state",
+                "associated_sample_count": 10,
+                "classification": "AT_LEAST_SOME_VISIBLE_PIXELS_REPORTED",
+                "miniaturized_sample_count": 0,
+                "no_visible_pixels_reported_sample_count": 0,
+                "observed_display_suppression_state": false,
+                "occlusion_semantics": "window_occluded is the inverse of NSWindowOcclusionStateVisible. The bit reports whether AppKit sees any visible pixels; it does not identify a physical coverage extent or the reason pixels are not visible.",
+                "sample_count": 10,
+                "sampling_interpretation": "discrete target-owned telemetry samples; not continuous state proof",
+                "unassociated_sample_count": 0,
+                "visible_pixels_reported_sample_count": 10,
+                "window_not_visible_sample_count": 0
+              }
+            }
+          },
+          "state_changed_fields": [
+            "window_key"
+          ],
+          "state_signature": {
+            "app_active": true,
+            "window_key": true,
+            "window_main": true,
+            "window_miniaturized": false,
+            "window_occluded": false,
+            "window_visible": true
+          },
+          "telemetry_sequence": 65,
+          "timestamp_ns": 890073349666084,
+          "transition_direction": "restoration_to_initial_observed_state",
+          "trigger": "window_notification"
+        },
+        {
+          "elapsed_from_host_start_ns": 60101002250,
+          "next_state_change_timestamp_ns": null,
+          "notification_name": "NSApplicationDidBecomeActiveNotification",
+          "phases": {
+            "before_10s": {
+              "acquisition_cohort": {
+                "acquired_count": 600,
+                "acquired_fps": 60.0,
+                "basis": "successful target acquisitions timestamped in the phase",
+                "displayed_cohort_fps": 60.0,
+                "exact_displayed_count": 600,
+                "exact_outcome_coverage_of_acquisitions": 1.0,
+                "exact_zero_count": 0,
+                "host_submit_duration_ns": {
+                  "count": 600,
+                  "max_ns": 18318000,
+                  "median_ns": 15826604.0,
+                  "p99_ns": 16729283.75
+                },
+                "next_drawable_duration_ns": {
+                  "count": 600,
+                  "max_ns": 17046500,
+                  "median_ns": 15360312.5,
+                  "p99_ns": 16137203.84
+                },
+                "next_drawable_ge_100ms_count": 0,
+                "next_drawable_ge_900ms_count": 0,
+                "raw_zero_callback_count": 0,
+                "raw_zero_not_displayed_count": 0,
+                "raw_zero_share_of_acquisitions": 0.0
+              },
+              "interval": {
+                "complete": true,
+                "observed_coverage_ns": 10000000000,
+                "observed_end_ns": 890073351094209,
+                "observed_start_ns": 890063351094209,
+                "requested_duration_ns": 10000000000,
+                "requested_end_ns": 890073351094209,
+                "requested_start_ns": 890063351094209
+              },
+              "request_phase": {
+                "basis": "unique target request timestamps in the phase; latency requires an exact BR7 chain",
+                "callback_latency_ge_100ms_count": 0,
+                "callback_latency_ge_900ms_count": 0,
+                "refresh_phase": {
+                  "phase_fraction_stats": {
+                    "count": 600,
+                    "max": 0.35619869823578004,
+                    "mean": 0.1850746496301344,
+                    "min": 0.09488224223273822,
+                    "p50": 0.1831542021013582,
+                    "p90": 0.19848862316824467,
+                    "p99": 0.26030825924091006
+                  },
+                  "quartiles": [
+                    {
+                      "count": 591,
+                      "percent": 98.5,
+                      "quartile": 1
+                    },
+                    {
+                      "count": 9,
+                      "percent": 1.5,
+                      "quartile": 2
+                    },
+                    {
+                      "count": 0,
+                      "percent": 0.0,
+                      "quartile": 3
+                    },
+                    {
+                      "count": 0,
+                      "percent": 0.0,
+                      "quartile": 4
+                    }
+                  ],
+                  "reference_period_ns": 16666459,
+                  "reference_presented_time_mach_ns": 890013334716041,
+                  "reference_scope": "fixed full-run BR7 reference; never re-estimated within a notification phase",
+                  "reference_uncertainty": "Descriptive only: a run-wide first displayed presentedTime may not represent local refresh phase during this notification interval or state transition.",
+                  "request_count": 600,
+                  "status": "valid_run_wide_reference"
+                },
+                "request_fps": 60.0,
+                "request_to_callback_latency_ns": {
+                  "count": 600,
+                  "max_ns": 48873166,
+                  "median_ns": 47504562.5,
+                  "p99_ns": 48138628.33
+                },
+                "unique_request_count": 600
+              },
+              "window_state_observation": {
+                "acquisition_context": "no consistent minimized/no-visible-pixels sample state",
+                "associated_sample_count": 12,
+                "classification": "AT_LEAST_SOME_VISIBLE_PIXELS_REPORTED",
+                "miniaturized_sample_count": 0,
+                "no_visible_pixels_reported_sample_count": 0,
+                "observed_display_suppression_state": false,
+                "occlusion_semantics": "window_occluded is the inverse of NSWindowOcclusionStateVisible. The bit reports whether AppKit sees any visible pixels; it does not identify a physical coverage extent or the reason pixels are not visible.",
+                "sample_count": 12,
+                "sampling_interpretation": "discrete target-owned telemetry samples; not continuous state proof",
+                "unassociated_sample_count": 0,
+                "visible_pixels_reported_sample_count": 12,
+                "window_not_visible_sample_count": 0
+              }
+            },
+            "first_10s_after": {
+              "acquisition_cohort": {
+                "acquired_count": 600,
+                "acquired_fps": 60.0,
+                "basis": "successful target acquisitions timestamped in the phase",
+                "displayed_cohort_fps": 60.0,
+                "exact_displayed_count": 600,
+                "exact_outcome_coverage_of_acquisitions": 1.0,
+                "exact_zero_count": 0,
+                "host_submit_duration_ns": {
+                  "count": 600,
+                  "max_ns": 19862166,
+                  "median_ns": 15884541.5,
+                  "p99_ns": 17961661.25
+                },
+                "next_drawable_duration_ns": {
+                  "count": 600,
+                  "max_ns": 18975292,
+                  "median_ns": 15379479.0,
+                  "p99_ns": 16895511.34
+                },
+                "next_drawable_ge_100ms_count": 0,
+                "next_drawable_ge_900ms_count": 0,
+                "raw_zero_callback_count": 0,
+                "raw_zero_not_displayed_count": 0,
+                "raw_zero_share_of_acquisitions": 0.0
+              },
+              "interval": {
+                "complete": true,
+                "observed_coverage_ns": 10000000000,
+                "observed_end_ns": 890083351094209,
+                "observed_start_ns": 890073351094209,
+                "requested_duration_ns": 10000000000,
+                "requested_end_ns": 890083351094209,
+                "requested_start_ns": 890073351094209
+              },
+              "request_phase": {
+                "basis": "unique target request timestamps in the phase; latency requires an exact BR7 chain",
+                "callback_latency_ge_100ms_count": 0,
+                "callback_latency_ge_900ms_count": 0,
+                "refresh_phase": {
+                  "phase_fraction_stats": {
+                    "count": 600,
+                    "max": 0.42403008341483933,
+                    "mean": 0.12185075806044543,
+                    "min": 0.06468098592508463,
+                    "p50": 0.12185689833695328,
+                    "p90": 0.15519331970876357,
+                    "p99": 0.29148129725696337
+                  },
+                  "quartiles": [
+                    {
+                      "count": 588,
+                      "percent": 98.0,
+                      "quartile": 1
+                    },
+                    {
+                      "count": 12,
+                      "percent": 2.0,
+                      "quartile": 2
+                    },
+                    {
+                      "count": 0,
+                      "percent": 0.0,
+                      "quartile": 3
+                    },
+                    {
+                      "count": 0,
+                      "percent": 0.0,
+                      "quartile": 4
+                    }
+                  ],
+                  "reference_period_ns": 16666459,
+                  "reference_presented_time_mach_ns": 890013334716041,
+                  "reference_scope": "fixed full-run BR7 reference; never re-estimated within a notification phase",
+                  "reference_uncertainty": "Descriptive only: a run-wide first displayed presentedTime may not represent local refresh phase during this notification interval or state transition.",
+                  "request_count": 600,
+                  "status": "valid_run_wide_reference"
+                },
+                "request_fps": 60.0,
+                "request_to_callback_latency_ns": {
+                  "count": 600,
+                  "max_ns": 66032083,
+                  "median_ns": 65128458.5,
+                  "p99_ns": 65991672.25
+                },
+                "unique_request_count": 600
+              },
+              "window_state_observation": {
+                "acquisition_context": "no consistent minimized/no-visible-pixels sample state",
+                "associated_sample_count": 11,
+                "classification": "AT_LEAST_SOME_VISIBLE_PIXELS_REPORTED",
+                "miniaturized_sample_count": 0,
+                "no_visible_pixels_reported_sample_count": 0,
+                "observed_display_suppression_state": false,
+                "occlusion_semantics": "window_occluded is the inverse of NSWindowOcclusionStateVisible. The bit reports whether AppKit sees any visible pixels; it does not identify a physical coverage extent or the reason pixels are not visible.",
+                "sample_count": 11,
+                "sampling_interpretation": "discrete target-owned telemetry samples; not continuous state proof",
+                "unassociated_sample_count": 0,
+                "visible_pixels_reported_sample_count": 11,
+                "window_not_visible_sample_count": 0
+              }
+            },
+            "restoration_10s_after": null,
+            "steady_hold": null
+          },
+          "state_changed_fields": [],
+          "state_signature": {
+            "app_active": true,
+            "window_key": true,
+            "window_main": true,
+            "window_miniaturized": false,
+            "window_occluded": false,
+            "window_visible": true
+          },
+          "telemetry_sequence": 66,
+          "timestamp_ns": 890073351094209,
+          "transition_direction": "notification_without_observed_state_change",
+          "trigger": "app_notification"
+        }
+      ],
+      "pathology_assessment": {
+        "bins": [
+          {
+            "acquired_count": 70,
+            "acquired_fps": 70.0,
+            "bin_index": 0,
+            "displayed_cohort_fps": 59.0,
+            "end_elapsed_ns": 1000000000,
+            "exact_displayed_count": 59,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 11,
+            "exact_zero_share_of_exact_outcomes": 0.15714285714285714,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 11,
+            "raw_zero_share_of_acquisitions": 0.15714285714285714,
+            "start_elapsed_ns": 0
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 1,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 2000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 1000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 2,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 3000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 2000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 3,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 4000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 3000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 4,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 5000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 4000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 5,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 6000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 5000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 6,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 7000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 6000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 7,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 8000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 7000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 8,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 9000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 8000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 9,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 10000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 9000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 10,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 11000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 10000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 11,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 12000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 11000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 12,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 13000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 12000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 13,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 14000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 13000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 14,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 15000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 14000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 15,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 16000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 15000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 16,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 17000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 16000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 17,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 18000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 17000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 18,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 19000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 18000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 19,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 20000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 19000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 20,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 21000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 20000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 21,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 22000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 21000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 22,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 23000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 22000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 23,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 24000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 23000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 24,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 25000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 24000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 25,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 26000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 25000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 26,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 27000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 26000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 27,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 28000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 27000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 28,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 29000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 28000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 29,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 30000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 29000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 30,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 31000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 30000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 31,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 32000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 31000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 32,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 33000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 32000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 33,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 34000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 33000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 34,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 35000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 34000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 35,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 36000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 35000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 36,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 37000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 36000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 37,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 38000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 37000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 38,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 39000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 38000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 39,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 40000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 39000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 40,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 41000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 40000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 41,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 42000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 41000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 42,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 43000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 42000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 43,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 44000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 43000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 44,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 45000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 44000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 45,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 46000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 45000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 46,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 47000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 46000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 47,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 48000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 47000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 48,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 49000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 48000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 49,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 50000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 49000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 50,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 51000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 50000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 51,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 52000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 51000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 52,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 53000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 52000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 53,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 54000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 53000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 54,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 55000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 54000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 55,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 56000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 55000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 56,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 57000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 56000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 57,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 58000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 57000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 58,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 59000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 58000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 59,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 60000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 59000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 60,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 61000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 60000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 61,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 62000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 61000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 62,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 63000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 62000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 63,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 64000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 63000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 64,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 65000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 64000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 65,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 66000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 65000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 66,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 67000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 66000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 67,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 68000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 67000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 68,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 69000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 68000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 69,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 70000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 69000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 70,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 71000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 70000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 71,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 72000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 71000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 72,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 73000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 72000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 73,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 74000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 73000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 74,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 75000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 74000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 75,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 76000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 75000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 76,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 77000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 76000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 77,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 78000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 77000000000
+          },
+          {
+            "acquired_count": 60,
+            "acquired_fps": 60.0,
+            "bin_index": 78,
+            "displayed_cohort_fps": 60.0,
+            "end_elapsed_ns": 79000000000,
+            "exact_displayed_count": 60,
+            "exact_outcome_coverage_of_acquisitions": 1.0,
+            "exact_zero_outcome_count": 0,
+            "exact_zero_share_of_exact_outcomes": 0.0,
+            "qualification_reason": "acquisition_rate_below_above_refresh_floor",
+            "qualifies": false,
+            "raw_zero_callback_count": 0,
+            "raw_zero_share_of_acquisitions": 0.0,
+            "start_elapsed_ns": 78000000000
+          }
+        ],
+        "classification": "NO_SUSTAINED_PATHOLOGY_OBSERVED",
+        "criteria": {
+          "acquired_fps_at_least": 75.0,
+          "displayed_cohort_fps_at_most": 30.0,
+          "displayed_definition": "exact BR7 chain classified as presented",
+          "exact_outcome_coverage_at_least": 0.9,
+          "exact_zero_share_of_exact_outcomes_at_least": 0.5,
+          "minimum_above_refresh_ratio": 1.25,
+          "minimum_consecutive_seconds": 5,
+          "minimum_reference_fps": 75.0,
+          "observed_available_screen_refresh_rates_hz": [
+            60.0
+          ],
+          "raw_zero_share_of_acquisitions_at_least": 0.5,
+          "whole_bin_duration_ns": 1000000000,
+          "zero_definition": "unique target callback in the acquisition cohort with raw presented_time_mach_ns equal to zero"
+        },
+        "evidence_status": "evaluated",
+        "interpretation": "Low or near-zero acquisition cannot qualify. A sustained segment requires at least max(75 FPS, 1.25 times the highest target-reported screen refresh) and at least half of acquisitions with a unique raw-zero callback, at most 30 exact displayed acquisitions per second, at least half of exact outcomes classified as zero, at least 90 percent exact-outcome coverage, and five contiguous full one-second bins. This is a run-local descriptive classifier.",
+        "low_acquisition_zero_bins_excluded": 0,
+        "qualifying_second_count": 0,
+        "sustained_pathology_observed": false,
+        "sustained_segments": []
+      },
+      "run_directory": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11d3b/runs/step11d3b-br8-state-02-20261011-005208-590fa5da",
+      "run_id": "step11d3b-br8-state-02-20261011-005208-590fa5da",
+      "source_files": [
+        {
+          "path": "run-result.json",
+          "role": "run_result",
+          "sha256": "e99189ffaec382e4be525f42de07225cd6d9b87bcff7c81dc2cee37ab4f2d247"
+        },
+        {
+          "path": "trace-index.json",
+          "role": "trace_index",
+          "sha256": "5263432a042816a229d290054dd6fd6845b553a2cc8f0912c268a440fbb7431f"
+        },
+        {
+          "path": "run-manifest.json",
+          "role": "run_manifest",
+          "sha256": "1a83d4508440bef19bcbf8ae31ebb28fd71c8019403a4cb1883ff10d1cc1b511"
+        },
+        {
+          "path": "app-trace.jsonl",
+          "role": "app_trace",
+          "sha256": "cc4f2c50adaacd02a441a2ba3900fce20fdaccbb758be5e6cceb4e5d734f1f5c"
+        },
+        {
+          "path": "host-traces/host-trace.9014.jsonl",
+          "role": "target_host_trace",
+          "sha256": "7ab40605d26016065d598da788f8a7910f81ed6350541dc5dd68173d0170fc0c"
+        },
+        {
+          "path": "experiments/dxvk_macos_step11d3b/STEP-11D3-BR6-REPORT.md",
+          "role": "accepted_set_report",
+          "sha256": "1129661a438430e29a077011cc2eb65b4676039c4d73179c3364aee6beb6feaa"
+        }
+      ]
+    }
+  ],
+  "schema_version": 1
+}

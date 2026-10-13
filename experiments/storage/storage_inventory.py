@@ -490,11 +490,13 @@ def main() -> int:
         "filesystem": {
             "mount_path": str(REPO), "free_bytes": free,
             "total_bytes": statvfs.f_blocks * statvfs.f_frsize,
-            "warning_bytes": 35 * 1024 ** 3,
+            "warning_bytes": 50 * 1024 ** 3,
             "hard_stop_bytes": 25 * 1024 ** 3,
             "emergency_bytes": 15 * 1024 ** 3,
-            "gate_minimum_bytes": 45 * 1024 ** 3,
+            "gate_minimum_bytes": 50 * 1024 ** 3,
             "preferred_free_bytes": 60 * 1024 ** 3,
+            "scoped_project_warning_bytes": 52 * 1024 ** 3,
+            "scoped_project_ceiling_bytes": 55 * 1024 ** 3,
             "allocation_note": ("Root and directory allocations deduplicate hard links by device/inode. APFS clone/shared extents are not identified; "
                                 "unlinked open read-only cache images are conservatively represented by vnode-length upper bounds; "
                                 "post-cleanup df is authoritative."),

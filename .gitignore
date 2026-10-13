@@ -31,3 +31,21 @@ __pycache__/
 # locally and track their byte-exact gzip archives beside them.
 /experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-300s-10-low-candidate/runtime.log
 /experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-300s-10-low-candidate/slow-visual_d3d11.log
+
+# Large raw captures and rebuildable control binaries stay local; reports,
+# compact run results, manifests, analyses, and cleanup receipts remain reviewable.
+/experiments/dxvk_macos_step11d3a/evidence/native-runs/**/trace.jsonl
+/experiments/dxvk_macos_step11d3b/runs/
+/experiments/dxvk_macos_step11d3b/control/*.exe
+/experiments/dxvk_macos_step11d3b/control/*.dylib
+/experiments/dxvk_macos_step11d3b/control/test_proxy_device_dispatch
+/experiments/dxvk_macos_step11d3b/test_proxy_device_dispatch
+/experiments/dxvk_macos_step11d3b/evidence/**/*.exe
+/experiments/dxvk_macos_step11d3b/evidence/**/*.dylib
+/experiments/dxvk_macos_step11d3b/evidence/**/public-window-observer
+/experiments/dxvk_macos_step11d3b/evidence/br4/collision-proof/collision_harness
+/experiments/dxvk_macos_step11d3b/evidence/br7/ownership-test
+/experiments/dxvk_macos_step11d3b/evidence/br7/ownership-test-final
+# Retain verified archives and receipts locally; this 335 MB archive exceeds
+# GitHub's per-file size limit.
+/experiments/dxvk_macos_step11d3b/evidence/br7/superseded-pre-br7.tar.gz

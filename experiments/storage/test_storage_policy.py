@@ -20,6 +20,523 @@ import storage_gate0 as gate0
 import build_retention
 
 
+class ProjectedStorageAdmissionTests(unittest.TestCase):
+    def test_scoped_54_gib_with_projected_free_60_gib_passes(self) -> None:
+        result = policy.projected_storage_admission(
+            current_free_bytes=60 * policy.GIB,
+            current_scoped_bytes=54 * policy.GIB,
+            peak_additional_bytes=0,
+        )
+        self.assertTrue(result["admitted"])
+        self.assertEqual(result["projected_free_bytes"], 60 * policy.GIB)
+        self.assertEqual(result["projected_scoped_bytes"], 54 * policy.GIB)
+
+    def test_exact_projected_limits_are_admitted(self) -> None:
+        result = policy.projected_storage_admission(
+            current_free_bytes=51 * policy.GIB,
+            current_scoped_bytes=54 * policy.GIB,
+            peak_additional_bytes=policy.GIB,
+        )
+        self.assertTrue(result["admitted"])
+        self.assertEqual(result["projected_free_bytes"], 50 * policy.GIB)
+        self.assertEqual(result["projected_scoped_bytes"], 55 * policy.GIB)
+        self.assertIn("projected scoped FG-Metal usage exceeds the 52 GiB warning threshold",
+                      result["warnings"])
+
+    def test_existing_45_plus_gib_allocation_is_not_blocked_by_old_ceiling(self) -> None:
+        result = policy.projected_storage_admission(
+            current_free_bytes=60 * policy.GIB,
+            current_scoped_bytes=46 * policy.GIB,
+            peak_additional_bytes=policy.GIB,
+        )
+        self.assertTrue(result["admitted"])
+
+    def test_projected_scope_over_55_gib_is_rejected_even_when_current_scope_passes(self) -> None:
+        result = policy.projected_storage_admission(
+            current_free_bytes=60 * policy.GIB,
+            current_scoped_bytes=54 * policy.GIB,
+            peak_additional_bytes=policy.GIB + 1,
+        )
+        self.assertFalse(result["admitted"])
+        self.assertEqual(result["projected_scoped_bytes"], 55 * policy.GIB + 1)
+
+    def test_projected_free_below_50_gib_is_rejected_when_scope_passes(self) -> None:
+        result = policy.projected_storage_admission(
+            current_free_bytes=50 * policy.GIB + 1,
+            current_scoped_bytes=54 * policy.GIB,
+            peak_additional_bytes=2,
+        )
+        self.assertFalse(result["admitted"])
+        self.assertEqual(result["projected_scoped_bytes"], 54 * policy.GIB + 2)
+        self.assertEqual(result["projected_free_bytes"], 50 * policy.GIB - 1)
+
+    def test_prefix_materialization_keeps_full_cow_peak_for_free_admission(self) -> None:
+        prefix_bytes = 3 * policy.GIB
+        persistent_bytes = 100 * policy.MIB
+        declared_bytes = prefix_bytes + persistent_bytes
+        margin = policy.admission_uncertainty_margin_bytes(declared_bytes)
+        estimates = {
+            "expected_prefix_bytes": prefix_bytes,
+            "expected_build_bytes": 0,
+            "estimated_persistent_bytes": persistent_bytes,
+            "estimated_uncertainty_margin_bytes": margin,
+            "estimated_projected_new_disk_bytes": declared_bytes + margin,
+        }
+        current_free = 52 * policy.GIB
+        current_scope = 48 * policy.GIB
+
+        old_incomplete_recheck = policy.projected_storage_admission(
+            current_free_bytes=current_free,
+            current_scoped_bytes=current_scope,
+            peak_additional_bytes=persistent_bytes + margin,
+        )
+        corrected_recheck = policy._post_materialization_prefix_admission(
+            current_free_bytes=current_free,
+            current_scoped_bytes=current_scope,
+            manifest_estimates=estimates,
+        )
+
+        self.assertTrue(old_incomplete_recheck["admitted"])
+        self.assertFalse(corrected_recheck["admitted"])
+        self.assertIn("projected free disk is below the 50 GiB normal minimum",
+                      corrected_recheck["blockers"])
+        self.assertEqual(corrected_recheck["peak_additional_bytes"], declared_bytes + margin)
+
+    def test_prefix_materialization_keeps_full_cow_peak_for_scope_admission(self) -> None:
+        prefix_bytes = 3 * policy.GIB
+        declared_bytes = prefix_bytes
+        margin = policy.admission_uncertainty_margin_bytes(declared_bytes)
+        estimates = {
+            "expected_prefix_bytes": prefix_bytes,
+            "expected_build_bytes": 0,
+            "estimated_persistent_bytes": 0,
+            "estimated_uncertainty_margin_bytes": margin,
+            "estimated_projected_new_disk_bytes": declared_bytes + margin,
+        }
+
+        result = policy._post_materialization_prefix_admission(
+            current_free_bytes=60 * policy.GIB,
+            current_scoped_bytes=53 * policy.GIB,
+            manifest_estimates=estimates,
+        )
+
+        self.assertFalse(result["admitted"])
+        self.assertIn("projected scoped FG-Metal usage exceeds the 55 GiB ceiling",
+                      result["blockers"])
+
+    def test_unlinked_mounted_image_upper_bound_is_included(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="fgmetal-inventory-bound-", dir="/private/tmp") as temp:
+            inventory_path = Path(temp) / "inventory.json"
+            inventory_path.write_text(json.dumps({"totals": {
+                "fgmetal_scoped_allocated_inode_bytes": 48 * policy.GIB,
+                "fgmetal_scoped_unlinked_mount_backing_upper_bound_bytes": policy.GIB,
+            }}), encoding="utf-8")
+            with mock.patch.object(policy, "INVENTORY_PATH", inventory_path):
+                measured = policy.conservative_project_usage_bytes({
+                    "allocated_inode_deduplicated_bytes": 47 * policy.GIB,
+                })
+        self.assertEqual(measured, 48 * policy.GIB)
+
+
+class PrefixLeaseAllocationAccountingTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.temp = tempfile.TemporaryDirectory(prefix="fgmetal-prefix-allocation-test-", dir="/private/tmp")
+        self.addCleanup(self.temp.cleanup)
+        self.key_path = Path(self.temp.name) / "signing-key"
+        self.key = policy._manifest_signing_key
+        self._key_patch = mock.patch.object(policy, "MANIFEST_SIGNING_KEY_PATH", self.key_path)
+        self._key_patch.start()
+        self.addCleanup(self._key_patch.stop)
+        policy._manifest_signing_key(create=True)
+        self.attested_scope = 47_831_126_016
+        self.attested_free = 68_871_286_784
+        self.nonlease_scope = 47_865_233_408
+        self.gate0_observed_scope = self.nonlease_scope
+        self.prefix_bytes = 2_303_463_424
+        self.output_bytes = 0
+        self.current_scope = 50_168_705_024
+        self.current_free = 67_814_637_568
+        self.expected_prefix = 3 * policy.GIB
+        self.persistent = 100 * policy.MIB
+        self.projected_peak = 3_658_691_380
+        self.binding = {
+            "experiment_id": "z4-regression",
+            "pid": os.getpid(),
+            "lease_token": "a" * 64,
+            "prefix_path": "/tmp/z4-regression-prefix",
+            "active_marker_path": "/tmp/z4-active/z4-regression.json",
+            "output_dir": "/tmp/z4-regression-output",
+        }
+        self.receipt = self._receipt()
+
+    def _receipt(self, **overrides: object) -> dict[str, object]:
+        record: dict[str, object] = {
+            "schema_version": 1,
+            **self.binding,
+            "pre_materialization_free_bytes": 67_819_061_248,
+            "post_materialization_free_bytes": 67_816_251_392,
+            "gate0_attested_observed_scope_bytes": self.gate0_observed_scope,
+            "gate0_attested_nonlease_scope_bytes": self.gate0_observed_scope,
+            "pre_materialization_nonlease_scope_bytes": self.nonlease_scope,
+            "post_materialization_nonlease_scope_bytes": self.nonlease_scope,
+            "pre_materialization_output_allocated_bytes": self.output_bytes,
+            "post_materialization_output_allocated_bytes": self.output_bytes,
+            "materialized_prefix_allocated_bytes": self.prefix_bytes,
+            "expected_prefix_bytes": self.expected_prefix,
+            "estimated_persistent_bytes": self.persistent,
+            "estimated_projected_new_disk_bytes": self.projected_peak,
+            "post_materialization_scope_bytes": self.current_scope,
+            "created_at_unix": time.time(),
+            **overrides,
+        }
+        return policy._seal_storage_evidence(record, "prefix_materialization_hmac_sha256")
+
+    def _blockers(self, *, receipt: dict[str, object] | None = None,
+                  current_free: int | None = None,
+                  current_scope: int | None = None,
+                  current_nonlease_scope: int | None = None,
+                  prefix_bytes: int | None = None,
+                  output_bytes: int | None = None,
+                  other_leases: int = 0) -> list[str]:
+        selected_receipt = receipt or self.receipt
+        return policy._prefix_lease_accounting_blockers(
+            selected_receipt,
+            current_free_bytes=self.current_free if current_free is None else current_free,
+            current_project_bytes=self.current_scope if current_scope is None else current_scope,
+            current_nonlease_project_bytes=(
+                self.nonlease_scope if current_nonlease_scope is None else current_nonlease_scope),
+            attested_nonlease_project_bytes=self.gate0_observed_scope,
+            current_prefix_allocated_bytes=self.prefix_bytes if prefix_bytes is None else prefix_bytes,
+            current_output_allocated_bytes=self.output_bytes if output_bytes is None else output_bytes,
+            attested_free_bytes=self.attested_free,
+            other_active_lease_count=other_leases,
+            expected_binding=self.binding,
+        )
+
+    def test_a_no_materialization_delta_passes(self) -> None:
+        receipt = self._receipt(materialized_prefix_allocated_bytes=0)
+        self.assertEqual(self._blockers(receipt=receipt, current_scope=self.nonlease_scope + 8_192,
+                                        prefix_bytes=0), [])
+
+    def test_b_legitimate_materialization_within_reservation_passes(self) -> None:
+        self.assertEqual(self._blockers(), [])
+
+    def test_c_materialization_near_reservation_passes_when_policy_limits_hold(self) -> None:
+        near_bound = self.expected_prefix
+        current_scope = self.nonlease_scope + near_bound + 8_192
+        receipt = self._receipt(materialized_prefix_allocated_bytes=near_bound,
+                                post_materialization_scope_bytes=current_scope)
+        self.assertEqual(self._blockers(receipt=receipt, current_scope=current_scope,
+                                        prefix_bytes=near_bound), [])
+
+    def test_d_materialization_over_authenticated_reservation_fails(self) -> None:
+        over_bound = self.expected_prefix + 1
+        receipt = self._receipt(materialized_prefix_allocated_bytes=over_bound)
+        self.assertTrue(any("signed reservation receipt" in blocker
+                            for blocker in self._blockers(receipt=receipt, prefix_bytes=over_bound)))
+
+    def test_e_unrelated_scoped_growth_during_active_lease_fails(self) -> None:
+        excess = 64 * policy.MIB
+        self.assertTrue(any("unrelated non-lease storage changed since Gate 0" in blocker
+                            for blocker in self._blockers(
+                                current_scope=self.current_scope + excess,
+                                current_nonlease_scope=self.nonlease_scope + excess)))
+
+    def test_materialization_rebase_rejects_concurrent_unrelated_growth(self) -> None:
+        growth = 64 * policy.MIB
+        receipt = self._receipt(
+            post_materialization_nonlease_scope_bytes=self.nonlease_scope + growth)
+        blockers = self._blockers(
+            receipt=receipt,
+            current_scope=self.current_scope + growth,
+            current_nonlease_scope=self.nonlease_scope + growth)
+        self.assertTrue(any("changed during PrefixLease materialization" in blocker
+                            for blocker in blockers))
+
+    def test_gate0_to_pre_materialization_growth_fails_without_tolerance(self) -> None:
+        excess = 64 * policy.MIB
+        receipt = self._receipt(
+            gate0_attested_nonlease_scope_bytes=self.attested_scope,
+            pre_materialization_nonlease_scope_bytes=self.nonlease_scope,
+            post_materialization_nonlease_scope_bytes=self.nonlease_scope)
+        self.assertTrue(any("unrelated non-lease storage changed since Gate 0" in blocker
+                            for blocker in self._blockers(
+                                receipt=receipt,
+                                current_scope=self.current_scope,
+                                current_nonlease_scope=self.attested_scope + excess)))
+
+    def test_f_second_active_prefix_lease_fails(self) -> None:
+        self.assertTrue(any("another or interrupted PrefixLease" in blocker
+                            for blocker in self._blockers(other_leases=1)))
+
+    def test_g_wrong_or_stale_lease_binding_fails(self) -> None:
+        wrong_lease = self._receipt(experiment_id="different-experiment")
+        self.assertTrue(any("stale or different lease" in blocker
+                            for blocker in self._blockers(receipt=wrong_lease)))
+        tampered = dict(self.receipt)
+        tampered["lease_token"] = "b" * 64
+        self.assertTrue(any("unauthenticated" in blocker
+                            for blocker in self._blockers(receipt=tampered)))
+
+    def test_h_projected_free_below_50_gib_fails(self) -> None:
+        blockers = self._blockers(current_free=49 * policy.GIB,
+                                  current_scope=self.current_scope)
+        self.assertTrue(any("50 GiB" in blocker for blocker in blockers))
+
+    def test_i_current_or_projected_scope_over_55_gib_fails(self) -> None:
+        blockers = self._blockers(current_scope=55 * policy.GIB + 1)
+        self.assertTrue(any("55 GiB" in blocker for blocker in blockers))
+        self.assertTrue(any("projected scoped FG-Metal usage exceeds the 55 GiB ceiling"
+                            in blocker for blocker in blockers))
+
+    def test_z3_byte_exact_regression_fails_old_guard_and_passes_lease_guard(self) -> None:
+        old_delta = self.current_scope - self.attested_scope
+        old_upper_bound = self.attested_scope + policy.GIB
+        self.assertEqual(old_delta, 2_337_579_008)
+        self.assertEqual(old_upper_bound, 48_904_867_840)
+        self.assertEqual(self.current_scope - old_upper_bound, 1_263_837_184)
+        self.assertEqual(self.nonlease_scope - self.attested_scope, 34_107_392)
+        self.assertEqual(self.current_scope, self.nonlease_scope + self.prefix_bytes + 8_192)
+        self.assertEqual(self.prefix_bytes, 2_303_463_424)
+        historical_receipt = self._receipt(
+            gate0_attested_nonlease_scope_bytes=self.attested_scope)
+        self.assertTrue(any("stale Gate 0 storage baseline" in blocker
+                            for blocker in self._blockers(receipt=historical_receipt)))
+        # A fresh Gate 0 binds the exact pre-materialization observed scope.
+        fresh_receipt = self._receipt(
+            gate0_attested_nonlease_scope_bytes=self.nonlease_scope)
+        self.assertEqual(self._blockers(receipt=fresh_receipt), [])
+
+    def test_policy_thresholds_remain_unchanged(self) -> None:
+        self.assertEqual(policy.GATE0_PROJECT_BUDGET, 55 * policy.GIB)
+        self.assertEqual(policy.FREE_MINIMUM, 50 * policy.GIB)
+        self.assertEqual(policy.FREE_PREFERRED, 60 * policy.GIB)
+        self.assertEqual(policy.PROJECT_WARNING, 52 * policy.GIB)
+        self.assertEqual(policy.FREE_HARD_STOP, 25 * policy.GIB)
+        self.assertEqual(policy.MIN_ADMISSION_UNCERTAINTY_MARGIN, 256 * policy.MIB)
+        self.assertEqual(policy.ADMISSION_UNCERTAINTY_BASIS_POINTS, 1000)
+
+    def test_excluding_lease_tree_keeps_hardlinks_that_exist_outside_it(self) -> None:
+        root = Path(self.temp.name) / "measured-project"
+        root.mkdir()
+        prefix = root / "prefix"
+        prefix.mkdir()
+        outside = root / "outside.bin"
+        outside.write_bytes(b"outside-linked-data" * 1024)
+        os.link(outside, prefix / "outside-link.bin")
+        (prefix / "lease-only.bin").write_bytes(b"lease-owned-data" * 1024)
+        discovered = policy.DiscoveredProjectRoot(
+            root, policy.ROOT_CLASS_MANDATORY, "synthetic-test")
+
+        with mock.patch.object(policy, "_classified_project_roots", return_value=[discovered]):
+            total = policy.measure_project_usage()
+            excluded = policy.measure_project_usage(exclude_paths=(prefix,))
+
+        outside_bytes = outside.stat().st_blocks * 512
+        lease_only_bytes = (prefix / "lease-only.bin").stat().st_blocks * 512
+        self.assertEqual(total["allocated_inode_deduplicated_bytes"], outside_bytes + lease_only_bytes)
+        self.assertEqual(excluded["allocated_inode_deduplicated_bytes"], outside_bytes + lease_only_bytes)
+        self.assertEqual(excluded["allocated_inode_deduplicated_bytes_excluding_paths"], outside_bytes)
+
+
+class SignedPersistentOutputAccountingTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.temp = tempfile.TemporaryDirectory(
+            prefix="fgmetal-signed-output-test-", dir="/private/tmp")
+        self.addCleanup(self.temp.cleanup)
+        self.repo = Path(self.temp.name) / "repo"
+        self.manifests = self.repo / "experiments/storage/manifests"
+        self.manifests.mkdir(parents=True)
+        self.runs = self.repo / "experiments/test-runs"
+        self.runs.mkdir(parents=True)
+        self.key_path = Path(self.temp.name) / "signing-key"
+        self.key_patch = mock.patch.object(policy, "MANIFEST_SIGNING_KEY_PATH", self.key_path)
+        self.key_patch.start()
+        self.addCleanup(self.key_patch.stop)
+        policy._manifest_signing_key(create=True)
+        self.repo_patch = mock.patch.object(policy, "REPO", self.repo)
+        self.repo_patch.start()
+        self.addCleanup(self.repo_patch.stop)
+        self.discovered = policy.DiscoveredProjectRoot(
+            self.repo, policy.ROOT_CLASS_MANDATORY, "synthetic-signed-output-test")
+
+    def _write_manifest(self, experiment_id: str, *, persistent: int = 64 * policy.MIB,
+                        gate0_hash: str = "0" * 64,
+                        output_dir: Path | None = None) -> tuple[Path, Path]:
+        selected_output = output_dir or self.runs / experiment_id
+        selected_output.mkdir(parents=True, exist_ok=True)
+        manifest_path = self.manifests / f"{experiment_id}.json"
+        estimates = {
+            "expected_duration_seconds": 60,
+            "expected_prefix_bytes": 0,
+            "expected_build_bytes": 0,
+            "estimated_persistent_bytes": persistent,
+            "estimated_max_new_disk_bytes": persistent,
+            "estimated_uncertainty_margin_bytes": policy.admission_uncertainty_margin_bytes(persistent),
+            "estimated_projected_new_disk_bytes": (
+                persistent + policy.admission_uncertainty_margin_bytes(persistent)),
+            "project_budget_bytes": policy.PROJECT_BUDGET,
+        }
+        manifest = {
+            **estimates,
+            "experiment_id": experiment_id,
+            "purpose": "synthetic signed-output accounting test",
+            "candidate_hashes": {},
+            "created_at_unix": time.time(),
+            "expected_prefix_requirement": False,
+            "expected_build_requirement": False,
+            "project_estimated_peak_bytes": persistent,
+            "projected_free_bytes": 100 * policy.GIB,
+            "projected_scoped_project_bytes": 1 * policy.GIB,
+            "storage_admission_warnings": [],
+            "project_budget_remaining_before_bytes": policy.PROJECT_BUDGET,
+            "free_before_bytes": 100 * policy.GIB,
+            "project_usage_before": {"allocated_inode_deduplicated_bytes": policy.GIB},
+            "blockers": [],
+            "warnings": [],
+            "cleanup_policy": "synthetic cleanup",
+            "retention_policy": "synthetic retention",
+            "storage_justification": None,
+            "persistent_growth_over_2g_approved": False,
+            "persistent_growth_over_2g_approval_reason": None,
+            "internal_storage_setup": False,
+            "storage_policy_smoke": False,
+            "gate0_attestation_sha256": gate0_hash,
+            "authorized_runner_paths": [],
+            "authorized_runner_sha256": {},
+            "build_source_tree_hash": None,
+            "build_configuration_key_sha256": None,
+            "build_kind": None,
+            "build_type": None,
+            "dependency_state": None,
+            "preserve_debug_reason": None,
+            "estimated_debug_bytes": None,
+            "failure_capture_paths": [],
+            "native_architecture": None,
+            "output_dir": str(selected_output),
+            "manifest_path": str(manifest_path),
+            "decision": "ALLOW",
+        }
+        manifest["manifest_hmac_sha256"] = policy._manifest_signature(manifest, create_key=True)
+        policy._write_json(manifest_path, manifest)
+        return manifest_path, selected_output
+
+    def test_signed_run_output_stays_in_whole_total_but_not_nonlease_total(self) -> None:
+        _manifest_path, output = self._write_manifest("signed-output-a")
+        (output / "run.bin").write_bytes(b"r" * (1024 * 1024))
+        unrelated = self.repo / "unrelated.bin"
+        unrelated.write_bytes(b"u" * (512 * 1024))
+
+        with mock.patch.object(policy, "_classified_project_roots", return_value=[self.discovered]):
+            snapshot, exclusions, blockers = policy._signed_persistent_output_snapshot()
+            total = policy.measure_project_usage()
+            nonlease = policy.measure_project_usage(exclude_paths=exclusions)
+
+        self.assertEqual(blockers, [])
+        self.assertEqual(len(snapshot["bindings"]), 1)
+        self.assertEqual(nonlease["allocated_inode_deduplicated_bytes_excluding_paths"],
+                         unrelated.stat().st_blocks * 512)
+        self.assertGreater(total["allocated_inode_deduplicated_bytes"],
+                           nonlease["allocated_inode_deduplicated_bytes_excluding_paths"])
+        self.assertGreaterEqual(policy.conservative_project_usage_bytes(total),
+                                total["allocated_inode_deduplicated_bytes"])
+
+    def test_signed_output_over_reservation_blocks_and_is_not_excluded(self) -> None:
+        manifest_path, output = self._write_manifest("signed-output-over", persistent=policy.MIB)
+        (output / "oversized.bin").write_bytes(b"o" * (8 * policy.MIB))
+
+        snapshot, exclusions, blockers = policy._signed_persistent_output_snapshot()
+
+        self.assertTrue(any("exceeds its persistent reservation" in item for item in blockers))
+        self.assertEqual(snapshot["bindings"], ())
+        self.assertNotIn(output, exclusions)
+        self.assertNotIn(manifest_path, exclusions)
+
+    def test_tampered_signed_manifest_does_not_authorize_output_exclusion(self) -> None:
+        manifest_path, output = self._write_manifest("signed-output-tampered")
+        (output / "run.bin").write_bytes(b"t" * (1024 * 1024))
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        manifest["output_dir"] = str(self.runs / "different-output")
+        policy._write_json(manifest_path, manifest)
+
+        with mock.patch.object(policy, "_classified_project_roots", return_value=[self.discovered]):
+            _snapshot, exclusions, blockers = policy._signed_persistent_output_snapshot()
+            total = policy.measure_project_usage()
+            unexcluded = policy.measure_project_usage(exclude_paths=exclusions)
+
+        self.assertEqual(blockers, [])
+        self.assertEqual(exclusions, ())
+        self.assertEqual(total["allocated_inode_deduplicated_bytes"],
+                         unexcluded["allocated_inode_deduplicated_bytes"])
+
+    def test_signed_output_snapshot_rebinds_allocation_growth(self) -> None:
+        _manifest_path, output = self._write_manifest("signed-output-rebind")
+        (output / "first.bin").write_bytes(b"a" * (1024 * 1024))
+        before, before_exclusions, before_blockers = policy._signed_persistent_output_snapshot()
+        (output / "second.bin").write_bytes(b"b" * (1024 * 1024))
+        after, after_exclusions, after_blockers = policy._signed_persistent_output_snapshot()
+
+        self.assertEqual(before_blockers, [])
+        self.assertEqual(after_blockers, [])
+        self.assertEqual(before_exclusions, after_exclusions)
+        self.assertNotEqual(before, after)
+
+    def test_signed_output_snapshot_detects_same_allocation_file_mutation(self) -> None:
+        _manifest_path, output = self._write_manifest("signed-output-content-rebind")
+        file_path = output / "evidence.bin"
+        file_path.write_bytes(b"a" * (1024 * 1024))
+        before, _before_exclusions, before_blockers = policy._signed_persistent_output_snapshot()
+        before_allocation = before["bindings"][0]["output_allocated_bytes"]
+        with file_path.open("r+b") as stream:
+            stream.write(b"b")
+            stream.flush()
+            os.fsync(stream.fileno())
+        after, _after_exclusions, after_blockers = policy._signed_persistent_output_snapshot()
+
+        self.assertEqual(before_blockers, [])
+        self.assertEqual(after_blockers, [])
+        self.assertEqual(after["bindings"][0]["output_allocated_bytes"], before_allocation)
+        self.assertNotEqual(before["bindings"][0]["output_tree_sha256"],
+                            after["bindings"][0]["output_tree_sha256"])
+
+    def test_new_signed_output_must_bind_current_gate0_attestation(self) -> None:
+        manifest_path, _output = self._write_manifest(
+            "signed-output-current-gate", gate0_hash="a" * 64)
+        _snapshot, _exclusions, blockers = policy._signed_persistent_output_snapshot(
+            expected_gate0_attestation_sha256="a" * 64)
+        self.assertEqual(blockers, [])
+
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        manifest["gate0_attestation_sha256"] = "b" * 64
+        manifest.pop("manifest_hmac_sha256")
+        manifest["manifest_hmac_sha256"] = policy._manifest_signature(manifest)
+        policy._write_json(manifest_path, manifest)
+        _snapshot, _exclusions, blockers = policy._signed_persistent_output_snapshot(
+            expected_gate0_attestation_sha256="a" * 64)
+        self.assertTrue(any("does not bind the current Gate 0" in item for item in blockers))
+
+    def test_current_run_scope_binding_rejects_signed_manifest_missing_required_field(self) -> None:
+        experiment_id = "signed-current-run-schema"
+        attestation_bytes = b"synthetic-gate0-attestation"
+        manifest_path, _output = self._write_manifest(
+            experiment_id,
+            gate0_hash=hashlib.sha256(attestation_bytes).hexdigest())
+
+        binding, blockers = policy._current_run_scope_binding(experiment_id, attestation_bytes)
+        self.assertIsNotNone(binding)
+        self.assertEqual(blockers, [])
+
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        manifest.pop("purpose")
+        manifest.pop("manifest_hmac_sha256")
+        manifest["manifest_hmac_sha256"] = policy._manifest_signature(manifest)
+        policy._write_json(manifest_path, manifest)
+
+        binding, blockers = policy._current_run_scope_binding(experiment_id, attestation_bytes)
+        self.assertIsNone(binding)
+        self.assertTrue(any("missing required fields" in item for item in blockers))
+
+
 class PrefixLeasePolicyTests(unittest.TestCase):
     def setUp(self) -> None:
         self.temp = tempfile.TemporaryDirectory(prefix="fgmetal-prefix-policy-test-", dir="/private/tmp")
@@ -85,7 +602,10 @@ class PrefixLeasePolicyTests(unittest.TestCase):
         lease = self._wine_launch_lease()
         env = {"WINEPREFIX": str(lease.prefix)}
         process = mock.Mock()
-        with mock.patch.object(policy, "assert_prefix_lease"), \
+        # This test isolates command selection; durable lease bindings are
+        # exercised with real marker files in test_prefixlease_wineprefix_contract.
+        with mock.patch.object(policy, "_assert_prefix_lease_locked"), \
+                mock.patch.object(lease, "_assert_bound_prefix_lease"), \
                 mock.patch.object(policy, "_spawn_in_directory_fd", return_value=process) as spawn:
             result = lease.start_wine_process(
                 ["/usr/bin/arch", "-x86_64", str(lease._wine_loader_path), "wineboot", "-u"],
@@ -97,7 +617,7 @@ class PrefixLeasePolicyTests(unittest.TestCase):
     def test_wine_launcher_rejects_unrelated_executable_with_wine_argument(self) -> None:
         lease = self._wine_launch_lease("wine-shell-rejected")
         env = {"WINEPREFIX": str(lease.prefix)}
-        with mock.patch.object(policy, "assert_prefix_lease"), \
+        with mock.patch.object(policy, "_assert_prefix_lease_locked"), \
                 mock.patch.object(policy, "_spawn_in_directory_fd") as spawn:
             with self.assertRaisesRegex(ValueError, "must execute the certified Wine binary"):
                 lease.start_wine_process(
@@ -108,7 +628,7 @@ class PrefixLeasePolicyTests(unittest.TestCase):
     def test_wine_launcher_rejects_process_control_overrides(self) -> None:
         lease = self._wine_launch_lease("wine-executable-override-rejected")
         env = {"WINEPREFIX": str(lease.prefix)}
-        with mock.patch.object(policy, "assert_prefix_lease"), \
+        with mock.patch.object(policy, "_assert_prefix_lease_locked"), \
                 mock.patch.object(policy, "_spawn_in_directory_fd") as spawn:
             with self.assertRaisesRegex(ValueError, "unsupported process-control options: executable"):
                 lease.start_wine_process(
@@ -119,7 +639,7 @@ class PrefixLeasePolicyTests(unittest.TestCase):
     def test_wine_launcher_rejects_environment_changes_after_sealing(self) -> None:
         lease = self._wine_launch_lease("wine-env-mismatch-rejected")
         env = {**lease._env, "DYLD_INSERT_LIBRARIES": "/tmp/host-child.dylib"}
-        with mock.patch.object(policy, "assert_prefix_lease"), \
+        with mock.patch.object(policy, "_assert_prefix_lease_locked"), \
                 mock.patch.object(policy, "_spawn_in_directory_fd") as spawn:
             with self.assertRaisesRegex(ValueError, "forbidden dynamic-loader control"):
                 lease.start_wine_process(
@@ -130,7 +650,7 @@ class PrefixLeasePolicyTests(unittest.TestCase):
     def test_wine_launcher_rejects_non_loader_startup_hooks(self) -> None:
         lease = self._wine_launch_lease("wine-startup-hook-rejected")
         env = {**lease._env, "LD_PRELOAD": "/tmp/host-child.dylib"}
-        with mock.patch.object(policy, "assert_prefix_lease"), \
+        with mock.patch.object(policy, "_assert_prefix_lease_locked"), \
                 mock.patch.object(policy, "_spawn_in_directory_fd") as spawn:
             with self.assertRaisesRegex(ValueError, "forbidden process startup hook"):
                 lease.start_wine_process(
@@ -141,7 +661,7 @@ class PrefixLeasePolicyTests(unittest.TestCase):
     def test_wine_launcher_rejects_python_site_startup_environment(self) -> None:
         lease = self._wine_launch_lease("wine-python-site-rejected")
         env = {**lease._env, "PYTHONUSERBASE": "/tmp/python-user-site"}
-        with mock.patch.object(policy, "assert_prefix_lease"), \
+        with mock.patch.object(policy, "_assert_prefix_lease_locked"), \
                 mock.patch.object(policy, "_spawn_in_directory_fd") as spawn:
             with self.assertRaisesRegex(ValueError, "forbidden process startup hook"):
                 lease.start_wine_process(
@@ -152,7 +672,7 @@ class PrefixLeasePolicyTests(unittest.TestCase):
     def test_wine_launcher_rejects_environment_mutation_even_if_not_a_loader_hook(self) -> None:
         lease = self._wine_launch_lease("wine-env-seal-rejected")
         env = {**lease._env, "LANG": "attacker-controlled"}
-        with mock.patch.object(policy, "assert_prefix_lease"), \
+        with mock.patch.object(policy, "_assert_prefix_lease_locked"), \
                 mock.patch.object(policy, "_spawn_in_directory_fd") as spawn:
             with self.assertRaisesRegex(ValueError, "differs from the verified PrefixLease environment"):
                 lease.start_wine_process(
@@ -1059,6 +1579,28 @@ class Gate0SmokeEvidenceTests(unittest.TestCase):
             self.assertEqual(readback, claim)
             self.assertEqual(readback_bytes, claim_bytes)
 
+    def test_storage_smoke_claim_rejects_noncanonical_trailing_bytes(self) -> None:
+        temp = tempfile.TemporaryDirectory(prefix="fgmetal-gate0-smoke-claim-canonical-", dir="/private/tmp")
+        self.addCleanup(temp.cleanup)
+        repo = Path(temp.name) / "repo"
+        repo.mkdir()
+        key_path = Path(temp.name) / "signing-key"
+        attestation_path = repo / "experiments/storage/storage-gate0-attestation.json"
+        smoke_id = (f"{policy.STORAGE_POLICY_SMOKE_ID_PREFIX}{time.strftime('%Y%m%d', time.gmtime())}-"
+                    f"{uuid.uuid4().hex[:16]}")
+        claims = repo / "experiments/storage/smoke-claims"
+        self._preflight(attestation_path, smoke_id, key_path)
+        with mock.patch.object(policy, "REPO", repo), \
+                mock.patch.object(policy, "GATE0_ATTESTATION_PATH", attestation_path), \
+                mock.patch.object(policy, "SMOKE_CLAIM_ROOT", claims), \
+                mock.patch.object(policy, "MANIFEST_SIGNING_KEY_PATH", key_path):
+            raw = policy._read_file_nofollow(attestation_path)
+            _, claim_bytes = policy._claim_storage_smoke_nonce(smoke_id, raw)
+            claim_path = policy._storage_smoke_claim_path(smoke_id)
+            claim_path.write_bytes(claim_bytes + b" ")
+            with self.assertRaisesRegex(ValueError, "missing, malformed, or unauthenticated"):
+                policy._read_storage_smoke_claim(smoke_id)
+
     def test_reconciliation_record_short_write_does_not_leave_partial_final(self) -> None:
         temp = tempfile.TemporaryDirectory(prefix="fgmetal-reconciliation-atomic-test-", dir="/private/tmp")
         self.addCleanup(temp.cleanup)
@@ -1211,6 +1753,7 @@ class NativeRunLeasePolicyTests(unittest.TestCase):
             mock.patch.object(policy, "CACHE", self.cache_dir),
             mock.patch.object(policy, "ACTIVE_LEASE_ROOT", self.active_root),
             mock.patch.object(policy, "GATE0_ATTESTATION_PATH", self.gate_attestation),
+            mock.patch.object(policy, "INVENTORY_PATH", self.base / "missing-inventory.json"),
             mock.patch.object(policy, "MANIFEST_SIGNING_KEY_PATH", self.key_path),
             mock.patch.object(policy, "disk_free_bytes", return_value=100 * policy.GIB),
             mock.patch.object(policy, "measure_project_usage",
@@ -1233,16 +1776,27 @@ class NativeRunLeasePolicyTests(unittest.TestCase):
         return path, digest
 
     def _make_manifest(self, exp_id: str, output_dir: Path, expected_prefix_bytes: int = 0,
-                       native_architecture: str = "arm64") -> Path:
+                       native_architecture: str = "arm64",
+                       estimated_persistent_bytes: int = 1024) -> Path:
         attestation_bytes = self.gate_attestation.read_bytes()
         attestation_sha = hashlib.sha256(attestation_bytes).hexdigest()
         manifest_path = self.manifest_root / f"{exp_id}.json"
+        declared_peak = expected_prefix_bytes + estimated_persistent_bytes
+        uncertainty_margin = policy.admission_uncertainty_margin_bytes(declared_peak)
         manifest = {
             "experiment_id": exp_id,
             "decision": "ALLOW",
-            "expected_prefix_bytes": expected_prefix_bytes,
             "expected_duration_seconds": 60,
-            "estimated_persistent_bytes": 1024,
+            "expected_prefix_requirement": expected_prefix_bytes > 0,
+            "expected_prefix_bytes": expected_prefix_bytes,
+            "expected_build_requirement": False,
+            "expected_build_bytes": 0,
+            "estimated_persistent_bytes": estimated_persistent_bytes,
+            "estimated_max_new_disk_bytes": declared_peak,
+            "estimated_uncertainty_margin_bytes": uncertainty_margin,
+            "estimated_projected_new_disk_bytes": declared_peak + uncertainty_margin,
+            "storage_justification": "synthetic bounded evidence estimate",
+            "project_budget_bytes": policy.PROJECT_BUDGET,
             "native_architecture": native_architecture,
             "manifest_path": str(manifest_path),
             "output_dir": str(output_dir),
@@ -1271,6 +1825,47 @@ class NativeRunLeasePolicyTests(unittest.TestCase):
         }
         defaults.update(kwargs)
         return policy.NativeRunLease(**defaults)
+
+    def test_native_lease_admits_54_gib_scope_with_60_gib_projected_free(self) -> None:
+        manifest_path = self._make_manifest(
+            "test-native-54gib", self.output_dir, estimated_persistent_bytes=0)
+        lease = self._create_lease("test-native-54gib", manifest_path=manifest_path)
+        margin = policy.admission_uncertainty_margin_bytes(0)
+        with mock.patch.object(policy, "disk_free_bytes", return_value=60 * policy.GIB + margin), \
+                mock.patch.object(policy, "measure_project_usage", return_value={
+                    "allocated_inode_deduplicated_bytes": 54 * policy.GIB,
+                }):
+            with lease:
+                self.assertTrue(lease.scratch_directory.is_dir())
+                self.assertTrue(any(
+                    event.get("action") == "PROJECTED_STORAGE_WARNING_BEFORE_NATIVE_LEASE"
+                    and "52 GiB" in event.get("warning", "")
+                    for event in lease._storage_watch_events))
+
+    def test_native_lease_rejects_projected_peak_above_55_gib(self) -> None:
+        manifest_path = self._make_manifest(
+            "test-native-over-55gib", self.output_dir,
+            estimated_persistent_bytes=policy.GIB + 1)
+        lease = self._create_lease("test-native-over-55gib", manifest_path=manifest_path)
+        with mock.patch.object(policy, "disk_free_bytes", return_value=60 * policy.GIB), \
+                mock.patch.object(policy, "measure_project_usage", return_value={
+                    "allocated_inode_deduplicated_bytes": 54 * policy.GIB,
+                }):
+            with self.assertRaisesRegex(RuntimeError, "projected scoped FG-Metal usage exceeds the 55 GiB ceiling"):
+                with lease:
+                    pass
+
+    def test_native_lease_rejects_projected_free_below_50_with_scope_inside_limit(self) -> None:
+        manifest_path = self._make_manifest(
+            "test-native-low-projected-free", self.output_dir, estimated_persistent_bytes=2)
+        lease = self._create_lease("test-native-low-projected-free", manifest_path=manifest_path)
+        with mock.patch.object(policy, "disk_free_bytes", return_value=50 * policy.GIB + 1), \
+                mock.patch.object(policy, "measure_project_usage", return_value={
+                    "allocated_inode_deduplicated_bytes": 54 * policy.GIB,
+                }):
+            with self.assertRaisesRegex(RuntimeError, "projected free disk is below the 50 GiB normal minimum"):
+                with lease:
+                    pass
 
     def test_native_lease_normal_exit_and_receipt_verification(self) -> None:
         lease = self._create_lease("test-native-normal")

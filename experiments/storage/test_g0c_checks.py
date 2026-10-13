@@ -26,6 +26,8 @@ class Gate0EvidenceBindingTests(unittest.TestCase):
         self.repo = self.root / "repo"
         self.storage = self.repo / "experiments/storage"
         self.storage.mkdir(parents=True)
+        self.manifest_root = self.storage / "manifests"
+        self.manifest_root.mkdir()
         self.attestation_path = self.storage / "storage-gate0-attestation.json"
         self.inventory_path = self.storage / "storage-inventory.json"
         self.receipt_path = self.storage / "storage-cleanup-receipt.json"
@@ -55,6 +57,7 @@ class Gate0EvidenceBindingTests(unittest.TestCase):
             "filesystem": {"free_bytes": 60 * policy.GIB},
             "totals": {
                 "fgmetal_scoped_allocated_inode_bytes": 10 * policy.GIB,
+                "fgmetal_scoped_observed_allocated_inode_bytes": 10 * policy.GIB,
                 "fgmetal_scoped_unlinked_mount_backing_upper_bound_bytes": 0,
                 "unaccounted_unlinked_mounted_backing_images": [],
             },
@@ -119,9 +122,18 @@ class Gate0EvidenceBindingTests(unittest.TestCase):
             "preserved_prefix_count": 0,
             "uncertified_prefix_count": 0,
             "active_lease_count": 0,
+            "inventory_measurements": {
+                "free_bytes": 60 * policy.GIB,
+                "fgmetal_scoped_allocated_inode_bytes": 10 * policy.GIB,
+                "fgmetal_scoped_observed_allocated_inode_bytes": 10 * policy.GIB,
+                "fgmetal_scoped_observed_nonlease_allocated_inode_bytes": 10 * policy.GIB,
+            },
             "measurements": {
                 "free_bytes": 60 * policy.GIB,
                 "fgmetal_scoped_allocated_inode_bytes": 10 * policy.GIB,
+                "fgmetal_scoped_observed_allocated_inode_bytes": 10 * policy.GIB,
+                "fgmetal_scoped_observed_nonlease_allocated_inode_bytes": 10 * policy.GIB,
+                "signed_persistent_output_bindings": [],
             },
             "prefixlease_smoke_status": "PASS",
         }
@@ -150,6 +162,7 @@ class Gate0EvidenceBindingTests(unittest.TestCase):
         self.patches.enter_context(mock.patch.object(policy, "uncertified_prefixes", return_value=[]))
         self.patches.enter_context(mock.patch.object(policy, "_active_lease_markers", return_value=[]))
         self.patches.enter_context(mock.patch.object(policy, "_pending_prefix_reconciliation_receipts", return_value=[]))
+        self.patches.enter_context(mock.patch.object(policy, "_pending_prefix_recovery_receipts", return_value=[]))
         self.patches.enter_context(mock.patch.object(policy, "prefix_state_fingerprint",
                                                      return_value={"sha256": "prefix-fingerprint"}))
         self.patches.enter_context(mock.patch.object(policy, "disk_free_bytes", return_value=60 * policy.GIB))
@@ -168,6 +181,89 @@ class Gate0EvidenceBindingTests(unittest.TestCase):
 
     def test_current_evidence_hashes_accept_admission(self) -> None:
         self.assertEqual(self._blockers(), [])
+
+    def test_unrelated_growth_after_gate0_fails_exact_observed_scope_check(self) -> None:
+        with mock.patch.object(policy, "measure_project_usage", return_value={
+                "allocated_inode_deduplicated_bytes": 10 * policy.GIB + 64 * policy.MIB}):
+            blockers = self._blockers()
+        self.assertIn("unrelated non-lease storage changed since Gate 0 certification", blockers)
+
+    def test_changed_historical_output_identity_fails_gate0(self) -> None:
+        baseline = {"experiment_id": "historical-run", "output_allocated_bytes": 1}
+        self.attestation["measurements"]["signed_persistent_output_bindings"] = [baseline]
+        self.attestation_path.write_text(json.dumps(self.attestation), encoding="utf-8")
+        snapshot = {"bindings": ({"experiment_id": "historical-run", "output_allocated_bytes": 2},)}
+        with mock.patch.object(policy, "_signed_persistent_output_snapshot",
+                               return_value=(snapshot, (), [])):
+            blockers = self._blockers()
+        self.assertIn("signed historical experiment outputs changed since Gate 0 certification", blockers)
+
+    def test_new_reserved_output_does_not_change_frozen_gate0_outputs(self) -> None:
+        snapshot = {"bindings": ({
+            "experiment_id": "new-run-after-gate0",
+            "manifest_gate0_attestation_sha256": "new-run-manifest-bound-to-current-gate0",
+        },)}
+        with mock.patch.object(policy, "_signed_persistent_output_snapshot",
+                               return_value=(snapshot, (), [])):
+            blockers = self._blockers()
+        self.assertNotIn("signed historical experiment outputs changed since Gate 0 certification", blockers)
+
+    def test_gate0_attestation_records_stable_post_write_observed_scope(self) -> None:
+        attestation = {
+            "state_fingerprint": {"fgmetal_scoped_unlinked_mount_backing_upper_bound_bytes": 0},
+            "inventory_measurements": {"fgmetal_scoped_allocated_inode_bytes": 10 * policy.GIB},
+        }
+        with mock.patch.object(gate0, "ATTESTATION", self.attestation_path), \
+                mock.patch.object(policy, "_manifest_signing_key", return_value=self.key), \
+                mock.patch.object(policy, "_signed_persistent_output_snapshot",
+                                  return_value=({"bindings": []}, (), [])), \
+                mock.patch.object(policy, "measure_project_usage", return_value={
+                    "allocated_inode_deduplicated_bytes": 10 * policy.GIB}), \
+                mock.patch.object(policy, "disk_free_bytes",
+                                  side_effect=(60 * policy.GIB, 61 * policy.GIB)):
+            measurements = gate0._write_exact_live_storage_baseline(attestation)
+        self.assertEqual(measurements, {
+            "free_bytes": 60 * policy.GIB,
+            "fgmetal_scoped_allocated_inode_bytes": 10 * policy.GIB,
+            "fgmetal_scoped_observed_allocated_inode_bytes": 10 * policy.GIB,
+            "fgmetal_scoped_observed_nonlease_allocated_inode_bytes": 10 * policy.GIB,
+            "signed_persistent_output_bindings": [],
+        })
+        self.assertTrue(policy._verify_gate0_signature(json.loads(self.attestation_path.read_text())))
+
+    def test_gate0_baseline_rejects_free_drift_above_existing_bound_with_diagnostic(self) -> None:
+        attestation = {
+            "state_fingerprint": {"fgmetal_scoped_unlinked_mount_backing_upper_bound_bytes": 0},
+            "inventory_measurements": {"fgmetal_scoped_allocated_inode_bytes": 10 * policy.GIB},
+        }
+        free_samples = [value for _ in range(8)
+                        for value in (60 * policy.GIB, 62 * policy.GIB + 1)]
+        with mock.patch.object(gate0, "ATTESTATION", self.attestation_path), \
+                mock.patch.object(policy, "_manifest_signing_key", return_value=self.key), \
+                mock.patch.object(policy, "_signed_persistent_output_snapshot",
+                                  return_value=({"bindings": []}, (), [])), \
+                mock.patch.object(policy, "measure_project_usage", return_value={
+                    "allocated_inode_deduplicated_bytes": 10 * policy.GIB}), \
+                mock.patch.object(policy, "disk_free_bytes", side_effect=free_samples):
+            with self.assertRaisesRegex(RuntimeError, str(2 * policy.GIB + 1)):
+                gate0._write_exact_live_storage_baseline(attestation)
+
+    def test_incomplete_gate0_baseline_is_persisted_as_signed_blocked(self) -> None:
+        attestation = {"status": "PREFLIGHT_PASS", "mode": "preflight"}
+        with mock.patch.object(gate0, "ATTESTATION", self.attestation_path), \
+                mock.patch.object(policy, "_manifest_signing_key", return_value=self.key), \
+                mock.patch.object(gate0, "_write_exact_live_storage_baseline",
+                                  side_effect=RuntimeError("synthetic stability failure")):
+            with self.assertRaisesRegex(RuntimeError, "synthetic stability failure"):
+                gate0._write_baseline_or_fail_closed(attestation)
+        saved = json.loads(self.attestation_path.read_text(encoding="utf-8"))
+        self.assertEqual(saved["status"], "BLOCKED")
+        self.assertTrue(policy._verify_gate0_signature(saved))
+        self.assertTrue(any("synthetic stability failure" in item
+                            for item in saved["gate0_blockers"]))
+
+    def test_gate0_free_drift_tolerance_reuses_existing_two_gib_bound(self) -> None:
+        self.assertEqual(policy.GATE0_FREE_DRIFT_TOLERANCE_BYTES, 2 * policy.GIB)
 
     def test_stale_supplemental_evidence_hash_rejects_admission(self) -> None:
         name = policy.GATE0_SUPPLEMENTAL_EVIDENCE[0]
@@ -255,17 +351,41 @@ class Gate0EvidenceBindingTests(unittest.TestCase):
 
 
 class Gate0CompletionEvidenceTests(unittest.TestCase):
+    @staticmethod
+    def _current_independent_review() -> dict[str, object]:
+        reviewed_files = {}
+        for field, relative_path in gate0.G0C_REVIEW_REQUIRED_FILES.items():
+            path = gate0.HERE / relative_path
+            reviewed_files[field] = {
+                "path": path.relative_to(gate0.REPO).as_posix(),
+                "sha256": gate0._sha(policy._read_file_nofollow(path)),
+            }
+        return {"status": "PASS", "findings": [], "reviewed_files": reviewed_files}
+
     def test_stale_independent_review_cannot_be_attested(self) -> None:
         with mock.patch.object(gate0, "_read_json", return_value={
                 "status": "PASS", "storage_policy_sha256": "0" * 64}):
             with self.assertRaisesRegex(RuntimeError, "independent review"):
                 gate0._verify_g0c_completion_evidence()
 
+    def test_stale_required_review_hash_cannot_be_attested(self) -> None:
+        for field in gate0.G0C_REVIEW_REQUIRED_FILES:
+            with self.subTest(field=field):
+                review = self._current_independent_review()
+                review["reviewed_files"][field]["sha256"] = "0" * 64
+                with mock.patch.object(gate0, "_read_json", return_value=review):
+                    with self.assertRaisesRegex(RuntimeError, "does not bind current"):
+                        gate0._verify_g0c_completion_evidence()
+
+    def test_missing_required_review_file_cannot_be_attested(self) -> None:
+        review = self._current_independent_review()
+        del review["reviewed_files"]["build_retention_tests"]
+        with mock.patch.object(gate0, "_read_json", return_value=review):
+            with self.assertRaisesRegex(RuntimeError, "does not bind current"):
+                gate0._verify_g0c_completion_evidence()
+
     def test_failed_consolidation_cannot_be_attested(self) -> None:
-        review = {"status": "PASS", "reviewed_files": {}}
-        for name, field in (("storage_policy.py", "source"),
-                            ("test_wine_launcher_policy.py", "tests")):
-            review["reviewed_files"][field] = {"sha256": gate0._sha(policy._read_file_nofollow(gate0.HERE / name))}
+        review = self._current_independent_review()
         with mock.patch.object(gate0, "_read_json", side_effect=[review, {"status": "FAIL"}]), \
                 mock.patch.object(policy, "_verify_storage_evidence", return_value=True):
             with self.assertRaisesRegex(RuntimeError, "consolidation"):
@@ -284,7 +404,7 @@ class PrefixLeasePostRunChecks(unittest.TestCase):
             "free_space_status": "PASS",
             "free_after_bytes": 44 * policy.GIB,
             "project_usage_after": {
-                "allocated_inode_deduplicated_bytes": 46 * policy.GIB,
+                "allocated_inode_deduplicated_bytes": 56 * policy.GIB,
             },
             "receipt_finalization_complete": True,
             "prefix_created": True,

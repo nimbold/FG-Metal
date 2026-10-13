@@ -12,14 +12,19 @@ import dataclasses
 import argparse
 import json
 import math
+import re
 import sys
+from collections import defaultdict
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any, Iterable, Mapping
 
 
 class ValidationError(Exception):
     """Raised when trace identity, clock, lifecycle, or join invariants fail."""
+
+
+_EVENTS_INDEX_CACHE: dict[int, tuple[int, dict[Any, list[dict[str, Any]]]]] = {}
 
 
 @dataclass
@@ -212,8 +217,10 @@ class TraceValidator:
             elif key in cls._RAW_FIELDS:
                 if value is not None and not isinstance(value, (dict, list)):
                     raise ValidationError(f"line {line_no} event {name!r}: {key} must be a raw JSON object or array")
-            elif key in cls._NULLABLE_FIELDS and name == "presentation_completion_observed" and value is None:
-                continue
+            elif key in cls._NULLABLE_FIELDS and value is None:
+                if name in ("presentation_completion_observed", "acquire_begin"):
+                    continue
+                raise ValidationError(f"line {line_no} event {name!r}: {key} cannot be null for this event")
             elif key in cls._FLOAT_FIELDS:
                 if (isinstance(value, bool) or not isinstance(value, (int, float))
                         or not math.isfinite(value)):
@@ -241,15 +248,36 @@ class TraceValidator:
     @staticmethod
     def _events(events: list[dict[str, Any]], *, origin: str | None = None,
                 name: str | None = None, **fields: Any) -> list[dict[str, Any]]:
-        result = []
-        for event in events:
-            if origin is not None and event.get("origin") != origin:
-                continue
-            if name is not None and event.get("event") != name:
-                continue
-            if all(event.get(key) == value for key, value in fields.items()):
-                result.append(event)
-        return result
+        cache_key = id(events)
+        entry = _EVENTS_INDEX_CACHE.get(cache_key)
+        if entry is None or entry[0] != len(events):
+            index: dict[Any, list[dict[str, Any]]] = defaultdict(list)
+            for e in events:
+                orig = e.get("origin")
+                ev = e.get("event")
+                index[(orig, ev)].append(e)
+                index[(orig, None)].append(e)
+                index[(None, ev)].append(e)
+                index[(None, None)].append(e)
+                frame_id = e.get("app_frame_id")
+                if isinstance(frame_id, int):
+                    index[(orig, ev, "app_frame_id", frame_id)].append(e)
+                    index[(orig, None, "app_frame_id", frame_id)].append(e)
+                    index[(None, ev, "app_frame_id", frame_id)].append(e)
+                    index[(None, None, "app_frame_id", frame_id)].append(e)
+            entry = (len(events), index)
+            _EVENTS_INDEX_CACHE[cache_key] = entry
+        else:
+            index = entry[1]
+
+        if "app_frame_id" in fields and isinstance(fields["app_frame_id"], int):
+            candidates = index.get((origin, name, "app_frame_id", fields["app_frame_id"]), [])
+        else:
+            candidates = index.get((origin, name), [])
+
+        if not fields:
+            return list(candidates)
+        return [e for e in candidates if all(e.get(k) == v for k, v in fields.items())]
 
     def _validate_drawable_request_ids(self, events: list[dict[str, Any]]) -> None:
         owners: dict[int, int] = {}
@@ -431,7 +459,7 @@ class TraceValidator:
             "screen_maximum_frames_per_second",
         )
         for later in self._events(events, origin="APP_SOURCE", name="layer_state"):
-            if later is configured_layer or later.get("reason") == "startup_before_control_configuration":
+            if later is configured_layer or later.get("ts_mach_ns", 0) <= configured_layer.get("ts_mach_ns", 0):
                 continue
             changed = [key for key in stable_layer_keys
                        if later.get(key) != configured_layer.get(key)]
@@ -1262,6 +1290,10 @@ class TraceValidator:
 
         accounted = {event_id for edge in report.join_edges
                      for event_id in edge.get("event_ids", [])}
+        records_by_key = {
+            (frame.app_frame_id, frame.acquisition_sequence, frame.image_index, frame.driver_present_sequence): frame
+            for frame in records
+        }
         for event in self._events(events, origin="MVK_SOURCE", name="make_available"):
             app_frame_id = self._integer(event, "app_frame_id")
             acquisition = self._integer(event, "acquisition_sequence")
@@ -1275,11 +1307,8 @@ class TraceValidator:
                     or swapchain_id <= 0 or image_id <= 0):
                 raise ValidationError(
                     f"make_available event_id={event['event_id']} lacks positive frame, acquisition, present, swapchain, or image identity")
-            candidates = [frame for frame in records
-                         if frame.app_frame_id == app_frame_id
-                         and frame.acquisition_sequence == acquisition
-                         and frame.image_index == image_index
-                         and frame.driver_present_sequence == present_sequence]
+            matched_frame = records_by_key.get((app_frame_id, acquisition, image_index, present_sequence))
+            candidates = [matched_frame] if matched_frame is not None else []
             present_requests = self._events(
                 events, origin="MVK_SOURCE", name="present_request",
                 app_frame_id=app_frame_id, acquisition_sequence=acquisition,
@@ -1319,12 +1348,14 @@ class TraceValidator:
                          if (event.get("origin"), event.get("event")) in frame_lifecycle_names}
         unaccounted = sorted(lifecycle_ids - accounted)
         if unaccounted:
-            first = next(event for event in events if int(event["event_id"]) == unaccounted[0])
+            events_by_id = {int(event["event_id"]): event for event in events if "event_id" in event}
+            first = events_by_id.get(unaccounted[0], {})
             raise ValidationError(
                 f"unaccounted lifecycle event {first.get('origin')}:{first.get('event')} "
                 f"event_id={unaccounted[0]}; trace contains an orphan or partial frame record")
 
     def validate(self, events: list[dict[str, Any]]) -> ValidationReport:
+        _EVENTS_INDEX_CACHE.clear()
         report = ValidationReport()
         try:
             self._validate_records(events, report)
@@ -1334,6 +1365,943 @@ class TraceValidator:
         except ValidationError as error:
             report.errors.append(str(error))
         return report
+
+
+class BareWineTraceValidator:
+    """Strict deterministic validator for STEP 11D.3-B's two-clock traces.
+
+    The Windows app clock and host Mach clock are deliberately not joined by
+    timestamp. Calls are paired by their explicit per-function sequence and
+    image index; host lifecycle edges use propagated acquisition, submit,
+    present, drawable, texture, and native image identities.
+    """
+
+    BUCKETS_MS = (
+        (0.0, 0.5, "<0.5 ms"), (0.5, 2.0, "0.5–2 ms"),
+        (2.0, 5.0, "2–5 ms"), (5.0, 10.0, "5–10 ms"),
+        (10.0, 14.0, "10–14 ms"), (14.0, 18.0, "14–18 ms"),
+        (18.0, 25.0, "18–25 ms"), (25.0, 50.0, "25–50 ms"),
+        (50.0, 100.0, "50–100 ms"), (100.0, 250.0, "100–250 ms"),
+        (250.0, 500.0, "250–500 ms"), (500.0, 900.0, "500–900 ms"),
+        (900.0, math.inf, ">=900 ms"),
+    )
+
+    def __init__(self, *, expected_original_vulkan_path: str,
+                 expected_moltenvk_paths: Iterable[str],
+                 expected_startup_identities: Mapping[str, Mapping[str, str]],
+                 expected_app_path: str, expected_app_sha256: str,
+                 expected_moltenvk_version: str,
+                 expected_duration_seconds: int | None = None,
+                 expected_target_unix_pid: int | None = None,
+                 expected_experiment_token: str | None = None) -> None:
+        self.expected_original_vulkan_path = str(Path(expected_original_vulkan_path).resolve())
+        self.expected_moltenvk_paths = {
+            str(Path(path).resolve()) for path in expected_moltenvk_paths
+        }
+        if not self.expected_moltenvk_paths:
+            raise ValueError("at least one exact MoltenVK path is required")
+        self.expected_startup_identities = {
+            role: {"path": str(Path(identity["path"]).resolve()),
+                   "sha256": str(identity["sha256"])}
+            for role, identity in expected_startup_identities.items()
+        }
+        self.expected_moltenvk_version = expected_moltenvk_version
+        self.expected_app_path = str(Path(expected_app_path).resolve())
+        self.expected_app_sha256 = expected_app_sha256
+        required_identity_roles = {
+            "wine", "wine_launcher", "winevulkan_dll", "winevulkan_so", "wine_host_loader",
+            "winemac_so", "trace_proxy", "moltenvk", "wineserver",
+        }
+        if set(self.expected_startup_identities) != required_identity_roles:
+            raise ValueError("startup identity binding must include every exact BR2 runtime role")
+        if any(not re.fullmatch(r"[0-9a-f]{64}", identity["sha256"])
+               for identity in self.expected_startup_identities.values()):
+            raise ValueError("startup identity binding contains a malformed SHA-256")
+        if not re.fullmatch(r"[0-9a-f]{64}", self.expected_app_sha256):
+            raise ValueError("expected app SHA-256 is malformed")
+        if expected_duration_seconds is not None and expected_duration_seconds <= 0:
+            raise ValueError("expected duration must be positive")
+        self.expected_duration_seconds = expected_duration_seconds
+        if ((expected_target_unix_pid is None) != (expected_experiment_token is None)
+                or expected_target_unix_pid is not None and (
+                    isinstance(expected_target_unix_pid, bool)
+                    or not isinstance(expected_target_unix_pid, int) or expected_target_unix_pid <= 0
+                    or not isinstance(expected_experiment_token, str)
+                    or not re.fullmatch(r"[0-9a-f]{32}", expected_experiment_token))):
+            raise ValueError("process-scoped validation requires exact target PID and experiment token")
+        self.expected_target_unix_pid = expected_target_unix_pid
+        self.expected_experiment_token = expected_experiment_token
+
+    @staticmethod
+    def _rows(events: list[dict[str, Any]], origin: str,
+              name: str | None = None) -> list[dict[str, Any]]:
+        return [row for row in events if row.get("origin") == origin
+                and (name is None or row.get("event") == name)]
+
+    @staticmethod
+    def _one(rows: list[dict[str, Any]], what: str) -> dict[str, Any]:
+        if len(rows) != 1:
+            raise ValidationError(f"{what}: expected one row, found {len(rows)}")
+        return rows[0]
+
+    @staticmethod
+    def _int(row: dict[str, Any], field: str, *, positive: bool = False) -> int:
+        value = row.get(field)
+        if isinstance(value, bool) or not isinstance(value, int):
+            raise ValidationError(f"{row.get('origin')}:{row.get('event')} {field} is not an integer")
+        if positive and value <= 0:
+            raise ValidationError(f"{row.get('origin')}:{row.get('event')} {field} must be positive")
+        return value
+
+    @staticmethod
+    def _number(row: dict[str, Any], field: str) -> float:
+        value = row.get(field)
+        if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value):
+            raise ValidationError(f"{row.get('origin')}:{row.get('event')} {field} is not finite")
+        return float(value)
+
+    @classmethod
+    def _call_pairs(cls, events: list[dict[str, Any]], origin: str,
+                    api_name: str, sequence_field: str) -> list[tuple[dict[str, Any], dict[str, Any]]]:
+        prefix = f"{api_name}_"
+        begins: dict[int, dict[str, Any]] = {}
+        ends: dict[int, dict[str, Any]] = {}
+        for row in cls._rows(events, origin):
+            event_name = row.get("event")
+            if event_name not in {prefix + "begin", prefix + "end"}:
+                continue
+            sequence = cls._int(row, sequence_field, positive=True)
+            target = begins if event_name.endswith("_begin") else ends
+            if sequence in target:
+                raise ValidationError(f"duplicate {origin}:{event_name} sequence {sequence}")
+            target[sequence] = row
+        if set(begins) != set(ends) or not begins:
+            raise ValidationError(
+                f"{origin}:{api_name} begin/end sequences differ or are empty: "
+                f"begins={len(begins)} ends={len(ends)}")
+        sequences = sorted(begins)
+        if sequences != list(range(1, len(sequences) + 1)):
+            raise ValidationError(f"{origin}:{api_name} sequence has a gap or does not start at one")
+        pairs = []
+        for sequence in sequences:
+            begin, end = begins[sequence], ends[sequence]
+            if origin == "APP_SOURCE":
+                if (begin.get("app_frame_id") != end.get("app_frame_id")
+                        or begin.get("call_begin_qpc_ticks") != end.get("call_begin_qpc_ticks")
+                        or end.get("call_end_qpc_ticks", 0) < begin.get("call_begin_qpc_ticks", 0)):
+                    raise ValidationError(f"{origin}:{api_name} sequence {sequence} has a mismatched interval")
+            else:
+                if (begin.get("call_begin_mach_ns") != end.get("call_begin_mach_ns")
+                        or end.get("call_end_mach_ns", 0) < begin.get("call_begin_mach_ns", 0)):
+                    raise ValidationError(f"{origin}:{api_name} sequence {sequence} has a mismatched interval")
+            pairs.append((begin, end))
+        return pairs
+
+    @classmethod
+    def duration_histogram(cls, durations_ns: list[int]) -> dict[str, Any]:
+        if any(isinstance(value, bool) or not isinstance(value, int) or value < 0
+               for value in durations_ns):
+            raise ValidationError("duration series contains a negative or non-integer value")
+        rows = []
+        for lower, upper, label in cls.BUCKETS_MS:
+            values = [value for value in durations_ns
+                      if value / 1_000_000 >= lower and value / 1_000_000 < upper]
+            rows.append({"bucket": label, "count": len(values),
+                         "percentage": (100.0 * len(values) / len(durations_ns)) if durations_ns else 0.0,
+                         "accumulated_wait_ns": sum(values)})
+        ordered = sorted(durations_ns)
+
+        def percentile(q: float) -> float | None:
+            if not ordered:
+                return None
+            rank = (len(ordered) - 1) * q
+            lo = math.floor(rank)
+            hi = math.ceil(rank)
+            return ordered[lo] + (ordered[hi] - ordered[lo]) * (rank - lo)
+
+        return {
+            "count": len(ordered), "histogram": rows,
+            "accumulated_wait_ns": sum(ordered),
+            "minimum_ns": ordered[0] if ordered else None,
+            "mean_ns": (sum(ordered) / len(ordered)) if ordered else None,
+            "median_ns": percentile(0.5), "p90_ns": percentile(0.90),
+            "p95_ns": percentile(0.95), "p99_ns": percentile(0.99),
+            "p99_9_ns": percentile(0.999), "maximum_ns": ordered[-1] if ordered else None,
+            "percentile_method": "linear interpolation on sorted samples at (n-1)*q",
+        }
+
+    def validate(self, app_events: list[dict[str, Any]], host_events: list[dict[str, Any]],
+                 *, loader_evidence: dict[str, Any] | None = None) -> dict[str, Any]:
+        if self.expected_target_unix_pid is not None:
+            if not host_events or any(
+                    row.get("host_pid") != self.expected_target_unix_pid
+                    or row.get("target_unix_pid") != self.expected_target_unix_pid
+                    or row.get("experiment_token") != self.expected_experiment_token
+                    or row.get("trace_role") != "target" for row in host_events):
+                raise ValidationError("helper or unbound process evidence cannot satisfy target trace validation")
+            config = self._one(self._rows(app_events, "APP_CONFIG", "app_configuration"), "target app config")
+            if (config.get("target_unix_pid") != self.expected_target_unix_pid
+                    or config.get("experiment_token") != self.expected_experiment_token):
+                raise ValidationError("PE app does not bind the supervised target process")
+        allowed_app_origins = {"APP_CONFIG", "APP_SOURCE"}
+        allowed_host_origins = {"INSTRUMENTATION", "WINE_SOURCE", "MVK_BOUNDARY",
+                                "LAYER_SOURCE", "LOGGER"}
+        if any(row.get("origin") not in allowed_app_origins for row in app_events):
+            raise ValidationError("app trace contains an unknown origin")
+        if any(row.get("origin") not in allowed_host_origins for row in host_events):
+            raise ValidationError("host trace contains an unknown origin")
+        if any(row.get("ts_clock_domain") != "windows_qpc_ticks" for row in app_events
+               if row.get("origin") == "APP_SOURCE"):
+            raise ValidationError("app trace is missing its QueryPerformanceCounter timestamp clock domain")
+        if any(row.get("ts_clock_domain") != "mach_absolute_time_ns" for row in host_events):
+            raise ValidationError("host trace is missing its Mach absolute timestamp clock domain")
+
+        clock = self._one(self._rows(host_events, "INSTRUMENTATION", "clock_metadata"),
+                          "host trace clock metadata")
+        if (clock.get("event_clock_source") != "mach_absolute_time"
+                or clock.get("event_clock_domain") != "mach_absolute_time_ns"
+                or clock.get("event_conversion") != "floor(ticks*numer/denom)"
+                or self._int(clock, "mach_timebase_numer", positive=True) <= 0
+                or self._int(clock, "mach_timebase_denom", positive=True) <= 0
+                or clock.get("presented_time_source") != "CAMetalDrawable.presentedTime"
+                or clock.get("presented_time_basis") != "mach_absolute_time_seconds"
+                or clock.get("presented_time_clock_domain") != "mach_absolute_time_ns"
+                or clock.get("presented_time_conversion") != "floor(seconds*1e9)"
+                or clock.get("presented_time_clock_contract")
+                    != "Apple Metal host-time seconds; present(at:) is Mach absolute seconds"
+                or clock.get("callback_delivery_clock_source") != "mach_absolute_time"
+                or clock.get("callback_delivery_clock_domain") != "mach_absolute_time_ns"):
+            raise ValidationError("host or presentedTime clock metadata is incomplete or uses an unidentified basis")
+
+        config = self._one(self._rows(app_events, "APP_CONFIG", "app_configuration"),
+                           "app configuration")
+        if (config.get("timestamp_clock_domain") != "windows_qpc_ticks"
+                or config.get("event_timestamp_clock_source") != "QueryPerformanceCounter"
+                or config.get("timestamp_conversion") != "floor(ticks*1e9/qpc_frequency)"):
+            raise ValidationError("app configuration lacks its QPC clock source, domain, or conversion")
+        required_config = {
+            "process_architecture": "x86_64", "requested_window_client_width": 640,
+            "requested_window_client_height": 360, "actual_window_client_width": 640,
+            "actual_window_client_height": 360, "window_mode": "windowed",
+            "window_dpi_aware": False, "dpi_x": 96, "dpi_y": 96,
+            "window_logical_dpi_scale_x": 1.0, "window_logical_dpi_scale_y": 1.0,
+            "display_refresh_hz": 60,
+            "requested_format": "VK_FORMAT_B8G8R8A8_UNORM",
+            "actual_format": 44, "actual_format_name": "VK_FORMAT_B8G8R8A8_UNORM",
+            "requested_present_mode": "VK_PRESENT_MODE_FIFO_KHR", "actual_present_mode": 2,
+            "actual_present_mode_name": "VK_PRESENT_MODE_FIFO_KHR",
+            "actual_color_space": 0,
+            "requested_swapchain_width": 640, "requested_swapchain_height": 360,
+            "actual_swapchain_width": 640, "actual_swapchain_height": 360,
+            "requested_image_count": 3, "actual_image_count": 3,
+            "submit2_entrypoint": "vkQueueSubmit2", "exit_code": 0,
+            "stop_reason": "duration_elapsed", "fatal_error": "",
+            "window_visible_at_start": True,
+            "host_runtime_startup_gate_passed": True,
+            "winevulkan_dll_module_loaded": True,
+            "winevulkan_dll_before_frame_loop": True,
+        }
+        mismatches = {key: {"expected": value, "actual": config.get(key)}
+                      for key, value in required_config.items() if config.get(key) != value}
+        if mismatches:
+            raise ValidationError(f"app window/swapchain configuration mismatch: {mismatches}")
+        if not isinstance(config.get("display_name"), str) or not config["display_name"].strip():
+            raise ValidationError("app trace does not identify the display containing its window")
+        app_winevulkan_path = config.get("winevulkan_dll_module_path")
+        if (not isinstance(app_winevulkan_path, str)
+                or app_winevulkan_path.replace("\\", "/").casefold()
+                    != "c:/windows/system32/winevulkan.dll"):
+            raise ValidationError("pre-frame app identity does not name the loaded builtin winevulkan.dll")
+        expected_dll_identity = self.expected_startup_identities["winevulkan_dll"]
+        app_winevulkan_host_path = config.get("winevulkan_dll_host_path")
+        app_winevulkan_sha256 = config.get("winevulkan_dll_sha256")
+        if (not isinstance(app_winevulkan_host_path, str)
+                or str(Path(app_winevulkan_host_path).resolve()) != expected_dll_identity["path"]
+                or app_winevulkan_sha256 != expected_dll_identity["sha256"]):
+            raise ValidationError(
+                "pre-frame app HMODULE path is not bound to the exact PrefixLease winevulkan.dll path and SHA-256")
+        run_ns = self._int(config, "actual_run_ns", positive=True)
+        qpc_frequency = self._int(config, "qpc_frequency", positive=True)
+        for row in self._rows(app_events, "APP_SOURCE"):
+            if (row.get("timestamp_clock_source") != "QueryPerformanceCounter"
+                    or row.get("ts_clock_domain") != "windows_qpc_ticks"
+                    or self._int(row, "qpc_frequency", positive=True) != qpc_frequency):
+                raise ValidationError("app event clock source, domain, or QPC frequency differs from its config")
+            timestamp_ticks = self._int(row, "ts_qpc_ticks", positive=True)
+            if self._int(row, "ts_qpc_ns", positive=True) != timestamp_ticks * 1_000_000_000 // qpc_frequency:
+                raise ValidationError("app event QPC timestamp conversion is inconsistent with its frequency")
+            for tick_field, ns_field in (
+                    ("call_begin_qpc_ticks", "call_begin_qpc_ns"),
+                    ("call_end_qpc_ticks", "call_end_qpc_ns"),
+                    ("duration_qpc_ticks", "duration_ns")):
+                if row.get(tick_field) is not None:
+                    ticks = self._int(row, tick_field)
+                    expected_ns = ticks * 1_000_000_000 // qpc_frequency
+                    if self._int(row, ns_field) != expected_ns:
+                        raise ValidationError(f"app event {tick_field} conversion is inconsistent with QPC frequency")
+        requested_seconds = self._int(config, "run_seconds_requested", positive=True)
+        if self.expected_duration_seconds is not None and requested_seconds != self.expected_duration_seconds:
+            raise ValidationError(
+                f"app requested {requested_seconds}s but this run requires {self.expected_duration_seconds}s")
+        if run_ns < requested_seconds * 950_000_000 or run_ns > (requested_seconds + 2) * 1_000_000_000:
+            raise ValidationError("app frame-loop duration differs materially from its requested duration")
+        if self._int(config, "trace_events_dropped") != 0:
+            raise ValidationError("app trace dropped one or more events")
+
+        process_identity = self._one(
+            self._rows(host_events, "INSTRUMENTATION", "process_identity"), "host process identity")
+        if (process_identity.get("compiled_architecture") != "x86_64"
+                or process_identity.get("process_architecture") != "x86_64"
+                or self._int(process_identity, "process_translated") != 1
+                or process_identity.get("process_start_clock_domain") != "mach_absolute_time_ns"
+                or self._int(process_identity, "process_start_monotonic_ns", positive=True) <= 0):
+            raise ValidationError("host trace process is not x86_64 under Rosetta")
+        expected_wine = self.expected_startup_identities["wine"]
+        expected_wine_launcher = self.expected_startup_identities["wine_launcher"]
+        if (str(Path(str(process_identity.get("main_executable_path", ""))).resolve())
+                != expected_wine["path"]
+                or process_identity.get("main_executable_sha256") != expected_wine["sha256"]
+                or str(Path(str(process_identity.get("wine_launcher_path", ""))).resolve())
+                    != expected_wine_launcher["path"]
+                or process_identity.get("wine_launcher_sha256") != expected_wine_launcher["sha256"]):
+            raise ValidationError("in-process Wine executable path or SHA-256 differs from the bound runtime")
+        proxy_identity = self._one(
+            self._rows(host_events, "INSTRUMENTATION", "vulkan_proxy_identity"), "Vulkan proxy identity")
+        if (proxy_identity.get("real_gipa_available") is not True
+                or proxy_identity.get("metal_surface_dlsym_available") is not True
+                or str(Path(str(proxy_identity.get("original_vulkan_library", ""))).resolve())
+                    != self.expected_original_vulkan_path
+                or proxy_identity.get("original_vulkan_library_sha256")
+                    != self.expected_startup_identities["moltenvk"]["sha256"]
+                or str(Path(str(proxy_identity.get("trace_proxy_path", ""))).resolve())
+                    != self.expected_startup_identities["trace_proxy"]["path"]
+                or proxy_identity.get("trace_proxy_sha256")
+                    != self.expected_startup_identities["trace_proxy"]["sha256"]
+                or str(Path(str(proxy_identity.get("loaded_proxy_path", ""))).resolve())
+                    != self.expected_startup_identities["trace_proxy"]["path"]
+                or proxy_identity.get("loaded_proxy_sha256")
+                    != self.expected_startup_identities["trace_proxy"]["sha256"]
+                or str(Path(str(proxy_identity.get("loaded_delegate_path", ""))).resolve())
+                    != self.expected_startup_identities["moltenvk"]["path"]
+                or proxy_identity.get("loaded_delegate_sha256")
+                    != self.expected_startup_identities["moltenvk"]["sha256"]
+                or proxy_identity.get("process_start_clock_domain") != "mach_absolute_time_ns"
+                or self._int(proxy_identity, "process_start_monotonic_ns", positive=True)
+                    != self._int(process_identity, "process_start_monotonic_ns", positive=True)):
+            raise ValidationError("proxy did not delegate to the exact pinned Wine Vulkan library")
+        startup = self._one(
+            self._rows(host_events, "INSTRUMENTATION", "host_runtime_startup"),
+            "in-process host runtime startup identity")
+        startup_id = startup.get("startup_id")
+        if (startup.get("startup_valid") is not True
+                or startup_id != process_identity.get("startup_id")
+                or startup_id != proxy_identity.get("startup_id")
+                or startup.get("process_architecture") != "x86_64"
+                or self._int(startup, "process_translated") != 1
+                or startup.get("process_start_clock_domain") != "mach_absolute_time_ns"
+                or self._int(startup, "process_start_monotonic_ns", positive=True)
+                    != self._int(process_identity, "process_start_monotonic_ns", positive=True)
+                or startup.get("moltenvk_version") != self.expected_moltenvk_version
+                or startup.get("moltenvk_version_source") != "vkGetVersionStringsMVK from loaded delegate"
+                or startup.get("vulkan_runtime_version") != "1.4.357"
+                or startup.get("moltenvk_sha256") != self.expected_startup_identities["moltenvk"]["sha256"]
+                or str(Path(str(startup.get("moltenvk_path", ""))).resolve())
+                    != self.expected_startup_identities["moltenvk"]["path"]
+                or startup.get("trace_proxy_sha256") != self.expected_startup_identities["trace_proxy"]["sha256"]
+                or str(Path(str(startup.get("trace_proxy_path", ""))).resolve())
+                    != self.expected_startup_identities["trace_proxy"]["path"]
+                or startup.get("winevulkan_so_sha256") != self.expected_startup_identities["winevulkan_so"]["sha256"]
+                or str(Path(str(startup.get("winevulkan_so_path", ""))).resolve())
+                    != self.expected_startup_identities["winevulkan_so"]["path"]
+                or startup.get("wine_host_loader_sha256") != self.expected_startup_identities["wine_host_loader"]["sha256"]
+                or str(Path(str(startup.get("wine_host_loader_path", ""))).resolve())
+                    != self.expected_startup_identities["wine_host_loader"]["path"]
+                or startup.get("host_loader_role")
+                    != "win32u.so::_vulkan_init_once direct dlopen libMoltenVK.dylib; no Khronos libvulkan"
+                or self._int(startup, "loaded_moltenvk_count") != 1
+                or self._int(startup, "loaded_proxy_count") != 1
+                or self._int(startup, "loaded_winevulkan_count") != 1
+                or self._int(startup, "loaded_host_loader_count") != 1
+                or self._int(startup, "loaded_libvulkan_dylib_count") != 0):
+            raise ValidationError("in-process runtime startup identity block is absent, stale, duplicated, or incorrect")
+        startup_modules = self._rows(host_events, "INSTRUMENTATION", "startup_module_identity")
+        startup_by_role: dict[str, dict[str, Any]] = {}
+        for row in startup_modules:
+            if row.get("startup_phase") is not True or row.get("startup_id") != startup_id:
+                raise ValidationError("startup module identity is outside the authenticated startup block")
+            role = row.get("role")
+            if role in startup_by_role:
+                raise ValidationError(f"duplicate startup module identity role: {role}")
+            startup_by_role[str(role)] = row
+        expected_module_roles = {"wine", "wine_launcher", "winevulkan_dll", "winevulkan_so",
+                                 "wine_host_loader", "winemac_so", "trace_proxy", "moltenvk",
+                                 "wineserver"}
+        if set(startup_by_role) != expected_module_roles:
+            raise ValidationError("startup module identity block is missing or duplicates a required runtime module")
+        for role, row in startup_by_role.items():
+            expected = self.expected_startup_identities[role]
+            if (str(Path(str(row.get("path", ""))).resolve()) != expected["path"]
+                    or row.get("sha256") != expected["sha256"]
+                    or str(Path(str(row.get("observed_path", ""))).resolve()) != expected["path"]
+                    or row.get("observed_sha256") != expected["sha256"]
+                    or row.get("identity_match") is not True):
+                raise ValidationError(f"startup {role} path or SHA-256 differs from the bound runtime")
+            expected_loaded = role not in {"wineserver", "wine_launcher"}
+            expected_kind = (
+                "prefixlease-bound-executable" if role == "wineserver" else
+                "prefixlease-spawn-executable" if role == "wine_launcher" else
+                "win32-hmodule-proof-in-paired-app-trace" if role == "winevulkan_dll" else
+                "dyld-main-executable" if role == "wine" else
+                "dyld-loaded-image")
+            if (row.get("loaded_in_process") is not expected_loaded
+                    or row.get("identity_kind") != expected_kind):
+                raise ValidationError(f"startup {role} load state or identity kind is ambiguous")
+        runtime_identities = loader_evidence.get("runtime_identities") if loader_evidence else None
+        if not isinstance(runtime_identities, dict):
+            raise ValidationError("loader evidence lacks runtime module identities")
+        loader_dll_path = loader_evidence.get("winevulkan_dll_reported_path")
+        if (not isinstance(loader_dll_path, str)
+                or loader_dll_path.replace("\\", "/").casefold()
+                    != app_winevulkan_path.replace("\\", "/").casefold()):
+            raise ValidationError("pre-frame loaded winevulkan.dll path differs from the Wine loader record")
+        if set(runtime_identities) != set(self.expected_startup_identities) | {"app"}:
+            raise ValidationError("loader evidence has missing or duplicate runtime identity roles")
+        for role, expected in self.expected_startup_identities.items():
+            runtime = runtime_identities.get(role)
+            if not isinstance(runtime, dict):
+                raise ValidationError(f"runtime identity evidence is missing {role}")
+            if (str(Path(str(runtime.get("path", ""))).resolve()) != expected["path"]
+                    or runtime.get("sha256") != expected["sha256"]):
+                raise ValidationError(f"runtime identity evidence differs from the bound {role} binary")
+        app_runtime = runtime_identities["app"]
+        if (str(Path(str(app_runtime.get("path", ""))).resolve()) != self.expected_app_path
+                or app_runtime.get("sha256") != self.expected_app_sha256):
+            raise ValidationError("runtime evidence differs from the bound native app path or SHA-256")
+        if (runtime_identities["winevulkan_dll"].get("load_kind") != "builtin"
+                or runtime_identities["moltenvk"].get("version") != self.expected_moltenvk_version
+                or loader_evidence.get("khronos_loader_loaded") is not False
+                or loader_evidence.get("moltenvk_version") != self.expected_moltenvk_version
+                or not loader_evidence.get("moltenvk_runtime_banners")
+                or any(row.get("moltenvk_version") != "1.4.2"
+                       or row.get("vulkan_version") != "1.4.357"
+                       for row in loader_evidence["moltenvk_runtime_banners"])):
+            raise ValidationError("runtime loader path, MoltenVK version, or direct-loader selection is incorrect")
+        layer = self._one(self._rows(host_events, "LAYER_SOURCE", "layer_configuration"),
+                          "WineMetalLayer configuration")
+        if (layer.get("layer_class") != "WineMetalLayer"
+                or layer.get("layer_is_cametal_layer") is not True
+                or str(Path(str(layer.get("layer_class_image_path", ""))).resolve())
+                    != self.expected_startup_identities["winemac_so"]["path"]
+                or layer.get("layer_class_image_sha256")
+                    != self.expected_startup_identities["winemac_so"]["sha256"]):
+            raise ValidationError(f"observed layer is not WineMetalLayer: {layer.get('layer_class')}")
+        layer_id = self._int(layer, "layer_id", positive=True)
+        identity_layer = layer
+        presentation_layers = self._rows(host_events, "LAYER_SOURCE", "layer_presentation_configuration")
+        if presentation_layers:
+            configured = self._one(presentation_layers, "WineMetalLayer presentation configuration")
+            for identity_key in ("layer_id", "layer_class", "layer_is_cametal_layer",
+                                 "layer_class_image_path", "layer_class_image_sha256"):
+                if configured.get(identity_key) != layer.get(identity_key):
+                    raise ValidationError("early and presentation layer identities differ")
+            if layer.get("observation_stage") != "surface_identity_before_swapchain":
+                raise ValidationError("split layer observation lacks an explicit early identity stage")
+            layer = configured
+        elif layer.get("observation_stage") == "surface_identity_before_swapchain":
+            raise ValidationError("split layer observation requires presentation configuration")
+        for key in ("maximum_drawable_count", "pixel_format"):
+            self._int(layer, key)
+        if self._int(layer, "maximum_drawable_count") != 3:
+            raise ValidationError("WineMetalLayer maximumDrawableCount differs from the requested three images")
+        for key in ("drawable_width", "drawable_height", "contents_scale",
+                    "layer_bounds_width_points", "layer_bounds_height_points"):
+            if self._number(layer, key) <= 0:
+                raise ValidationError(f"WineMetalLayer {key} must be positive")
+        for key in ("allows_next_drawable_timeout", "display_sync_enabled", "framebuffer_only"):
+            if type(layer.get(key)) is not bool:
+                raise ValidationError(f"WineMetalLayer {key} is not a boolean")
+        if (layer.get("drawable_width") != 640 or layer.get("drawable_height") != 360):
+            raise ValidationError("WineMetalLayer drawable size differs from the fixed 640x360 experiment")
+
+        trace_summary = self._one(self._rows(host_events, "LOGGER", "trace_summary"),
+                                  "host trace summary")
+        if (self._int(trace_summary, "dropped_count") != 0
+                or self._int(trace_summary, "write_failure_count") != 0
+                or self._int(trace_summary, "ring_capacity") != 8192):
+            raise ValidationError("host asynchronous trace ring reported drops, write failures, or a changed capacity")
+        frame_start_events = [row for row in host_events
+                              if row.get("event") in {
+                                  "vkAcquireNextImageKHR_begin", "vkQueueSubmit2_begin",
+                                  "vkQueuePresentKHR_begin", "next_drawable_begin",
+                              } and row.get("origin") in {"WINE_SOURCE", "MVK_BOUNDARY", "LAYER_SOURCE"}]
+        if not frame_start_events:
+            raise ValidationError("host trace contains no identified Vulkan frame events")
+        first_frame_event_id = min(self._int(row, "event_id", positive=True)
+                                   for row in frame_start_events)
+        startup_block = [clock, process_identity, proxy_identity, startup,
+                         *startup_modules, identity_layer]
+        if any(self._int(row, "event_id", positive=True) >= first_frame_event_id
+               for row in startup_block):
+            raise ValidationError("runtime, clock, or WineMetalLayer startup identity arrived after frame events")
+        dispatch = self._rows(host_events, "INSTRUMENTATION", "native_dispatch_source")
+        if len(dispatch) != 4:
+            raise ValidationError(f"expected four native Vulkan dispatch identities, found {len(dispatch)}")
+        dispatch_paths = []
+        for row in dispatch:
+            if row.get("resolved") is not True:
+                raise ValidationError("one or more native Vulkan entry points lack a dladdr identity")
+            path = str(Path(str(row.get("library_path", ""))).resolve())
+            if path not in self.expected_moltenvk_paths | {self.expected_original_vulkan_path}:
+                raise ValidationError(f"Vulkan dispatch resolved through an unexpected library: {path}")
+            dispatch_paths.append({"function": row.get("function"), "library_path": path,
+                                   "symbol_name": row.get("symbol_name")})
+
+        app_acquire = self._call_pairs(app_events, "APP_SOURCE", "app_vkAcquireNextImageKHR",
+                                       "app_acquire_seq")
+        app_submit = self._call_pairs(app_events, "APP_SOURCE", "app_vkQueueSubmit2", "app_submit_seq")
+        app_present = self._call_pairs(app_events, "APP_SOURCE", "app_vkQueuePresentKHR", "app_present_seq")
+        host_acquire = self._call_pairs(host_events, "WINE_SOURCE", "vkAcquireNextImageKHR", "wine_call_seq")
+        host_submit = self._call_pairs(host_events, "WINE_SOURCE", "vkQueueSubmit2", "wine_call_seq")
+        host_present = self._call_pairs(host_events, "WINE_SOURCE", "vkQueuePresentKHR", "wine_call_seq")
+        mvk_acquire = self._call_pairs(host_events, "MVK_BOUNDARY", "vkAcquireNextImageKHR", "wine_call_seq")
+        mvk_submit = self._call_pairs(host_events, "MVK_BOUNDARY", "vkQueueSubmit2", "wine_call_seq")
+        mvk_present = self._call_pairs(host_events, "MVK_BOUNDARY", "vkQueuePresentKHR", "wine_call_seq")
+        if not (len(app_acquire) == len(app_submit) == len(app_present)
+                == len(host_acquire) == len(host_submit) == len(host_present)
+                == len(mvk_acquire) == len(mvk_submit) == len(mvk_present)):
+            raise ValidationError("app and winevulkan/MoltenVK API counts differ; ordinal joins are ambiguous")
+        count = len(app_acquire)
+        if count != self._int(config, "app_frames_started", positive=True):
+            raise ValidationError("app frame count does not equal successful acquire call count")
+        if any(self._int(config, field, positive=True) != count for field in
+               ("app_submits", "app_present_requests")):
+            raise ValidationError("app acquire/submit/present totals differ")
+
+        surface_calls = self._call_pairs(
+            host_events, "MVK_BOUNDARY", "vkCreateMetalSurfaceEXT", "wine_call_seq")
+        fallback_surface_rows = self._rows(
+            host_events, "MVK_BOUNDARY", "vkCreateMacOSSurfaceMVK_begin")
+        fallback_surface_calls = self._call_pairs(
+            host_events, "MVK_BOUNDARY", "vkCreateMacOSSurfaceMVK", "wine_call_seq") \
+            if fallback_surface_rows else []
+        swapchain_calls = self._call_pairs(
+            host_events, "MVK_BOUNDARY", "vkCreateSwapchainKHR", "wine_call_seq")
+        if len(surface_calls) != 1 or fallback_surface_calls or len(swapchain_calls) != 1:
+            raise ValidationError(
+                "the pinned Wine path must create exactly one traced VK_EXT_metal_surface and swapchain")
+        surface_begin, surface_end = surface_calls[0]
+        swapchain_begin, swapchain_end = swapchain_calls[0]
+        if self._int(identity_layer, "event_id", positive=True) >= self._int(swapchain_begin, "event_id", positive=True):
+            raise ValidationError("WineMetalLayer identity must precede swapchain creation")
+        native_surface = self._int(surface_end, "surface_id", positive=True)
+        surface_layer = self._int(surface_end, "layer_id", positive=True)
+        if (self._int(surface_end, "vk_result") != 0
+                or self._int(surface_begin, "layer_id", positive=True) != surface_layer):
+            raise ValidationError("Wine vkCreateMetalSurfaceEXT did not succeed with one layer identity")
+        if surface_layer != layer_id:
+            raise ValidationError("WineMetalLayer nextDrawable identity differs from the surface pLayer")
+        if (self._int(swapchain_end, "surface_id", positive=True) != native_surface
+                or self._int(swapchain_begin, "surface_id", positive=True) != native_surface
+                or self._int(swapchain_end, "vk_result") != 0):
+            raise ValidationError("Wine swapchain does not belong to the unique created surface")
+        if (self._int(swapchain_end, "requested_image_count") != 3
+                or self._int(swapchain_end, "format") != 44
+                or self._int(swapchain_end, "width") != 640
+                or self._int(swapchain_end, "height") != 360
+                or self._int(swapchain_end, "present_mode") != 2):
+            raise ValidationError("native swapchain creation request differs from A's target configuration")
+        native_swapchain_from_create = self._int(swapchain_end, "swapchain_id", positive=True)
+
+        native_images: dict[tuple[int, int], int] = {}
+        image_rows = self._rows(host_events, "MVK_BOUNDARY", "swapchain_image_identity")
+        for row in image_rows:
+            key = (self._int(row, "swapchain_id", positive=True), self._int(row, "image_index"))
+            image_id = self._int(row, "image_id", positive=True)
+            if self._int(row, "surface_id", positive=True) != native_surface:
+                raise ValidationError("native swapchain image identity lost its surface identity")
+            if key in native_images:
+                raise ValidationError(f"duplicate native swapchain image identity: {key}")
+            native_images[key] = image_id
+        swapchain_ids = {key[0] for key in native_images}
+        if (len(swapchain_ids) != 1 or len(native_images) != 3
+                or {key[1] for key in native_images} != {0, 1, 2}):
+            raise ValidationError("native MoltenVK trace does not identify exactly three swapchain images")
+        native_swapchain = next(iter(swapchain_ids))
+        if native_swapchain != native_swapchain_from_create:
+            raise ValidationError("swapchain creation and acquired-image records identify different swapchains")
+
+        next_begin: dict[int, dict[str, Any]] = {}
+        next_end: dict[int, dict[str, Any]] = {}
+        for row in self._rows(host_events, "LAYER_SOURCE", "next_drawable_begin"):
+            sequence = self._int(row, "next_drawable_sequence", positive=True)
+            if sequence in next_begin:
+                raise ValidationError(f"duplicate nextDrawable begin sequence {sequence}")
+            next_begin[sequence] = row
+        for row in self._rows(host_events, "LAYER_SOURCE", "next_drawable_end"):
+            sequence = self._int(row, "next_drawable_sequence", positive=True)
+            if sequence in next_end:
+                raise ValidationError(f"duplicate nextDrawable end sequence {sequence}")
+            next_end[sequence] = row
+        if (set(next_begin) != set(next_end) or not next_end
+                or sorted(next_end) != list(range(1, len(next_end) + 1))):
+            raise ValidationError("nextDrawable begin/end sequence is incomplete or gapped")
+        next_drawable_events: list[dict[str, Any]] = []
+        next_by_frame: dict[tuple[int, int, int, int, int], list[dict[str, Any]]] = defaultdict(list)
+        for sequence in sorted(next_end):
+            begin, end = next_begin[sequence], next_end[sequence]
+            if (self._int(begin, "call_begin_mach_ns", positive=True)
+                    != self._int(end, "call_begin_mach_ns", positive=True)
+                    or self._int(end, "call_end_mach_ns", positive=True)
+                        < self._int(begin, "call_begin_mach_ns", positive=True)
+                    or self._int(begin, "tid", positive=True) != self._int(end, "tid", positive=True)
+                    or self._int(end, "duration_ns") != self._int(end, "call_end_mach_ns")
+                        - self._int(end, "call_begin_mach_ns")):
+                raise ValidationError(f"nextDrawable sequence {sequence} has an inconsistent interval")
+            row = dict(end)
+            row["next_drawable_sequence"] = sequence
+            row["next_drawable_begin_mach_ns"] = self._int(begin, "call_begin_mach_ns")
+            row["next_drawable_end_mach_ns"] = self._int(end, "call_end_mach_ns")
+            row["duration_ns"] = self._int(end, "duration_ns")
+            row["request_phase_fraction"] = None
+            next_drawable_events.append(row)
+            acquisition_value = self._int(end, "acquisition_sequence")
+            submit_value = self._int(end, "driver_submit_seq")
+            swapchain_value = self._int(end, "swapchain_id")
+            image_index_value = self._int(end, "image_index")
+            image_value = self._int(end, "image_id")
+            if (acquisition_value > 0 and submit_value > 0 and swapchain_value > 0
+                    and image_index_value in (0, 1, 2) and image_value > 0):
+                key = (acquisition_value, submit_value, swapchain_value,
+                       image_index_value, image_value)
+                next_by_frame[key].append(row)
+
+        present_join_rows = self._rows(host_events, "LAYER_SOURCE", "present_drawable_join")
+        request_rows = self._rows(host_events, "LAYER_SOURCE", "presented_handler_registered")
+        callback_rows = self._rows(host_events, "LAYER_SOURCE", "presented_callback")
+        availability_rows = self._rows(host_events, "LAYER_SOURCE", "availability_after_presented_handler")
+        release_rows = self._rows(host_events, "LAYER_SOURCE", "drawable_release")
+        def by_key(rows: list[dict[str, Any]], key_name: str, what: str) -> dict[int, dict[str, Any]]:
+            indexed: dict[int, dict[str, Any]] = {}
+            for row in rows:
+                key = self._int(row, key_name, positive=True)
+                if key in indexed:
+                    raise ValidationError(f"duplicate {what} identity {key}")
+                indexed[key] = row
+            return indexed
+        present_joins = by_key(present_join_rows, "present_seq", "present/drawable join")
+        if len(present_joins) != count:
+            raise ValidationError("present/drawable join rows do not cover each app present exactly once")
+        requests_by_drawable = by_key(request_rows, "drawable_id", "presented-handler registration")
+        callbacks_by_drawable = by_key(callback_rows, "drawable_id", "present callback")
+        availability_by_drawable = by_key(availability_rows, "drawable_id", "availability signal")
+        releases_by_drawable = by_key(release_rows, "drawable_id", "drawable release")
+        if not (len(requests_by_drawable) == len(callbacks_by_drawable)
+                == len(availability_by_drawable) == count):
+            raise ValidationError("drawable handler/callback/availability counts differ from frame count")
+        known_drawable_ids = {self._int(row, "drawable_id") for row in next_drawable_events
+                              if self._int(row, "drawable_id") > 0}
+        if any(drawable_id not in known_drawable_ids for drawable_id in releases_by_drawable):
+            raise ValidationError("drawable release event lacks a matching nextDrawable identity")
+
+        frames = []
+        for ordinal in range(count):
+            app_a_begin, app_a_end = app_acquire[ordinal]
+            app_s_begin, app_s_end = app_submit[ordinal]
+            app_p_begin, app_p_end = app_present[ordinal]
+            host_a_begin, host_a_end = host_acquire[ordinal]
+            host_s_begin, host_s_end = host_submit[ordinal]
+            host_p_begin, host_p_end = host_present[ordinal]
+            mvk_a_begin, mvk_a_end = mvk_acquire[ordinal]
+            mvk_s_begin, mvk_s_end = mvk_submit[ordinal]
+            mvk_p_begin, mvk_p_end = mvk_present[ordinal]
+            acquisition = ordinal + 1
+            app_frame_id = self._int(app_a_end, "app_frame_id", positive=True)
+            image_index = self._int(app_a_end, "image_index")
+            if image_index not in (0, 1, 2):
+                raise ValidationError(f"frame {app_frame_id} acquired invalid image index {image_index}")
+            native_image = native_images[(native_swapchain, image_index)]
+            api_ends = (app_a_end, app_s_end, app_p_end)
+            if any(self._int(row, "vk_result") not in (0, 1000001003) for row in api_ends):
+                raise ValidationError(f"frame {app_frame_id} has a failed app Vulkan call")
+            if any(self._int(row, "image_index") != image_index
+                   or self._int(row, "image_id", positive=True) <= 0 for row in api_ends):
+                raise ValidationError(f"frame {app_frame_id} app call image identity changed")
+            if any(self._int(row, "app_frame_id", positive=True) != app_frame_id
+                   for row in (app_s_end, app_p_end)):
+                raise ValidationError(f"frame {app_frame_id} app acquire/submit/present identities differ")
+            if any(self._int(row, "app_acquire_seq", positive=True) != acquisition
+                   for row in (app_a_end, app_s_end, app_p_end)):
+                raise ValidationError(f"frame {app_frame_id} app acquire sequence is not deterministic")
+            if any(self._int(row, "surface_id", positive=True) != native_surface
+                   or self._int(row, "image_index") != image_index
+                   or self._int(row, "image_id", positive=True) != native_image
+                   or self._int(row, "swapchain_id", positive=True) != native_swapchain
+                   or self._int(row, "vk_result") not in (0, 1000001003)
+                   for row in (host_a_end, host_s_end, host_p_end)):
+                raise ValidationError(f"frame {app_frame_id} host/native Vulkan image identity differs")
+            # WINE_SOURCE records the per-API call ordinal. The same producer
+            # counter is named acquisition/driver sequence in MVK_BOUNDARY.
+            # Check both labels explicitly; no timestamp-derived join is used.
+            if (self._int(host_a_end, "wine_call_seq", positive=True) != acquisition
+                    or self._int(mvk_a_end, "acquisition_sequence", positive=True) != acquisition
+                    or self._int(host_s_end, "acquisition_sequence", positive=True) != acquisition
+                    or self._int(host_p_end, "acquisition_sequence", positive=True) != acquisition
+                    or self._int(mvk_s_end, "acquisition_sequence", positive=True) != acquisition
+                    or self._int(mvk_p_end, "acquisition_sequence", positive=True) != acquisition
+                    or self._int(host_s_end, "wine_call_seq", positive=True) != ordinal + 1
+                    or self._int(mvk_s_end, "driver_submit_seq", positive=True) != ordinal + 1
+                    or self._int(host_p_end, "driver_submit_seq", positive=True) != ordinal + 1
+                    or self._int(mvk_p_end, "driver_submit_seq", positive=True) != ordinal + 1
+                    or self._int(mvk_p_end, "present_seq", positive=True) != ordinal + 1
+                    or self._int(host_p_begin, "present_seq", positive=True) != ordinal + 1
+                    or self._int(host_p_end, "present_seq", positive=True) != ordinal + 1
+                    or self._int(host_p_end, "wine_call_seq", positive=True) != ordinal + 1
+                    or self._int(mvk_p_end, "driver_present_seq", positive=True) != ordinal + 1):
+                raise ValidationError(f"frame {app_frame_id} lacks exact host acquisition/submit/present correlation")
+            for host_end, mvk_end in ((host_a_end, mvk_a_end), (host_s_end, mvk_s_end),
+                                      (host_p_end, mvk_p_end)):
+                for field in ("swapchain_id", "image_index", "image_id", "vk_result"):
+                    if host_end.get(field) != mvk_end.get(field):
+                        raise ValidationError(
+                            f"frame {app_frame_id} winevulkan/MoltenVK {field} identity differs")
+            if (self._int(app_s_end, "app_acquire_seq", positive=True) != acquisition
+                    or self._int(app_p_end, "app_acquire_seq", positive=True) != acquisition
+                    or self._int(app_p_end, "app_submit_seq", positive=True) != ordinal + 1
+                    or self._int(app_p_end, "app_present_seq", positive=True) != ordinal + 1):
+                raise ValidationError(f"frame {app_frame_id} lacks exact app frame/submit/present correlation")
+
+            draw_key = (acquisition, ordinal + 1, native_swapchain, image_index, native_image)
+            attempts = next_by_frame.get(draw_key, [])
+            if not attempts:
+                raise ValidationError(f"frame {app_frame_id} has no nextDrawable call for its acquired native image")
+            join = present_joins.get(ordinal + 1)
+            if (not join or join.get("matched") is not True
+                    or self._int(join, "swapchain_count", positive=True) != 1
+                    or self._int(join, "present_seq", positive=True) != ordinal + 1
+                    or self._int(join, "acquisition_sequence", positive=True) != acquisition
+                    or self._int(join, "submit_sequence", positive=True) != ordinal + 1
+                    or self._int(join, "surface_id", positive=True) != native_surface
+                    or self._int(join, "swapchain_id", positive=True) != native_swapchain
+                    or self._int(join, "image_index") != image_index
+                    or self._int(join, "image_id", positive=True) != native_image
+                    or self._int(join, "queue_id", positive=True)
+                        != self._int(host_p_begin, "queue_id", positive=True)
+                    or self._int(join, "call_begin_mach_ns", positive=True)
+                        != self._int(host_p_begin, "call_begin_mach_ns", positive=True)
+                    or self._int(join, "tid", positive=True)
+                        != self._int(host_p_begin, "tid", positive=True)):
+                raise ValidationError(f"frame {app_frame_id} present is not joined to its drawable by exact identity")
+            drawable_id = self._int(join, "drawable_id", positive=True)
+            selected_attempts = [row for row in attempts
+                                 if self._int(row, "drawable_id") == drawable_id]
+            if len(selected_attempts) != 1:
+                raise ValidationError(f"frame {app_frame_id} present drawable does not identify one nextDrawable result")
+            draw_end = selected_attempts[0]
+            if (self._int(draw_end, "texture_pixel_format", positive=True) == 0
+                    or self._int(draw_end, "layer_id", positive=True) != layer_id
+                    or self._int(draw_end, "surface_id", positive=True) != native_surface
+                    or self._int(draw_end, "texture_id", positive=True) <= 0):
+                raise ValidationError(f"frame {app_frame_id} selected drawable does not match its WineMetalLayer/native image")
+            if any(self._int(row, "texture_pixel_format") > 0 and row is not draw_end
+                   for row in attempts):
+                raise ValidationError(f"frame {app_frame_id} has multiple valid drawable attempts; association is ambiguous")
+            draw_sequence = self._int(draw_end, "next_drawable_sequence", positive=True)
+            draw_begin = next_begin[draw_sequence]
+            submit_begin_ns = self._int(host_s_begin, "call_begin_mach_ns", positive=True)
+            submit_end_ns = self._int(host_s_end, "call_end_mach_ns", positive=True)
+            draw_begin_ns = self._int(draw_begin, "call_begin_mach_ns", positive=True)
+            draw_end_ns = self._int(draw_end, "call_end_mach_ns", positive=True)
+            for attempt in attempts:
+                attempt_sequence = self._int(attempt, "next_drawable_sequence", positive=True)
+                attempt_begin = next_begin[attempt_sequence]
+                attempt_begin_ns = self._int(attempt_begin, "call_begin_mach_ns", positive=True)
+                attempt_end_ns = self._int(attempt, "call_end_mach_ns", positive=True)
+                if (self._int(attempt, "layer_id", positive=True) != layer_id
+                        or self._int(attempt, "surface_id", positive=True) != native_surface
+                        or self._int(attempt, "tid", positive=True)
+                            != self._int(host_s_begin, "tid", positive=True)
+                        or self._int(attempt_begin, "tid", positive=True)
+                            != self._int(host_s_begin, "tid", positive=True)
+                        or attempt_begin_ns < submit_begin_ns or attempt_end_ns > submit_end_ns):
+                    raise ValidationError(f"frame {app_frame_id} nextDrawable attempt lacks exact in-submit context")
+                attempt["app_frame_id"] = app_frame_id
+                attempt["selected_for_present"] = attempt is draw_end
+            if (self._int(draw_begin, "acquisition_sequence", positive=True) != acquisition
+                    or self._int(draw_end, "acquisition_sequence", positive=True) != acquisition
+                    or self._int(draw_begin, "driver_submit_seq", positive=True) != ordinal + 1
+                    or self._int(draw_end, "driver_submit_seq", positive=True) != ordinal + 1
+                    or self._int(draw_begin, "swapchain_id", positive=True) != native_swapchain
+                    or self._int(draw_end, "swapchain_id", positive=True) != native_swapchain
+                    or self._int(draw_begin, "image_index") != image_index
+                    or self._int(draw_end, "image_index") != image_index
+                    or self._int(draw_begin, "image_id", positive=True) != native_image
+                    or self._int(draw_end, "image_id", positive=True) != native_image
+                    or self._int(draw_begin, "tid", positive=True) != self._int(host_s_begin, "tid", positive=True)
+                    or self._int(draw_end, "tid", positive=True) != self._int(host_s_begin, "tid", positive=True)
+                    or draw_begin_ns < submit_begin_ns or draw_end_ns > submit_end_ns):
+                raise ValidationError(f"frame {app_frame_id} nextDrawable lacks same-thread in-submit image identity")
+            if (self._int(draw_end, "drawable_id", positive=True) != drawable_id
+                    or self._int(join, "texture_id", positive=True) != self._int(draw_end, "texture_id", positive=True)):
+                raise ValidationError(f"frame {app_frame_id} present/drawable texture identity differs")
+            request = requests_by_drawable.get(drawable_id)
+            callback = callbacks_by_drawable.get(drawable_id)
+            availability = availability_by_drawable.get(drawable_id)
+            release = releases_by_drawable.get(drawable_id)
+            if not all((request, callback, availability, release)):
+                raise ValidationError(f"frame {app_frame_id} has an incomplete drawable lifecycle")
+            for row in (request, callback, availability, release):
+                if (self._int(row, "surface_id", positive=True) != native_surface
+                        or self._int(row, "acquisition_sequence", positive=True) != acquisition
+                        or self._int(row, "image_id", positive=True) != native_image
+                        or self._int(row, "driver_present_seq", positive=True) != ordinal + 1
+                        or self._int(row, "present_queue_id", positive=True)
+                            != self._int(host_p_begin, "queue_id", positive=True)
+                        or self._int(row, "present_swapchain_id", positive=True) != native_swapchain
+                        or self._int(row, "present_image_index") != image_index
+                        or self._int(row, "present_image_id", positive=True) != native_image
+                        ):
+                    raise ValidationError(f"frame {app_frame_id} drawable lifecycle identity is ambiguous")
+            if (self._int(callback, "presented_time_mach_ns") < 0
+                    or type(callback.get("is_displayed")) is not bool
+                    or self._int(availability, "event_id", positive=True) == 0):
+                raise ValidationError(f"frame {app_frame_id} has malformed presented/availability data")
+            if (callback.get("presentation_clock_domain") != "mach_absolute_time_ns"
+                    or callback.get("presented_time_basis") != "mach_absolute_time_seconds"
+                    or callback.get("presented_time_conversion") != "floor(seconds*1e9)"
+                    or callback.get("callback_delivery_clock_domain") != "mach_absolute_time_ns"):
+                raise ValidationError(f"frame {app_frame_id}: callback timestamp has an unidentified clock basis")
+            if (self._int(draw_end, "duration_ns")
+                    != self._int(draw_end, "call_end_mach_ns") - self._int(draw_end, "call_begin_mach_ns")):
+                raise ValidationError(f"frame {app_frame_id} nextDrawable duration is inconsistent")
+
+            frames.append({
+                "app_frame_id": app_frame_id, "acquisition_sequence": acquisition,
+                "app_image_handle": self._int(app_a_end, "image_id", positive=True),
+                "image_index": image_index, "native_swapchain_id": native_swapchain,
+                "native_surface_id": native_surface,
+                "native_image_id": native_image,
+                "app_acquire_duration_ns": self._int(app_a_end, "duration_ns"),
+                "app_submit_duration_ns": self._int(app_s_end, "duration_ns"),
+                "app_present_duration_ns": self._int(app_p_end, "duration_ns"),
+                "native_acquire_duration_ns": self._int(host_a_end, "duration_ns"),
+                "native_acquire_begin_mach_ns": self._int(host_a_begin, "call_begin_mach_ns"),
+                "native_acquire_end_mach_ns": self._int(host_a_end, "call_end_mach_ns"),
+                "native_submit_duration_ns": self._int(host_s_end, "duration_ns"),
+                "native_submit_begin_mach_ns": submit_begin_ns,
+                "native_submit_end_mach_ns": submit_end_ns,
+                "native_present_duration_ns": self._int(host_p_end, "duration_ns"),
+                "next_drawable_begin_mach_ns": self._int(draw_begin, "call_begin_mach_ns"),
+                "next_drawable_end_mach_ns": self._int(draw_end, "call_end_mach_ns"),
+                "next_drawable_duration_ns": self._int(draw_end, "duration_ns"),
+                "drawable_id": drawable_id, "texture_id": self._int(draw_end, "texture_id", positive=True),
+                "present_request_mach_ns": self._int(host_p_begin, "call_begin_mach_ns", positive=True),
+                "presented_handler_registered_mach_ns": self._int(request, "ts_mach_ns"),
+                "presented_callback_mach_ns": self._int(callback, "ts_mach_ns"),
+                "presented_time_mach_ns": self._int(callback, "presented_time_mach_ns"),
+                "is_displayed": callback["is_displayed"],
+                "availability_observed_mach_ns": self._int(availability, "ts_mach_ns"),
+                "drawable_release_mach_ns": self._int(release, "ts_mach_ns"),
+                "next_drawable_attempts": [
+                    {"sequence": self._int(row, "next_drawable_sequence", positive=True),
+                     "drawable_id": self._int(row, "drawable_id"),
+                     "texture_pixel_format": self._int(row, "texture_pixel_format"),
+                     "duration_ns": self._int(row, "duration_ns"),
+                     "selected_for_present": row["selected_for_present"]}
+                    for row in attempts
+                ],
+                "app_event_ids": [self._int(row, "event_id") for row in
+                                   (app_a_begin, app_a_end, app_s_begin, app_s_end,
+                                    app_p_begin, app_p_end)],
+                "host_event_ids": [self._int(row, "event_id") for row in
+                                   (host_a_begin, host_a_end, host_s_begin, host_s_end,
+                                    host_p_begin, host_p_end, draw_begin, draw_end,
+                                    join, request, callback, availability, release)],
+                "mvk_event_ids": [self._int(row, "event_id") for row in
+                                  (mvk_a_begin, mvk_a_end, mvk_s_begin, mvk_s_end,
+                                   mvk_p_begin, mvk_p_end)],
+                "deterministic_join": "app API ordinal + native swapchain/image/acquisition/submit tuple -> WineMetalLayer drawable; exact present tuple -> drawable ID; callback and release keyed by drawable ID",
+            })
+
+        displayed = [row for row in frames if row["is_displayed"] and row["presented_time_mach_ns"] > 0]
+        if any(row["is_displayed"] != (row["presented_time_mach_ns"] > 0) for row in frames):
+            raise ValidationError("presented callback display flag disagrees with presentedTime")
+        displayed_times = sorted(row["presented_time_mach_ns"] for row in displayed)
+        intervals = [right - left for left, right in zip(displayed_times, displayed_times[1:])]
+        if not intervals or any(value <= 0 for value in intervals):
+            raise ValidationError("valid presentedTime records are insufficient or non-monotonic")
+        period = sorted(intervals)[(len(intervals) - 1) // 2]
+        if period <= 0:
+            raise ValidationError("effective presentation period is not positive")
+        for row in frames:
+            relative = row["next_drawable_begin_mach_ns"] - displayed_times[0]
+            row["request_phase_fraction"] = (relative % period) / period
+            row["effective_period_ns"] = period
+        for event in next_drawable_events:
+            relative = event["next_drawable_begin_mach_ns"] - displayed_times[0]
+            event["request_phase_fraction"] = (relative % period) / period
+            event["effective_period_ns"] = period
+        if any(event["duration_ns"] >= 100_000_000 and event.get("app_frame_id") is None
+               for event in next_drawable_events):
+            raise ValidationError("a >=100 ms nextDrawable wait cannot be tied to an app frame/native image")
+
+
+
+        wait_series = [row["duration_ns"] for row in next_drawable_events]
+        submit_series = [row["native_submit_duration_ns"] for row in frames]
+        present_series = [row["native_present_duration_ns"] for row in frames]
+        acquire_series = [row["native_acquire_duration_ns"] for row in frames]
+        app_submit_series = [row["app_submit_duration_ns"] for row in frames]
+        app_present_series = [row["app_present_duration_ns"] for row in frames]
+        app_acquire_series = [row["app_acquire_duration_ns"] for row in frames]
+        duration_seconds = run_ns / 1_000_000_000
+        loader = loader_evidence or {}
+        if loader.get("winevulkan_dll_loaded") is not True or loader.get("winevulkan_so_loaded") is not True:
+            raise ValidationError("loader log does not establish the exact winevulkan DLL and Unix module")
+        loaded_mvk = str(Path(str(loader.get("moltenvk_loaded_path", ""))).resolve())
+        if loaded_mvk not in self.expected_moltenvk_paths:
+            raise ValidationError("loader log does not establish the exact pinned MoltenVK path")
+        if loader.get("forbidden_module_names"):
+            raise ValidationError(f"forbidden D3D/DXVK/bridge module(s) loaded: {loader['forbidden_module_names']}")
+
+        return {
+            "is_valid": True, "quantitative_ready": True, "frame_count": len(frames),
+            "acquired_fps": len(app_acquire) / duration_seconds,
+            "presented_fps": len(displayed) / duration_seconds,
+            "wsi_present_rate": len(host_present) / duration_seconds,
+            "displayed_frames": len(displayed), "presentation_drop_count": len(frames) - len(displayed),
+            "presentation_drop_rate": (len(frames) - len(displayed)) / len(frames),
+            "effective_refresh_period_ns": period,
+            "effective_refresh_hz": 1_000_000_000 / period,
+            "layer_configuration": layer, "app_configuration": config,
+            "process_identity": process_identity, "proxy_identity": proxy_identity,
+            "native_dispatch_sources": dispatch_paths, "loader_evidence": loader,
+            "trace_summary": trace_summary,
+            "next_drawable": self.duration_histogram(wait_series),
+            "vkQueueSubmit2": self.duration_histogram(submit_series),
+            "vkQueueSubmit2_app": self.duration_histogram(app_submit_series),
+            "vkQueuePresentKHR_cpu": self.duration_histogram(present_series),
+            "vkQueuePresentKHR_app_cpu": self.duration_histogram(app_present_series),
+            "vkAcquireNextImageKHR": self.duration_histogram(acquire_series),
+            "vkAcquireNextImageKHR_app": self.duration_histogram(app_acquire_series),
+            "refresh_phase": {
+                "method": "request start modulo the measured median displayed-presentedTime interval; no 60.000 Hz assumption",
+                "period_ns": period,
+                "10_to_18_ms": [row for row in next_drawable_events
+                                if 10_000_000 <= row["duration_ns"] <= 18_000_000],
+                "over_25_ms": [row for row in next_drawable_events
+                               if row["duration_ns"] > 25_000_000],
+                "over_100_ms": [row for row in next_drawable_events
+                                if row["duration_ns"] > 100_000_000],
+            },
+            "next_drawable_events": next_drawable_events,
+            "frames": frames,
+            "availability_semantics": (
+                "availability_after_presented_handler is emitted after MoltenVK's original CAMetalDrawable handler returns. "
+                "In the pinned v1.4.2 source, normal presentation uses endPresentation -> signalAndUntrack/release; "
+                "makeAvailable is the explicit-release/teardown helper, not the normal present callback. "
+                "The next successful acquire of the same image_index is checked as the subsequent availability witness."
+            ),
+        }
 
 
 def main() -> None:

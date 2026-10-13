@@ -1,0 +1,48 @@
+{
+  "action_phase_duration_seconds": 20.0,
+  "corrected_uncovered_metrics": {
+    "acquire_count": 1198,
+    "acquired_fps": 59.9,
+    "callback_count": 1198,
+    "coverage_complete": true,
+    "displayed_callback_count": 1198,
+    "displayed_fps": 59.9,
+    "next_drawable_ms": {
+      "count": 1198,
+      "max": 40.385959,
+      "median": 16.0890205,
+      "p99": 16.63018824
+    },
+    "phase_duration_seconds": 20.0,
+    "phase_end_monotonic_ns": 956248989067000,
+    "phase_start_monotonic_ns": 956228989067000,
+    "raw_zero_callback_count": 0,
+    "raw_zero_fraction": 0.0,
+    "submit_ms": {
+      "count": 1198,
+      "max": 40.680708,
+      "median": 16.2567705,
+      "p99": 16.80765875
+    },
+    "target_pid": 40750,
+    "trace_path": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11d3b/runs/step11d3b-br9r-calibration-20261011-191535-62b08a17/host-traces/host-trace.40750.jsonl",
+    "trace_sha256": "41cf8107f34885a523f872b462d9e99fc77c64a3c9a48d49f96d92b682744659"
+  },
+  "disposition": "READ_ONLY_REDUCTION_OF_FAILED_INCOMPLETE_CALIBRATION",
+  "original_calibration_status": "FAIL",
+  "original_cover_was_shown": false,
+  "original_coverer_actions": [],
+  "phase_metric_origins": {
+    "acquire": "WINE_SOURCE",
+    "next_drawable": "LAYER_SOURCE",
+    "presented_callback": "LAYER_SOURCE",
+    "submit": "WINE_SOURCE"
+  },
+  "reducer_path": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11d3b/evidence/br9r2/coverer_sequence.py",
+  "reducer_sha256": "3207555ab573e1c53c24c6b04b8dedd3459facee4bb2d78a98cd2405adec6b51",
+  "schema_version": 1,
+  "source_controller_record": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11d3b/evidence/br9r2/br9r2-wine-calibration-20261011-1915-controller.json",
+  "source_controller_record_sha256": "04c7cb6e6e02718c6caf99ff9ee0f84b2e7d8d6573604b2803ca68e68863afb3",
+  "source_trace_path": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11d3b/runs/step11d3b-br9r-calibration-20261011-191535-62b08a17/host-traces/host-trace.40750.jsonl",
+  "source_trace_sha256": "41cf8107f34885a523f872b462d9e99fc77c64a3c9a48d49f96d92b682744659"
+}

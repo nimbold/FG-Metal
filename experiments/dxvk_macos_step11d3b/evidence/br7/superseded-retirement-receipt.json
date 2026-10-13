@@ -1,0 +1,3597 @@
+{
+  "status": "PASS",
+  "archive": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11d3b/evidence/br7/superseded-pre-br7.tar.gz",
+  "archive_sha256": "58d0776ca6720e7039ce99a16f0a472484868376a212d1f6387ef3c289d5e5fc",
+  "archive_bytes": 335039183,
+  "retired_directories": [
+    "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11d3b/runs/step11d3b-br5probe-bypass142-20261009-142424-17733559",
+    "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11d3b/runs/step11d3b-br5probe-bypass142-20261009-142733-d352fbe8",
+    "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11d3b/runs/step11d3b-br5probe-bypass142-20261009-143135-6978a0f8",
+    "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11d3b/runs/step11d3b-br5probe-bypass142-20261009-160055-9731627a",
+    "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11d3b/runs/step11d3b-br5probe-proxy142-20261009-135600-2dd58bd5",
+    "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11d3b/runs/step11d3b-br5probe-proxy142-20261009-140014-d030c285",
+    "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11d3b/runs/step11d3b-br5probe-proxy142-20261009-140359-16f56e1d",
+    "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11d3b/runs/step11d3b-br5probe-proxy142-20261009-140823-1b1bbe6c",
+    "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11d3b/runs/step11d3b-br5probe-proxy142-20261009-143926-529744ac",
+    "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11d3b/runs/step11d3b-br5probe-proxy142-20261009-144659-eae79fc3",
+    "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11d3b/runs/step11d3b-br5probe-proxy142-20261009-154230-374e5a8c",
+    "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11d3b/runs/step11d3b-br5probe-proxy142-20261009-155210-b240b470",
+    "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11d3b/runs/step11d3b-br5probe-proxy142-20261009-155649-5a0c6fab",
+    "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11d3b/runs/step11d3b-br5probe-proxy142-20261009-160623-42de535e",
+    "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11d3b/runs/step11d3b-br5probe-proxy142-20261009-170638-739f04d5",
+    "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11d3b/runs/step11d3b-br5probe-proxy142-20261009-171213-ae4b6a67",
+    "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11d3b/runs/step11d3b-smoke-20261008-153046-ebc1fece",
+    "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11d3b/runs/step11d3b-smoke-20261008-231847-ebb87fd1",
+    "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11d3b/runs/step11d3b-smoke-20261009-010654-1535b5c2",
+    "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11d3b/runs/step11d3b-smoke-20261009-011920-15acf753",
+    "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11d3b/runs/step11d3b-smoke-20261009-013454-7bffa023",
+    "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11d3b/runs/step11d3b-smoke-20261009-020934-e6365c3e",
+    "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11d3b/runs/step11d3b-smoke-20261009-122135-b7e17c8f",
+    "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11d3b/runs/step11d3b-smoke-20261009-131626-7bf1a512",
+    "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11d3b/runs/step11d3b-smoke-20261009-161522-5f9109da",
+    "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11d3b/runs/step11d3b-smoke-20261009-162342-08abe21f",
+    "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11d3b/runs/step11d3b-smoke-20261009-171857-f6cc4a2c",
+    "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11d3b/runs/step11d3b-smoke-20261009-204240-c4f18984",
+    "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11d3b/runs/step11d3b-smoke-20261009-205002-d16f5cb4",
+    "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11d3b/runs/step11d3b-smoke-20261009-210718-6f03cc56",
+    "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11d3b/runs/step11d3b-smoke-20261009-211922-bd4754d4",
+    "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11d3b/runs/step11d3b-smoke-20261009-214401-1cc13c01",
+    "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11d3b/evidence/br2/previous-control",
+    "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11d3b/evidence/br2/loader-diagnostics"
+  ],
+  "protected_accepted_evidence": [
+    "step11d3b-baseline-01-20261009-223854-cfea0560",
+    "step11d3b-baseline-02-20261010-054210-3a16e5aa",
+    "step11d3b-baseline-03-20261010-062321-91bb8f4d",
+    "step11d3b-smoke-20261009-223106-0e5e3a6b",
+    "step11d3b-smoke-20261010-053718-a78894d0"
+  ],
+  "files": {
+    "runs/step11d3b-br5probe-bypass142-20261009-142424-17733559/br5-config.json": {
+      "sha256": "e79a082c211e1323c60cdcab0c04ce031d54f46af4bc59094d917acc286ab03a",
+      "size": 417,
+      "mtime_ns": 1791555917719004242,
+      "inode": 95454069,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-bypass142-20261009-142424-17733559/process-runner.log": {
+      "sha256": "5d8f85e9d5a4b551d831a37af9285e691cd3457e85048a646d388e99eb4f2bde",
+      "size": 1691,
+      "mtime_ns": 1791555994451011799,
+      "inode": 95454070,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-bypass142-20261009-142424-17733559/prefix-cleanup.json": {
+      "sha256": "58ec59380a1fc8f1e255ed4e310a1b39e546b4a0dba91baa13f6875f97efa358",
+      "size": 65536,
+      "mtime_ns": 1791555994443907494,
+      "inode": 95454128,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-bypass142-20261009-142424-17733559/process-context.json": {
+      "sha256": "61e90b694bd1c8e8a5f8836b33bf3cd03900ca2dabd406a1e72116ae36fdf344",
+      "size": 5489,
+      "mtime_ns": 1791555917681044451,
+      "inode": 95454068,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-bypass142-20261009-142424-17733559/trace-loader/libMoltenVK.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791555917657367728,
+      "inode": 95454067,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-bypass142-20261009-142424-17733559/mvk/libMoltenVK.1.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791555917640571807,
+      "inode": 95454065,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-bypass142-20261009-142424-17733559/mvk/libMoltenVK.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791555917648991705,
+      "inode": 95454066,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-bypass142-20261009-142733-d352fbe8/br5-config.json": {
+      "sha256": "e79a082c211e1323c60cdcab0c04ce031d54f46af4bc59094d917acc286ab03a",
+      "size": 417,
+      "mtime_ns": 1791556107323098480,
+      "inode": 95454206,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-bypass142-20261009-142733-d352fbe8/prefix-state.json": {
+      "sha256": "f0a9c5c38dad3381927d8c28c88dfe0f904dbfaa4d7cb8160388730153cd0e1a",
+      "size": 2169,
+      "mtime_ns": 1791556255323874513,
+      "inode": 95459887,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-bypass142-20261009-142733-d352fbe8/process-runner.log": {
+      "sha256": "577805b3b2546dea9d3421bfcfe30d144939594f9ed73573ac45bf6523a48105",
+      "size": 3170,
+      "mtime_ns": 1791556279883084229,
+      "inode": 95454207,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-bypass142-20261009-142733-d352fbe8/app-trace.jsonl": {
+      "sha256": "ce52f41246b0e2882b0b32e173a0b9059d90d5e3213410227bf8f0e78c55ae64",
+      "size": 4430,
+      "mtime_ns": 1791556254654864057,
+      "inode": 95459881,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-bypass142-20261009-142733-d352fbe8/runtime.log": {
+      "sha256": "8d2802e796b2cb9afbdc62f91a149eb8ad3466c2a4f3c2734df0e4488fde42eb",
+      "size": 1097803,
+      "mtime_ns": 1791556254702658896,
+      "inode": 95459838,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-bypass142-20261009-142733-d352fbe8/execution-result.json": {
+      "sha256": "274f9780467446c221e51fd4102cd8e9bb4dfece4cd1bea3c82478da7c3794bf",
+      "size": 451,
+      "mtime_ns": 1791556254704645495,
+      "inode": 95459882,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-bypass142-20261009-142733-d352fbe8/prefix-cleanup.json": {
+      "sha256": "b302512731dc9a17e560745f4955b70b21eb45b485d3a5ff909b1d81b3b363b9",
+      "size": 65536,
+      "mtime_ns": 1791556279876915180,
+      "inode": 95459918,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-bypass142-20261009-142733-d352fbe8/prefix-registry-diff.txt.gz": {
+      "sha256": "b54b6fa397522315d2a06717232b89fcdf59945ce564038d2982d1733ae0f588",
+      "size": 3715,
+      "mtime_ns": 1791556255322107040,
+      "inode": 95459886,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-bypass142-20261009-142733-d352fbe8/process-context.json": {
+      "sha256": "ec0445731f4615f3b3a5b64338e9c93ef3ccc19427ad5d68f546f63720aff945",
+      "size": 5779,
+      "mtime_ns": 1791556107285936220,
+      "inode": 95454205,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-bypass142-20261009-142733-d352fbe8/trace-loader/libMoltenVK.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791556107261928482,
+      "inode": 95454204,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-bypass142-20261009-142733-d352fbe8/mvk/libMoltenVK.1.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791556107245010746,
+      "inode": 95454202,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-bypass142-20261009-142733-d352fbe8/mvk/libMoltenVK.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791556107253486823,
+      "inode": 95454203,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-bypass142-20261009-143135-6978a0f8/br5-config.json": {
+      "sha256": "a9789bd4c19b43b74bf0dcf1fe35f1707887178d91839f850e47e6a3cbf10d6c",
+      "size": 419,
+      "mtime_ns": 1791556349483092109,
+      "inode": 95460016,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-bypass142-20261009-143135-6978a0f8/prefix-state.json": {
+      "sha256": "6d15c3621715faf4ea8c24354a2b1c8e5d10abdb592304bf36b2aad856313d84",
+      "size": 2169,
+      "mtime_ns": 1791556508390875319,
+      "inode": 95465895,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-bypass142-20261009-143135-6978a0f8/process-runner.log": {
+      "sha256": "24e3c898f3d1c8e2bc14b63bd153592ce2a6234a35ddfd76ba9157b926116ddb",
+      "size": 539,
+      "mtime_ns": 1791556531118122747,
+      "inode": 95460017,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-bypass142-20261009-143135-6978a0f8/runtime.log": {
+      "sha256": "663635caceab735185ac67029b20c260dc695a49f6eba319573ce6b9f8c5b0de",
+      "size": 1249733,
+      "mtime_ns": 1791556507705400857,
+      "inode": 95465738,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-bypass142-20261009-143135-6978a0f8/execution-result.json": {
+      "sha256": "1c1f9dad7d45ece1c34697e24515503a5448f32009bf49ad9fedd5990bc8f4e1",
+      "size": 452,
+      "mtime_ns": 1791556507757306646,
+      "inode": 95465861,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-bypass142-20261009-143135-6978a0f8/prefix-cleanup.json": {
+      "sha256": "441525162962be834d0b2c03ad58b1d14202654229511496e6a1a359c286c29b",
+      "size": 65536,
+      "mtime_ns": 1791556531117767869,
+      "inode": 95465983,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-bypass142-20261009-143135-6978a0f8/prefix-registry-diff.txt.gz": {
+      "sha256": "52d29e2f3a61f2eaaf4802649c0699f120170727a8e50210a420eef50af647c0",
+      "size": 3715,
+      "mtime_ns": 1791556508389075971,
+      "inode": 95465894,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-bypass142-20261009-143135-6978a0f8/process-context.json": {
+      "sha256": "c7fbea62aa120d5304005b29a5cbcb3992ab7fe7ce6dee7ed10e5040eb97669b",
+      "size": 5789,
+      "mtime_ns": 1791556349480884050,
+      "inode": 95460015,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-bypass142-20261009-143135-6978a0f8/trace-loader/libMoltenVK.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791556349454070420,
+      "inode": 95460014,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-bypass142-20261009-143135-6978a0f8/mvk/libMoltenVK.1.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791556349435011393,
+      "inode": 95460012,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-bypass142-20261009-143135-6978a0f8/mvk/libMoltenVK.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791556349444379551,
+      "inode": 95460013,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-bypass142-20261009-160055-9731627a/br5-config.json": {
+      "sha256": "e0d72aa16ed8d94c95dde6779418be83860bb0bd3665fd5f4b6b878541291ef0",
+      "size": 419,
+      "mtime_ns": 1791561709420457706,
+      "inode": 95536259,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-bypass142-20261009-160055-9731627a/prefix-state.json": {
+      "sha256": "f5ca9d78d87b4978b3a33dae9e93609152291accad8fde646cc0d7a6ca4e8d2a",
+      "size": 2169,
+      "mtime_ns": 1791561857234331282,
+      "inode": 95541890,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-bypass142-20261009-160055-9731627a/process-runner.log": {
+      "sha256": "9b5b9889d378f10b27159e4d4bf995e642a3e89819608d91d9b8c8b15bcc8bb5",
+      "size": 538,
+      "mtime_ns": 1791561880027323464,
+      "inode": 95536260,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-bypass142-20261009-160055-9731627a/runtime.log": {
+      "sha256": "9c62f13ed31e93591bc961071da3d2a9201b2283624e4e0cfa382d5551a5ec50",
+      "size": 1171462,
+      "mtime_ns": 1791561856566756746,
+      "inode": 95541852,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-bypass142-20261009-160055-9731627a/execution-result.json": {
+      "sha256": "a6af49efa369860aeec1b3d6af8bfe9a7401b9530a4d3100f60edd6e43030153",
+      "size": 451,
+      "mtime_ns": 1791561856622167119,
+      "inode": 95541885,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-bypass142-20261009-160055-9731627a/prefix-cleanup.json": {
+      "sha256": "384e34cf1db88e3d8ec23cd07ed881cf38220df7af555dcf6e8c54166748d35d",
+      "size": 65536,
+      "mtime_ns": 1791561880026931043,
+      "inode": 95541904,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-bypass142-20261009-160055-9731627a/prefix-registry-diff.txt.gz": {
+      "sha256": "3ea292d14c18f1af514ab0bf926330747f5de4af15e2dd206ecd739fd08fdb59",
+      "size": 3710,
+      "mtime_ns": 1791561857232588126,
+      "inode": 95541889,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-bypass142-20261009-160055-9731627a/process-context.json": {
+      "sha256": "282013cbe1d80a10410915eaa239cf753257913b1ede88f0ed2f02fca5091ffa",
+      "size": 5789,
+      "mtime_ns": 1791561709418189019,
+      "inode": 95536258,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-bypass142-20261009-160055-9731627a/trace-loader/libMoltenVK.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791561709394043265,
+      "inode": 95536257,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-bypass142-20261009-160055-9731627a/mvk/libMoltenVK.1.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791561709376624069,
+      "inode": 95536255,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-bypass142-20261009-160055-9731627a/mvk/libMoltenVK.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791561709385499898,
+      "inode": 95536256,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-135600-2dd58bd5/br5-config.json": {
+      "sha256": "3eedec88957dbd1cd9c1ba0f2a73d948960f8c918fc2e8ad06bab9e6a01d149f",
+      "size": 365,
+      "mtime_ns": 1791554214519835163,
+      "inode": 95408983,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-135600-2dd58bd5/prefix-state.json": {
+      "sha256": "27fc80cc0d8be95fc55cf967b60e9137c95af8a77691b8a74eb5310df9b253c8",
+      "size": 2167,
+      "mtime_ns": 1791554361413105204,
+      "inode": 95414669,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-135600-2dd58bd5/process-runner.log": {
+      "sha256": "845c31957fe89063609c8c9d759eacf2d45bce2c76071f64cfcb2c6d453f2e7c",
+      "size": 536,
+      "mtime_ns": 1791554383985094141,
+      "inode": 95408984,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-135600-2dd58bd5/runtime.log": {
+      "sha256": "ae9ec92720895b2f234d5924a483de3cb56a4e99dca275a27b95cb37e127ba55",
+      "size": 1183129,
+      "mtime_ns": 1791554360803843102,
+      "inode": 95414624,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-135600-2dd58bd5/execution-result.json": {
+      "sha256": "7bd191487e14fb3cce59632486dc2ce7d3fbac84de5cd799c805f78d57931789",
+      "size": 450,
+      "mtime_ns": 1791554360808649346,
+      "inode": 95414664,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-135600-2dd58bd5/prefix-cleanup.json": {
+      "sha256": "459de3d80bbf9766e05107d0571dfb3e5e286e942142abd1d8bae693d6c54460",
+      "size": 65536,
+      "mtime_ns": 1791554383984713305,
+      "inode": 95414713,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-135600-2dd58bd5/prefix-registry-diff.txt.gz": {
+      "sha256": "f69b948bf6f183acfadab5f2159e26bf819d8e6e334baa18b2b53e0af112df14",
+      "size": 3714,
+      "mtime_ns": 1791554361411489275,
+      "inode": 95414668,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-135600-2dd58bd5/process-context.json": {
+      "sha256": "abec0b5ad1708d40e133c88aa7ce4e457ba4dcba6f065bfb967c6c0be095ce79",
+      "size": 6086,
+      "mtime_ns": 1791554214517794266,
+      "inode": 95408982,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-135600-2dd58bd5/trace-loader/libMoltenVK.dylib": {
+      "sha256": "2ac16e321ebb162a49abeab59e9c2a17249d6163e50f5ac88477849155fed52e",
+      "size": 7991016,
+      "mtime_ns": 1791554214496635075,
+      "inode": 95408981,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-135600-2dd58bd5/mvk/libMoltenVK.1.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791554214478301665,
+      "inode": 95408979,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-135600-2dd58bd5/mvk/libMoltenVK.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791554214486925343,
+      "inode": 95408980,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-135600-2dd58bd5/host-traces/host-trace.36556.jsonl": {
+      "sha256": "65c5bb8f3002974bfaf890315f9b39929d8b3dcaaae2b3655d568cd4f525b8d3",
+      "size": 3445,
+      "mtime_ns": 1791554360761448496,
+      "inode": 95414659,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-135600-2dd58bd5/host-traces/host-trace.36579.jsonl": {
+      "sha256": "909a9c065d424bd07a50f9f29d598791f72dd4064bcee13233583b2702da5c2f",
+      "size": 1837,
+      "mtime_ns": 1791554358957355991,
+      "inode": 95414662,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-140014-d030c285/br5-config.json": {
+      "sha256": "6659c1d47f8cf87f34c760df28779701c3319a0a233d0d4bba18788622adeea7",
+      "size": 374,
+      "mtime_ns": 1791554467147524746,
+      "inode": 95414784,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-140014-d030c285/prefix-state.json": {
+      "sha256": "34a986ebfcdc2531366020145a3ee66f8d46562f46fecbb20dd3e8c1616d6d0a",
+      "size": 2167,
+      "mtime_ns": 1791554614180751345,
+      "inode": 95420502,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-140014-d030c285/process-runner.log": {
+      "sha256": "00369d3bff3a48960b3bc44f27c1406ea4f3408947fdf3ec4359b90652416d39",
+      "size": 537,
+      "mtime_ns": 1791554637328725093,
+      "inode": 95414785,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-140014-d030c285/runtime.log": {
+      "sha256": "deaa5b5e49a01f447945d5e471018e658d6caefb67d7c13950d85defe2fe6393",
+      "size": 1251021,
+      "mtime_ns": 1791554613508166857,
+      "inode": 95420413,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-140014-d030c285/execution-result.json": {
+      "sha256": "fecf100f44748c5baa4dcff0ead32f20ce0bc21da2ff466c33bfb3eba848eb9d",
+      "size": 451,
+      "mtime_ns": 1791554613567446505,
+      "inode": 95420476,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-140014-d030c285/prefix-cleanup.json": {
+      "sha256": "cc9c8450f632e9e0990a7940cce2b83ee87ae86b39f89c4247c737c376d6bf69",
+      "size": 65536,
+      "mtime_ns": 1791554637328379965,
+      "inode": 95420593,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-140014-d030c285/prefix-registry-diff.txt.gz": {
+      "sha256": "a95e317bac057c81a94194a79f1cb0dc5e68b26747d70a38f5baadc916af5431",
+      "size": 3716,
+      "mtime_ns": 1791554614178983207,
+      "inode": 95420501,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-140014-d030c285/process-context.json": {
+      "sha256": "f6040bfa98cbf398c2707ba719e90957e670a766f218f44339bfb3acbed7845a",
+      "size": 6103,
+      "mtime_ns": 1791554467145598023,
+      "inode": 95414783,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-140014-d030c285/trace-loader/libMoltenVK.dylib": {
+      "sha256": "2ac16e321ebb162a49abeab59e9c2a17249d6163e50f5ac88477849155fed52e",
+      "size": 7991016,
+      "mtime_ns": 1791554467124923411,
+      "inode": 95414780,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-140014-d030c285/mvk/libMoltenVK.1.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791554467106846694,
+      "inode": 95414778,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-140014-d030c285/mvk/libMoltenVK.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791554467115300632,
+      "inode": 95414779,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-140014-d030c285/host-traces/host-trace.36850.jsonl": {
+      "sha256": "24051d6ad2c616028f04341a7b95bbb010acfb3813680cc1e20a644c40dfafa3",
+      "size": 1837,
+      "mtime_ns": 1791554611103456691,
+      "inode": 95420440,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-140014-d030c285/host-traces/host-trace.36829.jsonl": {
+      "sha256": "fb3d67f968b592820c715c650e0359ebc6fb2e8463217f88076763d3ee7c5e1f",
+      "size": 18141,
+      "mtime_ns": 1791554613508057398,
+      "inode": 95420467,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-140359-16f56e1d/br5-config.json": {
+      "sha256": "d777fd8903bc3041ec83e84211ce27d9eb57f60a5fa27525e0977199033af7b9",
+      "size": 479,
+      "mtime_ns": 1791554692789660930,
+      "inode": 95420640,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-140359-16f56e1d/prefix-state.json": {
+      "sha256": "0562a4559e894a2d2ac504b7b9b0634dcb96ee74af805b359dbb8b1b8dfe4aa0",
+      "size": 2167,
+      "mtime_ns": 1791554839573226726,
+      "inode": 95426365,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-140359-16f56e1d/process-runner.log": {
+      "sha256": "2e534bd031e8bc40bf89dd5f0ecdaaf66a0d7c749c9ea6f4788badc7ca78e37b",
+      "size": 3167,
+      "mtime_ns": 1791554862482497912,
+      "inode": 95420641,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-140359-16f56e1d/runtime.log": {
+      "sha256": "402f7c18e23a4f1db57392a3d5e470c9f646eaf0242850c1d7a1acd8258386d6",
+      "size": 1174798,
+      "mtime_ns": 1791554838887046012,
+      "inode": 95426254,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-140359-16f56e1d/execution-result.json": {
+      "sha256": "ecc220a55b780593a97266fc41156035f3dd67a6a62232b1db079b3f83bf9fcf",
+      "size": 451,
+      "mtime_ns": 1791554838905504690,
+      "inode": 95426333,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-140359-16f56e1d/prefix-cleanup.json": {
+      "sha256": "ea1f97cf476c5ad0e2a251b57ac6ee4bb53e5e01c65921390309aab09d20ad5c",
+      "size": 65536,
+      "mtime_ns": 1791554862475224775,
+      "inode": 95426385,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-140359-16f56e1d/prefix-registry-diff.txt.gz": {
+      "sha256": "39eb74b263f768a7901fa117bc09bdbecfb325ab302ee4404c8739cfc5a7fd2c",
+      "size": 3707,
+      "mtime_ns": 1791554839571566797,
+      "inode": 95426364,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-140359-16f56e1d/process-context.json": {
+      "sha256": "7e211508b789a3cb6224bd6183b4753ca24b4526b125fe5f46a51d4cfc157df2",
+      "size": 6094,
+      "mtime_ns": 1791554692752168860,
+      "inode": 95420639,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-140359-16f56e1d/trace-loader/libMoltenVK.dylib": {
+      "sha256": "2ac16e321ebb162a49abeab59e9c2a17249d6163e50f5ac88477849155fed52e",
+      "size": 7991016,
+      "mtime_ns": 1791554692731519749,
+      "inode": 95420638,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-140359-16f56e1d/mvk/libMoltenVK.1.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791554692713555866,
+      "inode": 95420636,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-140359-16f56e1d/mvk/libMoltenVK.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791554692721907886,
+      "inode": 95420637,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-140359-16f56e1d/host-traces/host-trace.37086.jsonl": {
+      "sha256": "08bb541550e764d953527ae3860020a349fb77104fe3ba1e758a9ba5c8088406",
+      "size": 1837,
+      "mtime_ns": 1791554836641628193,
+      "inode": 95426300,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-140359-16f56e1d/host-traces/host-trace.37068.jsonl": {
+      "sha256": "04ef5dae0a31da5d028db65d7dfbfa8c9a9a4d8b1d1f90c43caaee93bad9b6cc",
+      "size": 15891,
+      "mtime_ns": 1791554838888018269,
+      "inode": 95426326,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-140823-1b1bbe6c/br5-config.json": {
+      "sha256": "608bd868358d103d0f838f15b483d4144f2af73c5a47d7f5bc70c85d19bfaee3",
+      "size": 478,
+      "mtime_ns": 1791554955747916901,
+      "inode": 95426443,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-140823-1b1bbe6c/prefix-state.json": {
+      "sha256": "fd01790a8071ca7d83e8b55320c8c74cc27cc701b0b568ea36ed5390ba338426",
+      "size": 2167,
+      "mtime_ns": 1791555103803842341,
+      "inode": 95432333,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-140823-1b1bbe6c/process-runner.log": {
+      "sha256": "953146e0b5a25cba557b139acd8f394bf8dd7b605f844033863fd00e1fdc5719",
+      "size": 3167,
+      "mtime_ns": 1791555126303398361,
+      "inode": 95426444,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-140823-1b1bbe6c/runtime.log": {
+      "sha256": "2261540b92ec9880548db1d6ec42ab87770d307ab4d7a1c976113773da878e17",
+      "size": 1338680,
+      "mtime_ns": 1791555103110915119,
+      "inode": 95432046,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-140823-1b1bbe6c/execution-result.json": {
+      "sha256": "c44949fc44f1e43380b5930f2721c67c5836f7e01e44c5237d975a8b3e13d77e",
+      "size": 450,
+      "mtime_ns": 1791555103171602236,
+      "inode": 95432305,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-140823-1b1bbe6c/prefix-cleanup.json": {
+      "sha256": "03c8d157e555b87e226c549cc37b44d2a74a216e84d2c13b8b5e6589d0f57f19",
+      "size": 65536,
+      "mtime_ns": 1791555126298252748,
+      "inode": 95432420,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-140823-1b1bbe6c/prefix-registry-diff.txt.gz": {
+      "sha256": "55ec3a3bddb1f9bbd6aa60a0824cd93e49035b4911a1cbb3a6f1c8ebead400d1",
+      "size": 3713,
+      "mtime_ns": 1791555103802045244,
+      "inode": 95432332,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-140823-1b1bbe6c/process-context.json": {
+      "sha256": "bc011eaeb41d29a5f62e26e4e808697e35655b75e2f954442ef8a11a95170398",
+      "size": 6093,
+      "mtime_ns": 1791554955710540999,
+      "inode": 95426442,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-140823-1b1bbe6c/trace-loader/libMoltenVK.dylib": {
+      "sha256": "2ac16e321ebb162a49abeab59e9c2a17249d6163e50f5ac88477849155fed52e",
+      "size": 7991016,
+      "mtime_ns": 1791554955689833762,
+      "inode": 95426441,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-140823-1b1bbe6c/mvk/libMoltenVK.1.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791554955671639627,
+      "inode": 95426439,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-140823-1b1bbe6c/mvk/libMoltenVK.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791554955680022773,
+      "inode": 95426440,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-140823-1b1bbe6c/host-traces/host-trace.37331.jsonl": {
+      "sha256": "1c5b1a4d3d925e6060ed1cd690c32b5eea709c2d13706db0b6adf8c5a6981800",
+      "size": 15891,
+      "mtime_ns": 1791555103111979710,
+      "inode": 95432294,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-140823-1b1bbe6c/host-traces/host-trace.37349.jsonl": {
+      "sha256": "aa62d56641421557b51e13e4ece8f05a873923906b52d19707738fc995af0632",
+      "size": 1837,
+      "mtime_ns": 1791555100855536643,
+      "inode": 95432265,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-143926-529744ac/br5-config.json": {
+      "sha256": "441210c4b4f6f9816a9b2c78a87c66b27720264c5ce70fb0e516d6ea3570b954",
+      "size": 469,
+      "mtime_ns": 1791556818601336332,
+      "inode": 95466309,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-143926-529744ac/prefix-state.json": {
+      "sha256": "ba758a6b7efc7c3939fe4ab031e381d45df9f638f4bcddf945921a43dc031224",
+      "size": 2167,
+      "mtime_ns": 1791556966492838026,
+      "inode": 95472040,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-143926-529744ac/process-runner.log": {
+      "sha256": "6af7d0b2e64fae2929a03e90b106293fdffa11946ae4ec26533fe846a2c096be",
+      "size": 537,
+      "mtime_ns": 1791556989052776985,
+      "inode": 95466310,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-143926-529744ac/runtime.log": {
+      "sha256": "9d148ffb290a5128d4a3a184d7723e99283b81b028a035059d13057699928ee0",
+      "size": 1339295,
+      "mtime_ns": 1791556965796511186,
+      "inode": 95471935,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-143926-529744ac/execution-result.json": {
+      "sha256": "b720e14f2928930d22f1a06ab28638de7fdd59985f6dbc9c6108bb883f8ee51d",
+      "size": 450,
+      "mtime_ns": 1791556965851348998,
+      "inode": 95472028,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-143926-529744ac/prefix-cleanup.json": {
+      "sha256": "98a2636f32ea7af50d6aeef7c1e9b7e77c6bf176edfbca6da35c96d4f1041950",
+      "size": 65536,
+      "mtime_ns": 1791556989052407024,
+      "inode": 95472137,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-143926-529744ac/prefix-registry-diff.txt.gz": {
+      "sha256": "6e8e8339083054cb6f55e6628c2837db327937d95a1b545546434fcb4b53ef4d",
+      "size": 3713,
+      "mtime_ns": 1791556966491139304,
+      "inode": 95472039,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-143926-529744ac/process-context.json": {
+      "sha256": "ea37e54936c4b6546b9367fa2f34f8395fc1473cf63a285aebc9537424ea2158",
+      "size": 6092,
+      "mtime_ns": 1791556818599334275,
+      "inode": 95466308,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-143926-529744ac/trace-loader/libMoltenVK.dylib": {
+      "sha256": "2ac16e321ebb162a49abeab59e9c2a17249d6163e50f5ac88477849155fed52e",
+      "size": 7991016,
+      "mtime_ns": 1791556818578557859,
+      "inode": 95466307,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-143926-529744ac/mvk/libMoltenVK.1.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791556818560052545,
+      "inode": 95466305,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-143926-529744ac/mvk/libMoltenVK.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791556818568464820,
+      "inode": 95466306,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-143926-529744ac/host-traces/host-trace.40001.jsonl": {
+      "sha256": "0b46786d2ef22438eba4266c8c09d8f4fe9cd97ae064c181bb753bd7b701847d",
+      "size": 18141,
+      "mtime_ns": 1791556965796158475,
+      "inode": 95472004,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-143926-529744ac/host-traces/host-trace.40022.jsonl": {
+      "sha256": "b25dab585cb86246caa8533c3873bc7ce623cf288eb3befe2dc261af9e2ec598",
+      "size": 1837,
+      "mtime_ns": 1791556963538743822,
+      "inode": 95471975,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-144659-eae79fc3/br5-config.json": {
+      "sha256": "a81e7ddc280bc4706c52caff4c43d5e01b0b65d29bc2ea2588fe68f51d327950",
+      "size": 463,
+      "mtime_ns": 1791557272518912453,
+      "inode": 95472368,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-144659-eae79fc3/prefix-state.json": {
+      "sha256": "f9fab78b83b38fa04c00351840919aa541e09c41316f2ec45181cfa2dae7a5e1",
+      "size": 2167,
+      "mtime_ns": 1791557430971937302,
+      "inode": 95478107,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-144659-eae79fc3/process-runner.log": {
+      "sha256": "689679cfb0140391b518c4fa2f7c700a7e558434abf18a940a05e1814cc9ad75",
+      "size": 537,
+      "mtime_ns": 1791557454357772821,
+      "inode": 95472369,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-144659-eae79fc3/app-trace.jsonl": {
+      "sha256": "1c0f26cafd68f60542f69c2cb7c57ff36fdfa2de59dee9e26195e297e771237f",
+      "size": 3608184,
+      "mtime_ns": 1791557430288045568,
+      "inode": 95478053,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-144659-eae79fc3/runtime.log": {
+      "sha256": "97332f8c4af5509159cfa7c73f71b0a4bcf1c1fa8d36732b83a985df6d182de0",
+      "size": 1801806,
+      "mtime_ns": 1791557430175778273,
+      "inode": 95477959,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-144659-eae79fc3/execution-result.json": {
+      "sha256": "ce9f972c9c079d6de12a629aa1bb7addd3c1b7aa431a75631ba78420921ae72a",
+      "size": 450,
+      "mtime_ns": 1791557430320073873,
+      "inode": 95478055,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-144659-eae79fc3/prefix-cleanup.json": {
+      "sha256": "98de87675b4f55b9f9a614707940dee29281424d43908b23875223b24bada727",
+      "size": 65536,
+      "mtime_ns": 1791557454357413943,
+      "inode": 95478138,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-144659-eae79fc3/prefix-registry-diff.txt.gz": {
+      "sha256": "43ece1366205b1440fd99a1d4473ec6fe9f78b7580f786b90f58e8d34d0fc8ff",
+      "size": 3632,
+      "mtime_ns": 1791557430970090703,
+      "inode": 95478106,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-144659-eae79fc3/process-context.json": {
+      "sha256": "db1d4d4ae3006851dc6aee08a74e3d93356c3041ef8923370aaf888fb5308594",
+      "size": 6078,
+      "mtime_ns": 1791557272483123368,
+      "inode": 95472367,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-144659-eae79fc3/trace-loader/libMoltenVK.dylib": {
+      "sha256": "2ac16e321ebb162a49abeab59e9c2a17249d6163e50f5ac88477849155fed52e",
+      "size": 7991016,
+      "mtime_ns": 1791557272461951569,
+      "inode": 95472366,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-144659-eae79fc3/mvk/libMoltenVK.1.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791557272427874248,
+      "inode": 95472364,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-144659-eae79fc3/mvk/libMoltenVK.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791557272436838196,
+      "inode": 95472365,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-144659-eae79fc3/host-traces/host-trace.40386.jsonl": {
+      "sha256": "60f91024be11b99b044ddcf7c205613125ed802d18460349d3edb318088cffcb",
+      "size": 1837,
+      "mtime_ns": 1791557417846177253,
+      "inode": 95477984,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-144659-eae79fc3/host-traces/host-trace.40368.jsonl": {
+      "sha256": "2b208c103330bb2933038385e045b67a9f02b75dea7f340cd9ae539e0459ad66",
+      "size": 6643274,
+      "mtime_ns": 1791557430172775331,
+      "inode": 95478013,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-154230-374e5a8c/br5-config.json": {
+      "sha256": "1f9c3c359efebcc742d8068fa2f45b782b1ccedb1af146021443a9deb25958c7",
+      "size": 511,
+      "mtime_ns": 1791560604710924542,
+      "inode": 95518004,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-154230-374e5a8c/prefix-state.json": {
+      "sha256": "44a2815ae2c0488d76bc782151e86934f2dd1a30ac9fd9d5ada0008e9ec457d4",
+      "size": 2167,
+      "mtime_ns": 1791560752566835079,
+      "inode": 95523724,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-154230-374e5a8c/process-runner.log": {
+      "sha256": "9e685309ed8c5584a9cd23269b9805b422d44871602fd02216e3b82dcffbcc4a",
+      "size": 3169,
+      "mtime_ns": 1791560775689493276,
+      "inode": 95518005,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-154230-374e5a8c/runtime.log": {
+      "sha256": "9edab9bea89025ce4fb7a24419c19e623dfb03e50a96334a5e6591c57c18cc0a",
+      "size": 932901,
+      "mtime_ns": 1791560751780832560,
+      "inode": 95523672,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-154230-374e5a8c/execution-result.json": {
+      "sha256": "94161e0da6b0c54ea85b9fbd98ab2dd6d0b42ffe50bf2c4cbf3e828f1e0c2518",
+      "size": 451,
+      "mtime_ns": 1791560751959960445,
+      "inode": 95523719,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-154230-374e5a8c/prefix-cleanup.json": {
+      "sha256": "8de94d7bd6ec39de299cdd37e47576b4346e1413197ae8f20c5ec140bd6e0bc6",
+      "size": 65536,
+      "mtime_ns": 1791560775683783059,
+      "inode": 95523748,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-154230-374e5a8c/prefix-registry-diff.txt.gz": {
+      "sha256": "ffd75156dd73497f25fc743798ce5d6d7ec3c9d5dbd2298e8dd398c5b08184ab",
+      "size": 2298,
+      "mtime_ns": 1791560752565127440,
+      "inode": 95523723,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-154230-374e5a8c/process-context.json": {
+      "sha256": "66662a08db6e19bec47620932de24404f7180cafa878c8db36eb825cf92543ff",
+      "size": 6122,
+      "mtime_ns": 1791560604708742564,
+      "inode": 95518003,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-154230-374e5a8c/trace-loader/libMoltenVK.dylib": {
+      "sha256": "9c931aeb510d18c91895f9cfef9863be328863962a11012da661d81c5e965005",
+      "size": 7991016,
+      "mtime_ns": 1791560604687730507,
+      "inode": 95518002,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-154230-374e5a8c/mvk/libMoltenVK.1.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791560604668955344,
+      "inode": 95518000,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-154230-374e5a8c/mvk/libMoltenVK.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791560604677555919,
+      "inode": 95518001,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-154230-374e5a8c/host-traces/host-trace.44242.jsonl": {
+      "sha256": "04dad33cd0e7a4804f4955987d329eb443fe40e9e67712450b40e50c4f27df09",
+      "size": 1554,
+      "mtime_ns": 1791560751925187811,
+      "inode": 95523718,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-154230-374e5a8c/host-traces/host-trace.44261.jsonl": {
+      "sha256": "a9d15ed9d9e02acaf92b0b08585d03099e6bea019e5e2831cc5929655f09e614",
+      "size": 1554,
+      "mtime_ns": 1791560751623862158,
+      "inode": 95523715,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-155210-b240b470/br5-config.json": {
+      "sha256": "a0f17940307092e6b6d31e8d137d179df5e8cba225a03f4a9a9e91295b4d2883",
+      "size": 492,
+      "mtime_ns": 1791561183734668079,
+      "inode": 95524804,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-155210-b240b470/prefix-state.json": {
+      "sha256": "fc49a3a75c81b25f454fa1aba65751f08e26b9fb614ebfb65185bf2b7b0456b9",
+      "size": 2167,
+      "mtime_ns": 1791561333115417893,
+      "inode": 95530431,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-155210-b240b470/process-runner.log": {
+      "sha256": "b60e3046cbdc93aed27cc151c245347816f5fcc68258ad268a85f3a2bc9cab61",
+      "size": 537,
+      "mtime_ns": 1791561356248563136,
+      "inode": 95524805,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-155210-b240b470/runtime.log": {
+      "sha256": "91d9a0c44b9366a40a87ab4ae2eea7aa8c30edfb31a69520c52fda26b26e1fbc",
+      "size": 1172761,
+      "mtime_ns": 1791561332470970793,
+      "inode": 95530397,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-155210-b240b470/execution-result.json": {
+      "sha256": "4aad8e0e655c72e22fbf9e06fced1beb4de817c8583789ede497d7b6f887ce97",
+      "size": 451,
+      "mtime_ns": 1791561332512377367,
+      "inode": 95530426,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-155210-b240b470/prefix-cleanup.json": {
+      "sha256": "84674a48e1914c40c6e5f8dc6f16e85166ba37b3e80eacd410eff25dcdb78dd6",
+      "size": 65536,
+      "mtime_ns": 1791561356248213841,
+      "inode": 95530447,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-155210-b240b470/prefix-registry-diff.txt.gz": {
+      "sha256": "f76829ac62c6f663524fc78c8b3fce8914c20f4b590b3c484729aebb7ad76498",
+      "size": 3713,
+      "mtime_ns": 1791561333113662127,
+      "inode": 95530430,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-155210-b240b470/process-context.json": {
+      "sha256": "7cb7ecffad5842e2cb8d332e37f52a877057e287249046324ef428ad1f61ca14",
+      "size": 6122,
+      "mtime_ns": 1791561183732452893,
+      "inode": 95524803,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-155210-b240b470/trace-loader/libMoltenVK.dylib": {
+      "sha256": "b493fea024ef93a4576ff06026d9d589c3859189c365e5de21c05b5ad0356a89",
+      "size": 7991016,
+      "mtime_ns": 1791561183710969578,
+      "inode": 95524802,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-155210-b240b470/mvk/libMoltenVK.1.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791561183691905702,
+      "inode": 95524800,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-155210-b240b470/mvk/libMoltenVK.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791561183700981907,
+      "inode": 95524801,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-155210-b240b470/host-traces/host-trace.44630.jsonl": {
+      "sha256": "52c76b466478ef28d4c166088531cd2d68ad0794e73f05be97cd6252ddaf69ac",
+      "size": 18141,
+      "mtime_ns": 1791561332470879667,
+      "inode": 95530423,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-155210-b240b470/host-traces/host-trace.44648.jsonl": {
+      "sha256": "8badd74e791dfb051020e8f0fd5b6dd9834cb66490fc6d519c2ba6e7aa6ecf44",
+      "size": 1837,
+      "mtime_ns": 1791561329965881453,
+      "inode": 95530416,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-155649-5a0c6fab/br5-config.json": {
+      "sha256": "522ed96599e40a98b2df70ddc9c9aac4da58eca89d32a935c4a2e93f020aec0d",
+      "size": 493,
+      "mtime_ns": 1791561463254007820,
+      "inode": 95530559,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-155649-5a0c6fab/prefix-state.json": {
+      "sha256": "6ce46017f9c3f6708bd639d435af418484040459028d7fb8f014537c99bfb74b",
+      "size": 2167,
+      "mtime_ns": 1791561612699041041,
+      "inode": 95536194,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-155649-5a0c6fab/process-runner.log": {
+      "sha256": "d6f0cc768b2fdaed1eb64c4afb28713bad252f36893cb691e8fef26d8ed6c4fb",
+      "size": 537,
+      "mtime_ns": 1791561635843425384,
+      "inode": 95530560,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-155649-5a0c6fab/runtime.log": {
+      "sha256": "cb8012b2e40ab6c12a80d1faac29072fe6a08ed22ae098a314883afeccec5ea6",
+      "size": 1172738,
+      "mtime_ns": 1791561612068324145,
+      "inode": 95536158,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-155649-5a0c6fab/execution-result.json": {
+      "sha256": "819310aac5f4b4ca3698a6e2e7073d8fb890c85eb6fcb0a947d48abd947ee08d",
+      "size": 450,
+      "mtime_ns": 1791561612095015089,
+      "inode": 95536189,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-155649-5a0c6fab/prefix-cleanup.json": {
+      "sha256": "d7f8d2d3d059b1c73b8fbeaeff409d8644212701b3df5176140035caf5cc4783",
+      "size": 65536,
+      "mtime_ns": 1791561635843062922,
+      "inode": 95536207,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-155649-5a0c6fab/prefix-registry-diff.txt.gz": {
+      "sha256": "c42fa3d037c09802e7fbb90ab3b0e1607dccf206451bd9909bc68c9bf75ec003",
+      "size": 3720,
+      "mtime_ns": 1791561612697255775,
+      "inode": 95536193,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-155649-5a0c6fab/process-context.json": {
+      "sha256": "38493aa153d31539c09ba3ce578f0aa9fdffd6ef8356a7991bfc205b51a2ac4b",
+      "size": 6123,
+      "mtime_ns": 1791561463251587215,
+      "inode": 95530558,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-155649-5a0c6fab/trace-loader/libMoltenVK.dylib": {
+      "sha256": "b493fea024ef93a4576ff06026d9d589c3859189c365e5de21c05b5ad0356a89",
+      "size": 7991016,
+      "mtime_ns": 1791561463230147651,
+      "inode": 95530557,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-155649-5a0c6fab/mvk/libMoltenVK.1.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791561463211641071,
+      "inode": 95530555,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-155649-5a0c6fab/mvk/libMoltenVK.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791561463220504899,
+      "inode": 95530556,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-155649-5a0c6fab/host-traces/host-trace.44883.jsonl": {
+      "sha256": "125deb910a7a1eda375384dec69865beb8405902fd34a0c531e0ed0756cb196a",
+      "size": 1837,
+      "mtime_ns": 1791561609752665267,
+      "inode": 95536184,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-155649-5a0c6fab/host-traces/host-trace.44865.jsonl": {
+      "sha256": "2ab518c307d33c608bb7d7bdcd15df7ee65ad0203e670e7be9d6de0f3c996079",
+      "size": 18141,
+      "mtime_ns": 1791561612068250270,
+      "inode": 95536187,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-160623-42de535e/br5-config.json": {
+      "sha256": "b008e22c48135e0e5f452e2c583aa869017a03cdf8299f61113e3261e47f20bb",
+      "size": 474,
+      "mtime_ns": 1791562037467771863,
+      "inode": 95541980,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-160623-42de535e/prefix-state.json": {
+      "sha256": "8dad9ef2eb339c4aac39b5c5bfb9292be8984d40e21cd185ab7be2dc60598466",
+      "size": 2167,
+      "mtime_ns": 1791562197079360746,
+      "inode": 95547684,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-160623-42de535e/process-runner.log": {
+      "sha256": "0e011108d43638b37e01badb7efbd5f2bb6e8f8453ef2ad0be6d81b191f9e4fe",
+      "size": 537,
+      "mtime_ns": 1791562220550121965,
+      "inode": 95541981,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-160623-42de535e/app-trace.jsonl": {
+      "sha256": "14e251c14b513faa8de8154fcf2e645553bd18cc9114378d3d8a4816e0cd2f78",
+      "size": 7579347,
+      "mtime_ns": 1791562196427172267,
+      "inode": 95547678,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-160623-42de535e/runtime.log": {
+      "sha256": "8ebec17552087e03c2cba99826773bab4c4253a93a25e716e5155ddd249a4818",
+      "size": 1172516,
+      "mtime_ns": 1791562196328504637,
+      "inode": 95547641,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-160623-42de535e/execution-result.json": {
+      "sha256": "4050ae9575da5a3845d0033881d0d8aaa4c00ff3e8c157cfaa69c0adaa8aef90",
+      "size": 449,
+      "mtime_ns": 1791562196463199296,
+      "inode": 95547679,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-160623-42de535e/prefix-cleanup.json": {
+      "sha256": "88d500e98f381c3e2b0822742239e19efe408948d18a67b4f4c13c833c5106ba",
+      "size": 65536,
+      "mtime_ns": 1791562220549186832,
+      "inode": 95547693,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-160623-42de535e/prefix-registry-diff.txt.gz": {
+      "sha256": "5f1d3c58653d783756b7d98f2f0fd32867eb0f899643f0502d8b87b7303a3043",
+      "size": 3719,
+      "mtime_ns": 1791562197077492646,
+      "inode": 95547683,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-160623-42de535e/process-context.json": {
+      "sha256": "91a51edfacc54e9951bd1879b6f51fb8ef4b46861d7c54151ec1bce77cad4d81",
+      "size": 6089,
+      "mtime_ns": 1791562037427440003,
+      "inode": 95541979,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-160623-42de535e/trace-loader/libMoltenVK.dylib": {
+      "sha256": "b493fea024ef93a4576ff06026d9d589c3859189c365e5de21c05b5ad0356a89",
+      "size": 7991016,
+      "mtime_ns": 1791562037406118063,
+      "inode": 95541978,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-160623-42de535e/mvk/libMoltenVK.1.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791562037387687982,
+      "inode": 95541976,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-160623-42de535e/mvk/libMoltenVK.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791562037396292850,
+      "inode": 95541977,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-160623-42de535e/host-traces/host-trace.45353.jsonl": {
+      "sha256": "c54a00d5d0053b24a3d55e7423915d9e5014456929fe5c140cb415a116e37e9a",
+      "size": 1837,
+      "mtime_ns": 1791562183866534325,
+      "inode": 95547666,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-160623-42de535e/host-traces/host-trace.45334.jsonl": {
+      "sha256": "8d541fd00dce8ce594ddeb6bd436535cb905bc381296811948ab38ac92b9d391",
+      "size": 13967151,
+      "mtime_ns": 1791562196324707062,
+      "inode": 95547669,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-170638-739f04d5/br5-config.json": {
+      "sha256": "23f2ab0a79ed50fe5fee176dd29a16554563ba4a1681805cca7345a26237174f",
+      "size": 474,
+      "mtime_ns": 1791565652494412357,
+      "inode": 95591757,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-170638-739f04d5/prefix-state.json": {
+      "sha256": "d8d7b88b08da0449da02f0944bdcd3248dcf277915bee61e65f221949721fcad",
+      "size": 2167,
+      "mtime_ns": 1791565818203508907,
+      "inode": 95597583,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-170638-739f04d5/process-runner.log": {
+      "sha256": "3097b5d848b1fafcdaf158a5310ded3fc6a0d219ecb6f7fc389cc8d9c09c331c",
+      "size": 3168,
+      "mtime_ns": 1791565841754987178,
+      "inode": 95591758,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-170638-739f04d5/app-trace.jsonl": {
+      "sha256": "aedf71692ce8196feb5fb93456d7f38659185e77c2884ed901d209ff69eb5359",
+      "size": 3549,
+      "mtime_ns": 1791565817522087841,
+      "inode": 95597543,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-170638-739f04d5/runtime.log": {
+      "sha256": "705cd7e6487b782a1e4cf3a06e247a945d389a62a568ea33511eeb8b4bee90a4",
+      "size": 1171853,
+      "mtime_ns": 1791565817491029674,
+      "inode": 95597389,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-170638-739f04d5/execution-result.json": {
+      "sha256": "764ed802340a3c6e92fc6055f190bf0da989caad625f479800960ea31e1e4622",
+      "size": 450,
+      "mtime_ns": 1791565817591192782,
+      "inode": 95597559,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-170638-739f04d5/prefix-cleanup.json": {
+      "sha256": "41a8b22f8bd233973f4d6f9ad06afa8a4167d6dbe74bb258a54b806de9c3301b",
+      "size": 65536,
+      "mtime_ns": 1791565841749098165,
+      "inode": 95597612,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-170638-739f04d5/prefix-registry-diff.txt.gz": {
+      "sha256": "a1d77c41d79cffe78934cf5b3596f00fdd761bde9e3eb1b10cfaf116ec237922",
+      "size": 3722,
+      "mtime_ns": 1791565818201753807,
+      "inode": 95597582,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-170638-739f04d5/process-context.json": {
+      "sha256": "057bea80161fe61952d92288fe549c9dea52197b7f0c9a1b0de6848ee3c36f94",
+      "size": 6089,
+      "mtime_ns": 1791565652456035290,
+      "inode": 95591756,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-170638-739f04d5/trace-loader/libMoltenVK.dylib": {
+      "sha256": "95ad5b34539f0576c9486039c8324650322854d3bef6917f5fc594e1e688b760",
+      "size": 7991808,
+      "mtime_ns": 1791565652434709049,
+      "inode": 95591755,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-170638-739f04d5/mvk/libMoltenVK.1.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791565652415830872,
+      "inode": 95591753,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-170638-739f04d5/mvk/libMoltenVK.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791565652425051833,
+      "inode": 95591754,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-170638-739f04d5/host-traces/host-trace.49129.jsonl": {
+      "sha256": "474fa03b40541c3ac2cd48730bb302272b89a0fa9c346587fc6ace7534c73359",
+      "size": 1837,
+      "mtime_ns": 1791565799972451521,
+      "inode": 95597444,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-170638-739f04d5/host-traces/host-trace.49110.jsonl": {
+      "sha256": "08aaf2ca2da37d10c858b1176e1f6536bcf947e48c0d55ce9614a4b0409fd3d9",
+      "size": 15029,
+      "mtime_ns": 1791565817489784371,
+      "inode": 95597475,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-171213-ae4b6a67/br5-config.json": {
+      "sha256": "66b831683f2873e5de83eb505cad36292c1025790b7b87688959abfbcc55cf29",
+      "size": 474,
+      "mtime_ns": 1791565988116714655,
+      "inode": 95597839,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-171213-ae4b6a67/prefix-state.json": {
+      "sha256": "bb8f7c5c4176e0bf726af7ee0c24b68e6fed754d16f1b928fafd5be81ea1233d",
+      "size": 2167,
+      "mtime_ns": 1791566148405853976,
+      "inode": 95603579,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-171213-ae4b6a67/process-runner.log": {
+      "sha256": "ecc25d6c119cdeb73f41db39327e74e0e58f2dc6cc1e30801d42ad0d4d3a22af",
+      "size": 537,
+      "mtime_ns": 1791566171921494928,
+      "inode": 95597840,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-171213-ae4b6a67/app-trace.jsonl": {
+      "sha256": "5f6ee00641f568c5e969acaf0deb0e6429fece1105150e7d9967984aba2d4fb8",
+      "size": 3593502,
+      "mtime_ns": 1791566147696765610,
+      "inode": 95603540,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-171213-ae4b6a67/runtime.log": {
+      "sha256": "b6fe14e821f0460bda5a28b5ffa2f46407a001bbba4af2bba1288ee241131705",
+      "size": 1179011,
+      "mtime_ns": 1791566147627870797,
+      "inode": 95603460,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-171213-ae4b6a67/execution-result.json": {
+      "sha256": "b531170f9712e7d4c5d89775b008f5af38382a1f35aa256182cc48d3fdc23378",
+      "size": 451,
+      "mtime_ns": 1791566147716089542,
+      "inode": 95603546,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-171213-ae4b6a67/prefix-cleanup.json": {
+      "sha256": "d2c195465b30efe58908b38d9039c2783813ec817b2a3060fbe175f27f9ffa54",
+      "size": 65536,
+      "mtime_ns": 1791566171921099716,
+      "inode": 95603605,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-171213-ae4b6a67/prefix-registry-diff.txt.gz": {
+      "sha256": "7ec2e93c98c3413f925e21814c849e8c7fe55ce4d1ab3f907f1e53ee63ada8b6",
+      "size": 3626,
+      "mtime_ns": 1791566148403959041,
+      "inode": 95603578,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-171213-ae4b6a67/process-context.json": {
+      "sha256": "054eeba18e08c2704390d5e90960a8d9a4829f3b680a85440d70479015fc2345",
+      "size": 6089,
+      "mtime_ns": 1791565988078797924,
+      "inode": 95597838,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-171213-ae4b6a67/trace-loader/libMoltenVK.dylib": {
+      "sha256": "13b90393155f492fda648048e52b8c4746fdbbf094f5687b84caae1e32d0b383",
+      "size": 7991856,
+      "mtime_ns": 1791565988024527456,
+      "inode": 95597837,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-171213-ae4b6a67/mvk/libMoltenVK.1.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791565988005034940,
+      "inode": 95597833,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-171213-ae4b6a67/mvk/libMoltenVK.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791565988013625896,
+      "inode": 95597835,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-171213-ae4b6a67/host-traces/host-trace.49395.jsonl": {
+      "sha256": "d2539a2ac9c7296ec22ed555d760fa30907efc515c8ad74ec5a19316974038ed",
+      "size": 6634679,
+      "mtime_ns": 1791566147623868884,
+      "inode": 95603526,
+      "device": 16777230
+    },
+    "runs/step11d3b-br5probe-proxy142-20261009-171213-ae4b6a67/host-traces/host-trace.49413.jsonl": {
+      "sha256": "0caed3344c8ae03ad469479da91655da5da40c6305154f10d0fcdda2fe09dafc",
+      "size": 1837,
+      "mtime_ns": 1791566135183609416,
+      "inode": 95603496,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261008-153046-ebc1fece/recover_current_state.py": {
+      "sha256": "cb57f4c1b965d0559b09073a431496af59d15a9cb9edcd9f7e7530f9fb18c86a",
+      "size": 17017,
+      "mtime_ns": 1791473910623594684,
+      "inode": 94860682,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261008-153046-ebc1fece/prefix-state.json": {
+      "sha256": "73e3f9267b623db717963cd8fd3551054a2fa5215ac255a7d762d101831088d4",
+      "size": 1621,
+      "mtime_ns": 1791473637347929286,
+      "inode": 94860534,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261008-153046-ebc1fece/process-runner.log": {
+      "sha256": "3df55561e41c1599bc5fa3e4c10429aed65350e564efe2a566dadcb50e307860",
+      "size": 1381,
+      "mtime_ns": 1791473659205652548,
+      "inode": 94854824,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261008-153046-ebc1fece/current-state-recovery-receipt.json": {
+      "sha256": "f8f79a6396ee1a4e28f09220d817fbf025d152e49d4a5b81385e1b3ded1cbf17",
+      "size": 4236,
+      "mtime_ns": 1791473929337313277,
+      "inode": 94860707,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261008-153046-ebc1fece/final-gate0-snapshot.json": {
+      "sha256": "26c0de23414ef56d5e0a2fb61deac661ede0a45a007f5791c77098b4ed1e5414",
+      "size": 4096,
+      "mtime_ns": 1791474706604534831,
+      "inode": 94861179,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261008-153046-ebc1fece/runtime.log": {
+      "sha256": "3f6188ba9e1431cef65d3f7fab9d8396a29a794dc28a1ac5eaeca53fd2ecbd46",
+      "size": 147934,
+      "mtime_ns": 1791473637162072876,
+      "inode": 94860443,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261008-153046-ebc1fece/execution-result.json": {
+      "sha256": "705dc623a9b1a6ee1047c65f17f39c833052dee119491e06c7be854f157ed95d",
+      "size": 410,
+      "mtime_ns": 1791473637213011051,
+      "inode": 94860533,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261008-153046-ebc1fece/run-manifest.json": {
+      "sha256": "42039e0ebf5107228d76ec1fb3a529a362ec5bd11f9b8e39e740371e84d61969",
+      "size": 12567,
+      "mtime_ns": 1791473496852253512,
+      "inode": 94854822,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261008-153046-ebc1fece/prefix-cleanup.json": {
+      "sha256": "c2244255cf73b1b2a8a28c2b19ddefbbbd17947afb36df418cf27a1e66d7dfa5",
+      "size": 65536,
+      "mtime_ns": 1791473659198450023,
+      "inode": 94860561,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261008-153046-ebc1fece/process-context.json": {
+      "sha256": "b92fb9bdfa5d1a46384d6b79b46fda563b6d35247e07f4f5fc9fbd4b6dc888a0",
+      "size": 3773,
+      "mtime_ns": 1791473496852775100,
+      "inode": 94854823,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261008-153046-ebc1fece/run-result.json": {
+      "sha256": "2df18c6c742c72b7fd895f90f5983bc67b7d10a98ca13a444c3c8f5eed2fb400",
+      "size": 9029,
+      "mtime_ns": 1791473685165750504,
+      "inode": 94860577,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261008-153046-ebc1fece/trace-loader/libvulkan.dylib": {
+      "sha256": "6eb13b3ba6f195d09ab9e22002332db003e8641f1a8ff809b8eb60f2a898a597",
+      "size": 7932816,
+      "mtime_ns": 1791473496819139084,
+      "inode": 94854819,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261008-153046-ebc1fece/mvk/libMoltenVK.1.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791473496835773153,
+      "inode": 94854820,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261008-153046-ebc1fece/mvk/libMoltenVK.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791473496845712702,
+      "inode": 94854821,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261008-153046-ebc1fece/__pycache__/recover_current_state.cpython-314.pyc": {
+      "sha256": "f21a892533bf629d62e4c2ef82bb44def0432682f7e6586ad16189875e034e60",
+      "size": 21857,
+      "mtime_ns": 1791473919784548249,
+      "inode": 94860698,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261008-231847-ebb87fd1/prefix-state.json": {
+      "sha256": "2b09e7474ff8268140a21fc159849eb50728e7aa2c654bb6aeca058b01b6340f",
+      "size": 2143,
+      "mtime_ns": 1791501751883835430,
+      "inode": 94919948,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261008-231847-ebb87fd1/smoke-window-2.png": {
+      "sha256": "11c31e955292ad9e1e53afda05e30ed4fe90b145aae11c2fa49988e5fa0ef6f6",
+      "size": 250106,
+      "mtime_ns": 1791501734116706313,
+      "inode": 94919885,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261008-231847-ebb87fd1/process-runner.log": {
+      "sha256": "b10db3cf4bbb66aa3415b60277c1cafd8e27158398535876802b3e4238d406b3",
+      "size": 513,
+      "mtime_ns": 1791501774092641513,
+      "inode": 94914093,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261008-231847-ebb87fd1/smoke-window-1.png": {
+      "sha256": "c11cd91e5d35b4f9e089c6e85257f444dbdc4b178171fe1964e21bd59072999b",
+      "size": 250063,
+      "mtime_ns": 1791501724172118823,
+      "inode": 94919829,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261008-231847-ebb87fd1/app-trace.jsonl": {
+      "sha256": "a4b94cea776dc868b7621f3c10b15657032e28df6bc14ad654b0212397641719",
+      "size": 10141909,
+      "mtime_ns": 1791501751312798215,
+      "inode": 94919908,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261008-231847-ebb87fd1/runtime.log": {
+      "sha256": "d5fa33bad33df547bc8f73ed1fbd2f0fb5bb5296acad234a730b37d54ec4c5f7",
+      "size": 186076,
+      "mtime_ns": 1791501751145042187,
+      "inode": 94919693,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261008-231847-ebb87fd1/execution-result.json": {
+      "sha256": "6fbb6fe3e06148f12a1d7e4e080877d7a3854657b0c336521ebf3028d9a078d5",
+      "size": 411,
+      "mtime_ns": 1791501751340637455,
+      "inode": 94919909,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261008-231847-ebb87fd1/run-manifest.json": {
+      "sha256": "9f13b41b4b940f75e4e5b67863b4d4c3aa0674ba1261201741ed299617fae039",
+      "size": 12569,
+      "mtime_ns": 1791501577854055305,
+      "inode": 94914091,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261008-231847-ebb87fd1/prefix-cleanup.json": {
+      "sha256": "bf1ffc5a458349cdf2c302ce6851d16cb6fa17370548b913a7c51c8b44dc5ef5",
+      "size": 65536,
+      "mtime_ns": 1791501774092152219,
+      "inode": 94919965,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261008-231847-ebb87fd1/prefix-registry-diff.txt.gz": {
+      "sha256": "7f9e74ec3c79ae063797787c34ccd9f2ca9192f44e2cac4df8416e1bb1959271",
+      "size": 3628,
+      "mtime_ns": 1791501751881900919,
+      "inode": 94919947,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261008-231847-ebb87fd1/process-context.json": {
+      "sha256": "eea2ba4dae279157ea30701f84feb3401b49bd8be5f4e0ef61d9358e4d9b25df",
+      "size": 3773,
+      "mtime_ns": 1791501577854192431,
+      "inode": 94914092,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261008-231847-ebb87fd1/run-result.json": {
+      "sha256": "784b237ede981b6f4cca7779263592ad5ed1b37ef2ba0e59f34c3d2fe8c7838c",
+      "size": 10815,
+      "mtime_ns": 1791501799731570409,
+      "inode": 94919982,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261008-231847-ebb87fd1/trace-loader/libvulkan.dylib": {
+      "sha256": "6eb13b3ba6f195d09ab9e22002332db003e8641f1a8ff809b8eb60f2a898a597",
+      "size": 7932816,
+      "mtime_ns": 1791501577828949997,
+      "inode": 94914088,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261008-231847-ebb87fd1/mvk/libMoltenVK.1.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791501577838492176,
+      "inode": 94914089,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261008-231847-ebb87fd1/mvk/libMoltenVK.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791501577847084891,
+      "inode": 94914090,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-010654-1535b5c2/process-runner.log": {
+      "sha256": "75ef9a6c6129c04d50c1202fc954a03900cd2993bd2eae6ba21cb9d1c07df30c",
+      "size": 1358,
+      "mtime_ns": 1791508141610863595,
+      "inode": 95013266,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-010654-1535b5c2/run-manifest.json": {
+      "sha256": "f2744cd0ddc51acbf10391f9352ac7254ba32507d721fccf0bd3dd0b33b23cf3",
+      "size": 19096,
+      "mtime_ns": 1791508065831147323,
+      "inode": 95013264,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-010654-1535b5c2/prefix-cleanup.json": {
+      "sha256": "edf303d7ae19f83d777063db69be0b838ceecf39c68dbdfb58375855c78df5ff",
+      "size": 65536,
+      "mtime_ns": 1791508141603696088,
+      "inode": 95013304,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-010654-1535b5c2/process-context.json": {
+      "sha256": "89192bdbdb822ce1affb55717af0ada1fe631f7a9d8011c35bed866c5802da03",
+      "size": 5281,
+      "mtime_ns": 1791508065831266365,
+      "inode": 95013265,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-010654-1535b5c2/run-result.json": {
+      "sha256": "98e178c11211b7ed3cec7fba589a93163ff3e8a5a454d457e1b0036e854f2410",
+      "size": 9811,
+      "mtime_ns": 1791508167638136397,
+      "inode": 95013316,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-010654-1535b5c2/trace-loader/libMoltenVK.dylib": {
+      "sha256": "082f39b8b85a5eeea978b892b7b7607ffdf1e660704d7b73839a5ad7303859b7",
+      "size": 7930464,
+      "mtime_ns": 1791508065790724753,
+      "inode": 95013261,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-010654-1535b5c2/mvk/libMoltenVK.1.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791508065800219777,
+      "inode": 95013262,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-010654-1535b5c2/mvk/libMoltenVK.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791508065809359631,
+      "inode": 95013263,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-011920-15acf753/prefix-state.json": {
+      "sha256": "32ebb098a52f70d19e3faed85a4c7db121c113d7c83e309c0e696f0fade78afe",
+      "size": 2143,
+      "mtime_ns": 1791508954393646424,
+      "inode": 95055069,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-011920-15acf753/process-runner.log": {
+      "sha256": "c9f8124ec175af6d28ba8df1cb9526fbd2ef430021a6ecea128ad5341eb5416e",
+      "size": 3144,
+      "mtime_ns": 1791508976667564422,
+      "inode": 95049366,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-011920-15acf753/runtime.log": {
+      "sha256": "38ab5530ea713e4ac5e5fed514ceac11f6c29f0ecbf32e157df06787c01ec843",
+      "size": 827073,
+      "mtime_ns": 1791508953746732998,
+      "inode": 95054979,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-011920-15acf753/execution-result.json": {
+      "sha256": "be11e352c9ebb4d1e950f0dd46f5c57d3228e3b11c6faa40e819b48df90a34f6",
+      "size": 411,
+      "mtime_ns": 1791508953778826557,
+      "inode": 95055064,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-011920-15acf753/run-manifest.json": {
+      "sha256": "e4c4cd847f6bf22ba455f29d506358364b2920b3e8f075c9d95add37300271a8",
+      "size": 19379,
+      "mtime_ns": 1791508812403177639,
+      "inode": 95049364,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-011920-15acf753/prefix-cleanup.json": {
+      "sha256": "06b0986865f00b28c7f53df933ed2dc471cb7d3fee359e0093a74b148230e8e7",
+      "size": 65536,
+      "mtime_ns": 1791508976662038133,
+      "inode": 95055111,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-011920-15acf753/prefix-registry-diff.txt.gz": {
+      "sha256": "d9ea022be5a790cabd5122a9422599bb818608fca312ade91cd86e250efe8ccb",
+      "size": 2298,
+      "mtime_ns": 1791508954391922496,
+      "inode": 95055068,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-011920-15acf753/process-context.json": {
+      "sha256": "95fa34fe4b5a2fbed16576fecc22911b5e60030d8b1576cba67e0d8a9cad2b46",
+      "size": 5564,
+      "mtime_ns": 1791508812403298224,
+      "inode": 95049365,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-011920-15acf753/run-result.json": {
+      "sha256": "4a15d5599d3fb63f744513f678cda911422866e281c1b46813781d211715e685",
+      "size": 16513,
+      "mtime_ns": 1791509002394409420,
+      "inode": 95055123,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-011920-15acf753/trace-loader/libMoltenVK.dylib": {
+      "sha256": "082f39b8b85a5eeea978b892b7b7607ffdf1e660704d7b73839a5ad7303859b7",
+      "size": 7930464,
+      "mtime_ns": 1791508812362994231,
+      "inode": 95049361,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-011920-15acf753/mvk/libMoltenVK.1.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791508812372454340,
+      "inode": 95049362,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-011920-15acf753/mvk/libMoltenVK.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791508812381430278,
+      "inode": 95049363,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-013454-7bffa023/prefix-state.json": {
+      "sha256": "541bcc5f1ceded2e2fefb4c13694a4d21f9896462c72b188193f3d86e290d3ca",
+      "size": 2143,
+      "mtime_ns": 1791509888848020478,
+      "inode": 95094694,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-013454-7bffa023/process-runner.log": {
+      "sha256": "7fac45bef85e83afc89f21cd9712db3ae9117c12d673f630def34db5ff443e6d",
+      "size": 3145,
+      "mtime_ns": 1791509911283124806,
+      "inode": 95088987,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-013454-7bffa023/runtime.log": {
+      "sha256": "28386790deb6e008edb944f25d954f6415e3708c4e4a9ba25a53f7dee63afd55",
+      "size": 931304,
+      "mtime_ns": 1791509888221910997,
+      "inode": 95094595,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-013454-7bffa023/execution-result.json": {
+      "sha256": "96d0f3eceb502289bfa6f92c3e4df74ee218c76bcfb39dd9bf6e460a3db5fd10",
+      "size": 410,
+      "mtime_ns": 1791509888263431795,
+      "inode": 95094689,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-013454-7bffa023/run-manifest.json": {
+      "sha256": "7cb6c95918e0aa78b0bbe8806e926c6d11168950e51cef12bf7a8173d0ae87f8",
+      "size": 19378,
+      "mtime_ns": 1791509745209502669,
+      "inode": 95088985,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-013454-7bffa023/prefix-cleanup.json": {
+      "sha256": "bd2ba1602183f1b8f1f0bc584d3df8040dff50363c2cba7c41a5c89a4bc6bab6",
+      "size": 65536,
+      "mtime_ns": 1791509911277565891,
+      "inode": 95094728,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-013454-7bffa023/host-trace.jsonl": {
+      "sha256": "1a8723cb80b9ef5fb65a219c85406a1e67b134c959c1802ab5f30070be2bae39",
+      "size": 5869,
+      "mtime_ns": 1791509888215442159,
+      "inode": 95094682,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-013454-7bffa023/prefix-registry-diff.txt.gz": {
+      "sha256": "ea38b797aae778d45fa2fb089c732ac79e5618ce64eaaa7a800d6ee03ae1a337",
+      "size": 2297,
+      "mtime_ns": 1791509888846108631,
+      "inode": 95094693,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-013454-7bffa023/process-context.json": {
+      "sha256": "f86aa823a165ee3875d5237de96225e0791a8ac412d5297d7842ce902236ee62",
+      "size": 5564,
+      "mtime_ns": 1791509745209620336,
+      "inode": 95088986,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-013454-7bffa023/run-result.json": {
+      "sha256": "1626eca80efef5ac033e35938686b4e8b801798b48869a418c4ee12c27007382",
+      "size": 16201,
+      "mtime_ns": 1791509937215987875,
+      "inode": 95094736,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-013454-7bffa023/trace-loader/libMoltenVK.dylib": {
+      "sha256": "082f39b8b85a5eeea978b892b7b7607ffdf1e660704d7b73839a5ad7303859b7",
+      "size": 7930464,
+      "mtime_ns": 1791509745170046052,
+      "inode": 95088982,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-013454-7bffa023/mvk/libMoltenVK.1.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791509745179486287,
+      "inode": 95088983,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-013454-7bffa023/mvk/libMoltenVK.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791509745188026306,
+      "inode": 95088984,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-020934-e6365c3e/process-runner.log": {
+      "sha256": "9cf7676a57bf484ab89d0e0d314b4453967175dcca68d53dba120ac336fa0556",
+      "size": 829,
+      "mtime_ns": 1791511855484840703,
+      "inode": 95151313,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-020934-e6365c3e/run-manifest.json": {
+      "sha256": "4d13dcc82b5d71f081dbd8962f62ccfd4553383931267879e63f5e80c26f9d7a",
+      "size": 19957,
+      "mtime_ns": 1791511827163214050,
+      "inode": 95151311,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-020934-e6365c3e/process-context.json": {
+      "sha256": "00eb731884f6a0a243949dd7574a3274cddc14bb9277e264eaa3c836499c73af",
+      "size": 5797,
+      "mtime_ns": 1791511827163340259,
+      "inode": 95151312,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-020934-e6365c3e/run-result.json": {
+      "sha256": "deb23e4cb06cb441eb32730ee3acf83e0a14725fbd5df0cdaa2339bf5562562a",
+      "size": 6711,
+      "mtime_ns": 1791511881363825831,
+      "inode": 95151340,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-020934-e6365c3e/trace-loader/libMoltenVK.dylib": {
+      "sha256": "7b60124e8a211dbb8155101030311bd12015ba10b6da51c86a3557c682494b61",
+      "size": 7978256,
+      "mtime_ns": 1791511827122082699,
+      "inode": 95151308,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-020934-e6365c3e/mvk/libMoltenVK.1.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791511827132593944,
+      "inode": 95151309,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-020934-e6365c3e/mvk/libMoltenVK.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791511827141172176,
+      "inode": 95151310,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-122135-b7e17c8f/br3-runtime-observations.json": {
+      "sha256": "fa1e2569abe2736568eb0df7a2390435143dfb3a6f37d484f22f573f38f1d3e1",
+      "size": 3060,
+      "mtime_ns": 1791548814251959715,
+      "inode": 95246964,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-122135-b7e17c8f/prefix-state.json": {
+      "sha256": "812564511fb8ae04314e9e7d1599a91dd3dd11d9bd251182efa3080c5751bd0c",
+      "size": 2143,
+      "mtime_ns": 1791548688526878726,
+      "inode": 95246831,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-122135-b7e17c8f/process-runner.log": {
+      "sha256": "6003ac8a776b6d297aad014e47fe614f7ff8ee92ad926445f3aea0d09786e7a6",
+      "size": 3145,
+      "mtime_ns": 1791548710674965153,
+      "inode": 95241122,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-122135-b7e17c8f/runtime.log": {
+      "sha256": "89780e0e9ccce812827c987a8d22109bc2cbe8d81d86ae96a618e9834283a32b",
+      "size": 1163682,
+      "mtime_ns": 1791548687873867364,
+      "inode": 95246723,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-122135-b7e17c8f/execution-result.json": {
+      "sha256": "e5966119a64a0e6ba7b92125c74627278f766f1b741b44e91c799b16b9ec4bff",
+      "size": 411,
+      "mtime_ns": 1791548687929601544,
+      "inode": 95246826,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-122135-b7e17c8f/run-manifest.json": {
+      "sha256": "2d6fe7a66cb5280db1d861db6921bbf7eb129ee16f96e65e6839376d23f45fd6",
+      "size": 20517,
+      "mtime_ns": 1791548545362078633,
+      "inode": 95241120,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-122135-b7e17c8f/prefix-cleanup.json": {
+      "sha256": "90f026925bead2c114e6d0aec14ade9a83851e91dd060d2f3e71adc53de7f47a",
+      "size": 65536,
+      "mtime_ns": 1791548710669319868,
+      "inode": 95246879,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-122135-b7e17c8f/host-trace.jsonl": {
+      "sha256": "90bce83ee95d2fda118248a817fab1abd75701e6ca351059a967329616132b7c",
+      "size": 759,
+      "mtime_ns": 1791548684723791396,
+      "inode": 95246819,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-122135-b7e17c8f/prefix-registry-diff.txt.gz": {
+      "sha256": "ed300c10df9995b6049122d0fb533b30a187d34ef8631f0e29c0c1901afd9be4",
+      "size": 3714,
+      "mtime_ns": 1791548688525167257,
+      "inode": 95246830,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-122135-b7e17c8f/process-context.json": {
+      "sha256": "22d0629f232edcf3889230b58fe8965fb855b76593b3a9288aba7243dd3a85f5",
+      "size": 5797,
+      "mtime_ns": 1791548545362190550,
+      "inode": 95241121,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-122135-b7e17c8f/run-result.json": {
+      "sha256": "de3a9017c548f89ef360ab0208224cfd72e0b4eeffb9b82d3fc950a459d08640",
+      "size": 16574,
+      "mtime_ns": 1791548735933100798,
+      "inode": 95246892,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-122135-b7e17c8f/trace-loader/libMoltenVK.dylib": {
+      "sha256": "7b60124e8a211dbb8155101030311bd12015ba10b6da51c86a3557c682494b61",
+      "size": 7978256,
+      "mtime_ns": 1791548545322485011,
+      "inode": 95241117,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-122135-b7e17c8f/mvk/libMoltenVK.1.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791548545331816319,
+      "inode": 95241118,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-122135-b7e17c8f/mvk/libMoltenVK.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791548545340416539,
+      "inode": 95241119,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-131626-7bf1a512/trace-index.json": {
+      "sha256": "f32f8dc8e0bae9eea23b89428d9d3886aa819fdba9a5482e5d13b6032f771760",
+      "size": 7528,
+      "mtime_ns": 1791552009364055735,
+      "inode": 95396410,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-131626-7bf1a512/prefix-state.json": {
+      "sha256": "3cfc71527f8622bd98e2687fae4dfdf092b902ed5baf5ad1589533f4e6313ab4",
+      "size": 2143,
+      "mtime_ns": 1791551986521390639,
+      "inode": 95396361,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-131626-7bf1a512/process-runner.log": {
+      "sha256": "3eb1065b24fdd88da2f2ec448a277216df293a4a60e89ba7aa3f871c935617e5",
+      "size": 3144,
+      "mtime_ns": 1791552009351109939,
+      "inode": 95390153,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-131626-7bf1a512/runtime.log": {
+      "sha256": "8cf576551c5520f3e33b89cb30f4246339ce2eb41fa8cea2a09ca97bf135c90f",
+      "size": 1171641,
+      "mtime_ns": 1791551985862093497,
+      "inode": 95396228,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-131626-7bf1a512/execution-result.json": {
+      "sha256": "9d9a628f3777c9ec9838605f399888613fb061102a28b8e87e511bd2c900213b",
+      "size": 438,
+      "mtime_ns": 1791551985909929739,
+      "inode": 95396352,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-131626-7bf1a512/run-manifest.json": {
+      "sha256": "b97d53844950f1d95df17c24d11c4e5d9652cc4b615a18944476fbe7af61a881",
+      "size": 21359,
+      "mtime_ns": 1791551838585121748,
+      "inode": 95390151,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-131626-7bf1a512/prefix-cleanup.json": {
+      "sha256": "be43108875fb5a45e2011236ceea29bc50a16f8a32fc5812f6eed22982c75fb7",
+      "size": 65536,
+      "mtime_ns": 1791552009345764819,
+      "inode": 95396409,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-131626-7bf1a512/prefix-registry-diff.txt.gz": {
+      "sha256": "046e7c1770ae799a5ce131e88808c7f7dd6ad8ea2ce98a4ea3549fac8fafca3e",
+      "size": 3715,
+      "mtime_ns": 1791551986519383834,
+      "inode": 95396360,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-131626-7bf1a512/process-context.json": {
+      "sha256": "91ed8dd8a03c190eb8ab8422db37eebf6fc367f76d5c511d350fdc79a3ed2f0c",
+      "size": 5961,
+      "mtime_ns": 1791551838585255332,
+      "inode": 95390152,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-131626-7bf1a512/run-result.json": {
+      "sha256": "fa2be5079298ba3109871472b227e39b8a9b51adc02fc1cd2b3fc8c98612412f",
+      "size": 24940,
+      "mtime_ns": 1791552034860787431,
+      "inode": 95396427,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-131626-7bf1a512/trace-loader/libMoltenVK.dylib": {
+      "sha256": "2ac16e321ebb162a49abeab59e9c2a17249d6163e50f5ac88477849155fed52e",
+      "size": 7991016,
+      "mtime_ns": 1791551838543776426,
+      "inode": 95390147,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-131626-7bf1a512/mvk/libMoltenVK.1.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791551838553374824,
+      "inode": 95390148,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-131626-7bf1a512/mvk/libMoltenVK.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791551838562086758,
+      "inode": 95390149,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-131626-7bf1a512/host-traces/host-trace.34889.jsonl": {
+      "sha256": "5d97f54ecf48918613c2b812fbb8cb032eabf696ce388e0a75f3b3a00c838822",
+      "size": 15747,
+      "mtime_ns": 1791551985863224713,
+      "inode": 95396349,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-131626-7bf1a512/host-traces/host-trace.34907.jsonl": {
+      "sha256": "e4824b6baedd9ebab38a4097d8180088be4e7926eaa677144e8380f5621b7c6f",
+      "size": 1813,
+      "mtime_ns": 1791551983061834572,
+      "inode": 95396339,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-161522-5f9109da/trace-index.json": {
+      "sha256": "36f97a25e0bfd340990ac2aafd95d2ce097382901c23610e769f93be0c40e06e",
+      "size": 3556,
+      "mtime_ns": 1791562780494218951,
+      "inode": 95553847,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-161522-5f9109da/prefix-state.json": {
+      "sha256": "0647dfd01560117a0158473f4cdbc94c9934a04a855a03f2d46197e92071bda8",
+      "size": 2143,
+      "mtime_ns": 1791562756830556022,
+      "inode": 95553827,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-161522-5f9109da/screenshot-content-check.json": {
+      "sha256": "8e05242b3879abebc1d49b1579658ce5584dc88500499d297d776f7c17597e54",
+      "size": 963,
+      "mtime_ns": 1791562808014098673,
+      "inode": 95553880,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-161522-5f9109da/smoke-window-2.png": {
+      "sha256": "1fe538a5b66d6dce0fcfefdbf78bbfb158e2af58fa31ea36de0da21ea7a5f56b",
+      "size": 127229,
+      "mtime_ns": 1791562736362261445,
+      "inode": 95553819,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-161522-5f9109da/process-runner.log": {
+      "sha256": "ed4a5f0b50e66cbf13805e8a24718de4ce48d212869c5db72ed13ba9deb86dec",
+      "size": 513,
+      "mtime_ns": 1791562780394229559,
+      "inode": 95548092,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-161522-5f9109da/smoke-window-1.png": {
+      "sha256": "82ee1974aab46748f2fb93a6391cfcb71026ca1e58e3883185573c49a807bbe4",
+      "size": 127031,
+      "mtime_ns": 1791562726400716961,
+      "inode": 95553807,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-161522-5f9109da/app-trace.jsonl": {
+      "sha256": "15309feea3a16c000aa3842500d491c2461689381ecbef8612a2f8ea6bbb4908",
+      "size": 22871145,
+      "mtime_ns": 1791562756301193346,
+      "inode": 95553824,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-161522-5f9109da/runtime.log": {
+      "sha256": "051d74ce92f150e4ab8ba09a0ad3a573ee8b11bd9130cad0ce114fd2454bf627",
+      "size": 1172468,
+      "mtime_ns": 1791562756064374236,
+      "inode": 95553708,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-161522-5f9109da/execution-result.json": {
+      "sha256": "78f51a1bf3b5944229b5cc07b1f2d6b71fd70747e1848fb4b6c369570bcb2f7f",
+      "size": 438,
+      "mtime_ns": 1791562756331048654,
+      "inode": 95553825,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-161522-5f9109da/run-manifest.json": {
+      "sha256": "abfa182aa75bb8d0a4b91a51711155dfc40e0d35594a31dc33e26fc69489f331",
+      "size": 21306,
+      "mtime_ns": 1791562576236970309,
+      "inode": 95548090,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-161522-5f9109da/prefix-cleanup.json": {
+      "sha256": "07a2194277768fc45fb400dc138ade447d13db61f1c504a1d8d677b413305ff3",
+      "size": 65536,
+      "mtime_ns": 1791562780393828639,
+      "inode": 95553845,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-161522-5f9109da/prefix-registry-diff.txt.gz": {
+      "sha256": "3b5b8c5ea50d7d41284c107bf61627fdc6288cd67d06c4b7c5e2640a405083e9",
+      "size": 3713,
+      "mtime_ns": 1791562756828779631,
+      "inode": 95553826,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-161522-5f9109da/process-context.json": {
+      "sha256": "dfe99f18e1acfc7858e4bfb48ce9a6f032739a156d02dc58572b540b33eb0089",
+      "size": 5909,
+      "mtime_ns": 1791562576238496698,
+      "inode": 95548091,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-161522-5f9109da/run-result.json": {
+      "sha256": "f65ce567f1c0afab7c5b114c8728879c51e54e2b134971db056a8cef0d1f7a30",
+      "size": 20374,
+      "mtime_ns": 1791562808014531901,
+      "inode": 95553881,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-161522-5f9109da/trace-loader/libMoltenVK.dylib": {
+      "sha256": "b493fea024ef93a4576ff06026d9d589c3859189c365e5de21c05b5ad0356a89",
+      "size": 7991016,
+      "mtime_ns": 1791562576186114481,
+      "inode": 95548084,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-161522-5f9109da/mvk/libMoltenVK.1.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791562576202814713,
+      "inode": 95548087,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-161522-5f9109da/mvk/libMoltenVK.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791562576211915128,
+      "inode": 95548088,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-161522-5f9109da/host-traces/host-trace.45724.jsonl": {
+      "sha256": "502c620dac5bbd771ab7791ef05c26f4ecbdfd2407f42d6542e4707a5e0354d4",
+      "size": 42008576,
+      "mtime_ns": 1791562756061804422,
+      "inode": 95553796,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-161522-5f9109da/host-traces/host-trace.45744.jsonl": {
+      "sha256": "49ddf9a4b09ef7d6c00060dff3024cbd33b4f737df0fdf53dda022f77e7f3c83",
+      "size": 1813,
+      "mtime_ns": 1791562723690070721,
+      "inode": 95553789,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-162342-08abe21f/trace-index.json": {
+      "sha256": "b9a0c74f81dddc0d6f497aa47960d1343a3779f839b88a49c0ee7ae72fc20816",
+      "size": 7558,
+      "mtime_ns": 1791563281490043015,
+      "inode": 95560473,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-162342-08abe21f/prefix-state.json": {
+      "sha256": "1640cd18b4c226b6992863505ef83c84eb0a51865a7ac94c65d4371265cdcf0d",
+      "size": 2143,
+      "mtime_ns": 1791563257114933068,
+      "inode": 95560455,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-162342-08abe21f/smoke-window-2.png": {
+      "sha256": "a449a57720b604718afb1374189cafbf2a5c7bbc92063730720829c81e737353",
+      "size": 127188,
+      "mtime_ns": 1791563235963210665,
+      "inode": 95560448,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-162342-08abe21f/process-runner.log": {
+      "sha256": "ad56205274cafafa575337f71c195ce3bca5b71e66fe0a6bab40d9159c8b8c50",
+      "size": 513,
+      "mtime_ns": 1791563280851318610,
+      "inode": 95554705,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-162342-08abe21f/smoke-window-1.png": {
+      "sha256": "1579b6e72e33c3fde13423750b5331b8c08619c035f93fb3757f10c9f93d6f54",
+      "size": 126625,
+      "mtime_ns": 1791563225997821592,
+      "inode": 95560432,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-162342-08abe21f/app-trace.jsonl": {
+      "sha256": "26f92167a1f0e1a802fb1ddc2f4abcb41d6ae0d519cbd064604d8c9a5c8376eb",
+      "size": 22871381,
+      "mtime_ns": 1791563256569407512,
+      "inode": 95560452,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-162342-08abe21f/runtime.log": {
+      "sha256": "c69378bf723bc675860b10fe6c5540504d8b06cef8cffc9fcb738ca505e32d87",
+      "size": 1172468,
+      "mtime_ns": 1791563256320190741,
+      "inode": 95560290,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-162342-08abe21f/execution-result.json": {
+      "sha256": "feed4315e3bea31da67175b062ab7a8797ddb91d61a9ea3d556df3cd90b1b50c",
+      "size": 438,
+      "mtime_ns": 1791563256609239876,
+      "inode": 95560453,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-162342-08abe21f/run-manifest.json": {
+      "sha256": "78d24dfe809d5c1a816b15720b7cd9be66203e8cd4f976fb1a6730cc845c81d5",
+      "size": 21307,
+      "mtime_ns": 1791563075952714323,
+      "inode": 95554703,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-162342-08abe21f/prefix-cleanup.json": {
+      "sha256": "a89cd7cfbf37f373aa702b73787eaa594c59e4dc6700329b9580e5aabf74470f",
+      "size": 65536,
+      "mtime_ns": 1791563280850934398,
+      "inode": 95560472,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-162342-08abe21f/prefix-registry-diff.txt.gz": {
+      "sha256": "bf734bf160597f2211cad2a4e38a6cf2270bef84fa25f2611ab1e38b724f107b",
+      "size": 3723,
+      "mtime_ns": 1791563257113255094,
+      "inode": 95560454,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-162342-08abe21f/process-context.json": {
+      "sha256": "274073ee649a3b929ceceb37cc8aee5682524d72effa0034fcb0e0e7ca4ce8d6",
+      "size": 5909,
+      "mtime_ns": 1791563075952956534,
+      "inode": 95554704,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-162342-08abe21f/run-result.json": {
+      "sha256": "2b5ca7d7c7f842469d8c2db84507efe932ba9bd5afc47ba3e501d91412f5928a",
+      "size": 24437,
+      "mtime_ns": 1791563310106604912,
+      "inode": 95560481,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-162342-08abe21f/trace-loader/libMoltenVK.dylib": {
+      "sha256": "80d2dd32d778f2905cfc121234fa10c4095fb56b2b1364ffb22f0ff59f83e66b",
+      "size": 7991016,
+      "mtime_ns": 1791563075887390019,
+      "inode": 95554697,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-162342-08abe21f/mvk/libMoltenVK.1.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791563075907832247,
+      "inode": 95554700,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-162342-08abe21f/mvk/libMoltenVK.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791563075926931255,
+      "inode": 95554701,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-162342-08abe21f/host-traces/host-trace.46152.jsonl": {
+      "sha256": "6e88d9505c56c1aca6938f495aa0831e7815c6364106e1686adeb6c0bea5632e",
+      "size": 42068957,
+      "mtime_ns": 1791563256317012212,
+      "inode": 95560423,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-162342-08abe21f/host-traces/host-trace.46172.jsonl": {
+      "sha256": "e41aa17149362862f3b217fa42556132087763088ab0cb83bcd85cc9afcabc10",
+      "size": 1813,
+      "mtime_ns": 1791563223947814116,
+      "inode": 95560420,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-171857-f6cc4a2c/trace-index.json": {
+      "sha256": "1c4c9e18e9b162bd62610259dcc2b784795a2aa1e6773680720236308927bec9",
+      "size": 7558,
+      "mtime_ns": 1791566595296111066,
+      "inode": 95609604,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-171857-f6cc4a2c/prefix-state.json": {
+      "sha256": "73eaa5980a28997aa9bb22a3bdcddad85b255f329bd5f57157afd4f7937fdc96",
+      "size": 2143,
+      "mtime_ns": 1791566571278827080,
+      "inode": 95609555,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-171857-f6cc4a2c/process-runner.log": {
+      "sha256": "1dee93611c171c9bb26673a4c89fef71651008d23836e166a36734c196f28893",
+      "size": 513,
+      "mtime_ns": 1791566594922518225,
+      "inode": 95603775,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-171857-f6cc4a2c/app-trace.jsonl": {
+      "sha256": "e9ba53ccd2a120de24f7c979db59304f5509c3199da19f89ae454057368897ea",
+      "size": 11233081,
+      "mtime_ns": 1791566570709902947,
+      "inode": 95609523,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-171857-f6cc4a2c/runtime.log": {
+      "sha256": "1c6ea2a71f32339ad69c2ccacb61343e8309f09348996249c7ea1590bf0cb7d5",
+      "size": 1178963,
+      "mtime_ns": 1791566570573714294,
+      "inode": 95609379,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-171857-f6cc4a2c/execution-result.json": {
+      "sha256": "71eaea9b5837435ecacc1004ac5e422451b9377cfa1d4284709d5fddec355f27",
+      "size": 438,
+      "mtime_ns": 1791566570731656901,
+      "inode": 95609525,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-171857-f6cc4a2c/run-manifest.json": {
+      "sha256": "1d6b4b5d177cd3de12ae77746cfccbcca3deb9e6d008bf4dc18a19ab58a1a91c",
+      "size": 21306,
+      "mtime_ns": 1791566391504076268,
+      "inode": 95603773,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-171857-f6cc4a2c/prefix-cleanup.json": {
+      "sha256": "8d2183b084c67e6c9722ae46f9d98dd4c9967b748125b3445628a3447402c0b0",
+      "size": 65536,
+      "mtime_ns": 1791566594922086555,
+      "inode": 95609603,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-171857-f6cc4a2c/prefix-registry-diff.txt.gz": {
+      "sha256": "09db36ba7cbdb7fe7d9c88792f31df3735349acb2ab44c43d917bfadf9a5cdb3",
+      "size": 3629,
+      "mtime_ns": 1791566571277133189,
+      "inode": 95609554,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-171857-f6cc4a2c/process-context.json": {
+      "sha256": "07828b38feeacdab5780328c8d37d02e2d643e1184439d632b4960e3ba2bf970",
+      "size": 5909,
+      "mtime_ns": 1791566391504194810,
+      "inode": 95603774,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-171857-f6cc4a2c/run-result.json": {
+      "sha256": "0962f570cdefb406f0cd966c24297f5c92032ab8514825b3562c10ab2924d3fb",
+      "size": 133439,
+      "mtime_ns": 1791566622720304038,
+      "inode": 95609609,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-171857-f6cc4a2c/trace-loader/libMoltenVK.dylib": {
+      "sha256": "13b90393155f492fda648048e52b8c4746fdbbf094f5687b84caae1e32d0b383",
+      "size": 7991856,
+      "mtime_ns": 1791566391461734662,
+      "inode": 95603769,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-171857-f6cc4a2c/mvk/libMoltenVK.1.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791566391471868090,
+      "inode": 95603770,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-171857-f6cc4a2c/mvk/libMoltenVK.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791566391481072218,
+      "inode": 95603771,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-171857-f6cc4a2c/host-traces/host-trace.49717.jsonl": {
+      "sha256": "568a34884aaa1f7fd3aa6411e0983ac09d3ee0332bf315928469962650e603df",
+      "size": 20678601,
+      "mtime_ns": 1791566570572638033,
+      "inode": 95609437,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-171857-f6cc4a2c/host-traces/host-trace.49736.jsonl": {
+      "sha256": "ad0aad4a3ef29a3c01fd5b2ba45fa53be232d3a51123f123b3166d163fde4f1e",
+      "size": 1813,
+      "mtime_ns": 1791566538152577742,
+      "inode": 95609406,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-204240-c4f18984/trace-index.json": {
+      "sha256": "8cb0f0115e7e536851a9892828466a47d58cb0677f4d0372be44c603c1ab312f",
+      "size": 7558,
+      "mtime_ns": 1791578813918955616,
+      "inode": 95775251,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-204240-c4f18984/prefix-state.json": {
+      "sha256": "8a42db9a204aeaeb9eee8aa73a2e88d941a8666894e305158998376e82e3481a",
+      "size": 2143,
+      "mtime_ns": 1791578790241023705,
+      "inode": 95775212,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-204240-c4f18984/process-runner.log": {
+      "sha256": "66a814a0e02168c63d31ca7d6a985589987b8ff2f1a84df470d5799950b4027e",
+      "size": 513,
+      "mtime_ns": 1791578813546164994,
+      "inode": 95769130,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-204240-c4f18984/app-trace.jsonl": {
+      "sha256": "f0ed10e0131e21127a3a0d183b5730edbbc85803319279dd0c331b7da9054e05",
+      "size": 14773669,
+      "mtime_ns": 1791578789641747599,
+      "inode": 95775205,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-204240-c4f18984/runtime.log": {
+      "sha256": "fe345d51e5f0f9e2f7fde82b8a2e2f5c501404e8a949cddb41ce21e1567c9b1b",
+      "size": 1178963,
+      "mtime_ns": 1791578789452748143,
+      "inode": 95774757,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-204240-c4f18984/execution-result.json": {
+      "sha256": "4b7d01caed1821f64fbf04777159280930d5d8f290c16720e1e498f938114426",
+      "size": 439,
+      "mtime_ns": 1791578789716720034,
+      "inode": 95775206,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-204240-c4f18984/run-manifest.json": {
+      "sha256": "d9bff443f2cb64ec5d182bf0d169a5bb6a8a84c0003827305e135ef4067679ab",
+      "size": 21306,
+      "mtime_ns": 1791578613295007412,
+      "inode": 95769128,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-204240-c4f18984/prefix-cleanup.json": {
+      "sha256": "f1cc5ecb9dad3e467229f071ecd6b6ece2dcb5d46ba3d3f4626aec67cb043596",
+      "size": 65536,
+      "mtime_ns": 1791578813545629948,
+      "inode": 95775250,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-204240-c4f18984/prefix-registry-diff.txt.gz": {
+      "sha256": "4abbf98acd79dabcd151e768a88441f35e687cd5396955c0cfeaae2fc033f8bf",
+      "size": 3640,
+      "mtime_ns": 1791578790239455318,
+      "inode": 95775211,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-204240-c4f18984/process-context.json": {
+      "sha256": "c32ceb5991336c762f14c7b23e26fdfdc6b7561b5cae81e5a291f73c9f18af16",
+      "size": 5909,
+      "mtime_ns": 1791578613295249247,
+      "inode": 95769129,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-204240-c4f18984/run-result.json": {
+      "sha256": "58339d7aa1a57258bf2b62b42aa401240868aa518c44a75ee0b41f3430c65bb9",
+      "size": 133453,
+      "mtime_ns": 1791578841124624450,
+      "inode": 95775298,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-204240-c4f18984/trace-loader/libMoltenVK.dylib": {
+      "sha256": "13b90393155f492fda648048e52b8c4746fdbbf094f5687b84caae1e32d0b383",
+      "size": 7991856,
+      "mtime_ns": 1791578613252796055,
+      "inode": 95769122,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-204240-c4f18984/mvk/libMoltenVK.1.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791578613263513969,
+      "inode": 95769125,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-204240-c4f18984/mvk/libMoltenVK.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791578613272745079,
+      "inode": 95769126,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-204240-c4f18984/host-traces/host-trace.78505.jsonl": {
+      "sha256": "2e935000876e9a14b9ea8114524b7ab51aed820b19a7880d6319f1b0ef84af36",
+      "size": 1813,
+      "mtime_ns": 1791578756382369116,
+      "inode": 95774795,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-204240-c4f18984/host-traces/host-trace.78486.jsonl": {
+      "sha256": "229f7608869bdbfe1433c4fb55ca8d1bdfe46b8f7e7bc6c0d0609a4e670af546",
+      "size": 27174796,
+      "mtime_ns": 1791578789446451429,
+      "inode": 95774799,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-205002-d16f5cb4/trace-index.json": {
+      "sha256": "8e85e170e38c7725ed8f5e3c4ef1749f1cc67c12263930535352dbc20e380fa9",
+      "size": 7558,
+      "mtime_ns": 1791579258198690030,
+      "inode": 95789527,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-205002-d16f5cb4/prefix-state.json": {
+      "sha256": "2691a9c9e0e360d0a04ade0228cfa06eb70de1f7c90160e239316b2fa00cef84",
+      "size": 2143,
+      "mtime_ns": 1791579233895577673,
+      "inode": 95789385,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-205002-d16f5cb4/process-runner.log": {
+      "sha256": "2b7def495f31e539f60856acda42b0f6a080e26e0777a3c894508c947b5d0c86",
+      "size": 513,
+      "mtime_ns": 1791579257378373161,
+      "inode": 95783138,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-205002-d16f5cb4/app-trace.jsonl": {
+      "sha256": "2bd3f0df90d39f45c360c766d4b212b9f926f8cf493f6c2199743fdf8984d385",
+      "size": 18884391,
+      "mtime_ns": 1791579233345090501,
+      "inode": 95789377,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-205002-d16f5cb4/runtime.log": {
+      "sha256": "4fc3f5b79889cdd98102ff8db9bdd1c36515b8dc6b646ee97253896e5cbd9752",
+      "size": 1178963,
+      "mtime_ns": 1791579233117552974,
+      "inode": 95788923,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-205002-d16f5cb4/execution-result.json": {
+      "sha256": "5eaf0192f2137affdf40b747f31e125d75882cca931effbc1777c626162688ea",
+      "size": 438,
+      "mtime_ns": 1791579233370885244,
+      "inode": 95789378,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-205002-d16f5cb4/run-manifest.json": {
+      "sha256": "d8acc559789eb4b6cf051512a5e317fe3595af235fb5554e86f87ee1d8e985c1",
+      "size": 21306,
+      "mtime_ns": 1791579055496090931,
+      "inode": 95783136,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-205002-d16f5cb4/prefix-cleanup.json": {
+      "sha256": "a7a105afffd7ddafb60197735643193c763225b559d81c2c71b814d0785b5f75",
+      "size": 65536,
+      "mtime_ns": 1791579257378005991,
+      "inode": 95789518,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-205002-d16f5cb4/prefix-registry-diff.txt.gz": {
+      "sha256": "58b6c753e6016de823d14d1a3287222eeeaf1674ffb7c4042fa63265a855b145",
+      "size": 3629,
+      "mtime_ns": 1791579233893978202,
+      "inode": 95789384,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-205002-d16f5cb4/process-context.json": {
+      "sha256": "5cfa20aa5a1ba883fcae4d8b16d8c1fd9d1bab74dc162610362f5f4afb35715e",
+      "size": 5909,
+      "mtime_ns": 1791579055496205473,
+      "inode": 95783137,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-205002-d16f5cb4/run-result.json": {
+      "sha256": "f0851a2b8b6b9714a18bed8b10e41c31d52c64f4f7d0828a71a1a3cbf0c089a9",
+      "size": 12039763,
+      "mtime_ns": 1791579285984187573,
+      "inode": 95789600,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-205002-d16f5cb4/trace-loader/libMoltenVK.dylib": {
+      "sha256": "13b90393155f492fda648048e52b8c4746fdbbf094f5687b84caae1e32d0b383",
+      "size": 7991856,
+      "mtime_ns": 1791579055453514321,
+      "inode": 95783130,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-205002-d16f5cb4/mvk/libMoltenVK.1.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791579055463746855,
+      "inode": 95783133,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-205002-d16f5cb4/mvk/libMoltenVK.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791579055473112342,
+      "inode": 95783134,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-205002-d16f5cb4/host-traces/host-trace.79408.jsonl": {
+      "sha256": "48785c0da222b4c97877e9f89fbab9b98dad98d848858eb20f6a0056a112d432",
+      "size": 1813,
+      "mtime_ns": 1791579200578507259,
+      "inode": 95789120,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-205002-d16f5cb4/host-traces/host-trace.79390.jsonl": {
+      "sha256": "2ca29006d5840fd89c09ef1b10f884480193d72ad4c7420e02400080209e52f3",
+      "size": 34731118,
+      "mtime_ns": 1791579233108572070,
+      "inode": 95789141,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-210718-6f03cc56/trace-index.json": {
+      "sha256": "08491a22cf62db9e3277a648aa625299529a239be5df829f8c2e0a12d614727d",
+      "size": 7558,
+      "mtime_ns": 1791580299008828043,
+      "inode": 95840660,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-210718-6f03cc56/prefix-state.json": {
+      "sha256": "e44a0b3b0039bbb2fe3eebc068476bbbb36b39d2e35e9a46a9a5d0d1e3499719",
+      "size": 2143,
+      "mtime_ns": 1791580274374841259,
+      "inode": 95840478,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-210718-6f03cc56/process-runner.log": {
+      "sha256": "45353c83e0ea65d3bf7a5bd5cb6f95b2656c1b4e67d1e7f6c8032d0d4b5be2d1",
+      "size": 515,
+      "mtime_ns": 1791580298481863374,
+      "inode": 95834193,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-210718-6f03cc56/app-trace.jsonl": {
+      "sha256": "14950b3f437768c47eb27e4324c9dd752a5843265aa343c469d19ab336e60f28",
+      "size": 18599775,
+      "mtime_ns": 1791580273797921954,
+      "inode": 95840461,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-210718-6f03cc56/runtime.log": {
+      "sha256": "2b09415978c515ad7fd7e0686f8e665480bf1a2bbb3e526b6c33aec6f6db76b6",
+      "size": 1178963,
+      "mtime_ns": 1791580273479410193,
+      "inode": 95839917,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-210718-6f03cc56/execution-result.json": {
+      "sha256": "4a2a48b624fb8b52b3aa609a25f52e84640e0a99ac624f28ee6991139d23c847",
+      "size": 438,
+      "mtime_ns": 1791580273847749882,
+      "inode": 95840471,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-210718-6f03cc56/run-manifest.json": {
+      "sha256": "7754310021e59e8b14ded5b38d28ec97f345edf01cba25ac30a1be3eedb2d88c",
+      "size": 21305,
+      "mtime_ns": 1791580093863418322,
+      "inode": 95834191,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-210718-6f03cc56/prefix-cleanup.json": {
+      "sha256": "674bd86fa560bc82263bd03fff8bba5f958d272df7a07ed236c9fea86a35a9ab",
+      "size": 65536,
+      "mtime_ns": 1791580298481476121,
+      "inode": 95840659,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-210718-6f03cc56/prefix-registry-diff.txt.gz": {
+      "sha256": "e7425c38dc12c2c7a91037be037405d9b7cfe605d18b99e9a659f2756af777c3",
+      "size": 3630,
+      "mtime_ns": 1791580274373239330,
+      "inode": 95840477,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-210718-6f03cc56/process-context.json": {
+      "sha256": "5980f1bc43c73aaf3487da3b328233d45040b5b4860d4fb6e45cc68f0c143877",
+      "size": 5909,
+      "mtime_ns": 1791580093863577448,
+      "inode": 95834192,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-210718-6f03cc56/run-result.json": {
+      "sha256": "4191074736277701288cc75439ec8c3b42229adef81db177dddf52b8d9430945",
+      "size": 11833810,
+      "mtime_ns": 1791580327190033072,
+      "inode": 95840773,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-210718-6f03cc56/trace-loader/libMoltenVK.dylib": {
+      "sha256": "1b3dda059905bbacb6dfb63718c78eb1505682fb6d493d5be2ef4dec51a38688",
+      "size": 7979752,
+      "mtime_ns": 1791580093816355248,
+      "inode": 95834186,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-210718-6f03cc56/mvk/libMoltenVK.1.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791580093828589052,
+      "inode": 95834187,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-210718-6f03cc56/mvk/libMoltenVK.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791580093838336377,
+      "inode": 95834188,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-210718-6f03cc56/host-traces/host-trace.82600.jsonl": {
+      "sha256": "e6a197057cc27220f016a4e4e779f0459ab5b6f9c967876e4398c6c43750dab5",
+      "size": 34213597,
+      "mtime_ns": 1791580273474046818,
+      "inode": 95840174,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-210718-6f03cc56/host-traces/host-trace.82619.jsonl": {
+      "sha256": "56d8bd6bf4999be0dd2e096389e4a529589ee2c5d2ef9051e33a906d07cf435f",
+      "size": 1813,
+      "mtime_ns": 1791580240660036503,
+      "inode": 95840171,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-211922-bd4754d4/trace-index.json": {
+      "sha256": "d344d03ef52270a726f0c284369d4d2787db119a4c24f20760d4398dd9f34964",
+      "size": 7558,
+      "mtime_ns": 1791581020833472871,
+      "inode": 95849588,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-211922-bd4754d4/prefix-state.json": {
+      "sha256": "b09deb37ffd184a972dca1df6580ab10756ad0c99fc272b721878c0efffb8380",
+      "size": 2143,
+      "mtime_ns": 1791580997836004607,
+      "inode": 95849567,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-211922-bd4754d4/screenshot-content-check.json": {
+      "sha256": "4d93b0079e518733643d11f1116f6a10363917a5ad0bd61ca6a6c1e5d3c57569",
+      "size": 972,
+      "mtime_ns": 1791581048923419175,
+      "inode": 95849711,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-211922-bd4754d4/smoke-window-2.png": {
+      "sha256": "1fa260d29c64e9ab6e002cf24f09d41090de749bf5ad8f38f7d8bef1ca6a6746",
+      "size": 256908,
+      "mtime_ns": 1791580977613951481,
+      "inode": 95849477,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-211922-bd4754d4/process-runner.log": {
+      "sha256": "b31dfca8739c6368afd6ab49f21b081c9e61eba06fe05c3d26ccaa0c0a1282ca",
+      "size": 513,
+      "mtime_ns": 1791581020498973237,
+      "inode": 95843261,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-211922-bd4754d4/smoke-window-1.png": {
+      "sha256": "fb544c4a4b231f235b1e164f218185cf71c613567748eca39299a019f20a7e28",
+      "size": 256875,
+      "mtime_ns": 1791580968720562336,
+      "inode": 95849427,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-211922-bd4754d4/app-trace.jsonl": {
+      "sha256": "6d7656d39b126e2666fe7e9d057a85ce53c11ab8a0d27e14ad7e86dffe9c78be",
+      "size": 11234347,
+      "mtime_ns": 1791580997273948834,
+      "inode": 95849538,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-211922-bd4754d4/smoke-authorization.json": {
+      "sha256": "bf62f32050bc3f4953f202c2d80ff8eabfe13be6faf84e2eed21d977f0febf87",
+      "size": 5671,
+      "mtime_ns": 1791581048969020670,
+      "inode": 95849713,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-211922-bd4754d4/runtime.log": {
+      "sha256": "256abfc9c8a87fd6f71e468cf0db2ef1533824f97c4422329e312efde83a4b4e",
+      "size": 1178963,
+      "mtime_ns": 1791580997113201171,
+      "inode": 95849165,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-211922-bd4754d4/execution-result.json": {
+      "sha256": "2a3bc935190411c836c480ad14b852840cb5fd694a1b80e6c9162928291d9fa7",
+      "size": 437,
+      "mtime_ns": 1791580997307882056,
+      "inode": 95849549,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-211922-bd4754d4/run-manifest.json": {
+      "sha256": "eaf3795a9d2dff2432098afd411345ee1e4e16b6e6d27046ccc9708605c20e6f",
+      "size": 21305,
+      "mtime_ns": 1791580815185266920,
+      "inode": 95843259,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-211922-bd4754d4/prefix-cleanup.json": {
+      "sha256": "9d9524f1c740ea20369681b97b640f6ee9d5aae7be93121f3b14a07cd506decb",
+      "size": 65536,
+      "mtime_ns": 1791581020498440108,
+      "inode": 95849587,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-211922-bd4754d4/prefix-registry-diff.txt.gz": {
+      "sha256": "6fe5e48c9b442407d9d5341fd52c313c9d1e791dddb25489aa064d33ae59507c",
+      "size": 3628,
+      "mtime_ns": 1791580997834469304,
+      "inode": 95849566,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-211922-bd4754d4/process-context.json": {
+      "sha256": "ab54e3c3f32ef61905c010838a1f6e303628b9191bb0fdf957ece4ee421d98b5",
+      "size": 5909,
+      "mtime_ns": 1791580815185380088,
+      "inode": 95843260,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-211922-bd4754d4/run-result.json": {
+      "sha256": "4722be19073f1f5bf84111df3aeb46292114dcd689ae13e2b5e1011cc670e231",
+      "size": 9160629,
+      "mtime_ns": 1791581048963497126,
+      "inode": 95849712,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-211922-bd4754d4/trace-loader/libMoltenVK.dylib": {
+      "sha256": "1b3dda059905bbacb6dfb63718c78eb1505682fb6d493d5be2ef4dec51a38688",
+      "size": 7979752,
+      "mtime_ns": 1791580815140383822,
+      "inode": 95843253,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-211922-bd4754d4/mvk/libMoltenVK.1.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791580815153796093,
+      "inode": 95843256,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-211922-bd4754d4/mvk/libMoltenVK.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791580815163153124,
+      "inode": 95843257,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-211922-bd4754d4/host-traces/host-trace.84236.jsonl": {
+      "sha256": "dbcd057b435271119b96974435884dbd812474aa7bd63ed7cbd21444aab6c5db",
+      "size": 1813,
+      "mtime_ns": 1791580964181758654,
+      "inode": 95849384,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-211922-bd4754d4/host-traces/host-trace.84217.jsonl": {
+      "sha256": "c8a40f6c28c4ccfb65353c6f3210ed544c20971def990c56c321e3e537260768",
+      "size": 20679713,
+      "mtime_ns": 1791580997106974290,
+      "inode": 95849389,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-214401-1cc13c01/trace-index.json": {
+      "sha256": "faafe59d241a407dcbfcca02854b422970130ca4d866657984745ff0ae7fe033",
+      "size": 7558,
+      "mtime_ns": 1791582496639417382,
+      "inode": 95912212,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-214401-1cc13c01/prefix-state.json": {
+      "sha256": "181b5e815ca5c271f19ee9e3b45ca57d2dc2fc1cc10014dbed3680f585d58831",
+      "size": 2143,
+      "mtime_ns": 1791582472698792193,
+      "inode": 95912138,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-214401-1cc13c01/screenshot-content-check.json": {
+      "sha256": "19b217cea7650a9bb9f3a17ebbd1d938807f9f7182e98d4d2359b6126d8389a0",
+      "size": 971,
+      "mtime_ns": 1791582525019235746,
+      "inode": 95912346,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-214401-1cc13c01/smoke-window-2.png": {
+      "sha256": "d1a156644917c87c65f99c90b2162e716d733d5301592c41d66447601bd85ee1",
+      "size": 257164,
+      "mtime_ns": 1791582452383593522,
+      "inode": 95912052,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-214401-1cc13c01/process-runner.log": {
+      "sha256": "86e0c19bf8749667fddd74a3e6ab54dde078f744791e6c500e915934dfa8bc39",
+      "size": 513,
+      "mtime_ns": 1791582496323103971,
+      "inode": 95906107,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-214401-1cc13c01/smoke-window-1.png": {
+      "sha256": "b72094b0c85f216c2c3002e68ab05de2ef3c9cc88818fd75154651d760ce3119",
+      "size": 257147,
+      "mtime_ns": 1791582443667820438,
+      "inode": 95912033,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-214401-1cc13c01/app-trace.jsonl": {
+      "sha256": "9d281ecd6e89d70881aae2b5c7c3ad60906493d02f840a2d538aac2a2a1976f6",
+      "size": 11519825,
+      "mtime_ns": 1791582472110001651,
+      "inode": 95912104,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-214401-1cc13c01/smoke-authorization.json": {
+      "sha256": "09eead3b5d3a8aadc4c32ea00bbb00dbcc0d06bfad90cf246bc6b4ea2073d2d4",
+      "size": 5671,
+      "mtime_ns": 1791582525066612221,
+      "inode": 95912348,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-214401-1cc13c01/runtime.log": {
+      "sha256": "4192fdb7a69330ccf66dc4d8da35b70285f072953fb78e10954208e81bacbd33",
+      "size": 1178963,
+      "mtime_ns": 1791582471945143620,
+      "inode": 95911906,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-214401-1cc13c01/execution-result.json": {
+      "sha256": "e7744a3710da0845fc65bae2e3d313610a8f62be489904bc1c66b4ce166e818a",
+      "size": 436,
+      "mtime_ns": 1791582472171702829,
+      "inode": 95912117,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-214401-1cc13c01/run-manifest.json": {
+      "sha256": "7f61b0758cc6f5d12ec54e09539711760c0b2373d8fc5b3f24b8c6e41fa0bd25",
+      "size": 21301,
+      "mtime_ns": 1791582294171724052,
+      "inode": 95906105,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-214401-1cc13c01/prefix-cleanup.json": {
+      "sha256": "c24667d7cb5cf0a548fad68df384b01236cc8bca58256685688996f1f4773be3",
+      "size": 65536,
+      "mtime_ns": 1791582496322338214,
+      "inode": 95912211,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-214401-1cc13c01/prefix-registry-diff.txt.gz": {
+      "sha256": "e4364c4a5023c5734e89613fe822c6bd5ca892e4bd462a265aaaf75610463dad",
+      "size": 3626,
+      "mtime_ns": 1791582472696679759,
+      "inode": 95912137,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-214401-1cc13c01/process-context.json": {
+      "sha256": "ed934465a922c6811105b124dc6c69b3ab793f4c1f4aa746e5d5b74409bddc6f",
+      "size": 5909,
+      "mtime_ns": 1791582294172141597,
+      "inode": 95906106,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-214401-1cc13c01/run-result.json": {
+      "sha256": "9beeca88c7764025be9e688281417de0f09a1868bb02fc13fb794508411047f9",
+      "size": 9356926,
+      "mtime_ns": 1791582525061206343,
+      "inode": 95912347,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-214401-1cc13c01/trace-loader/libMoltenVK.dylib": {
+      "sha256": "1b3dda059905bbacb6dfb63718c78eb1505682fb6d493d5be2ef4dec51a38688",
+      "size": 7979752,
+      "mtime_ns": 1791582294115753672,
+      "inode": 95906101,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-214401-1cc13c01/mvk/libMoltenVK.1.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791582294132411977,
+      "inode": 95906102,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-214401-1cc13c01/mvk/libMoltenVK.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791582294149718037,
+      "inode": 95906103,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-214401-1cc13c01/host-traces/host-trace.91869.jsonl": {
+      "sha256": "1cbfdf089efe7af9c879fffe516f8ceecbd9e06ce83a55f92612c3230d501157",
+      "size": 21206230,
+      "mtime_ns": 1791582471939378488,
+      "inode": 95911992,
+      "device": 16777230
+    },
+    "runs/step11d3b-smoke-20261009-214401-1cc13c01/host-traces/host-trace.91888.jsonl": {
+      "sha256": "1b120ad3545607aad9cd3e7f42d39119144314350ba8fcf1be5c9ec76539cb56",
+      "size": 1813,
+      "mtime_ns": 1791582439477057904,
+      "inode": 95911987,
+      "device": 16777230
+    },
+    "evidence/br2/previous-control/bare_vulkan_app-2fae0f2.exe": {
+      "sha256": "2fae0f29f76091203242276fe449bd81cd600fc0eca93a78148e7f1105d500fb",
+      "size": 55748714,
+      "mtime_ns": 1791470284076133051,
+      "inode": 94923555,
+      "device": 16777230
+    },
+    "evidence/br2/previous-control/bare_vulkan_app-pre-host-image-identity-b564a4e.exe": {
+      "sha256": "b564a4e75292f3e588d08eaef40a90bc1bf4e33c5c2541b6b86cb174dabe7295",
+      "size": 55771727,
+      "mtime_ns": 1791509093812650416,
+      "inode": 95095255,
+      "device": 16777230
+    },
+    "evidence/br2/previous-control/libvulkan-trace-pre-startup-identity-082f39b.dylib": {
+      "sha256": "082f39b8b85a5eeea978b892b7b7607ffdf1e660704d7b73839a5ad7303859b7",
+      "size": 7930464,
+      "mtime_ns": 1791506103340527181,
+      "inode": 95095256,
+      "device": 16777230
+    },
+    "evidence/br2/previous-control/bare_vulkan_app-pre-qpc-floor-3af1b5e.exe": {
+      "sha256": "3af1b5ed0315f10f53e421e39303f3f838ce40b221b9c414c811341a37eebea0",
+      "size": 55775936,
+      "mtime_ns": 1791510541279683204,
+      "inode": 95102798,
+      "device": 16777230
+    },
+    "evidence/br2/previous-control/libvulkan-trace-6eb13b3.dylib": {
+      "sha256": "6eb13b3ba6f195d09ab9e22002332db003e8641f1a8ff809b8eb60f2a898a597",
+      "size": 7932816,
+      "mtime_ns": 1791473047850090321,
+      "inode": 94923554,
+      "device": 16777230
+    },
+    "evidence/br2/previous-control/bare_vulkan_app-pre-qpc-integer-floor-54cdba1.exe": {
+      "sha256": "54cdba1871507d8ad209f1bd541698a2c685e5a7a4ef9ae85dbfcce66a86a647",
+      "size": 55775936,
+      "mtime_ns": 1791511216836479453,
+      "inode": 95124226,
+      "device": 16777230
+    },
+    "evidence/br2/loader-diagnostics/runtime_fallback_probe.cpp": {
+      "sha256": "71241371d61dddab9a2a5076c200390e86c257920ffcf9973aca67df317fa9e4",
+      "size": 4356,
+      "mtime_ns": 1791505721852704765,
+      "inode": 94924247,
+      "device": 16777230
+    },
+    "evidence/br2/loader-diagnostics/collect_static_chain.py": {
+      "sha256": "b4af312cc3b12dbd2fdcdcab668cb9df34441b5a4aa9dcb75719aadb05bd1485",
+      "size": 4055,
+      "mtime_ns": 1791506091825741379,
+      "inode": 94944582,
+      "device": 16777230
+    },
+    "evidence/br2/loader-diagnostics/proxy-route-probe-result.json": {
+      "sha256": "7b0017b6a8a537049298ef3837b45a4023f6793fcf3e6cb7cc1c6ce0e621b8b3",
+      "size": 74757,
+      "mtime_ns": 1791504908118208509,
+      "inode": 94923636,
+      "device": 16777230
+    },
+    "evidence/br2/loader-diagnostics/moltenvk_runtime_version_probe.cpp": {
+      "sha256": "2337e058b561abb69e046dc08e23f01a79423ffe9c030cb69877a9155b554cdf",
+      "size": 1250,
+      "mtime_ns": 1791510396555987013,
+      "inode": 95095117,
+      "device": 16777230
+    },
+    "evidence/br2/loader-diagnostics/runtime-fallback-probe.stdout.txt": {
+      "sha256": "0f1811f35e4ae554b547996e4e762a34b0a86fe4441ff8674022376bd6440a8f",
+      "size": 260,
+      "mtime_ns": 1791505725743807598,
+      "inode": 94924259,
+      "device": 16777230
+    },
+    "evidence/br2/loader-diagnostics/probe_direct.stderr.txt": {
+      "sha256": "70904b84b16140c63d0667fee7d945d370e1961cc469b88b330b207eb423bfe0",
+      "size": 7754,
+      "mtime_ns": 1791504231221533509,
+      "inode": 94923111,
+      "device": 16777230
+    },
+    "evidence/br2/loader-diagnostics/proxy_route_probe.cpp": {
+      "sha256": "ad7f346a583a33dfff628beed1cd25feec6ff1ab3816e0d9018b1ce8a8dd5fd8",
+      "size": 5442,
+      "mtime_ns": 1791506759538570105,
+      "inode": 94923604,
+      "device": 16777230
+    },
+    "evidence/br2/loader-diagnostics/probe_arch.stdout.txt": {
+      "sha256": "bd511c00d2b003a37154d44bb0e8e566f9f4ccd4ef478b18c41def591367a788",
+      "size": 3280,
+      "mtime_ns": 1791504231231075321,
+      "inode": 94923113,
+      "device": 16777230
+    },
+    "evidence/br2/loader-diagnostics/proxy_route_probe": {
+      "sha256": "0c682a30d4df64f842d3dfe6fee7449e1e5c28c9c0cebc80b2763226d9f80258",
+      "size": 15616,
+      "mtime_ns": 1791506773043620349,
+      "inode": 94965210,
+      "device": 16777230
+    },
+    "evidence/br2/loader-diagnostics/wine_version_direct.stdout.txt": {
+      "sha256": "481aca01ddeaa91331cdff0c74f2cb146f695f081a6a4b87b9a155e17080bfb3",
+      "size": 31,
+      "mtime_ns": 1791504231249546983,
+      "inode": 94923117,
+      "device": 16777230
+    },
+    "evidence/br2/loader-diagnostics/proxy-route-probe-version-only-result.json": {
+      "sha256": "7b0017b6a8a537049298ef3837b45a4023f6793fcf3e6cb7cc1c6ce0e621b8b3",
+      "size": 74757,
+      "mtime_ns": 1791504926336185004,
+      "inode": 94923654,
+      "device": 16777230
+    },
+    "evidence/br2/loader-diagnostics/static-chain-post-rebuild.json": {
+      "sha256": "15094da251fef37824fe03fd0128cbeb62231f55a1171bcad6219cfaa685fc89",
+      "size": 30895,
+      "mtime_ns": 1791506173433759465,
+      "inode": 94944586,
+      "device": 16777230
+    },
+    "evidence/br2/loader-diagnostics/wine_version_arch.stderr.txt": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0,
+      "mtime_ns": 1791504231263732158,
+      "inode": 94923120,
+      "device": 16777230
+    },
+    "evidence/br2/loader-diagnostics/arch_probe.c": {
+      "sha256": "a16aaf97015ee185b91fcbe3f4428f4764f4d16c5bc39f7b3f6c33f09e1c939d",
+      "size": 1722,
+      "mtime_ns": 1791504131822977571,
+      "inode": 94923042,
+      "device": 16777230
+    },
+    "evidence/br2/loader-diagnostics/arch-transition-matrix.json": {
+      "sha256": "65e0f357c83c7ee0ded09e7cbfa0cc5fc29ab61643c6642a8c30efbe26b5f62a",
+      "size": 20183,
+      "mtime_ns": 1791504231263952409,
+      "inode": 94923121,
+      "device": 16777230
+    },
+    "evidence/br2/loader-diagnostics/moltenvk_runtime_version_probe": {
+      "sha256": "b83d110fb8c8eb9b687352bf6342e7a8383c71fec5ca19dc6f7d8257156711da",
+      "size": 9064,
+      "mtime_ns": 1791510396638141601,
+      "inode": 95095121,
+      "device": 16777230
+    },
+    "evidence/br2/loader-diagnostics/arch_inject_probe.c": {
+      "sha256": "06d5b092e8bc5820be320d75d59a5f5fa37f0897d4d8d9ce5aa2471d3f52682e",
+      "size": 1681,
+      "mtime_ns": 1791504150904213062,
+      "inode": 94923059,
+      "device": 16777230
+    },
+    "evidence/br2/loader-diagnostics/arch_probe": {
+      "sha256": "c00d3978c213de02dc12d4b756a02fe96a15f58069b1cdc390d50b82ea26fbab",
+      "size": 9160,
+      "mtime_ns": 1791504213455602176,
+      "inode": 94923095,
+      "device": 16777230
+    },
+    "evidence/br2/loader-diagnostics/runtime_fallback_probe": {
+      "sha256": "d363633abe2968721ead0a861f5fe8569e8a48aec02f5be843e4c02364f4dbe9",
+      "size": 15072,
+      "mtime_ns": 1791505725379495937,
+      "inode": 94924279,
+      "device": 16777230
+    },
+    "evidence/br2/loader-diagnostics/proxy_startup_json_probe.cpp": {
+      "sha256": "a054a257e1fcc4607988a3274e1571f5ff78ae48dfab6c7887571661c6ac3ac6",
+      "size": 748,
+      "mtime_ns": 1791510648643869076,
+      "inode": 95095289,
+      "device": 16777230
+    },
+    "evidence/br2/loader-diagnostics/arch_inject_probe.dylib": {
+      "sha256": "7daca06c961f7c17ce9e2de952c354de9171ce87b62c70d165f24d92afee5fd4",
+      "size": 9136,
+      "mtime_ns": 1791504213510171696,
+      "inode": 94923098,
+      "device": 16777230
+    },
+    "evidence/br2/loader-diagnostics/run_proxy_route_probe.py": {
+      "sha256": "0bed768be0b16ae6b08554dc5c834a43dd6c5ee62daa698fe478494bf6b59ab9",
+      "size": 4114,
+      "mtime_ns": 1791506815968609188,
+      "inode": 94923612,
+      "device": 16777230
+    },
+    "evidence/br2/loader-diagnostics/static-loader-and-runtime-candidates.json": {
+      "sha256": "da2bf753e0e2f6affa5c706b104a2b90df96a1bcf90044428a7e76ac67bcc95f",
+      "size": 309414,
+      "mtime_ns": 1791505900802364285,
+      "inode": 94924162,
+      "device": 16777230
+    },
+    "evidence/br2/loader-diagnostics/probe_direct.stdout.txt": {
+      "sha256": "4cc509caf4b62a2604d0dcab9bc0cf23d9ed6ca81f6923fe87747c6e5556942b",
+      "size": 3661,
+      "mtime_ns": 1791504231221427633,
+      "inode": 94923110,
+      "device": 16777230
+    },
+    "evidence/br2/loader-diagnostics/runtime-fallback-probe.stderr.txt": {
+      "sha256": "c29f9e855b5b02e5ce648cd5a72dd6185256ecd918d66e505c14e6ede4c50375",
+      "size": 77861,
+      "mtime_ns": 1791505725743631846,
+      "inode": 94924260,
+      "device": 16777230
+    },
+    "evidence/br2/loader-diagnostics/proxy-route-probe-enumeration-result.json": {
+      "sha256": "d97bf346881264e791b30fd248cf892c6481032de1642b8ce6d61e982c2aa300",
+      "size": 81151,
+      "mtime_ns": 1791504928104510974,
+      "inode": 94923670,
+      "device": 16777230
+    },
+    "evidence/br2/loader-diagnostics/moltenvk-runtime-version-probe.txt": {
+      "sha256": "87b2d2bc6e8e569c5d5ac9e585248c60d2f34a9d5173072db751046d3d8bd41f",
+      "size": 101,
+      "mtime_ns": 1791510398281032151,
+      "inode": 95095122,
+      "device": 16777230
+    },
+    "evidence/br2/loader-diagnostics/wine_version_direct.stderr.txt": {
+      "sha256": "4cd9ecc7a18fa2e1f7ac13423c23c2deffa1fe131ba7f038fdddb62cc00a0137",
+      "size": 73838,
+      "mtime_ns": 1791504231249655358,
+      "inode": 94923118,
+      "device": 16777230
+    },
+    "evidence/br2/loader-diagnostics/probe_arch.stderr.txt": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0,
+      "mtime_ns": 1791504231231122446,
+      "inode": 94923114,
+      "device": 16777230
+    },
+    "evidence/br2/loader-diagnostics/wine_version_arch.stdout.txt": {
+      "sha256": "481aca01ddeaa91331cdff0c74f2cb146f695f081a6a4b87b9a155e17080bfb3",
+      "size": 31,
+      "mtime_ns": 1791504231263675324,
+      "inode": 94923119,
+      "device": 16777230
+    },
+    "evidence/br2/loader-diagnostics/proxy_startup_json_probe": {
+      "sha256": "d5d8116bfba322c46dde5d46f73a6d695275d542355abb12ff6c22092065136c",
+      "size": 8712,
+      "mtime_ns": 1791510653763748519,
+      "inode": 95095295,
+      "device": 16777230
+    },
+    "evidence/br2/loader-diagnostics/run_proxy_startup_json_probe.py": {
+      "sha256": "0065e6d0d47411142731040020df1da77902fad1adb885cf4134e59bacc59d01",
+      "size": 6071,
+      "mtime_ns": 1791510648644248163,
+      "inode": 95095290,
+      "device": 16777230
+    },
+    "evidence/br2/loader-diagnostics/proxy-route-run-enumeration-20261009-041635-c349fb2d/proxy-route-probe-result.json": {
+      "sha256": "97592b8e6de9fa1e4a45cf3c92162775a289404875c2dda702e8329473ca3d01",
+      "size": 80916,
+      "mtime_ns": 1791506798074058725,
+      "inode": 94968918,
+      "device": 16777230
+    },
+    "evidence/br2/loader-diagnostics/proxy-route-run-enumeration-20261009-040509-459fdb1e/proxy-route-probe-result.json": {
+      "sha256": "f7d3797478627793d2fc5067d6833166f7454e725a887cbbbf1a7cb65c431b29",
+      "size": 80751,
+      "mtime_ns": 1791506111282314016,
+      "inode": 94944665,
+      "device": 16777230
+    },
+    "evidence/br2/loader-diagnostics/__pycache__/run_proxy_route_probe.cpython-314.pyc": {
+      "sha256": "cba464ee2125e5378b706c6e6804ec0e85d126f3067d02170e448f8a7e2fa686",
+      "size": 6650,
+      "mtime_ns": 1791507231950994304,
+      "inode": 94978860,
+      "device": 16777230
+    },
+    "evidence/br2/loader-diagnostics/__pycache__/run_proxy_startup_json_probe.cpython-314.pyc": {
+      "sha256": "08e8c5ecc45c41d733cb048b7f3adc9b1ce053c2a9b9500792b6092f66fb37a9",
+      "size": 9837,
+      "mtime_ns": 1791510664953761029,
+      "inode": 95095324,
+      "device": 16777230
+    },
+    "evidence/br2/loader-diagnostics/__pycache__/collect_static_chain.cpython-314.pyc": {
+      "sha256": "ebad777fb8ac513137a531a534746b4247fe6816da28c3cf40f32ec23464bd84",
+      "size": 6420,
+      "mtime_ns": 1791506376420541018,
+      "inode": 94951540,
+      "device": 16777230
+    },
+    "evidence/br2/loader-diagnostics/proxy-route-run-enumeration-20261009-041805-fdbab9a4/proxy-route-probe-result.json": {
+      "sha256": "007571eea85be77a941f3fe3051a8c49cccda87dd1daa5bd9ba124e1d4734564",
+      "size": 80961,
+      "mtime_ns": 1791506887061451502,
+      "inode": 94978647,
+      "device": 16777230
+    },
+    "evidence/br2/loader-diagnostics/proxy-route-run-enumeration-20261009-052141-a2686e99/proxy-route-probe-result.json": {
+      "sha256": "3629c6a5e0e80c3be4c107ae983c2c30dae3ed2e6d372e07da00ca91a3fb7704",
+      "size": 81611,
+      "mtime_ns": 1791510702699343062,
+      "inode": 95102736,
+      "device": 16777230
+    },
+    "evidence/br2/loader-diagnostics/proxy-startup-json-20261009T015053Z/result.json": {
+      "sha256": "3173d945785cef2da64546c42ee293276d902308e5d2bf108f0a886d004c78cc",
+      "size": 1312,
+      "mtime_ns": 1791510656116150805,
+      "inode": 95095317,
+      "device": 16777230
+    },
+    "evidence/br2/loader-diagnostics/proxy-startup-json-20261009T015053Z/host-trace.jsonl": {
+      "sha256": "dfa397f967fe9e02d03119b670067b0314001a165d8ce2399fee522c8a71877f",
+      "size": 11579,
+      "mtime_ns": 1791510656112544609,
+      "inode": 95095312,
+      "device": 16777230
+    },
+    "evidence/br2/loader-diagnostics/proxy-route-run-enumeration-20261009-040423-ebf53a65/proxy-route-probe-result.json": {
+      "sha256": "a47ac61e9652d757c267147af860d413ecf35c641c92950a5d39095bf65e137c",
+      "size": 80751,
+      "mtime_ns": 1791506065988338166,
+      "inode": 94944560,
+      "device": 16777230
+    },
+    "evidence/br2/loader-diagnostics/proxy-route-run-enumeration-20261009-040423-ebf53a65/trace-loader/libMoltenVK.dylib": {
+      "sha256": "e48032d329d893d8530003a8417ee94ef6d3d82b3fc87df95dfd398314d5e761",
+      "size": 7930464,
+      "mtime_ns": 1791506063992159312,
+      "inode": 94944551,
+      "device": 16777230
+    },
+    "evidence/br2/loader-diagnostics/proxy-route-run-enumeration-20261009-040423-ebf53a65/mvk/libMoltenVK.1.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791506063995689002,
+      "inode": 94944552,
+      "device": 16777230
+    },
+    "evidence/br2/loader-diagnostics/proxy-startup-json-20261009T015053Z/trace-loader/libMoltenVK.dylib": {
+      "sha256": "7b60124e8a211dbb8155101030311bd12015ba10b6da51c86a3557c682494b61",
+      "size": 7978256,
+      "mtime_ns": 1791510653768012763,
+      "inode": 95095303,
+      "device": 16777230
+    },
+    "evidence/br2/loader-diagnostics/proxy-startup-json-20261009T015053Z/mvk/libMoltenVK.1.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791510653770145239,
+      "inode": 95095304,
+      "device": 16777230
+    },
+    "evidence/br2/loader-diagnostics/proxy-startup-json-20261009T015053Z/prefix/drive_c/windows/system32/winevulkan.dll": {
+      "sha256": "a18992aca34493aae325a5c1c6ddc78b905876fb65b2ca91fe7b1882b33fd2dc",
+      "size": 2096724,
+      "mtime_ns": 1791510653770849787,
+      "inode": 95095305,
+      "device": 16777230
+    },
+    "evidence/br2/loader-diagnostics/proxy-route-run-enumeration-20261009-052141-a2686e99/trace-loader/libMoltenVK.dylib": {
+      "sha256": "7b60124e8a211dbb8155101030311bd12015ba10b6da51c86a3557c682494b61",
+      "size": 7978256,
+      "mtime_ns": 1791510701214294105,
+      "inode": 95102727,
+      "device": 16777230
+    },
+    "evidence/br2/loader-diagnostics/proxy-route-run-enumeration-20261009-052141-a2686e99/mvk/libMoltenVK.1.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791510701219040140,
+      "inode": 95102728,
+      "device": 16777230
+    },
+    "evidence/br2/loader-diagnostics/proxy-route-run-enumeration-20261009-041805-fdbab9a4/trace-loader/libMoltenVK.dylib": {
+      "sha256": "082f39b8b85a5eeea978b892b7b7607ffdf1e660704d7b73839a5ad7303859b7",
+      "size": 7930464,
+      "mtime_ns": 1791506885137568483,
+      "inode": 94978640,
+      "device": 16777230
+    },
+    "evidence/br2/loader-diagnostics/proxy-route-run-enumeration-20261009-041805-fdbab9a4/mvk/libMoltenVK.1.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791506885141959429,
+      "inode": 94978641,
+      "device": 16777230
+    },
+    "evidence/br2/loader-diagnostics/proxy-route-run/trace-loader/libMoltenVK.dylib": {
+      "sha256": "609109b688bccf23fb55f4b5daff4d4c02191e45ffdb5fc125bdf1f12ad0ab5a",
+      "size": 7930952,
+      "mtime_ns": 1791504905964592406,
+      "inode": 94923625,
+      "device": 16777230
+    },
+    "evidence/br2/loader-diagnostics/proxy-route-run/mvk/libMoltenVK.1.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791504905968515059,
+      "inode": 94923626,
+      "device": 16777230
+    },
+    "evidence/br2/loader-diagnostics/proxy-route-run-enumeration-20261009-040509-459fdb1e/trace-loader/libMoltenVK.dylib": {
+      "sha256": "082f39b8b85a5eeea978b892b7b7607ffdf1e660704d7b73839a5ad7303859b7",
+      "size": 7930464,
+      "mtime_ns": 1791506109732234748,
+      "inode": 94944656,
+      "device": 16777230
+    },
+    "evidence/br2/loader-diagnostics/proxy-route-run-enumeration-20261009-040509-459fdb1e/mvk/libMoltenVK.1.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791506109736071690,
+      "inode": 94944657,
+      "device": 16777230
+    },
+    "evidence/br2/loader-diagnostics/proxy-route-run-enumeration-20261009-041635-c349fb2d/trace-loader/libMoltenVK.dylib": {
+      "sha256": "082f39b8b85a5eeea978b892b7b7607ffdf1e660704d7b73839a5ad7303859b7",
+      "size": 7930464,
+      "mtime_ns": 1791506795065244619,
+      "inode": 94965226,
+      "device": 16777230
+    },
+    "evidence/br2/loader-diagnostics/proxy-route-run-enumeration-20261009-041635-c349fb2d/mvk/libMoltenVK.1.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791506795071540797,
+      "inode": 94965227,
+      "device": 16777230
+    },
+    "evidence/br2/loader-diagnostics/proxy-route-run-enumeration/trace-loader/libMoltenVK.dylib": {
+      "sha256": "609109b688bccf23fb55f4b5daff4d4c02191e45ffdb5fc125bdf1f12ad0ab5a",
+      "size": 7930952,
+      "mtime_ns": 1791504926625634819,
+      "inode": 94923661,
+      "device": 16777230
+    },
+    "evidence/br2/loader-diagnostics/proxy-route-run-enumeration/mvk/libMoltenVK.1.dylib": {
+      "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+      "size": 10925552,
+      "mtime_ns": 1791504926628407546,
+      "inode": 94923662,
+      "device": 16777230
+    }
+  },
+  "created_unix": 1791616756.042444,
+  "restore": "Extract archive into experiments/dxvk_macos_step11d3b; member paths retain original locations.",
+  "retired_original_logical_bytes": 1866705304,
+  "verified_regular_files": 506
+}

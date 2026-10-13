@@ -69,6 +69,7 @@ class BuildRetentionTests(unittest.TestCase):
             mock.patch.object(retention, "_require_no_live_process", return_value=None),
             mock.patch.object(retention, "_key", return_value=b"r" * 32),
             mock.patch.object(storage_policy, "REPO", self.repo),
+            mock.patch.object(storage_policy, "INVENTORY_PATH", self.repo / "missing-inventory.json"),
             mock.patch.object(storage_policy, "GATE0_ATTESTATION_PATH", self.gate_attestation),
             mock.patch.object(storage_policy, "_experiment_manifest_path",
                               side_effect=lambda experiment_id: self.manifests / f"{experiment_id}.json"),
@@ -86,8 +87,12 @@ class BuildRetentionTests(unittest.TestCase):
         self._write_owner_manifest()
 
     def _manifest_estimates(self, manifest: dict) -> dict[str, int]:
+        declared_peak = 64 * 1024 ** 2
+        margin = storage_policy.admission_uncertainty_margin_bytes(declared_peak)
         return {"expected_build_bytes": 64 * 1024 ** 2,
-                "estimated_max_new_disk_bytes": 64 * 1024 ** 2}
+                "estimated_max_new_disk_bytes": declared_peak,
+                "estimated_uncertainty_margin_bytes": margin,
+                "estimated_projected_new_disk_bytes": declared_peak + margin}
 
     def _write_owner_manifest(self, source_hash: str | None = None, config_hash: str | None = None,
                               build_kind: str = "dxvk", build_type: str = "release",
@@ -857,7 +862,7 @@ class BuildRetentionTests(unittest.TestCase):
             args = command
             pid = os.getpid()
 
-            def wait(self):
+            def wait(self, timeout=None):
                 (lease.path / "synthetic.dll").write_bytes(b"command output")
                 self.returncode = 0
                 return 0
@@ -898,7 +903,7 @@ class BuildRetentionTests(unittest.TestCase):
         class FailedSyntheticBuild:
             pid = os.getpid()
 
-            def wait(self):
+            def wait(self, timeout=None):
                 return 41
 
             def poll(self):
@@ -923,6 +928,72 @@ class BuildRetentionTests(unittest.TestCase):
             retention.MANIFEST_ROOT / f"{lease.build_id}.failure/failure-manifest.json")
         self.assertEqual(failure["return_code"], 41)
         self.assertIsNone(failure["error"])
+
+    def test_build_emergency_free_space_stop_terminates_and_records_failure_evidence(self) -> None:
+        lease = self._lease("build-emergency-free-stop")
+        command = ["meson", "compile", "-C", "."]
+
+        class RunningSyntheticBuild:
+            args = command
+            pid = 987654
+            returncode = None
+
+            def poll(self):
+                return self.returncode
+
+            def wait(self, timeout=None):
+                if self.returncode is None and timeout is not None:
+                    raise subprocess.TimeoutExpired(self.args, timeout)
+                self.returncode = -15
+                return self.returncode
+
+        process = RunningSyntheticBuild()
+        real_popen = retention.subprocess.Popen
+
+        def synthetic_popen(args, *positional, **options):
+            if isinstance(args, (list, tuple)) and args[:1] == ["/usr/bin/sandbox-exec"]:
+                return process
+            return real_popen(args, *positional, **options)
+
+        def terminate_synthetic_group(pid, signum):
+            self.assertEqual(pid, process.pid)
+            self.assertEqual(signum, retention.signal.SIGTERM)
+            process.returncode = -15
+
+        with mock.patch.object(storage_policy, "disk_free_bytes",
+                               side_effect=[60 * retention.GIB, 24 * retention.GIB]):
+            with mock.patch.object(retention.subprocess, "Popen", side_effect=synthetic_popen):
+                with mock.patch.object(retention.os, "killpg", side_effect=terminate_synthetic_group) as killpg:
+                    with self.assertRaisesRegex(retention.RetentionError, "25 GiB emergency hard stop"):
+                        lease.run(command)
+
+        killpg.assert_called_once_with(process.pid, retention.signal.SIGTERM)
+        self.assertEqual(process.returncode, -15)
+        failure = retention._read_json(
+            retention.MANIFEST_ROOT / f"{lease.build_id}.failure/failure-manifest.json")
+        self.assertEqual(failure["storage_watch_events"][0]["action"], "HARD_STOP_TERMINATE")
+        self.assertEqual(failure["storage_watch_events"][0]["free_bytes"], 24 * retention.GIB)
+
+    def test_build_runtime_warning_below_admission_threshold_is_not_an_emergency_stop(self) -> None:
+        lease = self._lease("build-runtime-warning")
+
+        class CompletedSyntheticBuild:
+            waits = 0
+
+            def wait(self, timeout=None):
+                self.waits += 1
+                if self.waits == 1:
+                    raise subprocess.TimeoutExpired(["synthetic-build"], timeout)
+                return 0
+
+        with mock.patch.object(storage_policy, "disk_free_bytes",
+                               side_effect=[49 * retention.GIB, 49 * retention.GIB]):
+            with mock.patch.object(retention.time, "sleep", return_value=None):
+                self.assertEqual(lease._wait_for_build_process(CompletedSyntheticBuild()), 0)
+
+        self.assertEqual(len(lease.storage_watch_events), 2)
+        self.assertEqual(lease.storage_watch_events[0]["action"], "WARNING_NO_NEW_EXPERIMENTS")
+        self.assertEqual(lease.storage_watch_events[1]["action"], "PROCESS_COMPLETED")
 
     def test_duplicate_completion_is_idempotent(self) -> None:
         lease = self._lease("duplicate-completion")
@@ -2274,6 +2345,16 @@ class BuildRetentionTests(unittest.TestCase):
         reserved_path = lease2.reserve()
         self.assertIsNone(reserved_path)
         self.assertIsNotNone(lease2.reused_manifest)
+
+    def test_build_lease_does_not_block_54_gib_project_from_old_45_gib_ceiling(self) -> None:
+        lease = self._lease("build-project-54gib")
+        with mock.patch.object(storage_policy, "disk_free_bytes", return_value=60 * retention.GIB), \
+                mock.patch.object(storage_policy, "measure_project_usage", return_value={
+                    "allocated_inode_deduplicated_bytes": 54 * retention.GIB,
+                }), \
+                mock.patch.object(retention, "capacity_blockers", return_value=["synthetic post-admission stop"]):
+            with self.assertRaisesRegex(retention.RetentionError, "build cap blocks creation"):
+                lease.reserve()
 
 
 if __name__ == "__main__":

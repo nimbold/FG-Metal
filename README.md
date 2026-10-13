@@ -8,7 +8,9 @@ Framegen is an experimental renderer-independent frame-generation library. Its p
 
 > **DXVK-MacOS Step 11C: PARTIAL PASS; Step 11D is not cleared.** A rebuilt matched 20-second, 15 Hz run preserved measured DXGI accounting while issuing 42 extra WSI presents for 301 application Presents. The user directly confirmed brief magenta and cyan flashes in the post-audit candidate; the newest matched build has a separate API run. The scheduler remains far below doubled cadence, and fullscreen, recreation, failure, and pending-work shutdown checks remain unverified. See the [Step 11C report](experiments/dxvk_macos_step11c/REPORT.md).
 
-> **Step 11D.3-A: CASE A3 — INCONCLUSIVE.** The primary native control architecture is x86_64 to match the translated STEP 11D.2 MoltenVK process. Architecture, trace publication, and correlation checks are in place, but the fresh leased Xcode build did not produce a MoltenVK dylib or native executable. Xcode failed while loading the project under the confined build environment. No native loader probe, 30-second graphics smoke, or five-minute baseline ran. See the [Step 11D.3-A1 report](experiments/dxvk_macos_step11d3a/STEP-11D3-A1-REPORT.md). Step 11D.3-B has not started.
+> **Step 11D.3-A: CASE A2 — DIVERGENT / HEALTHY NATIVE BASELINE.** Thin x86_64 MoltenVK running under Rosetta achieves 59.99–60.01 FPS with >99.79% of nextDrawable calls locked in 14–18 ms and 0 waits >= 50 ms. The severe presentation starvation of STEP 11D.2 does not reproduce in native control; the issue is isolated to upstream components in the Wine/DXVK stack. See the [Step 11D.3-A3 report](experiments/dxvk_macos_step11d3a/STEP-11D3-A3-REPORT.md).
+
+> **Step 11D.3-B: CASE B1 — BARE WINE VULKAN REPRODUCES DRAWABLE INSTABILITY; BR9R-N3 — INCONCLUSIVE.** Fresh Wine authorization passed, but the frozen-coverer calibration did not establish full coverage, so Native foreground and Native cover runs remain unstarted. STEP 11D.3-C remains gated. See the [BR9R2 report](experiments/dxvk_macos_step11d3b/STEP-11D3-BR9R2-REPORT.md).
 
 ## What works today
 
@@ -20,7 +22,8 @@ Framegen is an experimental renderer-independent frame-generation library. Its p
 | GPTK / D3DMetal | Cooperative D3D12 tests passed on Highball GPTK 4. Transparent DXGI attachment reached **PARTIAL PASS** on a controlled app; same-chain generated presents break common application buffer progression. It is not a product adapter. |
 | DXMT | Step 10B.6.1: **WINDOWED FAIL / NOT CLEARED; FULLSCREEN FAIL; RIFE NOT CLEARED; architecture STOP.** Qualified matched runs passed source safety but retained abnormal Display durations and all Direct-to-Display No. Two public-property probes did not establish a durable fullscreen lane. Return to renderer-strategy selection; see the [report and evidence](experiments/dxmt_framegen/evidence/step10b6_1/report.md). |
 | DXVK-MacOS | Step 11C: **PARTIAL PASS.** Separate AppFrameId/WSI/internal identity and measured DXGI accounting invariants pass in a matched low-rate windowed run; the user confirmed brief magenta and cyan flashes. The scheduler misses doubled cadence. Fullscreen/recreation/failure/pending-work shutdown checks remain unverified. See the [report and evidence](experiments/dxvk_macos_step11c/REPORT.md). |
-| Native MoltenVK control | Step 11D.3-A: **A3 / INCONCLUSIVE.** The build lifecycle is leased and Gate 0 is current, but Xcode project loading failed under the build sandbox before compilation. No native runtime or graphics result exists. See the [A1 infrastructure report](experiments/dxvk_macos_step11d3a/STEP-11D3-A1-REPORT.md). |
+| Native MoltenVK control | Step 11D.3-A: **CASE A2 (HEALTHY BASELINE).** Provenance-bound BuildLease 12 produced thin x86_64 artifacts promoted to CAS. Rosetta loader probe 06, smoke 06, and 3x 5-minute baselines passed with valid offline traces and 0 errors, delivering steady 60.00 FPS cadence. See the [Step 11D.3-A3 report](experiments/dxvk_macos_step11d3a/STEP-11D3-A3-REPORT.md). |
+| Bare Wine Vulkan / BR9R2 | Step 11D.3-B: **CASE B1; BR9R-N3 INCONCLUSIVE.** Fresh authorization passed; the 20-second uncovered calibration interval was healthy, but verified coverer occlusion and restoration were not established. Native runs and STEP 11D.3-C remain gated. See the [BR9R2 report](experiments/dxvk_macos_step11d3b/STEP-11D3-BR9R2-REPORT.md). |
 
 See [the current decisions](DECISIONS.md), [work status](TASKS.md), and the [Step 8D.1 feasibility report](docs/feasibility/dxgi-d3d12-gptk4-step8d1.md) for evidence and limits.
 
@@ -48,7 +51,7 @@ The roadmap follows evidence and public interface availability. A completed feas
 - [ ] Select and validate an inference backend only after quality, latency, licensing, and redistribution review.
 - [ ] Validate any chosen adapter through lifecycle/failure coverage, a sustained soak, and clean-machine packaging before describing it as supported.
 
-See the detailed [roadmap](ROADMAP.md), current [tasks](TASKS.md), and [decisions](DECISIONS.md). Step 11D.3-B and RIFE implementation remain gated; this README does not authorize either.
+See the detailed [roadmap](ROADMAP.md), current [tasks](TASKS.md), and [decisions](DECISIONS.md). STEP 11D.3-C and RIFE implementation remain gated; the Step 11D.3-B result is experimental and does not establish a supported integration.
 
 ## Build and test
 
