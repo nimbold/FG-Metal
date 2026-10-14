@@ -50,6 +50,67 @@ GATE0_MAX_AGE_SECONDS = 60 * 60
 ACTIVE_PREFIX_LEASE_MARKER_MAX_BYTES = 16 * 1024
 ACTIVE_PREFIX_LEASE_MARKER_MAX_ALLOCATED_BYTES = 64 * 1024
 STORAGE_POLICY_SMOKE_ID_PREFIX = "step11d3-storage-policy-smoke-"
+HISTORICAL_TERMINAL_RUN_ID = "step11d3b-baseline-01-20261014-130823-44892b9b"
+HISTORICAL_TERMINAL_OUTPUT_BYTES = 725_688_320
+HISTORICAL_TERMINAL_OUTPUT_LOGICAL_BYTES = 720_231_108
+HISTORICAL_TERMINAL_ROOT_IDENTITY = (16_777_229, 98_341_479)
+HISTORICAL_TERMINAL_POST_OUTPUT_BYTES = 598_573_056
+HISTORICAL_TERMINAL_ORIGINAL_RESERVATION_BYTES = 314_572_800
+HISTORICAL_TERMINAL_REPORT_PREFIX_BYTES = 160_968
+HISTORICAL_TERMINAL_REPORT_PREFIX_SHA256 = "9012ccacc5a64dc9a8d0f5198059f791a10d514a7857c5dda3fdd5e6c337e00d"
+HISTORICAL_TERMINAL_LEGACY_CLOSURE_SHA256 = "8b591c60099965513a7485890928f96af242a6ca3422a28ed20eb3440c140bcf"
+HISTORICAL_TERMINAL_LSOF_PATH = "/usr/sbin/lsof"
+HISTORICAL_TERMINAL_TRUSTED_FILES = {
+    "app-trace.jsonl": "d57f5ec94bb2bdab51bebd87c97e3a7bc0650539dd5756897ae39a5aec87774c",
+    "execution-result.json": "dca9ab61f70d36a2790243bd2a7b058c7dbda7e09f365f1f89d1f208aab3b4f6",
+    "host-traces/host-trace.58921.jsonl": "f839fab2af872f597747a3d1d088e785b3ea4bf8237961e5377c6c49276866d2",
+    "host-traces/host-trace.58942.jsonl": "03c760a06e261364788571da15264887e5476188829d601bb06b98cd15e7ce5f",
+    "mvk/libMoltenVK.1.dylib": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+    "mvk/libMoltenVK.dylib": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+    "prefix-cleanup.json": "0e80c241e6f0b72cc7432d76a5182a3cc9c7faf91d2fc7db6ec31ac718013308",
+    "prefix-registry-diff.txt.gz": "d9ba6648609b3e00d2a79c0be45ef4cf20fbd796fa4cf5c8f02d700344fc1bed",
+    "prefix-state.json": "6fcc00dd8e06f4c9ad4777a62631697cdfc0fbe075cd21bdcfaefa5d5c3a2c53",
+    "process-context.json": "154092c5ae04fcd942d1869014c1388e07574fb931f6c6aa5105c6bc78ede2a9",
+    "process-runner.log": "140385ceda92b0660cc38e1d0add459ca6d7a26e51cad80336e26ec5c05e6b09",
+    "run-manifest.json": "e7e77a3185ea9d5c9a4e8fa1880e9ef4420d17c9bd675fd32f3d86eeb2b1e365",
+    "run-result.json": "a321d23588ded6c6d1c1f23fa9d8093a544d85e81aec3810be0aa2d1dbfa7589",
+    "runtime.log": "78c918cc0d77bf029349f7a975c9e13f200d56ce2ba94af62a5bb9fa7685f7c3",
+    "trace-index.json": "1e03ffab47bf76a1d3a440b639b232cf15a9238955e4c64cfd23de2ba3694582",
+    "trace-loader/libMoltenVK.dylib": "04bbfc075f6ab999d0538f4a5371f3abd65fb0f0e307be0dea56e47aaefd5157",
+}
+HISTORICAL_TERMINAL_SOURCE_EVIDENCE = {
+    "controller.json": (
+        "/private/tmp/codex-br9r2-z9auth-retry-20261014-a31f4e79/"
+        "z9-replay-1-20261014-130814-7dafc87e/controller.json",
+        "1a7590578476931ceb9e816f7a1a15c507d63d6ec9abd36bcdedfec3771e638b",
+    ),
+    "timeline.jsonl": (
+        "/private/tmp/codex-br9r2-z9auth-retry-20261014-a31f4e79/"
+        "z9-replay-1-20261014-130814-7dafc87e/timeline.jsonl",
+        "680fcb513c01e2e56e442c100b33ed0df16a386c68e2f5f16669bcbe56eb63f8",
+    ),
+    "observer/observer-result.json": (
+        "/private/tmp/codex-br9r2-z9auth-retry-20261014-a31f4e79/"
+        "z9-replay-1-20261014-130814-7dafc87e-observer/observer-result.json",
+        "17fb45ab4077ad13c642d0a8cb0032441f4a4797898e7245f962ae5f9f00b0aa",
+    ),
+    "observer/observer-controller.json": (
+        "/private/tmp/codex-br9r2-z9auth-retry-20261014-a31f4e79/"
+        "z9-replay-1-20261014-130814-7dafc87e-observer/observer-controller.json",
+        "f82e9e985108281595f56ec81f833321611ae9dedcdaa1278026bd0727d97da2",
+    ),
+    "observer/observer-samples.jsonl": (
+        "/private/tmp/codex-br9r2-z9auth-retry-20261014-a31f4e79/"
+        "z9-replay-1-20261014-130814-7dafc87e-observer/observer-samples.jsonl",
+        "d4787506c269a74ee0d7f1099ab4234e83737df63feb53bef407121c24930603",
+    ),
+}
+HISTORICAL_TERMINAL_BLOCKERS = [
+    "signed experiment output exceeds its persistent reservation: " + HISTORICAL_TERMINAL_RUN_ID,
+    "unrelated non-lease storage changed since Gate 0 certification",
+    "signed experiment output exceeds its persistent reservation: " + HISTORICAL_TERMINAL_RUN_ID,
+]
+HISTORICAL_TERMINAL_REPOSITORY = Path(__file__).resolve().parents[2]
 NORMAL_PERSISTENT_TARGET = 250 * MIB
 NORMAL_TEMPORARY_TARGET = 3 * GIB
 MIN_ADMISSION_UNCERTAINTY_MARGIN = 256 * MIB
@@ -534,6 +595,43 @@ def _persistent_output_snapshot(path: Path) -> tuple[int, str]:
     return sum(allocated_by_inode.values()), tree_digest.hexdigest()
 
 
+def _persistent_output_allocated_bytes(path: Path) -> int:
+    """Read allocated output bytes without hashing file contents on the live guard path."""
+    root_info = _stat_entry_nofollow(path)
+    if root_info is None:
+        return 0
+    repo_info = REPO.lstat()
+    if not stat.S_ISDIR(root_info.st_mode) or root_info.st_dev != repo_info.st_dev:
+        raise OSError("signed experiment output is not a directory on the measured project filesystem")
+    allocated_by_inode: dict[tuple[int, int], int] = {}
+    pending = [path]
+    while pending:
+        current = pending.pop()
+        current_info = current.lstat()
+        if (not stat.S_ISDIR(current_info.st_mode)
+                or current_info.st_dev != root_info.st_dev):
+            raise OSError("signed experiment output crosses a filesystem boundary")
+        with os.scandir(current) as entries:
+            for entry in entries:
+                info = entry.stat(follow_symlinks=False)
+                if stat.S_ISLNK(info.st_mode):
+                    raise OSError("signed experiment output contains a symlink")
+                if stat.S_ISDIR(info.st_mode):
+                    if info.st_dev != root_info.st_dev:
+                        raise OSError("signed experiment output crosses a filesystem boundary")
+                    pending.append(Path(entry.path))
+                elif stat.S_ISREG(info.st_mode):
+                    allocated_by_inode.setdefault(
+                        (info.st_dev, info.st_ino), getattr(info, "st_blocks", 0) * 512)
+                else:
+                    raise OSError("signed experiment output contains a non-regular file")
+    after_info = _stat_entry_nofollow(path)
+    if (after_info is None
+            or _storage_entry_identity(after_info) != _storage_entry_identity(root_info)):
+        raise OSError("signed experiment output root changed during allocation measurement")
+    return sum(allocated_by_inode.values())
+
+
 def _signed_persistent_output_snapshot(
     *, exclude_experiment_id: str | None = None,
     expected_gate0_attestation_sha256: str | None = None,
@@ -558,7 +656,12 @@ def _signed_persistent_output_snapshot(
     try:
         root_info = os.fstat(directory_fd)
         names_before = sorted(name for name in os.listdir(directory_fd) if name.endswith(".json"))
+        target_manifest_name = f"{HISTORICAL_TERMINAL_RUN_ID}.json"
+        if (target_manifest_name not in names_before
+                and REPO.resolve() == HISTORICAL_TERMINAL_REPOSITORY):
+            blockers.append("historical terminal storage manifest is missing")
         for name in names_before:
+            is_historical_target = name == target_manifest_name
             info = _stat_child_nofollow(directory_fd, name)
             if info is None:
                 entries.append((name, None, None))
@@ -572,11 +675,15 @@ def _signed_persistent_output_snapshot(
             if (not stat.S_ISREG(info.st_mode) or info.st_uid != os.getuid()
                     or info.st_nlink != 1 or stat.S_IMODE(info.st_mode) != 0o600
                     or info.st_size > 1024 * 1024 or allocated > 2 * 1024 * 1024):
+                if is_historical_target:
+                    blockers.append("historical terminal storage manifest has an unsafe file identity")
                 continue
             try:
                 manifest, raw, read_info = _read_json_at(
                     directory_fd, name, maximum_bytes=1024 * 1024)
             except (OSError, ValueError, TypeError, json.JSONDecodeError):
+                if is_historical_target:
+                    blockers.append("historical terminal storage manifest is unreadable")
                 continue
             digest = hashlib.sha256(raw).hexdigest()
             after_info = _stat_child_nofollow(directory_fd, name)
@@ -599,18 +706,27 @@ def _signed_persistent_output_snapshot(
                         or manifest.get("decision") != "ALLOW"
                         or raw != _canonical_pretty_json_bytes(manifest)
                         or not _verify_manifest_signature(manifest)):
+                    if is_historical_target:
+                        blockers.append("historical terminal storage manifest identity or signature is invalid")
                     continue
                 estimates = _validated_manifest_estimates(manifest)
                 output_dir = _measured_output_dir(manifest.get("output_dir", ""))
                 if str(output_dir) != manifest.get("output_dir"):
+                    if is_historical_target:
+                        blockers.append("historical terminal output path is not canonical")
                     continue
             except (OSError, TypeError, ValueError, RuntimeError, json.JSONDecodeError):
+                if is_historical_target:
+                    blockers.append("historical terminal storage manifest or output path is invalid")
                 continue
             if experiment_id == exclude_experiment_id:
+                if is_historical_target:
+                    blockers.append("historical terminal output cannot be excluded as an active run")
                 continue
             manifest_gate0_hash = manifest.get("gate0_attestation_sha256")
             if (expected_gate0_attestation_sha256 is not None
                     and experiment_id not in (baseline_experiment_ids or set())
+                    and experiment_id != HISTORICAL_TERMINAL_RUN_ID
                     and manifest_gate0_hash != expected_gate0_attestation_sha256):
                 blockers.append(
                     f"new signed experiment output does not bind the current Gate 0 attestation: {experiment_id}")
@@ -637,11 +753,26 @@ def _signed_persistent_output_snapshot(
                         and _storage_entry_identity(output_after) != output_identity)):
                 blockers.append(f"signed experiment output path changed during storage accounting: {experiment_id}")
                 continue
+            terminal_closure: dict[str, Any] | None = None
+            if is_historical_target:
+                terminal_closure, terminal_closure_blockers = _verify_historical_terminal_closure(
+                    manifest, digest, output_dir,
+                    allocated_bytes=output_allocated,
+                    metadata_tree_sha256=output_tree_sha256,
+                    allowed_active_experiment_id=exclude_experiment_id,
+                )
+                blockers.extend(terminal_closure_blockers)
+                if terminal_closure is None:
+                    if output_allocated > estimates["estimated_persistent_bytes"]:
+                        blockers.append(
+                            f"signed experiment output exceeds its persistent reservation: {experiment_id}")
+                    continue
             if output_allocated > estimates["estimated_persistent_bytes"]:
-                blockers.append(
-                    f"signed experiment output exceeds its persistent reservation: {experiment_id}")
-                continue
-            bindings.append({
+                if terminal_closure is None:
+                    blockers.append(
+                        f"signed experiment output exceeds its persistent reservation: {experiment_id}")
+                    continue
+            binding = {
                 "experiment_id": experiment_id,
                 "manifest_path": str(manifest_path),
                 "manifest_sha256": digest,
@@ -652,7 +783,14 @@ def _signed_persistent_output_snapshot(
                 "output_allocated_bytes": output_allocated,
                 "output_tree_sha256": output_tree_sha256,
                 "output_reservation_bytes": estimates["estimated_persistent_bytes"],
-            })
+            }
+            if terminal_closure is not None:
+                binding.update({
+                    "historical_terminal_closure_path": terminal_closure["closure_path"],
+                    "historical_terminal_closure_sha256": terminal_closure["closure_sha256"],
+                    "historical_terminal_tree_sha256": terminal_closure["closure_tree_sha256"],
+                })
+            bindings.append(binding)
             output_paths.extend((manifest_path, output_dir))
         names_after = sorted(name for name in os.listdir(directory_fd) if name.endswith(".json"))
         final_root_info = os.fstat(directory_fd)
@@ -681,6 +819,891 @@ def _signed_persistent_output_snapshot(
         "bindings": tuple(bindings),
     }
     return snapshot, tuple(dict.fromkeys(output_paths)), blockers
+
+
+def _historical_terminal_run_paths() -> dict[str, Path]:
+    run_id = HISTORICAL_TERMINAL_RUN_ID
+    run_dir = REPO / "experiments/dxvk_macos_step11d3b/runs" / run_id
+    return {
+        "storage_manifest": _experiment_manifest_path(run_id),
+        "run_manifest": run_dir / "run-manifest.json",
+        "run_result": run_dir / "run-result.json",
+        "cleanup_receipt": run_dir / "prefix-cleanup.json",
+        "execution_result": run_dir / "execution-result.json",
+        "trace_index": run_dir / "trace-index.json",
+        "output_dir": run_dir,
+        "report": REPO / "experiments/dxvk_macos_step11d3b/STEP-11D3-BR9R2-REPORT.md",
+    }
+
+
+def _historical_terminal_tree_snapshot(path: Path) -> dict[str, Any]:
+    """Hash a terminal output through pinned, no-follow descriptors and revalidate its names."""
+    path = Path(os.path.abspath(path))
+    expected_output = _historical_terminal_run_paths()["output_dir"]
+    if path != expected_output:
+        raise ValueError("historical closure tree path is not the fixed Z9 run directory")
+    parent_fd = _open_directory_nofollow(path.parent)
+    root_fd: int | None = None
+    try:
+        parent_before = os.fstat(parent_fd)
+        root_lstat = _stat_child_nofollow(parent_fd, path.name)
+        if root_lstat is None or not stat.S_ISDIR(root_lstat.st_mode):
+            raise OSError("historical closure output root is missing or is not a real directory")
+        root_fd = os.open(path.name, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0)
+                          | getattr(os, "O_NOFOLLOW", 0), dir_fd=parent_fd)
+        root_info = os.fstat(root_fd)
+        if (_storage_entry_identity(root_info) != _storage_entry_identity(root_lstat)
+                or not stat.S_ISDIR(root_info.st_mode)
+                or root_info.st_dev != REPO.lstat().st_dev
+                or (root_info.st_dev, root_info.st_ino) != HISTORICAL_TERMINAL_ROOT_IDENTITY
+                or root_info.st_uid != os.getuid()):
+            raise OSError("historical closure output root identity is unexpected")
+
+        entries: list[dict[str, Any]] = []
+        allocated_by_inode: dict[tuple[int, int], int] = {}
+        logical_bytes = 0
+
+        def visit(directory_fd: int, relative: str, directory_info: os.stat_result) -> None:
+            nonlocal logical_bytes
+            names_before = sorted(os.listdir(directory_fd))
+            entries.append({
+                "path": relative or ".",
+                "kind": "directory",
+                "identity": list(_storage_entry_identity(directory_info)),
+            })
+            for name in names_before:
+                if (not name or name in {".", ".."} or "/" in name or "\\" in name
+                        or "\x00" in name):
+                    raise OSError("historical closure tree contains a non-canonical name")
+                child_relative = f"{relative}/{name}" if relative else name
+                before = _stat_child_nofollow(directory_fd, name)
+                if before is None or before.st_dev != root_info.st_dev:
+                    raise OSError("historical closure tree changed or crossed a filesystem boundary")
+                if stat.S_ISLNK(before.st_mode):
+                    raise OSError("historical closure tree contains a symlink")
+                if stat.S_ISDIR(before.st_mode):
+                    child_fd = os.open(name, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0)
+                                       | getattr(os, "O_NOFOLLOW", 0), dir_fd=directory_fd)
+                    try:
+                        opened = os.fstat(child_fd)
+                        if _storage_entry_identity(opened) != _storage_entry_identity(before):
+                            raise OSError("historical closure directory changed while opening")
+                        visit(child_fd, child_relative, opened)
+                        after = _stat_child_nofollow(directory_fd, name)
+                        if (after is None
+                                or _storage_entry_identity(after) != _storage_entry_identity(opened)):
+                            raise OSError("historical closure directory changed while enumerating")
+                    finally:
+                        os.close(child_fd)
+                    continue
+                if not stat.S_ISREG(before.st_mode) or before.st_nlink != 1:
+                    raise OSError("historical closure tree contains a non-regular or linked file")
+                descriptor = os.open(name, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)
+                                      | getattr(os, "O_NONBLOCK", 0), dir_fd=directory_fd)
+                try:
+                    opened = os.fstat(descriptor)
+                    if _storage_entry_identity(opened) != _storage_entry_identity(before):
+                        raise OSError("historical closure file changed while opening")
+                    digest = hashlib.sha256()
+                    length = 0
+                    while True:
+                        block = os.read(descriptor, 4 * 1024 * 1024)
+                        if not block:
+                            break
+                        digest.update(block)
+                        length += len(block)
+                    after_open = os.fstat(descriptor)
+                    after_name = _stat_child_nofollow(directory_fd, name)
+                    if (length != opened.st_size
+                            or _storage_entry_identity(after_open) != _storage_entry_identity(opened)
+                            or after_name is None
+                            or _storage_entry_identity(after_name) != _storage_entry_identity(opened)):
+                        raise OSError("historical closure file changed while hashing")
+                finally:
+                    os.close(descriptor)
+                entries.append({
+                    "path": child_relative,
+                    "kind": "file",
+                    "identity": list(_storage_entry_identity(opened)),
+                    "sha256": digest.hexdigest(),
+                })
+                inode = (opened.st_dev, opened.st_ino)
+                allocated_by_inode[inode] = getattr(opened, "st_blocks", 0) * 512
+                logical_bytes += opened.st_size
+            names_after = sorted(os.listdir(directory_fd))
+            current_directory = os.fstat(directory_fd)
+            if (names_after != names_before
+                    or _storage_entry_identity(current_directory)
+                    != _storage_entry_identity(directory_info)):
+                raise OSError("historical closure directory listing changed during measurement")
+
+        visit(root_fd, "", root_info)
+        root_after = _stat_child_nofollow(parent_fd, path.name)
+        parent_after = os.fstat(parent_fd)
+        if (root_after is None
+                or _storage_entry_identity(root_after) != _storage_entry_identity(root_info)
+                or (parent_before.st_dev, parent_before.st_ino)
+                != (parent_after.st_dev, parent_after.st_ino)):
+            raise OSError("historical closure output root or parent changed during measurement")
+        reopened_parent_fd = _open_directory_nofollow(path.parent)
+        try:
+            reopened_parent = os.fstat(reopened_parent_fd)
+            if (reopened_parent.st_dev, reopened_parent.st_ino) != (parent_before.st_dev, parent_before.st_ino):
+                raise OSError("historical closure output parent path was substituted")
+        finally:
+            os.close(reopened_parent_fd)
+        entries.sort(key=lambda item: item["path"])
+        digest = hashlib.sha256()
+        for item in entries:
+            digest.update(json.dumps(item, sort_keys=True, separators=(",", ":"),
+                                     ensure_ascii=False).encode("utf-8"))
+            digest.update(b"\n")
+        allocated_bytes = sum(allocated_by_inode.values())
+        if (logical_bytes != HISTORICAL_TERMINAL_OUTPUT_LOGICAL_BYTES
+                or allocated_bytes != HISTORICAL_TERMINAL_OUTPUT_BYTES):
+            raise OSError("historical closure output totals differ from the provenance inventory")
+        file_hashes = {item["path"]: item["sha256"] for item in entries if item["kind"] == "file"}
+        if file_hashes != HISTORICAL_TERMINAL_TRUSTED_FILES:
+            raise OSError("historical closure file set or content differs from the provenance inventory")
+        return {
+            "output_dir": str(path),
+            "root_identity": list(_storage_entry_identity(root_info)),
+            "parent_identity": [parent_before.st_dev, parent_before.st_ino],
+            "entries": entries,
+            "entry_count": len(entries),
+            "file_count": len(file_hashes),
+            "logical_bytes": logical_bytes,
+            "allocated_bytes": allocated_bytes,
+            "tree_sha256": digest.hexdigest(),
+        }
+    finally:
+        if root_fd is not None:
+            os.close(root_fd)
+        os.close(parent_fd)
+
+
+def _historical_terminal_copy_controller_evidence() -> dict[str, str]:
+    destination_root = (REPO / "experiments/dxvk_macos_step11d3b/evidence/br9r2"
+                        / "historical-closure-review/source-controller")
+    copied: dict[str, str] = {}
+    for relative, (source_raw, expected_sha256) in HISTORICAL_TERMINAL_SOURCE_EVIDENCE.items():
+        source = Path(source_raw)
+        contents = _read_file_nofollow(source, maximum_bytes=64 * 1024 * 1024)
+        digest = hashlib.sha256(contents).hexdigest()
+        if digest != expected_sha256:
+            raise RuntimeError(f"transient historical controller evidence changed: {relative}")
+        target = destination_root / relative
+        parent_fd = _open_directory_nofollow(target.parent, create=True, strict_directory_sync=True)
+        try:
+            existing = _stat_child_nofollow(parent_fd, target.name)
+            if existing is not None:
+                existing_bytes, existing_identity = _read_file_from_directory_fd(
+                    parent_fd, target.name, display_path=target, maximum_bytes=64 * 1024 * 1024)
+                if (hashlib.sha256(existing_bytes).hexdigest() != expected_sha256
+                        or (existing.st_dev, existing.st_ino) != existing_identity[:2]):
+                    raise RuntimeError(f"refusing to replace conflicting copied evidence: {target}")
+            else:
+                descriptor = os.open(target.name, os.O_WRONLY | os.O_CREAT | os.O_EXCL
+                                     | getattr(os, "O_NOFOLLOW", 0), 0o600, dir_fd=parent_fd)
+                try:
+                    offset = 0
+                    while offset < len(contents):
+                        count = os.write(descriptor, contents[offset:])
+                        if count <= 0:
+                            raise OSError("short write while preserving controller evidence")
+                        offset += count
+                    os.fsync(descriptor)
+                finally:
+                    os.close(descriptor)
+                os.fsync(parent_fd)
+            copied[relative] = digest
+        finally:
+            os.close(parent_fd)
+    controller_path = destination_root / "controller.json"
+    controller = json.loads(_read_file_nofollow(controller_path, maximum_bytes=64 * 1024 * 1024))
+    if (controller.get("run_id") != HISTORICAL_TERMINAL_RUN_ID
+            or controller.get("status") != "INVALID_OR_INCOMPLETE"
+            or controller.get("technical_valid") is not False
+            or controller.get("finder_actions") != []
+            or controller.get("measured_phases") != {}
+            or controller.get("measured_sequence_completed") is not False):
+        raise RuntimeError("preserved controller does not prove the recorded invalid, unexecuted run")
+    return copied
+
+
+def _historical_terminal_evidence(
+    *, report_prefix_binding: Mapping[str, Any] | None = None,
+) -> dict[str, Any]:
+    paths = _historical_terminal_run_paths()
+    raw_by_name = {
+        name: _read_file_nofollow(paths[name])
+        for name in ("storage_manifest", "run_manifest", "run_result", "cleanup_receipt",
+                     "execution_result", "trace_index")
+    }
+    decoded = {name: json.loads(raw) for name, raw in raw_by_name.items()}
+    run_id = HISTORICAL_TERMINAL_RUN_ID
+    storage_manifest = decoded["storage_manifest"]
+    run_manifest = decoded["run_manifest"]
+    run_result = decoded["run_result"]
+    cleanup = decoded["cleanup_receipt"]
+    execution = decoded["execution_result"]
+    trace_index = decoded["trace_index"]
+    manifest_path = paths["storage_manifest"]
+    manifest_sha = hashlib.sha256(raw_by_name["storage_manifest"]).hexdigest()
+    experiment_token = manifest_sha[:32]
+    if (manifest_sha != "11732b65ef09689e0cac94f3e0579e9c45f5af24def1129f8e7bfa910efc9d59"
+            or storage_manifest.get("experiment_id") != run_id
+            or storage_manifest.get("manifest_path") != str(manifest_path)
+            or storage_manifest.get("output_dir") != str(paths["output_dir"])
+            or storage_manifest.get("estimated_persistent_bytes") != HISTORICAL_TERMINAL_ORIGINAL_RESERVATION_BYTES
+            or storage_manifest.get("decision") != "ALLOW"
+            or raw_by_name["storage_manifest"] != _canonical_pretty_json_bytes(storage_manifest)
+            or not _verify_manifest_signature(storage_manifest)):
+        raise RuntimeError("original signed storage manifest is missing, changed, or unauthenticated")
+    if (run_manifest.get("experiment_id") != run_id
+            or run_manifest.get("storage_manifest_path") != str(manifest_path)
+            or hashlib.sha256(raw_by_name["run_manifest"]).hexdigest()
+            != HISTORICAL_TERMINAL_TRUSTED_FILES["run-manifest.json"]):
+        raise RuntimeError("historical run manifest identity or trusted hash changed")
+    post = run_result.get("gate0_post")
+    pre = run_result.get("gate0_pre")
+    if (run_result.get("experiment_id") != run_id
+            or run_result.get("status") != "FAIL"
+            or run_result.get("is_valid") is not False
+            or run_result.get("prefix_cleanup_pass") is not True
+            or not isinstance(post, Mapping)
+            or post.get("stage") != "POST"
+            or post.get("gate0_status") != "BLOCKED"
+            or post.get("gate0_blockers") != HISTORICAL_TERMINAL_BLOCKERS
+            or not isinstance(pre, Mapping)
+            or pre.get("stage") != "PRE"
+            or pre.get("gate0_status") != "PASS"
+            or pre.get("gate0_blockers") != []
+            or hashlib.sha256(raw_by_name["run_result"]).hexdigest()
+            != HISTORICAL_TERMINAL_TRUSTED_FILES["run-result.json"]):
+        raise RuntimeError("original FAIL and Gate POST BLOCKED evidence is missing or changed")
+    if (cleanup.get("experiment_id") != run_id
+            or cleanup.get("status") != "PASS"
+            or cleanup.get("prefix_deleted") is not True
+            or cleanup.get("prefix_preserved") is not False
+            or cleanup.get("receipt_finalization_complete") is not True
+            or cleanup.get("active_lease_marker_removed_after_receipt") is not True
+            or cleanup.get("active_lease_marker_removal_order") != "receipt_durable_before_marker_removal"
+            or cleanup.get("expected_persistent_bytes") != HISTORICAL_TERMINAL_ORIGINAL_RESERVATION_BYTES
+            or cleanup.get("wineprefix_identity", {}).get("manifest_sha256") != manifest_sha
+            or not _verify_storage_evidence(cleanup, "cleanup_receipt_hmac_sha256")
+            or hashlib.sha256(raw_by_name["cleanup_receipt"]).hexdigest()
+            != HISTORICAL_TERMINAL_TRUSTED_FILES["prefix-cleanup.json"]):
+        raise RuntimeError("historical PrefixLease cleanup receipt is missing or invalid")
+    if (execution.get("experiment_id") != run_id
+            or execution.get("experiment_token") != experiment_token
+            or execution.get("timed_out") is not False
+            or execution.get("process_returncode") != 0
+            or execution.get("target_unix_pid") != 58921
+            or hashlib.sha256(raw_by_name["execution_result"]).hexdigest()
+            != HISTORICAL_TERMINAL_TRUSTED_FILES["execution-result.json"]):
+        raise RuntimeError("historical execution result is not the expected terminal process record")
+    if (trace_index.get("status") != "PASS"
+            or trace_index.get("errors") != []
+            or trace_index.get("experiment_token") != experiment_token
+            or hashlib.sha256(raw_by_name["trace_index"]).hexdigest()
+            != HISTORICAL_TERMINAL_TRUSTED_FILES["trace-index.json"]):
+        raise RuntimeError("historical trace index is missing, changed, or invalid")
+
+    report_raw = _read_file_nofollow(paths["report"], maximum_bytes=16 * 1024 * 1024)
+    required_report_facts = (
+        "R5 — INVALID / INCOMPLETE".encode("utf-8"),
+        "T8 — insufficient timing evidence".encode("utf-8"),
+        b"598,573,056",
+        b"725,688,320",
+        b"314,572,800",
+    )
+    if any(fact not in report_raw for fact in required_report_facts):
+        raise RuntimeError("historical report no longer contains the immutable R5/T8 and allocation facts")
+    if report_prefix_binding is None:
+        report_prefix_bytes = len(report_raw)
+        report_prefix_sha256 = hashlib.sha256(report_raw).hexdigest()
+        if (report_prefix_bytes != HISTORICAL_TERMINAL_REPORT_PREFIX_BYTES
+                or report_prefix_sha256 != HISTORICAL_TERMINAL_REPORT_PREFIX_SHA256):
+            raise RuntimeError("pre-closure historical R5/T8 report bytes differ from their trusted snapshot")
+    else:
+        report_prefix_bytes = report_prefix_binding.get("bytes")
+        report_prefix_sha256 = report_prefix_binding.get("sha256")
+        if (report_prefix_binding.get("path") != str(paths["report"])
+                or report_prefix_bytes != HISTORICAL_TERMINAL_REPORT_PREFIX_BYTES
+                or report_prefix_sha256 != HISTORICAL_TERMINAL_REPORT_PREFIX_SHA256
+                or not isinstance(report_prefix_bytes, int) or isinstance(report_prefix_bytes, bool)
+                or report_prefix_bytes < 0 or not isinstance(report_prefix_sha256, str)
+                or not re.fullmatch(r"[0-9a-f]{64}", report_prefix_sha256)
+                or len(report_raw) < report_prefix_bytes
+                or hashlib.sha256(report_raw[:report_prefix_bytes]).hexdigest() != report_prefix_sha256):
+            raise RuntimeError("historical R5/T8 report prefix changed after closure")
+    controller_hashes: dict[str, str] = {}
+    controller_root = (REPO / "experiments/dxvk_macos_step11d3b/evidence/br9r2"
+                       / "historical-closure-review/source-controller")
+    for relative, (_source, expected_sha256) in HISTORICAL_TERMINAL_SOURCE_EVIDENCE.items():
+        copied_path = controller_root / relative
+        copied_bytes = _read_file_nofollow(copied_path, maximum_bytes=64 * 1024 * 1024)
+        copied_sha256 = hashlib.sha256(copied_bytes).hexdigest()
+        if copied_sha256 != expected_sha256:
+            raise RuntimeError(f"durable controller evidence copy changed: {relative}")
+        controller_hashes[relative] = copied_sha256
+    controller = json.loads(_read_file_nofollow(
+        controller_root / "controller.json", maximum_bytes=64 * 1024 * 1024))
+    if (controller.get("run_id") != run_id
+            or controller.get("status") != "INVALID_OR_INCOMPLETE"
+            or controller.get("technical_valid") is not False
+            or controller.get("finder_actions") != []
+            or controller.get("measured_phases") != {}
+            or controller.get("measured_sequence_completed") is not False):
+        raise RuntimeError("durable controller copy no longer proves the original invalid run")
+    return {
+        "paths": {key: str(value) for key, value in paths.items()},
+        "sha256": {name: hashlib.sha256(raw).hexdigest() for name, raw in raw_by_name.items()},
+        "manifest_hmac_sha256": storage_manifest["manifest_hmac_sha256"],
+        "experiment_token": experiment_token,
+        "original_reservation_bytes": HISTORICAL_TERMINAL_ORIGINAL_RESERVATION_BYTES,
+        "gate0_pre_status": pre["gate0_status"],
+        "gate0_pre_evidence_sha256": hashlib.sha256(json.dumps(
+            pre, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode()).hexdigest(),
+        "gate0_post_status": post["gate0_status"],
+        "gate0_post_blockers": list(post["gate0_blockers"]),
+        "gate0_post_evidence_sha256": hashlib.sha256(json.dumps(
+            post, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode()).hexdigest(),
+        "gate0_post_allocation_bytes": HISTORICAL_TERMINAL_POST_OUTPUT_BYTES,
+        "gate0_post_allocation_provenance": "report reconstruction; not a numeric field in the embedded POST object",
+        "run_status": run_result["status"],
+        "r5_classification": "INVALID / INCOMPLETE",
+        "t8_classification": "INSUFFICIENT TIMING EVIDENCE",
+        "finder_treatment": "NOT EXECUTED",
+        "report_prefix_bytes": report_prefix_bytes,
+        "report_prefix_sha256": report_prefix_sha256,
+        "cleanup_status": cleanup["status"],
+        "cleanup_receipt_hmac_sha256": cleanup["cleanup_receipt_hmac_sha256"],
+        "prefix_path": cleanup["prefix_path"],
+        "prefix_was_deleted": cleanup["prefix_deleted"],
+        "process_ids": sorted({58921, 58942}),
+        "controller_evidence_sha256": controller_hashes,
+    }
+
+
+def _historical_terminal_liveness_check(
+    evidence: Mapping[str, Any], *, allowed_active_experiment_id: str | None = None,
+) -> dict[str, Any]:
+    markers = _active_lease_markers()
+    expected_allowed_marker = (
+        ACTIVE_LEASE_ROOT / f"{allowed_active_experiment_id}.json"
+        if allowed_active_experiment_id is not None
+        and allowed_active_experiment_id != HISTORICAL_TERMINAL_RUN_ID
+        and re.fullmatch(r"[A-Za-z0-9_-]+", allowed_active_experiment_id) else None)
+    if markers and (expected_allowed_marker is None or markers != [expected_allowed_marker]):
+        raise RuntimeError("active or interrupted PrefixLease markers prevent historical closure")
+    unrelated_marker_count = 0 if markers and markers == [expected_allowed_marker] else len(markers)
+    retention_directory = Path(__file__).resolve().parent
+    if str(retention_directory) not in sys.path:
+        sys.path.insert(0, str(retention_directory))
+    import build_retention  # pylint: disable=import-outside-toplevel
+    build_state = build_retention._snapshot()
+    if any(build_state.get(key) for key in (
+            "active", "completed_pending_retirement", "failed_or_retiring", "unknown")):
+        raise RuntimeError("active, pending, failed, or ambiguous BuildLease state prevents closure")
+
+    pid_checks = []
+    for pid in evidence.get("process_ids", ()):
+        if not isinstance(pid, int) or isinstance(pid, bool) or pid <= 1:
+            raise RuntimeError("historical process identity is malformed")
+        result = subprocess.run(["/bin/ps", "-p", str(pid), "-o", "pid=,lstart=,command="],
+                                text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                timeout=10, check=False)
+        if result.returncode not in (0, 1) or result.stderr.strip():
+            raise RuntimeError(f"historical process liveness could not be checked for pid {pid}")
+        if result.stdout.strip():
+            raise RuntimeError(f"historical process pid {pid} is still present")
+        pid_checks.append({"pid": pid, "status": "GONE"})
+
+    lsof_identity = _historical_terminal_lsof_identity()
+    lsof_path = lsof_identity["path"]
+    output_dir = Path(evidence["paths"]["output_dir"])
+    prefix = Path(str(evidence["prefix_path"]))
+    result = subprocess.run([lsof_path, "-nP", "-Fpcn"], text=True,
+                            stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                            timeout=90, check=False)
+    if result.returncode != 0 or result.stderr.strip():
+        raise RuntimeError("lsof could not inspect open process paths for historical quiescence")
+    path_roots = {str(output_dir), str(prefix)}
+    try:
+        path_roots.add(str(prefix.resolve(strict=False)))
+    except OSError:
+        raise RuntimeError("historical prefix path cannot be normalized safely")
+    current_pid: str | None = None
+    matches: list[dict[str, str]] = []
+    for line in result.stdout.splitlines():
+        if line.startswith("p"):
+            current_pid = line[1:]
+        elif line.startswith("n"):
+            open_name = line[1:].removesuffix(" (deleted)")
+            normalized_name = os.path.normpath(open_name)
+            if any(normalized_name == root or normalized_name.startswith(root + os.sep)
+                   for root in path_roots):
+                matches.append({"pid": current_pid or "unknown", "path": open_name})
+    if matches:
+        raise RuntimeError("a process still has a historical output or prefix path open")
+    if _historical_terminal_lsof_identity() != lsof_identity:
+        raise RuntimeError("trusted lsof identity changed during historical path liveness inspection")
+    if prefix.exists() or prefix.is_symlink():
+        prefix_info = prefix.lstat()
+        if not stat.S_ISDIR(prefix_info.st_mode):
+            raise RuntimeError("historical PrefixLease path was replaced with a non-directory")
+        raise RuntimeError("deleted historical PrefixLease path unexpectedly exists")
+    if evidence.get("prefix_was_deleted") is not True:
+        raise RuntimeError("historical PrefixLease deletion is not authenticated")
+    return {
+        "active_prefix_markers": unrelated_marker_count,
+        "build_retention_status": "QUIESCENT",
+        "historical_processes": pid_checks,
+        "output_and_prefix_lsof_status": "NO_MATCH",
+        "prefix_status": "DELETED",
+        "lsof": lsof_identity,
+    }
+
+
+def _historical_terminal_lsof_identity() -> dict[str, Any]:
+    """Read the fixed, root-owned system lsof binary without consulting PATH."""
+    path = Path(HISTORICAL_TERMINAL_LSOF_PATH)
+    if str(path) != HISTORICAL_TERMINAL_LSOF_PATH or not path.is_absolute():
+        raise RuntimeError("trusted lsof path is not canonical")
+    parent_fd = _open_directory_nofollow(path.parent)
+    try:
+        parent_info = os.fstat(parent_fd)
+        if (not stat.S_ISDIR(parent_info.st_mode) or parent_info.st_uid != 0
+                or stat.S_IMODE(parent_info.st_mode) & 0o022):
+            raise RuntimeError("trusted lsof parent directory is not root-owned and non-writable")
+        before = _stat_child_nofollow(parent_fd, path.name)
+        if (before is None or not stat.S_ISREG(before.st_mode) or before.st_uid != 0
+                or before.st_nlink != 1 or not (before.st_mode & 0o111)
+                or stat.S_IMODE(before.st_mode) & 0o022):
+            raise RuntimeError("trusted lsof binary is not a root-owned, non-writable executable")
+        contents, identity = _read_file_from_directory_fd(
+            parent_fd, path.name, display_path=path, maximum_bytes=64 * 1024 * 1024)
+        after = _stat_child_nofollow(parent_fd, path.name)
+        parent_after = os.fstat(parent_fd)
+        if (after is None or _storage_entry_identity(after) != _storage_entry_identity(before)
+                or _storage_entry_identity(before)[:2] != identity[:2]
+                or (parent_after.st_dev, parent_after.st_ino) != (parent_info.st_dev, parent_info.st_ino)):
+            raise RuntimeError("trusted lsof changed while its identity was read")
+        return {
+            "path": HISTORICAL_TERMINAL_LSOF_PATH,
+            "sha256": hashlib.sha256(contents).hexdigest(),
+            "file_identity": list(identity),
+            "owner_uid": before.st_uid,
+            "mode": stat.S_IMODE(before.st_mode),
+            "parent_identity": [parent_info.st_dev, parent_info.st_ino],
+        }
+    finally:
+        os.close(parent_fd)
+
+
+def _historical_terminal_closure_path() -> Path:
+    return (REPO / "experiments/storage/historical-terminal-closures"
+            / f"{HISTORICAL_TERMINAL_RUN_ID}.json")
+
+
+def _historical_terminal_closure_correction_path() -> Path:
+    return (REPO / "experiments/storage/historical-terminal-closures"
+            / f"{HISTORICAL_TERMINAL_RUN_ID}.correction-1.json")
+
+
+def _historical_terminal_source_hashes() -> dict[str, str]:
+    names = ("storage_policy.py", "storage_gate0.py", "storage_inventory.py", "build_retention.py")
+    return {
+        name: hashlib.sha256(_read_file_nofollow(Path(__file__).resolve().parent / name)).hexdigest()
+        for name in names
+    }
+
+
+def _open_historical_terminal_closure_directory(*, create: bool = False) -> tuple[int, tuple[int, int]]:
+    """Open the counted, owned closure directory and pin its current path identity."""
+    path = _historical_terminal_closure_path().parent
+    repo_info = REPO.lstat()
+    if not stat.S_ISDIR(repo_info.st_mode) or repo_info.st_uid != os.getuid():
+        raise OSError("repository root is not an owned real directory")
+    directory_fd = _open_directory_nofollow(
+        path, create=create, strict_directory_sync=create)
+    try:
+        info = os.fstat(directory_fd)
+        if (not stat.S_ISDIR(info.st_mode) or info.st_uid != os.getuid()
+                or info.st_dev != repo_info.st_dev or stat.S_IMODE(info.st_mode) & 0o022):
+            raise OSError("historical closure directory is not owned, non-writable, and counted")
+        identity = (info.st_dev, info.st_ino)
+        reopened_fd = _open_directory_nofollow(path)
+        try:
+            reopened = os.fstat(reopened_fd)
+            if (reopened.st_dev, reopened.st_ino) != identity:
+                raise OSError("historical closure directory path identity changed")
+        finally:
+            os.close(reopened_fd)
+        return directory_fd, identity
+    except BaseException:
+        os.close(directory_fd)
+        raise
+
+
+def _read_historical_terminal_closure_file(
+    directory_fd: int, expected_name: str, directory_identity: tuple[int, int],
+) -> tuple[dict[str, Any] | None, bytes | None, str | None]:
+    info = _stat_child_nofollow(directory_fd, expected_name)
+    if (info is None or not stat.S_ISREG(info.st_mode) or info.st_uid != os.getuid()
+            or info.st_nlink != 1 or stat.S_IMODE(info.st_mode) != 0o600
+            or getattr(info, "st_blocks", 0) * 512 > 1024 * 1024):
+        return None, None, "historical terminal closure file identity or permissions are unsafe"
+    try:
+        record, raw, read_info = _read_json_at(directory_fd, expected_name, maximum_bytes=1024 * 1024)
+    except (OSError, ValueError, TypeError, json.JSONDecodeError) as error:
+        return None, None, f"historical terminal closure cannot be read safely: {error}"
+    after = _stat_child_nofollow(directory_fd, expected_name)
+    if (after is None or _storage_entry_identity(after) != _storage_entry_identity(info)
+            or _storage_entry_identity(read_info) != _storage_entry_identity(info)
+            or raw != _canonical_pretty_json_bytes(record)):
+        return None, None, "historical terminal closure changed or is not canonically encoded"
+    if record.get("closure_directory_identity") != list(directory_identity):
+        return None, None, "historical terminal closure directory identity is not bound to its certificate"
+    return record, raw, None
+
+
+def _is_supersedable_legacy_terminal_closure(
+    record: Mapping[str, Any], raw: bytes, directory_identity: tuple[int, int],
+) -> bool:
+    """Recognize only the authenticated v2 writer artifact missing its path field."""
+    if hashlib.sha256(raw).hexdigest() != HISTORICAL_TERMINAL_LEGACY_CLOSURE_SHA256:
+        return False
+    historical_evidence = record.get("historical_evidence")
+    evidence_hashes = (historical_evidence.get("sha256")
+                       if isinstance(historical_evidence, Mapping) else None)
+    if not isinstance(evidence_hashes, Mapping):
+        return False
+    expected_report = {
+        "path": str(_historical_terminal_run_paths()["report"]),
+        "bytes": HISTORICAL_TERMINAL_REPORT_PREFIX_BYTES,
+        "sha256": HISTORICAL_TERMINAL_REPORT_PREFIX_SHA256,
+    }
+    return (
+        record.get("schema_version") == 2
+        and record.get("closure_policy") == "history-preserving-terminal-overrun-v1"
+        and record.get("experiment_id") == HISTORICAL_TERMINAL_RUN_ID
+        and "closure_path" not in record
+        and record.get("storage_manifest_path") == str(_experiment_manifest_path(HISTORICAL_TERMINAL_RUN_ID))
+        and record.get("storage_manifest_sha256") == evidence_hashes.get("storage_manifest")
+        and record.get("original_reservation_bytes") == HISTORICAL_TERMINAL_ORIGINAL_RESERVATION_BYTES
+        and record.get("historical_failure_preserved") is True
+        and record.get("authorizes_execution") is False
+        and record.get("changes_original_gate_result") is False
+        and record.get("counts_toward_project_scope") is True
+        and record.get("closure_directory_identity") == list(directory_identity)
+        and record.get("report_prefix") == expected_report
+        and isinstance(record.get("source_sha256"), dict)
+        and isinstance(record.get("gate0_control_sha256"), dict)
+        and isinstance(record.get("tree_sha256"), str)
+        and re.fullmatch(r"[0-9a-f]{64}", record["tree_sha256"]) is not None
+        and _verify_storage_evidence(record, "closure_hmac_sha256")
+        and bool(raw)
+    )
+
+
+def _read_historical_terminal_closure() -> tuple[dict[str, Any] | None, bytes | None, str | None]:
+    path = _historical_terminal_closure_path()
+    correction_path = _historical_terminal_closure_correction_path()
+    try:
+        directory_fd, directory_identity = _open_historical_terminal_closure_directory()
+    except FileNotFoundError:
+        return None, None, "historical terminal closure is missing"
+    except OSError as error:
+        return None, None, f"historical terminal closure directory cannot be opened safely: {error}"
+    try:
+        expected_name = path.name
+        correction_name = correction_path.name
+        names = sorted(os.listdir(directory_fd))
+        allowed_name_sets = ([expected_name], sorted([expected_name, correction_name]))
+        if names not in allowed_name_sets:
+            return None, None, "historical terminal closure directory has missing or unexpected entries"
+        original, original_raw, original_error = _read_historical_terminal_closure_file(
+            directory_fd, expected_name, directory_identity)
+        if original is None or original_raw is None:
+            return None, None, original_error
+        if names == [expected_name]:
+            if (original.get("schema_version") != 3
+                    or original.get("closure_path") != str(path)
+                    or original.get("closure_revision") != 0):
+                return None, None, "historical terminal closure schema is not a current schema-v3 record"
+            record, raw = original, original_raw
+        else:
+            correction, correction_raw, correction_error = _read_historical_terminal_closure_file(
+                directory_fd, correction_name, directory_identity)
+            if correction is None or correction_raw is None:
+                return None, None, correction_error
+            if (not _is_supersedable_legacy_terminal_closure(
+                    original, original_raw, directory_identity)
+                    or correction.get("schema_version") != 3
+                    or correction.get("closure_revision") != 1
+                    or correction.get("closure_path") != str(correction_path)
+                    or correction.get("supersedes_closure_path") != str(path)
+                    or correction.get("supersedes_closure_sha256")
+                    != hashlib.sha256(original_raw).hexdigest()):
+                return None, None, "historical terminal closure correction does not bind the superseded certificate"
+            record, raw = correction, correction_raw
+        names_after = sorted(os.listdir(directory_fd))
+        directory_after = os.fstat(directory_fd)
+        if (names_after != names
+                or (directory_after.st_dev, directory_after.st_ino) != directory_identity):
+            return None, None, "historical terminal closure directory changed while it was read"
+        reopened_fd, reopened_identity = _open_historical_terminal_closure_directory()
+        os.close(reopened_fd)
+        if reopened_identity != directory_identity:
+            return None, None, "historical terminal closure directory path changed while it was read"
+        return record, raw, None
+    except (OSError, ValueError, TypeError, json.JSONDecodeError) as error:
+        return None, None, f"historical terminal closure cannot be read safely: {error}"
+    finally:
+        os.close(directory_fd)
+
+
+def _verify_historical_terminal_closure(
+    manifest: Mapping[str, Any], manifest_sha256: str, output_dir: Path,
+    *, allocated_bytes: int, metadata_tree_sha256: str,
+    allowed_active_experiment_id: str | None = None,
+) -> tuple[dict[str, Any] | None, list[str]]:
+    record, raw, read_error = _read_historical_terminal_closure()
+    if record is None or raw is None:
+        return None, [f"historical terminal closure for {HISTORICAL_TERMINAL_RUN_ID} is invalid: {read_error}"]
+    try:
+        expected_closure_path = (
+            _historical_terminal_closure_correction_path()
+            if record.get("closure_revision") == 1 else _historical_terminal_closure_path())
+        if (record.get("schema_version") != 3
+                or record.get("closure_policy") != "history-preserving-terminal-overrun-v1"
+                or record.get("experiment_id") != HISTORICAL_TERMINAL_RUN_ID
+                or record.get("closure_path") != str(expected_closure_path)
+                or record.get("closure_revision") not in (0, 1)
+                or record.get("storage_manifest_path") != str(_experiment_manifest_path(HISTORICAL_TERMINAL_RUN_ID))
+                or record.get("storage_manifest_sha256") != manifest_sha256
+                or record.get("original_reservation_bytes") != HISTORICAL_TERMINAL_ORIGINAL_RESERVATION_BYTES
+                or record.get("historical_failure_preserved") is not True
+                or record.get("authorizes_execution") is not False
+                or record.get("changes_original_gate_result") is not False
+                or record.get("counts_toward_project_scope") is not True
+                or record.get("closure_directory_identity") is None
+                or record.get("report_prefix") != {
+                    "path": str(_historical_terminal_run_paths()["report"]),
+                    "bytes": HISTORICAL_TERMINAL_REPORT_PREFIX_BYTES,
+                    "sha256": HISTORICAL_TERMINAL_REPORT_PREFIX_SHA256,
+                }
+                or not _verify_storage_evidence(record, "closure_hmac_sha256")):
+            raise ValueError("closure schema, exact identity, original manifest binding, immutable reservation, or signature is invalid")
+        if (manifest.get("experiment_id") != HISTORICAL_TERMINAL_RUN_ID
+                or manifest.get("estimated_persistent_bytes") != HISTORICAL_TERMINAL_ORIGINAL_RESERVATION_BYTES
+                or hashlib.sha256(_read_file_nofollow(_experiment_manifest_path(
+                    HISTORICAL_TERMINAL_RUN_ID))).hexdigest() != manifest_sha256):
+            raise ValueError("the original storage manifest changed after terminal closure")
+        evidence = _historical_terminal_evidence(report_prefix_binding=record.get("report_prefix"))
+        if record.get("historical_evidence") != evidence:
+            raise ValueError("one or more immutable run, cleanup, result, controller, or report records changed")
+        if (record.get("output_dir") != str(output_dir)
+                or record.get("metadata_output_allocated_bytes") != allocated_bytes
+                or record.get("metadata_output_tree_sha256") != metadata_tree_sha256):
+            raise ValueError("the signed output identity changed after terminal closure")
+        liveness = _historical_terminal_liveness_check(
+            evidence, allowed_active_experiment_id=allowed_active_experiment_id)
+        if record.get("liveness_at_closure") != liveness:
+            raise ValueError("historical liveness tools or quiescence evidence changed after closure")
+        if record.get("source_sha256") != _historical_terminal_source_hashes():
+            raise ValueError("historical closure source-control hashes changed")
+        if record.get("gate0_control_sha256") != _gate0_control_hashes():
+            raise ValueError("historical closure Gate 0 control hashes changed")
+        current_inventory = _historical_terminal_tree_snapshot(output_dir)
+        if current_inventory != record.get("tree_inventory"):
+            raise ValueError("the closed historical tree changed after terminal closure")
+        if (current_inventory.get("allocated_bytes") != record.get("closed_tree_allocated_bytes")
+                or current_inventory.get("tree_sha256") != record.get("tree_sha256")
+                or current_inventory.get("root_identity") != record.get("tree_root_identity")):
+            raise ValueError("the closed tree no longer matches its signed identity and content digest")
+        # Re-read all source records and the closure after measurement to fence races.
+        evidence_after = _historical_terminal_evidence(report_prefix_binding=record.get("report_prefix"))
+        latest_record, latest_raw, latest_error = _read_historical_terminal_closure()
+        if (evidence_after != evidence or latest_error is not None or latest_record != record
+                or latest_raw != raw):
+            raise ValueError("historical evidence or closure changed while Gate 0 verified it")
+        return {
+            "closure_path": record["closure_path"],
+            "closure_sha256": hashlib.sha256(raw).hexdigest(),
+            "closure_tree_sha256": current_inventory["tree_sha256"],
+            "closure_allocated_bytes": current_inventory["allocated_bytes"],
+            "closure_liveness": liveness,
+        }, []
+    except (OSError, RuntimeError, ValueError, TypeError, json.JSONDecodeError) as error:
+        return None, [f"historical terminal closure for {HISTORICAL_TERMINAL_RUN_ID} failed verification: {error}"]
+
+
+def close_historical_terminal_run() -> dict[str, Any]:
+    """Append one authenticated, non-authorizing closure for the exact failed Z9 run."""
+    original_closure_path = _historical_terminal_closure_path()
+    correction_path = _historical_terminal_closure_correction_path()
+    certification_lock = acquire_storage_certification_lock(exclusive=True)
+    allocation_lock = None
+    try:
+        allocation_lock = _acquire_storage_allocation_lock()
+        _historical_terminal_copy_controller_evidence()
+        directory_fd, directory_identity = _open_historical_terminal_closure_directory(create=True)
+        legacy_record: dict[str, Any] | None = None
+        try:
+            existing_names = sorted(os.listdir(directory_fd))
+            superseded_raw: bytes | None = None
+            if existing_names == []:
+                closure_path = original_closure_path
+                closure_revision = 0
+            elif existing_names == [original_closure_path.name]:
+                legacy, legacy_raw, legacy_error = _read_historical_terminal_closure_file(
+                    directory_fd, original_closure_path.name, directory_identity)
+                if (legacy is None or legacy_raw is None
+                        or not _is_supersedable_legacy_terminal_closure(
+                            legacy, legacy_raw, directory_identity)):
+                    raise FileExistsError(
+                        "historical terminal closure is append-only and the existing record cannot be superseded"
+                        + (f": {legacy_error}" if legacy_error else ""))
+                closure_path = correction_path
+                closure_revision = 1
+                superseded_raw = legacy_raw
+                legacy_record = legacy
+            else:
+                raise FileExistsError("historical terminal closure is append-only and already exists")
+        finally:
+            os.close(directory_fd)
+        evidence_before = _historical_terminal_evidence()
+        liveness_before = _historical_terminal_liveness_check(evidence_before)
+        tree_before = _historical_terminal_tree_snapshot(Path(evidence_before["paths"]["output_dir"]))
+        tree_confirm = _historical_terminal_tree_snapshot(Path(evidence_before["paths"]["output_dir"]))
+        evidence_confirm = _historical_terminal_evidence()
+        liveness_confirm = _historical_terminal_liveness_check(evidence_confirm)
+        if (tree_before != tree_confirm or evidence_before != evidence_confirm
+                or liveness_before != liveness_confirm):
+            raise RuntimeError("historical evidence, liveness, or tree changed between closure measurements")
+        if superseded_raw is not None and (
+                legacy_record is None
+                or legacy_record.get("historical_evidence") != evidence_before
+                or legacy_record.get("liveness_at_closure") != liveness_before
+                or legacy_record.get("tree_inventory") != tree_before
+                or legacy_record.get("tree_sha256") != tree_before.get("tree_sha256")
+                or legacy_record.get("closed_tree_allocated_bytes") != tree_before.get("allocated_bytes")
+                or legacy_record.get("closed_tree_logical_bytes") != tree_before.get("logical_bytes")
+                or legacy_record.get("tree_root_identity") != tree_before.get("root_identity")
+                or legacy_record.get("output_dir") != evidence_before["paths"]["output_dir"]
+                or legacy_record.get("metadata_output_allocated_bytes") != HISTORICAL_TERMINAL_OUTPUT_BYTES
+                or legacy_record.get("metadata_output_tree_sha256")
+                != _persistent_output_snapshot(Path(evidence_before["paths"]["output_dir"]))[1]):
+            raise RuntimeError(
+                "legacy terminal closure does not match the independently remeasured evidence, liveness, or tree")
+
+        source_hashes = _historical_terminal_source_hashes()
+        report_binding = {
+            "path": evidence_before["paths"]["report"],
+            "bytes": evidence_before["report_prefix_bytes"],
+            "sha256": evidence_before["report_prefix_sha256"],
+        }
+        record = {
+            "schema_version": 3,
+            "closure_policy": "history-preserving-terminal-overrun-v1",
+            "experiment_id": HISTORICAL_TERMINAL_RUN_ID,
+            "closure_path": str(closure_path),
+            "closure_revision": closure_revision,
+            "created_at_unix": time.time(),
+            "storage_manifest_path": evidence_before["paths"]["storage_manifest"],
+            "storage_manifest_sha256": evidence_before["sha256"]["storage_manifest"],
+            "manifest_hmac_sha256": evidence_before["manifest_hmac_sha256"],
+            "original_reservation_bytes": HISTORICAL_TERMINAL_ORIGINAL_RESERVATION_BYTES,
+            "gate0_post_allocation_bytes": HISTORICAL_TERMINAL_POST_OUTPUT_BYTES,
+            "gate0_post_allocation_provenance": evidence_before["gate0_post_allocation_provenance"],
+            "gate0_post_status": evidence_before["gate0_post_status"],
+            "gate0_post_blockers": evidence_before["gate0_post_blockers"],
+            "run_result_status": evidence_before["run_status"],
+            "r5_classification": evidence_before["r5_classification"],
+            "t8_classification": evidence_before["t8_classification"],
+            "finder_treatment": evidence_before["finder_treatment"],
+            "historical_failure_preserved": True,
+            "authorizes_execution": False,
+            "changes_original_gate_result": False,
+            "counts_toward_project_scope": True,
+            "closure_directory_identity": list(directory_identity),
+            "report_prefix": report_binding,
+            "historical_evidence": evidence_before,
+            "output_dir": evidence_before["paths"]["output_dir"],
+            "metadata_output_allocated_bytes": HISTORICAL_TERMINAL_OUTPUT_BYTES,
+            "metadata_output_tree_sha256": _persistent_output_snapshot(
+                Path(evidence_before["paths"]["output_dir"]))[1],
+            "tree_root_identity": tree_before["root_identity"],
+            "tree_parent_identity": tree_before["parent_identity"],
+            "tree_inventory": tree_before,
+            "tree_sha256": tree_before["tree_sha256"],
+            "closed_tree_allocated_bytes": tree_before["allocated_bytes"],
+            "closed_tree_logical_bytes": tree_before["logical_bytes"],
+            "liveness_at_closure": liveness_before,
+            "source_sha256": source_hashes,
+            "gate0_control_sha256": _gate0_control_hashes(),
+            "closure_reason": "Preserve the authenticated terminal FAIL/BLOCKED result while permitting exact historical allocation accounting.",
+        }
+        if superseded_raw is not None:
+            record.update({
+                "supersedes_closure_path": str(original_closure_path),
+                "supersedes_closure_sha256": hashlib.sha256(superseded_raw).hexdigest(),
+                "supersedes_closure_reason": (
+                    "The original authenticated schema-v2 append omitted its required closure_path field; "
+                    "it is retained unchanged and superseded by this independently bound correction."
+                ),
+            })
+        sealed = _seal_storage_evidence(record, "closure_hmac_sha256")
+        raw = _canonical_pretty_json_bytes(sealed)
+        directory_fd, write_directory_identity = _open_historical_terminal_closure_directory()
+        try:
+            if write_directory_identity != directory_identity:
+                raise RuntimeError("historical closure directory was substituted before append")
+            expected_existing_names = [original_closure_path.name] if closure_revision == 1 else []
+            if sorted(os.listdir(directory_fd)) != expected_existing_names:
+                raise RuntimeError("historical terminal closure directory changed before append")
+            descriptor = os.open(closure_path.name, os.O_WRONLY | os.O_CREAT | os.O_EXCL
+                                 | getattr(os, "O_NOFOLLOW", 0), 0o600, dir_fd=directory_fd)
+            try:
+                offset = 0
+                while offset < len(raw):
+                    count = os.write(descriptor, raw[offset:])
+                    if count <= 0:
+                        raise OSError("short write while appending historical terminal closure")
+                    offset += count
+                os.fsync(descriptor)
+            finally:
+                os.close(descriptor)
+            os.fsync(directory_fd)
+        finally:
+            os.close(directory_fd)
+
+        readback, readback_raw, readback_error = _read_historical_terminal_closure()
+        evidence_after = _historical_terminal_evidence(report_prefix_binding=report_binding)
+        liveness_after = _historical_terminal_liveness_check(evidence_after)
+        tree_after = _historical_terminal_tree_snapshot(Path(evidence_after["paths"]["output_dir"]))
+        if (readback_error is not None or readback != sealed or readback_raw != raw
+                or evidence_after != evidence_before or liveness_after != liveness_before
+                or tree_after != tree_before):
+            # Keep any partial or invalid append in place; the verifier fails closed and never rebases it.
+            raise RuntimeError("historical closure failed its durable post-write revalidation")
+        return {
+            "status": "CLOSED",
+            "experiment_id": HISTORICAL_TERMINAL_RUN_ID,
+            "closure_path": str(closure_path),
+            "closure_sha256": hashlib.sha256(raw).hexdigest(),
+            "tree_sha256": tree_before["tree_sha256"],
+            "allocated_bytes": tree_before["allocated_bytes"],
+            "original_reservation_bytes": HISTORICAL_TERMINAL_ORIGINAL_RESERVATION_BYTES,
+            "gate0_post_status": evidence_before["gate0_post_status"],
+        }
+    finally:
+        _release_storage_allocation_lock(allocation_lock)
+        release_storage_certification_lock(certification_lock)
 
 
 def _authorized_runner_records(paths: list[str], *, requires_managed_prefix: bool) -> dict[str, str]:
@@ -5367,8 +6390,14 @@ class PrefixLease:
             raise OSError("prefix clone target identity or filesystem changed during materialization")
 
     def wait_process(self, process: subprocess.Popen[Any], *, timeout_seconds: float,
-                     poll_interval_seconds: float = 2.0) -> int:
+                     poll_interval_seconds: float = 2.0,
+                     output_limit_bytes: int | None = None) -> int:
         """Wait while enforcing the emergency free-space stop during a run."""
+        if (output_limit_bytes is not None
+                and (not isinstance(output_limit_bytes, int)
+                     or isinstance(output_limit_bytes, bool)
+                     or output_limit_bytes <= 0)):
+            raise ValueError("output_limit_bytes must be a positive integer when provided")
         if self._wine_loader_path is not None:
             args = process.args if isinstance(process.args, (list, tuple)) else [process.args]
             if str(self._wine_loader_path) in {str(arg) for arg in args}:
@@ -5398,6 +6427,29 @@ class PrefixLease:
                     elif process in self._managed_processes:
                         self._managed_processes.remove(process)
                     raise RuntimeError(f"Wine prefix path changed during the run: {error}") from error
+            if output_limit_bytes is not None:
+                output_allocated = _persistent_output_allocated_bytes(self.output_dir)
+                stop_margin = min(64 * MIB, max(1 * MIB, output_limit_bytes // 100))
+                stop_threshold = output_limit_bytes - stop_margin
+                if output_allocated >= stop_threshold:
+                    event = {
+                        "elapsed_seconds": round(time.monotonic() - started, 3),
+                        "sampled_at_unix": time.time(),
+                        "action": "STOP_OUTPUT_BUDGET_GUARD",
+                        "output_allocated_bytes": output_allocated,
+                        "output_limit_bytes": output_limit_bytes,
+                        "output_stop_threshold_bytes": stop_threshold,
+                        "output_stop_margin_bytes": stop_margin,
+                    }
+                    self._storage_watch_events.append(event)
+                    if not self._terminate_and_reap(process):
+                        self._unsafe_live_process = True
+                        event["process_still_running"] = True
+                    elif process in self._managed_processes:
+                        self._managed_processes.remove(process)
+                    raise RuntimeError(
+                        "signed output budget guard stopped the target before the reservation boundary: "
+                        f"{output_allocated} >= {stop_threshold} of {output_limit_bytes} bytes")
             remaining = deadline - time.monotonic()
             if remaining <= 0:
                 completed = process.poll()
@@ -7598,12 +8650,18 @@ def main(argv: list[str] | None = None) -> int:
     sub = parser.add_subparsers(dest="command", required=True)
     recov = sub.add_parser("recover-interrupted-smoke", help="Recover an interrupted storage-only smoke lease marker")
     recov.add_argument("experiment_id", help="Interrupted smoke experiment ID")
+    sub.add_parser("close-historical-terminal-run",
+                   help="Append the fixed history-preserving Z9 terminal closure")
     sub.add_parser("reconcile", help="Reconcile abandoned storage smoke lease markers")
     sub.add_parser("blockers", help="Check live Gate 0 storage blockers")
     args = parser.parse_args(argv)
 
     if args.command == "recover-interrupted-smoke":
         result = recover_interrupted_storage_smoke_lease_marker(args.experiment_id)
+        print(json.dumps(result, indent=2))
+        return 0
+    elif args.command == "close-historical-terminal-run":
+        result = close_historical_terminal_run()
         print(json.dumps(result, indent=2))
         return 0
     elif args.command == "reconcile":

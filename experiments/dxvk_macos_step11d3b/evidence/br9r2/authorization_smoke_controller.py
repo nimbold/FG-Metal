@@ -54,6 +54,8 @@ COVERER = pathlib.Path(
     "1f6e6ade1d852825084b317031eae3cb3edb2de19b77f4c1e5a7ca85aad48fbc/"
     "neutral-coverer"
 )
+# Bound gate acquisition and runner completion separately. Reset only after the
+# qualifying signal and controller record are written.
 RUNNER_WATCHDOG_SECONDS = 1200
 START_GATE_SAMPLE_MAX_AGE_NS = 1_500_000_000
 RUN_ID_PATTERN = re.compile(r"step11d3b-smoke-\d{8}-\d{6}-[0-9a-f]{8}")
@@ -286,6 +288,7 @@ def run() -> int:
             record["status"] = "RUNNING"
             atomic_json(record_path, record)
             runner_deadline = time.monotonic() + RUNNER_WATCHDOG_SECONDS
+            runner_watchdog_phase = "start_gate_acquisition"
             while runner.poll() is None and time.monotonic() < runner_deadline:
                 if start_gate_signal is None:
                     latest = observer.latest()
@@ -311,20 +314,25 @@ def run() -> int:
                             record["start_gate_released_at_utc"] = candidate["released_at_utc"]
                             record["start_gate_released_monotonic_ns"] = candidate["released_monotonic_ns"]
                             atomic_json(record_path, record)
+                            runner_watchdog_phase = "post_gate_completion"
+                            runner_deadline = time.monotonic() + RUNNER_WATCHDOG_SECONDS
                 try:
                     runner.wait(timeout=0.1)
                 except subprocess.TimeoutExpired:
                     pass
             if runner.poll() is None:
                 record["runner_watchdog_triggered"] = True
+                record["runner_watchdog_phase"] = runner_watchdog_phase
                 record["runner_watchdog_triggered_at_utc"] = utc_now()
-                atomic_json(record_path, record)
-                runner.terminate()
                 try:
-                    runner_returncode = runner.wait(timeout=30)
-                except subprocess.TimeoutExpired:
-                    runner.kill()
-                    runner_returncode = runner.wait(timeout=10)
+                    atomic_json(record_path, record)
+                finally:
+                    runner.terminate()
+                    try:
+                        runner_returncode = runner.wait(timeout=30)
+                    except subprocess.TimeoutExpired:
+                        runner.kill()
+                        runner_returncode = runner.wait(timeout=10)
             else:
                 runner_returncode = runner.returncode
         if start_gate_signal is None:
@@ -392,7 +400,8 @@ def run() -> int:
         run_status = record.get("run_result", {}).get("status")
         signature = record.get("run_result", {}).get("smoke_signature")
         record["status"] = (
-            "PASS" if runner_returncode == 0 and run_status == "PASS"
+            "PASS" if record.get("runner_watchdog_triggered") is not True
+            and runner_returncode == 0 and run_status == "PASS"
             and record.get("run_result", {}).get("is_valid") is True
             and record.get("run_result", {}).get("quantitative_ready") is True
             and isinstance(signature, dict) and signature.get("healthy_refresh") is True

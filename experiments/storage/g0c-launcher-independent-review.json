@@ -23,10 +23,10 @@
     "test_review": "A-I threshold and lifecycle matrix, byte-exact Z3 regression, 64 MiB unrelated-growth checks, hardlink boundary behavior, and storage-only smoke path were reviewed. The follow-up regression re-signs a canonical current-Gate0 manifest with a required field removed and confirms that current-run scope binding rejects it. Follow-up regressions cover valid-HMAC/current-Gate0 missing-field rejection, bounded free drift, over-bound rejection with exact delta, and signed fail-close."
   },
   "executed_test_results": {
-    "focused_command": "/opt/homebrew/bin/python3.14 -m unittest test_g0c_checks.Gate0EvidenceBindingTests (from experiments/storage)",
-    "focused_result": "PASS: 4 focused baseline stability tests; full Gate0 checks included in suite",
+    "focused_command": "/opt/homebrew/bin/python3.14 -m unittest test_storage_policy.HistoricalTerminalClosureTests (from experiments/storage)",
+    "focused_result": "PASS: 19 H1 closure adversarial tests",
     "full_command": "/opt/homebrew/bin/python3.14 -m unittest discover -q -s experiments/storage -p 'test_*.py' (from repository root)",
-    "full_result": "PASS: 449 tests",
+    "full_result": "PASS: 471 tests",
     "git_diff_check": "PASS",
     "py_compile": "PASS"
   },
@@ -52,6 +52,50 @@
       "resolution": "The verifier now uses the existing 2 GiB volume-free drift bound while retaining exact allocation, nonlease, output, and exclusion checks; failed verification persists a signed BLOCKED attestation.",
       "reviewed_at_utc": "2026-10-12T18:43:56Z",
       "reviewer_identity": "Codex independent read-only reviewer /root/z4_independent_review",
+      "status": "PASS"
+    },
+    {
+      "finding": "Fresh Gate 0 preflight found that the previous independent review did not bind the current signed-output cap enforcement in storage_policy.py or its regression tests.",
+      "model_identity": "GPT-6 Luna (Max)",
+      "nine_point_review": "A fresh Phase A implementation review inspected the derived stream/lifecycle reservation, PrefixLease output-cap enforcement, final Gate 0/output binding, replay-2 interlock, tests, and unchanged 55/50 thresholds. It returned PASS with no substantive findings.",
+      "other_findings": [],
+      "regression": "The current Z9 suite passes 20 tests, including derived reservation boundaries, output overflow, temporal PRE stream coverage, transient stop rejection, and replay-2 fail-closed eligibility; storage-policy and process-runner focused suites also passed after their implementation changes.",
+      "resolution": "The current storage_policy.py and test_storage_policy.py hashes below were reviewed; the 55 GiB ceiling, 50 GiB projected-free minimum, and unrelated non-lease growth rejection remain unchanged.",
+      "reviewed_at_utc": "2026-10-14T17:09:35Z",
+      "reviewer_identity": "Codex independent read-only implementation reviewer Kepler (agent 01a13b5a-af53-70a1-bfcd-1e93f4af98a1)",
+      "status": "PASS"
+    },
+    {
+      "finding": "Fresh H1 review found closure-directory device and identity binding, exact report-prefix revalidation, lsof PATH substitution, and post-closure tree-growth test gaps.",
+      "model_identity": "GPT-6 Luna (Max)",
+      "nine_point_review": "Independent read-only implementation review of historical evidence preservation, terminal and lease liveness, closure identity, immutable tree checks, storage charging, authorization isolation, source hashes, and adversarial regressions returned PASS.",
+      "other_findings": [],
+      "regression": "The H1 suite passes 16 synthetic cases, including valid-HMAC wrong report prefix, legacy schema rejection, PATH spoof resistance, unknown process state, original manifest mutation, tree race, and a valid synthetic closure followed by 64 MiB tree growth rejected by the verifier. The complete Python 3.14 storage suite passed 468 tests.",
+      "resolution": "Closure schema v2 binds the exact original report prefix and same-filesystem owned directory identity, checks current source and Gate 0 control hashes, and rechecks a fixed root-owned non-writable /usr/sbin/lsof identity. The original overrun exception remains limited to its authenticated historical run; output bytes stay in full project scope and 55/50 GiB checks remain active.",
+      "reviewed_at_utc": "2026-10-14T18:03:20Z",
+      "reviewer_identity": "Codex independent read-only implementation reviewer /root/h1_fresh_reviewer",
+      "status": "PASS"
+    },
+    {
+      "finding": "The H1 terminal evidence validator initially assumed the run manifest carried an experiment_token, but the historical schema binds that token through the storage manifest digest.",
+      "model_identity": "GPT-6 Luna (Max)",
+      "nine_point_review": "Re-review of the corrected evidence chain confirmed the token is SHA-256 of the raw signed storage manifest truncated to 32 lowercase hex characters; execution-result.json and trace-index.json both match it and their pinned hashes. The run manifest has no token field.",
+      "other_findings": [],
+      "regression": "The corrected implementation was rechecked read-only against the actual historical files. The complete Python 3.14 suite passes 468 tests, including 16 synthetic H1 closure cases.",
+      "resolution": "Derive the token only after checking the exact manifest SHA, canonical encoding, and HMAC; require execution and trace-index records to match that derived token, and include it in closure evidence. No historical source artifact was changed.",
+      "reviewed_at_utc": "2026-10-14T18:05:29Z",
+      "reviewer_identity": "Codex independent read-only implementation reviewer /root/h1_fresh_reviewer",
+      "status": "PASS"
+    },
+    {
+      "finding": "The first append-only historical closure certificate was preserved but failed schema-v3 verification because its writer omitted closure_path.",
+      "model_identity": "GPT-6 Luna (Max)",
+      "nine_point_review": "Final read-only review of the correction writer, verifier, immutable original certificate binding, and current adversarial tests returned PASS with no blocking findings.",
+      "other_findings": [],
+      "regression": "The new wrong-legacy-hash test verifies correction creation fails, the original certificate remains byte-identical, and no correction file appears. H1 suite: 19 passed; full Python 3.14 storage suite: 471 passed.",
+      "resolution": "Correction creation is allowed only for the exact pinned legacy certificate and fresh matching historical evidence, liveness, tree, report prefix, metadata, and byte totals. G0C source and test bindings below now match the reviewed files.",
+      "reviewed_at_utc": "2026-10-14T18:21:14Z",
+      "reviewer_identity": "Fresh independent read-only reviewer /root/h1_fresh_reviewer",
       "status": "PASS"
     }
   ],
@@ -564,7 +608,7 @@
     "status": "PASS"
   },
   "review_type": "independent_prefixlease_post_materialization_accounting_review",
-  "reviewed_at_utc": "2026-10-12T18:43:56Z",
+  "reviewed_at_utc": "2026-10-14T18:21:14Z",
   "reviewed_files": {
     "build_retention_control": {
       "path": "experiments/storage/build_retention.py",
@@ -592,11 +636,11 @@
     },
     "source": {
       "path": "experiments/storage/storage_policy.py",
-      "sha256": "7ce9bfc8143a527ef05bc1b0610fa8c7dc2afdb7b6dbad55183f7243e5a86313"
+      "sha256": "c2feb4c3a607ad4bf92a1a023feffd431aa13fc2b620fc7e1cf59e819b72efc1"
     },
     "storage_policy_tests": {
       "path": "experiments/storage/test_storage_policy.py",
-      "sha256": "524bed3ba141e6d9f8be87d29a618e177b684b9fbf3caff0e72a22aee3a0c68c"
+      "sha256": "0cc610bd9988ab14348d3b32e288af4c405a381c6348285f6382f5cafa0ba0a7"
     },
     "storage_smoke_runner": {
       "path": "experiments/storage/smoke_prefix_lease.py",

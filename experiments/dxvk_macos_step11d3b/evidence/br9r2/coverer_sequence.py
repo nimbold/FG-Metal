@@ -54,6 +54,7 @@ UNCOVERED_SECONDS = 20
 COVERED_SECONDS = 40
 RESTORED_SECONDS = 20
 STATE_STABILITY_NS = 2_000_000_000
+NO_COVERER_ATTAINMENT_TIMEOUT_NS = 10_000_000_000
 SAMPLE_GAP_LIMIT_NS = 1_500_000_000
 TELEMETRY_STALE_AFTER_NS = 2_000_000_000
 STATE_OBSERVATION_GRACE_NS = SAMPLE_GAP_LIMIT_NS
@@ -320,6 +321,7 @@ def exact_covered_sample(sample: dict[str, Any], *, target_pid: int,
         and isinstance(row.get("rankFrontToBack"), int)
         and row["rankFrontToBack"] >= 0
         and row["rankFrontToBack"] < target_rank
+        and row.get("layer") == 8
         for row in windows
     )
     if not window_match or target.get("covererOnExpectedDisplay") is not True:
@@ -598,6 +600,30 @@ def verify_covering_status(response: dict[str, Any], *, target_pid: int,
     )
 
 
+def verify_coverer_command_accepted(response: dict[str, Any], *, command: str,
+                                    target_pid: int, target_window_id: int,
+                                    coverer_pid: int, coverer_window_id: int) -> bool:
+    """Validate command execution and local coverer identity, not WindowServer attainment."""
+    return bool(
+        response.get("event") == "command"
+        and response.get("command") == command
+        and response.get("status") == "PASS"
+        and response.get("target_pid") == target_pid
+        and response.get("target_window_number") == target_window_id
+        and response.get("coverer_pid") == coverer_pid
+        and response.get("coverer_window_number") == coverer_window_id
+        and response.get("coverer_is_visible") is True
+        and response.get("coverer_is_opaque") is True
+        and response.get("coverer_alpha_value") == 1
+        and response.get("coverer_appkit_level") == 8
+        and response.get("coverer_can_be_key") is False
+        and response.get("coverer_can_be_main") is False
+        and response.get("coverer_is_key") is False
+        and response.get("coverer_is_main") is False
+        and response.get("coverer_application_is_active") is False
+    )
+
+
 def current_observer_state(observer: LifecycleWindowObserver) -> tuple[
         list[dict[str, Any]], dict[str, Any] | None, dict[str, Any] | None]:
     samples = read_observer_samples(observer.samples_path)
@@ -819,12 +845,19 @@ def run_sequence(kind: str, identifier: str, tag: str,
                         calibration, record, "COVER_ACTION_ISSUED", monotonic_ns=show_started)
                     show_response = coverer.command("show")
                     status = show_response
-                    record["actions"].append({
+                    show_action = {
                         "action": "show_coverer",
                         "start_monotonic_ns": show_started,
                         "response": show_response,
+                        "protocol_state": "COMMAND_ACCEPTED" if (
+                            show_response.get("event") == "command"
+                            and show_response.get("command") == "show"
+                            and show_response.get("status") == "PASS") else "COMMAND_FAILED",
+                        "window_state": "PENDING_EXTERNAL_WINDOWSERVER_ATTAINMENT",
+                        "attainment_source": "independent public CGWindow observer",
                         "attained": False,
-                    })
+                    }
+                    record["actions"].append(show_action)
                     atomic_json(record_path, record)
                     shown_target_window_id = show_response.get("target_window_number")
                     coverer_window_id = show_response.get("coverer_window_number")
@@ -832,10 +865,11 @@ def run_sequence(kind: str, identifier: str, tag: str,
                             or not isinstance(target_window_id, int) or not isinstance(coverer_pid, int)
                             or not isinstance(coverer_window_id, int)):
                         raise RuntimeError("coverer response changed or omitted its bound target/coverer PID or window ID")
-                    if not verify_covering_status(
-                            show_response, target_pid=target_pid,
-                            target_window_id=target_window_id):
-                        raise RuntimeError(f"neutral coverer did not report full opaque coverage: {show_response}")
+                    if not verify_coverer_command_accepted(
+                            show_response, command="show", target_pid=target_pid,
+                            target_window_id=target_window_id, coverer_pid=coverer_pid,
+                            coverer_window_id=coverer_window_id):
+                        raise RuntimeError(f"coverer did not accept SHOW for the exact bound window: {show_response}")
 
                     coverage_predicate = lambda sample: exact_covered_sample(
                         sample, target_pid=target_pid, target_window_id=target_window_id,
@@ -851,11 +885,29 @@ def run_sequence(kind: str, identifier: str, tag: str,
                             expected_window_id=target_window_id)
                         if coverage_streak is not None:
                             break
+                        if time.monotonic_ns() - show_started >= NO_COVERER_ATTAINMENT_TIMEOUT_NS:
+                            raise RuntimeError(
+                                "public WindowServer observer did not attain stable exact coverage "
+                                "within 10 seconds after accepted SHOW")
                         status = coverer.command("status")
-                        if not verify_covering_status(
+                        status_accepted = verify_coverer_command_accepted(
+                            status, command="status", target_pid=target_pid,
+                            target_window_id=target_window_id, coverer_pid=coverer_pid,
+                            coverer_window_id=coverer_window_id)
+                        record["actions"].append({
+                            "action": "coverer_attainment_poll",
+                            "controller_monotonic_ns": time.monotonic_ns(),
+                            "response": status,
+                            "protocol_state": "COMMAND_ACCEPTED" if status_accepted else "COMMAND_FAILED",
+                            "window_state": "PENDING_EXTERNAL_WINDOWSERVER_ATTAINMENT",
+                            "coverer_snapshot_reports_attainment": verify_covering_status(
                                 status, target_pid=target_pid,
-                                target_window_id=target_window_id):
-                            raise RuntimeError(f"coverer lost full opaque coverage before observer confirmation: {status}")
+                                target_window_id=target_window_id),
+                            "attainment_source": "independent public CGWindow observer",
+                        })
+                        if not status_accepted:
+                            raise RuntimeError(f"coverer STATUS command or local state failed while SHOW was pending: {status}")
+                        atomic_json(record_path, record)
                         time.sleep(OBSERVER_SAMPLE_INTERVAL_SECONDS)
                     if coverage_streak is None:
                         raise RuntimeError("observer did not prove exact full coverage for three samples over two seconds")
@@ -872,8 +924,20 @@ def run_sequence(kind: str, identifier: str, tag: str,
                         "covered_action_duration_ns": COVERED_SECONDS * 1_000_000_000,
                         "state_observation_grace_limit_ns": STATE_OBSERVATION_GRACE_NS,
                     })
-                    record["actions"][-1]["attained"] = True
-                    record["actions"][-1]["attainment"] = coverage_streak
+                    attained_status = coverer.command("status")
+                    if not verify_coverer_command_accepted(
+                            attained_status, command="status", target_pid=target_pid,
+                            target_window_id=target_window_id, coverer_pid=coverer_pid,
+                            coverer_window_id=coverer_window_id):
+                        raise RuntimeError(f"coverer local state changed after public coverage attainment: {attained_status}")
+                    show_action["attained"] = True
+                    show_action["protocol_state"] = "COMMAND_ACCEPTED"
+                    show_action["window_state"] = "WINDOW_STATE_ATTAINED"
+                    show_action["attainment"] = coverage_streak
+                    show_action["attainment_status_snapshot"] = attained_status
+                    show_action["attainment_status_snapshot_matches_geometry"] = verify_covering_status(
+                        attained_status, target_pid=target_pid,
+                        target_window_id=target_window_id)
                     record["status"] = "VERIFIED_FULL_COVER_HOLD"
                     atomic_json(record_path, record)
                     next_status_at = time.monotonic() + 5
@@ -884,16 +948,22 @@ def run_sequence(kind: str, identifier: str, tag: str,
                             break
                         if time.monotonic() >= next_status_at:
                             status = coverer.command("status")
+                            status_accepted = verify_coverer_command_accepted(
+                                status, command="status", target_pid=target_pid,
+                                target_window_id=target_window_id, coverer_pid=coverer_pid,
+                                coverer_window_id=coverer_window_id)
                             record["actions"].append({
                                 "action": "covered_hold_snapshot",
                                 "controller_monotonic_ns": time.monotonic_ns(),
                                 "response": status,
-                                "attained": verify_covering_status(
+                                "protocol_state": "COMMAND_ACCEPTED" if status_accepted else "COMMAND_FAILED",
+                                "window_state": "WINDOW_STATE_ATTAINED",
+                                "coverer_snapshot_matches_public_state": verify_covering_status(
                                     status, target_pid=target_pid,
                                     target_window_id=target_window_id),
                             })
-                            if not record["actions"][-1]["attained"]:
-                                record["phase_errors"].append("coverer status lost full coverage during the 40-second hold")
+                            if not status_accepted:
+                                record["phase_errors"].append("coverer STATUS command or local state failed during the 40-second hold")
                                 break
                             next_status_at += 5
                             atomic_json(record_path, record)

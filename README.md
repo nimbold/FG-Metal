@@ -10,7 +10,7 @@ Framegen is an experimental renderer-independent frame-generation library. Its p
 
 > **Step 11D.3-A: CASE A2 — DIVERGENT / HEALTHY NATIVE BASELINE.** Thin x86_64 MoltenVK running under Rosetta achieves 59.99–60.01 FPS with >99.79% of nextDrawable calls locked in 14–18 ms and 0 waits >= 50 ms. The severe presentation starvation of STEP 11D.2 does not reproduce in native control; the issue is isolated to upstream components in the Wine/DXVK stack. See the [Step 11D.3-A3 report](experiments/dxvk_macos_step11d3a/STEP-11D3-A3-REPORT.md).
 
-> **Step 11D.3-B: CASE B1 — BARE WINE VULKAN REPRODUCES DRAWABLE INSTABILITY; BR9R-N3 — INCONCLUSIVE.** Fresh Wine authorization passed, but the frozen-coverer calibration did not establish full coverage, so Native foreground and Native cover runs remain unstarted. STEP 11D.3-C remains gated. See the [BR9R2 report](experiments/dxvk_macos_step11d3b/STEP-11D3-BR9R2-REPORT.md).
+> **Step 11D.3-B: CASE B1 — BARE WINE VULKAN REPRODUCES DRAWABLE INSTABILITY; BR9R-N3 — INCONCLUSIVE.** Historical Z9 remains R5 / T8. The latest lifecycle authorization failed before Wine startup because the runner failed its PrefixLease source-authorization check. Six H2 reviews also found an impossible AppKit Visible-bit predicate for `occlusionState == 8194` and Finder actions scheduled during the required action-free PRE. No new Finder replay ran. Resolve the runner and protocol blockers under a new review before Native or STEP 11D.3-C work. See the [BR9R2 report](experiments/dxvk_macos_step11d3b/STEP-11D3-BR9R2-REPORT.md) and [H2 adversarial review](experiments/dxvk_macos_step11d3b/evidence/br9r2/z9-finder-replay-20261014/Z9R-H2-F-ADVERSARIAL.md).
 
 ## What works today
 

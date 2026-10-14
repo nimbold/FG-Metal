@@ -339,7 +339,9 @@ func raiseTargetWindow(pid: pid_t, expectedTitle: String) -> [String: Any] {
         let title = titleValue as? String
         if title == expectedTitle { matches.append((window, title)) }
     }
-    let selected: AXUIElement? = matches.count == 1 ? matches[0].0 : (matches.isEmpty && windows.count == 1 ? windows[0] : nil)
+    // Never raise a merely sole AX window: bind the public AX action to one
+    // exact expected-title window for this already PID-bound Wine process.
+    let selected: AXUIElement? = matches.count == 1 ? matches[0].0 : nil
     let raiseError = selected.map { AXUIElementPerformAction($0, kAXRaiseAction as CFString) }
     return [
         "attempted": true,
@@ -1274,24 +1276,6 @@ func main() throws -> Int32 {
                 path: parsed.targetTracePath, pid: parsed.pid, token: parsed.token,
                 expectedProcessPath: parsed.expectedProcessPath.standardizedFileURL.path,
                 expectedProcessSHA256: parsed.expectedProcessSHA256)
-            let app = NSRunningApplication(processIdentifier: parsed.pid)
-            let activation: [String: Any] = [
-                "event": "activation", "atUTC": utcNow(),
-                "atMonotonicNS": DispatchTime.now().uptimeNanoseconds,
-                "targetPID": Int(parsed.pid),
-                "source": app == nil ? "NSRunningApplication unavailable for handed-off PID" : "NSRunningApplication.activate",
-                "runningApplicationAvailable": app != nil,
-                "returnValue": boxed(app?.activate(options: [.activateAllWindows])),
-            ]
-            activationActions.append(activation)
-            activationCount += 1
-            lastActivationAt = DispatchTime.now().uptimeNanoseconds
-            activationActions.append([
-                "event": "activation", "atUTC": utcNow(),
-                "atMonotonicNS": DispatchTime.now().uptimeNanoseconds,
-                "targetPID": Int(parsed.pid), "source": "public Accessibility frontmost/raise",
-                "result": raiseTargetWindow(pid: parsed.pid, expectedTitle: parsed.title),
-            ])
             emit([
                 "event": "target_handoff_received",
                 "receivedAtUTC": handoffReceivedAtUTC as Any? ?? NSNull(),
@@ -1354,22 +1338,32 @@ func main() throws -> Int32 {
                 }
                 if let error { ambiguityError = error }
                 if newWindowID != nil { previousWindowID = newWindowID }
-                if activationCount < 3, now > lastActivationAt + 2_000_000_000,
-                   isCanonicalUncovered(sample) == false {
+                let target = sample["target"] as? [String: Any]
+                let exactTargetWindowAvailable = (integer(target?["windowID"]) ?? 0) > 0
+                    && target?["titleMatched"] as? Bool == true
+                    && target?["windowIdentityAmbiguous"] as? Bool == false
+                    && target?["processIdentityMatches"] as? Bool == true
+                let activationDue = activationCount == 0
+                    || (activationCount < 3 && now > lastActivationAt + 2_000_000_000
+                        && isCanonicalUncovered(sample) == false)
+                if exactTargetWindowAvailable && activationDue {
                     let retryApp = NSRunningApplication(processIdentifier: parsed.pid)
                     activationActions.append([
                         "event": "activation", "atUTC": utcNow(),
                         "atMonotonicNS": now, "targetPID": Int(parsed.pid),
-                        "source": retryApp == nil
-                            ? "NSRunningApplication unavailable for handed-off PID"
-                            : "NSRunningApplication.activate retry",
+                        "source": retryApp == nil ? "NSRunningApplication unavailable for exact target window"
+                            : (activationCount == 0 ? "NSRunningApplication.activate after exact target discovery"
+                               : "NSRunningApplication.activate retry after exact target discovery"),
+                        "targetWindowID": target?["windowID"] as Any? ?? NSNull(),
+                        "sampledAtMonotonicNS": sample["sampledAtMonotonicNS"] as Any? ?? NSNull(),
                         "runningApplicationAvailable": retryApp != nil,
                         "returnValue": boxed(retryApp?.activate(options: [.activateAllWindows])),
                     ])
                     activationActions.append([
                         "event": "activation", "atUTC": utcNow(),
                         "atMonotonicNS": DispatchTime.now().uptimeNanoseconds,
-                        "targetPID": Int(parsed.pid), "source": "public Accessibility frontmost/raise retry",
+                        "targetPID": Int(parsed.pid), "source": "public Accessibility frontmost/raise after exact target discovery",
+                        "targetWindowID": target?["windowID"] as Any? ?? NSNull(),
                         "result": raiseTargetWindow(pid: parsed.pid, expectedTitle: parsed.title),
                     ])
                     activationCount += 1

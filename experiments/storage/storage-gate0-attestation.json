@@ -23,7 +23,7 @@
     "unknown_count": 0
   },
   "build_retention_test_report_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/build-retention-tests.log",
-  "build_retention_test_report_sha256": "a8187827822a94b183e1c0172f2ff6cd98fdd208da5c716688a5a25fba5efcd9",
+  "build_retention_test_report_sha256": "02b81cf9827a3299f139cd40452d59dde13aea38c5e0e9df25b23c19398b5c7c",
   "canonical_artifact_store_audit": {
     "artifact_count": 1067,
     "sha256": "85b1e66943b8bb24e2ef8710b3d65e21be16f179d15c89384fd6739b736f06ab",
@@ -32,31 +32,31 @@
   },
   "certified_template": true,
   "cleanup_receipt_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/storage-cleanup-receipt.json",
-  "cleanup_receipt_sha256": "7e888f9f932bc27a776d879fb5058d8ec16853a48d603952076f3c8cf6ac17d6",
-  "created_at_unix": 1791893801.509772,
-  "evidence_logical_bytes": 68431179,
+  "cleanup_receipt_sha256": "747cc986f813ff9f2428f2728b5590c033c22b9ff1b64bca791249f0716fa618",
+  "created_at_unix": 1792010959.20507,
+  "evidence_logical_bytes": 72472698,
   "evidence_size": {
-    "file_count": 1229,
-    "logical_bytes": 68431179,
-    "unique_inode_allocated_bytes": 71127040
+    "file_count": 1319,
+    "logical_bytes": 72472698,
+    "unique_inode_allocated_bytes": 75345920
   },
-  "evidence_unique_inode_bytes": 71127040,
-  "gate0_hmac_sha256": "23c7bc323c505403215aad14e1ac3b7fcf6b2e2a929dea3b61c54c06bfbc5d64",
-  "global_inode_deduplicated_bytes": 51468509184,
-  "global_inode_deduplicated_bytes_including_unlinked_mount_upper_bound": 51468509184,
+  "evidence_unique_inode_bytes": 75345920,
+  "gate0_hmac_sha256": "ca2a64a19c4b0b10e92419e43ff9e659b570889abb94fd68ee847dc95560be86",
+  "global_inode_deduplicated_bytes": 53014855680,
+  "global_inode_deduplicated_bytes_including_unlinked_mount_upper_bound": 53014855680,
   "inventory_measurements": {
-    "fgmetal_scoped_allocated_inode_bytes": 48416772096,
-    "fgmetal_scoped_observed_allocated_inode_bytes": 48416772096,
-    "free_bytes": 77546754048
+    "fgmetal_scoped_allocated_inode_bytes": 49963118592,
+    "fgmetal_scoped_observed_allocated_inode_bytes": 49963118592,
+    "free_bytes": 69369626624
   },
   "inventory_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/storage-inventory.json",
-  "inventory_sha256": "0c304d540a94ed413a1d5b8ad444c730577bc756b09bec823f531ae93883df23",
+  "inventory_sha256": "da803e2a4c3acc4fc005b79b3a59a3169602733f3fc54f751aa58d0e4063c061",
   "manifest_signing_key_sha256": "274cc29bb5bc904224bad3d0c65e0e2516beb69107a870563e0bff1a6e60aaf3",
   "measurements": {
-    "fgmetal_scoped_allocated_inode_bytes": 48416776192,
-    "fgmetal_scoped_observed_allocated_inode_bytes": 48416776192,
-    "fgmetal_scoped_observed_nonlease_allocated_inode_bytes": 46661148672,
-    "free_bytes": 77556187136,
+    "fgmetal_scoped_allocated_inode_bytes": 49963122688,
+    "fgmetal_scoped_observed_allocated_inode_bytes": 49963122688,
+    "fgmetal_scoped_observed_nonlease_allocated_inode_bytes": 46734876672,
+    "free_bytes": 69366353920,
     "signed_persistent_output_bindings": [
       {
         "experiment_id": "step11d3-storage-policy-smoke-20261011-139a06316adc4ba6",
@@ -539,6 +539,38 @@
         "output_tree_sha256": "b65cc7625b432983ac46b5c5b5a032c5cd34e784d9269ba9f75ee63b338d25ab"
       },
       {
+        "experiment_id": "step11d3-storage-policy-smoke-20261013-44a239deeae54f55",
+        "manifest_gate0_attestation_sha256": "df2a10d2110962200e239dc2a3204febaa97b252221e86032180c9ada13cd4b8",
+        "manifest_identity": [
+          16777229,
+          98034617,
+          33152,
+          501,
+          1,
+          3562,
+          1791909474372153865,
+          1791909474372247116,
+          8
+        ],
+        "manifest_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/manifests/step11d3-storage-policy-smoke-20261013-44a239deeae54f55.json",
+        "manifest_sha256": "0a5f5364baf30e4b63eb7bda8f9f14314776fe2c05746d484b5b8c656c7d9e02",
+        "output_allocated_bytes": 155648,
+        "output_dir": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/smoke-runs/step11d3-storage-policy-smoke-20261013-44a239deeae54f55",
+        "output_identity": [
+          16777229,
+          98034618,
+          16832,
+          501,
+          7,
+          224,
+          1791910092323573497,
+          1791910092323573497,
+          0
+        ],
+        "output_reservation_bytes": 33554432,
+        "output_tree_sha256": "4d5e4dd817f0798261076b69e5dc2de07e656878b462c5d7316273aa6a0144f7"
+      },
+      {
         "experiment_id": "step11d3-storage-policy-smoke-20261013-4563454d577b484b",
         "manifest_gate0_attestation_sha256": "7d2e3c8ea85af9b2509d2fa3f033151cc68357d34c7160449dc9e7bb56883fc2",
         "manifest_identity": [
@@ -571,6 +603,38 @@
         "output_tree_sha256": "82e869b010923a2d54cc8472a5c0974fa477a013d5334b3d74a993e30fab7df4"
       },
       {
+        "experiment_id": "step11d3-storage-policy-smoke-20261013-6c3f2388974a4338",
+        "manifest_gate0_attestation_sha256": "d36241295756409092e5e3c63661fbfcd63ca981558ccce644f9b15afe0c80be",
+        "manifest_identity": [
+          16777229,
+          98082945,
+          33152,
+          501,
+          1,
+          3563,
+          1791919399110353368,
+          1791919399110452452,
+          8
+        ],
+        "manifest_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/manifests/step11d3-storage-policy-smoke-20261013-6c3f2388974a4338.json",
+        "manifest_sha256": "503d21c8029f0f851035e629967cc6b0e0be8c411031b53b5f424b9ef29941bf",
+        "output_allocated_bytes": 159744,
+        "output_dir": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/smoke-runs/step11d3-storage-policy-smoke-20261013-6c3f2388974a4338",
+        "output_identity": [
+          16777229,
+          98082946,
+          16832,
+          501,
+          7,
+          224,
+          1791920061687521624,
+          1791920061687521624,
+          0
+        ],
+        "output_reservation_bytes": 33554432,
+        "output_tree_sha256": "14edf6733e7ac1574e9596fed6724dd4f2fee49caf403bf844774ec54690bd03"
+      },
+      {
         "experiment_id": "step11d3-storage-policy-smoke-20261013-73abf8010cb94d2b",
         "manifest_gate0_attestation_sha256": "476fd1ec430900e037e7c385a512d6b6aa3e38f729746ae9d0b9f4f506862fb7",
         "manifest_identity": [
@@ -601,6 +665,38 @@
         ],
         "output_reservation_bytes": 33554432,
         "output_tree_sha256": "fb809e894bdd0b4d38786d9245d8c4f94a7a561a5e63d3e11003b75b8642197b"
+      },
+      {
+        "experiment_id": "step11d3-storage-policy-smoke-20261013-8ebcc69391264db2",
+        "manifest_gate0_attestation_sha256": "7c533cd398fb3b8b117b53c72b6d18232234c3698d94feef3a4845d5cb3e5b53",
+        "manifest_identity": [
+          16777229,
+          97998185,
+          33152,
+          501,
+          1,
+          3561,
+          1791906202390990143,
+          1791906202391071727,
+          8
+        ],
+        "manifest_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/manifests/step11d3-storage-policy-smoke-20261013-8ebcc69391264db2.json",
+        "manifest_sha256": "728fce7f0608e2887f0ed40926d5e1ee07c7ba68c1c1019d84afb54c1a4043b7",
+        "output_allocated_bytes": 151552,
+        "output_dir": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/smoke-runs/step11d3-storage-policy-smoke-20261013-8ebcc69391264db2",
+        "output_identity": [
+          16777229,
+          97998186,
+          16832,
+          501,
+          7,
+          224,
+          1791906807643353996,
+          1791906807643353996,
+          0
+        ],
+        "output_reservation_bytes": 33554432,
+        "output_tree_sha256": "8464396ee5af36b8a99cb85e4fd6e4c1596dc2dc6ce056a38f61f90f14446586"
       },
       {
         "experiment_id": "step11d3-storage-policy-smoke-20261013-93b9a6382d414eb9",
@@ -699,6 +795,297 @@
         "output_tree_sha256": "1cc0bc669a3f1cc64f1e4dde23abc275fe86b58551b157ca4b9de2f5c83fd608"
       },
       {
+        "experiment_id": "step11d3-storage-policy-smoke-20261014-181524779a0742c0",
+        "manifest_gate0_attestation_sha256": "6fbfdacd5db250f1256c66c12ae2af909c78b34e43524fd81f722b94edf530e5",
+        "manifest_identity": [
+          16777229,
+          98191063,
+          33152,
+          501,
+          1,
+          3561,
+          1791969829752592119,
+          1791969829752681119,
+          8
+        ],
+        "manifest_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/manifests/step11d3-storage-policy-smoke-20261014-181524779a0742c0.json",
+        "manifest_sha256": "111681c574f739b1cfb6d3910401d9080dd8f5bf03da75b557e4f7ec46a63e95",
+        "output_allocated_bytes": 159744,
+        "output_dir": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/smoke-runs/step11d3-storage-policy-smoke-20261014-181524779a0742c0",
+        "output_identity": [
+          16777229,
+          98191064,
+          16832,
+          501,
+          7,
+          224,
+          1791970505511630380,
+          1791970505511630380,
+          0
+        ],
+        "output_reservation_bytes": 33554432,
+        "output_tree_sha256": "4f5f1b3b903b2a0b540f1425ccc812952747cf703cef9c56643274ce29925305"
+      },
+      {
+        "experiment_id": "step11d3-storage-policy-smoke-20261014-2405a86ddd524fbe",
+        "manifest_gate0_attestation_sha256": "14e386b2c8d05e8a7da29ab885bb23091479f0df4ffd60b3b95952b5061f15bb",
+        "manifest_identity": [
+          16777229,
+          98216005,
+          33152,
+          501,
+          1,
+          3561,
+          1791971969568945015,
+          1791971969569038349,
+          8
+        ],
+        "manifest_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/manifests/step11d3-storage-policy-smoke-20261014-2405a86ddd524fbe.json",
+        "manifest_sha256": "7e621a10802fbeeaf86cfe628f1552b64d9d19caa3258c4f16f25770439c4586",
+        "output_allocated_bytes": 159744,
+        "output_dir": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/smoke-runs/step11d3-storage-policy-smoke-20261014-2405a86ddd524fbe",
+        "output_identity": [
+          16777229,
+          98216006,
+          16832,
+          501,
+          7,
+          224,
+          1791972659812161994,
+          1791972659812161994,
+          0
+        ],
+        "output_reservation_bytes": 33554432,
+        "output_tree_sha256": "311415fe45e253cc7270b9112bd2426b5b958f243a0567aedbc1560b81ee020d"
+      },
+      {
+        "experiment_id": "step11d3-storage-policy-smoke-20261014-2c091e831859435c",
+        "manifest_gate0_attestation_sha256": "c54ee8d56b8dae1d1cead91c0634655b6df7d1610f35206f8957b7043f52651f",
+        "manifest_identity": [
+          16777229,
+          98623110,
+          33152,
+          501,
+          1,
+          3561,
+          1792005091724712110,
+          1792005091724811611,
+          8
+        ],
+        "manifest_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/manifests/step11d3-storage-policy-smoke-20261014-2c091e831859435c.json",
+        "manifest_sha256": "60553ad18f21b5f497b0d58a96af36ffabc46711b8528c7199ed26abdc407087",
+        "output_allocated_bytes": 172032,
+        "output_dir": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/smoke-runs/step11d3-storage-policy-smoke-20261014-2c091e831859435c",
+        "output_identity": [
+          16777229,
+          98623111,
+          16832,
+          501,
+          7,
+          224,
+          1792005894250974807,
+          1792005894250974807,
+          0
+        ],
+        "output_reservation_bytes": 33554432,
+        "output_tree_sha256": "5e9ff00be2361b863b2ab092249e0775593f543d177cdcbdbec6023440da5aed"
+      },
+      {
+        "experiment_id": "step11d3-storage-policy-smoke-20261014-3354cdf1245f4542",
+        "manifest_gate0_attestation_sha256": "6da29e04fe11687ae5afa8f2663e4aadc65d71bb8f71aea5b21decbee4ed7b43",
+        "manifest_identity": [
+          16777229,
+          98249227,
+          33152,
+          501,
+          1,
+          3561,
+          1791975169679756431,
+          1791975169679847473,
+          8
+        ],
+        "manifest_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/manifests/step11d3-storage-policy-smoke-20261014-3354cdf1245f4542.json",
+        "manifest_sha256": "c0358c11211f424dab4f91052295e7dc14f58941f556958a57a023aa10a97f14",
+        "output_allocated_bytes": 163840,
+        "output_dir": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/smoke-runs/step11d3-storage-policy-smoke-20261014-3354cdf1245f4542",
+        "output_identity": [
+          16777229,
+          98249228,
+          16832,
+          501,
+          7,
+          224,
+          1791975897571511734,
+          1791975897571511734,
+          0
+        ],
+        "output_reservation_bytes": 33554432,
+        "output_tree_sha256": "b57455fedd5488de7ec95b35eadd8b73f49e21a48e55f6907af11bb8149bbed5"
+      },
+      {
+        "experiment_id": "step11d3-storage-policy-smoke-20261014-811b5f4baf7c4a2d",
+        "manifest_gate0_attestation_sha256": "896163e544bbaf257853328234cc154551bbbbb5a8ff69a9246b01f6edd3afa3",
+        "manifest_identity": [
+          16777229,
+          98597269,
+          33152,
+          501,
+          1,
+          3561,
+          1792002932882620843,
+          1792002932882724803,
+          8
+        ],
+        "manifest_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/manifests/step11d3-storage-policy-smoke-20261014-811b5f4baf7c4a2d.json",
+        "manifest_sha256": "3d80505a9f8b93ef456cd72b64e1330997ec8b7d5b778d07cb42e77c5944256a",
+        "output_allocated_bytes": 172032,
+        "output_dir": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/smoke-runs/step11d3-storage-policy-smoke-20261014-811b5f4baf7c4a2d",
+        "output_identity": [
+          16777229,
+          98597270,
+          16832,
+          501,
+          7,
+          224,
+          1792003733972784645,
+          1792003733972784645,
+          0
+        ],
+        "output_reservation_bytes": 33554432,
+        "output_tree_sha256": "f287a0fdac9f1811f915e2f7908a53845d19e1a26fe27c444afebd9c57f11bce"
+      },
+      {
+        "experiment_id": "step11d3-storage-policy-smoke-20261014-a1204291f7194be2",
+        "manifest_gate0_attestation_sha256": "07fb878641d3db2fe70bc0399abdb04c66376af86c0fd6f6251a87b2ce63e22f",
+        "manifest_identity": [
+          16777229,
+          98287679,
+          33152,
+          501,
+          1,
+          3561,
+          1791978738132790033,
+          1791978738132903117,
+          8
+        ],
+        "manifest_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/manifests/step11d3-storage-policy-smoke-20261014-a1204291f7194be2.json",
+        "manifest_sha256": "63a4dc4d50e858ad4644c8fd12e0ad2032f24f0cb704e32a654d48aeb0116035",
+        "output_allocated_bytes": 167936,
+        "output_dir": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/smoke-runs/step11d3-storage-policy-smoke-20261014-a1204291f7194be2",
+        "output_identity": [
+          16777229,
+          98287680,
+          16832,
+          501,
+          7,
+          224,
+          1791979630958002181,
+          1791979630958002181,
+          0
+        ],
+        "output_reservation_bytes": 33554432,
+        "output_tree_sha256": "5badbbe2b25aa5a22a26d2c250051d7999ee57c5f24827e322075b1ea592c0e4"
+      },
+      {
+        "experiment_id": "step11d3-storage-policy-smoke-20261014-a45f68f30c0f446f",
+        "manifest_gate0_attestation_sha256": "8897552ae24ccef2842eabcf4b460cbcffd6bd82cd4d39a3468adb9c2f029628",
+        "manifest_identity": [
+          16777229,
+          98324229,
+          33152,
+          501,
+          1,
+          3561,
+          1791981839517559624,
+          1791981839517646916,
+          8
+        ],
+        "manifest_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/manifests/step11d3-storage-policy-smoke-20261014-a45f68f30c0f446f.json",
+        "manifest_sha256": "709c400df5a155f1f55ecd57696ceaf224b03b5337218465a16c35cdb228cdf6",
+        "output_allocated_bytes": 167936,
+        "output_dir": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/smoke-runs/step11d3-storage-policy-smoke-20261014-a45f68f30c0f446f",
+        "output_identity": [
+          16777229,
+          98324230,
+          16832,
+          501,
+          7,
+          224,
+          1791982600697165109,
+          1791982600697165109,
+          0
+        ],
+        "output_reservation_bytes": 33554432,
+        "output_tree_sha256": "9c2da62f2d7178bd0f7892bdeae389a0cb9b36800ec4fadba9604932b2ec6192"
+      },
+      {
+        "experiment_id": "step11d3-storage-policy-smoke-20261014-a60425043d42485e",
+        "manifest_gate0_attestation_sha256": "4b23559a6f37f06d0ff2a34db1889a91ce56695c7e75ae52b5770708093920f6",
+        "manifest_identity": [
+          16777229,
+          98653008,
+          33152,
+          501,
+          1,
+          3562,
+          1792009849612150209,
+          1792009849612250043,
+          8
+        ],
+        "manifest_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/manifests/step11d3-storage-policy-smoke-20261014-a60425043d42485e.json",
+        "manifest_sha256": "70e6c58e826782dc9965a3cd3f5811dab8ec17d93db3a06d49f825b4427298f4",
+        "output_allocated_bytes": 172032,
+        "output_dir": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/smoke-runs/step11d3-storage-policy-smoke-20261014-a60425043d42485e",
+        "output_identity": [
+          16777229,
+          98653009,
+          16832,
+          501,
+          7,
+          224,
+          1792010667689546986,
+          1792010667689546986,
+          0
+        ],
+        "output_reservation_bytes": 33554432,
+        "output_tree_sha256": "1a30724435d258ff7cecf312235c0dfa8cecda9b212a98c7bef5cebc78111980"
+      },
+      {
+        "experiment_id": "step11d3b-baseline-01-20261014-130823-44892b9b",
+        "historical_terminal_closure_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/historical-terminal-closures/step11d3b-baseline-01-20261014-130823-44892b9b.correction-1.json",
+        "historical_terminal_closure_sha256": "8201c356ce00f8b2577df90c4e3ed5e6bb229bacef4f1785eac0a6edb5628710",
+        "historical_terminal_tree_sha256": "6b2c295fbce4e089de2ecd6bc133b9e06c22b80b2cd9e530cc5722cfff98eb57",
+        "manifest_gate0_attestation_sha256": "bb44b51ace0d0b336d09f511b4f9e2970548a7ca24b224b7214b99855e6957ea",
+        "manifest_identity": [
+          16777229,
+          98341478,
+          33152,
+          501,
+          1,
+          6447,
+          1791983551867963680,
+          1791983551868052806,
+          16
+        ],
+        "manifest_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/manifests/step11d3b-baseline-01-20261014-130823-44892b9b.json",
+        "manifest_sha256": "11732b65ef09689e0cac94f3e0579e9c45f5af24def1129f8e7bfa910efc9d59",
+        "output_allocated_bytes": 725688320,
+        "output_dir": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11d3b/runs/step11d3b-baseline-01-20261014-130823-44892b9b",
+        "output_identity": [
+          16777229,
+          98341479,
+          16877,
+          501,
+          16,
+          512,
+          1791987292307000886,
+          1791987292307000886,
+          0
+        ],
+        "output_reservation_bytes": 314572800,
+        "output_tree_sha256": "7f6b89d5f3e27081db47a63a65c2e73e9c007bdcc49e0eb91d01ddca527ea67a"
+      },
+      {
         "experiment_id": "step11d3b-br8-state-05-20261011-123411-f2c33b3b",
         "manifest_gate0_attestation_sha256": "7f34a5514d108781894211c2a7c3ed4524b3011d47f0ce3f3d6c737a16caf2c4",
         "manifest_identity": [
@@ -778,7 +1165,7 @@
         ],
         "manifest_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/manifests/step11d3b-br9r-calibration-20261013-081800-3a0ae6ec.json",
         "manifest_sha256": "0d314dca1d9db3e2953f60acd76bd64c7401e277da16edd223785f5c5460d97d",
-        "output_allocated_bytes": 234254336,
+        "output_allocated_bytes": 224452608,
         "output_dir": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11d3b/runs/step11d3b-br9r-calibration-20261013-081800-3a0ae6ec",
         "output_identity": [
           16777229,
@@ -792,7 +1179,71 @@
           0
         ],
         "output_reservation_bytes": 314572800,
-        "output_tree_sha256": "99c72f1a8bedf5f06fc906806a3227bbc92f8683391bc86f0064f287cb3521c5"
+        "output_tree_sha256": "a78fd1e8f5cd4df45dae0f1e972d2c893a6039c1047375eae4743e9f3b1088c8"
+      },
+      {
+        "experiment_id": "step11d3b-br9r-calibration-20261013-124203-9f4d1985",
+        "manifest_gate0_attestation_sha256": "6c25f2c7cce32963b4224afc0f0c5c7c63aa3b9e121a77e2a200ab0cd49f76b0",
+        "manifest_identity": [
+          16777229,
+          97967202,
+          33152,
+          501,
+          1,
+          6470,
+          1791895518297794245,
+          1791895518297898662,
+          16
+        ],
+        "manifest_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/manifests/step11d3b-br9r-calibration-20261013-124203-9f4d1985.json",
+        "manifest_sha256": "80d656360e8fba4dbc8ea6be47fe776c11cc789873aa0d1aabc6b98b6b7174a6",
+        "output_allocated_bytes": 155066368,
+        "output_dir": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11d3b/runs/step11d3b-br9r-calibration-20261013-124203-9f4d1985",
+        "output_identity": [
+          16777229,
+          97967203,
+          16877,
+          501,
+          16,
+          512,
+          1791896320217234169,
+          1791896320217234169,
+          0
+        ],
+        "output_reservation_bytes": 314572800,
+        "output_tree_sha256": "5d240fa6989b4e68d89f3216d2eb995cb24cc19b8fa58bf08ca2066b9380f62c"
+      },
+      {
+        "experiment_id": "step11d3b-br9r-calibration-20261013-171838-46e1a8b2",
+        "manifest_gate0_attestation_sha256": "ccd9194007bc010630ae6f0a217457bae7ed888c43f79722c071a1e26aa32fcc",
+        "manifest_identity": [
+          16777229,
+          98059957,
+          33152,
+          501,
+          1,
+          6471,
+          1791912131151293276,
+          1791912131151405110,
+          16
+        ],
+        "manifest_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/manifests/step11d3b-br9r-calibration-20261013-171838-46e1a8b2.json",
+        "manifest_sha256": "98506e94c1790cf60ffb5960e21d64e1f5f3bbb712ae8e625fc98e54b1bf7841",
+        "output_allocated_bytes": 155271168,
+        "output_dir": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11d3b/runs/step11d3b-br9r-calibration-20261013-171838-46e1a8b2",
+        "output_identity": [
+          16777229,
+          98059958,
+          16877,
+          501,
+          16,
+          512,
+          1791912989262598117,
+          1791912989262598117,
+          0
+        ],
+        "output_reservation_bytes": 314572800,
+        "output_tree_sha256": "e9cecb933bec3bae0fd263a176619bbfa2b85377b83997a0616b018cff42c003"
       },
       {
         "experiment_id": "step11d3b-br9r2-coverer-20261011-115232-8d4fe3d2",
@@ -1290,7 +1741,7 @@
         ],
         "manifest_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/manifests/step11d3b-smoke-20261012-190615-07dbd67c.json",
         "manifest_sha256": "b5ebf022d431061aa1c936bbe8e73ef902e5f515bd7dea2376396c574f76b12e",
-        "output_allocated_bytes": 50315264,
+        "output_allocated_bytes": 49389568,
         "output_dir": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11d3b/runs/step11d3b-smoke-20261012-190615-07dbd67c",
         "output_identity": [
           16777229,
@@ -1304,7 +1755,7 @@
           0
         ],
         "output_reservation_bytes": 104857600,
-        "output_tree_sha256": "6c9d15c2ab79feb02f08ff46dd06b3362a35ad7b78e1bbaacba7cc9f965e34c5"
+        "output_tree_sha256": "ecca533bbb833afe1cbb853a41968758d92f9e546a2290090a6b177484f8c522"
       },
       {
         "experiment_id": "step11d3b-smoke-20261013-065619-6c07abdd",
@@ -1322,7 +1773,7 @@
         ],
         "manifest_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/manifests/step11d3b-smoke-20261013-065619-6c07abdd.json",
         "manifest_sha256": "59816ba95fc52ba4770d6297f3f7d41629dbe5d826779ac89ac145606f2132bf",
-        "output_allocated_bytes": 75681792,
+        "output_allocated_bytes": 73801728,
         "output_dir": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11d3b/runs/step11d3b-smoke-20261013-065619-6c07abdd",
         "output_identity": [
           16777229,
@@ -1336,7 +1787,7 @@
           0
         ],
         "output_reservation_bytes": 104857600,
-        "output_tree_sha256": "1d596bb8d35a72fffd3bb48f78a4e1d3b1312e7316b40ded890668e200645a4e"
+        "output_tree_sha256": "e1e2f0019d1e70945f682520a6fc136d5d95f2b8c51b4bfc83d21ba1501a8a2a"
       },
       {
         "experiment_id": "step11d3b-smoke-20261013-075944-174accd2",
@@ -1354,7 +1805,7 @@
         ],
         "manifest_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/manifests/step11d3b-smoke-20261013-075944-174accd2.json",
         "manifest_sha256": "8bb9912ff5ee42b1c87e960d474b864054e01c7d679a3c5f4f8bb1a15a8c102b",
-        "output_allocated_bytes": 75739136,
+        "output_allocated_bytes": 73904128,
         "output_dir": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11d3b/runs/step11d3b-smoke-20261013-075944-174accd2",
         "output_identity": [
           16777229,
@@ -1368,7 +1819,7 @@
           0
         ],
         "output_reservation_bytes": 104857600,
-        "output_tree_sha256": "8a29b236bc3e990eb5613c2ccb5e95b0499a4184266245952d69cab7e626f7a6"
+        "output_tree_sha256": "aab6732c0335c9aed516e71b2d6fead694caf2608c658f525f9f062a7c5b6a2c"
       },
       {
         "experiment_id": "step11d3b-smoke-20261013-092251-8bb784ca",
@@ -1386,7 +1837,7 @@
         ],
         "manifest_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/manifests/step11d3b-smoke-20261013-092251-8bb784ca.json",
         "manifest_sha256": "d8158a3c9435f21fa6322cd197c8c65dd313f412f1b2cb305f5f5ae8fe64a84e",
-        "output_allocated_bytes": 75722752,
+        "output_allocated_bytes": 73924608,
         "output_dir": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11d3b/runs/step11d3b-smoke-20261013-092251-8bb784ca",
         "output_identity": [
           16777229,
@@ -1400,7 +1851,199 @@
           0
         ],
         "output_reservation_bytes": 104857600,
-        "output_tree_sha256": "c5d8f6aaaa30ad474cd39fb41fe348ac56766400bcd31359ec41b576619f1129"
+        "output_tree_sha256": "e82113de1509c2475d32dc3341c1e4d06df0fcc6bd185cd832f7213609702ee1"
+      },
+      {
+        "experiment_id": "step11d3b-smoke-20261013-122616-f8eae88a",
+        "manifest_gate0_attestation_sha256": "6c25f2c7cce32963b4224afc0f0c5c7c63aa3b9e121a77e2a200ab0cd49f76b0",
+        "manifest_identity": [
+          16777229,
+          97956512,
+          33152,
+          501,
+          1,
+          6151,
+          1791894567193878534,
+          1791894567193983993,
+          16
+        ],
+        "manifest_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/manifests/step11d3b-smoke-20261013-122616-f8eae88a.json",
+        "manifest_sha256": "5f1e454d7489d78ff89d31d4ffcd3ce76d288fe47e51a673347cd0c23a0b8d83",
+        "output_allocated_bytes": 73973760,
+        "output_dir": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11d3b/runs/step11d3b-smoke-20261013-122616-f8eae88a",
+        "output_identity": [
+          16777229,
+          97956513,
+          16877,
+          501,
+          21,
+          672,
+          1791895301270094759,
+          1791895301270094759,
+          0
+        ],
+        "output_reservation_bytes": 104857600,
+        "output_tree_sha256": "bee480563fb774f48c158615baf8187f723b8bbc1c0b6f6933d112688d337b7c"
+      },
+      {
+        "experiment_id": "step11d3b-smoke-20261013-160619-7f0921d4",
+        "manifest_gate0_attestation_sha256": "4284a8c3fdff58579b7cdd2efea0d47327b05924d7ea7b290bbc50a08e358836",
+        "manifest_identity": [
+          16777229,
+          98014319,
+          33152,
+          501,
+          1,
+          6150,
+          1791907776148314620,
+          1791907776148424205,
+          16
+        ],
+        "manifest_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/manifests/step11d3b-smoke-20261013-160619-7f0921d4.json",
+        "manifest_sha256": "60d94e78075fe7507f90018937530e3543433be6a4bd3d616890d1aedfbc7b36",
+        "output_allocated_bytes": 76328960,
+        "output_dir": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11d3b/runs/step11d3b-smoke-20261013-160619-7f0921d4",
+        "output_identity": [
+          16777229,
+          98014320,
+          16877,
+          501,
+          105,
+          3360,
+          1791908773366497031,
+          1791908773366497031,
+          0
+        ],
+        "output_reservation_bytes": 104857600,
+        "output_tree_sha256": "167039b22ebc306f6ac1cedc9b8bb41d3fc7177304cbd13f5c6ef59aab5f6ec8"
+      },
+      {
+        "experiment_id": "step11d3b-smoke-20261013-165939-2fd34a1d",
+        "manifest_gate0_attestation_sha256": "ccd9194007bc010630ae6f0a217457bae7ed888c43f79722c071a1e26aa32fcc",
+        "manifest_identity": [
+          16777229,
+          98051382,
+          33152,
+          501,
+          1,
+          6150,
+          1791910983388804245,
+          1791910983388893079,
+          16
+        ],
+        "manifest_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/manifests/step11d3b-smoke-20261013-165939-2fd34a1d.json",
+        "manifest_sha256": "6c1dcfb9d399ca66a416ada01da35fe1d30f7267dede1c585c41901072ef06b2",
+        "output_allocated_bytes": 73912320,
+        "output_dir": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11d3b/runs/step11d3b-smoke-20261013-165939-2fd34a1d",
+        "output_identity": [
+          16777229,
+          98051383,
+          16877,
+          501,
+          21,
+          672,
+          1791911773182924286,
+          1791911773182924286,
+          0
+        ],
+        "output_reservation_bytes": 104857600,
+        "output_tree_sha256": "37d0c12b5dc93aa849791c7bee1814a00520ba7ca4330e5caef0480bbeb00b39"
+      },
+      {
+        "experiment_id": "step11d3b-smoke-20261013-194952-8a6a0487",
+        "manifest_gate0_attestation_sha256": "c92ba67275e18c6d3bc6dde0c4e4a218e5f07e235d5f17877462b7bb9a7e3760",
+        "manifest_identity": [
+          16777229,
+          98098806,
+          33152,
+          501,
+          1,
+          6150,
+          1791921212244886441,
+          1791921212244993233,
+          16
+        ],
+        "manifest_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/manifests/step11d3b-smoke-20261013-194952-8a6a0487.json",
+        "manifest_sha256": "96c0d14fddba4e1ce65f8660cebbd583db09635f63c47e413ed3ac8af0499881",
+        "output_allocated_bytes": 73912320,
+        "output_dir": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11d3b/runs/step11d3b-smoke-20261013-194952-8a6a0487",
+        "output_identity": [
+          16777229,
+          98098807,
+          16877,
+          501,
+          21,
+          672,
+          1791922044056771475,
+          1791922044056771475,
+          0
+        ],
+        "output_reservation_bytes": 104857600,
+        "output_tree_sha256": "daeae3dbd25750216906c98f66b33d9349723d9b5b03f3f9141c2c85d3cc0377"
+      },
+      {
+        "experiment_id": "step11d3b-smoke-20261014-102111-ab9804d7",
+        "manifest_gate0_attestation_sha256": "4b31d82b5f2f37e0e3b29a2f0586fa3bae08d53324219ecf40a157a28782bbc1",
+        "manifest_identity": [
+          16777229,
+          98230688,
+          33152,
+          501,
+          1,
+          6149,
+          1791973501473252607,
+          1791973501473359066,
+          16
+        ],
+        "manifest_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/manifests/step11d3b-smoke-20261014-102111-ab9804d7.json",
+        "manifest_sha256": "dedd5b36b17b3c2b677863962a2e48b36ec24e183034f5d2256fb6e448ba8567",
+        "output_allocated_bytes": 78458880,
+        "output_dir": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11d3b/runs/step11d3b-smoke-20261014-102111-ab9804d7",
+        "output_identity": [
+          16777229,
+          98230689,
+          16877,
+          501,
+          48,
+          1536,
+          1791974517033115855,
+          1791974517033115855,
+          0
+        ],
+        "output_reservation_bytes": 104857600,
+        "output_tree_sha256": "4bb7c22a1cef8eddcdc82847ce4aa87978a0eab72d4c760a7f0e2a3f2d02b59c"
+      },
+      {
+        "experiment_id": "step11d3b-smoke-20261014-112011-087f5dc3",
+        "manifest_gate0_attestation_sha256": "2810328d3f83f9ff141a69835906f78361fdb4c6b3e4acc037ab29c3a13c8137",
+        "manifest_identity": [
+          16777229,
+          98266218,
+          33152,
+          501,
+          1,
+          6150,
+          1791977046505982655,
+          1791977046506093031,
+          16
+        ],
+        "manifest_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/manifests/step11d3b-smoke-20261014-112011-087f5dc3.json",
+        "manifest_sha256": "ba767dc79a76f279cf1594805254db75e0336d0bb7fc647e8be94b5fcb6fa97a",
+        "output_allocated_bytes": 74326016,
+        "output_dir": "/Users/nima/Documents/Code/FG-Metal/experiments/dxvk_macos_step11d3b/runs/step11d3b-smoke-20261014-112011-087f5dc3",
+        "output_identity": [
+          16777229,
+          98266219,
+          16877,
+          501,
+          21,
+          672,
+          1791978050252616250,
+          1791978050252616250,
+          0
+        ],
+        "output_reservation_bytes": 104857600,
+        "output_tree_sha256": "eeab5fc8f63fb32083e166696fcb28eef8e4240927318eee9f4034a301f90374"
       },
       {
         "experiment_id": "step11d3b-z4-storage-repro-20261012-165839-c5984325",
@@ -1474,17 +2117,17 @@
   "prefix_count": 2,
   "prefix_state_fingerprint_sha256": "e4a5e836850a26ef9b80c0447ca95bfde51b208298da8c82551a1a107b17e356",
   "prefixlease_smoke": {
-    "cleanup_receipt_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/smoke-runs/step11d3-storage-policy-smoke-20261013-73abf8010cb94d2b/prefix-cleanup.json",
-    "cleanup_receipt_sha256": "2d3e9ac1c6edabb3205d2baf28cc54feff4f863ece785547be5a5bb21020247e",
-    "experiment_id": "step11d3-storage-policy-smoke-20261013-73abf8010cb94d2b",
-    "manifest_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/manifests/step11d3-storage-policy-smoke-20261013-73abf8010cb94d2b.json",
-    "manifest_sha256": "65b809707a7ba8dcf8a68bd02a8928d3f33a991723fc124f4d5f983f864f261c",
-    "preflight_attestation_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/smoke-runs/step11d3-storage-policy-smoke-20261013-73abf8010cb94d2b/gate0-preflight-attestation.json",
-    "preflight_attestation_sha256": "476fd1ec430900e037e7c385a512d6b6aa3e38f729746ae9d0b9f4f506862fb7",
-    "report_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/smoke-runs/step11d3-storage-policy-smoke-20261013-73abf8010cb94d2b/prefix-smoke-report.json",
-    "report_sha256": "f7fdbfae4e886cb298519672b2c902651da61abd257598a7e8309dc152ed61ec",
-    "smoke_nonce_claim_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/smoke-claims/step11d3-storage-policy-smoke-20261013-73abf8010cb94d2b.json",
-    "smoke_nonce_claim_sha256": "d4ca6417385fed8cd4cce2756c65c10ff73aa71a8d4702f868b9aefcc1be34ce",
+    "cleanup_receipt_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/smoke-runs/step11d3-storage-policy-smoke-20261014-a60425043d42485e/prefix-cleanup.json",
+    "cleanup_receipt_sha256": "6eb941ad99aa864d820aee41deeb866e9e42b0c8881dee75f78404177542a5cf",
+    "experiment_id": "step11d3-storage-policy-smoke-20261014-a60425043d42485e",
+    "manifest_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/manifests/step11d3-storage-policy-smoke-20261014-a60425043d42485e.json",
+    "manifest_sha256": "70e6c58e826782dc9965a3cd3f5811dab8ec17d93db3a06d49f825b4427298f4",
+    "preflight_attestation_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/smoke-runs/step11d3-storage-policy-smoke-20261014-a60425043d42485e/gate0-preflight-attestation.json",
+    "preflight_attestation_sha256": "4b23559a6f37f06d0ff2a34db1889a91ce56695c7e75ae52b5770708093920f6",
+    "report_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/smoke-runs/step11d3-storage-policy-smoke-20261014-a60425043d42485e/prefix-smoke-report.json",
+    "report_sha256": "699fa2ffa05832b822ea44258dda7502a8cc1f58881152db04c37ad06579dbb7",
+    "smoke_nonce_claim_path": "/Users/nima/Documents/Code/FG-Metal/experiments/storage/smoke-claims/step11d3-storage-policy-smoke-20261014-a60425043d42485e.json",
+    "smoke_nonce_claim_sha256": "8545eb6281658070aabc97369a2a1dbf007f2c5b2ec52533520edacbda1864c7",
     "status": "PASS"
   },
   "prefixlease_smoke_status": "PASS",
@@ -1499,11 +2142,11 @@
     "smoke_prefix_lease.py": "fc654e3f431c81bea3bf0b604d57341b8109dbe1d094bb68ee793bbdbf639028",
     "storage_gate0.py": "d4a42335f1ab7b8bc805796c9df62ed6a0747032a15a24c969c1a8f3331c9142",
     "storage_inventory.py": "7b600312af63a98f652df454def358d963c35aa99830cfb330467bb7d9f057b0",
-    "storage_policy.py": "7ce9bfc8143a527ef05bc1b0610fa8c7dc2afdb7b6dbad55183f7243e5a86313",
+    "storage_policy.py": "c2feb4c3a607ad4bf92a1a023feffd431aa13fc2b620fc7e1cf59e819b72efc1",
     "test_build_retention.py": "3614b4d476743bb816d54935838c2b9de387e239bf8292334480dda853d8db3c",
     "test_evidence_consolidation.py": "89e510178c9d200dc17eeed737d352fe00c5aa45dc9fc449aa97fcd7821ef4d2",
     "test_g0c_checks.py": "8bc1f5e196480109aa450c9c59b169402b8f8e340826d0227d8cf26d6eed6323",
-    "test_storage_policy.py": "524bed3ba141e6d9f8be87d29a618e177b684b9fbf3caff0e72a22aee3a0c68c",
+    "test_storage_policy.py": "0cc610bd9988ab14348d3b32e288af4c405a381c6348285f6382f5cafa0ba0a7",
     "test_storage_recovery.py": "a4951ab138567afa7f43d97362bb7a30a6ec82fc2e079086622215f165ac93e7",
     "test_wine_launcher_policy.py": "004e7e33cac1d1288aec2392d3303601d4efd1c65a0d75a40f326bd29baa4faf"
   },
@@ -1535,15 +2178,15 @@
       "shared_payload_logical_bytes": 16059699287
     },
     "evidence_size": {
-      "file_count": 1229,
-      "logical_bytes": 68431179,
-      "unique_inode_allocated_bytes": 71127040
+      "file_count": 1319,
+      "logical_bytes": 72472698,
+      "unique_inode_allocated_bytes": 75345920
     },
-    "fgmetal_scoped_allocated_inode_bytes": 48416772096,
+    "fgmetal_scoped_allocated_inode_bytes": 49963118592,
     "fgmetal_scoped_unlinked_mount_backing_upper_bound_bytes": 0,
-    "free_bytes": 77546754048,
-    "global_inode_deduplicated_bytes_including_unlinked_mount_upper_bound": 51468509184,
-    "inventory_sha256": "0c304d540a94ed413a1d5b8ad444c730577bc756b09bec823f531ae93883df23",
+    "free_bytes": 69369626624,
+    "global_inode_deduplicated_bytes_including_unlinked_mount_upper_bound": 53014855680,
+    "inventory_sha256": "da803e2a4c3acc4fc005b79b3a59a3169602733f3fc54f751aa58d0e4063c061",
     "prefix_state_fingerprint_sha256": "e4a5e836850a26ef9b80c0447ca95bfde51b208298da8c82551a1a107b17e356",
     "preserved_prefix_count": 2,
     "uncertified_prefix_count": 0,
@@ -1564,7 +2207,7 @@
     "g0c-evidence-consolidation-plan.json": "3c7a6caced2bd08c6899945f4d72be338684c7c23f956f588c7942f18c949dce",
     "g0c-evidence-consolidation-receipt.json": "91a2e959bee1565eb560e23d09c5b8db4ecace1610feb465c48524ac4cf9cae6",
     "g0c-hardlink-audit.json": "7087de7cb91a58dd716e9ca265b2e3e0c9900f52fa03822e7127f7625f6b4395",
-    "g0c-launcher-independent-review.json": "a96d21f228548f18761a06b2a36ccd82f416a32b2bcd63b80fb3ba93eb79b304",
+    "g0c-launcher-independent-review.json": "a41677b75ac31d10254a90546a578c96eeccd4a1fd1767d8a42fe701150b5093",
     "g0c-launcher-tests.log": "3eae4527cd9bd41544844b3f5fbc4969ccf666ac9645bc5db9386216a0d218ee"
   },
   "template_file_count": 4916,

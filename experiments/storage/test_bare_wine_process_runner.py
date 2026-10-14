@@ -69,6 +69,12 @@ class BareWineProcessRunnerTests(unittest.TestCase):
         self.assertEqual(result['process_returncode'], 124)
         self.assertIsNone(result['target_process_exit_monotonic_ns'])
 
+    def test_output_cap_is_passed_to_prefixlease_watcher(self):
+        context, lease, _root = self.exercise(0)
+        context['output_limit_bytes'] = 4 * 1024 * 1024
+        self.assertEqual(runner.run_managed_process(context, lease), 0)
+        self.assertEqual(lease.wait_process.call_args.kwargs['output_limit_bytes'], 4 * 1024 * 1024)
+
 
 if __name__ == '__main__':
     unittest.main()

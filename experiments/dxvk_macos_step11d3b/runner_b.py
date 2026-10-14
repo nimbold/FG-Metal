@@ -37,7 +37,7 @@ RUNTIME_MANIFEST = STORAGE / "runtime-manifests/step11d_r_active_runtime.json"
 APP = HERE / "control/bare_vulkan_app-start-gated.exe"
 APP_SOURCE = HERE / "bare_vulkan_app.cpp"
 APP_BUILD_RECEIPT = HERE / "evidence/br9r2/bare-vulkan-app-start-gate-build.json"
-PROXY = HERE / "control/libvulkan-trace-start-gated-configured.dylib"
+PROXY = HERE / "control/libvulkan-trace-z8-identity.dylib"
 PROXY_SOURCE = HERE / "trace_loader.mm"
 PROCESS_RUNNER = HERE / "wine_process_runner.py"
 WINEVULKAN_DLL = RUNTIME / "lib/wine/x86_64-windows/winevulkan.dll"
@@ -49,6 +49,7 @@ WINE_HOST_EXECUTABLE = RUNTIME / "lib/wine/x86_64-unix/wine"
 WINESERVER = RUNTIME / "bin/wineserver"
 TRACE_VALIDATOR = STORAGE / "trace_validator.py"
 BR9R2_EVIDENCE = HERE / "evidence/br9r2"
+TRACE_PROXY_BUILD_RECEIPT = HERE / "evidence/br9r2/z8-identity-20261013/proxy-build-provenance.json"
 PUBLIC_WINDOW_OBSERVER_SOURCE = BR9R2_EVIDENCE / "public_window_observer.swift"
 LIFECYCLE_OBSERVER_CONTROLLER = BR9R2_EVIDENCE / "lifecycle_window_observer.py"
 AUTHORIZATION_SMOKE_CONTROLLER = BR9R2_EVIDENCE / "authorization_smoke_controller.py"
@@ -656,12 +657,18 @@ def candidate_files() -> dict[str, dict[str, Any]]:
         "moltenvk_icd": ICD, "wine_runtime_manifest": RUNTIME_MANIFEST,
         "app": APP, "app_source": APP_SOURCE, "trace_proxy": PROXY,
         "app_build_receipt": APP_BUILD_RECEIPT,
-        "trace_proxy_build_receipt": BR9R2_EVIDENCE / "start-gate-telemetry-post-config-proxy-build.json",
+        "trace_proxy_build_receipt": TRACE_PROXY_BUILD_RECEIPT,
         "trace_proxy_source": PROXY_SOURCE, "process_runner": PROCESS_RUNNER,
         "trace_validator": TRACE_VALIDATOR, "runner": HERE / "runner_b.py",
         "storage_policy": STORAGE / "storage_policy.py",
         "trace_processes": HERE / "trace_processes.py",
         "loader_evidence": HERE / "loader_evidence.py",
+        "z9_replay_budget": HERE / "evidence/br9r2/z9-finder-replay-20261014/z9_replay_budget.py",
+        "z9_replay_safety": HERE / "evidence/br9r2/z9-finder-replay-20261014/z9_replay_safety.py",
+        "z9_replay_controller": HERE / "evidence/br9r2/z9-finder-replay-20261014/z9_finder_replay.py",
+        "z9_collector_source": HERE / "evidence/br9r2/z9-finder-replay-20261014/public_cgwindow_inventory_z9.swift",
+        "z9_detector": HERE / "evidence/br9r2/z9-finder-replay-20261014/z9_fast_zero_detector.py",
+        "z9_protocol": HERE / "evidence/br9r2/z9-finder-replay-20261014/Z9-PREDECLARED-PROTOCOL.md",
     }
     identities = {name: file_identity(path) for name, path in files.items()}
     expected = {
@@ -679,9 +686,9 @@ def candidate_files() -> dict[str, dict[str, Any]]:
         "app_source": "b51e1e2636587c5aedeaee2aa6915a0ed9de5019db1097606baba2d1a4d22c16",
         "app": "31fd01f5b59c408053a3f82146427fae9d1b5b515ce9fe2ed681358aed8ad088",
         "app_build_receipt": "e0128f9001a0f9da84f16e2534e29223075048111a6896e2ddf0f933379032ee",
-        "trace_proxy": "dd8a87b3743abe07fa428c02c5a4f737100e0893c13c91a45aeee530736a5290",
-        "trace_proxy_source": "26e942682d93c91153f5e0a2baa6c4767a0047c4b9dcc38075c57dc1d789059c",
-        "trace_proxy_build_receipt": "0e1960e749d6aba4b046b38e68146faeb838def9891ac538f2568f1067b3a654",
+        "trace_proxy": "04bbfc075f6ab999d0538f4a5371f3abd65fb0f0e307be0dea56e47aaefd5157",
+        "trace_proxy_source": "08d721e9871c9715594a2ec5e6c140ce2bfd26e9beeb4febc6109247f1ea596a",
+        "trace_proxy_build_receipt": "7241a71e28197f5b889d8e255a655f06a6f46128dbf704044f663d589d979cb2",
     }
     for name, digest in expected.items():
         if identities[name]["sha256"] != digest:
@@ -1107,6 +1114,42 @@ def gate0_snapshot(stage: str) -> dict[str, Any]:
     }
 
 
+def write_z9_final_post(snapshot: dict[str, Any]) -> dict[str, str] | None:
+    raw_path = os.environ.get("FG_Z9_FINAL_POST_PATH")
+    if raw_path is None:
+        return None
+    root = observer_evidence_root()
+    path = Path(raw_path)
+    if (not path.is_absolute() or path.name != "baseline-final-gate0-post.json"
+            or path.parent.parent != root or path.resolve(strict=False) != path
+            or path.parent.is_symlink()):
+        raise RuntimeError("Z9 final Gate 0 artifact path is outside its owned run directory")
+    parent_info = path.parent.lstat()
+    if (not stat.S_ISDIR(parent_info.st_mode) or parent_info.st_uid != os.getuid()
+            or stat.S_IMODE(parent_info.st_mode) != 0o700):
+        raise RuntimeError("Z9 final Gate 0 run directory must be owned and mode 0700")
+    payload = (json.dumps(snapshot, indent=2, sort_keys=True) + "\n").encode()
+    descriptor = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW
+                         | os.O_CLOEXEC, 0o600)
+    try:
+        with os.fdopen(descriptor, "wb") as stream:
+            stream.write(payload)
+            stream.flush()
+            os.fsync(stream.fileno())
+        directory = os.open(path.parent, os.O_RDONLY | os.O_DIRECTORY)
+        try:
+            os.fsync(directory)
+        finally:
+            os.close(directory)
+    except BaseException:
+        try:
+            path.unlink()
+        except FileNotFoundError:
+            pass
+        raise
+    return {"path": str(path), "sha256": sha256(path)}
+
+
 def windows_path(path: Path) -> str:
     absolute = str(path.resolve())
     if not absolute.startswith("/"):
@@ -1333,10 +1376,24 @@ def phase_command(mode: str, baseline_index: int | None = None) -> tuple[int, st
 
 
 def run_one(mode: str, baseline_index: int | None = None,
-            smoke_authorization_id: str | None = None) -> dict[str, Any]:
+            smoke_authorization_id: str | None = None, *,
+            z9_replay: bool = False) -> dict[str, Any]:
+    if z9_replay and (mode != "baseline" or baseline_index not in {1, 2}):
+        raise ValueError("Z9 replay mode is restricted to baseline 1 or 2")
     observer_paths = observer_paths_from_environment(
         required=mode in {"smoke", "calibration"})
     duration_seconds, phase = phase_command(mode, baseline_index)
+    z9_budget_detail: dict[str, Any] | None = None
+    z9_persistent_bytes = None
+    z9_signed_output_limit_bytes = None
+    if z9_replay:
+        z9_budget_dir = HERE / "evidence/br9r2/z9-finder-replay-20261014"
+        sys.path.insert(0, str(z9_budget_dir))
+        import z9_replay_budget  # pylint: disable=import-outside-toplevel
+
+        z9_budget_detail = z9_replay_budget.reservation_breakdown()
+        z9_persistent_bytes = z9_budget_detail["required_persistent_output_bytes"]
+        z9_signed_output_limit_bytes = z9_budget_detail["signed_run_output_limit_bytes"]
     prior_smoke: dict[str, Any] | None = None
     prior_smoke_path: Path | None = None
     if mode in {"baseline", "sample", "confirm", "state", "calibration"}:
@@ -1377,9 +1434,18 @@ def run_one(mode: str, baseline_index: int | None = None,
         expected_duration_seconds=duration_seconds,
         expected_prefix_bytes=3 * GIB,
         expected_build_bytes=0,
-        estimated_persistent_bytes=(100 if mode == "smoke" else 300) * MIB,
-        storage_justification=(None if mode == "smoke" else
+        estimated_persistent_bytes=(z9_persistent_bytes if z9_replay else
+                                    (100 if mode == "smoke" else 300) * MIB),
+        storage_justification=(
+            "Derived Z9 replay reservation covers measured per-stream trace/runtime/controller/observer growth, "
+            "bounded 50 ms same-query opaque-cover evidence (64 rows x 192 bytes plus 512 bytes/sample), "
+            "fixed run artifacts, and a separate 10 percent model margin; see the signed z9_replay_budget breakdown."
+            if z9_replay else None if mode == "smoke" else
             "Retain bounded app and asynchronous host traces, qualitative screenshots, loader log, run manifest, and PrefixLease cleanup receipt for one serialized observation run."),
+        persistent_growth_over_2g_approval=(
+            "Z9 replay-only measured-growth reservation is derived by z9_replay_budget.reservation_breakdown; "
+            "it is bounded by the signed PrefixLease output cap and remains subject to unchanged 55/50 GiB admission."
+            if z9_replay else None),
         authorized_runner_paths=[runner],
         output_dir=output,
         additional={"experiment_step": "11D.3-B", "run_phase": phase,
@@ -1387,6 +1453,10 @@ def run_one(mode: str, baseline_index: int | None = None,
                     "requested_window": [640, 360], "requested_format": "VK_FORMAT_B8G8R8A8_UNORM",
                     "requested_present_mode": "VK_PRESENT_MODE_FIFO_KHR",
                     "requested_swapchain_images": 3, "architecture": "x86_64-under-Rosetta",
+                    **({"z9_replay_budget": z9_budget_detail,
+                        "z9_replay_budget_sha256": sha256(
+                            HERE / "evidence/br9r2/z9-finder-replay-20261014/z9_replay_budget.py")}
+                       if z9_replay and z9_budget_detail is not None else {}),
                     **wine_execution_binding(inputs)},
     )
     output.mkdir(parents=True, exist_ok=False)
@@ -1505,6 +1575,7 @@ def run_one(mode: str, baseline_index: int | None = None,
         "public_window_start_gate_signal_path": (
             str(observer_paths["start_signal"]) if mode == "smoke" and observer_paths else None),
         "start_gate_safety_watchdog_seconds": 900 if mode == "smoke" else None,
+        "output_limit_bytes": (z9_signed_output_limit_bytes if z9_replay else None),
     }
     process_context_path.write_text(json.dumps(process_context, indent=2, sort_keys=True) + "\n")
     process = None
@@ -1924,7 +1995,71 @@ def run_one(mode: str, baseline_index: int | None = None,
         "created_at_utc": datetime.now(timezone.utc).isoformat(),
     }
     result_path = output / "run-result.json"
-    result_path.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n")
+    result_payload = (json.dumps(result, indent=2, sort_keys=True) + "\n").encode()
+    if z9_replay:
+        current_output_allocated = storage_policy._persistent_output_allocated_bytes(output)
+        allocation_block = max(4096, os.statvfs(output).f_bsize)
+        predicted_result_allocation = (
+            (len(result_payload) + allocation_block - 1) // allocation_block * allocation_block
+        )
+        result_limit = z9_budget_detail["run_result_file_limit_bytes"]
+        if (len(result_payload) > result_limit
+                or current_output_allocated + predicted_result_allocation > z9_signed_output_limit_bytes):
+            original_digest = hashlib.sha256(result_payload).hexdigest()
+            result = {
+                "schema_version": 1,
+                "status": "FAIL",
+                "is_valid": False,
+                "experiment_id": experiment_id,
+                "phase": phase,
+                "duration_seconds_requested": duration_seconds,
+                "process_returncode": process_returncode,
+                "prefix_cleanup_pass": cleanup_good,
+                "z9_result_payload_omitted_for_output_budget": True,
+                "z9_result_payload_sha256": original_digest,
+                "z9_result_payload_bytes": len(result_payload),
+                "z9_result_file_limit_bytes": result_limit,
+                "z9_signed_output_limit_bytes": z9_signed_output_limit_bytes,
+            }
+            result_payload = (json.dumps(result, indent=2, sort_keys=True) + "\n").encode()
+    descriptor = os.open(result_path, os.O_WRONLY | os.O_CREAT | os.O_EXCL
+                         | os.O_NOFOLLOW | os.O_CLOEXEC, 0o600)
+    try:
+        with os.fdopen(descriptor, "wb") as result_stream:
+            result_stream.write(result_payload)
+            result_stream.flush()
+            os.fsync(result_stream.fileno())
+    except BaseException:
+        try:
+            result_path.unlink()
+        except FileNotFoundError:
+            pass
+        raise
+    if z9_replay:
+        post_final = gate0_snapshot("POST_FINAL")
+        final_output_allocated, final_output_digest = storage_policy._persistent_output_snapshot(output)
+        final_output_limit = z9_signed_output_limit_bytes
+        final_output_within_reservation = final_output_allocated <= final_output_limit
+        post_final["signed_output_allocated_bytes"] = final_output_allocated
+        post_final["signed_output_tree_sha256"] = final_output_digest
+        post_final["signed_output_limit_bytes"] = final_output_limit
+        post_final["signed_output_within_reservation"] = final_output_within_reservation
+        post_final_good = (post_final["gate0_status"] == "PASS"
+                           and post_final["free_bytes"] >= storage_policy.FREE_MINIMUM
+                           and post_final["scoped_fgmetal_bytes"]
+                           <= storage_policy.GATE0_PROJECT_BUDGET
+                           and final_output_within_reservation)
+        sidecar = write_z9_final_post(post_final)
+        result["gate0_post_final"] = post_final
+        result["gate0_post_final_good"] = post_final_good
+        result["signed_output_allocated_bytes_post_final"] = final_output_allocated
+        result["signed_output_limit_bytes"] = final_output_limit
+        result["gate0_post_final_artifact"] = sidecar
+        if not post_final_good or sidecar is None:
+            result["status"] = "FAIL"
+            result["is_valid"] = False
+            result["gate0_post_final_error"] = (
+                "final Gate 0 snapshot failed or its transient sidecar was not recorded")
     authorization_path = None
     if mode == "smoke" and valid and trace_good and validation is not None:
         authorization = {
@@ -1959,6 +2094,11 @@ def run_one(mode: str, baseline_index: int | None = None,
                                                 if validation else None),
                       "smoke_authorization": (str(authorization_path)
                                               if authorization_path else None),
+                      "gate0_post_final_good": result.get("gate0_post_final_good"),
+                      "gate0_post_final_artifact": result.get("gate0_post_final_artifact"),
+                      "signed_output_allocated_bytes_post_final": result.get(
+                          "signed_output_allocated_bytes_post_final"),
+                      "signed_output_limit_bytes": result.get("signed_output_limit_bytes"),
                       "exception": exception_text}, indent=2, sort_keys=True))
     return result
 
@@ -1968,6 +2108,9 @@ def main() -> int:
         result = run_one("smoke")
     elif (len(sys.argv) == 4 and sys.argv[1] in {"baseline", "sample", "confirm", "state"}):
         result = run_one(sys.argv[1], int(sys.argv[2]), sys.argv[3])
+    elif (len(sys.argv) == 5 and sys.argv[1] == "baseline"
+          and sys.argv[4] == "--z9-replay"):
+        result = run_one("baseline", int(sys.argv[2]), sys.argv[3], z9_replay=True)
     elif (len(sys.argv) == 4 and sys.argv[1] == "calibration"):
         result = run_one("calibration", int(sys.argv[2]), sys.argv[3])
     else:

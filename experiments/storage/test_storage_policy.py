@@ -537,6 +537,497 @@ class SignedPersistentOutputAccountingTests(unittest.TestCase):
         self.assertTrue(any("missing required fields" in item for item in blockers))
 
 
+class HistoricalTerminalClosureTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.temp = tempfile.TemporaryDirectory(
+            prefix="fgmetal-terminal-closure-test-", dir="/private/tmp")
+        self.addCleanup(self.temp.cleanup)
+        self.root = Path(self.temp.name) / "repo"
+        self.run_id = policy.HISTORICAL_TERMINAL_RUN_ID
+        self.output = (self.root / "experiments/dxvk_macos_step11d3b/runs" / self.run_id)
+        self.output.mkdir(parents=True)
+        self.manifest_path = (self.root / "experiments/storage/manifests" / f"{self.run_id}.json")
+        self.manifest_path.parent.mkdir(parents=True)
+        self.manifest_bytes = b"synthetic immutable storage manifest\n"
+        self.manifest_path.write_bytes(self.manifest_bytes)
+        self.manifest_sha256 = hashlib.sha256(self.manifest_bytes).hexdigest()
+        self.payload = self.output / "required.bin"
+        self.payload.write_bytes(b"synthetic terminal evidence")
+        self.repo_patch = mock.patch.object(policy, "REPO", self.root)
+        self.repo_patch.start()
+        self.addCleanup(self.repo_patch.stop)
+        for name, value in (
+                ("HISTORICAL_TERMINAL_REPORT_PREFIX_BYTES", 5),
+                ("HISTORICAL_TERMINAL_REPORT_PREFIX_SHA256", "5" * 64)):
+            patcher = mock.patch.object(policy, name, value)
+            patcher.start()
+            self.addCleanup(patcher.stop)
+        self._patch_tree_contract()
+        self.tree = policy._historical_terminal_tree_snapshot(self.output)
+        self.evidence = {
+            "paths": {
+                "run": str(self.output),
+                "output_dir": str(self.output),
+                "report": str(policy._historical_terminal_run_paths()["report"]),
+                "storage_manifest": str(self.manifest_path),
+            },
+            "sha256": {
+                "run_result": "1" * 64,
+                "storage_manifest": self.manifest_sha256,
+            },
+            "manifest_hmac_sha256": "2" * 64,
+            "gate0_post_allocation_provenance": "report reconstruction; not a numeric field in the embedded POST object",
+            "gate0_post_status": "BLOCKED",
+            "gate0_post_blockers": list(policy.HISTORICAL_TERMINAL_BLOCKERS),
+            "run_status": "FAIL",
+            "r5_classification": "INVALID / INCOMPLETE",
+            "t8_classification": "INSUFFICIENT TIMING EVIDENCE",
+            "finder_treatment": "NOT EXECUTED",
+            "report_prefix_bytes": 5,
+            "report_prefix_sha256": "5" * 64,
+            "controller_evidence_sha256": {"controller.json": "3" * 64},
+            "prefix_path": "/private/tmp/synthetic-historical-prefix",
+            "prefix_was_deleted": True,
+            "process_ids": [58921, 58942],
+        }
+        self.metadata_tree_sha256 = "4" * 64
+
+    def _patch_tree_contract(self) -> None:
+        info = self.output.lstat()
+        payload_info = self.payload.lstat()
+        self.contract_patches = [
+            mock.patch.object(policy, "HISTORICAL_TERMINAL_ROOT_IDENTITY",
+                              (info.st_dev, info.st_ino)),
+            mock.patch.object(policy, "HISTORICAL_TERMINAL_OUTPUT_BYTES",
+                              payload_info.st_blocks * 512),
+            mock.patch.object(policy, "HISTORICAL_TERMINAL_OUTPUT_LOGICAL_BYTES",
+                              payload_info.st_size),
+            mock.patch.object(policy, "HISTORICAL_TERMINAL_TRUSTED_FILES", {
+                "required.bin": hashlib.sha256(self.payload.read_bytes()).hexdigest()}),
+        ]
+        for patcher in self.contract_patches:
+            patcher.start()
+            self.addCleanup(patcher.stop)
+
+    def _write_closure(self, *, changes: dict[str, object] | None = None) -> dict[str, object]:
+        path = policy._historical_terminal_closure_path()
+        path.parent.mkdir(parents=True, exist_ok=True)
+        directory_fd, directory_identity = policy._open_historical_terminal_closure_directory()
+        os.close(directory_fd)
+        record: dict[str, object] = {
+            "schema_version": 3,
+            "closure_policy": "history-preserving-terminal-overrun-v1",
+            "experiment_id": self.run_id,
+            "closure_path": str(path),
+            "closure_revision": 0,
+            "storage_manifest_path": str(self.manifest_path),
+            "storage_manifest_sha256": self.manifest_sha256,
+            "original_reservation_bytes": policy.HISTORICAL_TERMINAL_ORIGINAL_RESERVATION_BYTES,
+            "historical_failure_preserved": True,
+            "authorizes_execution": False,
+            "changes_original_gate_result": False,
+            "counts_toward_project_scope": True,
+            "report_prefix": {"path": str(policy._historical_terminal_run_paths()["report"]),
+                              "bytes": 5, "sha256": "5" * 64},
+            "closure_directory_identity": list(directory_identity),
+            "liveness_at_closure": {"status": "QUIESCENT"},
+            "source_sha256": policy._historical_terminal_source_hashes(),
+            "gate0_control_sha256": policy._gate0_control_hashes(),
+            "historical_evidence": self.evidence,
+            "output_dir": str(self.output),
+            "metadata_output_allocated_bytes": self.tree["allocated_bytes"],
+            "metadata_output_tree_sha256": self.metadata_tree_sha256,
+            "tree_inventory": self.tree,
+            "closed_tree_allocated_bytes": self.tree["allocated_bytes"],
+            "closed_tree_logical_bytes": self.tree["logical_bytes"],
+            "tree_sha256": self.tree["tree_sha256"],
+            "tree_root_identity": self.tree["root_identity"],
+        }
+        if changes:
+            record.update(changes)
+        sealed = policy._seal_storage_evidence(record, "closure_hmac_sha256")
+        path.write_bytes(policy._canonical_pretty_json_bytes(sealed))
+        path.chmod(0o600)
+        return sealed
+
+    def _write_legacy_closure_missing_path(self) -> tuple[dict[str, object], bytes]:
+        path = policy._historical_terminal_closure_path()
+        path.parent.mkdir(parents=True, exist_ok=True)
+        directory_fd, directory_identity = policy._open_historical_terminal_closure_directory()
+        os.close(directory_fd)
+        record: dict[str, object] = {
+            "schema_version": 2,
+            "closure_policy": "history-preserving-terminal-overrun-v1",
+            "experiment_id": self.run_id,
+            "created_at_unix": 123.0,
+            "storage_manifest_path": str(self.manifest_path),
+            "storage_manifest_sha256": self.manifest_sha256,
+            "original_reservation_bytes": policy.HISTORICAL_TERMINAL_ORIGINAL_RESERVATION_BYTES,
+            "historical_failure_preserved": True,
+            "authorizes_execution": False,
+            "changes_original_gate_result": False,
+            "counts_toward_project_scope": True,
+            "report_prefix": {"path": str(policy._historical_terminal_run_paths()["report"]),
+                              "bytes": 5, "sha256": "5" * 64},
+            "closure_directory_identity": list(directory_identity),
+            "liveness_at_closure": {"status": "QUIESCENT"},
+            "source_sha256": policy._historical_terminal_source_hashes(),
+            "gate0_control_sha256": policy._gate0_control_hashes(),
+            "historical_evidence": self.evidence,
+            "output_dir": str(self.output),
+            "metadata_output_allocated_bytes": self.tree["allocated_bytes"],
+            "metadata_output_tree_sha256": self.metadata_tree_sha256,
+            "tree_inventory": self.tree,
+            "closed_tree_allocated_bytes": self.tree["allocated_bytes"],
+            "closed_tree_logical_bytes": self.tree["logical_bytes"],
+            "tree_sha256": self.tree["tree_sha256"],
+            "tree_root_identity": self.tree["root_identity"],
+        }
+        sealed = policy._seal_storage_evidence(record, "closure_hmac_sha256")
+        raw = policy._canonical_pretty_json_bytes(sealed)
+        path.write_bytes(raw)
+        path.chmod(0o600)
+        return sealed, raw
+
+    def _write_correction_for_legacy(self, legacy_raw: bytes) -> dict[str, object]:
+        path = policy._historical_terminal_closure_correction_path()
+        directory_fd, directory_identity = policy._open_historical_terminal_closure_directory()
+        os.close(directory_fd)
+        record: dict[str, object] = {
+            "schema_version": 3,
+            "closure_policy": "history-preserving-terminal-overrun-v1",
+            "experiment_id": self.run_id,
+            "closure_path": str(path),
+            "closure_revision": 1,
+            "supersedes_closure_path": str(policy._historical_terminal_closure_path()),
+            "supersedes_closure_sha256": hashlib.sha256(legacy_raw).hexdigest(),
+            "supersedes_closure_reason": "Synthetic append-only correction fixture.",
+            "storage_manifest_path": str(self.manifest_path),
+            "storage_manifest_sha256": self.manifest_sha256,
+            "original_reservation_bytes": policy.HISTORICAL_TERMINAL_ORIGINAL_RESERVATION_BYTES,
+            "historical_failure_preserved": True,
+            "authorizes_execution": False,
+            "changes_original_gate_result": False,
+            "counts_toward_project_scope": True,
+            "report_prefix": {"path": str(policy._historical_terminal_run_paths()["report"]),
+                              "bytes": 5, "sha256": "5" * 64},
+            "closure_directory_identity": list(directory_identity),
+            "liveness_at_closure": {"status": "QUIESCENT"},
+            "source_sha256": policy._historical_terminal_source_hashes(),
+            "gate0_control_sha256": policy._gate0_control_hashes(),
+            "historical_evidence": self.evidence,
+            "output_dir": str(self.output),
+            "metadata_output_allocated_bytes": self.tree["allocated_bytes"],
+            "metadata_output_tree_sha256": self.metadata_tree_sha256,
+            "tree_inventory": self.tree,
+            "closed_tree_allocated_bytes": self.tree["allocated_bytes"],
+            "tree_sha256": self.tree["tree_sha256"],
+            "tree_root_identity": self.tree["root_identity"],
+        }
+        sealed = policy._seal_storage_evidence(record, "closure_hmac_sha256")
+        path.write_bytes(policy._canonical_pretty_json_bytes(sealed))
+        path.chmod(0o600)
+        return sealed
+
+    def _verify(self, *, inventory: dict[str, object] | None = None,
+                manifest_sha256: str | None = None,
+                actual_tree: bool = False) -> tuple[dict[str, object] | None, list[str]]:
+        with mock.patch.object(policy, "_historical_terminal_evidence", return_value=self.evidence), \
+                mock.patch.object(policy, "_historical_terminal_liveness_check",
+                                  return_value={"status": "QUIESCENT"}):
+            verify = lambda: policy._verify_historical_terminal_closure(
+                {"experiment_id": self.run_id,
+                 "estimated_persistent_bytes": policy.HISTORICAL_TERMINAL_ORIGINAL_RESERVATION_BYTES},
+                manifest_sha256 or self.manifest_sha256,
+                self.output,
+                allocated_bytes=self.tree["allocated_bytes"],
+                metadata_tree_sha256=self.metadata_tree_sha256,
+            )
+            if actual_tree:
+                return verify()
+            with mock.patch.object(policy, "_historical_terminal_tree_snapshot",
+                                   return_value=inventory if inventory is not None else self.tree):
+                return verify()
+
+    def test_exact_failed_run_accepts_authenticated_closure_without_authorizing_execution(self) -> None:
+        closure = self._write_closure()
+        binding, blockers = self._verify()
+
+        self.assertEqual(blockers, [])
+        self.assertIsNotNone(binding)
+        self.assertEqual(closure["authorizes_execution"], False)
+        self.assertEqual(closure["original_reservation_bytes"], 314_572_800)
+        self.assertNotIn("manifest_hmac_sha256", closure)
+        with self.assertRaises(ValueError):
+            policy._validated_manifest_estimates(closure)
+
+    def test_wrong_run_or_manifest_hash_fails(self) -> None:
+        self._write_closure(changes={"experiment_id": "copied-to-another-run"})
+        binding, blockers = self._verify()
+        self.assertIsNone(binding)
+        self.assertTrue(any("identity" in item or "schema" in item for item in blockers))
+
+        closure_path = policy._historical_terminal_closure_path()
+        closure_path.unlink()
+        self._write_closure()
+        binding, blockers = self._verify(manifest_sha256="f" * 64)
+        self.assertIsNone(binding)
+        self.assertTrue(any("manifest" in item for item in blockers))
+
+    def test_valid_hmac_with_wrong_report_prefix_is_rejected(self) -> None:
+        self._write_closure(changes={
+            "report_prefix": {
+                "path": str(policy._historical_terminal_run_paths()["report"]),
+                "bytes": 5,
+                "sha256": "6" * 64,
+            }
+        })
+        binding, blockers = self._verify()
+        self.assertIsNone(binding)
+        self.assertTrue(any("closure schema" in item for item in blockers))
+
+    def test_original_manifest_mutation_cannot_reuse_closure(self) -> None:
+        self._write_closure()
+        self.manifest_path.write_bytes(self.manifest_bytes + b"changed")
+        binding, blockers = self._verify()
+        self.assertIsNone(binding)
+        self.assertTrue(any("original storage manifest changed" in item for item in blockers))
+
+    def test_legacy_schema_certificate_is_rejected(self) -> None:
+        self._write_closure(changes={"schema_version": 1})
+        binding, blockers = self._verify()
+        self.assertIsNone(binding)
+        self.assertTrue(any("closure schema" in item for item in blockers))
+
+    def test_copied_closure_file_is_rejected(self) -> None:
+        self._write_closure()
+        (policy._historical_terminal_closure_path().parent / "another-run.json").write_bytes(b"copy")
+        binding, blockers = self._verify()
+        self.assertIsNone(binding)
+        self.assertTrue(any("unexpected entries" in item for item in blockers))
+
+    def test_append_only_correction_binds_legacy_certificate_without_path(self) -> None:
+        legacy, legacy_raw = self._write_legacy_closure_missing_path()
+        self.assertNotIn("closure_path", legacy)
+        with mock.patch.object(policy, "HISTORICAL_TERMINAL_LEGACY_CLOSURE_SHA256",
+                               hashlib.sha256(legacy_raw).hexdigest()):
+            correction = self._write_correction_for_legacy(legacy_raw)
+            binding, blockers = self._verify()
+
+            self.assertEqual(blockers, [])
+            self.assertIsNotNone(binding)
+            self.assertEqual(binding["closure_path"], str(policy._historical_terminal_closure_correction_path()))
+            self.assertEqual(correction["supersedes_closure_sha256"], hashlib.sha256(legacy_raw).hexdigest())
+            self.assertEqual(policy._historical_terminal_closure_path().read_bytes(), legacy_raw)
+
+            policy._historical_terminal_closure_path().write_bytes(legacy_raw + b"tamper")
+            binding, blockers = self._verify()
+            self.assertIsNone(binding)
+            self.assertTrue(any("closure" in item for item in blockers))
+
+    def test_edited_certificate_and_symlinked_closure_directory_fail_closed(self) -> None:
+        self._write_closure()
+        path = policy._historical_terminal_closure_path()
+        tampered = path.read_bytes().replace(b'"authorizes_execution": false',
+                                             b'"authorizes_execution": true')
+        path.write_bytes(tampered)
+        path.chmod(0o600)
+        binding, blockers = self._verify()
+        self.assertIsNone(binding)
+        self.assertTrue(any("signature" in item or "canonical" in item for item in blockers))
+
+        path.unlink()
+        outside = path.parent.with_name("closure-target")
+        outside.mkdir()
+        path.parent.rmdir()
+        path.parent.symlink_to(outside, target_is_directory=True)
+        binding, blockers = self._verify()
+        self.assertIsNone(binding)
+        self.assertTrue(any("cannot be opened safely" in item for item in blockers))
+
+    def test_future_tree_mutation_fails_even_when_allocated_bytes_do_not_change(self) -> None:
+        self._write_closure()
+        changed = dict(self.tree)
+        changed["tree_sha256"] = "f" * 64
+        binding, blockers = self._verify(inventory=changed)
+        self.assertIsNone(binding)
+        self.assertTrue(any("tree changed" in item for item in blockers))
+
+    def test_unexpected_64_mib_tree_growth_is_rejected(self) -> None:
+        self._write_closure()
+        unexpected = self.output / "unexpected-growth.bin"
+        with unexpected.open("wb") as stream:
+            block = b"x" * (1024 * 1024)
+            for _ in range(64):
+                stream.write(block)
+        binding, blockers = self._verify(actual_tree=True)
+        self.assertIsNone(binding)
+        self.assertTrue(any("provenance inventory" in item for item in blockers))
+
+    def test_descriptor_snapshot_rejects_missing_file_symlink_and_replaced_root(self) -> None:
+        self.payload.unlink()
+        with self.assertRaises(OSError):
+            policy._historical_terminal_tree_snapshot(self.output)
+        self.payload.write_bytes(b"synthetic terminal evidence")
+        self.payload.unlink()
+        self.payload.symlink_to(self.output / "does-not-exist")
+        with self.assertRaises(OSError):
+            policy._historical_terminal_tree_snapshot(self.output)
+
+        self.payload.unlink()
+        self.payload.write_bytes(b"synthetic terminal evidence")
+        moved = self.output.with_name(self.output.name + "-old")
+        self.output.rename(moved)
+        self.output.mkdir()
+        (self.output / "required.bin").write_bytes(b"synthetic terminal evidence")
+        with self.assertRaises(OSError):
+            policy._historical_terminal_tree_snapshot(self.output)
+
+    def test_live_prefix_marker_blocks_liveness_check(self) -> None:
+        with mock.patch.object(policy, "_active_lease_markers", return_value=[Path("/tmp/active.json")]):
+            with self.assertRaisesRegex(RuntimeError, "PrefixLease markers"):
+                policy._historical_terminal_liveness_check(self.evidence)
+
+    def test_live_build_state_blocks_liveness_check(self) -> None:
+        with mock.patch.object(policy, "_active_lease_markers", return_value=[]), \
+                mock.patch.object(build_retention, "_snapshot", return_value={
+                    "active": [{"build_id": "live"}],
+                    "completed_pending_retirement": [],
+                    "failed_or_retiring": [],
+                    "unknown": [],
+                }):
+            with self.assertRaisesRegex(RuntimeError, "BuildLease state"):
+                policy._historical_terminal_liveness_check(self.evidence)
+
+    def test_live_historical_process_blocks_liveness_check(self) -> None:
+        def live_process(args: list[str], **_kwargs: object) -> subprocess.CompletedProcess[str]:
+            return subprocess.CompletedProcess(args, 0, stdout="58921 live process\n", stderr="")
+
+        with mock.patch.object(policy, "_active_lease_markers", return_value=[]), \
+                mock.patch.object(build_retention, "_snapshot", return_value={
+                    "active": [], "completed_pending_retirement": [],
+                    "failed_or_retiring": [], "unknown": [],
+                }), \
+                mock.patch.object(policy.subprocess, "run", side_effect=live_process):
+            with self.assertRaisesRegex(RuntimeError, "pid 58921 is still present"):
+                policy._historical_terminal_liveness_check(self.evidence)
+
+    def test_unknown_process_liveness_blocks_closure(self) -> None:
+        def unknown_process(args: list[str], **_kwargs: object) -> subprocess.CompletedProcess[str]:
+            return subprocess.CompletedProcess(args, 1, stdout="", stderr="permission denied")
+
+        with mock.patch.object(policy, "_active_lease_markers", return_value=[]), \
+                mock.patch.object(build_retention, "_snapshot", return_value={
+                    "active": [], "completed_pending_retirement": [],
+                    "failed_or_retiring": [], "unknown": [],
+                }), \
+                mock.patch.object(policy.subprocess, "run", side_effect=unknown_process):
+            with self.assertRaisesRegex(RuntimeError, "could not be checked"):
+                policy._historical_terminal_liveness_check(self.evidence)
+
+    def test_lsof_lookup_cannot_be_redirected_through_path(self) -> None:
+        trusted_identity = {
+            "path": "/usr/sbin/lsof", "sha256": "a" * 64,
+            "file_identity": [1, 2, 3, 4, 5], "owner_uid": 0,
+            "mode": 0o755, "parent_identity": [1, 6],
+        }
+
+        def empty_liveness_output(args: list[str], **_kwargs: object) -> subprocess.CompletedProcess[str]:
+            if args[0] == "/bin/ps":
+                return subprocess.CompletedProcess(args, 1, stdout="", stderr="")
+            return subprocess.CompletedProcess(args, 0, stdout="", stderr="")
+
+        with mock.patch.object(policy, "_active_lease_markers", return_value=[]), \
+                mock.patch.object(build_retention, "_snapshot", return_value={
+                    "active": [], "completed_pending_retirement": [],
+                    "failed_or_retiring": [], "unknown": [],
+                }), \
+                mock.patch.object(policy, "_historical_terminal_lsof_identity",
+                                  return_value=trusted_identity), \
+                mock.patch.object(policy.subprocess, "run", side_effect=empty_liveness_output) as run, \
+                mock.patch.object(policy.shutil, "which", return_value="/private/tmp/spoofed/lsof") as which:
+            result = policy._historical_terminal_liveness_check(self.evidence)
+
+        self.assertEqual(result["lsof"], trusted_identity)
+        self.assertEqual(run.call_args_list[-1].args[0][0], "/usr/sbin/lsof")
+        which.assert_not_called()
+
+    def test_tree_mutation_between_closure_measurements_leaves_no_certificate(self) -> None:
+        changed_tree = dict(self.tree)
+        changed_tree["tree_sha256"] = "e" * 64
+        evidence = {
+            "paths": {"output_dir": str(self.output)},
+        }
+        with mock.patch.object(policy, "acquire_storage_certification_lock", return_value=object()), \
+                mock.patch.object(policy, "_acquire_storage_allocation_lock", return_value=object()), \
+                mock.patch.object(policy, "release_storage_certification_lock"), \
+                mock.patch.object(policy, "_release_storage_allocation_lock"), \
+                mock.patch.object(policy, "_historical_terminal_copy_controller_evidence", return_value={}), \
+                mock.patch.object(policy, "_historical_terminal_evidence", return_value=evidence), \
+                mock.patch.object(policy, "_historical_terminal_liveness_check",
+                                  return_value={"status": "QUIESCENT"}), \
+                mock.patch.object(policy, "_historical_terminal_tree_snapshot",
+                                  side_effect=[self.tree, changed_tree]):
+            with self.assertRaisesRegex(RuntimeError, "changed between closure measurements"):
+                policy.close_historical_terminal_run()
+        self.assertFalse(policy._historical_terminal_closure_path().exists())
+        self.assertFalse(policy._historical_terminal_closure_correction_path().exists())
+
+    def test_writer_appends_correction_without_rewriting_legacy_certificate(self) -> None:
+        _legacy, legacy_raw = self._write_legacy_closure_missing_path()
+        legacy_hash_patcher = mock.patch.object(
+            policy, "HISTORICAL_TERMINAL_LEGACY_CLOSURE_SHA256",
+            hashlib.sha256(legacy_raw).hexdigest())
+        legacy_hash_patcher.start()
+        self.addCleanup(legacy_hash_patcher.stop)
+        lock_patches = [
+            mock.patch.object(policy, "acquire_storage_certification_lock", return_value=object()),
+            mock.patch.object(policy, "_acquire_storage_allocation_lock", return_value=object()),
+            mock.patch.object(policy, "release_storage_certification_lock"),
+            mock.patch.object(policy, "_release_storage_allocation_lock"),
+            mock.patch.object(policy, "_historical_terminal_copy_controller_evidence", return_value={}),
+            mock.patch.object(policy, "_historical_terminal_evidence", return_value=self.evidence),
+            mock.patch.object(policy, "_historical_terminal_liveness_check",
+                              return_value={"status": "QUIESCENT"}),
+            mock.patch.object(policy, "_historical_terminal_tree_snapshot", return_value=self.tree),
+            mock.patch.object(policy, "_persistent_output_snapshot",
+                              return_value=(self.tree["allocated_bytes"], self.metadata_tree_sha256)),
+            mock.patch.object(policy, "_gate0_control_hashes", return_value={"gate0": "a" * 64}),
+        ]
+        for patcher in lock_patches:
+            patcher.start()
+            self.addCleanup(patcher.stop)
+
+        result = policy.close_historical_terminal_run()
+
+        self.assertEqual(result["status"], "CLOSED")
+        self.assertEqual(result["closure_path"], str(policy._historical_terminal_closure_correction_path()))
+        self.assertEqual(policy._historical_terminal_closure_path().read_bytes(), legacy_raw)
+        correction = json.loads(policy._historical_terminal_closure_correction_path().read_text())
+        self.assertEqual(correction["supersedes_closure_sha256"], hashlib.sha256(legacy_raw).hexdigest())
+        self.assertEqual(correction["closure_revision"], 1)
+
+    def test_writer_refuses_legacy_certificate_with_wrong_pinned_hash(self) -> None:
+        _legacy, legacy_raw = self._write_legacy_closure_missing_path()
+        patchers = [
+            mock.patch.object(policy, "acquire_storage_certification_lock", return_value=object()),
+            mock.patch.object(policy, "_acquire_storage_allocation_lock", return_value=object()),
+            mock.patch.object(policy, "release_storage_certification_lock"),
+            mock.patch.object(policy, "_release_storage_allocation_lock"),
+            mock.patch.object(policy, "_historical_terminal_copy_controller_evidence", return_value={}),
+            mock.patch.object(policy, "HISTORICAL_TERMINAL_LEGACY_CLOSURE_SHA256", "f" * 64),
+        ]
+        for patcher in patchers:
+            patcher.start()
+            self.addCleanup(patcher.stop)
+
+        with self.assertRaisesRegex(FileExistsError, "cannot be superseded"):
+            policy.close_historical_terminal_run()
+
+        self.assertEqual(policy._historical_terminal_closure_path().read_bytes(), legacy_raw)
+        self.assertFalse(policy._historical_terminal_closure_correction_path().exists())
+
+
 class PrefixLeasePolicyTests(unittest.TestCase):
     def setUp(self) -> None:
         self.temp = tempfile.TemporaryDirectory(prefix="fgmetal-prefix-policy-test-", dir="/private/tmp")
@@ -597,6 +1088,32 @@ class PrefixLeasePolicyTests(unittest.TestCase):
         lease._sealed_wine_env = dict(lease._env)
         lease._runtime_env_verified = True
         return lease
+
+    def test_prefixlease_output_budget_guard_stops_before_signed_limit(self) -> None:
+        lease = self._lease("output-budget-guard")
+        process = mock.Mock()
+        process.poll.return_value = None
+        process.args = ["/certified/wine"]
+        lease._clone_process = None
+        limit = 8 * policy.MIB
+        threshold = limit - policy.MIB
+        with mock.patch.object(policy, "_persistent_output_allocated_bytes",
+                               return_value=threshold), \
+                mock.patch.object(lease, "_terminate_and_reap", return_value=True) as terminate:
+            with self.assertRaisesRegex(RuntimeError, "signed output budget guard stopped"):
+                lease.wait_process(process, timeout_seconds=10, output_limit_bytes=limit)
+        terminate.assert_called_once_with(process)
+        event = lease._storage_watch_events[-1]
+        self.assertEqual(event["action"], "STOP_OUTPUT_BUDGET_GUARD")
+        self.assertEqual(event["output_allocated_bytes"], threshold)
+        self.assertEqual(event["output_limit_bytes"], limit)
+        self.assertFalse(lease._storage_violation)
+        self.assertEqual(lease._managed_processes, [])
+
+    def test_prefixlease_output_budget_guard_rejects_boolean_limit(self) -> None:
+        lease = self._lease("output-budget-bool-rejected")
+        with self.assertRaisesRegex(ValueError, "positive integer"):
+            lease.wait_process(mock.Mock(), timeout_seconds=1, output_limit_bytes=True)
 
     def test_wine_launcher_accepts_certified_arch_exec(self) -> None:
         lease = self._wine_launch_lease()

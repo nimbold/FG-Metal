@@ -113,7 +113,10 @@ static double g_cached_refresh_hz = 0;
 static bool g_cached_refresh_known = false;
 struct WindowTelemetrySnapshot {
     uint64_t layer_id = 0;
+    uint64_t window_view_id = 0;
     uint64_t window_id = 0;
+    NSInteger window_number = -1;
+    uint8_t window_lookup_path = 0;
     uint64_t screen_id = 0;
     uint64_t occlusion_state = 0;
     bool window_associated = false;
@@ -1408,19 +1411,31 @@ NSView* find_view_for_metal_layer(NSView* view, CAMetalLayer* layer,
     return nil;
 }
 
-NSWindow* owning_window_for_metal_layer(CAMetalLayer* layer) {
+NSWindow* owning_window_for_metal_layer(CAMetalLayer* layer,
+                                        NSView** matched_view = nullptr,
+                                        uint8_t* lookup_path = nullptr) {
+    if (matched_view) *matched_view = nil;
+    if (lookup_path) *lookup_path = 0;
     if (!layer) return nil;
     id delegate = layer.delegate;
     if ([delegate isKindOfClass:[NSView class]]) {
         NSView* view = (NSView*)delegate;
-        if (view.layer == layer && view.window) return view.window;
+        if (view.layer == layer && view.window) {
+            if (matched_view) *matched_view = view;
+            if (lookup_path) *lookup_path = 1;
+            return view.window;
+        }
     }
     NSApplication* app = NSApp;
     if (!app) return nil;
     for (NSWindow* window in app.windows) {
         unsigned visited = 0;
         NSView* match = find_view_for_metal_layer(window.contentView, layer, 0, visited);
-        if (match && match.window == window) return window;
+        if (match && match.window == window) {
+            if (matched_view) *matched_view = match;
+            if (lookup_path) *lookup_path = 2;
+            return window;
+        }
     }
     return nil;
 }
@@ -1456,7 +1471,10 @@ bool same_window_telemetry_snapshot(const WindowTelemetrySnapshot& a,
                                     const WindowTelemetrySnapshot& b) {
 #define FG_TELEMETRY_SAME(field) if (a.field != b.field) return false
     FG_TELEMETRY_SAME(layer_id);
+    FG_TELEMETRY_SAME(window_view_id);
     FG_TELEMETRY_SAME(window_id);
+    FG_TELEMETRY_SAME(window_number);
+    FG_TELEMETRY_SAME(window_lookup_path);
     FG_TELEMETRY_SAME(screen_id);
     FG_TELEMETRY_SAME(occlusion_state);
     FG_TELEMETRY_SAME(window_associated);
@@ -1505,7 +1523,9 @@ bool same_window_telemetry_snapshot(const WindowTelemetrySnapshot& a,
 }
 
 WindowTelemetrySnapshot read_window_telemetry_snapshot(CAMetalLayer* layer,
-                                                        NSWindow* window) {
+                                                        NSWindow* window,
+                                                        NSView* matched_view,
+                                                        uint8_t lookup_path) {
     WindowTelemetrySnapshot snapshot{};
     snapshot.layer_id = (uint64_t)(uintptr_t)layer;
     snapshot.drawable_width = layer.drawableSize.width;
@@ -1525,10 +1545,13 @@ WindowTelemetrySnapshot read_window_telemetry_snapshot(CAMetalLayer* layer,
     snapshot.layer_bounds_width = layer_bounds.size.width;
     snapshot.layer_bounds_height = layer_bounds.size.height;
     snapshot.app_active = NSApp ? [NSApp isActive] : false;
+    snapshot.window_view_id = (uint64_t)(uintptr_t)matched_view;
+    snapshot.window_lookup_path = lookup_path;
     if (!window) return snapshot;
 
     snapshot.window_associated = true;
     snapshot.window_id = (uint64_t)(uintptr_t)window;
+    snapshot.window_number = (NSInteger)[window windowNumber];
     snapshot.window_visible = [window isVisible];
     snapshot.window_ordered = snapshot.window_visible;
     snapshot.window_key = [window isKeyWindow];
@@ -1589,7 +1612,10 @@ void emit_window_telemetry(const char* trigger, NSString* notification_name,
         g_window_telemetry_observers_initialized = false;
         return;
     }
-    NSWindow* window = owning_window_for_metal_layer(layer);
+        NSView* matched_view = nil;
+        uint8_t lookup_path = 0;
+        NSWindow* window = owning_window_for_metal_layer(
+            layer, &matched_view, &lookup_path);
     if (!g_window_telemetry_observers_initialized
             || window != tracked_window_telemetry_window()) {
         NSNotificationCenter* center = [NSNotificationCenter defaultCenter];
@@ -1642,7 +1668,7 @@ void emit_window_telemetry(const char* trigger, NSString* notification_name,
     }
 
     const WindowTelemetrySnapshot snapshot =
-        read_window_telemetry_snapshot(layer, window);
+        read_window_telemetry_snapshot(layer, window, matched_view, lookup_path);
     const bool unchanged = g_window_telemetry_has_snapshot
         && same_window_telemetry_snapshot(snapshot,
                                           g_last_window_telemetry_snapshot);
@@ -1657,10 +1683,14 @@ void emit_window_telemetry(const char* trigger, NSString* notification_name,
         ? json_quote([notification_name UTF8String]
               ? [notification_name UTF8String] : "")
         : "null";
+    const char* lookup_path_name = snapshot.window_lookup_path == 1
+        ? "direct_delegate"
+        : (snapshot.window_lookup_path == 2 ? "subtree" : "none");
     char fields[4096]{};
     std::snprintf(fields, sizeof(fields),
         ",\"telemetry_sequence\":%" PRIu64 ",\"trigger\":\"%s\",\"notification_name\":%s"
-        ",\"layer_id\":%" PRIu64 ",\"window_id\":%" PRIu64 ",\"window_associated\":%s"
+        ",\"layer_id\":%" PRIu64 ",\"window_view_id\":%" PRIu64
+        ",\"window_id\":%" PRIu64 ",\"window_number\":%ld,\"window_lookup_path\":\"%s\",\"window_associated\":%s"
         ",\"window_visible\":%s,\"window_key\":%s,\"window_main\":%s,\"window_occluded\":%s"
         ",\"window_occlusion_state\":%" PRIu64 ",\"window_miniaturized\":%s,\"app_active\":%s"
         ",\"window_ordered\":%s,\"window_alpha\":%.3f,\"window_level\":%ld"
@@ -1676,7 +1706,9 @@ void emit_window_telemetry(const char* trigger, NSString* notification_name,
         ",\"maximum_drawable_count\":%" PRIu64 ",\"allows_next_drawable_timeout\":%s,\"display_sync_enabled\":%s"
         ",\"pixel_format\":%" PRIu64 ",\"framebuffer_only\":%s,\"layer_opaque\":%s,\"layer_hidden\":%s,\"layer_masks_to_bounds\":%s",
         sequence, trigger, notification.c_str(), snapshot.layer_id,
-        snapshot.window_id, snapshot.window_associated ? "true" : "false",
+        snapshot.window_view_id, snapshot.window_id,
+        (long)snapshot.window_number, lookup_path_name,
+        snapshot.window_associated ? "true" : "false",
         snapshot.window_visible ? "true" : "false",
         snapshot.window_key ? "true" : "false",
         snapshot.window_main ? "true" : "false",
@@ -1750,9 +1782,12 @@ void emit_layer_presentation_configuration(CAMetalLayer* layer) {
                     std::memory_order_release);
                 return;
             }
-            WindowTelemetrySnapshot snapshot =
-                read_window_telemetry_snapshot(layer,
-                    owning_window_for_metal_layer(layer));
+            NSView* matched_view = nil;
+            uint8_t lookup_path = 0;
+            NSWindow* window = owning_window_for_metal_layer(
+                layer, &matched_view, &lookup_path);
+            WindowTelemetrySnapshot snapshot = read_window_telemetry_snapshot(
+                layer, window, matched_view, lookup_path);
             if (snapshot.drawable_width <= 0 || snapshot.drawable_height <= 0
                     || snapshot.layer_bounds_width <= 0
                     || snapshot.layer_bounds_height <= 0) {

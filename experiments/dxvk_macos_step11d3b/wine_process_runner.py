@@ -59,6 +59,7 @@ def run_managed_process(context: dict, lease: PrefixLease) -> int:
     handoff_monotonic_ns = None
     timed_out = False
     timeout_error = None
+    process_error = None
     started = time.monotonic()
     with log_path.open("w", encoding="utf-8") as log:
         try:
@@ -105,12 +106,19 @@ def run_managed_process(context: dict, lease: PrefixLease) -> int:
                 }
                 write_handoff(handoff_path, handoff)
                 handoff_sha256 = hashlib.sha256(handoff_path.read_bytes()).hexdigest()
-            process_returncode = lease.wait_process(
-                process,
-                timeout_seconds=(context["duration_seconds"] + 90
-                                 + int(context.get("start_gate_safety_watchdog_seconds") or 0)),
-            )
-            target_process_exit_monotonic_ns = time.monotonic_ns()
+            try:
+                process_returncode = lease.wait_process(
+                    process,
+                    timeout_seconds=(context["duration_seconds"] + 90
+                                     + int(context.get("start_gate_safety_watchdog_seconds") or 0)),
+                    output_limit_bytes=context.get("output_limit_bytes"),
+                )
+                target_process_exit_monotonic_ns = time.monotonic_ns()
+            except RuntimeError as error:
+                process_error = f"{type(error).__name__}: {error}"
+                process_returncode = process.poll()
+                if process_returncode is not None:
+                    target_process_exit_monotonic_ns = time.monotonic_ns()
         except subprocess.TimeoutExpired as error:
             timed_out = True
             process_returncode = 124
@@ -126,6 +134,7 @@ def run_managed_process(context: dict, lease: PrefixLease) -> int:
         "target_window_observer_handoff_sha256": handoff_sha256,
         "target_window_observer_handoff_monotonic_ns": handoff_monotonic_ns,
         "timed_out": timed_out,
+        "managed_process_error": process_error,
         "runtime_process_elapsed_seconds": elapsed,
         "prefix_winevulkan_path": str(
             prefix_winevulkan_path.resolve(strict=True)
@@ -138,6 +147,8 @@ def run_managed_process(context: dict, lease: PrefixLease) -> int:
     # The execution record and runtime log remain separate durable evidence.
     if timeout_error is not None:
         raise timeout_error
+    if process_error is not None:
+        raise RuntimeError(process_error)
     if process_returncode != 0:
         error_tail = log_path.read_text(encoding="utf-8", errors="replace")[-2000:]
         raise RuntimeError(f"Wine child exited {process_returncode}: {error_tail}")
