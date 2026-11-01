@@ -1,63 +1,140 @@
-# Framegen
+# FG-Metal
 
-Framegen is an experimental renderer-independent frame-generation library. Its processing contract uses GPU textures: a renderer adapter supplies source frames, a backend generates an output texture, and the renderer decides when to present it. Frame pixels are not read back to the CPU, and the project does not capture the desktop.
+**Renderer-integrated frame generation for macOS — GPU-native, evidence-gated, no screen capture.**
 
-> **Status: experimental; not a drop-in game mod or overlay.** The C ABI is a draft, and there is no supported adapter for an unmodified game.
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+[![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Apple%20silicon-lightgrey.svg)](#requirements)
+[![C++](https://img.shields.io/badge/C%2B%2B-23-00599C.svg)](CMakeLists.txt)
+[![Status](https://img.shields.io/badge/status-experimental-orange.svg)](#status-at-a-glance)
 
-> **Current renderer-feasibility status (2026-10-08): Step 10B.6.1 — STOP the current DXMT CAMetalDisplayLink Framegen architecture; RIFE is not cleared.** Matched windowed and fullscreen F runs preserved accepted-source safety but failed presentation health. A public contentsScale-only probe improved the short trace, then failed the fresh 60-second validation. Native calibration confirms Display surface rows are not FPS or drawable IDs; physical scanout remains unverified. See the [Step 10B.6.1 report](experiments/dxmt_framegen/evidence/step10b6_1/report.md).
+FG-Metal is a frame-generation research project built around one rule: **no claim survives without a measurement that could have falsified it.** It pairs a renderer-independent GPU-texture library with a live in-process integration that has generated and displayed real interpolated frames inside a running game on Apple silicon.
 
-> **DXVK-MacOS Step 11C: PARTIAL PASS; Step 11D is not cleared.** A rebuilt matched 20-second, 15 Hz run preserved measured DXGI accounting while issuing 42 extra WSI presents for 301 application Presents. The user directly confirmed brief magenta and cyan flashes in the post-audit candidate; the newest matched build has a separate API run. The scheduler remains far below doubled cadence, and fullscreen, recreation, failure, and pending-work shutdown checks remain unverified. See the [Step 11C report](experiments/dxvk_macos_step11c/REPORT.md).
+Every headline number in this repository traces to a dated report and a content-hashed evidence directory. Results that failed are published with the same prominence as results that passed.
 
-> **Step 11D.3-A: CASE A2 — DIVERGENT / HEALTHY NATIVE BASELINE.** Thin x86_64 MoltenVK running under Rosetta achieves 59.99–60.01 FPS with >99.79% of nextDrawable calls locked in 14–18 ms and 0 waits >= 50 ms. The severe presentation starvation of STEP 11D.2 does not reproduce in native control; the issue is isolated to upstream components in the Wine/DXVK stack. See the [Step 11D.3-A3 report](experiments/dxvk_macos_step11d3a/STEP-11D3-A3-REPORT.md).
+> **Not a product.** There is no supported adapter for an unmodified game, the C ABI is a draft, and continuous 2× frame generation is **not** achieved. See [Status at a glance](#status-at-a-glance) for exactly what is and is not established.
 
-> **Step 11D.3-B: CASE B1 — BARE WINE VULKAN REPRODUCES DRAWABLE INSTABILITY; BR9R-N3 — INCONCLUSIVE.** Historical Z9 remains R5 / T8. The latest lifecycle authorization failed before Wine startup because the runner failed its PrefixLease source-authorization check. Six H2 reviews also found an impossible AppKit Visible-bit predicate for `occlusionState == 8194` and Finder actions scheduled during the required action-free PRE. No new Finder replay ran. Resolve the runner and protocol blockers under a new review before Native or STEP 11D.3-C work. See the [BR9R2 report](experiments/dxvk_macos_step11d3b/STEP-11D3-BR9R2-REPORT.md) and [H2 adversarial review](experiments/dxvk_macos_step11d3b/evidence/br9r2/z9-finder-replay-20261014/Z9R-H2-F-ADVERSARIAL.md).
+---
 
-## What works today
+## Contents
 
-| Area | Current status |
-| --- | --- |
-| Core library and C ABI | Implemented; ABI is not stable and has not been validated by an external renderer. |
-| Metal backend | Practical-RIFE v4.26 GPU inference and a standalone macOS preview host. Model weights are prepared separately and are not checked in. |
-| Quality and pacing | Optional HUD/temporal controls and a model-independent pacing scheduler; results are synthetic and do not establish in-game quality or display pacing. |
-| GPTK / D3DMetal | Cooperative D3D12 tests passed on Highball GPTK 4. Transparent DXGI attachment reached **PARTIAL PASS** on a controlled app; same-chain generated presents break common application buffer progression. It is not a product adapter. |
-| DXMT | Step 10B.6.1: **WINDOWED FAIL / NOT CLEARED; FULLSCREEN FAIL; RIFE NOT CLEARED; architecture STOP.** Qualified matched runs passed source safety but retained abnormal Display durations and all Direct-to-Display No. Two public-property probes did not establish a durable fullscreen lane. Return to renderer-strategy selection; see the [report and evidence](experiments/dxmt_framegen/evidence/step10b6_1/report.md). |
-| DXVK-MacOS | Step 11C: **PARTIAL PASS.** Separate AppFrameId/WSI/internal identity and measured DXGI accounting invariants pass in a matched low-rate windowed run; the user confirmed brief magenta and cyan flashes. The scheduler misses doubled cadence. Fullscreen/recreation/failure/pending-work shutdown checks remain unverified. See the [report and evidence](experiments/dxvk_macos_step11c/REPORT.md). |
-| Native MoltenVK control | Step 11D.3-A: **CASE A2 (HEALTHY BASELINE).** Provenance-bound BuildLease 12 produced thin x86_64 artifacts promoted to CAS. Rosetta loader probe 06, smoke 06, and 3x 5-minute baselines passed with valid offline traces and 0 errors, delivering steady 60.00 FPS cadence. See the [Step 11D.3-A3 report](experiments/dxvk_macos_step11d3a/STEP-11D3-A3-REPORT.md). |
-| Bare Wine Vulkan / BR9R2 | Step 11D.3-B: **CASE B1; BR9R-N3 INCONCLUSIVE.** Fresh authorization passed; the 20-second uncovered calibration interval was healthy, but verified coverer occlusion and restoration were not established. Native runs and STEP 11D.3-C remain gated. See the [BR9R2 report](experiments/dxvk_macos_step11d3b/STEP-11D3-BR9R2-REPORT.md). |
+- [Status at a glance](#status-at-a-glance)
+- [What has actually been demonstrated](#what-has-actually-been-demonstrated)
+- [The current blocker](#the-current-blocker)
+- [Architecture](#architecture)
+- [Requirements](#requirements)
+- [Build and test](#build-and-test)
+- [Repository layout](#repository-layout)
+- [Prior renderer investigations](#prior-renderer-investigations)
+- [Documentation](#documentation)
+- [Project boundaries](#project-boundaries)
+- [Contributing](#contributing)
+- [License](#license)
 
-See [the current decisions](DECISIONS.md), [work status](TASKS.md), and the [Step 8D.1 feasibility report](docs/feasibility/dxgi-d3d12-gptk4-step8d1.md) for evidence and limits.
+---
 
-## Features
+## Status at a glance
 
-- GPU texture import, asynchronous interpolation tickets, presentation feedback, history invalidation, and statistics through a provisional C ABI.
-- A Metal backend using Practical-RIFE v4.26 with `QUALITY` (float32) and `BALANCED` (float16) inference modes.
-- Optional explicit UI-plane composition and automatic HUD protection.
-- An opt-in temporal quality controller and a model-independent presentation scheduler.
-- A synthetic motion corpus, benchmark tools, and strict visual-quality comparisons.
+| Capability | State | Evidence |
+| --- | --- | --- |
+| Core library, GPU-texture contract, draft C ABI | **Implemented, tested** | `tests/`, [`include/framegen/api.h`](include/framegen/api.h) |
+| Metal backend (Practical-RIFE v4.26) | **Offline / synthetic only** | [Temporal quality](docs/TEMPORAL_QUALITY.md) |
+| Presentation scheduler | **Simulated only** | [`framegen-pacing-host`](tests/pacing_host.cpp) |
+| Real in-world A→M→B on the game's own layer | **Validated** (one pair) | [R114](FG-METAL-R114-INPROCESS-TARGET-LATCH-TITLE-DISPLAY-REPORT.md) |
+| Re-armable continuous A→M→B | **Validated** (60 tuples) | [R115](FG-METAL-R115-REARMABLE-CONTINUOUS-TITLE-REPORT.md) |
+| Async GPU fast gate, non-blocking M-then-B | **Validated** (51/51 ordered) | [R116](FG-METAL-R116-CRITICAL-PATH-PACING-REPORT.md) |
+| Generation throughput ≥ source rate | **Not validated** | [R118](FG-METAL-R118-LIVE-GENERATION-THROUGHPUT-REPORT.md), [R119](FG-METAL-R119-LIVE-CONTENTION-AND-EVIDENCE-ISOLATION-REPORT.md) |
+| Continuous 30→60 | **Not validated** | [R120](FG-METAL-R120-CONTINUOUS-30-TO-60-TITLE-REPORT.md), [R121](FG-METAL-R121-PRESENTATION-OCCUPANCY-REPORT.md) |
+| Continuous 60→120 | **Not attempted** | [R117](FG-METAL-R117-LOOKAHEAD-2X-FEASIBILITY-REPORT.md) |
+| Real title depth and motion vectors | **Not validated** (constant-depth prototype) | [R105](FG-METAL-R105-TITLE-INPUTS-CONSOLIDATED-REPORT.md), [R106](FG-METAL-R106-TITLE-DERIVED-MOTION-CONSOLIDATED-REPORT.md) |
+| Supported adapter for an unmodified game | **None exists** | [TASKS.md](TASKS.md) |
 
-The benchmark fixtures do not contain copyrighted game footage. Synthetic results are not substitutes for licensed game captures or real-game validation.
+---
 
-## Roadmap
+## What has actually been demonstrated
 
-The roadmap follows evidence and public interface availability. A completed feasibility experiment is not a supported renderer integration.
+The project has two tracks that are deliberately kept separate.
 
-- [x] Build the renderer-independent GPU texture contract, Metal placeholder backend, preview host, and synthetic test harness.
-- [x] Add offline image/temporal metrics and a model-independent presentation scheduler; keep quality claims limited to synthetic evidence.
-- [x] Complete cooperative GPTK/D3DMetal and public DXGI experiments with their current limits recorded.
-- [x] Record the current DXMT and DXVK-MacOS feasibility results, including unresolved native-baseline blockers.
-- [ ] Select a renderer strategy only after the unresolved presentation and public resource-access questions have an evidence-backed answer.
-- [ ] Stabilize the C ABI, device/format contract, synchronization rules, and adapter boundary through independent consumers.
-- [ ] Expand evaluation using material with documented rights; benchmark quality and pacing on supported hardware.
-- [ ] Select and validate an inference backend only after quality, latency, licensing, and redistribution review.
-- [ ] Validate any chosen adapter through lifecycle/failure coverage, a sustained soak, and clean-machine packaging before describing it as supported.
+**1. A reusable library.** `src/`, `include/`, `backends/`, and `adapters/` build a renderer-independent frame-generation core: opaque GPU resource import, asynchronous interpolation tickets, presentation feedback, history invalidation, HUD preservation modes, and a model-independent pacing scheduler. It builds clean and passes its full test suite on Apple silicon. Its quality numbers come from a project-authored synthetic corpus, and they are not in-game quality claims.
 
-See the detailed [roadmap](ROADMAP.md), current [tasks](TASKS.md), and [decisions](DECISIONS.md). STEP 11D.3-C and RIFE implementation remain gated; the Step 11D.3-B result is experimental and does not establish a supported integration.
+**2. A live in-process integration.** [`experiments/metalfx_frame_interpolator_R93/`](experiments/metalfx_frame_interpolator_R93/) is where the product question is actually being answered. It hooks a real title running under Highball/D3DMetal, captures source frames on the GPU, derives a motion field, interpolates with MetalFX, and presents the generated frame through the game's own `CAMetalLayer`.
+
+What that integration has proven, in a real game process:
+
+- A real in-world frame pair was captured, interpolated, and displayed as **A → M → B** with `reachedDisplay=1`, and the game remained stable for 9,864 further frames ([R114](FG-METAL-R114-INPROCESS-TARGET-LATCH-TITLE-DISPLAY-REPORT.md)).
+- The lifecycle is **re-armable**: 60 accepted tuples across two processes with zero source leaks, zero stale callbacks, zero duplicate dispatches ([R115](FG-METAL-R115-REARMABLE-CONTINUOUS-TITLE-REPORT.md)).
+- The critical-path gate moved from **31.28 ms to 0.128 ms** of CPU time, and M-then-B scheduling held ordering and distinctness in 51 of 51 in-game tuples ([R116](FG-METAL-R116-CRITICAL-PATH-PACING-REPORT.md)).
+- A genuine **30 fps source cadence** was established by back-pressure, not frame thinning: 738 of 744 presents were actually blocked by the limiter ([R120](FG-METAL-R120-CONTINUOUS-30-TO-60-TITLE-REPORT.md)).
+
+What it has not proven: that the output is a continuous 60 fps stream. It is not. See below.
+
+---
+
+## The current blocker
+
+R121 decomposed the interpolation presentation path end to end. The result is not where it was expected to be.
+
+| Quantity | Measured | Budget |
+| --- | --- | --- |
+| Present hook → M dispatched to WSI (median) | **41.392 ms** | 33.333 ms |
+| of which: wait for the SOURCE frame to retire on the GPU | **23.073 ms** (59.7 %) | — |
+| of which: frozen estimator + MetalFX | 15.799 ms (38.2 %) | — |
+| of which: all fifteen remaining links combined | 0.867 ms (2.1 %) | — |
+| Internal `nextDrawable` acquisition (median) | 0.017 ms | — |
+| Observed output rate | **27.11 fps** | 60 fps |
+| Source rate in the same window | 29.14 fps | 30 fps |
+
+The 25 ms that earlier rounds attributed to "presentation overhead" is not presentation overhead. The capture blit is committed on the producer's command queue, so by in-order queue semantics it cannot begin until the frame it is copying has retired. Every CPU-side and drawable-side component measures below one millisecond combined.
+
+That leaves one open problem, and it is arithmetic rather than scheduling:
+
+> The SOURCE frame occupies the GPU for ~25 ms of every 33.3 ms period, leaving ~7.7 ms for interpolation passes that need ~15.8 ms. **The deficit is ~8.1 ms, and it lives entirely inside GPU work.** No presentation-side reordering can reach it.
+
+Three candidate fixes were evaluated and **all were declined with measurement**, not caution: committing the blit earlier moves the GPU start by the same amount in the opposite direction; capturing in the completion handler gains nothing; a separate queue inherits the same hazard. The honest classification is `GPU_CAPACITY_FOR_INTERPOLATION` — see [R121 §11](FG-METAL-R121-PRESENTATION-OCCUPANCY-REPORT.md).
+
+---
+
+## Architecture
+
+The core deals in opaque GPU resource references and explicit metadata. Renderer-specific resource import and synchronization translation belong in adapters, never in the core.
+
+```text
+Renderer / test application
+        │
+        │  imports renderer-owned GPU textures (never CPU readback)
+        ▼
+include/framegen ── public, opaque GPU-resource C ABI (draft, versioned)
+        │
+src/core ─────────── validation, submission contract, lifecycle
+        ├── src/pacing ────── timing and presentation policy
+        ├── src/quality ───── quality policy and controls
+        ├── src/diagnostics ─ metadata and performance diagnostics
+        └── backend contract
+                ├── src/metal ──── Metal resource and execution path
+                └── backends/* ─── separately evaluated algorithm candidates
+```
+
+**Resource flow.** The producer supplies two temporally ordered source textures. The adapter wraps them without routing pixels through CPU memory. The backend schedules GPU work and returns a distinct output texture plus the completion point the consumer must wait on. The consumer presents it and reports the outcome; resources are retained through both producer and consumer completion.
+
+**Pacing.** `PresentationScheduler` is a thread-safe policy state machine. Source submissions update bounded metadata and return at most one generation request; callers run backend submission on their own worker. It allows at most one active or ready generated output, applies per-output readiness and presentation deadlines, and falls back to a real source frame when a generated result is late or unavailable. It never blocks on the backend while holding its lock and retains no FIFO.
+
+**HUD preservation.** Explicit UI-plane mode interpolates scene colour and composites the declared endpoint UI in linear light. Automatic protection is a GPU confidence field over screen-position stability, local change disagreement, sharp edges, and short-range high-frequency structure, with a stateful per-pixel mask history. It is a conservative heuristic for screen-space UI, not a motion estimator — its failure modes are documented in [HUD preservation](docs/HUD_PRESERVATION.md).
+
+The full contract — ownership, synchronization, clock domains, and adapter boundaries — is in [ARCHITECTURE.md](ARCHITECTURE.md).
+
+---
+
+## Requirements
+
+- macOS on Apple silicon, with the Apple SDK and Clang toolchain
+- CMake 3.25 or newer
+- Ninja
+- A Metal-capable device for the preview host and benchmark runner
+
+The core and its tests build without Metal, so a non-Apple host can still compile and run the renderer-independent path.
+
+---
 
 ## Build and test
-
-### macOS with Metal
-
-Requirements: macOS, Apple SDK and Clang toolchain, CMake 3.25 or newer, and Ninja.
 
 ```sh
 cmake -S . -B build -G Ninja
@@ -65,15 +142,9 @@ cmake --build build
 ctest --test-dir build --output-on-failure
 ```
 
-Run the Python benchmark-metric checks with the standard library:
+The default build produces five CTest targets: core, pacing simulation, C API, C API header smoke, and Metal C API.
 
-```sh
-PYTHONDONTWRITEBYTECODE=1 python3 tests/test_benchmark_metrics.py
-```
-
-### Core-only build
-
-The renderer-independent core and tests can also be built without the Metal targets:
+Core-only build, with no Metal targets:
 
 ```sh
 cmake -S . -B build-core -G Ninja \
@@ -83,19 +154,23 @@ cmake --build build-core
 ctest --test-dir build-core --output-on-failure
 ```
 
-### Metal preview and model weights
+Python metric checks need only the standard library:
 
-The preview requires a Metal-capable Mac and converted weights at `models/local/rife-v4.26/rife-v4.26.fgweights`, or a path provided with `FRAMEGEN_MODEL_WEIGHTS`. Prepare the weights using the [offline conversion guide](tools/rife/README.md). The weights are local and are not included in Git.
+```sh
+PYTHONDONTWRITEBYTECODE=1 python3 tests/test_benchmark_metrics.py
+```
+
+### Metal preview host
+
+The preview requires converted weights at `models/local/rife-v4.26/rife-v4.26.fgweights`, or a path given by `FRAMEGEN_MODEL_WEIGHTS`. Weights are prepared locally and are not committed.
 
 ```sh
 open build/adapters/test-metal/framegen-test-metal.app
 ```
 
-Set `FRAMEGEN_METAL_MODEL_VARIANT=QUALITY` or `BALANCED` to select an inference precision mode. The default is `QUALITY`.
+Set `FRAMEGEN_METAL_MODEL_VARIANT=QUALITY` or `BALANCED` to select inference precision. The default is `QUALITY`.
 
-## Benchmarks
-
-Enable the optional Metal benchmark runner with `-DFRAMEGEN_BUILD_TOOLS=ON`, then run the synthetic motion corpus:
+### Benchmarks
 
 ```sh
 cmake -S . -B build -G Ninja -DFRAMEGEN_BUILD_TOOLS=ON
@@ -106,34 +181,86 @@ python3 tools/benchmark/bench.py run \
   --output test-results/benchmarks/rife-v4.26-raw-synthetic-motion.json
 ```
 
-For HUD-protected runs, metric definitions, comparisons, and known limitations, see [benchmark guidance](docs/BENCHMARK.md) and [temporal quality results](docs/TEMPORAL_QUALITY.md). The scheduler host is a simulation, not an in-game or physical-display test:
+Metric definitions, HUD-protected runs, and known limitations are in [benchmark guidance](docs/BENCHMARK.md). The scheduler host is a deterministic simulation, not a display-cadence test:
 
 ```sh
 build/tests/framegen-pacing-host
 ```
 
+---
+
+## Repository layout
+
+```text
+include/framegen/    Public C ABI and C++ backend SPI
+src/                 Core, Metal backend, pacing, quality, diagnostics
+backends/            Candidate algorithms — reserved, not approved dependencies
+adapters/            test-metal host; d3dmetal, dxmt, dxvk reserved
+tools/               Benchmark runner, corpus, analyzer, RIFE conversion
+tests/               CTest suite and Python metric checks
+docs/                Benchmark, HUD, temporal quality, feasibility, provenance
+experiments/         Dated investigation trees with evidence and reports
+*.md (root)          Append-only engineering log, R65–R121 and Step 8–11 closeouts
+```
+
+The root-level `FG-METAL-R*.md` files are the project's primary record. They are kept at the root deliberately so that report-to-report references and evidence paths stay stable; a future documentation consolidation is tracked in [TASKS.md](TASKS.md).
+
+---
+
+## Prior renderer investigations
+
+Four integration routes were investigated before the current title work. Three are closed, and one produced the baseline that redirected the effort.
+
+| Route | Outcome | Why it stopped |
+| --- | --- | --- |
+| GPTK 4 / D3DMetal transparent adapter | **PARTIAL PASS** | No supported public per-swapchain Metal hook; same-chain generated presents break common application buffer progression |
+| DXMT + `CAMetalDisplayLink` | **STOP** | Matched windowed and fullscreen runs failed presentation health; physical scanout unverifiable |
+| DXVK-MacOS Step 11 | **11E NOT READY** | AppFrame/backbuffer identity, cross-frame A/B ownership, and release-ledger closure unproven |
+| Native MoltenVK control | **Healthy baseline** | 59.99–60.01 FPS with 0 waits ≥ 50 ms — proving the starvation is upstream, in the Wine/DXVK stack |
+
+The native control is the most useful result in that set: it converted a suspected platform limitation into a bounded, upstream-specific defect. Details are in the [Step 11 closeout](STEP11-CLOSEOUT-RECONCILIATION.md) and [decisions](DECISIONS.md).
+
+---
+
 ## Documentation
 
-| Document | Description |
+| Document | Contents |
 | --- | --- |
-| [Architecture](ARCHITECTURE.md) | Library modules, resource ownership, and adapter boundary. |
-| [Roadmap](ROADMAP.md) | Planned project direction. |
-| [Decisions](DECISIONS.md) | Accepted constraints and open questions. |
-| [Tasks](TASKS.md) | Completed, blocked, and follow-up work. |
-| [HUD preservation](docs/HUD_PRESERVATION.md) | UI-plane and automatic HUD controls. |
-| [Temporal quality](docs/TEMPORAL_QUALITY.md) | Synthetic evaluation and regressions. |
-| [Renderer feasibility](docs/feasibility/) | GPTK, D3DMetal, and DXGI experiment reports. |
-| [Model provenance](docs/provenance/rife-v4.26.md) | Model source, conversion, license, and reference evidence. |
-| [Contributing](CONTRIBUTING.md) and [provenance policy](PROVENANCE.md) | Contribution and third-party material requirements. |
+| [Architecture](ARCHITECTURE.md) | Modules, resource ownership, synchronization, adapter boundary |
+| [Roadmap](ROADMAP.md) | Phase structure and prerequisites |
+| [Tasks](TASKS.md) | Completed, blocked, and open work with verification records |
+| [Decisions](DECISIONS.md) | Accepted constraints and open questions |
+| [Step 11 closeout](STEP11-CLOSEOUT-RECONCILIATION.md) | DXVK disposition and 11E readiness |
+| [Benchmark guidance](docs/BENCHMARK.md) | Corpus format, metrics, and limits |
+| [Temporal quality](docs/TEMPORAL_QUALITY.md) | Synthetic evaluation and regressions |
+| [HUD preservation](docs/HUD_PRESERVATION.md) | UI-plane and automatic protection |
+| [Renderer feasibility](docs/feasibility/) | GPTK, D3DMetal, DXGI, DXMT reports |
+| [Model provenance](docs/provenance/rife-v4.26.md) | Source, conversion, license, evidence |
+
+Recent title-integration rounds, newest first: [R121](FG-METAL-R121-PRESENTATION-OCCUPANCY-REPORT.md) · [R120](FG-METAL-R120-CONTINUOUS-30-TO-60-TITLE-REPORT.md) · [R119](FG-METAL-R119-LIVE-CONTENTION-AND-EVIDENCE-ISOLATION-REPORT.md) · [R118](FG-METAL-R118-LIVE-GENERATION-THROUGHPUT-REPORT.md) · [R117](FG-METAL-R117-LOOKAHEAD-2X-FEASIBILITY-REPORT.md) · [R116](FG-METAL-R116-CRITICAL-PATH-PACING-REPORT.md) · [R115](FG-METAL-R115-REARMABLE-CONTINUOUS-TITLE-REPORT.md) · [R114](FG-METAL-R114-INPROCESS-TARGET-LATCH-TITLE-DISPLAY-REPORT.md)
+
+---
 
 ## Project boundaries
 
-- The core must not depend on Highball, Wine, D3DMetal, DXMT, or DXVK.
-- Renderer integrations belong in separate adapters and must use documented/public interfaces.
-- The live frame path must remain GPU-native; CPU code may schedule work and handle metadata, but must not read back frame pixels.
-- Do not inspect, copy, depend on, reconstruct, or imitate private Lossless Scaling or LSFG interfaces, binaries, models, or behavior.
-- Original project code is intended to use Apache-2.0. Third-party code, models, weights, datasets, and runtime dependencies have separate provenance and redistribution requirements; see [LICENSE](LICENSE) and [PROVENANCE.md](PROVENANCE.md).
+These are constraints on the implementation, not aspirations.
 
-## Contributing and support
+- **GPU-native live path.** CPU code may schedule work and handle metadata; it must not read back frame pixels. No screen capture, desktop duplication, or CPU image-buffer processing.
+- **Core independence.** The core must not depend on Highball, Wine, D3DMetal, DXMT, or DXVK. Integrations live in adapters and use documented public interfaces only.
+- **Clean-room design.** No inspection, copying, reconstruction, or imitation of private Lossless Scaling / LSFG interfaces, binaries, models, or behaviour.
+- **Evidence before claims.** A completed feasibility experiment is not a supported integration. Unverified means unverified in the README, the reports, and the commit messages.
+- **Separate provenance.** Original code is Apache-2.0. Third-party code, models, weights, datasets, and runtime dependencies carry independent rights records in [PROVENANCE.md](PROVENANCE.md).
 
-Read [CONTRIBUTING.md](CONTRIBUTING.md) and [PROVENANCE.md](PROVENANCE.md) before proposing code, dependencies, model assets, or evaluation data. For current priorities and integration limits, start with [TASKS.md](TASKS.md) and [DECISIONS.md](DECISIONS.md).
+---
+
+## Contributing
+
+Read [CONTRIBUTING.md](CONTRIBUTING.md) and [PROVENANCE.md](PROVENANCE.md) before proposing code, dependencies, model assets, or evaluation data. Contributions are expected to state what was verified and what was not, and to keep renderer-specific code in adapters.
+
+Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/); the scope names the subsystem (`api`, `metal`, `pacing`, `hud`, `temporal`, `dxmt`, `dxvk`, `experiments`, `docs`).
+
+---
+
+## License
+
+Original project code is licensed under the [Apache License 2.0](LICENSE). Third-party components, models, weights, and datasets retain their own terms; see [PROVENANCE.md](PROVENANCE.md).

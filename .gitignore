@@ -79,6 +79,12 @@ __pycache__/
 /experiments/metalfx_frame_interpolator_R93/provider_smoke
 /experiments/metalfx_frame_interpolator_R93/frame_interpolator_smoke
 
+# R6 storage-gate iteration scratch: superseded candidate patches, dependency
+# manifests, and workspace snapshots, roughly 160 MB of them. The reviews and
+# reports that selected the retained candidate are tracked.
+/R6-A-R87-*
+/R6-A-*-CANDIDATE-*.diff
+
 # Storage-gate generated dumps. Single attestations and structured-output files
 # reach hundreds of megabytes; the gate code, tests, and reviews that produced
 # them are tracked.
