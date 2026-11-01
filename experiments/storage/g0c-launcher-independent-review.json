@@ -1,659 +1,547 @@
 {
-  "accounting_review": {
-    "authorized_exclusions": {
-      "active_marker": "Exact schema and canonical encoding, finite timestamp, owner/private/single-link checks, 16 KiB file and 64 KiB allocated caps; materialized marker binds an authenticated receipt.",
-      "manifest": "Fixed ID-derived path, nofollow read, signature and canonical encoding, owner/private/single-link checks, 2 MiB allocation cap.",
-      "output": "Canonical experiment output directory; allocated bytes capped by the signed persistent-output reservation.",
-      "prefix": "Excluded only with authenticated receipt and matching directory device/inode; prefix allocation remains capped by the signed reservation.",
-      "smoke_claim": "Fixed one-use HMAC-authenticated claim, exact schema, canonical encoding, 16 KiB file and 64 KiB allocated caps."
-    },
-    "gate0_baseline": "Gate0 measures after its attestation write, then verifies stable observed allocation, free space, and signed readback. Live checks compare raw nonlease allocation exactly to the attested observed value.",
-    "historical_evidence_limit": "The retained Wine run does not contain the failed assertion-time raw scope and receipt. The exact Z3 fixture demonstrates the old-guard arithmetic and legitimate-prefix model, but not independent provenance for the historical assertion-time measurement.",
-    "outcome": "PASS",
-    "policy_thresholds_unchanged": {
-      "hard_stop_free_gib": 25,
-      "minimum_projected_free_gib": 50,
-      "preferred_free_gib": 60,
-      "project_ceiling_gib": 55,
-      "project_warning_gib": 52,
-      "uncertainty_margin": "max(256 MiB, ceil(10% of raw prefix + build + persistent peak))"
-    },
-    "race_and_link_handling": "Gate0 rebinds manifest, output, claim, marker, prefix, and exclusion set after scanning. Persistent unrelated growth during materialization is rejected by exact pre/post/current comparisons. Hardlinks remain counted when any link is outside the excluded paths. APFS clone sharing remains unobservable; the full projected peak and uncertainty margin remain charged.",
-    "summary": "No remaining code blocker found. Gate0 records raw full allocation separately from exact nonlease allocation. Current raw nonlease allocation, conservative scope, signed output bindings, and exclusions remain exact across the post-write recheck. Volume free-space samples use only the existing 2 GiB bound, and failed stabilization persists signed BLOCKED evidence. The active-run manifest requires the complete signed field set before it can authorize accounting exclusions.",
-    "test_review": "A-I threshold and lifecycle matrix, byte-exact Z3 regression, 64 MiB unrelated-growth checks, hardlink boundary behavior, and storage-only smoke path were reviewed. The follow-up regression re-signs a canonical current-Gate0 manifest with a required field removed and confirms that current-run scope binding rejects it. Follow-up regressions cover valid-HMAC/current-Gate0 missing-field rejection, bounded free drift, over-bound rejection with exact delta, and signed fail-close."
-  },
-  "executed_test_results": {
-    "focused_command": "/opt/homebrew/bin/python3.14 -m unittest test_storage_policy.HistoricalTerminalClosureTests (from experiments/storage)",
-    "focused_result": "PASS: 19 H1 closure adversarial tests",
-    "full_command": "/opt/homebrew/bin/python3.14 -m unittest discover -q -s experiments/storage -p 'test_*.py' (from repository root)",
-    "full_result": "PASS: 471 tests",
-    "git_diff_check": "PASS",
-    "py_compile": "PASS"
-  },
   "findings": [],
-  "follow_up_reviews": [
-    {
-      "finding": "The active-run manifest omitted the required-field check used for historical outputs.",
-      "model_identity": "GPT-6 Luna (Max)",
-      "nine_point_review": "All prior accounting and lifecycle conclusions remain unchanged; the schema omission was the sole blocker.",
-      "other_findings": [],
-      "regression": "A canonical manifest with valid HMAC and current Gate0 hash is re-signed after removing purpose; binding is denied with a missing-required-fields blocker.",
-      "resolution": "The active-run binding now rejects missing required fields before any exclusion is authorized.",
-      "reviewed_at_utc": "2026-10-12T18:24:10Z",
-      "reviewer_identity": "Codex independent read-only reviewer /root/z4_independent_review",
-      "status": "PASS"
+  "r78_binding": {
+    "candidate": {
+      "candidate_core_sha256": "79f13322ab2b2bd10c02bb88dd2c2827e1ab4b06de9fab04b7a40dabb34db78b",
+      "candidate_id": "R6-A-R78-BOUNDED-GATE-TRANSITION-CANDIDATE-1",
+      "path": "R6-A-R78-BOUNDED-GATE-TRANSITION-CANDIDATE-1.json"
     },
-    {
-      "finding": "Exact free-space equality across two full scans prevented Gate0 stabilization and could leave a signed PASS after a failed command.",
-      "model_identity": "GPT-6 Luna (Max)",
-      "nine_point_review": "The prior accounting conclusions remain unchanged; reviewer found no new accounting or TOCTOU weakening and approved fresh Gate0.",
-      "other_findings": [],
-      "regression": "Tests accept 1 GiB free drift, reject 2 GiB plus one byte with a byte delta, verify signed fail-close, and pin the shared tolerance at 2 GiB.",
-      "resolution": "The verifier now uses the existing 2 GiB volume-free drift bound while retaining exact allocation, nonlease, output, and exclusion checks; failed verification persists a signed BLOCKED attestation.",
-      "reviewed_at_utc": "2026-10-12T18:43:56Z",
-      "reviewer_identity": "Codex independent read-only reviewer /root/z4_independent_review",
-      "status": "PASS"
+    "completion_contract": {
+      "manifest_commit_contract_path": "R6-A-R66-MANIFEST-COMMIT-CONTRACT.md",
+      "manifest_commit_contract_sha256": "01fb7933b1ceddf0a6edfac8c645719e8f279c0ac8c008bc551c77a0d462ed0b",
+      "path": "R6-A-R66-ORCHESTRATOR-RECONCILIATION.md",
+      "sha256": "0a10518af7f02e307e6b9aa69751418f483323d0e42dc4fb692ca06ef41b3846"
     },
-    {
-      "finding": "Fresh Gate 0 preflight found that the previous independent review did not bind the current signed-output cap enforcement in storage_policy.py or its regression tests.",
-      "model_identity": "GPT-6 Luna (Max)",
-      "nine_point_review": "A fresh Phase A implementation review inspected the derived stream/lifecycle reservation, PrefixLease output-cap enforcement, final Gate 0/output binding, replay-2 interlock, tests, and unchanged 55/50 thresholds. It returned PASS with no substantive findings.",
-      "other_findings": [],
-      "regression": "The current Z9 suite passes 20 tests, including derived reservation boundaries, output overflow, temporal PRE stream coverage, transient stop rejection, and replay-2 fail-closed eligibility; storage-policy and process-runner focused suites also passed after their implementation changes.",
-      "resolution": "The current storage_policy.py and test_storage_policy.py hashes below were reviewed; the 55 GiB ceiling, 50 GiB projected-free minimum, and unrelated non-lease growth rejection remain unchanged.",
-      "reviewed_at_utc": "2026-10-14T17:09:35Z",
-      "reviewer_identity": "Codex independent read-only implementation reviewer Kepler (agent 01a13b5a-af53-70a1-bfcd-1e93f4af98a1)",
-      "status": "PASS"
+    "completion_review": {
+      "path": "experiments/storage/R6-A-R75-INDEPENDENT-SAFETY-REVIEW.md",
+      "sha256": "9c5de1dd9eec177e017833f877674b24505d2bbf9c73930f9a3d54a4bfad14c6"
     },
-    {
-      "finding": "Fresh H1 review found closure-directory device and identity binding, exact report-prefix revalidation, lsof PATH substitution, and post-closure tree-growth test gaps.",
-      "model_identity": "GPT-6 Luna (Max)",
-      "nine_point_review": "Independent read-only implementation review of historical evidence preservation, terminal and lease liveness, closure identity, immutable tree checks, storage charging, authorization isolation, source hashes, and adversarial regressions returned PASS.",
-      "other_findings": [],
-      "regression": "The H1 suite passes 16 synthetic cases, including valid-HMAC wrong report prefix, legacy schema rejection, PATH spoof resistance, unknown process state, original manifest mutation, tree race, and a valid synthetic closure followed by 64 MiB tree growth rejected by the verifier. The complete Python 3.14 storage suite passed 468 tests.",
-      "resolution": "Closure schema v2 binds the exact original report prefix and same-filesystem owned directory identity, checks current source and Gate 0 control hashes, and rechecks a fixed root-owned non-writable /usr/sbin/lsof identity. The original overrun exception remains limited to its authenticated historical run; output bytes stay in full project scope and 55/50 GiB checks remain active.",
-      "reviewed_at_utc": "2026-10-14T18:03:20Z",
-      "reviewer_identity": "Codex independent read-only implementation reviewer /root/h1_fresh_reviewer",
-      "status": "PASS"
-    },
-    {
-      "finding": "The H1 terminal evidence validator initially assumed the run manifest carried an experiment_token, but the historical schema binds that token through the storage manifest digest.",
-      "model_identity": "GPT-6 Luna (Max)",
-      "nine_point_review": "Re-review of the corrected evidence chain confirmed the token is SHA-256 of the raw signed storage manifest truncated to 32 lowercase hex characters; execution-result.json and trace-index.json both match it and their pinned hashes. The run manifest has no token field.",
-      "other_findings": [],
-      "regression": "The corrected implementation was rechecked read-only against the actual historical files. The complete Python 3.14 suite passes 468 tests, including 16 synthetic H1 closure cases.",
-      "resolution": "Derive the token only after checking the exact manifest SHA, canonical encoding, and HMAC; require execution and trace-index records to match that derived token, and include it in closure evidence. No historical source artifact was changed.",
-      "reviewed_at_utc": "2026-10-14T18:05:29Z",
-      "reviewer_identity": "Codex independent read-only implementation reviewer /root/h1_fresh_reviewer",
-      "status": "PASS"
-    },
-    {
-      "finding": "The first append-only historical closure certificate was preserved but failed schema-v3 verification because its writer omitted closure_path.",
-      "model_identity": "GPT-6 Luna (Max)",
-      "nine_point_review": "Final read-only review of the correction writer, verifier, immutable original certificate binding, and current adversarial tests returned PASS with no blocking findings.",
-      "other_findings": [],
-      "regression": "The new wrong-legacy-hash test verifies correction creation fails, the original certificate remains byte-identical, and no correction file appears. H1 suite: 19 passed; full Python 3.14 storage suite: 471 passed.",
-      "resolution": "Correction creation is allowed only for the exact pinned legacy certificate and fresh matching historical evidence, liveness, tree, report prefix, metadata, and byte totals. G0C source and test bindings below now match the reviewed files.",
-      "reviewed_at_utc": "2026-10-14T18:21:14Z",
-      "reviewer_identity": "Fresh independent read-only reviewer /root/h1_fresh_reviewer",
-      "status": "PASS"
-    }
-  ],
-  "model_identity": "GPT-6 Luna (Max)",
-  "prior_review": {
-    "br9r2_sequence_assessment": {
-      "assessment_status": "STATIC_PROJECTION_PASS_REQUIRES_FRESH_GATE0_AND_LIVE_LEASE_CHECKS",
-      "current_inventory_baseline": {
-        "conservative_scope_bytes": 48481857536,
-        "conservative_scope_gib": 45.152,
-        "free_bytes": 69046431744,
-        "free_gib": 64.305,
-        "generated_at_utc": "2026-10-11T12:58:01.628352+00:00",
-        "inventory_sha256": "1d9706f5476e121b3bc10bb1bd8f8453ae1d86b4bfdbc09806f22790b0810490",
-        "observed_inode_deduplicated_scope_bytes": 47045750784,
-        "unlinked_mount_upper_bound_bytes": 1436106752
-      },
-      "existing_coverer_artifact": {
-        "binary_path": "/Users/nima/Library/Caches/FGMetal/artifacts/sha256/1f6e6ade1d852825084b317031eae3cb3edb2de19b77f4c1e5a7ca85aad48fbc/neutral-coverer",
-        "binary_sha256": "1f6e6ade1d852825084b317031eae3cb3edb2de19b77f4c1e5a7ca85aad48fbc",
-        "binary_size_bytes": 147888,
-        "build_helper_note": "The helper contains an earlier controller digest pin and would fail closed if asked to compile against the changed controller. Recompilation is not part of the resumed route because the current verified binary and provenance already exist and are reused.",
-        "compile_manifest_decision": "ALLOW",
-        "compile_manifest_path": "experiments/storage/manifests/step11d3b-br9r2-coverer-20261011-115232-8d4fe3d2.json",
-        "compile_manifest_sha256": "6d1d8b3fbad40d73e1f05588f0ab126e6e0637ed8c194663ba8e07171b97c00d",
-        "new_compile_required": false,
-        "provenance_path": "experiments/dxvk_macos_step11d3b/evidence/br9r2/coverer-build-step11d3b-br9r2-coverer-20261011-115232-8d4fe3d2/coverer-build-provenance.json",
-        "provenance_sha256": "cf7ab7bf96ead4e33d05e1f24a3ea1e49a0beac516bf07af73e1554d599d1ba3",
-        "provenance_status": "PASS",
-        "reuse_existing_artifact": true,
-        "source_sha256": "8618bfa139df18d7da6c4db46518b8cf690c8c42bb568aa8470d118c8c6c0b82"
-      },
-      "limitations": "Projection assumes serialized execution, stated lease peaks, prior outputs present in the measured starting inventory, no unmodeled external allocation, and successful cleanup. Each phase must still pass fresh Gate 0 and its own live projected-peak admission.",
-      "no_experiment_started_by_reviewer": true,
-      "planned_peaks": {
-        "conservative_sum_of_full_projected_peaks_bytes": 6306345780,
-        "final_report_reserve_bytes": 1048576,
-        "native_phase_count": 3,
-        "native_projected_peak_bytes_each": 805306368,
-        "native_raw_persistent_bytes_each": 536870912,
-        "native_uncertainty_bytes_each": 268435456,
-        "wine_state5_projected_peak_bytes": 3889378100,
-        "wine_state5_raw_bytes": 3535798272,
-        "wine_state5_uncertainty_bytes": 353579828
-      },
-      "projected_serial_final": {
-        "projected_free_bytes": 62740085964,
-        "projected_free_gib": 58.431,
-        "projected_scope_bytes": 54788203316,
-        "projected_scope_gib": 51.025,
-        "threshold_result": "Above 50 GiB projected free and below 55 GiB projected scope; below-60-GiB free advisory only; below 52 GiB scope warning."
-      },
-      "sequence": [
-        "fresh Wine state-5 PrefixLease",
-        "Native foreground NativeRunLease",
-        "Native occlusion NativeRunLease 1",
-        "Native occlusion NativeRunLease 2"
-      ]
-    },
-    "canonical_thresholds": {
-      "emergency_hard_stop_free_bytes": 26843545600,
-      "equality_semantics": "Exactly 50 GiB projected free and exactly 55 GiB projected scope are admitted.",
-      "gib_bytes": 1073741824,
-      "normal_projected_free_minimum_bytes": 53687091200,
-      "preferred_free_advisory_bytes": 64424509440,
-      "project_scope_warning_above_bytes": 55834574848,
-      "scoped_project_ceiling_bytes": 59055800320,
-      "uncertainty_margin": {
-        "formula": "max(256 MiB, ceil(10% of raw prefix + build + persistent peak))",
-        "minimum_bytes": 268435456,
-        "proportional_basis_points": 1000,
-        "rounding": "ceiling to whole byte"
-      }
-    },
-    "current_gate0_state": {
-      "attested_inventory_sha256": "3ed08f54d2104739b97d8cacd51efdf11706f0a3a9a5d99c851f101e610b43f8",
-      "current_inventory_generated_at_utc": "2026-10-11T12:58:01.628352+00:00",
-      "current_inventory_path": "experiments/storage/storage-inventory.json",
-      "current_inventory_sha256": "1d9706f5476e121b3bc10bb1bd8f8453ae1d86b4bfdbc09806f22790b0810490",
-      "experiment_result_implication": "Readiness only: the old stored attestation cannot admit a new lease. This review does not claim a Gate 0 or BR9R2 experiment result.",
-      "inventory_hash_matches_attestation": false,
-      "readiness_status": "STALE_REQUIRES_FRESH_GATE0",
-      "required_control_hashes_stale_against_attestation": [
-        {
-          "attested_sha256": "61b28e46917069188ff53ab1a113d172f1d8bd3a046ce594c0543633173d65cd",
-          "current_sha256": "2d1ad68df26148d1fc7236e4b0ffd0d6fb7babb5cc047512b120bceaff38d962",
-          "field": "build_retention_control",
-          "path": "experiments/storage/build_retention.py"
-        },
-        {
-          "attested_sha256": "0f2f4d9edddf2b2be440bf50264b2612af6b43663cb73aba3c7ced22727e8c26",
-          "current_sha256": "3614b4d476743bb816d54935838c2b9de387e239bf8292334480dda853d8db3c",
-          "field": "build_retention_tests",
-          "path": "experiments/storage/test_build_retention.py"
-        },
-        {
-          "attested_sha256": "d93786117fa1cbbfd5d4a94504a49cb9e4ecc2460b01712929dee745fe406c6e",
-          "current_sha256": "57c075e1054223b891dd83738d7ea5958f7026292a504977e65ed32d1f6be066",
-          "field": "gate0_control",
-          "path": "experiments/storage/storage_gate0.py"
-        },
-        {
-          "attested_sha256": "91e27ed0a2b27bf871db467b0fa545943e6ac71948227c18bc9acf9be25f739f",
-          "current_sha256": "71ae6240883365ed7f43187b6801a05d3b6b8e4c9af6dc0f7caaed989a4483ad",
-          "field": "gate0_checks_tests",
-          "path": "experiments/storage/test_g0c_checks.py"
-        }
-      ],
-      "stored_attestation_mode": "final",
-      "stored_attestation_path": "experiments/storage/storage-gate0-attestation.json",
-      "stored_attestation_sha256": "7f34a5514d108781894211c2a7c3ed4524b3011d47f0ce3f3d6c737a16caf2c4",
-      "stored_attestation_status": "PASS"
-    },
-    "findings": [],
-    "gate0_artifact_contract": {
-      "complete_suite_log": {
-        "path": "experiments/dxvk_macos_step11d3b/evidence/br9r2/storage-suite-post-gate0-binding-fix.log",
-        "reviewer_reran_tests": false,
-        "sha256": "46851c09e5de97a1297b4b64d619cbc1ecd2588829aa6305dcbd17bac8a2372f",
-        "summary": "Ran 408 tests in 6.739s; OK"
-      },
-      "parser": "storage_gate0._verify_g0c_completion_evidence",
-      "parser_behavior": "For every field in G0C_REVIEW_REQUIRED_FILES, require the exact repo-relative path and SHA-256 of the current nofollow-read source bytes; also require status PASS and findings [].",
-      "regression_test_behavior": "The test constructs the exact current required field/path/hash map, then verifies stale required hashes for every field and missing required fields are rejected. The parser source separately checks exact path equality.",
-      "required_fields": [
-        "source",
-        "tests",
-        "storage_policy_tests",
-        "build_retention_control",
-        "build_retention_tests",
-        "prefix_preflight_control",
-        "prefixlease_contract_tests",
-        "gate0_control",
-        "gate0_checks_tests"
-      ],
-      "required_file_bindings": [
-        {
-          "field": "source",
-          "path": "experiments/storage/storage_policy.py",
-          "sha256": "97ee17a5ae6a4b81496f03f6cf6e4c630a4239eaa08a5e1bcbeb65fc2a2b7ec7"
-        },
-        {
-          "field": "tests",
-          "path": "experiments/storage/test_wine_launcher_policy.py",
-          "sha256": "d2ad7086077e9d50f80428b41a759c537e93912c229b6085d78a8b6f1cc0d3ae"
-        },
-        {
-          "field": "storage_policy_tests",
-          "path": "experiments/storage/test_storage_policy.py",
-          "sha256": "4eff8bcfa34eac88c4bdd0aa0bd535aefa6484f1d469bc6526d1a2675084bc20"
-        },
-        {
-          "field": "build_retention_control",
-          "path": "experiments/storage/build_retention.py",
-          "sha256": "2d1ad68df26148d1fc7236e4b0ffd0d6fb7babb5cc047512b120bceaff38d962"
-        },
-        {
-          "field": "build_retention_tests",
-          "path": "experiments/storage/test_build_retention.py",
-          "sha256": "3614b4d476743bb816d54935838c2b9de387e239bf8292334480dda853d8db3c"
-        },
-        {
-          "field": "prefix_preflight_control",
-          "path": "experiments/storage/prefix_preflight.py",
-          "sha256": "888afd7ac36aa528bdb1548bee5449a688b25824ba7625101f10aea76562233b"
-        },
-        {
-          "field": "prefixlease_contract_tests",
-          "path": "experiments/storage/test_prefixlease_wineprefix_contract.py",
-          "sha256": "6b6db2be3b3a9e08dbd52767b14c5d29251deb6741be4b987f92a27ba1d002f2"
-        },
-        {
-          "field": "gate0_control",
-          "path": "experiments/storage/storage_gate0.py",
-          "sha256": "57c075e1054223b891dd83738d7ea5958f7026292a504977e65ed32d1f6be066"
-        },
-        {
-          "field": "gate0_checks_tests",
-          "path": "experiments/storage/test_g0c_checks.py",
-          "sha256": "71ae6240883365ed7f43187b6801a05d3b6b8e4c9af6dc0f7caaed989a4483ad"
-        }
-      ],
-      "source_evidence": [
-        {
-          "lines": "61-71; 872-890",
-          "path": "experiments/storage/storage_gate0.py"
-        },
-        {
-          "lines": "258-297",
-          "path": "experiments/storage/test_g0c_checks.py"
-        }
-      ],
-      "status": "PASS"
-    },
-    "model_identity": "GPT-6 Luna (Max)",
-    "questions": [
-      {
-        "answer": "YES. Admission computes projected scope as current conservative scope plus the full projected peak and projected free as current free minus that peak. It blocks only scope above 55 GiB or projected free below 50 GiB; exact equality at both boundaries passes.",
-        "evidence": [
-          {
-            "lines": "38-46; 235-268",
-            "path": "experiments/storage/storage_policy.py"
-          },
-          {
-            "lines": "24-71",
-            "path": "experiments/storage/test_storage_policy.py"
-          }
-        ],
-        "number": 1,
-        "question": "Does current code enforce scoped usage <=55 GiB and projected free >=50 GiB against the complete declared peak, with equality permitted?"
-      },
-      {
-        "answer": "YES. Projected free below 60 GiB emits a warning; only projected free below 50 GiB blocks normal admission.",
-        "evidence": [
-          {
-            "lines": "38-46; 250-260",
-            "path": "experiments/storage/storage_policy.py"
-          },
-          {
-            "lines": "24-43",
-            "path": "experiments/storage/test_storage_policy.py"
-          }
-        ],
-        "number": 2,
-        "question": "Is 60 GiB only a preferred/advisory free-space target?"
-      },
-      {
-        "answer": "YES. Current free below 25 GiB blocks admission. Managed BuildLease, PrefixLease, and NativeRunLease work also monitor live free space and trigger emergency stop handling below 25 GiB; normal new-run projected admission still requires at least 50 GiB.",
-        "evidence": [
-          {
-            "lines": "235-260; 4487-4554; 4952-4960; 6154-6165",
-            "path": "experiments/storage/storage_policy.py"
-          },
-          {
-            "lines": "5892-5919",
-            "path": "experiments/storage/build_retention.py"
-          },
-          {
-            "lines": "932-975",
-            "path": "experiments/storage/test_build_retention.py"
-          }
-        ],
-        "number": 3,
-        "question": "Does 25 GiB remain an emergency hard stop rather than the normal admission threshold?"
-      },
-      {
-        "answer": "YES. BuildLease, PrefixLease, and NativeRunLease consume the validated signed estimated_projected_new_disk_bytes. Each repeats its live projected check while holding the shared allocation lock, preventing concurrent leases from using the same headroom. The resumed BR9R2 route has no new BuildLease because it reuses the already artifactized coverer.",
-        "evidence": [
-          {
-            "lines": "5389-5405",
-            "path": "experiments/storage/build_retention.py"
-          },
-          {
-            "lines": "4042-4053; 4122-4133; 4760-4773; 5976-6028",
-            "path": "experiments/storage/storage_policy.py"
-          }
-        ],
-        "number": 4,
-        "question": "Does every relevant lease use the full projected peak, rather than only current allocation?"
-      },
-      {
-        "answer": "YES. After clone publication it remeasures free space and conservative scoped usage, then checks the complete signed projected peak again. The code explicitly retains the full prefix plus uncertainty as possible future APFS COW allocation after materialization.",
-        "evidence": [
-          {
-            "lines": "271-285; 4952-4987",
-            "path": "experiments/storage/storage_policy.py"
-          },
-          {
-            "lines": "73-125",
-            "path": "experiments/storage/test_storage_policy.py"
-          }
-        ],
-        "number": 5,
-        "question": "Does PrefixLease recheck the remaining projected peak after materialization, including residual APFS copy-on-write demand and uncertainty?"
-      },
-      {
-        "answer": "YES for validated signed manifests. The margin is max(256 MiB, ceiling(10% of prefix + build + persistent raw peak)); manifest validation rejects missing or inconsistent components/margins, and all lease admission paths use the resulting full projected peak.",
-        "evidence": [
-          {
-            "lines": "286-294; 918-949; 3562-3565",
-            "path": "experiments/storage/storage_policy.py"
-          },
-          {
-            "lines": "5389-5405",
-            "path": "experiments/storage/build_retention.py"
-          }
-        ],
-        "number": 6,
-        "question": "Are uncertainty margins applied consistently?"
-      },
-      {
-        "answer": "NO. The shared helper blocks projected scope above 55 GiB, and the regression test rejects a 54 GiB current scope plus a peak that crosses the ceiling.",
-        "evidence": [
-          {
-            "lines": "246-260",
-            "path": "experiments/storage/storage_policy.py"
-          },
-          {
-            "lines": "54-61",
-            "path": "experiments/storage/test_storage_policy.py"
-          }
-        ],
-        "number": 7,
-        "question": "Can current scope below the ceiling but projected scope above 55 GiB incorrectly pass?"
-      },
-      {
-        "answer": "NO. The shared helper blocks projected free below 50 GiB, and tests cover both the helper and NativeRunLease rejecting an under-50-GiB projected result.",
-        "evidence": [
-          {
-            "lines": "246-256",
-            "path": "experiments/storage/storage_policy.py"
-          },
-          {
-            "lines": "63-71; 1435-1450",
-            "path": "experiments/storage/test_storage_policy.py"
-          }
-        ],
-        "number": 8,
-        "question": "Can projected free below 50 GiB incorrectly pass?"
-      },
-      {
-        "answer": "NO in the current BR9R2 route. The active Wine runner uses the current Gate 0 thresholds and PrefixLease; the Native runner uses NativeRunLease; the BR9R2 controller invokes those paths. The archived br7 runner source still contains old 45 GiB PRE/POST checks, but the current controller does not invoke it.",
-        "evidence": [
-          {
-            "lines": "542-569",
-            "path": "experiments/dxvk_macos_step11d3b/runner_b.py"
-          },
-          {
-            "lines": "305-360",
-            "path": "experiments/dxvk_macos_step11d3a/run_native_control.py"
-          },
-          {
-            "lines": "188-198; 350-385",
-            "path": "experiments/dxvk_macos_step11d3b/evidence/br9r2/coverer_sequence.py"
-          },
-          {
-            "lines": "520-521; 816-817",
-            "path": "experiments/dxvk_macos_step11d3b/evidence/br7/runner-br6.py"
-          }
-        ],
-        "number": 9,
-        "question": "Is any active BR9R2 executable path still using the old 45 GiB scoped ceiling?"
-      },
-      {
-        "answer": "YES. The old executable checks remain only in an archived historical runner; other references describe the prior limit in regression tests and historical reports. Current BR9R2 runner/controller sources do not use that ceiling.",
-        "evidence": [
-          {
-            "lines": "520-521; 816-817",
-            "path": "experiments/dxvk_macos_step11d3b/evidence/br7/runner-br6.py"
-          },
-          {
-            "lines": "46-51",
-            "path": "experiments/storage/test_storage_policy.py"
-          },
-          {
-            "lines": "23-29; 125-145",
-            "path": "experiments/dxvk_macos_step11d3b/STEP-11D3-BR9R2-REPORT.md"
-          }
-        ],
-        "number": 10,
-        "question": "Are remaining old 45 GiB references confined to historical or regression material?"
-      },
-      {
-        "answer": "NO concrete weakening found. Build termination still polls and terminates at the 25 GiB emergency stop. Prefix and Native leases retain exact manifest, path/inode, executable/environment, bounded process supervision, cleanup receipt, and fail-closed cleanup checks. The full suite log reports 408 tests / OK; this reviewer inspected the log but did not run tests.",
-        "evidence": [
-          {
-            "lines": "5389-5405; 5892-5919",
-            "path": "experiments/storage/build_retention.py"
-          },
-          {
-            "lines": "4213-4256; 4476-4554; 4949-4987; 5940-6028; 6154-6165; 6264-6285; 6360-6374",
-            "path": "experiments/storage/storage_policy.py"
-          },
-          {
-            "lines": "932-1003",
-            "path": "experiments/storage/test_build_retention.py"
-          },
-          {
-            "lines": "final unittest summary",
-            "path": "experiments/dxvk_macos_step11d3b/evidence/br9r2/storage-suite-post-gate0-binding-fix.log"
-          }
-        ],
-        "number": 11,
-        "question": "Did the changes weaken cleanup, retention, lease identity, or anti-runaway controls?"
-      },
-      {
-        "answer": "YES, for the serialized declared peaks, subject to fresh Gate 0 and each live lease check. The current inventory snapshot starts at 69,046,431,744 free bytes and 48,481,857,536 conservative scoped bytes. A 3 GiB + 300 MiB Wine state-5 PrefixLease projects 3,889,378,100 bytes including 353,579,828 uncertainty. Three 512 MiB Native phases each project 805,306,368 bytes including the 256 MiB minimum uncertainty; adding a 1 MiB report reserve gives a deliberately conservative cumulative full-peak projection of 6,306,345,780 bytes, ending at 62,740,085,964 free (58.431 GiB) and 54,788,203,316 scoped (51.025 GiB). That remains above the 50 GiB free minimum and below the 55 GiB scope ceiling; it crosses only the preferred below-60-GiB free advisory, and remains below the 52 GiB scope warning. The existing coverer binary and PASS provenance/manifest hash chain are present and verified, so a new compile is not part of the resumed sequence. This is a static projection, not an experiment result; current stored Gate 0 state is stale and must be refreshed before any phase starts.",
-        "evidence": [
-          {
-            "lines": "filesystem.free_bytes; totals.fgmetal_scoped_observed_allocated_inode_bytes; totals.fgmetal_scoped_unlinked_mount_backing_upper_bound_bytes; totals.fgmetal_scoped_allocated_inode_bytes",
-            "path": "experiments/storage/storage-inventory.json"
-          },
-          {
-            "lines": "559-569",
-            "path": "experiments/dxvk_macos_step11d3b/runner_b.py"
-          },
-          {
-            "lines": "278-355",
-            "path": "experiments/dxvk_macos_step11d3a/run_native_control.py"
-          },
-          {
-            "lines": "188-198; 208-240; 350-385",
-            "path": "experiments/dxvk_macos_step11d3b/evidence/br9r2/coverer_sequence.py"
-          },
-          {
-            "lines": "174-215",
-            "path": "experiments/dxvk_macos_step11d3b/evidence/br9r2/build_neutral_coverer.py"
-          },
-          {
-            "lines": "status; binary_sha256; manifest_sha256",
-            "path": "experiments/dxvk_macos_step11d3b/evidence/br9r2/coverer-build-step11d3b-br9r2-coverer-20261011-115232-8d4fe3d2/coverer-build-provenance.json"
-          }
-        ],
-        "number": 12,
-        "question": "Is the amended policy safe for the BR9R2 sequence of a fresh Wine PrefixLease followed by NativeRunLease runs, including each live projected admission?"
-      }
+    "completion_review_verdicts": [
+      "PASS — BUILDLEASE SUCCESS CANNOT BECOME DURABLE BEFORE ALL COMPLETION IDENTITY VALIDATION AND MANIFEST COMMIT REQUIREMENTS ARE DURABLY SATISFIED",
+      "PASS — HOST V3 DUAL-LINEAGE FINALIZATION STILL BINDS BOTH GRAPH IDENTITIES, BOTH GRAPH KEYS, THE FROZEN SESSION PLAN, AND OUTPUT LINEAGE"
     ],
-    "review_type": "fresh_independent_read_only_storage_policy_and_BR9R2_sequence_review",
-    "reviewed_at_utc": "2026-10-11T13:22:20Z",
-    "reviewed_files": {
-      "archived_45_gib_runner": {
-        "path": "experiments/dxvk_macos_step11d3b/evidence/br7/runner-br6.py",
-        "sha256": "48c77c58dbd74a2f0c3d0bbf7954a94f94958a0eba238708dd67c677f090bb9e"
-      },
-      "br9r2_controller": {
-        "path": "experiments/dxvk_macos_step11d3b/evidence/br9r2/coverer_sequence.py",
-        "sha256": "0d5c7870948df33a4df1630bf6132ddd44bdfd6bcc0893a96c356a806077611c"
-      },
-      "br9r2_coverer_build_helper": {
-        "path": "experiments/dxvk_macos_step11d3b/evidence/br9r2/build_neutral_coverer.py",
-        "sha256": "30c30684ec546dc075efb459d6d99975f436ddf957773776123d11b07c9324b3"
-      },
-      "br9r2_coverer_source": {
-        "path": "experiments/dxvk_macos_step11d3b/neutral_coverer.swift",
-        "sha256": "8618bfa139df18d7da6c4db46518b8cf690c8c42bb568aa8470d118c8c6c0b82"
-      },
-      "br9r2_native_runner": {
-        "path": "experiments/dxvk_macos_step11d3a/run_native_control.py",
-        "sha256": "52fcfad1ce2655d95d5ef1ea1d54dab05fe74eba55fd0f75397cd8e38a44c563"
-      },
-      "br9r2_report": {
-        "path": "experiments/dxvk_macos_step11d3b/STEP-11D3-BR9R2-REPORT.md",
-        "sha256": "10ce420b19b7d5bfc7c2aa947e30d76e686bf4eafc8708ce6da5705023659f9e"
-      },
-      "br9r2_storage_suite_log": {
-        "path": "experiments/dxvk_macos_step11d3b/evidence/br9r2/storage-suite-post-gate0-binding-fix.log",
-        "sha256": "46851c09e5de97a1297b4b64d619cbc1ecd2588829aa6305dcbd17bac8a2372f"
-      },
-      "br9r2_wine_runner": {
-        "path": "experiments/dxvk_macos_step11d3b/runner_b.py",
-        "sha256": "a8229134df685e293ca8bba8b7e109e9a77a5b59bc3f6f8f04ca2a25b0812b51"
-      },
-      "build_retention_control": {
-        "path": "experiments/storage/build_retention.py",
-        "sha256": "2d1ad68df26148d1fc7236e4b0ffd0d6fb7babb5cc047512b120bceaff38d962"
-      },
-      "build_retention_tests": {
-        "path": "experiments/storage/test_build_retention.py",
-        "sha256": "3614b4d476743bb816d54935838c2b9de387e239bf8292334480dda853d8db3c"
-      },
-      "coverer_build_provenance": {
-        "path": "experiments/dxvk_macos_step11d3b/evidence/br9r2/coverer-build-step11d3b-br9r2-coverer-20261011-115232-8d4fe3d2/coverer-build-provenance.json",
-        "sha256": "cf7ab7bf96ead4e33d05e1f24a3ea1e49a0beac516bf07af73e1554d599d1ba3"
-      },
-      "coverer_compile_manifest": {
-        "path": "experiments/storage/manifests/step11d3b-br9r2-coverer-20261011-115232-8d4fe3d2.json",
-        "sha256": "6d1d8b3fbad40d73e1f05588f0ab126e6e0637ed8c194663ba8e07171b97c00d"
-      },
-      "current_inventory_snapshot": {
-        "path": "experiments/storage/storage-inventory.json",
-        "sha256": "1d9706f5476e121b3bc10bb1bd8f8453ae1d86b4bfdbc09806f22790b0810490"
-      },
-      "gate0_checks_tests": {
-        "path": "experiments/storage/test_g0c_checks.py",
-        "sha256": "71ae6240883365ed7f43187b6801a05d3b6b8e4c9af6dc0f7caaed989a4483ad"
-      },
-      "gate0_control": {
-        "path": "experiments/storage/storage_gate0.py",
-        "sha256": "57c075e1054223b891dd83738d7ea5958f7026292a504977e65ed32d1f6be066"
-      },
-      "prefix_preflight_control": {
-        "path": "experiments/storage/prefix_preflight.py",
-        "sha256": "888afd7ac36aa528bdb1548bee5449a688b25824ba7625101f10aea76562233b"
-      },
-      "prefixlease_contract_tests": {
-        "path": "experiments/storage/test_prefixlease_wineprefix_contract.py",
-        "sha256": "6b6db2be3b3a9e08dbd52767b14c5d29251deb6741be4b987f92a27ba1d002f2"
-      },
-      "source": {
-        "path": "experiments/storage/storage_policy.py",
-        "sha256": "97ee17a5ae6a4b81496f03f6cf6e4c630a4239eaa08a5e1bcbeb65fc2a2b7ec7"
-      },
-      "storage_policy_tests": {
-        "path": "experiments/storage/test_storage_policy.py",
-        "sha256": "4eff8bcfa34eac88c4bdd0aa0bd535aefa6484f1d469bc6526d1a2675084bc20"
-      },
-      "stored_gate0_attestation": {
-        "path": "experiments/storage/storage-gate0-attestation.json",
-        "sha256": "7f34a5514d108781894211c2a7c3ed4524b3011d47f0ce3f3d6c737a16caf2c4"
-      },
-      "tests": {
-        "path": "experiments/storage/test_wine_launcher_policy.py",
-        "sha256": "d2ad7086077e9d50f80428b41a759c537e93912c229b6085d78a8b6f1cc0d3ae"
-      }
+    "crash_matrix": {
+      "path": "R6-A-R70-ADMISSION-RESERVATION-CRASH-MATRIX.md",
+      "sha256": "cf48d93ac8a707f5ad535d78aeeb84a80e337915be1b18d8de57f95ed5f0258e"
     },
-    "reviewer_identity": "Codex independent read-only audit agent /root/final_storage_review_v2",
-    "reviewer_status": "PASS",
+    "execution_dependency_manifest": {
+      "path": "R6-A-R78-EXECUTION-DEPENDENCY-MANIFEST.json",
+      "sha256": "05242076c4f97013247fb7edb4198bef57b1bb84a7b13759cd75e9f258ffc38c"
+    },
+    "execution_plan": {
+      "canonical_sha256": "2197f11b5b7c25d5f9e99966422207e44ed8445652780c151dc30517d43971b4",
+      "graph_pair_key": "3d1ad23b8084fb902b1378093b56b234f7090d886f0cec8776ddf458d2785e17",
+      "path": "experiments/storage/R6-A-R78-DUAL-LINEAGE-EXECUTION-PLAN-CANDIDATE-1.json",
+      "raw_sha256": "e776b3dccc0da5b19852e3df2ea34f21a99cdacb08929051112001e22bf7ae68"
+    },
+    "files": {
+      "R6-A-R66-MANIFEST-COMMIT-CONTRACT.md": "01fb7933b1ceddf0a6edfac8c645719e8f279c0ac8c008bc551c77a0d462ed0b",
+      "R6-A-R66-ORCHESTRATOR-RECONCILIATION.md": "0a10518af7f02e307e6b9aa69751418f483323d0e42dc4fb692ca06ef41b3846",
+      "R6-A-R70-ADMISSION-RESERVATION-CRASH-MATRIX.md": "cf48d93ac8a707f5ad535d78aeeb84a80e337915be1b18d8de57f95ed5f0258e",
+      "R6-A-R78-BOUNDED-GATE-TRANSITION-CANDIDATE-1.diff": "db6467609085c5002af2d716f36504982710500e56664d1f744eb89d92e95dd7",
+      "experiments/storage/R6-A-R71-CAPACITY-SAFETY-CONTRACT.md": "b8d88d7d45a11ceae167e6e6e320ca8ff5cc50ca16b79300c5474b26662a97ba",
+      "experiments/storage/R6-A-R71-CONSUMPTION-TIME-INTEGRITY.md": "9a16c4fa3657f8b54ec43ce97225ed8c60d6dab2e12974d083fe9ef172f4197a",
+      "experiments/storage/R6-A-R71-EXECUTION-DEPENDENCY-CLOSURE.md": "d12d6ba101ef410c3676d5e6f20a9c4b6d9e14491f7b5bb0af73fb6fee8bf08b",
+      "experiments/storage/R6-A-R71-NONLEASE-DRIFT-PURPOSE.md": "dca4e72bc53aa4d848c637e1dba18e462eb8524977a5cd57a40cf4c09e0be13f",
+      "experiments/storage/R6-A-R71-OS-ISOLATION-ALTERNATIVE.md": "751984c77916241a1c93c4d70dc8f293bdbca87636d9115d62be8a4da8e9a986",
+      "experiments/storage/R6-A-R71-R70-FINDING-RECLASSIFICATION.md": "f693743feb460dc1873a6e06f55755445210562b1a01316634d179d496ae4540",
+      "experiments/storage/R6-A-R71-THREAT-MODEL.md": "96d2888eae32f97c3aacea442bca8fac22c4ae2f7cbef790c75f66d5e38e49f3",
+      "experiments/storage/R6-A-R75-INDEPENDENT-SAFETY-REVIEW.md": "9c5de1dd9eec177e017833f877674b24505d2bbf9c73930f9a3d54a4bfad14c6",
+      "experiments/storage/R6-A-R78-COMPLETION-VERIFIER.md": "d5b27be908c8d5aae24e4737c8dbbd4f41deadd03a5cca0f4e3b1e371139b32b",
+      "experiments/storage/R6-A-R78-DUAL-GRAPH-ORDER-CONTRACT.md": "0cd13c4aac1d6343a12faf29e47570630390ab961a19493117796c7607db8102",
+      "experiments/storage/R6-A-R78-DUAL-LINEAGE-EXECUTION-PLAN-CANDIDATE-1.json": "e776b3dccc0da5b19852e3df2ea34f21a99cdacb08929051112001e22bf7ae68",
+      "experiments/storage/R6-A-R78-FRESH-G0C-PROVENANCE-REVIEW.md": "1a2dc47b471eba0aa58852757a6ab9611ab970a3df252736d1734ab16755335a",
+      "experiments/storage/R6-A-R78-GATE-EVIDENCE-CONTRACT.md": "2997637468cffdbd5b449f60a04ef272517e27518e2cab7d359f909c86bc4194",
+      "experiments/storage/R6-A-R78-GATE-SIDECAR-SCHEMA.json": "6feab5984bc35d0c080998fe9950480ef17c9b7ebf2226ee3a586f94f7a4b779",
+      "experiments/storage/R6-A-R78-LATE-REFUSAL-EVIDENCE-CONTRACT.md": "95ab15105d2e8f7cda396c57f8c04b30db21f3e783201efe3010c03e5d2c8276",
+      "experiments/storage/R6-A-R78-PREFIXLEASE-TRANSITION-CONTRACT.md": "6d40369adbc39d1f748dd61adecbcee4cc8235e24feed0ea121274484b6c59b8",
+      "experiments/storage/R6-A-R78-RESERVATION-CONTRACT.md": "1e31dfbce2282504e05c4096aa08eedefed25b47013baac7ffd71741ef64c123",
+      "experiments/storage/r6a_dependency_manifest.py": "aa5cc6903236bf14ccc25200adaa99ebbcde55c8abbcdbeaf496563b3fdd060a",
+      "experiments/storage/run_r6a_execution.py": "064edf5a538f52e39690c16f51432cf4858001530abb01860058ceacd7839e4c",
+      "experiments/storage/smoke_prefix_lease.py": "03f29234b3044834f77fb22322d4e2233295783988f9c8d9f93a78f193f7fcf6",
+      "experiments/storage/storage_gate0.py": "aa3bc9455106acd5d10e2a480c10eb2f2d0433a04b7284e6cef77e87847bd7b5",
+      "experiments/storage/storage_policy.py": "a013893c6baa16ae47129a6039af3f86ee44c4ff8d721d0e62ff6063bb1742c0",
+      "experiments/storage/test_build_retention.py": "c45e061ed4dc64c900585fe86190fb81c9b81d0ea5467379041acba3e22101ba",
+      "experiments/storage/test_g0c_checks.py": "34d81ffa3dfafa0ee2e2e745b52c9e55a453da99ea8ecace6fc38f86ad8d53f0",
+      "experiments/storage/test_r6a_dependency_manifest.py": "e1eccc290eedf89cff00121da7e343d6d8cb1e83029c4b341326f86bc920e51c",
+      "experiments/storage/test_run_r6a_execution.py": "3b34b296a4e2895cc36f0364b8673018b7cf0fc3ac8e4f7321da775f7ee5bca3",
+      "experiments/storage/test_storage_policy.py": "921f62a69e649b4e4c535871d91b9d8753b8481bb6884258d26c0d49fffe0ec6",
+      "experiments/storage/test_storage_recovery.py": "6c6716e76d9d288b955604ffe8ee9489b16f58fa69ae7559f791fa9080656785"
+    },
+    "fresh_g0c_answer": "Can durable SUCCESS exist without a validated committed manifest? NO",
+    "fresh_g0c_review": {
+      "path": "experiments/storage/R6-A-R78-FRESH-G0C-PROVENANCE-REVIEW.md",
+      "sha256": "1a2dc47b471eba0aa58852757a6ab9611ab970a3df252736d1734ab16755335a"
+    },
+    "milestone": "R78",
     "schema_version": 1,
-    "scope": "Fresh source-based review of storage admission, BuildLease/PrefixLease/NativeRunLease, required tests, Gate 0 completion binding, BR9R2 runner/controller/build sources, existing coverer provenance, current inventory and the named full-suite log. No tests, Gate 0, builds, Wine, Native, or graphics actions were run by this reviewer. Only this review artifact was refreshed.",
     "status": "PASS"
   },
-  "review_type": "independent_prefixlease_post_materialization_accounting_review",
-  "reviewed_at_utc": "2026-10-14T18:21:14Z",
+  "r79_binding": {
+    "candidate": {
+      "candidate_core_sha256": "4f594849f66fcee7679ca8a40e185343be83f25e624001c3e3580e68ace4564a",
+      "candidate_id": "R6-A-R79-FAILED-OUTPUT-DISPOSITION-CANDIDATE-1",
+      "path": "R6-A-R79-FAILED-OUTPUT-DISPOSITION-CANDIDATE-1.json"
+    },
+    "completion_contract": {
+      "manifest_commit_contract_path": "R6-A-R66-MANIFEST-COMMIT-CONTRACT.md",
+      "manifest_commit_contract_sha256": "01fb7933b1ceddf0a6edfac8c645719e8f279c0ac8c008bc551c77a0d462ed0b",
+      "path": "R6-A-R66-ORCHESTRATOR-RECONCILIATION.md",
+      "sha256": "0a10518af7f02e307e6b9aa69751418f483323d0e42dc4fb692ca06ef41b3846"
+    },
+    "completion_review": {
+      "path": "experiments/storage/R6-A-R75-INDEPENDENT-SAFETY-REVIEW.md",
+      "sha256": "9c5de1dd9eec177e017833f877674b24505d2bbf9c73930f9a3d54a4bfad14c6"
+    },
+    "completion_review_verdicts": [
+      "PASS — BUILDLEASE SUCCESS CANNOT BECOME DURABLE BEFORE ALL COMPLETION IDENTITY VALIDATION AND MANIFEST COMMIT REQUIREMENTS ARE DURABLY SATISFIED",
+      "PASS — HOST V3 DUAL-LINEAGE FINALIZATION STILL BINDS BOTH GRAPH IDENTITIES, BOTH GRAPH KEYS, THE FROZEN SESSION PLAN, AND OUTPUT LINEAGE"
+    ],
+    "crash_matrix": {
+      "path": "R6-A-R70-ADMISSION-RESERVATION-CRASH-MATRIX.md",
+      "sha256": "cf48d93ac8a707f5ad535d78aeeb84a80e337915be1b18d8de57f95ed5f0258e"
+    },
+    "execution_dependency_manifest": {
+      "path": "R6-A-R79-EXECUTION-DEPENDENCY-MANIFEST.json",
+      "sha256": "ccaeb7864ff475f0221187f451f16066e508ad72babbe1e5804c647ab5b52c27"
+    },
+    "execution_plan": {
+      "canonical_sha256": "d0ce046673a5b1f774a9e9ccaca4de95c5cf3f4aec0014370bf3b3ac07a2add4",
+      "graph_pair_key": "3d1ad23b8084fb902b1378093b56b234f7090d886f0cec8776ddf458d2785e17",
+      "path": "experiments/storage/R6-A-R79-DUAL-LINEAGE-EXECUTION-PLAN-CANDIDATE-1.json",
+      "raw_sha256": "33fbe2f0e6a96cd1c496b7ce35af4cd94c77f501082bd7390102eaf1320d661b"
+    },
+    "files": {
+      "R6-A-R66-MANIFEST-COMMIT-CONTRACT.md": "01fb7933b1ceddf0a6edfac8c645719e8f279c0ac8c008bc551c77a0d462ed0b",
+      "R6-A-R66-ORCHESTRATOR-RECONCILIATION.md": "0a10518af7f02e307e6b9aa69751418f483323d0e42dc4fb692ca06ef41b3846",
+      "R6-A-R70-ADMISSION-RESERVATION-CRASH-MATRIX.md": "cf48d93ac8a707f5ad535d78aeeb84a80e337915be1b18d8de57f95ed5f0258e",
+      "R6-A-R79-FAILED-OUTPUT-DISPOSITION-CANDIDATE-1.diff": "46c7235d3c13b6aa8c51a6eaac9c39f6e1cd0b5c4ac0d9c035c6ced001a6859a",
+      "experiments/storage/R6-A-R71-CAPACITY-SAFETY-CONTRACT.md": "b8d88d7d45a11ceae167e6e6e320ca8ff5cc50ca16b79300c5474b26662a97ba",
+      "experiments/storage/R6-A-R71-CONSUMPTION-TIME-INTEGRITY.md": "9a16c4fa3657f8b54ec43ce97225ed8c60d6dab2e12974d083fe9ef172f4197a",
+      "experiments/storage/R6-A-R71-EXECUTION-DEPENDENCY-CLOSURE.md": "d12d6ba101ef410c3676d5e6f20a9c4b6d9e14491f7b5bb0af73fb6fee8bf08b",
+      "experiments/storage/R6-A-R71-NONLEASE-DRIFT-PURPOSE.md": "dca4e72bc53aa4d848c637e1dba18e462eb8524977a5cd57a40cf4c09e0be13f",
+      "experiments/storage/R6-A-R71-OS-ISOLATION-ALTERNATIVE.md": "751984c77916241a1c93c4d70dc8f293bdbca87636d9115d62be8a4da8e9a986",
+      "experiments/storage/R6-A-R71-R70-FINDING-RECLASSIFICATION.md": "f693743feb460dc1873a6e06f55755445210562b1a01316634d179d496ae4540",
+      "experiments/storage/R6-A-R71-THREAT-MODEL.md": "96d2888eae32f97c3aacea442bca8fac22c4ae2f7cbef790c75f66d5e38e49f3",
+      "experiments/storage/R6-A-R75-INDEPENDENT-SAFETY-REVIEW.md": "9c5de1dd9eec177e017833f877674b24505d2bbf9c73930f9a3d54a4bfad14c6",
+      "experiments/storage/R6-A-R78-COMPLETION-VERIFIER.md": "d5b27be908c8d5aae24e4737c8dbbd4f41deadd03a5cca0f4e3b1e371139b32b",
+      "experiments/storage/R6-A-R78-DUAL-GRAPH-ORDER-CONTRACT.md": "0cd13c4aac1d6343a12faf29e47570630390ab961a19493117796c7607db8102",
+      "experiments/storage/R6-A-R78-GATE-EVIDENCE-CONTRACT.md": "2997637468cffdbd5b449f60a04ef272517e27518e2cab7d359f909c86bc4194",
+      "experiments/storage/R6-A-R78-GATE-SIDECAR-SCHEMA.json": "6feab5984bc35d0c080998fe9950480ef17c9b7ebf2226ee3a586f94f7a4b779",
+      "experiments/storage/R6-A-R78-LATE-REFUSAL-EVIDENCE-CONTRACT.md": "95ab15105d2e8f7cda396c57f8c04b30db21f3e783201efe3010c03e5d2c8276",
+      "experiments/storage/R6-A-R78-PREFIXLEASE-TRANSITION-CONTRACT.md": "6d40369adbc39d1f748dd61adecbcee4cc8235e24feed0ea121274484b6c59b8",
+      "experiments/storage/R6-A-R78-RESERVATION-CONTRACT.md": "1e31dfbce2282504e05c4096aa08eedefed25b47013baac7ffd71741ef64c123",
+      "experiments/storage/R6-A-R79-DUAL-LINEAGE-EXECUTION-PLAN-CANDIDATE-1.json": "33fbe2f0e6a96cd1c496b7ce35af4cd94c77f501082bd7390102eaf1320d661b",
+      "experiments/storage/R6-A-R79-FAILED-OUTPUT-DISPOSITION-CONTRACT.md": "e99315e4af888b666275236e1d8454534be45c22b3336d6074091073c4e00aac",
+      "experiments/storage/R6-A-R79-FRESH-G0C-PROVENANCE-REVIEW.md": "c8503275bd42be2c1030fc6f491b3b91465fc2c7e09850b9ac3169847a70cb4c",
+      "experiments/storage/R6-A-R79-R77-EVIDENCE-INVENTORY.md": "43732aa8008ad66ef0b47e2b710f951f0947e5f79b996cf1680160212632c031",
+      "experiments/storage/failed-output-dispositions/step11d3-storage-policy-smoke-20261024-69574b75b1a5456e/custody/legacy_diagnostic_transcript.bin": "d4ac1a286893758080006f9964fd4b1c7c89654508cd7b965aa1f86d209bc22d",
+      "experiments/storage/failed-output-dispositions/step11d3-storage-policy-smoke-20261024-69574b75b1a5456e/custody/legacy_reconciliation.bin": "c83842f848eef87b3394ea8394ac1758b73d190c04fe3a36e23855e61334fbb1",
+      "experiments/storage/failed-output-dispositions/step11d3-storage-policy-smoke-20261024-69574b75b1a5456e/disposition.json": "ed970031e4cf1d7eb46bb224ed0fb996b3f54e42987e3bbd42527fcdfe147b99",
+      "experiments/storage/g0c-launcher-independent-review-R78-PRESERVED.json": "5636b5868639189f760b36287976edb56ed11df71aac80715bf145cbd19af9a3",
+      "experiments/storage/manifests/step11d3-storage-policy-smoke-20261024-69574b75b1a5456e.json": "c918c2c22550a3295e0f18c21abc80bbb1013e5bf20818f04e561bace88630d7",
+      "experiments/storage/r6a_dependency_manifest.py": "6ef7a35108b08ead203eccc4693d3785a154b6a7dcd7b27ad1be6a3bd04d36cf",
+      "experiments/storage/run_r6a_execution.py": "26790b74829243117361b7885232849224c14be2ea1cae1aebf6ef79ea673e08",
+      "experiments/storage/smoke-claims/step11d3-storage-policy-smoke-20261024-69574b75b1a5456e.json": "524b208fd88b252315b8150dca1270d5d6dfc6d38d6b9a01f5b6ecfa6df3ce10",
+      "experiments/storage/smoke-runs/step11d3-storage-policy-smoke-20261024-69574b75b1a5456e/gate0-preflight-attestation.json": "ebbc9c37de8842a392a6552da72af8f017108a327903f966b112b871e837f72d",
+      "experiments/storage/storage_policy.py": "4e2b16e16dfb525201e8168f5af0309438f3c821b7c21b75d9f51b286d5aa9ed",
+      "experiments/storage/test_failed_output_disposition.py": "c6f7ba9c90dcdbdbd6e93b79b777f469b9a92c2902aa9423371cd6246febc297",
+      "experiments/storage/test_r6a_dependency_manifest.py": "26943d51f382e511c3ce914fdcfb5d99b42aedc96a4a8aabfb29b70b03951f22",
+      "experiments/storage/test_run_r6a_execution.py": "611b19267561c015f792de7fe02de68c1ff76f3ecbb45d3faa726170ba3f7629"
+    },
+    "fresh_g0c_answer": "Can durable SUCCESS exist without a validated committed manifest? NO",
+    "fresh_g0c_review": {
+      "path": "experiments/storage/R6-A-R79-FRESH-G0C-PROVENANCE-REVIEW.md",
+      "sha256": "c8503275bd42be2c1030fc6f491b3b91465fc2c7e09850b9ac3169847a70cb4c"
+    },
+    "milestone": "R79",
+    "schema_version": 1,
+    "status": "PASS"
+  },
+  "r80_binding": {
+    "candidate": {
+      "candidate_core_sha256": "be7de19970f0dab6b9a1ac06cc9125b9ba0b7b09dec667e6c5e46c5ce94fbb72",
+      "candidate_id": "R6-A-R80-POST-MATERIALIZATION-PREFIXLEASE-CANDIDATE-1",
+      "path": "R6-A-R80-POST-MATERIALIZATION-PREFIXLEASE-CANDIDATE-1.json"
+    },
+    "completion_contract": {
+      "manifest_commit_contract_path": "R6-A-R66-MANIFEST-COMMIT-CONTRACT.md",
+      "manifest_commit_contract_sha256": "01fb7933b1ceddf0a6edfac8c645719e8f279c0ac8c008bc551c77a0d462ed0b",
+      "path": "R6-A-R66-ORCHESTRATOR-RECONCILIATION.md",
+      "sha256": "0a10518af7f02e307e6b9aa69751418f483323d0e42dc4fb692ca06ef41b3846"
+    },
+    "completion_review": {
+      "path": "experiments/storage/R6-A-R75-INDEPENDENT-SAFETY-REVIEW.md",
+      "sha256": "9c5de1dd9eec177e017833f877674b24505d2bbf9c73930f9a3d54a4bfad14c6"
+    },
+    "completion_review_verdicts": [
+      "PASS — BUILDLEASE SUCCESS CANNOT BECOME DURABLE BEFORE ALL COMPLETION IDENTITY VALIDATION AND MANIFEST COMMIT REQUIREMENTS ARE DURABLY SATISFIED",
+      "PASS — HOST V3 DUAL-LINEAGE FINALIZATION STILL BINDS BOTH GRAPH IDENTITIES, BOTH GRAPH KEYS, THE FROZEN SESSION PLAN, AND OUTPUT LINEAGE"
+    ],
+    "crash_matrix": {
+      "path": "R6-A-R70-ADMISSION-RESERVATION-CRASH-MATRIX.md",
+      "sha256": "cf48d93ac8a707f5ad535d78aeeb84a80e337915be1b18d8de57f95ed5f0258e"
+    },
+    "execution_dependency_manifest": {
+      "path": "R6-A-R80-EXECUTION-DEPENDENCY-MANIFEST.json",
+      "sha256": "9e7b0808d3efbf480c33883ee1f5f66e45ef510d6a2f6f4e430f92d94c8f1ef9"
+    },
+    "execution_plan": {
+      "canonical_sha256": "117a08c69fdbfbc12c26c678756c87c457754ffccb5c747de46ac5164664e779",
+      "graph_pair_key": "3d1ad23b8084fb902b1378093b56b234f7090d886f0cec8776ddf458d2785e17",
+      "path": "experiments/storage/R6-A-R80-DUAL-LINEAGE-EXECUTION-PLAN-CANDIDATE-1.json",
+      "raw_sha256": "91ed8b4ac34c32ed5fe395f08dd80a8e09419a31c88f66d1b8fe9822b72c4283"
+    },
+    "files": {
+      "R6-A-R66-MANIFEST-COMMIT-CONTRACT.md": "01fb7933b1ceddf0a6edfac8c645719e8f279c0ac8c008bc551c77a0d462ed0b",
+      "R6-A-R66-ORCHESTRATOR-RECONCILIATION.md": "0a10518af7f02e307e6b9aa69751418f483323d0e42dc4fb692ca06ef41b3846",
+      "R6-A-R70-ADMISSION-RESERVATION-CRASH-MATRIX.md": "cf48d93ac8a707f5ad535d78aeeb84a80e337915be1b18d8de57f95ed5f0258e",
+      "R6-A-R80-POST-MATERIALIZATION-PREFIXLEASE-CANDIDATE-1.diff": "389d9712ce47581421a19c031e56d29be8b7e072d36f54e75d9a179393f6c6b6",
+      "experiments/storage/R6-A-R71-CAPACITY-SAFETY-CONTRACT.md": "b8d88d7d45a11ceae167e6e6e320ca8ff5cc50ca16b79300c5474b26662a97ba",
+      "experiments/storage/R6-A-R71-CONSUMPTION-TIME-INTEGRITY.md": "9a16c4fa3657f8b54ec43ce97225ed8c60d6dab2e12974d083fe9ef172f4197a",
+      "experiments/storage/R6-A-R71-EXECUTION-DEPENDENCY-CLOSURE.md": "d12d6ba101ef410c3676d5e6f20a9c4b6d9e14491f7b5bb0af73fb6fee8bf08b",
+      "experiments/storage/R6-A-R71-NONLEASE-DRIFT-PURPOSE.md": "dca4e72bc53aa4d848c637e1dba18e462eb8524977a5cd57a40cf4c09e0be13f",
+      "experiments/storage/R6-A-R71-OS-ISOLATION-ALTERNATIVE.md": "751984c77916241a1c93c4d70dc8f293bdbca87636d9115d62be8a4da8e9a986",
+      "experiments/storage/R6-A-R71-R70-FINDING-RECLASSIFICATION.md": "f693743feb460dc1873a6e06f55755445210562b1a01316634d179d496ae4540",
+      "experiments/storage/R6-A-R71-THREAT-MODEL.md": "96d2888eae32f97c3aacea442bca8fac22c4ae2f7cbef790c75f66d5e38e49f3",
+      "experiments/storage/R6-A-R75-INDEPENDENT-SAFETY-REVIEW.md": "9c5de1dd9eec177e017833f877674b24505d2bbf9c73930f9a3d54a4bfad14c6",
+      "experiments/storage/R6-A-R78-COMPLETION-VERIFIER.md": "d5b27be908c8d5aae24e4737c8dbbd4f41deadd03a5cca0f4e3b1e371139b32b",
+      "experiments/storage/R6-A-R78-DUAL-GRAPH-ORDER-CONTRACT.md": "0cd13c4aac1d6343a12faf29e47570630390ab961a19493117796c7607db8102",
+      "experiments/storage/R6-A-R78-GATE-EVIDENCE-CONTRACT.md": "2997637468cffdbd5b449f60a04ef272517e27518e2cab7d359f909c86bc4194",
+      "experiments/storage/R6-A-R78-GATE-SIDECAR-SCHEMA.json": "6feab5984bc35d0c080998fe9950480ef17c9b7ebf2226ee3a586f94f7a4b779",
+      "experiments/storage/R6-A-R78-LATE-REFUSAL-EVIDENCE-CONTRACT.md": "95ab15105d2e8f7cda396c57f8c04b30db21f3e783201efe3010c03e5d2c8276",
+      "experiments/storage/R6-A-R78-PREFIXLEASE-TRANSITION-CONTRACT.md": "6d40369adbc39d1f748dd61adecbcee4cc8235e24feed0ea121274484b6c59b8",
+      "experiments/storage/R6-A-R78-RESERVATION-CONTRACT.md": "1e31dfbce2282504e05c4096aa08eedefed25b47013baac7ffd71741ef64c123",
+      "experiments/storage/R6-A-R79-FAILED-OUTPUT-DISPOSITION-CONTRACT.md": "e99315e4af888b666275236e1d8454534be45c22b3336d6074091073c4e00aac",
+      "experiments/storage/R6-A-R79-R77-EVIDENCE-INVENTORY.md": "43732aa8008ad66ef0b47e2b710f951f0947e5f79b996cf1680160212632c031",
+      "experiments/storage/R6-A-R80-CLEANUP-CONTRACT.md": "bc1f83ad031ac2125792788907dac32aa5f38db40e4644ded6edfd710d790cb3",
+      "experiments/storage/R6-A-R80-DUAL-LINEAGE-EXECUTION-PLAN-CANDIDATE-1.json": "91ed8b4ac34c32ed5fe395f08dd80a8e09419a31c88f66d1b8fe9822b72c4283",
+      "experiments/storage/R6-A-R80-FRESH-G0C-PROVENANCE-REVIEW.md": "ae28cb876c6bb958e49731ed3fdbe5afce7d5bda2be80ca3a270f483b5d69e63",
+      "experiments/storage/R6-A-R80-POST-MATERIALIZATION-PREFIXLEASE-CONTRACT.md": "dc142872b28a9e985c5557c1d78eff7965f44489f6113d8fe04f50bfac49e59b",
+      "experiments/storage/R6-A-R80-R79-POST-MATERIALIZATION-FORENSICS.md": "6338093c81bbd7b03899849c308fe0b3a53666c7b7fddfcd614fce334fabe409",
+      "experiments/storage/failed-output-dispositions/step11d3-storage-policy-smoke-20261024-69574b75b1a5456e/custody/legacy_diagnostic_transcript.bin": "d4ac1a286893758080006f9964fd4b1c7c89654508cd7b965aa1f86d209bc22d",
+      "experiments/storage/failed-output-dispositions/step11d3-storage-policy-smoke-20261024-69574b75b1a5456e/custody/legacy_reconciliation.bin": "c83842f848eef87b3394ea8394ac1758b73d190c04fe3a36e23855e61334fbb1",
+      "experiments/storage/failed-output-dispositions/step11d3-storage-policy-smoke-20261024-69574b75b1a5456e/disposition.json": "ed970031e4cf1d7eb46bb224ed0fb996b3f54e42987e3bbd42527fcdfe147b99",
+      "experiments/storage/g0c-launcher-independent-review-R78-PRESERVED.json": "5636b5868639189f760b36287976edb56ed11df71aac80715bf145cbd19af9a3",
+      "experiments/storage/g0c-launcher-independent-review-R79-PRESERVED.json": "f7d1222d7d556cad80c3d449b60346894623af86d1c784504f92c6bf302604a7",
+      "experiments/storage/manifests/step11d3-storage-policy-smoke-20261024-69574b75b1a5456e.json": "c918c2c22550a3295e0f18c21abc80bbb1013e5bf20818f04e561bace88630d7",
+      "experiments/storage/manifests/step11d3-storage-policy-smoke-20261024-f7c2a643c96a41a7.json": "fc016bf9dd79213e041f6427ea4b6bef7e056e740830336b854ef4ddd70762eb",
+      "experiments/storage/r6a_dependency_manifest.py": "ad4adc032a143900bf3c4d590a95e6243a7fadd56145974dd871a30857c31c13",
+      "experiments/storage/run_r6a_execution.py": "97dd8d09940a2ca762d8dc09bbb01cbdcfcad34bfe9d780431de1dc842903718",
+      "experiments/storage/smoke-claims/step11d3-storage-policy-smoke-20261024-69574b75b1a5456e.json": "524b208fd88b252315b8150dca1270d5d6dfc6d38d6b9a01f5b6ecfa6df3ce10",
+      "experiments/storage/smoke-claims/step11d3-storage-policy-smoke-20261024-f7c2a643c96a41a7.json": "c6ce18e90daa34ffff3763f218c31c20d996e9e6ac02b2a1b79e6ebb75e94ebe",
+      "experiments/storage/smoke-runs/step11d3-storage-policy-smoke-20261024-69574b75b1a5456e/gate0-preflight-attestation.json": "ebbc9c37de8842a392a6552da72af8f017108a327903f966b112b871e837f72d",
+      "experiments/storage/smoke-runs/step11d3-storage-policy-smoke-20261024-f7c2a643c96a41a7/gate0-path-state.json.zlib": "2fe0c6323af320d509e6b25e4aac1dbbde78125df237877e64af892957fe3bc8",
+      "experiments/storage/smoke-runs/step11d3-storage-policy-smoke-20261024-f7c2a643c96a41a7/gate0-preflight-attestation.json": "c62039445aecb6bf6bea832778d351d0b7a44094c03256c3c5de5846b0570a4f",
+      "experiments/storage/smoke-runs/step11d3-storage-policy-smoke-20261024-f7c2a643c96a41a7/prefix-cleanup.json": "0ff29d470ee27191a4a2716104ee86b217f7a73bedb3236aabcbbb3201bc6804",
+      "experiments/storage/smoke-runs/step11d3-storage-policy-smoke-20261024-f7c2a643c96a41a7/prefix-state.json": "c58becf1514ce7a33408279a1311d698844253c0414c2d1ac3e071878a707846",
+      "experiments/storage/smoke_prefix_lease.py": "be293e1476ea9d217a8b21d5f3f6dac22a05ec5ed967f4ec76ed8ea0600c1978",
+      "experiments/storage/storage_policy.py": "2e68180dad306c18c9f58902c49e4329f02f3b3a6d6bd033e810046ffecef7b9",
+      "experiments/storage/test_prefixlease_wineprefix_contract.py": "fc5161321fe70720380692f2a53bc5764329fa9053e12b206578b6a4efbc29df",
+      "experiments/storage/test_r6a_dependency_manifest.py": "63a56f42b829a63236e0aba63098a84ed84b2d6410edc295431a0a19da91e3be",
+      "experiments/storage/test_run_r6a_execution.py": "aed9585c24a9c53803079d925df0b25f796deefad41f42bd1272487818e374be",
+      "experiments/storage/test_storage_policy.py": "35890d93ad593de7656967a312cbf45fe7e2da9a82c1beedc61a2b762c1a905f"
+    },
+    "fresh_g0c_answer": "Can durable SUCCESS exist without a validated committed manifest? NO",
+    "fresh_g0c_review": {
+      "path": "experiments/storage/R6-A-R80-FRESH-G0C-PROVENANCE-REVIEW.md",
+      "sha256": "ae28cb876c6bb958e49731ed3fdbe5afce7d5bda2be80ca3a270f483b5d69e63"
+    },
+    "milestone": "R80",
+    "schema_version": 1,
+    "status": "PASS"
+  },
+  "r81_binding": {
+    "candidate": {
+      "candidate_core_sha256": "5cfdf61d38438450e459ebacc0f037ec35281b91b68e3bb66aa3da8e329f81ed",
+      "candidate_id": "R6-A-R81-SMOKE-MANIFEST-PUBLICATION-CANDIDATE-1",
+      "path": "R6-A-R81-SMOKE-MANIFEST-PUBLICATION-CANDIDATE-1.json"
+    },
+    "completion_contract": {
+      "manifest_commit_contract_path": "R6-A-R66-MANIFEST-COMMIT-CONTRACT.md",
+      "manifest_commit_contract_sha256": "01fb7933b1ceddf0a6edfac8c645719e8f279c0ac8c008bc551c77a0d462ed0b",
+      "path": "R6-A-R66-ORCHESTRATOR-RECONCILIATION.md",
+      "sha256": "0a10518af7f02e307e6b9aa69751418f483323d0e42dc4fb692ca06ef41b3846"
+    },
+    "completion_review": {
+      "path": "experiments/storage/R6-A-R75-INDEPENDENT-SAFETY-REVIEW.md",
+      "sha256": "9c5de1dd9eec177e017833f877674b24505d2bbf9c73930f9a3d54a4bfad14c6"
+    },
+    "completion_review_verdicts": [
+      "PASS — BUILDLEASE SUCCESS CANNOT BECOME DURABLE BEFORE ALL COMPLETION IDENTITY VALIDATION AND MANIFEST COMMIT REQUIREMENTS ARE DURABLY SATISFIED",
+      "PASS — HOST V3 DUAL-LINEAGE FINALIZATION STILL BINDS BOTH GRAPH IDENTITIES, BOTH GRAPH KEYS, THE FROZEN SESSION PLAN, AND OUTPUT LINEAGE"
+    ],
+    "crash_matrix": {
+      "path": "R6-A-R70-ADMISSION-RESERVATION-CRASH-MATRIX.md",
+      "sha256": "cf48d93ac8a707f5ad535d78aeeb84a80e337915be1b18d8de57f95ed5f0258e"
+    },
+    "execution_dependency_manifest": {
+      "path": "R6-A-R81-EXECUTION-DEPENDENCY-MANIFEST.json",
+      "sha256": "32c083d9bdab6db9c3048cf6eb8b90d082e7f28b8f5efa3393084e95aa08a3e2"
+    },
+    "execution_plan": {
+      "canonical_sha256": "60c8fdad4fae9bc34c6619d74049e3a88edc2b305acf3bdf486a58d148521677",
+      "graph_pair_key": "3d1ad23b8084fb902b1378093b56b234f7090d886f0cec8776ddf458d2785e17",
+      "path": "experiments/storage/R6-A-R81-DUAL-LINEAGE-EXECUTION-PLAN-CANDIDATE-1.json",
+      "raw_sha256": "0df29fe1ca0d39c1e48170274618dbd0980f1be21f7a886141a1c723324ebb36"
+    },
+    "files": {
+      "R6-A-R66-MANIFEST-COMMIT-CONTRACT.md": "01fb7933b1ceddf0a6edfac8c645719e8f279c0ac8c008bc551c77a0d462ed0b",
+      "R6-A-R66-ORCHESTRATOR-RECONCILIATION.md": "0a10518af7f02e307e6b9aa69751418f483323d0e42dc4fb692ca06ef41b3846",
+      "R6-A-R70-ADMISSION-RESERVATION-CRASH-MATRIX.md": "cf48d93ac8a707f5ad535d78aeeb84a80e337915be1b18d8de57f95ed5f0258e",
+      "R6-A-R81-SMOKE-MANIFEST-PUBLICATION-CANDIDATE-1.diff": "3493792c27bbb1e2454ef650267446986d56f1bc7e7ef20e676caba26dc1181a",
+      "experiments/storage/R6-A-R71-CAPACITY-SAFETY-CONTRACT.md": "b8d88d7d45a11ceae167e6e6e320ca8ff5cc50ca16b79300c5474b26662a97ba",
+      "experiments/storage/R6-A-R71-CONSUMPTION-TIME-INTEGRITY.md": "9a16c4fa3657f8b54ec43ce97225ed8c60d6dab2e12974d083fe9ef172f4197a",
+      "experiments/storage/R6-A-R71-EXECUTION-DEPENDENCY-CLOSURE.md": "d12d6ba101ef410c3676d5e6f20a9c4b6d9e14491f7b5bb0af73fb6fee8bf08b",
+      "experiments/storage/R6-A-R71-NONLEASE-DRIFT-PURPOSE.md": "dca4e72bc53aa4d848c637e1dba18e462eb8524977a5cd57a40cf4c09e0be13f",
+      "experiments/storage/R6-A-R71-OS-ISOLATION-ALTERNATIVE.md": "751984c77916241a1c93c4d70dc8f293bdbca87636d9115d62be8a4da8e9a986",
+      "experiments/storage/R6-A-R71-R70-FINDING-RECLASSIFICATION.md": "f693743feb460dc1873a6e06f55755445210562b1a01316634d179d496ae4540",
+      "experiments/storage/R6-A-R71-THREAT-MODEL.md": "96d2888eae32f97c3aacea442bca8fac22c4ae2f7cbef790c75f66d5e38e49f3",
+      "experiments/storage/R6-A-R75-INDEPENDENT-SAFETY-REVIEW.md": "9c5de1dd9eec177e017833f877674b24505d2bbf9c73930f9a3d54a4bfad14c6",
+      "experiments/storage/R6-A-R78-COMPLETION-VERIFIER.md": "d5b27be908c8d5aae24e4737c8dbbd4f41deadd03a5cca0f4e3b1e371139b32b",
+      "experiments/storage/R6-A-R78-DUAL-GRAPH-ORDER-CONTRACT.md": "0cd13c4aac1d6343a12faf29e47570630390ab961a19493117796c7607db8102",
+      "experiments/storage/R6-A-R78-GATE-EVIDENCE-CONTRACT.md": "2997637468cffdbd5b449f60a04ef272517e27518e2cab7d359f909c86bc4194",
+      "experiments/storage/R6-A-R78-GATE-SIDECAR-SCHEMA.json": "6feab5984bc35d0c080998fe9950480ef17c9b7ebf2226ee3a586f94f7a4b779",
+      "experiments/storage/R6-A-R78-LATE-REFUSAL-EVIDENCE-CONTRACT.md": "95ab15105d2e8f7cda396c57f8c04b30db21f3e783201efe3010c03e5d2c8276",
+      "experiments/storage/R6-A-R78-PREFIXLEASE-TRANSITION-CONTRACT.md": "6d40369adbc39d1f748dd61adecbcee4cc8235e24feed0ea121274484b6c59b8",
+      "experiments/storage/R6-A-R78-RESERVATION-CONTRACT.md": "1e31dfbce2282504e05c4096aa08eedefed25b47013baac7ffd71741ef64c123",
+      "experiments/storage/R6-A-R79-FAILED-OUTPUT-DISPOSITION-CONTRACT.md": "e99315e4af888b666275236e1d8454534be45c22b3336d6074091073c4e00aac",
+      "experiments/storage/R6-A-R79-R77-EVIDENCE-INVENTORY.md": "43732aa8008ad66ef0b47e2b710f951f0947e5f79b996cf1680160212632c031",
+      "experiments/storage/R6-A-R80-CLEANUP-CONTRACT.md": "bc1f83ad031ac2125792788907dac32aa5f38db40e4644ded6edfd710d790cb3",
+      "experiments/storage/R6-A-R80-POST-MATERIALIZATION-PREFIXLEASE-CONTRACT.md": "dc142872b28a9e985c5557c1d78eff7965f44489f6113d8fe04f50bfac49e59b",
+      "experiments/storage/R6-A-R80-R79-POST-MATERIALIZATION-FORENSICS.md": "6338093c81bbd7b03899849c308fe0b3a53666c7b7fddfcd614fce334fabe409",
+      "experiments/storage/R6-A-R81-CLI-OPT-IN-CONTRACT.md": "586ca9c96ae0e7f1e6adfb9c462acb9172fbadc27fa6c0da8c6324c83412b025",
+      "experiments/storage/R6-A-R81-DUAL-LINEAGE-EXECUTION-PLAN-CANDIDATE-1.json": "0df29fe1ca0d39c1e48170274618dbd0980f1be21f7a886141a1c723324ebb36",
+      "experiments/storage/R6-A-R81-FRESH-G0C-REVIEW.json": "01633f6ccec4cc4389ff7e18118da228f605a574cf9cd2c2a6198fa7ea727d01",
+      "experiments/storage/R6-A-R81-SMOKE-MANIFEST-PUBLICATION-CONTRACT.md": "473b5eb26469e1e3c1f2a091e713730404e773de54873293bfbb81403b6106ae",
+      "experiments/storage/failed-output-dispositions/step11d3-storage-policy-smoke-20261024-69574b75b1a5456e/custody/legacy_diagnostic_transcript.bin": "d4ac1a286893758080006f9964fd4b1c7c89654508cd7b965aa1f86d209bc22d",
+      "experiments/storage/failed-output-dispositions/step11d3-storage-policy-smoke-20261024-69574b75b1a5456e/custody/legacy_reconciliation.bin": "c83842f848eef87b3394ea8394ac1758b73d190c04fe3a36e23855e61334fbb1",
+      "experiments/storage/failed-output-dispositions/step11d3-storage-policy-smoke-20261024-69574b75b1a5456e/disposition.json": "ed970031e4cf1d7eb46bb224ed0fb996b3f54e42987e3bbd42527fcdfe147b99",
+      "experiments/storage/g0c-launcher-independent-review-R78-PRESERVED.json": "5636b5868639189f760b36287976edb56ed11df71aac80715bf145cbd19af9a3",
+      "experiments/storage/g0c-launcher-independent-review-R79-PRESERVED.json": "f7d1222d7d556cad80c3d449b60346894623af86d1c784504f92c6bf302604a7",
+      "experiments/storage/g0c-launcher-independent-review-R80-PRESERVED.json": "6b34ae2e1b407a5087003a32a611c8cb4ce552740a6edb60cd1da858652a04e5",
+      "experiments/storage/manifests/step11d3-storage-policy-smoke-20261024-69574b75b1a5456e.json": "c918c2c22550a3295e0f18c21abc80bbb1013e5bf20818f04e561bace88630d7",
+      "experiments/storage/manifests/step11d3-storage-policy-smoke-20261024-f7c2a643c96a41a7.json": "fc016bf9dd79213e041f6427ea4b6bef7e056e740830336b854ef4ddd70762eb",
+      "experiments/storage/r6a_dependency_manifest.py": "769c345e56dbad80560fa98727a79c888cd069260bf44698fde66e7acdd41298",
+      "experiments/storage/run_r6a_execution.py": "82a5136a8e54c408ddb21a6db6f959250b33266f16f0702c6f7ed774752b2dc7",
+      "experiments/storage/smoke-claims/step11d3-storage-policy-smoke-20261024-69574b75b1a5456e.json": "524b208fd88b252315b8150dca1270d5d6dfc6d38d6b9a01f5b6ecfa6df3ce10",
+      "experiments/storage/smoke-claims/step11d3-storage-policy-smoke-20261024-f7c2a643c96a41a7.json": "c6ce18e90daa34ffff3763f218c31c20d996e9e6ac02b2a1b79e6ebb75e94ebe",
+      "experiments/storage/smoke-runs/step11d3-storage-policy-smoke-20261024-69574b75b1a5456e/gate0-preflight-attestation.json": "ebbc9c37de8842a392a6552da72af8f017108a327903f966b112b871e837f72d",
+      "experiments/storage/smoke-runs/step11d3-storage-policy-smoke-20261024-f7c2a643c96a41a7/gate0-path-state.json.zlib": "2fe0c6323af320d509e6b25e4aac1dbbde78125df237877e64af892957fe3bc8",
+      "experiments/storage/smoke-runs/step11d3-storage-policy-smoke-20261024-f7c2a643c96a41a7/gate0-preflight-attestation.json": "c62039445aecb6bf6bea832778d351d0b7a44094c03256c3c5de5846b0570a4f",
+      "experiments/storage/smoke-runs/step11d3-storage-policy-smoke-20261024-f7c2a643c96a41a7/prefix-cleanup.json": "0ff29d470ee27191a4a2716104ee86b217f7a73bedb3236aabcbbb3201bc6804",
+      "experiments/storage/smoke-runs/step11d3-storage-policy-smoke-20261024-f7c2a643c96a41a7/prefix-state.json": "c58becf1514ce7a33408279a1311d698844253c0414c2d1ac3e071878a707846",
+      "experiments/storage/smoke_prefix_lease.py": "4e7600e57344a12c1f29fdbbf840ce48483b0028738a47cb5a28df1d235b74a3",
+      "experiments/storage/storage_policy.py": "bbe132c596e421b9f7b3edf18128a828a1ca11a8a62a0d838cbb5360c8791116",
+      "experiments/storage/test_r6a_dependency_manifest.py": "af2e0e7ffa8fe8845f12986998bb5e9c79cc4f68179e9df3b995428d77bfb759",
+      "experiments/storage/test_run_r6a_execution.py": "ea3399a44047ad0830a45951237aa320b505b2bd6cef43e7ba0948c4e0a5e905",
+      "experiments/storage/test_storage_policy.py": "11a47bbbf126f02ebcad8a763c33ec4c474b2ee07cbe3dfbce3c54fe6149e5d5",
+      "experiments/storage/test_storage_recovery.py": "28d4a543e2b3e4eb236cd8d1817b81b162a7cf23b9bfb3ee0bc5bb4b1561b5fc"
+    },
+    "fresh_g0c_answer": "Can durable SUCCESS exist without a validated committed manifest? NO",
+    "fresh_g0c_review": {
+      "path": "experiments/storage/R6-A-R81-FRESH-G0C-REVIEW.json",
+      "sha256": "01633f6ccec4cc4389ff7e18118da228f605a574cf9cd2c2a6198fa7ea727d01"
+    },
+    "milestone": "R81",
+    "schema_version": 1,
+    "status": "PASS"
+  },
+  "r86_binding": {
+    "candidate": {
+      "candidate_core_sha256": "61cf4f7d45d5692baac1010701c383c05fef7dafdcf8356b32c0d9550dac38d9",
+      "candidate_id": "R6-A-R86-CANONICAL-REGRESSION-REPAIR-CANDIDATE-1",
+      "path": "R6-A-R86-CANONICAL-REGRESSION-REPAIR-CANDIDATE-1.json"
+    },
+    "completion_contract": {
+      "manifest_commit_contract_path": "R6-A-R66-MANIFEST-COMMIT-CONTRACT.md",
+      "manifest_commit_contract_sha256": "01fb7933b1ceddf0a6edfac8c645719e8f279c0ac8c008bc551c77a0d462ed0b",
+      "path": "R6-A-R66-ORCHESTRATOR-RECONCILIATION.md",
+      "sha256": "0a10518af7f02e307e6b9aa69751418f483323d0e42dc4fb692ca06ef41b3846"
+    },
+    "completion_review": {
+      "path": "experiments/storage/R6-A-R86-COMPLETION-VERIFIER.md",
+      "sha256": "d9cca4025f9b1e26b225bdd0ad5e9a20e0b3de0c9753cbf6ac8e7a1cb389e883"
+    },
+    "completion_review_verdicts": [
+      "PASS — BUILDLEASE SUCCESS CANNOT BECOME DURABLE BEFORE ALL COMPLETION IDENTITY VALIDATION AND MANIFEST COMMIT REQUIREMENTS ARE DURABLY SATISFIED",
+      "PASS — HOST V3 DUAL-LINEAGE FINALIZATION STILL BINDS BOTH GRAPH IDENTITIES, BOTH GRAPH KEYS, THE FROZEN SESSION PLAN, AND OUTPUT LINEAGE"
+    ],
+    "crash_matrix": {
+      "path": "R6-A-R70-ADMISSION-RESERVATION-CRASH-MATRIX.md",
+      "sha256": "cf48d93ac8a707f5ad535d78aeeb84a80e337915be1b18d8de57f95ed5f0258e"
+    },
+    "execution_dependency_manifest": {
+      "path": "R6-A-R86-EXECUTION-DEPENDENCY-MANIFEST.json",
+      "sha256": "8f697d60b371e4d8a79d6236a95ef1f7838cfe5b6cc4d5c05cf90bd6de3748e5"
+    },
+    "execution_plan": {
+      "canonical_sha256": "f02a0645e01bd758a1a918964f2726835b68dd030e2499e6609d30100274dfc1",
+      "graph_pair_key": "3d1ad23b8084fb902b1378093b56b234f7090d886f0cec8776ddf458d2785e17",
+      "path": "experiments/storage/R6-A-R86-DUAL-LINEAGE-EXECUTION-PLAN-CANDIDATE-1.json",
+      "raw_sha256": "d058fecf48e8efa885165a1f446502230904b03c7d3b55790b042a48840fd5ae"
+    },
+    "files": {
+      "R6-A-R66-MANIFEST-COMMIT-CONTRACT.md": "01fb7933b1ceddf0a6edfac8c645719e8f279c0ac8c008bc551c77a0d462ed0b",
+      "R6-A-R66-ORCHESTRATOR-RECONCILIATION.md": "0a10518af7f02e307e6b9aa69751418f483323d0e42dc4fb692ca06ef41b3846",
+      "R6-A-R70-ADMISSION-RESERVATION-CRASH-MATRIX.md": "cf48d93ac8a707f5ad535d78aeeb84a80e337915be1b18d8de57f95ed5f0258e",
+      "R6-A-R86-CANONICAL-REGRESSION-REPAIR-CANDIDATE-1.diff": "b720991392ac0543cf0c7281d7613e709e7ffb343126f098de10d4da0c2f28a9",
+      "experiments/storage/R6-A-R71-CAPACITY-SAFETY-CONTRACT.md": "b8d88d7d45a11ceae167e6e6e320ca8ff5cc50ca16b79300c5474b26662a97ba",
+      "experiments/storage/R6-A-R71-CONSUMPTION-TIME-INTEGRITY.md": "9a16c4fa3657f8b54ec43ce97225ed8c60d6dab2e12974d083fe9ef172f4197a",
+      "experiments/storage/R6-A-R71-EXECUTION-DEPENDENCY-CLOSURE.md": "d12d6ba101ef410c3676d5e6f20a9c4b6d9e14491f7b5bb0af73fb6fee8bf08b",
+      "experiments/storage/R6-A-R71-NONLEASE-DRIFT-PURPOSE.md": "dca4e72bc53aa4d848c637e1dba18e462eb8524977a5cd57a40cf4c09e0be13f",
+      "experiments/storage/R6-A-R71-OS-ISOLATION-ALTERNATIVE.md": "751984c77916241a1c93c4d70dc8f293bdbca87636d9115d62be8a4da8e9a986",
+      "experiments/storage/R6-A-R71-R70-FINDING-RECLASSIFICATION.md": "f693743feb460dc1873a6e06f55755445210562b1a01316634d179d496ae4540",
+      "experiments/storage/R6-A-R71-THREAT-MODEL.md": "96d2888eae32f97c3aacea442bca8fac22c4ae2f7cbef790c75f66d5e38e49f3",
+      "experiments/storage/R6-A-R78-COMPLETION-VERIFIER.md": "d5b27be908c8d5aae24e4737c8dbbd4f41deadd03a5cca0f4e3b1e371139b32b",
+      "experiments/storage/R6-A-R78-DUAL-GRAPH-ORDER-CONTRACT.md": "0cd13c4aac1d6343a12faf29e47570630390ab961a19493117796c7607db8102",
+      "experiments/storage/R6-A-R78-GATE-EVIDENCE-CONTRACT.md": "2997637468cffdbd5b449f60a04ef272517e27518e2cab7d359f909c86bc4194",
+      "experiments/storage/R6-A-R78-GATE-SIDECAR-SCHEMA.json": "6feab5984bc35d0c080998fe9950480ef17c9b7ebf2226ee3a586f94f7a4b779",
+      "experiments/storage/R6-A-R78-LATE-REFUSAL-EVIDENCE-CONTRACT.md": "95ab15105d2e8f7cda396c57f8c04b30db21f3e783201efe3010c03e5d2c8276",
+      "experiments/storage/R6-A-R78-PREFIXLEASE-TRANSITION-CONTRACT.md": "6d40369adbc39d1f748dd61adecbcee4cc8235e24feed0ea121274484b6c59b8",
+      "experiments/storage/R6-A-R78-RESERVATION-CONTRACT.md": "1e31dfbce2282504e05c4096aa08eedefed25b47013baac7ffd71741ef64c123",
+      "experiments/storage/R6-A-R79-FAILED-OUTPUT-DISPOSITION-CONTRACT.md": "e99315e4af888b666275236e1d8454534be45c22b3336d6074091073c4e00aac",
+      "experiments/storage/R6-A-R79-R77-EVIDENCE-INVENTORY.md": "43732aa8008ad66ef0b47e2b710f951f0947e5f79b996cf1680160212632c031",
+      "experiments/storage/R6-A-R80-CLEANUP-CONTRACT.md": "bc1f83ad031ac2125792788907dac32aa5f38db40e4644ded6edfd710d790cb3",
+      "experiments/storage/R6-A-R80-POST-MATERIALIZATION-PREFIXLEASE-CONTRACT.md": "dc142872b28a9e985c5557c1d78eff7965f44489f6113d8fe04f50bfac49e59b",
+      "experiments/storage/R6-A-R80-R79-POST-MATERIALIZATION-FORENSICS.md": "6338093c81bbd7b03899849c308fe0b3a53666c7b7fddfcd614fce334fabe409",
+      "experiments/storage/R6-A-R81-CLI-OPT-IN-CONTRACT.md": "586ca9c96ae0e7f1e6adfb9c462acb9172fbadc27fa6c0da8c6324c83412b025",
+      "experiments/storage/R6-A-R81-SMOKE-MANIFEST-PUBLICATION-CONTRACT.md": "473b5eb26469e1e3c1f2a091e713730404e773de54873293bfbb81403b6106ae",
+      "experiments/storage/R6-A-R86-CANONICAL-REPAIR-CONTRACT.md": "5cd8ab92e3c76bbf283a5de2b67d19122a4a255e0dc722cfa7230beaf38d1efe",
+      "experiments/storage/R6-A-R86-COMPLETION-VERIFIER.md": "d9cca4025f9b1e26b225bdd0ad5e9a20e0b3de0c9753cbf6ac8e7a1cb389e883",
+      "experiments/storage/R6-A-R86-DUAL-LINEAGE-EXECUTION-PLAN-CANDIDATE-1.json": "d058fecf48e8efa885165a1f446502230904b03c7d3b55790b042a48840fd5ae",
+      "experiments/storage/R6-A-R86-FRESH-G0C-REVIEW.json": "97cc666ced1c0e75716713e07b2d0b4c13bfe2384f482b74f2ae970aedd26440",
+      "experiments/storage/R6-A-R86-RUNNER-MAP.md": "2706d4af9a068584b919cf7f82b7e76ccf343e94d44331a671b03ce2a84c8d20",
+      "experiments/storage/build_retention.py": "6e56da92436227110e5f55b7b0ee2e0cc5421a7dab6ce822162d7e36612bb27c",
+      "experiments/storage/failed-output-dispositions/step11d3-storage-policy-smoke-20261024-69574b75b1a5456e/custody/legacy_diagnostic_transcript.bin": "d4ac1a286893758080006f9964fd4b1c7c89654508cd7b965aa1f86d209bc22d",
+      "experiments/storage/failed-output-dispositions/step11d3-storage-policy-smoke-20261024-69574b75b1a5456e/custody/legacy_reconciliation.bin": "c83842f848eef87b3394ea8394ac1758b73d190c04fe3a36e23855e61334fbb1",
+      "experiments/storage/failed-output-dispositions/step11d3-storage-policy-smoke-20261024-69574b75b1a5456e/disposition.json": "ed970031e4cf1d7eb46bb224ed0fb996b3f54e42987e3bbd42527fcdfe147b99",
+      "experiments/storage/g0c-launcher-independent-review-R78-PRESERVED.json": "5636b5868639189f760b36287976edb56ed11df71aac80715bf145cbd19af9a3",
+      "experiments/storage/g0c-launcher-independent-review-R79-PRESERVED.json": "f7d1222d7d556cad80c3d449b60346894623af86d1c784504f92c6bf302604a7",
+      "experiments/storage/g0c-launcher-independent-review-R80-PRESERVED.json": "6b34ae2e1b407a5087003a32a611c8cb4ce552740a6edb60cd1da858652a04e5",
+      "experiments/storage/g0c-launcher-independent-review-R81-PRESERVED.json": "1178d2375ec66003ec84eb9aba8c2562a50e5e7cd4fb3504ae67f2d1d2a29cc6",
+      "experiments/storage/manifests/step11d3-storage-policy-smoke-20261024-69574b75b1a5456e.json": "c918c2c22550a3295e0f18c21abc80bbb1013e5bf20818f04e561bace88630d7",
+      "experiments/storage/manifests/step11d3-storage-policy-smoke-20261024-f7c2a643c96a41a7.json": "fc016bf9dd79213e041f6427ea4b6bef7e056e740830336b854ef4ddd70762eb",
+      "experiments/storage/r6a_dependency_manifest.py": "a30e360b229e03f7388496b221e3c5ae0e628aa96ed864cd82364d647dcf4448",
+      "experiments/storage/run_r6a_execution.py": "ec69d356b1097adee04137acccbcde64c51d2b7f8bada88b13e4e14a69a7ef64",
+      "experiments/storage/smoke-claims/step11d3-storage-policy-smoke-20261024-69574b75b1a5456e.json": "524b208fd88b252315b8150dca1270d5d6dfc6d38d6b9a01f5b6ecfa6df3ce10",
+      "experiments/storage/smoke-claims/step11d3-storage-policy-smoke-20261024-f7c2a643c96a41a7.json": "c6ce18e90daa34ffff3763f218c31c20d996e9e6ac02b2a1b79e6ebb75e94ebe",
+      "experiments/storage/smoke-runs/step11d3-storage-policy-smoke-20261024-69574b75b1a5456e/gate0-preflight-attestation.json": "ebbc9c37de8842a392a6552da72af8f017108a327903f966b112b871e837f72d",
+      "experiments/storage/smoke-runs/step11d3-storage-policy-smoke-20261024-f7c2a643c96a41a7/gate0-path-state.json.zlib": "2fe0c6323af320d509e6b25e4aac1dbbde78125df237877e64af892957fe3bc8",
+      "experiments/storage/smoke-runs/step11d3-storage-policy-smoke-20261024-f7c2a643c96a41a7/gate0-preflight-attestation.json": "c62039445aecb6bf6bea832778d351d0b7a44094c03256c3c5de5846b0570a4f",
+      "experiments/storage/smoke-runs/step11d3-storage-policy-smoke-20261024-f7c2a643c96a41a7/prefix-cleanup.json": "0ff29d470ee27191a4a2716104ee86b217f7a73bedb3236aabcbbb3201bc6804",
+      "experiments/storage/smoke-runs/step11d3-storage-policy-smoke-20261024-f7c2a643c96a41a7/prefix-state.json": "c58becf1514ce7a33408279a1311d698844253c0414c2d1ac3e071878a707846",
+      "experiments/storage/test_build_retention.py": "aafc1202f60a2cf7172eb40de1d352e67d0666b5b0937f18b6821d8e37064f59",
+      "experiments/storage/test_buildlease_v3_fixture_cleanup_contract.py": "b1f16e5251603e86bc777c4741fdc437a11c65e3662376b8ac37e55f4fb5b846",
+      "experiments/storage/test_buildlease_v3_host_adversarial.py": "f4771f61f774faff3efec704fc163daf9b7620943fa5309e61984ca7bab0dc54",
+      "experiments/storage/test_r6a_dependency_manifest.py": "a3af4fe9788e20aef50346cff92d74040a66e0610076d70ff2e69c483cec0232",
+      "experiments/storage/test_run_r6a_execution.py": "96fc9ad4643c1599d68be10a6f2e439619a48e192fe58018bd7c75d570bdd590"
+    },
+    "fresh_g0c_answer": "Can durable SUCCESS exist without a validated committed manifest? NO",
+    "fresh_g0c_review": {
+      "path": "experiments/storage/R6-A-R86-FRESH-G0C-REVIEW.json",
+      "sha256": "97cc666ced1c0e75716713e07b2d0b4c13bfe2384f482b74f2ae970aedd26440"
+    },
+    "milestone": "R86",
+    "schema_version": 1,
+    "status": "PASS"
+  },
   "reviewed_files": {
     "build_retention_control": {
       "path": "experiments/storage/build_retention.py",
-      "sha256": "2d1ad68df26148d1fc7236e4b0ffd0d6fb7babb5cc047512b120bceaff38d962"
+      "sha256": "6e56da92436227110e5f55b7b0ee2e0cc5421a7dab6ce822162d7e36612bb27c",
+      "size_bytes": 1053359
     },
     "build_retention_tests": {
       "path": "experiments/storage/test_build_retention.py",
-      "sha256": "3614b4d476743bb816d54935838c2b9de387e239bf8292334480dda853d8db3c"
+      "sha256": "aafc1202f60a2cf7172eb40de1d352e67d0666b5b0937f18b6821d8e37064f59",
+      "size_bytes": 685866
+    },
+    "dependency_manifest_control": {
+      "path": "experiments/storage/r6a_dependency_manifest.py",
+      "sha256": "a30e360b229e03f7388496b221e3c5ae0e628aa96ed864cd82364d647dcf4448",
+      "size_bytes": 42778
+    },
+    "dependency_manifest_tests": {
+      "path": "experiments/storage/test_r6a_dependency_manifest.py",
+      "sha256": "a3af4fe9788e20aef50346cff92d74040a66e0610076d70ff2e69c483cec0232",
+      "size_bytes": 61653
     },
     "gate0_checks_tests": {
       "path": "experiments/storage/test_g0c_checks.py",
-      "sha256": "8bc1f5e196480109aa450c9c59b169402b8f8e340826d0227d8cf26d6eed6323"
+      "sha256": "34d81ffa3dfafa0ee2e2e745b52c9e55a453da99ea8ecace6fc38f86ad8d53f0",
+      "size_bytes": 102831
     },
     "gate0_control": {
       "path": "experiments/storage/storage_gate0.py",
-      "sha256": "d4a42335f1ab7b8bc805796c9df62ed6a0747032a15a24c969c1a8f3331c9142"
+      "sha256": "aa3bc9455106acd5d10e2a480c10eb2f2d0433a04b7284e6cef77e87847bd7b5",
+      "size_bytes": 88803
+    },
+    "inventory_control": {
+      "path": "experiments/storage/storage_inventory.py",
+      "sha256": "8ea210e4509743f8b1a195781c38d387089ac5c696e66d12b064ee1c1d87247f",
+      "size_bytes": 44273
     },
     "prefix_preflight_control": {
       "path": "experiments/storage/prefix_preflight.py",
-      "sha256": "888afd7ac36aa528bdb1548bee5449a688b25824ba7625101f10aea76562233b"
+      "sha256": "888afd7ac36aa528bdb1548bee5449a688b25824ba7625101f10aea76562233b",
+      "size_bytes": 949
     },
     "prefixlease_contract_tests": {
       "path": "experiments/storage/test_prefixlease_wineprefix_contract.py",
-      "sha256": "9ed18d5d0ebe0332f5f012ce1ebcc50a808fea38525572d0f870e6e405d2768e"
+      "sha256": "fc5161321fe70720380692f2a53bc5764329fa9053e12b206578b6a4efbc29df",
+      "size_bytes": 32058
+    },
+    "r6a_runner_control": {
+      "path": "experiments/storage/run_r6a_execution.py",
+      "sha256": "ec69d356b1097adee04137acccbcde64c51d2b7f8bada88b13e4e14a69a7ef64",
+      "size_bytes": 102149
+    },
+    "r6a_runner_tests": {
+      "path": "experiments/storage/test_run_r6a_execution.py",
+      "sha256": "96fc9ad4643c1599d68be10a6f2e439619a48e192fe58018bd7c75d570bdd590",
+      "size_bytes": 87610
+    },
+    "shared_capacity_policy": {
+      "path": "experiments/storage/HOST-V3-SHARED-CAPACITY-POLICY.md",
+      "sha256": "6fa198356e9cf3c0272b36e5eba84642b78cd330e05b4429db7f9ffdd13686d7",
+      "size_bytes": 5576
     },
     "source": {
       "path": "experiments/storage/storage_policy.py",
-      "sha256": "c2feb4c3a607ad4bf92a1a023feffd431aa13fc2b620fc7e1cf59e819b72efc1"
+      "sha256": "bbe132c596e421b9f7b3edf18128a828a1ca11a8a62a0d838cbb5360c8791116",
+      "size_bytes": 892006
     },
     "storage_policy_tests": {
       "path": "experiments/storage/test_storage_policy.py",
-      "sha256": "0cc610bd9988ab14348d3b32e288af4c405a381c6348285f6382f5cafa0ba0a7"
+      "sha256": "11a47bbbf126f02ebcad8a763c33ec4c474b2ee07cbe3dfbce3c54fe6149e5d5",
+      "size_bytes": 441259
     },
-    "storage_smoke_runner": {
+    "storage_smoke_control": {
       "path": "experiments/storage/smoke_prefix_lease.py",
-      "sha256": "fc654e3f431c81bea3bf0b604d57341b8109dbe1d094bb68ee793bbdbf639028"
+      "sha256": "4e7600e57344a12c1f29fdbbf840ce48483b0028738a47cb5a28df1d235b74a3",
+      "size_bytes": 26974
     },
     "tests": {
       "path": "experiments/storage/test_wine_launcher_policy.py",
-      "sha256": "004e7e33cac1d1288aec2392d3303601d4efd1c65a0d75a40f326bd29baa4faf"
+      "sha256": "004e7e33cac1d1288aec2392d3303601d4efd1c65a0d75a40f326bd29baa4faf",
+      "size_bytes": 34137
+    },
+    "vm_capacity_controller": {
+      "path": "experiments/storage/vm_capacity_domain.py",
+      "sha256": "1bfc7666e584041a873cc059ed769002160687cf23ffb53e1ab8ce12d4e79805",
+      "size_bytes": 786489
+    },
+    "vm_capacity_tests": {
+      "path": "experiments/storage/test_vm_capacity_domain.py",
+      "sha256": "ec5ebb75036b5ff310be5b02087fe38ed60009dec2e03cb58a8279833ffc8a07",
+      "size_bytes": 359916
+    },
+    "vm_restore_metadata_probe": {
+      "path": "experiments/storage/vm_restore_metadata_probe.swift",
+      "sha256": "779cbba581e6cfdec12d7a42b4dd3e9d225c3db2a49be1f390cb1827d8781e95",
+      "size_bytes": 6430
     }
   },
-  "reviewer_identity": "Codex independent read-only reviewer /root/z4_independent_review",
-  "reviewer_status": "PASS",
-  "schema_version": 1,
-  "scope": "Fresh source-based review of Gate0 baseline exactness, current-run accounting exclusions and identity, lease materialization accounting, A-I and Z3 regressions, relevant storage controls, and the BR9R2 runner. Two read-only follow-ups verified the active-manifest required-field check and the bounded Gate0 free-space stability/fail-closed behavior. Scoped-allocation, nonlease, output, and exclusion binding remain exact. No reviewer tests, Gate0, Wine, Native, or graphics actions were run.",
   "status": "PASS"
 }

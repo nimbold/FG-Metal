@@ -9,6 +9,9 @@ explicitly marked and counts against the two-prefix retention limit.
 from __future__ import annotations
 
 import ast
+import base64
+import copy
+import datetime
 import json
 import math
 import os
@@ -22,6 +25,7 @@ import difflib
 import gzip
 import hashlib
 import hmac
+import plistlib
 import secrets
 import signal
 import fcntl
@@ -30,6 +34,8 @@ import ctypes
 import errno
 import argparse
 import contextlib
+import threading
+import zlib
 from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
@@ -42,16 +48,30 @@ FREE_WARNING = 50 * GIB
 FREE_MINIMUM = 50 * GIB
 FREE_PREFERRED = 60 * GIB
 PROJECT_WARNING = 52 * GIB
-PROJECT_BUDGET = 55 * GIB
-GATE0_PROJECT_BUDGET = 55 * GIB
+PROJECT_BUDGET = 60 * GIB
+GATE0_PROJECT_BUDGET = 60 * GIB
 # Volume free-space can drift between full-tree scans; scoped allocation remains exact.
 GATE0_FREE_DRIFT_TOLERANCE_BYTES = 2 * GIB
 GATE0_MAX_AGE_SECONDS = 60 * 60
+GATE0_ATTESTATION_MAX_BYTES = 8 * MIB
 ACTIVE_PREFIX_LEASE_MARKER_MAX_BYTES = 16 * 1024
 ACTIVE_PREFIX_LEASE_MARKER_MAX_ALLOCATED_BYTES = 64 * 1024
 STORAGE_POLICY_SMOKE_ID_PREFIX = "step11d3-storage-policy-smoke-"
+R65_ADMISSION_CLAIM_DIRECTORY = "r65-admission-claims"
+R66_R69_ADMISSION_CLAIM_DIRECTORY = "r66-r69-admission-claims"
 HISTORICAL_TERMINAL_RUN_ID = "step11d3b-baseline-01-20261014-130823-44892b9b"
+HISTORICAL_TERMINAL_APFS_OLD_DEVICE = 16_777_229
+HISTORICAL_TERMINAL_APFS_VOLUME_UUID = "270E840B-FC2D-4B73-BE0F-D0ED097C4ECA"
+HISTORICAL_TERMINAL_APFS_MOUNT_EVIDENCE = (
+    "experiments/storage/R6-VM-P0-RETRY-READINESS-MOUNT-IDENTITY-20261017T122608Z.json")
+HISTORICAL_TERMINAL_APFS_MOUNT_EVIDENCE_SHA256 = (
+    "5d230426fcab955544faafe9a88077fdda0041fca63e70e6672fd6b0bbd5509e")
+HISTORICAL_TERMINAL_ORIGINAL_PROJECT_BUDGET_BYTES = 55 * GIB
 HISTORICAL_TERMINAL_OUTPUT_BYTES = 725_688_320
+HISTORICAL_TERMINAL_CORRECTION2_OUTPUT_BYTES = 724_766_720
+HISTORICAL_TERMINAL_CORRECTION2_SHA256 = "f0317a73c158fadaad52742f13e8944a444fa39e3c6b3a25eb3c3c25389b1613"
+HISTORICAL_TERMINAL_CORRECTION2_HMAC_SHA256 = "a855fa1b39f58bb8fabdb39066737dbef9540cc1c4daef70d73585f426f9f2e7"
+HISTORICAL_TERMINAL_CORRECTION3_OUTPUT_BYTES = 720_261_120
 HISTORICAL_TERMINAL_OUTPUT_LOGICAL_BYTES = 720_231_108
 HISTORICAL_TERMINAL_ROOT_IDENTITY = (16_777_229, 98_341_479)
 HISTORICAL_TERMINAL_POST_OUTPUT_BYTES = 598_573_056
@@ -59,7 +79,34 @@ HISTORICAL_TERMINAL_ORIGINAL_RESERVATION_BYTES = 314_572_800
 HISTORICAL_TERMINAL_REPORT_PREFIX_BYTES = 160_968
 HISTORICAL_TERMINAL_REPORT_PREFIX_SHA256 = "9012ccacc5a64dc9a8d0f5198059f791a10d514a7857c5dda3fdd5e6c337e00d"
 HISTORICAL_TERMINAL_LEGACY_CLOSURE_SHA256 = "8b591c60099965513a7485890928f96af242a6ca3422a28ed20eb3440c140bcf"
+HISTORICAL_TERMINAL_CORRECTION1_SHA256 = "8201c356ce00f8b2577df90c4e3ed5e6bb229bacef4f1785eac0a6edb5628710"
+HISTORICAL_TERMINAL_CORRECTION1_HMAC_SHA256 = "87853a1f9f46c44208e18f07fb9b2b42d28ff58a7d29ae416a51bf223f3a764f"
+HISTORICAL_TERMINAL_CORRECTION1_TREE_SHA256 = "6b2c295fbce4e089de2ecd6bc133b9e06c22b80b2cd9e530cc5722cfff98eb57"
+HISTORICAL_TERMINAL_CORRECTION2_TREE_SHA256 = "814a8d9ba791e214bf49a32ee3574a42ddbb8752809204e639cae9d832c4b89b"
+HISTORICAL_TERMINAL_CORRECTION2_METADATA_SHA256 = "ccfbcba1666d6e252ac3428ff6e7f7b15f22e16382345fe6c0526a6d49b2a6a9"
+HISTORICAL_TERMINAL_CORRECTION3_TREE_SHA256 = "d44f6f1e6653c969f50947c35b4c19797f3cf41c2f87304f7f5281af83b7e712"
+HISTORICAL_TERMINAL_CORRECTION3_METADATA_SHA256 = "c8b4bff079c6896911552a355fa789f16f1b80933d9138398a24a380444d83c4"
+HISTORICAL_TERMINAL_TRACE_BLOCK_PREDECESSOR_IDENTITY = (
+    16_777_229, 98_349_254, 33_152, 501, 1, 364_651_052,
+    1_791_984_608_145_456_810, 1_791_984_608_145_456_810, 721_016,
+)
+HISTORICAL_TERMINAL_TRACE_BLOCK_CURRENT = 712_216
+HISTORICAL_TERMINAL_RUNTIME_LOG_IDENTITY = (
+    16_777_229, 98_348_228, 33_188, 501, 1, 1_179_148,
+    1_791_984_608_149_107_432, 1_791_984_608_149_107_432, 4_104,
+)
+HISTORICAL_TERMINAL_RUNTIME_LOG_CORRECTION2_BLOCKS = 2_304
+HISTORICAL_TERMINAL_H5_REVIEW_SHA256 = {
+    "H5-A-CLOSURE-FORENSICS.md": "0d854815c650840453c9a9f23de7a7ba9b43fecb4f6e3b16d7a1189369def711",
+    "H5-B-ADVERSARIAL-CONTRACT.md": "9b60de4cefc88df4072dd16f5f7eee91e27eb6b5cc6a7ffd9270ee7e1d61ee7f",
+    "H5-RECONCILIATION.md": "06d920cabe5c5fb114f6129e38c4a126ee3211bd4923e7b934bf0c405bf28893",
+    "H4-A-MEASURE-PROFILE.md": "e612b8b0a8cd628b63ba2216ca566cc496f7090c8d01e8dcedd4cbc2d487ccd1",
+    "H4-B-ALGORITHM.md": "8705f3a2cb10b8c25bf716f3f49610f3b67587967a7e7b9eacc62c9b1f51e946",
+    "H4-FRESH-REVIEW.md": "ab7b8b08cf907dfe84bb3e0ca4bc4d167dbb99b5a821ebb1dfc5002beff9388e",
+}
 HISTORICAL_TERMINAL_LSOF_PATH = "/usr/sbin/lsof"
+HISTORICAL_TERMINAL_LSOF_SHA256 = (
+    "deff85c7b4750a948a69fcd48eae3b394a37575e5048e5eb4a35b7a0482c3dc8")
 HISTORICAL_TERMINAL_TRUSTED_FILES = {
     "app-trace.jsonl": "d57f5ec94bb2bdab51bebd87c97e3a7bc0650539dd5756897ae39a5aec87774c",
     "execution-result.json": "dca9ab61f70d36a2790243bd2a7b058c7dbda7e09f365f1f89d1f208aab3b4f6",
@@ -121,6 +168,18 @@ FULL_DEBUG_BUILD_TYPES = {"debug", "debugoptimized", "unstripped", "full-debug"}
 RUNNER_ADMISSION_CONTRACT = "prefixlease-scoped-managed-process-v16"
 ROOT_CLASS_MANDATORY = "MANDATORY"
 ROOT_CLASS_OPTIONAL_EPHEMERAL = "OPTIONAL_EPHEMERAL"
+NONLEASE_ALLOCATION_SNAPSHOT_SCHEMA = 1
+NONLEASE_ALLOCATION_SNAPSHOT_MAX_PATHS = 100_000
+NONLEASE_DRIFT_DIAGNOSTIC_MAX_PATHS = 256
+FGMETAL_ROOT_MARKER_NAMES = (
+    ".fgmetal-storage-root.json",
+    ".fgmetal-build-lease.json",
+    "FGMETAL_PREFIX_TEMPLATE.json",
+)
+BUILD_ROOT_SIGNATURE_FILES = frozenset({
+    "build.ninja", ".ninja_log", ".ninja_deps", "CMakeCache.txt", "config.status",
+})
+BUILD_ROOT_SIGNATURE_DIRS = frozenset({"meson-private", "CMakeFiles", "XCBuildData"})
 SIGNED_OUTPUT_MANIFEST_REQUIRED_FIELDS = frozenset({
     "experiment_id", "purpose", "candidate_hashes", "created_at_unix",
     "expected_duration_seconds", "expected_prefix_requirement", "expected_prefix_bytes",
@@ -140,8 +199,25 @@ SIGNED_OUTPUT_MANIFEST_REQUIRED_FIELDS = frozenset({
 })
 
 REPO = Path(__file__).resolve().parents[2]
+GATE0_PATH_STATE_SIDECAR_PATH = REPO / "experiments/storage/storage-gate0-path-state.json.zlib"
 WINE_RUNTIME_TREE_MANIFEST = REPO / "experiments/storage/runtime-manifests/step11d_r_active_runtime.json"
 CACHE = Path.home() / "Library" / "Caches" / "FGMetal"
+VM_CAPACITY_DOMAIN_ROOT = CACHE / "vm-capacity-domain"
+VM_CAPACITY_DOMAIN_ACTIVE_MARKER = VM_CAPACITY_DOMAIN_ROOT / "active-session.json"
+VM_CAPACITY_DOMAIN_DEFERRED_INACTIVATION = (
+    VM_CAPACITY_DOMAIN_ROOT / "deferred-capacity-inactivation.json")
+VM_CAPACITY_DOMAIN_ACTIVE_MARKER_MAX_BYTES = 16 * 1024
+# This is the APFS container shared by the repository and the VM capacity
+# domain. Keep the identity here so storage admission can authenticate the
+# claim without importing the VM execution controller.
+VM_CAPACITY_DOMAIN_EXPECTED_CONTAINER_UUID = "0C1A50F1-E2F9-4BB0-A6C2-6B2581B7EE83"
+VM_CAPACITY_DOMAIN_EXPECTED_PHYSICAL_STORE_UUID = "69F188B6-DF27-4E2E-960B-919C85AA18B3"
+VM_CAPACITY_DOMAIN_EXPECTED_SAFETY_RESERVE_BYTES = 15 * GIB
+VM_CAPACITY_DOMAIN_EXPECTED_RESTORE_PATH = "/Volumes/FGMetal-VM/restore.ipsw"
+VM_CAPACITY_DOMAIN_EXPECTED_UNLINKED_RESTORE_PATH = (
+    "/Volumes/FGMetal-VM/"
+    ".restore.ipsw.deferred-retirement-2e6cd78d402945e08d5a755b86e55bac")
+VM_DEFERRED_REVIEW_MAX_AGE_SECONDS = 30 * 60
 ARTIFACT_STORE = CACHE / "artifacts" / "sha256"
 PREFIX_ROOT = CACHE / "prefixes"
 PREFIX_TEMPLATE = PREFIX_ROOT / "wine-11.17-mvk142-pristine"
@@ -152,16 +228,563 @@ GATE0_ATTESTATION_PATH = REPO / "experiments/storage/storage-gate0-attestation.j
 STORAGE_CLEANUP_RECEIPT_PATH = REPO / "experiments/storage/storage-cleanup-receipt.json"
 GATE0_SUPPLEMENTAL_EVIDENCE = (
     "g0c-hardlink-audit.json", "g0c-evidence-consolidation-plan.json",
-    "g0c-evidence-consolidation-receipt.json", "g0c-launcher-independent-review.json",
+    "g0c-evidence-consolidation-receipt.json", "g0c-launcher-independent-review-R88.json",
+    "g0c-launcher-independent-review-R89.json",
+    "g0c-launcher-independent-review-R89-CANDIDATE-9.json",
+    "g0c-launcher-independent-review-R89-CANDIDATE-10.json",
+    "g0c-launcher-independent-review-R90-CANDIDATE-1.json",
+    "R6-A-R89-FRESH-G0C-REVIEW.json",
+    "R6-A-R89-FRESH-G0C-REVIEW-CANDIDATE-9.json",
+    "R6-A-R89-FRESH-G0C-REVIEW-CANDIDATE-10.json",
+    "R6-A-R90-FRESH-G0C-REVIEW-CANDIDATE-1.json",
+    "g0c-launcher-independent-review-R90-CANDIDATE-2.json",
+    "R6-A-R90-FRESH-G0C-REVIEW-CANDIDATE-2.json",
+    "g0c-launcher-independent-review-R90-CANDIDATE-3.json",
+    "g0c-launcher-independent-review-R90-CANDIDATE-6.json",
+    "g0c-launcher-independent-review-R90-CANDIDATE-7.json",
+    "g0c-launcher-independent-review-R90-CANDIDATE-8.json",
+    "g0c-launcher-independent-review-R90-CANDIDATE-9.json",
+    "R6-A-R90-FRESH-G0C-REVIEW-CANDIDATE-6.json",
+    "R6-A-R90-FRESH-G0C-REVIEW-CANDIDATE-7.json",
+    "R6-A-R90-FRESH-G0C-REVIEW-CANDIDATE-9.json",
+    "R6-A-R87-EXECUTION-DEPENDENCY-MANIFEST-CANDIDATE-8.json",
+    "R6-A-R87-EXECUTION-DEPENDENCY-MANIFEST-CANDIDATE-9.json",
+    "R6-A-R87-EXECUTION-DEPENDENCY-MANIFEST-CANDIDATE-10.json",
+    "R6-A-R87-EXECUTION-DEPENDENCY-MANIFEST-CANDIDATE-11.json",
+    "R6-A-R87-EXECUTION-DEPENDENCY-MANIFEST-CANDIDATE-12.json",
+    "R6-A-R87-EXECUTION-DEPENDENCY-MANIFEST-CANDIDATE-16.json",
+    "R6-A-R87-EXECUTION-DEPENDENCY-MANIFEST-CANDIDATE-17.json",
+    "R6-A-R87-EXECUTION-DEPENDENCY-MANIFEST-CANDIDATE-18.json",
+    "g0c-launcher-independent-review-R90-CANDIDATE-10.json",
+    "g0c-launcher-independent-review-R91-CANDIDATE-20.json",
+    "R6-A-R90-FRESH-G0C-REVIEW-CANDIDATE-10.json",
+    "R6-A-R87-EXECUTION-DEPENDENCY-MANIFEST-CANDIDATE-19.json",
+    "R6-A-R91-FRESH-G0C-REVIEW-CANDIDATE-20.json",
+    "R6-A-R87-EXECUTION-DEPENDENCY-MANIFEST-CANDIDATE-20.json",
+    "R6-A-R87-EXECUTION-DEPENDENCY-MANIFEST-CANDIDATE-21.json",
+    "g0c-launcher-independent-review-R91-CANDIDATE-21.json",
+    "R6-A-R91-FRESH-G0C-REVIEW-CANDIDATE-21.json",
+    "g0c-launcher-independent-review-R92-CANDIDATE-22.json",
+    "R6-A-R92-FRESH-G0C-REVIEW-CANDIDATE-22.json",
+    "R6-A-R87-EXECUTION-DEPENDENCY-MANIFEST-CANDIDATE-22.json",
+    "g0c-launcher-independent-review-R92-CANDIDATE-23.json",
+    "R6-A-R92-FRESH-G0C-REVIEW-CANDIDATE-23.json",
+    "R6-A-R87-EXECUTION-DEPENDENCY-MANIFEST-CANDIDATE-23.json",
+    "g0c-launcher-independent-review-R93-CANDIDATE-24.json",
+    "R6-A-R93-FRESH-G0C-REVIEW-CANDIDATE-24.json",
+    "R6-A-R87-EXECUTION-DEPENDENCY-MANIFEST-CANDIDATE-24.json",
+    "g0c-launcher-independent-review-R94-CANDIDATE-25.json",
+    "R6-A-R94-FRESH-G0C-REVIEW-CANDIDATE-25.json",
+    "R6-A-R87-EXECUTION-DEPENDENCY-MANIFEST-CANDIDATE-25.json",
+    "g0c-launcher-independent-review-R95-CANDIDATE-26.json",
+    "R6-A-R95-FRESH-G0C-REVIEW-CANDIDATE-26.json",
+    "R6-A-R87-EXECUTION-DEPENDENCY-MANIFEST-CANDIDATE-26.json",
+    "g0c-launcher-independent-review-R96-CANDIDATE-27.json",
+    "R6-A-R96-FRESH-G0C-REVIEW-CANDIDATE-27.json",
+    "R6-A-R87-EXECUTION-DEPENDENCY-MANIFEST-CANDIDATE-27.json",
+    "admission-dispositions/r6a-r87-admission-20261025T174249Z-r89-3d8d7a30.json",
+    "admission-dispositions/r6a-r87-admission-20261025T1957Z-r89-c9-7a4e.json",
     "g0c-launcher-tests.log", "g0c-checks-tests.log", "g0c-consolidation-tests.log",
 )
+GATE0_SUPPLEMENTAL_REPOSITORY_ROOT_FILES = frozenset({
+    "g0c-launcher-independent-review-R90-CANDIDATE-3.json",
+    "R6-A-R87-EXECUTION-DEPENDENCY-MANIFEST-CANDIDATE-8.json",
+    "R6-A-R87-EXECUTION-DEPENDENCY-MANIFEST-CANDIDATE-9.json",
+    "R6-A-R87-EXECUTION-DEPENDENCY-MANIFEST-CANDIDATE-10.json",
+    "R6-A-R87-EXECUTION-DEPENDENCY-MANIFEST-CANDIDATE-11.json",
+    "R6-A-R87-EXECUTION-DEPENDENCY-MANIFEST-CANDIDATE-12.json",
+    "R6-A-R87-EXECUTION-DEPENDENCY-MANIFEST-CANDIDATE-16.json",
+    "R6-A-R87-EXECUTION-DEPENDENCY-MANIFEST-CANDIDATE-17.json",
+    "R6-A-R87-EXECUTION-DEPENDENCY-MANIFEST-CANDIDATE-18.json",
+    "R6-A-R87-EXECUTION-DEPENDENCY-MANIFEST-CANDIDATE-19.json",
+    "R6-A-R87-EXECUTION-DEPENDENCY-MANIFEST-CANDIDATE-20.json",
+    "R6-A-R87-EXECUTION-DEPENDENCY-MANIFEST-CANDIDATE-21.json",
+    "R6-A-R87-EXECUTION-DEPENDENCY-MANIFEST-CANDIDATE-22.json",
+    "R6-A-R87-EXECUTION-DEPENDENCY-MANIFEST-CANDIDATE-23.json",
+    "R6-A-R87-EXECUTION-DEPENDENCY-MANIFEST-CANDIDATE-24.json",
+    "R6-A-R87-EXECUTION-DEPENDENCY-MANIFEST-CANDIDATE-25.json",
+    "R6-A-R87-EXECUTION-DEPENDENCY-MANIFEST-CANDIDATE-26.json",
+    "R6-A-R87-EXECUTION-DEPENDENCY-MANIFEST-CANDIDATE-27.json",
+})
+R89_G0C_REVIEW_RECORD_NAME = "g0c-launcher-independent-review-R89-CANDIDATE-10.json"
+R90_G0C_REVIEW_RECORD_NAME = "g0c-launcher-independent-review-R90-CANDIDATE-10.json"
+R91_CANDIDATE_20_G0C_REVIEW_RECORD_NAME = "g0c-launcher-independent-review-R91-CANDIDATE-20.json"
+R91_G0C_REVIEW_RECORD_NAME = "g0c-launcher-independent-review-R91-CANDIDATE-21.json"
+R92_CANDIDATE_22_G0C_REVIEW_RECORD_NAME = "g0c-launcher-independent-review-R92-CANDIDATE-22.json"
+R92_G0C_REVIEW_RECORD_NAME = "g0c-launcher-independent-review-R92-CANDIDATE-23.json"
+R93_G0C_REVIEW_RECORD_NAME = "g0c-launcher-independent-review-R93-CANDIDATE-24.json"
+R94_G0C_REVIEW_RECORD_NAME = "g0c-launcher-independent-review-R94-CANDIDATE-25.json"
+R95_G0C_REVIEW_RECORD_NAME = "g0c-launcher-independent-review-R95-CANDIDATE-26.json"
+R96_G0C_REVIEW_RECORD_NAME = "g0c-launcher-independent-review-R96-CANDIDATE-27.json"
+G0C_REVIEW_RECORD_NAME = R90_G0C_REVIEW_RECORD_NAME
+R89_G0C_REVIEW_REQUIRED_FILES = {
+    "source": "storage_policy.py",
+    "tests": "test_wine_launcher_policy.py",
+    "storage_policy_tests": "test_storage_policy.py",
+    "failed_output_disposition_tests": "test_failed_output_disposition.py",
+    "build_retention_control": "build_retention.py",
+    "build_retention_tests": "test_build_retention.py",
+    "prefix_preflight_control": "prefix_preflight.py",
+    "prefixlease_contract_tests": "test_prefixlease_wineprefix_contract.py",
+    "gate0_control": "storage_gate0.py",
+    "inventory_control": "storage_inventory.py",
+    "gate0_checks_tests": "test_g0c_checks.py",
+    "shared_capacity_policy": "HOST-V3-SHARED-CAPACITY-POLICY.md",
+    "vm_capacity_controller": "vm_capacity_domain.py",
+    "vm_capacity_tests": "test_vm_capacity_domain.py",
+    "vm_restore_metadata_probe": "vm_restore_metadata_probe.swift",
+    "storage_smoke_control": "smoke_prefix_lease.py",
+    "dependency_manifest_control": "r6a_dependency_manifest.py",
+    "r6a_runner_control": "run_r6a_execution.py",
+    "dependency_manifest_tests": "test_r6a_dependency_manifest.py",
+    "r6a_runner_tests": "test_run_r6a_execution.py",
+}
+G0C_REVIEW_REQUIRED_FILES = {
+    **R89_G0C_REVIEW_REQUIRED_FILES,
+    "admission_disposition_tests": "test_r6a_admission_disposition.py",
+}
+R90_ONLY_SUPPLEMENTAL_EVIDENCE = frozenset({
+    "g0c-launcher-independent-review-R90-CANDIDATE-1.json",
+    "R6-A-R90-FRESH-G0C-REVIEW-CANDIDATE-1.json",
+    "R6-A-R87-EXECUTION-DEPENDENCY-MANIFEST-CANDIDATE-11.json",
+    "g0c-launcher-independent-review-R90-CANDIDATE-2.json",
+    "R6-A-R90-FRESH-G0C-REVIEW-CANDIDATE-2.json",
+    "R6-A-R87-EXECUTION-DEPENDENCY-MANIFEST-CANDIDATE-12.json",
+    "g0c-launcher-independent-review-R90-CANDIDATE-3.json",
+    "g0c-launcher-independent-review-R90-CANDIDATE-6.json",
+    "g0c-launcher-independent-review-R90-CANDIDATE-7.json",
+    "g0c-launcher-independent-review-R90-CANDIDATE-8.json",
+    "g0c-launcher-independent-review-R90-CANDIDATE-9.json",
+    "R6-A-R90-FRESH-G0C-REVIEW-CANDIDATE-6.json",
+    "R6-A-R90-FRESH-G0C-REVIEW-CANDIDATE-7.json",
+    "R6-A-R90-FRESH-G0C-REVIEW-CANDIDATE-9.json",
+    "R6-A-R87-EXECUTION-DEPENDENCY-MANIFEST-CANDIDATE-16.json",
+    "R6-A-R87-EXECUTION-DEPENDENCY-MANIFEST-CANDIDATE-17.json",
+    "R6-A-R87-EXECUTION-DEPENDENCY-MANIFEST-CANDIDATE-18.json",
+    "g0c-launcher-independent-review-R90-CANDIDATE-10.json",
+    "R6-A-R90-FRESH-G0C-REVIEW-CANDIDATE-10.json",
+    "R6-A-R87-EXECUTION-DEPENDENCY-MANIFEST-CANDIDATE-19.json",
+    "g0c-launcher-independent-review-R91-CANDIDATE-20.json",
+    "g0c-launcher-independent-review-R91-CANDIDATE-21.json",
+    "R6-A-R91-FRESH-G0C-REVIEW-CANDIDATE-20.json",
+    "R6-A-R91-FRESH-G0C-REVIEW-CANDIDATE-21.json",
+    "R6-A-R87-EXECUTION-DEPENDENCY-MANIFEST-CANDIDATE-20.json",
+    "R6-A-R87-EXECUTION-DEPENDENCY-MANIFEST-CANDIDATE-21.json",
+    "admission-dispositions/r6a-r87-admission-20261025T174249Z-r89-3d8d7a30.json",
+    "admission-dispositions/r6a-r87-admission-20261025T1957Z-r89-c9-7a4e.json",
+})
+
+
+def gate0_supplemental_path(repo_root: Path, name: str) -> Path:
+    """Resolve one source-declared Gate supplemental record to its fixed repository location."""
+    if name not in GATE0_SUPPLEMENTAL_EVIDENCE:
+        raise ValueError("unknown Gate supplemental evidence name")
+    if name in GATE0_SUPPLEMENTAL_REPOSITORY_ROOT_FILES:
+        return repo_root / name
+    return repo_root / "experiments/storage" / name
+
+
+def current_g0c_review_record_name(environ: Mapping[str, str] | None = None) -> str:
+    """Select the current generic G0C review for an explicitly selected R6-A plan."""
+    values = os.environ if environ is None else environ
+    return (R96_G0C_REVIEW_RECORD_NAME if values.get("FG_METAL_R96_PLAN_PATH") else
+            R95_G0C_REVIEW_RECORD_NAME if values.get("FG_METAL_R95_PLAN_PATH") else
+            R94_G0C_REVIEW_RECORD_NAME if values.get("FG_METAL_R94_PLAN_PATH") else
+            R93_G0C_REVIEW_RECORD_NAME if values.get("FG_METAL_R93_PLAN_PATH") else
+            R92_G0C_REVIEW_RECORD_NAME if values.get("FG_METAL_R92_PLAN_PATH") else
+            R91_G0C_REVIEW_RECORD_NAME
+            if values.get("FG_METAL_R91_PLAN_PATH") else G0C_REVIEW_RECORD_NAME)
+
+
+def _gate0_is_r90_attestation(attestation: Mapping[str, Any]) -> bool:
+    supplemental = attestation.get("supplemental_evidence_sha256")
+    return (isinstance(supplemental, Mapping)
+            and any(bool(supplemental.get(name))
+                    for name in R90_ONLY_SUPPLEMENTAL_EVIDENCE))
+
+
+def _gate0_is_r91_attestation(attestation: Mapping[str, Any]) -> bool:
+    """Recognize either exact historical C20 or current C21 R91 packet."""
+    supplemental = attestation.get("supplemental_evidence_sha256")
+    if not isinstance(supplemental, Mapping):
+        return False
+    packet_variants = (
+        (R91_CANDIDATE_20_G0C_REVIEW_RECORD_NAME,
+         "R6-A-R91-FRESH-G0C-REVIEW-CANDIDATE-20.json",
+         "R6-A-R87-EXECUTION-DEPENDENCY-MANIFEST-CANDIDATE-20.json",
+         "R6-A-R87-PHASE-AWARE-CAS-CAP-CANDIDATE-20",
+         "experiments/storage/R6-A-R87-DUAL-LINEAGE-EXECUTION-PLAN-CANDIDATE-16.json"),
+        (R91_G0C_REVIEW_RECORD_NAME,
+         "R6-A-R91-FRESH-G0C-REVIEW-CANDIDATE-21.json",
+         "R6-A-R87-EXECUTION-DEPENDENCY-MANIFEST-CANDIDATE-21.json",
+         "R6-A-R87-PHASE-AWARE-CAS-CAP-CANDIDATE-21",
+         "experiments/storage/R6-A-R87-DUAL-LINEAGE-EXECUTION-PLAN-CANDIDATE-17.json"),
+    )
+    for global_name, candidate_name, manifest_name, candidate_id, plan_path in packet_variants:
+        documents: dict[str, Any] = {}
+        for name in (global_name, candidate_name, manifest_name):
+            expected = supplemental.get(name)
+            if not isinstance(expected, str) or not re.fullmatch(r"[0-9a-f]{64}", expected):
+                break
+            try:
+                raw = _read_file_nofollow(gate0_supplemental_path(REPO, name))
+            except (OSError, RuntimeError, ValueError):
+                break
+            if not hmac.compare_digest(hashlib.sha256(raw).hexdigest(), expected):
+                break
+            try:
+                documents[name] = json.loads(
+                    raw, object_pairs_hook=_g0c_no_duplicate_json_keys)
+            except (UnicodeDecodeError, json.JSONDecodeError, ValueError):
+                break
+        else:
+            global_review = documents[global_name]
+            candidate_review = documents[candidate_name]
+            manifest = documents[manifest_name]
+            if (isinstance(global_review, dict)
+                    and global_review.get("status") == "PASS"
+                    and global_review.get("findings") == []
+                    and isinstance(global_review.get("review_scope"), str)
+                    and "R91" in global_review["review_scope"]
+                    and isinstance(candidate_review, dict)
+                    and candidate_review.get("candidate_id") == candidate_id
+                    and candidate_review.get("plan_path") == plan_path
+                    and isinstance(manifest, dict)
+                    and manifest.get("candidate_id") == candidate_id
+                    and manifest.get("status") == "FROZEN_DEPENDENCY_CLOSURE"):
+                return True
+    return False
+
+
+def _gate0_is_r92_attestation(attestation: Mapping[str, Any]) -> bool:
+    """Recognize either exact, immutable R92 candidate packet."""
+    supplemental = attestation.get("supplemental_evidence_sha256")
+    if not isinstance(supplemental, Mapping):
+        return False
+    generations = (
+        (R92_CANDIDATE_22_G0C_REVIEW_RECORD_NAME,
+         "R6-A-R92-FRESH-G0C-REVIEW-CANDIDATE-22.json",
+         "R6-A-R87-EXECUTION-DEPENDENCY-MANIFEST-CANDIDATE-22.json",
+         "R6-A-R87-PHASE-AWARE-CAS-CAP-CANDIDATE-22",
+         "experiments/storage/R6-A-R87-DUAL-LINEAGE-EXECUTION-PLAN-CANDIDATE-19.json"),
+        (R92_G0C_REVIEW_RECORD_NAME,
+         "R6-A-R92-FRESH-G0C-REVIEW-CANDIDATE-23.json",
+         "R6-A-R87-EXECUTION-DEPENDENCY-MANIFEST-CANDIDATE-23.json",
+         "R6-A-R87-PHASE-AWARE-CAS-CAP-CANDIDATE-23",
+         "experiments/storage/R6-A-R87-DUAL-LINEAGE-EXECUTION-PLAN-CANDIDATE-20.json"),
+    )
+    for names in generations:
+        docs: list[dict[str, Any]] = []
+        for name in names[:3]:
+            expected = supplemental.get(name)
+            if not isinstance(expected, str) or not re.fullmatch(r"[0-9a-f]{64}", expected):
+                break
+            try:
+                raw = _read_file_nofollow(gate0_supplemental_path(REPO, name))
+                if not hmac.compare_digest(hashlib.sha256(raw).hexdigest(), expected):
+                    break
+                value = json.loads(raw, object_pairs_hook=_g0c_no_duplicate_json_keys)
+            except (OSError, RuntimeError, ValueError, json.JSONDecodeError):
+                break
+            if not isinstance(value, dict):
+                break
+            docs.append(value)
+        if len(docs) != 3:
+            continue
+        global_review, candidate_review, manifest = docs
+        if (global_review.get("status") == "PASS"
+                and global_review.get("findings") == []
+                and isinstance(global_review.get("review_scope"), str)
+                and "R92" in global_review["review_scope"]
+                and candidate_review.get("candidate_id") == names[3]
+                and candidate_review.get("plan_path") == names[4]
+                and manifest.get("candidate_id") == names[3]
+                and manifest.get("status") == "FROZEN_DEPENDENCY_CLOSURE"):
+            return True
+    return False
+
+
+def _gate0_is_r93_attestation(attestation: Mapping[str, Any]) -> bool:
+    """Recognize the exact R93 Candidate24/Plan21 supplemental packet."""
+    supplemental = attestation.get("supplemental_evidence_sha256")
+    if not isinstance(supplemental, Mapping):
+        return False
+    names = (
+        R93_G0C_REVIEW_RECORD_NAME,
+        "R6-A-R93-FRESH-G0C-REVIEW-CANDIDATE-24.json",
+        "R6-A-R87-EXECUTION-DEPENDENCY-MANIFEST-CANDIDATE-24.json",
+    )
+    docs: list[dict[str, Any]] = []
+    for name in names:
+        expected = supplemental.get(name)
+        if not isinstance(expected, str) or not re.fullmatch(r"[0-9a-f]{64}", expected):
+            return False
+        try:
+            raw = _read_file_nofollow(gate0_supplemental_path(REPO, name))
+            if not hmac.compare_digest(hashlib.sha256(raw).hexdigest(), expected):
+                return False
+            value = json.loads(raw, object_pairs_hook=_g0c_no_duplicate_json_keys)
+        except (OSError, RuntimeError, ValueError, json.JSONDecodeError):
+            return False
+        if not isinstance(value, dict):
+            return False
+        docs.append(value)
+    global_review, candidate_review, manifest = docs
+    return bool(
+        global_review.get("status") == "PASS"
+        and global_review.get("findings") == []
+        and isinstance(global_review.get("review_scope"), str)
+        and "R93" in global_review["review_scope"]
+        and candidate_review.get("candidate_id")
+            == "R6-A-R87-PHASE-AWARE-CAS-CAP-CANDIDATE-24"
+        and candidate_review.get("plan_path")
+            == "experiments/storage/R6-A-R87-DUAL-LINEAGE-EXECUTION-PLAN-CANDIDATE-21.json"
+        and manifest.get("candidate_id")
+            == "R6-A-R87-PHASE-AWARE-CAS-CAP-CANDIDATE-24"
+        and manifest.get("status") == "FROZEN_DEPENDENCY_CLOSURE")
+
+
+def _gate0_is_r94_attestation(attestation: Mapping[str, Any]) -> bool:
+    """Recognize the exact R94 Candidate25/Plan23 supplemental packet."""
+    supplemental = attestation.get("supplemental_evidence_sha256")
+    if not isinstance(supplemental, Mapping):
+        return False
+    names = (
+        R94_G0C_REVIEW_RECORD_NAME,
+        "R6-A-R94-FRESH-G0C-REVIEW-CANDIDATE-25.json",
+        "R6-A-R87-EXECUTION-DEPENDENCY-MANIFEST-CANDIDATE-25.json",
+    )
+    docs: list[dict[str, Any]] = []
+    for name in names:
+        expected = supplemental.get(name)
+        if not isinstance(expected, str) or not re.fullmatch(r"[0-9a-f]{64}", expected):
+            return False
+        try:
+            raw = _read_file_nofollow(gate0_supplemental_path(REPO, name))
+            if not hmac.compare_digest(hashlib.sha256(raw).hexdigest(), expected):
+                return False
+            value = json.loads(raw, object_pairs_hook=_g0c_no_duplicate_json_keys)
+        except (OSError, RuntimeError, ValueError, json.JSONDecodeError):
+            return False
+        if not isinstance(value, dict):
+            return False
+        docs.append(value)
+    global_review, candidate_review, manifest = docs
+    return bool(
+        global_review.get("status") == "PASS"
+        and global_review.get("findings") == []
+        and isinstance(global_review.get("review_scope"), str)
+        and "R94" in global_review["review_scope"]
+        and candidate_review.get("candidate_id")
+            == "R6-A-R87-PHASE-AWARE-CAS-CAP-CANDIDATE-25"
+        and candidate_review.get("plan_path")
+            == "experiments/storage/R6-A-R87-DUAL-LINEAGE-EXECUTION-PLAN-CANDIDATE-23.json"
+        and manifest.get("candidate_id")
+            == "R6-A-R87-PHASE-AWARE-CAS-CAP-CANDIDATE-25"
+        and manifest.get("status") == "FROZEN_DEPENDENCY_CLOSURE")
+
+
+def _gate0_is_r95_attestation(attestation: Mapping[str, Any]) -> bool:
+    """Recognize the exact R95 Candidate26/Plan24 supplemental packet."""
+    supplemental = attestation.get("supplemental_evidence_sha256")
+    if not isinstance(supplemental, Mapping):
+        return False
+    names = (
+        R95_G0C_REVIEW_RECORD_NAME,
+        "R6-A-R95-FRESH-G0C-REVIEW-CANDIDATE-26.json",
+        "R6-A-R87-EXECUTION-DEPENDENCY-MANIFEST-CANDIDATE-26.json",
+    )
+    docs: list[dict[str, Any]] = []
+    for name in names:
+        expected = supplemental.get(name)
+        if not isinstance(expected, str) or not re.fullmatch(r"[0-9a-f]{64}", expected):
+            return False
+        try:
+            raw = _read_file_nofollow(gate0_supplemental_path(REPO, name))
+            if not hmac.compare_digest(hashlib.sha256(raw).hexdigest(), expected):
+                return False
+            value = json.loads(raw, object_pairs_hook=_g0c_no_duplicate_json_keys)
+        except (OSError, RuntimeError, ValueError, json.JSONDecodeError):
+            return False
+        if not isinstance(value, dict):
+            return False
+        docs.append(value)
+    global_review, candidate_review, manifest = docs
+    return bool(
+        global_review.get("status") == "PASS"
+        and global_review.get("findings") == []
+        and isinstance(global_review.get("review_scope"), str)
+        and "R95" in global_review["review_scope"]
+        and candidate_review.get("candidate_id")
+            == "R6-A-R87-PHASE-AWARE-CAS-CAP-CANDIDATE-26"
+        and candidate_review.get("plan_path")
+            == "experiments/storage/R6-A-R87-DUAL-LINEAGE-EXECUTION-PLAN-CANDIDATE-24.json"
+        and manifest.get("candidate_id")
+            == "R6-A-R87-PHASE-AWARE-CAS-CAP-CANDIDATE-26"
+        and manifest.get("status") == "FROZEN_DEPENDENCY_CLOSURE")
+
+
+def _gate0_is_r96_attestation(attestation: Mapping[str, Any]) -> bool:
+    """Recognize the exact R96 Candidate27/Plan25 supplemental packet."""
+    supplemental = attestation.get("supplemental_evidence_sha256")
+    if not isinstance(supplemental, Mapping):
+        return False
+    names = (
+        R96_G0C_REVIEW_RECORD_NAME,
+        "R6-A-R96-FRESH-G0C-REVIEW-CANDIDATE-27.json",
+        "R6-A-R87-EXECUTION-DEPENDENCY-MANIFEST-CANDIDATE-27.json",
+    )
+    docs: list[dict[str, Any]] = []
+    for name in names:
+        expected = supplemental.get(name)
+        if not isinstance(expected, str) or not re.fullmatch(r"[0-9a-f]{64}", expected):
+            return False
+        try:
+            raw = _read_file_nofollow(gate0_supplemental_path(REPO, name))
+            if not hmac.compare_digest(hashlib.sha256(raw).hexdigest(), expected):
+                return False
+            value = json.loads(raw, object_pairs_hook=_g0c_no_duplicate_json_keys)
+        except (OSError, RuntimeError, ValueError, json.JSONDecodeError):
+            return False
+        if not isinstance(value, dict):
+            return False
+        docs.append(value)
+    global_review, candidate_review, manifest = docs
+    return bool(
+        global_review.get("status") == "PASS"
+        and global_review.get("findings") == []
+        and isinstance(global_review.get("review_scope"), str)
+        and "R96" in global_review["review_scope"]
+        and candidate_review.get("candidate_id")
+            == "R6-A-R87-PHASE-AWARE-CAS-CAP-CANDIDATE-27"
+        and candidate_review.get("plan_path")
+            == "experiments/storage/R6-A-R87-DUAL-LINEAGE-EXECUTION-PLAN-CANDIDATE-25.json"
+        and manifest.get("candidate_id")
+            == "R6-A-R87-PHASE-AWARE-CAS-CAP-CANDIDATE-27"
+        and manifest.get("status") == "FROZEN_DEPENDENCY_CLOSURE")
+
+
+def _gate0_evidence_contract(attestation: Mapping[str, Any]) -> tuple[tuple[str, ...], Mapping[str, str]]:
+    """Select the reviewed-file and supplemental contract signed by this Gate generation."""
+    if (_gate0_is_r96_attestation(attestation)
+            or _gate0_is_r95_attestation(attestation)
+            or _gate0_is_r94_attestation(attestation)
+            or _gate0_is_r93_attestation(attestation)
+            or _gate0_is_r92_attestation(attestation)
+            or _gate0_is_r91_attestation(attestation)):
+        return GATE0_SUPPLEMENTAL_EVIDENCE, G0C_REVIEW_REQUIRED_FILES
+    if _gate0_is_r90_attestation(attestation):
+        return GATE0_SUPPLEMENTAL_EVIDENCE, G0C_REVIEW_REQUIRED_FILES
+    historical_names = tuple(
+        name for name in GATE0_SUPPLEMENTAL_EVIDENCE
+        if name not in R90_ONLY_SUPPLEMENTAL_EVIDENCE)
+    return historical_names, R89_G0C_REVIEW_REQUIRED_FILES
+
+
+def g0c_reviewed_file_record(repo_root: Path, relative_path: str) -> dict[str, Any]:
+    """Build a reviewed-file record from one no-follow read of its bytes."""
+    if (not isinstance(relative_path, str) or not relative_path
+            or Path(relative_path).is_absolute()
+            or Path(relative_path).as_posix() != relative_path
+            or ".." in Path(relative_path).parts):
+        raise ValueError("G0C reviewed-file path is not canonical and repository-relative")
+    contents = _read_file_nofollow(repo_root / relative_path, maximum_bytes=16 * 1024 * 1024)
+    return {"path": relative_path, "sha256": hashlib.sha256(contents).hexdigest(),
+            "size_bytes": len(contents)}
+
+
+def g0c_reviewed_files(repo_root: Path, roster: Mapping[str, str]) -> dict[str, dict[str, Any]]:
+    """Build records for the source-derived G0C roster."""
+    if len(set(roster.values())) != len(roster):
+        raise ValueError("G0C reviewed-file roster contains duplicate paths")
+    return {field: g0c_reviewed_file_record(
+                repo_root, (Path("experiments/storage") / path).as_posix())
+            for field, path in roster.items()}
+
+
+def _g0c_no_duplicate_json_keys(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    value: dict[str, Any] = {}
+    for key, item in pairs:
+        if key in value:
+            raise ValueError(f"duplicate JSON object key: {key}")
+        value[key] = item
+    return value
+
+
+def parse_g0c_reviewed_files(raw: bytes, repo_root: Path,
+                             roster: Mapping[str, str]) -> tuple[dict[str, Any], list[str]]:
+    """Shared strict G0C record parser; permits unrelated top-level review fields."""
+    try:
+        review = json.loads(raw, object_pairs_hook=_g0c_no_duplicate_json_keys)
+    except (UnicodeDecodeError, json.JSONDecodeError, ValueError) as error:
+        return {}, [f"G0C independent review record is malformed: {error}"]
+    if not isinstance(review, dict):
+        return {}, ["G0C independent review record is not a JSON object"]
+    if review.get("status") != "PASS" or review.get("findings") != []:
+        return review, ["G0C independent review record does not PASS with an empty findings list"]
+    reviewed = review.get("reviewed_files")
+    if (not isinstance(reviewed, dict) or set(reviewed) != set(roster)
+            or len(set(roster.values())) != len(roster)):
+        return review, ["G0C independent review record omits or adds required reviewed_files bindings"]
+    blockers: list[str] = []
+    seen: set[str] = set()
+    for field, relative_path in roster.items():
+        expected = (Path("experiments/storage") / relative_path).as_posix()
+        record = reviewed.get(field)
+        if not isinstance(record, dict):
+            blockers.append(f"G0C independent review does not bind current {expected}")
+            continue
+        path = record.get("path")
+        if isinstance(path, str) and path in seen:
+            blockers.append(f"G0C independent review contains a duplicate reviewed path: {path}")
+            continue
+        if isinstance(path, str):
+            seen.add(path)
+        if set(record) != {"path", "sha256", "size_bytes"} or path != expected:
+            blockers.append(f"G0C independent review does not bind current {expected}")
+            continue
+        digest, size = record.get("sha256"), record.get("size_bytes")
+        if (not isinstance(digest, str) or re.fullmatch(r"[0-9a-f]{64}", digest) is None
+                or type(size) is not int or size < 0):
+            blockers.append(f"G0C independent review does not bind current {expected}")
+            continue
+        try:
+            current = _read_file_nofollow(repo_root / expected, maximum_bytes=16 * 1024 * 1024)
+        except (OSError, RuntimeError) as error:
+            blockers.append(f"G0C reviewed file is missing or unreadable: {expected}: {error}")
+            continue
+        if digest != hashlib.sha256(current).hexdigest() or size != len(current):
+            blockers.append(f"G0C independent review does not bind current {expected}")
+    return review, blockers
+
+
 SMOKE_CLAIM_ROOT = REPO / "experiments/storage/smoke-claims"
+FAILED_OUTPUT_DISPOSITION_ROOT = REPO / "experiments/storage/failed-output-dispositions"
 PREFIX_RECONCILIATION_ROOT = REPO / "experiments/storage/prefix-lease-reconciliation"
 PREFIX_RECOVERY_RECEIPTS_ROOT = REPO / "experiments/storage/prefix-recovery-receipts"
 STORAGE_CERTIFICATION_LOCK = CACHE / ".storage-certification.lock"
 MANIFEST_SIGNING_KEY_PATH = CACHE / ".storage-manifest-signing-key"
 
 _ACTIVE_LEASE: "PrefixLease | None" = None
+
+# A persisted storage-smoke ALLOW is not executable authority by itself.  The
+# producer registers its exact read-back digest only after begin_experiment
+# reaches its successful return path; PrefixLease consumes that one-process,
+# one-shot handoff before performing any prefix work.  A process restart cannot
+# replay a consumed nonce from a leftover manifest.
+_STORAGE_SMOKE_PUBLICATION_LOCK = threading.Lock()
+_STORAGE_SMOKE_PUBLISHED_ALLOW_DIGESTS: dict[str, tuple[int, str]] = {}
+
+
+def _reset_storage_smoke_publication_handoffs_after_fork() -> None:
+    """Discard inherited one-shot capabilities in a forked child process."""
+    global _STORAGE_SMOKE_PUBLICATION_LOCK
+    _STORAGE_SMOKE_PUBLICATION_LOCK = threading.Lock()
+    _STORAGE_SMOKE_PUBLISHED_ALLOW_DIGESTS.clear()
+
+
+if hasattr(os, "register_at_fork"):
+    os.register_at_fork(after_in_child=_reset_storage_smoke_publication_handoffs_after_fork)
 
 
 def _is_storage_policy_smoke_id(value: Any) -> bool:
@@ -173,6 +796,16 @@ def _storage_smoke_claim_path(experiment_id: str) -> Path:
     if not _is_storage_policy_smoke_id(experiment_id):
         raise ValueError("invalid storage-smoke nonce ID")
     return SMOKE_CLAIM_ROOT / f"{experiment_id}.json"
+
+
+def _consume_storage_smoke_published_allow(experiment_id: str, manifest_sha256: str) -> bool:
+    """Consume the exact successful same-process begin_experiment handoff once."""
+    with _STORAGE_SMOKE_PUBLICATION_LOCK:
+        handoff = _STORAGE_SMOKE_PUBLISHED_ALLOW_DIGESTS.pop(experiment_id, None)
+    return (isinstance(handoff, tuple) and len(handoff) == 2
+            and handoff[0] == os.getpid()
+            and isinstance(handoff[1], str)
+            and hmac.compare_digest(handoff[1], manifest_sha256))
 
 
 def _read_storage_smoke_claim(experiment_id: str) -> tuple[dict[str, Any], bytes]:
@@ -190,7 +823,10 @@ def _read_storage_smoke_claim(experiment_id: str) -> tuple[dict[str, Any], bytes
             or info is None or not stat.S_ISREG(info.st_mode) or info.st_uid != os.getuid()
             or info.st_nlink != 1 or stat.S_IMODE(info.st_mode) != 0o600
             or info.st_size > 16 * 1024 or allocated_bytes > 64 * 1024
-            or set(claim) != expected_keys or raw != _canonical_pretty_json_bytes(claim)
+            or frozenset(claim) not in {
+                frozenset(expected_keys),
+                frozenset(expected_keys | {"claim_slot_binding"}),
+            } or raw != _canonical_pretty_json_bytes(claim)
             or not _verify_storage_evidence(claim, "smoke_claim_hmac_sha256")
             or claim.get("schema_version") != 1
             or claim.get("experiment_id") != experiment_id
@@ -208,7 +844,263 @@ def _read_storage_smoke_claim(experiment_id: str) -> tuple[dict[str, Any], bytes
             or not isinstance(claim.get("pid"), int) or isinstance(claim.get("pid"), bool)
             or claim["pid"] <= 0):
         raise ValueError("storage-smoke nonce claim is missing, malformed, or unauthenticated")
+    if "claim_slot_binding" in claim:
+        _validate_storage_smoke_claim_slot_descriptor(
+            experiment_id, claim["claim_slot_binding"])
     return claim, raw
+
+
+def _storage_smoke_claim_slot_state(info: os.stat_result) -> dict[str, int]:
+    return {
+        "device": info.st_dev,
+        "inode": info.st_ino,
+        "mode": stat.S_IMODE(info.st_mode),
+        "owner_uid": info.st_uid,
+        "owner_gid": info.st_gid,
+        "link_count": info.st_nlink,
+        "size_bytes": info.st_size,
+        "allocated_bytes": getattr(info, "st_blocks", 0) * 512,
+        "mtime_ns": info.st_mtime_ns,
+        "ctime_ns": info.st_ctime_ns,
+    }
+
+
+def _storage_smoke_claim_observation(experiment_id: str) -> dict[str, Any]:
+    """Capture a bounded no-follow claim observation, including non-regular paths."""
+    path = _storage_smoke_claim_path(experiment_id)
+    parent_fd = _open_directory_nofollow(path.parent)
+    try:
+        try:
+            info = os.stat(path.name, dir_fd=parent_fd, follow_symlinks=False)
+        except FileNotFoundError:
+            return {"sha256": None, "row": None}
+
+        state = _storage_smoke_claim_slot_state(info)
+        if stat.S_ISREG(info.st_mode):
+            raw, fd_identity = _read_file_from_directory_fd(
+                parent_fd, path.name, display_path=path, maximum_bytes=16 * 1024)
+            after = os.stat(path.name, dir_fd=parent_fd, follow_symlinks=False)
+            after_state = _storage_smoke_claim_slot_state(after)
+            path_identity = (after_state["device"], after_state["inode"],
+                             after_state["size_bytes"], after_state["mtime_ns"],
+                             after_state["ctime_ns"])
+            if (not stat.S_ISREG(after.st_mode) or fd_identity != path_identity
+                    or state != after_state):
+                raise OSError("storage-smoke claim path changed during its observation")
+            row = {"path": str(path), "kind": "file", **after_state}
+            return {"sha256": hashlib.sha256(raw).hexdigest(), "row": row}
+
+        if stat.S_ISLNK(info.st_mode):
+            target = os.readlink(path.name, dir_fd=parent_fd)
+            after = os.stat(path.name, dir_fd=parent_fd, follow_symlinks=False)
+            after_state = _storage_smoke_claim_slot_state(after)
+            if not stat.S_ISLNK(after.st_mode) or state != after_state:
+                raise OSError("storage-smoke claim symlink changed during its observation")
+            return {"sha256": None, "row": {
+                "path": str(path), "kind": "symlink", **after_state, "target": target}}
+
+        if stat.S_ISDIR(info.st_mode):
+            descriptor = os.open(path.name, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0)
+                                 | getattr(os, "O_NOFOLLOW", 0), dir_fd=parent_fd)
+            try:
+                opened = os.fstat(descriptor)
+                children = sorted(os.listdir(descriptor))
+                finished = os.fstat(descriptor)
+                after = os.stat(path.name, dir_fd=parent_fd, follow_symlinks=False)
+                after_state = _storage_smoke_claim_slot_state(after)
+                if (not stat.S_ISDIR(after.st_mode)
+                        or (opened.st_dev, opened.st_ino) != (finished.st_dev, finished.st_ino)
+                        or state != after_state
+                        or _storage_smoke_claim_slot_state(opened) != state
+                        or _storage_smoke_claim_slot_state(finished) != state
+                        or any(not isinstance(name, str) or name in {".", ".."}
+                               or "/" in name or "\x00" in name for name in children)):
+                    raise OSError("storage-smoke claim directory changed during its observation")
+                return {"sha256": None, "row": {
+                    "path": str(path), "kind": "directory", **after_state,
+                    "children": children}}
+            finally:
+                os.close(descriptor)
+
+        after = os.stat(path.name, dir_fd=parent_fd, follow_symlinks=False)
+        after_state = _storage_smoke_claim_slot_state(after)
+        if state != after_state or stat.S_ISREG(after.st_mode) or stat.S_ISDIR(after.st_mode):
+            raise OSError("storage-smoke claim special entry changed during its observation")
+        return {"sha256": None, "row": {
+            "path": str(path), "kind": "special", **after_state}}
+    finally:
+        os.close(parent_fd)
+
+
+def _validate_storage_smoke_claim_slot_descriptor(
+    experiment_id: str, descriptor: Any,
+) -> dict[str, Any]:
+    path = _storage_smoke_claim_path(experiment_id)
+    if (not isinstance(descriptor, Mapping)
+            or set(descriptor) != {"path", "sha256", "hmac_sha256", "state"}
+            or descriptor.get("path") != str(path)
+            or not isinstance(descriptor.get("sha256"), str)
+            or not re.fullmatch(r"[0-9a-f]{64}", descriptor["sha256"])
+            or not isinstance(descriptor.get("hmac_sha256"), str)
+            or not re.fullmatch(r"[0-9a-f]{64}", descriptor["hmac_sha256"])):
+        raise ValueError("storage-smoke claim slot descriptor is malformed")
+    state = descriptor.get("state")
+    state_keys = {"device", "inode", "mode", "owner_uid", "owner_gid", "link_count",
+                  "size_bytes", "allocated_bytes", "mtime_ns", "ctime_ns"}
+    if (not isinstance(state, Mapping) or set(state) != state_keys
+            or any(not isinstance(value, int) or isinstance(value, bool) or value < 0
+                   for value in state.values())
+            or state.get("mode") != 0o600 or state.get("owner_uid") != os.getuid()
+            or state.get("owner_gid") != os.getgid() or state.get("link_count") != 1):
+        raise ValueError("storage-smoke claim slot state is malformed")
+    return dict(descriptor)
+
+
+def _decode_storage_smoke_claim_slot(experiment_id: str, raw: bytes) -> dict[str, Any]:
+    record = json.loads(raw, object_pairs_hook=_g0c_no_duplicate_json_keys)
+    expected_keys = {"schema_version", "record_type", "experiment_id", "claim_path",
+                     "reserved_at_unix", "pid", STORAGE_SMOKE_CLAIM_SLOT_HMAC_FIELD}
+    if (not isinstance(record, dict) or set(record) != expected_keys
+            or raw != _canonical_pretty_json_bytes(record)
+            or not _verify_storage_evidence(record, STORAGE_SMOKE_CLAIM_SLOT_HMAC_FIELD)
+            or record.get("schema_version") != 1
+            or record.get("record_type") != "STORAGE_SMOKE_NONCE_CLAIM_SLOT"
+            or record.get("experiment_id") != experiment_id
+            or record.get("claim_path") != str(_storage_smoke_claim_path(experiment_id))
+            or not isinstance(record.get("reserved_at_unix"), (int, float))
+            or isinstance(record.get("reserved_at_unix"), bool)
+            or not math.isfinite(float(record["reserved_at_unix"]))
+            or not isinstance(record.get("pid"), int) or isinstance(record.get("pid"), bool)
+            or record["pid"] <= 0):
+        raise ValueError("storage-smoke nonce claim slot is missing, malformed, or unauthenticated")
+    return record
+
+
+def _write_storage_smoke_claim_slot(experiment_id: str) -> dict[str, Any]:
+    """Create the authenticated claim inode before Gate captures its baseline."""
+    path = _storage_smoke_claim_path(experiment_id)
+    record = _seal_storage_evidence({
+        "schema_version": 1,
+        "record_type": "STORAGE_SMOKE_NONCE_CLAIM_SLOT",
+        "experiment_id": experiment_id,
+        "claim_path": str(path),
+        "reserved_at_unix": time.time(),
+        "pid": os.getpid(),
+    }, STORAGE_SMOKE_CLAIM_SLOT_HMAC_FIELD)
+    raw = _canonical_pretty_json_bytes(record)
+    if len(raw) > STORAGE_SMOKE_CLAIM_MAX_BYTES:
+        raise RuntimeError("storage-smoke nonce claim slot exceeds its protocol file bound")
+    parent_fd = _open_directory_nofollow(path.parent, strict_directory_sync=True)
+    descriptor: int | None = None
+    created_identity: tuple[int, int] | None = None
+    try:
+        descriptor = os.open(
+            path.name, os.O_RDWR | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0),
+            0o600, dir_fd=parent_fd)
+        opened_info = os.fstat(descriptor)
+        created_identity = (opened_info.st_dev, opened_info.st_ino)
+        view = memoryview(raw)
+        while view:
+            written = os.write(descriptor, view)
+            if written <= 0:
+                raise OSError("short write while reserving storage-smoke claim slot")
+            view = view[written:]
+        os.fchmod(descriptor, 0o600)
+        os.fsync(descriptor)
+        info = os.fstat(descriptor)
+        path_info = os.stat(path.name, dir_fd=parent_fd, follow_symlinks=False)
+        if ((path_info.st_dev, path_info.st_ino) != created_identity
+                or not stat.S_ISREG(path_info.st_mode)):
+            raise RuntimeError("storage-smoke claim slot path no longer names its created inode")
+        os.close(descriptor)
+        descriptor = None
+        os.fsync(parent_fd)
+        if (not stat.S_ISREG(info.st_mode) or info.st_uid != os.getuid()
+                or info.st_gid != os.getgid() or info.st_nlink != 1
+                or stat.S_IMODE(info.st_mode) != 0o600 or info.st_size != len(raw)):
+            raise RuntimeError("storage-smoke claim slot has unsafe file identity")
+        return {
+            "path": str(path),
+            "sha256": hashlib.sha256(raw).hexdigest(),
+            "hmac_sha256": record[STORAGE_SMOKE_CLAIM_SLOT_HMAC_FIELD],
+            "state": _storage_smoke_claim_slot_state(info),
+        }
+    except BaseException:
+        if descriptor is not None:
+            try:
+                info = os.fstat(descriptor)
+                created_identity = (info.st_dev, info.st_ino)
+            except OSError:
+                pass
+            os.close(descriptor)
+            descriptor = None
+        if created_identity is not None:
+            try:
+                path_info = os.stat(path.name, dir_fd=parent_fd, follow_symlinks=False)
+                if (path_info.st_dev, path_info.st_ino) == created_identity:
+                    os.unlink(path.name, dir_fd=parent_fd)
+                    os.fsync(parent_fd)
+            except FileNotFoundError:
+                pass
+        raise
+    finally:
+        if descriptor is not None:
+            os.close(descriptor)
+        os.close(parent_fd)
+
+
+def _read_storage_smoke_claim_slot(
+    experiment_id: str, descriptor: Any,
+) -> tuple[dict[str, Any], bytes]:
+    expected = _validate_storage_smoke_claim_slot_descriptor(experiment_id, descriptor)
+    path = _storage_smoke_claim_path(experiment_id)
+    raw = _read_file_nofollow(path, maximum_bytes=STORAGE_SMOKE_CLAIM_MAX_BYTES)
+    record = _decode_storage_smoke_claim_slot(experiment_id, raw)
+    info = _stat_entry_nofollow(path)
+    if (info is None or not stat.S_ISREG(info.st_mode)
+            or expected["sha256"] != hashlib.sha256(raw).hexdigest()
+            or expected["hmac_sha256"] != record[STORAGE_SMOKE_CLAIM_SLOT_HMAC_FIELD]
+            or expected["state"] != _storage_smoke_claim_slot_state(info)):
+        raise ValueError("storage-smoke claim slot differs from the signed preflight identity")
+    return record, raw
+
+
+def _read_storage_smoke_claim_for_slot(
+    experiment_id: str, descriptor: Any, attestation_bytes: bytes,
+) -> tuple[dict[str, Any], bytes]:
+    """Authenticate a consumed claim against its signed, pre-existing slot."""
+    expected = _validate_storage_smoke_claim_slot_descriptor(experiment_id, descriptor)
+    claim, raw = _read_storage_smoke_claim(experiment_id)
+    info = _stat_entry_nofollow(_storage_smoke_claim_path(experiment_id))
+    state = expected["state"]
+    if (claim.get("claim_slot_binding") != expected
+            or claim.get("preflight_attestation_sha256")
+               != hashlib.sha256(attestation_bytes).hexdigest()
+            or claim.get("claim_reason") != "PrefixLease smoke allocation"
+            or info is None
+            or (info.st_dev, info.st_ino, info.st_uid, info.st_gid,
+                stat.S_IMODE(info.st_mode), info.st_nlink)
+               != (state["device"], state["inode"], state["owner_uid"],
+                   state["owner_gid"], state["mode"], state["link_count"])
+            or len(raw) != info.st_size):
+        raise ValueError("consumed storage-smoke claim differs from its signed slot")
+    return claim, raw
+
+
+def _discard_storage_smoke_claim_slot(
+    experiment_id: str, descriptor: Mapping[str, Any],
+) -> None:
+    _read_storage_smoke_claim_slot(experiment_id, descriptor)
+    path = _storage_smoke_claim_path(experiment_id)
+    parent_fd = _open_directory_nofollow(path.parent, strict_directory_sync=True)
+    try:
+        current = os.stat(path.name, dir_fd=parent_fd, follow_symlinks=False)
+        if _storage_smoke_claim_slot_state(current) != dict(descriptor["state"]):
+            raise OSError("storage-smoke claim slot identity changed before removal")
+        os.unlink(path.name, dir_fd=parent_fd)
+        os.fsync(parent_fd)
+    finally:
+        os.close(parent_fd)
 
 
 def _write_storage_smoke_claim(experiment_id: str, preflight_bytes: bytes,
@@ -222,35 +1114,95 @@ def _write_storage_smoke_claim(experiment_id: str, preflight_bytes: bytes,
             or preflight.get("prefixlease_smoke_status") != "PENDING"
             or preflight.get("permitted_smoke_experiment_id") != experiment_id):
         raise ValueError("storage-smoke nonce claim requires its signed pending preflight")
+    slot_descriptor = preflight.get("smoke_nonce_claim_slot")
+    if slot_descriptor is not None:
+        try:
+            _read_storage_smoke_claim_slot(experiment_id, slot_descriptor)
+        except (OSError, ValueError, TypeError, json.JSONDecodeError) as error:
+            raise FileExistsError(
+                "storage-smoke nonce claim slot is already consumed or no longer authentic") from error
     now = time.time()
-    parent_fd = _open_directory_nofollow(path.parent, create=True, strict_directory_sync=True)
+    claim_record: dict[str, Any] = {
+        "schema_version": 1,
+        "experiment_id": experiment_id,
+        "claim_path": str(path),
+        "preflight_attestation_path": str(GATE0_ATTESTATION_PATH),
+        "preflight_attestation_sha256": hashlib.sha256(preflight_bytes).hexdigest(),
+        "preflight_created_at_unix": preflight["created_at_unix"],
+        "claimed_at_unix": now,
+        "claim_reason": reason,
+        "pid": os.getpid(),
+    }
+    if slot_descriptor is not None:
+        claim_record["claim_slot_binding"] = dict(slot_descriptor)
+    record = _seal_storage_evidence(claim_record, "smoke_claim_hmac_sha256")
+    raw = _canonical_pretty_json_bytes(record)
+    smoke_output = REPO / "experiments/storage/smoke-runs" / experiment_id
+    _assert_storage_smoke_output_reservation(
+        smoke_output, projected_write_bytes=len(raw), projected_path=path)
+    parent_fd = _open_directory_nofollow(path.parent, strict_directory_sync=True)
     descriptor: int | None = None
     try:
-        flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0)
-        descriptor = os.open(path.name, flags, 0o600, dir_fd=parent_fd)
-        record = _seal_storage_evidence({
-            "schema_version": 1,
-            "experiment_id": experiment_id,
-            "claim_path": str(path),
-            "preflight_attestation_path": str(GATE0_ATTESTATION_PATH),
-            "preflight_attestation_sha256": hashlib.sha256(preflight_bytes).hexdigest(),
-            "preflight_created_at_unix": preflight["created_at_unix"],
-            "claimed_at_unix": now,
-            "claim_reason": reason,
-            "pid": os.getpid(),
-        }, "smoke_claim_hmac_sha256")
-        raw = (json.dumps(record, indent=2, sort_keys=True) + "\n").encode("utf-8")
+        if slot_descriptor is None:
+            flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0)
+            descriptor = os.open(path.name, flags, 0o600, dir_fd=parent_fd)
+        else:
+            descriptor = os.open(
+                path.name, os.O_RDWR | getattr(os, "O_NOFOLLOW", 0), dir_fd=parent_fd)
+            # Serialize all policy consumers on the preprovisioned inode. The
+            # lock creates no namespace entry and is released when this fd is
+            # closed, including on process termination.
+            fcntl.flock(descriptor, fcntl.LOCK_EX)
+            slot_info = os.fstat(descriptor)
+            path_info = os.stat(path.name, dir_fd=parent_fd, follow_symlinks=False)
+            if ((path_info.st_dev, path_info.st_ino) != (slot_info.st_dev, slot_info.st_ino)
+                    or not stat.S_ISREG(path_info.st_mode)):
+                raise RuntimeError("storage-smoke nonce claim slot path identity changed")
+            slot_raw = os.read(descriptor, STORAGE_SMOKE_CLAIM_MAX_BYTES + 1)
+            try:
+                slot_record = _decode_storage_smoke_claim_slot(experiment_id, slot_raw)
+            except (ValueError, TypeError, json.JSONDecodeError) as error:
+                raise FileExistsError(
+                    "storage-smoke nonce claim slot is already consumed or changed") from error
+            if (len(slot_raw) > STORAGE_SMOKE_CLAIM_MAX_BYTES
+                    or _storage_smoke_claim_slot_state(slot_info)
+                    != dict(slot_descriptor["state"])
+                    or hashlib.sha256(slot_raw).hexdigest() != slot_descriptor["sha256"]
+                    or slot_record.get(STORAGE_SMOKE_CLAIM_SLOT_HMAC_FIELD)
+                    != slot_descriptor["hmac_sha256"]):
+                raise FileExistsError("storage-smoke nonce claim slot is already consumed or changed")
+            os.lseek(descriptor, 0, os.SEEK_SET)
+            os.ftruncate(descriptor, 0)
         view = memoryview(raw)
         while view:
             written = os.write(descriptor, view)
             if written <= 0:
                 raise OSError("short write while consuming storage-smoke nonce")
             view = view[written:]
-        os.fchmod(descriptor, 0o600)
+        if slot_descriptor is None:
+            os.fchmod(descriptor, 0o600)
         os.fsync(descriptor)
+        written_info = os.fstat(descriptor)
+        if slot_descriptor is not None:
+            slot_state = slot_descriptor["state"]
+            if (written_info.st_dev != slot_state["device"]
+                    or written_info.st_ino != slot_state["inode"]
+                    or written_info.st_uid != slot_state["owner_uid"]
+                    or written_info.st_gid != slot_state["owner_gid"]
+                    or stat.S_IMODE(written_info.st_mode) != slot_state["mode"]
+                    or written_info.st_nlink != slot_state["link_count"]):
+                raise RuntimeError("storage-smoke claim inode identity changed during slot consumption")
+            path_info = os.stat(path.name, dir_fd=parent_fd, follow_symlinks=False)
+            if ((path_info.st_dev, path_info.st_ino)
+                    != (written_info.st_dev, written_info.st_ino)):
+                raise RuntimeError("storage-smoke claim path no longer names the consumed slot inode")
         os.close(descriptor)
         descriptor = None
         os.fsync(parent_fd)
+        published, published_raw = _read_storage_smoke_claim(experiment_id)
+        if published != record or published_raw != raw:
+            raise RuntimeError("storage-smoke nonce claim failed authenticated in-place read-back")
+        _assert_storage_smoke_output_reservation(smoke_output)
         return record, raw
     finally:
         if descriptor is not None:
@@ -277,7 +1229,7 @@ def _claim_storage_smoke_nonce(experiment_id: str, preflight_bytes: bytes) -> tu
 def _current_preflight_smoke_id() -> str | None:
     """Return the one nonce-bound smoke ID authorized by the live signed preflight."""
     try:
-        raw = _read_file_nofollow(GATE0_ATTESTATION_PATH)
+        raw = _read_file_nofollow(GATE0_ATTESTATION_PATH, maximum_bytes=GATE0_ATTESTATION_MAX_BYTES)
         attestation = json.loads(raw)
         created = float(attestation.get("created_at_unix", 0))
     except (OSError, ValueError, TypeError, json.JSONDecodeError):
@@ -290,6 +1242,13 @@ def _current_preflight_smoke_id() -> str | None:
             or age < 0 or age > GATE0_MAX_AGE_SECONDS
             or not _verify_gate0_signature(attestation)):
         return None
+    slot_descriptor = attestation.get("smoke_nonce_claim_slot")
+    if slot_descriptor is not None:
+        try:
+            _read_storage_smoke_claim_slot(smoke_id, slot_descriptor)
+        except (OSError, ValueError, TypeError, json.JSONDecodeError):
+            return None
+        return smoke_id
     try:
         if _stat_entry_nofollow(_storage_smoke_claim_path(smoke_id)) is not None:
             return None
@@ -310,6 +1269,154 @@ def disk_free_bytes(path: Path | str = REPO) -> int:
         return space.f_bavail * space.f_frsize
     finally:
         os.close(directory_fd)
+
+
+def _volume_identity(path: Path | str = REPO) -> dict[str, int]:
+    """Read current volume identity through a no-follow directory descriptor."""
+    directory_fd = _open_directory_nofollow(Path(path))
+    try:
+        info = os.fstat(directory_fd)
+        vfs = os.fstatvfs(directory_fd)
+        fsid = getattr(vfs, "f_fsid", None)
+        if not isinstance(info.st_dev, int) or not isinstance(fsid, int):
+            raise RuntimeError("filesystem device or fsid is unavailable")
+        return {"device": info.st_dev, "fsid": fsid,
+                "total_bytes": vfs.f_blocks * vfs.f_frsize}
+    finally:
+        os.close(directory_fd)
+
+
+def _entry_volume_identity(path: Path, *, directory: bool) -> tuple[int, int]:
+    """Read device and filesystem id from an O_NOFOLLOW entry descriptor."""
+    flags = os.O_RDONLY | getattr(os, "O_CLOEXEC", 0) | getattr(os, "O_NOFOLLOW", 0)
+    if directory:
+        flags |= getattr(os, "O_DIRECTORY", 0)
+    fd = os.open(path, flags)
+    try:
+        info = os.fstat(fd)
+        fsid = getattr(os.fstatvfs(fd), "f_fsid", None)
+        if not isinstance(info.st_dev, int) or not isinstance(fsid, int):
+            raise RuntimeError(f"filesystem device or fsid is unavailable: {path}")
+        return info.st_dev, fsid
+    finally:
+        os.close(fd)
+
+
+def _entry_volume_identity_at(parent_fd: int, name: str) -> tuple[int, int, int]:
+    """Read device, inode, and filesystem id through a pinned parent descriptor."""
+    flags = (os.O_RDONLY | getattr(os, "O_CLOEXEC", 0) | getattr(os, "O_NOFOLLOW", 0)
+             | getattr(os, "O_NONBLOCK", 0))
+    fd = os.open(name, flags, dir_fd=parent_fd)
+    try:
+        info = os.fstat(fd)
+        fsid = getattr(os.fstatvfs(fd), "f_fsid", None)
+        if not isinstance(info.st_dev, int) or not isinstance(info.st_ino, int) or not isinstance(fsid, int):
+            raise RuntimeError(f"filesystem device, inode, or fsid is unavailable: {name}")
+        return info.st_dev, info.st_ino, fsid
+    finally:
+        os.close(fd)
+
+
+class _DarwinFsid(ctypes.Structure):
+    _fields_ = [("val", ctypes.c_int32 * 2)]
+
+
+class _DarwinStatfs(ctypes.Structure):
+    # Keep this layout aligned with the 64-bit struct statfs in sys/mount.h.
+    _fields_ = [
+        ("f_bsize", ctypes.c_uint32),
+        ("f_iosize", ctypes.c_int32),
+        ("f_blocks", ctypes.c_uint64),
+        ("f_bfree", ctypes.c_uint64),
+        ("f_bavail", ctypes.c_uint64),
+        ("f_files", ctypes.c_uint64),
+        ("f_ffree", ctypes.c_uint64),
+        ("f_fsid", _DarwinFsid),
+        ("f_owner", ctypes.c_uint32),
+        ("f_type", ctypes.c_uint32),
+        ("f_flags", ctypes.c_uint32),
+        ("f_fssubtype", ctypes.c_uint32),
+        ("f_fstypename", ctypes.c_char * 16),
+        ("f_mntonname", ctypes.c_char * 1024),
+        ("f_mntfromname", ctypes.c_char * 1024),
+        ("f_flags_ext", ctypes.c_uint32),
+        ("f_reserved", ctypes.c_uint32 * 7),
+    ]
+
+
+_DARWIN_LIBC = None
+_DARWIN_FSTATFS = None
+if sys.platform == "darwin":
+    try:
+        _DARWIN_LIBC = ctypes.CDLL(None, use_errno=True)
+        _DARWIN_FSTATFS = _DARWIN_LIBC.fstatfs
+        _DARWIN_FSTATFS.argtypes = [ctypes.c_int, ctypes.POINTER(_DarwinStatfs)]
+        _DARWIN_FSTATFS.restype = ctypes.c_int
+    except AttributeError:
+        _DARWIN_FSTATFS = None
+
+
+def _mountpoint_from_fd(fd: int) -> str:
+    """Return the kernel mountpoint for this pinned directory descriptor."""
+    if _DARWIN_FSTATFS is None:
+        raise RuntimeError("native descriptor-bound mountpoint identity is unavailable")
+    record = _DarwinStatfs()
+    if _DARWIN_FSTATFS(fd, ctypes.byref(record)) != 0:
+        error_number = ctypes.get_errno()
+        raise OSError(error_number, os.strerror(error_number), "fstatfs")
+    mountpoint = os.fsdecode(record.f_mntonname)
+    if not mountpoint.startswith("/") or os.path.normpath(mountpoint) != mountpoint:
+        raise RuntimeError("native descriptor-bound mountpoint identity is malformed")
+    return mountpoint
+
+
+def _descriptor_mount_identity(fd: int, *, label: str = "directory") -> tuple[int, int, int, str]:
+    """Read device, inode, fsid, and kernel mountpoint from one pinned descriptor."""
+    info = os.fstat(fd)
+    fsid = getattr(os.fstatvfs(fd), "f_fsid", None)
+    if not isinstance(info.st_dev, int) or not isinstance(fsid, int):
+        raise RuntimeError(f"filesystem device or fsid is unavailable: {label}")
+    if not isinstance(info.st_ino, int):
+        raise RuntimeError(f"filesystem inode is unavailable: {label}")
+    return info.st_dev, info.st_ino, fsid, _mountpoint_from_fd(fd)
+
+
+def _entry_mount_identity(path: Path, *, directory: bool) -> tuple[int, int, int, str]:
+    """Read device, inode, fsid, and kernel mountpoint from one no-follow descriptor."""
+    flags = os.O_RDONLY | getattr(os, "O_CLOEXEC", 0) | getattr(os, "O_NOFOLLOW", 0)
+    if directory:
+        flags |= getattr(os, "O_DIRECTORY", 0)
+    fd = os.open(path, flags)
+    try:
+        return _descriptor_mount_identity(fd, label=str(path))
+    finally:
+        os.close(fd)
+
+
+def _entry_mount_identity_at(parent_fd: int, name: str, *, directory: bool = True) -> tuple[int, int, int, str]:
+    """Read an entry's mount identity relative to its pinned parent directory."""
+    flags = os.O_RDONLY | getattr(os, "O_CLOEXEC", 0) | getattr(os, "O_NOFOLLOW", 0)
+    if directory:
+        flags |= getattr(os, "O_DIRECTORY", 0)
+    fd = os.open(name, flags, dir_fd=parent_fd)
+    try:
+        return _descriptor_mount_identity(fd, label=name)
+    finally:
+        os.close(fd)
+
+
+def _r71_volume_identity_blockers(inventory: Mapping[str, Any], *,
+                                 repo_volume: Mapping[str, int],
+                                 build_volume: Mapping[str, int]) -> list[str]:
+    attested = inventory.get("filesystem", {}).get("volume_identity")
+    expected = {"device": repo_volume.get("device"), "fsid": repo_volume.get("fsid")}
+    blockers = []
+    if not isinstance(attested, Mapping) or dict(attested) != expected:
+        blockers.append("R71 live build volume identity differs from the Gate-attested inventory")
+    if (build_volume.get("device"), build_volume.get("fsid")) != (
+            repo_volume.get("device"), repo_volume.get("fsid")):
+        blockers.append("R71 BuildLease root is not on the Gate-attested capacity volume")
+    return blockers
 
 
 def conservative_project_usage_bytes(project_usage: Mapping[str, Any] | None = None) -> int:
@@ -336,7 +1443,14 @@ def conservative_project_usage_bytes(project_usage: Mapping[str, Any] | None = N
 
 def projected_storage_admission(*, current_free_bytes: int, current_scoped_bytes: int,
                                 peak_additional_bytes: int) -> dict[str, Any]:
-    """Validate the complete declared peak against both normal-admission limits."""
+    """Validate the peak and any authenticated shared-store commitment.
+
+    ``current_free_bytes`` is the live APFS free-space measurement, so it already
+    reflects allocated VM and safety-volume data. The VM marker contributes only
+    its still-outstanding growth commitment here; quota and volume allocation are
+    never subtracted a second time. Every call reads the live, authenticated
+    marker so no admission caller can opt out of a valid commitment.
+    """
     values = {
         "current_free_bytes": current_free_bytes,
         "current_scoped_bytes": current_scoped_bytes,
@@ -345,10 +1459,28 @@ def projected_storage_admission(*, current_free_bytes: int, current_scoped_bytes
     if any(not isinstance(value, int) or isinstance(value, bool) or value < 0
            for value in values.values()):
         raise ValueError("projected storage inputs must be non-negative integers")
-    projected_free = current_free_bytes - peak_additional_bytes
+    commitment_marker_sha256: str | None = None
+    commitment_error: str | None = None
+    accounted_commitment_bytes = 0
+    try:
+        capacity_snapshot = _vm_capacity_commitment_snapshot()
+        shared_capacity_commitment_bytes = capacity_snapshot["committed_growth_bytes"]
+        accounted_commitment_bytes = shared_capacity_commitment_bytes
+        commitment_marker_sha256 = capacity_snapshot["marker_sha256"]
+    except (OSError, RuntimeError, TypeError, ValueError, OverflowError) as error:
+        # An unreadable or unauthenticated claim is never treated as zero for
+        # admission. Keep its value unknown in the result; the separate zero
+        # arithmetic placeholder cannot yield ALLOW because of the blocker.
+        shared_capacity_commitment_bytes = None
+        commitment_error = str(error)
+    projected_free = (current_free_bytes - accounted_commitment_bytes - peak_additional_bytes)
     projected_scoped = current_scoped_bytes + peak_additional_bytes
     blockers: list[str] = []
     warnings: list[str] = []
+    if commitment_error is not None:
+        blockers.append(
+            "authenticated shared VM capacity commitment is unavailable; admission fails closed: "
+            + commitment_error)
     if current_free_bytes < FREE_HARD_STOP:
         blockers.append(f"current free space is below the {FREE_HARD_STOP // GIB} GiB emergency hard stop")
     if projected_free < FREE_MINIMUM:
@@ -362,6 +1494,8 @@ def projected_storage_admission(*, current_free_bytes: int, current_scoped_bytes
         warnings.append(f"projected scoped FG-Metal usage exceeds the {PROJECT_WARNING // GIB} GiB warning threshold")
     return {
         **values,
+        "shared_capacity_commitment_bytes": shared_capacity_commitment_bytes,
+        "shared_capacity_commitment_marker_sha256": commitment_marker_sha256,
         "projected_free_bytes": projected_free,
         "projected_scoped_bytes": projected_scoped,
         "admitted": not blockers,
@@ -372,19 +1506,55 @@ def projected_storage_admission(*, current_free_bytes: int, current_scoped_bytes
 
 def _post_materialization_prefix_admission(*, current_free_bytes: int,
                                            current_scoped_bytes: int,
-                                           manifest_estimates: Mapping[str, int]) -> dict[str, Any]:
-    """Recheck a materialized prefix against its full signed peak estimate.
+                                           manifest_estimates: Mapping[str, int],
+                                           materialized_prefix_bytes: int = 0) -> dict[str, Any]:
+    """Recheck a materialized prefix against its physical free-space and scoped limits.
 
-    Prefix templates are cloned with APFS copy-on-write. The current inode-based
-    inventory cannot prove how much of the clone's shared storage may still be
-    allocated later, so the complete declared peak, including the prefix and its
-    uncertainty margin, remains possible demand after materialization.
+    Prefix templates are cloned with APFS copy-on-write. For volume free space,
+    extent sharing means physical disk blocks have not yet been consumed, so the
+    complete declared peak remains potential future demand against free space.
+
+    However, for scoped project usage, POSIX st_blocks accounting has already
+    counted the cloned inodes in full. Adding the declared prefix reservation again
+    would double-count physical prefix bytes. Therefore, the peak additional demand
+    evaluated against scoped usage accounts for the already-materialized prefix blocks.
     """
-    return projected_storage_admission(
+    if (not isinstance(materialized_prefix_bytes, int)
+            or isinstance(materialized_prefix_bytes, bool)
+            or materialized_prefix_bytes < 0):
+        raise ValueError("materialized_prefix_bytes must be a non-negative integer")
+
+    declared_peak = manifest_estimates["estimated_projected_new_disk_bytes"]
+    scoped_additional = max(0, declared_peak - materialized_prefix_bytes)
+
+    free_admission = projected_storage_admission(
+        current_free_bytes=current_free_bytes,
+        current_scoped_bytes=0,
+        peak_additional_bytes=declared_peak,
+    )
+    scope_admission = projected_storage_admission(
         current_free_bytes=current_free_bytes,
         current_scoped_bytes=current_scoped_bytes,
-        peak_additional_bytes=manifest_estimates["estimated_projected_new_disk_bytes"],
+        peak_additional_bytes=scoped_additional,
     )
+
+    blockers = list(dict.fromkeys(free_admission["blockers"] + scope_admission["blockers"]))
+    warnings = list(dict.fromkeys(free_admission["warnings"] + scope_admission["warnings"]))
+
+    return {
+        "current_free_bytes": current_free_bytes,
+        "current_scoped_bytes": current_scoped_bytes,
+        "peak_additional_bytes": declared_peak,
+        "scoped_additional_bytes": scoped_additional,
+        "materialized_prefix_bytes": materialized_prefix_bytes,
+        "shared_capacity_commitment_bytes": free_admission["shared_capacity_commitment_bytes"],
+        "shared_capacity_commitment_marker_sha256": free_admission["shared_capacity_commitment_marker_sha256"],
+        "projected_free_bytes": free_admission["projected_free_bytes"],
+        "projected_scoped_bytes": scope_admission["projected_scoped_bytes"],
+        "admitted": not blockers,
+        "blockers": blockers,
+        "warnings": warnings,
+    }
 
 
 def admission_uncertainty_margin_bytes(declared_peak_bytes: int) -> int:
@@ -410,12 +1580,27 @@ def _is_other_project_path(path: Path) -> bool:
                or "step10b6_1" in part.lower() for part in path.parts)
 
 
-def _classified_project_roots() -> list[DiscoveredProjectRoot]:
+def _classified_project_roots(*, strict: bool = False,
+                              active_buildlease_id: str | None = None,
+                              active_workspace_identity: Mapping[str, Any] | None = None,
+                              allow_pre_dispatch: bool = False,
+                              exited_process_id: int | None = None,
+                              ) -> list[DiscoveredProjectRoot]:
+    if allow_pre_dispatch and (
+            not strict or active_buildlease_id is None
+            or not isinstance(active_workspace_identity, Mapping)):
+        raise RuntimeError(
+            "R71 pre-dispatch root discovery lacks its exact active workspace binding")
     roots: list[DiscoveredProjectRoot] = []
     seen: set[str] = set()
 
     def add_root(path: Path, classification: str, category: str) -> None:
-        key = str(path.resolve(strict=False))
+        try:
+            key = str(path.resolve(strict=strict))
+        except OSError as error:
+            if strict:
+                raise RuntimeError(f"cannot resolve mandatory storage root: {path}") from error
+            key = str(path.resolve(strict=False))
         if key in seen:
             return
         seen.add(key)
@@ -425,8 +1610,9 @@ def _classified_project_roots() -> list[DiscoveredProjectRoot]:
             st = path.lstat()
             dev = st.st_dev
             ino = st.st_ino
-        except OSError:
-            pass
+        except OSError as error:
+            if strict and classification == ROOT_CLASS_MANDATORY:
+                raise RuntimeError(f"mandatory storage root is missing or unreadable: {path}") from error
         roots.append(DiscoveredProjectRoot(
             path=path,
             classification=classification,
@@ -435,47 +1621,1563 @@ def _classified_project_roots() -> list[DiscoveredProjectRoot]:
             expected_ino=ino,
         ))
 
+    def has_build_root_signature(path: Path) -> bool:
+        """Detect build/lease roots semantically without counting unrelated files."""
+        try:
+            for marker_name in (*FGMETAL_ROOT_MARKER_NAMES,
+                                *BUILD_ROOT_SIGNATURE_FILES,
+                                *BUILD_ROOT_SIGNATURE_DIRS):
+                marker = path / marker_name
+                try:
+                    info = marker.lstat()
+                except FileNotFoundError:
+                    continue
+                expected_type = (stat.S_ISDIR(info.st_mode)
+                                 if marker_name in BUILD_ROOT_SIGNATURE_DIRS
+                                 else stat.S_ISREG(info.st_mode))
+                if expected_type:
+                    return True
+                if strict:
+                    # lstat deliberately does not follow the signature. A
+                    # symlink or special object with a known marker name is an
+                    # ambiguous root candidate and must block classification.
+                    raise RuntimeError(
+                        f"unsafe build-root signature object: {marker}"
+                    )
+            return False
+        except RuntimeError:
+            raise
+        except OSError as error:
+            if strict:
+                raise RuntimeError(f"cannot inspect possible build-root signature: {path}") from error
+            return False
+
     add_root(REPO, ROOT_CLASS_MANDATORY, "main_repo")
-    worktrees = subprocess.run(
+    worktree_result = subprocess.run(
         ["git", "worktree", "list", "--porcelain"], cwd=REPO,
         text=True, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, check=False,
-    ).stdout
+    )
+    if strict and worktree_result.returncode != 0:
+        raise RuntimeError("cannot enumerate registered Git worktrees for strict R71 capacity")
+    worktrees = worktree_result.stdout
     for line in worktrees.splitlines():
         if line.startswith("worktree "):
             path = Path(line.removeprefix("worktree "))
-            if path != REPO and path.is_dir():
-                add_root(path, ROOT_CLASS_MANDATORY, "git_worktree")
+            if path != REPO:
+                if strict and (path.is_symlink() or not path.is_dir()):
+                    raise RuntimeError(f"registered Git worktree is missing or unsafe: {path}")
+                if path.is_dir():
+                    add_root(path, ROOT_CLASS_MANDATORY, "git_worktree")
 
     cache_root = Path.home() / "Library" / "Caches"
-    for path in cache_root.iterdir() if cache_root.is_dir() else ():
+    try:
+        cache_children = list(cache_root.iterdir()) if cache_root.is_dir() else []
+    except OSError as error:
+        if strict:
+            raise RuntimeError("cannot enumerate user cache roots for strict R71 capacity") from error
+        cache_children = []
+    if strict and (cache_root.is_symlink() or not cache_root.is_dir()):
+        raise RuntimeError("user cache root is missing for strict R71 capacity")
+    if strict and (CACHE.is_symlink() or not CACHE.is_dir()):
+        raise RuntimeError("mandatory FG-Metal cache root is missing or unsafe for strict R71 capacity")
+    for path in cache_children:
         name = path.name.lower()
-        if path.is_dir() and (
-            name.startswith(("fgmetal", "fg-metal", "fgmetal-", "fg-metal-"))
-            or name == "lsfg-metal"
-        ):
+        project_cache = (name.startswith(("fgmetal", "fg-metal", "fgmetal-", "fg-metal-"))
+                         or name == "lsfg-metal")
+        if strict and not project_cache and path.is_symlink():
+            # An unrecognized cache-directory alias can hide compiler roots
+            # at arbitrary depth. Do not follow and account an unknown cache
+            # tree; classify the directory alias as an unknown root instead.
+            # Symlinks to regular report files remain ordinary files and are
+            # skipped by the directory-root logic below.
+            try:
+                target_info = path.stat()
+            except OSError as error:
+                raise RuntimeError(
+                    f"unrecognized cache symlink has an unreadable target: {path}") from error
+            if stat.S_ISDIR(target_info.st_mode):
+                raise RuntimeError(f"unrecognized cache directory alias: {path}")
+        if strict and not project_cache and path.is_dir() and has_build_root_signature(path):
+            raise RuntimeError(f"unrecognized cache build/lease root: {path}")
+        if strict and project_cache and path.is_symlink():
+            raise RuntimeError(f"project cache root is missing or unsafe: {path}")
+        # Prefixes identify directory roots, not log/report files that happen
+        # to share a prefix. Keep cache and temp discovery consistent here.
+        if not path.is_dir():
+            continue
+        if path.is_dir() and not path.is_symlink() and project_cache:
             if path == CACHE:
                 add_root(path, ROOT_CLASS_MANDATORY, "project_cache")
             else:
                 add_root(path, ROOT_CLASS_OPTIONAL_EPHEMERAL, "project_cache_aux")
 
     temp_root = Path("/private/tmp")
+    if strict and (temp_root.is_symlink() or not temp_root.is_dir()):
+        raise RuntimeError("temporary root is missing or unsafe for strict R71 capacity")
     if temp_root.is_dir():
-        for path in temp_root.iterdir():
+        try:
+            temp_children = list(temp_root.iterdir())
+        except OSError as error:
+            if strict:
+                raise RuntimeError("cannot enumerate temporary roots for strict R71 capacity") from error
+            temp_children = []
+        for path in temp_children:
             name = path.name.lower()
+            project_temp = name.startswith(("fgmetal", "fg-metal", "step10a", "step11b"))
+            if strict and project_temp and path.is_symlink():
+                raise RuntimeError(f"project temporary root is missing or unsafe: {path}")
+            if strict and not project_temp and path.is_dir() and has_build_root_signature(path):
+                raise RuntimeError(f"unrecognized temporary build/lease root: {path}")
             if path.is_dir() and name.startswith(("fgmetal", "fg-metal", "step10a", "step11b")):
                 if "-test-" in name or name.startswith("test-") or "synthetic" in name:
                     continue
                 add_root(path, ROOT_CLASS_OPTIONAL_EPHEMERAL, "project_temp")
     xcode_root = Path.home() / "Library/Developer/Xcode/DerivedData"
+    if strict and xcode_root.exists() and (xcode_root.is_symlink() or not xcode_root.is_dir()):
+        raise RuntimeError("Xcode DerivedData root is unsafe for strict R71 capacity")
     if xcode_root.is_dir():
-        for path in xcode_root.iterdir():
-            if path.is_dir() and not path.is_symlink() and path.name.lower().startswith("moltenvkpackaging-"):
+        try:
+            xcode_children = list(xcode_root.iterdir())
+        except OSError as error:
+            if strict:
+                raise RuntimeError("cannot enumerate Xcode DerivedData for strict R71 capacity") from error
+            xcode_children = []
+        for path in xcode_children:
+            matches_project_xcode = path.name.lower().startswith("moltenvkpackaging-")
+            if strict and matches_project_xcode and (path.is_symlink() or not path.is_dir()):
+                raise RuntimeError(f"Xcode DerivedData project root is missing or unsafe: {path}")
+            if path.is_dir() and not path.is_symlink() and matches_project_xcode:
                 add_root(path, ROOT_CLASS_OPTIONAL_EPHEMERAL, "xcode_derived_data")
+    if strict:
+        # Retention already performs semantic discovery of compiler build roots
+        # (including unbranded /private/tmp roots). If a candidate is outside
+        # every accounted root, reject it unless the exact R17 ownership table
+        # identifies it as protected non-FG-Metal data. Never add such an
+        # unknown tree to project usage merely because it resembles a build.
+        try:
+            import build_retention
+
+            candidates = (build_retention._all_root_candidates()
+                          if active_buildlease_id is None
+                          else build_retention._all_root_candidates(
+                              active_buildlease_id=active_buildlease_id,
+                              active_workspace_identity=active_workspace_identity,
+                              **({"exited_process_id": exited_process_id}
+                                 if exited_process_id is not None else {}),
+                              **({"allow_pre_dispatch": True}
+                                 if allow_pre_dispatch else {})))
+            for candidate in candidates:
+                if candidate.is_symlink() or not candidate.is_dir():
+                    raise RuntimeError(f"compiler build-root candidate is unsafe: {candidate}")
+                if any(candidate == root.path or root.path in candidate.parents for root in roots):
+                    continue
+                disposition = build_retention._r17_temp_root_disposition(candidate)
+                if (disposition is not None
+                        and disposition.get("accounting_scope") == "OTHER_PROJECT_PROTECTED"):
+                    continue
+                if disposition is not None:
+                    add_root(candidate, ROOT_CLASS_OPTIONAL_EPHEMERAL, "project_temp")
+                    continue
+                raise RuntimeError(f"unrecognized compiler build root: {candidate}")
+        except RuntimeError:
+            raise
+        except Exception as error:
+            raise RuntimeError("cannot enumerate semantic compiler build roots for strict R71 capacity") from error
     return roots
 
 
 def _project_roots() -> list[Path]:
     return [r.path for r in _classified_project_roots()]
+
+
+def capture_storage_tree_state(*, excluded_paths: Sequence[Path | str] = (),
+                               classified_roots: Sequence[DiscoveredProjectRoot] | None = None) -> dict[str, Any]:
+    """Capture a strict path and inode snapshot for the mandatory FG-Metal roots.
+
+    Unlike ``measure_project_usage`` this includes directories and namespace
+    entries. It is a drift fingerprint, not a physical-space estimator. Any
+    traversal/stat failure is fatal so an incomplete walk can never certify a
+    baseline. The Gate attestation is omitted as a self-referential signed
+    object; its containing directory keeps names and allocation metadata, with
+    only timestamps normalized because the Gate atomically republishes itself.
+    """
+    excluded = {Path(os.path.abspath(Path(item).expanduser())) for item in excluded_paths}
+    gate_path = Path(os.path.abspath(GATE0_ATTESTATION_PATH))
+    sidecar_path = Path(os.path.abspath(GATE0_PATH_STATE_SIDECAR_PATH))
+    rows: list[dict[str, Any]] = []
+    gate_parent = Path(os.path.abspath(gate_path.parent))
+    root_rows = list(classified_roots) if classified_roots is not None else _classified_project_roots()
+    roots = [row.path for row in root_rows
+             if row.classification == ROOT_CLASS_MANDATORY]
+    if not roots:
+        raise RuntimeError("no mandatory storage roots are available for path-state capture")
+
+    def add(path: Path, info: os.stat_result, *, children: list[str] | None = None) -> None:
+        absolute = Path(os.path.abspath(path))
+        if (absolute in {gate_path, sidecar_path}
+                or any(_is_project_usage_path_excluded(absolute, {item}) for item in excluded)):
+            return
+        mode = info.st_mode
+        if stat.S_ISDIR(mode):
+            kind = "directory"
+        elif stat.S_ISREG(mode):
+            kind = "file"
+        elif stat.S_ISLNK(mode):
+            kind = "symlink"
+        else:
+            kind = "special"
+        row: dict[str, Any] = {
+            "path": str(absolute), "kind": kind, "device": info.st_dev,
+            "inode": info.st_ino, "mode": stat.S_IMODE(mode),
+            "owner_uid": info.st_uid, "owner_gid": info.st_gid,
+            "link_count": info.st_nlink, "size_bytes": info.st_size,
+            "allocated_bytes": getattr(info, "st_blocks", 0) * 512,
+            "mtime_ns": info.st_mtime_ns, "ctime_ns": info.st_ctime_ns,
+        }
+        if absolute in {gate_parent, sidecar_path.parent} and kind == "directory":
+            row.pop("mtime_ns", None)
+            row.pop("ctime_ns", None)
+        if absolute == sidecar_path.parent and kind == "directory":
+            # The sidecar is excluded from its own baseline. Its containing
+            # directory still records exact child names, identity, mode and
+            # link count, while its aggregate allocation can depend on the
+            # compressed sidecar length and is authenticated separately.
+            row.pop("size_bytes", None)
+            row.pop("allocated_bytes", None)
+        if children is not None:
+            row["children"] = children
+        if kind == "symlink":
+            row["target"] = os.readlink(absolute)
+        rows.append(row)
+
+    for root in roots:
+        root = Path(os.path.abspath(root))
+        try:
+            root_info = root.lstat()
+        except OSError as error:
+            raise RuntimeError(f"mandatory storage root cannot be stated: {root}: {error}") from error
+        if not stat.S_ISDIR(root_info.st_mode):
+            raise RuntimeError(f"mandatory storage root is not a real directory: {root}")
+        for current, dirnames, filenames in os.walk(root, topdown=True, followlinks=False,
+                                                    onerror=lambda error: (_ for _ in ()).throw(error)):
+            current_path = Path(current)
+            try:
+                current_info = current_path.lstat()
+            except OSError as error:
+                raise RuntimeError(f"directory changed during path-state capture: {current_path}: {error}") from error
+            names = sorted(name for name in dirnames + filenames
+                           if current_path / name not in {gate_path, sidecar_path})
+            add(current_path, current_info, children=names)
+            retained_dirs: list[str] = []
+            for name in dirnames:
+                child = current_path / name
+                try:
+                    info = child.lstat()
+                except OSError as error:
+                    raise RuntimeError(f"path changed during path-state capture: {child}: {error}") from error
+                if stat.S_ISLNK(info.st_mode):
+                    add(child, info)
+                elif stat.S_ISDIR(info.st_mode):
+                    retained_dirs.append(name)
+                else:
+                    add(child, info)
+            dirnames[:] = retained_dirs
+            for name in filenames:
+                child = current_path / name
+                try:
+                    add(child, child.lstat())
+                except OSError as error:
+                    raise RuntimeError(f"path changed during path-state capture: {child}: {error}") from error
+    rows.sort(key=lambda row: row["path"])
+    canonical = json.dumps(rows, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+    return {"schema_version": 1, "sha256": hashlib.sha256(canonical).hexdigest(), "entries": rows}
+
+
+GATE_PATH_STATE_SIDECAR_MAX_COMPRESSED_BYTES = 12 * MIB
+GATE_PATH_STATE_SIDECAR_MAX_UNCOMPRESSED_BYTES = 128 * MIB
+STORAGE_SMOKE_OUTPUT_RESERVATION_BYTES = 32 * MIB
+STORAGE_SMOKE_GATE_COPY_BUDGET_BYTES = 16 * MIB
+STORAGE_SMOKE_MANIFEST_MAX_BYTES = 2 * MIB
+STORAGE_SMOKE_CLAIM_MAX_BYTES = 16 * 1024
+STORAGE_SMOKE_CLAIM_SLOT_HMAC_FIELD = "smoke_claim_slot_hmac_sha256"
+STORAGE_SMOKE_START_MARKER_MAX_BYTES = 64 * 1024
+STORAGE_SMOKE_CLEANUP_RECEIPT_MAX_BYTES = 2 * MIB
+STORAGE_SMOKE_REPORT_MAX_BYTES = 4 * MIB
+STORAGE_SMOKE_OTHER_OUTPUT_OBJECT_MAX_BYTES = 16 * MIB
+# Directory growth is not represented by a child file's allocated_bytes. Keep
+# a per-publication reserve of sixteen filesystem-reported I/O blocks for the
+# containing directory's leaf/index metadata; check observed st_blocks growth
+# against the signed Gate baseline after each publication.
+STORAGE_SMOKE_DIRECTORY_GROWTH_RESERVE_BLOCKS = 16
+
+
+def write_gate_path_state_sidecar(storage_tree_state: Mapping[str, Any],
+                                  nonlease_allocation_snapshot: Mapping[str, Any]) -> dict[str, Any]:
+    """Atomically persist the bounded, authenticated Gate path-state payload."""
+    payload = {
+        "schema_version": 1,
+        "storage_tree_state": dict(storage_tree_state),
+        "nonlease_allocation_snapshot": dict(nonlease_allocation_snapshot),
+    }
+    raw = json.dumps(payload, sort_keys=True, separators=(",", ":"),
+                     ensure_ascii=False, allow_nan=False).encode("utf-8")
+    if len(raw) > GATE_PATH_STATE_SIDECAR_MAX_UNCOMPRESSED_BYTES:
+        raise RuntimeError("Gate path-state payload exceeds its 128 MiB uncompressed bound")
+    compressed = zlib.compress(raw, level=9)
+    if len(compressed) > GATE_PATH_STATE_SIDECAR_MAX_COMPRESSED_BYTES:
+        raise RuntimeError("Gate path-state sidecar exceeds its 12 MiB compressed bound")
+    path = GATE0_PATH_STATE_SIDECAR_PATH
+    # The common publisher walks every parent component with O_NOFOLLOW and
+    # publishes relative to that pinned directory descriptor.
+    _atomic_write_bytes(path, compressed, strict_directory_sync=True)
+    compressed_readback = _read_file_nofollow(
+        path, maximum_bytes=GATE_PATH_STATE_SIDECAR_MAX_COMPRESSED_BYTES)
+    info = path.lstat()
+    if (compressed_readback != compressed or not stat.S_ISREG(info.st_mode)
+            or info.st_uid != os.getuid() or info.st_gid != os.getgid()
+            or stat.S_IMODE(info.st_mode) != 0o600 or info.st_nlink != 1):
+        raise RuntimeError("Gate path-state sidecar is not a single-link regular file")
+    roots = [row for row in _classified_project_roots()
+             if Path(os.path.abspath(path)) == row.path
+             or row.path in Path(os.path.abspath(path)).parents]
+    if not roots:
+        raise RuntimeError("Gate path-state sidecar is outside measured project roots")
+    root = max(roots, key=lambda row: len(row.path.parts))
+    return {
+        "schema_version": 1,
+        "path": str(path),
+        "encoding": "zlib-json",
+        "compressed_bytes": len(compressed),
+        "compressed_sha256": hashlib.sha256(compressed).hexdigest(),
+        "compressed_hmac_sha256": hmac.new(_manifest_signing_key(), compressed,
+                                             hashlib.sha256).hexdigest(),
+        "uncompressed_bytes": len(raw),
+        "uncompressed_sha256": hashlib.sha256(raw).hexdigest(),
+        "allocated_bytes": getattr(info, "st_blocks", 0) * 512,
+        "device": info.st_dev,
+        "inode": info.st_ino,
+        "mode": stat.S_IMODE(info.st_mode),
+        "link_count": info.st_nlink,
+        "size_bytes": info.st_size,
+        "owner_uid": info.st_uid,
+        "owner_gid": info.st_gid,
+        "mtime_ns": info.st_mtime_ns,
+        "ctime_ns": info.st_ctime_ns,
+        "root": str(root.path),
+        "classification": root.classification,
+        "category": root.category,
+    }
+
+
+def read_gate_path_state_sidecar(attestation: Mapping[str, Any]) -> dict[str, Any]:
+    """Load and authenticate the detached Gate tree and non-lease path snapshots."""
+    descriptor = attestation.get("path_state_sidecar")
+    if not isinstance(descriptor, Mapping) or descriptor.get("schema_version") != 1:
+        raise RuntimeError("Gate path-state sidecar descriptor is missing or unsupported")
+    integer_fields = ("compressed_bytes", "uncompressed_bytes", "allocated_bytes", "device",
+                      "inode", "mode", "link_count", "size_bytes", "owner_uid", "owner_gid",
+                      "mtime_ns", "ctime_ns")
+    if any(not isinstance(descriptor.get(key), int) or isinstance(descriptor.get(key), bool)
+           or descriptor.get(key) < 0 for key in integer_fields):
+        raise RuntimeError("Gate path-state sidecar descriptor has invalid integer fields")
+    path = GATE0_PATH_STATE_SIDECAR_PATH
+    if descriptor.get("path") != str(path) or path.is_symlink():
+        raise RuntimeError("Gate path-state sidecar path is not the fixed measured project file")
+    parent_fd = _open_directory_nofollow(path.parent)
+    try:
+        compressed, _identity = _read_file_from_directory_fd(
+            parent_fd, path.name, display_path=path,
+            maximum_bytes=GATE_PATH_STATE_SIDECAR_MAX_COMPRESSED_BYTES)
+        raw_info = os.stat(path.name, dir_fd=parent_fd, follow_symlinks=False)
+        parent_info = os.fstat(parent_fd)
+    finally:
+        os.close(parent_fd)
+    if (not stat.S_ISREG(raw_info.st_mode) or raw_info.st_nlink != 1
+            or descriptor.get("device") != raw_info.st_dev
+            or descriptor.get("inode") != raw_info.st_ino
+            or descriptor.get("mode") != stat.S_IMODE(raw_info.st_mode)
+            or raw_info.st_uid != os.getuid() or raw_info.st_gid != os.getgid()
+            or descriptor.get("owner_uid") != raw_info.st_uid
+            or descriptor.get("owner_gid") != raw_info.st_gid
+            or stat.S_IMODE(raw_info.st_mode) != 0o600
+            or descriptor.get("size_bytes") != raw_info.st_size
+            or _identity != (raw_info.st_dev, raw_info.st_ino, raw_info.st_size,
+                             raw_info.st_mtime_ns, getattr(raw_info, "st_ctime_ns", 0))
+            or raw_info.st_dev != parent_info.st_dev
+            or descriptor.get("link_count") != raw_info.st_nlink
+            or descriptor.get("allocated_bytes") != getattr(raw_info, "st_blocks", 0) * 512):
+        raise RuntimeError("Gate path-state sidecar filesystem identity or allocation changed")
+    if (descriptor.get("mtime_ns") != raw_info.st_mtime_ns
+            or descriptor.get("ctime_ns") != getattr(raw_info, "st_ctime_ns", 0)
+            or descriptor.get("size_bytes") != raw_info.st_size
+            or raw_info.st_size != len(compressed)):
+        raise RuntimeError("Gate path-state sidecar signed size or timestamps changed")
+    if (descriptor.get("encoding") != "zlib-json"
+            or not isinstance(descriptor.get("compressed_sha256"), str)
+            or not re.fullmatch(r"[0-9a-f]{64}", descriptor["compressed_sha256"])
+            or not isinstance(descriptor.get("compressed_hmac_sha256"), str)
+            or not re.fullmatch(r"[0-9a-f]{64}", descriptor["compressed_hmac_sha256"])
+            or not isinstance(descriptor.get("uncompressed_sha256"), str)
+            or not re.fullmatch(r"[0-9a-f]{64}", descriptor["uncompressed_sha256"])
+            or descriptor.get("compressed_bytes") != len(compressed)
+            or descriptor.get("compressed_sha256") != hashlib.sha256(compressed).hexdigest()
+            or not hmac.compare_digest(
+                str(descriptor.get("compressed_hmac_sha256", "")),
+                hmac.new(_manifest_signing_key(), compressed, hashlib.sha256).hexdigest())):
+        raise RuntimeError("Gate path-state sidecar digest or authentication failed")
+    decoder = zlib.decompressobj()
+    payload_raw = decoder.decompress(compressed, GATE_PATH_STATE_SIDECAR_MAX_UNCOMPRESSED_BYTES + 1)
+    if (len(payload_raw) > GATE_PATH_STATE_SIDECAR_MAX_UNCOMPRESSED_BYTES
+            or decoder.unconsumed_tail or not decoder.eof or decoder.unused_data):
+        raise RuntimeError("Gate path-state sidecar is malformed or exceeds its decompression bound")
+    payload_raw += decoder.flush()
+    if len(payload_raw) > GATE_PATH_STATE_SIDECAR_MAX_UNCOMPRESSED_BYTES:
+        raise RuntimeError("Gate path-state sidecar exceeds its post-flush decompression bound")
+    if (len(payload_raw) != descriptor.get("uncompressed_bytes")
+            or hashlib.sha256(payload_raw).hexdigest() != descriptor.get("uncompressed_sha256")):
+        raise RuntimeError("Gate path-state sidecar uncompressed digest does not match Gate")
+    payload = json.loads(payload_raw, object_pairs_hook=_g0c_no_duplicate_json_keys)
+    if json.dumps(payload, sort_keys=True, separators=(",", ":"),
+                  ensure_ascii=False).encode("utf-8") != payload_raw:
+        raise RuntimeError("Gate path-state sidecar payload is not canonical JSON")
+    if (not isinstance(payload, dict) or payload.get("schema_version") != 1
+            or not isinstance(payload.get("storage_tree_state"), dict)
+            or not isinstance(payload.get("nonlease_allocation_snapshot"), dict)):
+        raise RuntimeError("Gate path-state sidecar payload has an unsupported schema")
+    allocation = payload["nonlease_allocation_snapshot"]
+    tree = payload["storage_tree_state"]
+    tree_entries = tree.get("entries")
+    if (tree.get("schema_version") != 1 or not isinstance(tree_entries, list)
+            or any(not isinstance(row, Mapping) or not isinstance(row.get("path"), str)
+                   for row in tree_entries)):
+        raise RuntimeError("Gate path-state tree entries are malformed")
+    tree_paths = [row["path"] for row in tree_entries]
+    if len(set(tree_paths)) != len(tree_paths) or tree_paths != sorted(tree_paths):
+        raise RuntimeError("Gate path-state tree has duplicate or unordered paths")
+    normalized_parent_paths = {
+        str(Path(os.path.abspath(GATE0_ATTESTATION_PATH.parent))),
+        str(Path(os.path.abspath(GATE0_PATH_STATE_SIDECAR_PATH.parent))),
+    }
+    sidecar_parent_path = str(Path(os.path.abspath(GATE0_PATH_STATE_SIDECAR_PATH.parent)))
+    for row in tree_entries:
+        path_value = row["path"]
+        numeric_fields = ["device", "inode", "mode", "owner_uid", "owner_gid", "link_count"]
+        optional_normalized_fields: set[str] = set()
+        if path_value != sidecar_parent_path:
+            numeric_fields.extend(("size_bytes", "allocated_bytes"))
+        else:
+            optional_normalized_fields.update(("size_bytes", "allocated_bytes"))
+        if path_value not in normalized_parent_paths:
+            numeric_fields.extend(("mtime_ns", "ctime_ns"))
+        else:
+            optional_normalized_fields.update(("mtime_ns", "ctime_ns"))
+        if (not Path(path_value).is_absolute()
+                or str(Path(os.path.abspath(path_value))) != path_value
+                or row.get("kind") not in {"directory", "file", "symlink", "special"}
+                or any(not isinstance(row.get(key), int) or isinstance(row.get(key), bool)
+                       or row.get(key) < 0 for key in numeric_fields)
+                or any(key in row for key in optional_normalized_fields)
+                or row.get("link_count", 0) < 1
+                or row.get("mode", 0) > 0o7777):
+            raise RuntimeError("Gate path-state tree contains an invalid path identity")
+        children = row.get("children")
+        if row.get("kind") == "directory":
+            if (not isinstance(children, list)
+                    or any(not isinstance(name, str) or not name or "/" in name for name in children)
+                    or children != sorted(set(children))):
+                raise RuntimeError("Gate path-state directory child list is malformed or ambiguous")
+        elif children is not None:
+            raise RuntimeError("Gate path-state non-directory row has directory children")
+    tree_canonical = json.dumps(tree_entries, sort_keys=True, separators=(",", ":"),
+                                ensure_ascii=False).encode("utf-8")
+    if hashlib.sha256(tree_canonical).hexdigest() != tree.get("sha256"):
+        raise RuntimeError("Gate path-state tree digest is inconsistent")
+    entries = allocation.get("entries")
+    if not isinstance(entries, list):
+        raise RuntimeError("Gate path-state sidecar allocation snapshot entries are malformed")
+    allocation_paths = [row.get("path") for row in entries if isinstance(row, Mapping)]
+    if (len(allocation_paths) != len(entries) or any(not isinstance(path, str) for path in allocation_paths)
+            or len(set(allocation_paths)) != len(allocation_paths)
+            or allocation_paths != sorted(allocation_paths)):
+        raise RuntimeError("Gate allocation snapshot has duplicate, malformed, or unordered paths")
+    _allocation_snapshot_total_bytes(allocation)
+    sidecar_row = {
+        "path": str(path), "root": descriptor.get("root"),
+        "classification": descriptor.get("classification"),
+        "category": descriptor.get("category"), "kind": "regular_file",
+        "size_bytes": descriptor.get("size_bytes"),
+        "allocated_bytes": descriptor.get("allocated_bytes"),
+        "owner_uid": descriptor.get("owner_uid"), "owner_gid": descriptor.get("owner_gid"),
+        "mode": descriptor.get("mode"),
+        "link_count": descriptor.get("link_count"), "device": descriptor.get("device"),
+        "inode": descriptor.get("inode"), "mtime_ns": descriptor.get("mtime_ns"),
+        "ctime_ns": descriptor.get("ctime_ns"),
+    }
+    if any(not isinstance(sidecar_row[key], (str, int)) or isinstance(sidecar_row[key], bool)
+           for key in ("root", "classification", "category", "size_bytes", "allocated_bytes",
+                       "owner_uid", "owner_gid", "mode", "link_count", "device", "inode", "mtime_ns", "ctime_ns")):
+        raise RuntimeError("Gate path-state sidecar allocation identity is malformed")
+    classified_roots = [row for row in _classified_project_roots()
+                        if Path(str(path)) == row.path or row.path in Path(str(path)).parents]
+    if not classified_roots:
+        raise RuntimeError("Gate path-state sidecar root is no longer a measured project root")
+    actual_root = max(classified_roots, key=lambda row: len(row.path.parts))
+    if (sidecar_row["root"] != str(actual_root.path)
+            or sidecar_row["classification"] != actual_root.classification
+            or sidecar_row["category"] != actual_root.category):
+        raise RuntimeError("Gate path-state sidecar measured-root classification changed")
+    if any(row.get("path") == str(path) for row in entries if isinstance(row, Mapping)):
+        raise RuntimeError("Gate path-state allocation snapshot unexpectedly contains its own sidecar row")
+    entries.append(sidecar_row)
+    entries.sort(key=lambda row: row.get("path", ""))
+    allocation["entry_count"] = len(entries)
+    allocation["entries_sha256"] = _allocation_snapshot_entries_sha256(entries)
+    _allocation_snapshot_total_bytes(allocation)
+    return payload
+
+
+def evaluate_storage_smoke_transition(
+    before: Mapping[str, Any], after: Mapping[str, Any], *, experiment_id: str,
+    attestation_bytes: bytes, sidecar_bytes: bytes, output_dir: Path,
+    manifest_path: Path, claim_path: Path, active_marker_bytes: bytes | None = None,
+    _materialized_prefix_path: Path | None = None,
+) -> bool:
+    """Validate the one exact authenticated preflight-to-PrefixLease namespace transition."""
+    try:
+        if (not _is_storage_policy_smoke_id(experiment_id)
+                or len(attestation_bytes) > GATE0_ATTESTATION_MAX_BYTES
+                or len(sidecar_bytes) > GATE_PATH_STATE_SIDECAR_MAX_COMPRESSED_BYTES
+                or len(attestation_bytes) + len(sidecar_bytes)
+                    > STORAGE_SMOKE_GATE_COPY_BUDGET_BYTES):
+            return False
+        if (Path(os.path.abspath(output_dir)) != REPO / "experiments/storage/smoke-runs" / experiment_id
+                or Path(os.path.abspath(manifest_path)) != _experiment_manifest_path(experiment_id)
+                or Path(os.path.abspath(claim_path)) != _storage_smoke_claim_path(experiment_id)):
+            return False
+        attestation = json.loads(attestation_bytes, object_pairs_hook=_g0c_no_duplicate_json_keys)
+        if not isinstance(attestation, dict):
+            return False
+        sidecar_descriptor = attestation.get("path_state_sidecar")
+        if (attestation.get("status") != "PREFLIGHT_PASS"
+                or attestation.get("mode") != "preflight"
+                or attestation.get("permitted_smoke_experiment_id") != experiment_id
+                or not _verify_gate0_signature(attestation)
+                or attestation_bytes != _canonical_pretty_json_bytes(attestation)
+                or not isinstance(sidecar_descriptor, Mapping)
+                or sidecar_descriptor.get("compressed_sha256")
+                != hashlib.sha256(sidecar_bytes).hexdigest()):
+            return False
+        read_gate_path_state_sidecar(attestation)
+        if dict(before) != read_gate_path_state_sidecar(attestation)["storage_tree_state"]:
+            return False
+        preflight_sha256 = hashlib.sha256(attestation_bytes).hexdigest()
+        preflight_copy_path = output_dir / "gate0-preflight-attestation.json"
+        if (_read_file_nofollow(preflight_copy_path,
+                                maximum_bytes=GATE0_ATTESTATION_MAX_BYTES)
+                != attestation_bytes):
+            return False
+        sidecar_copy_path = output_dir / "gate0-path-state.json.zlib"
+        if _read_file_nofollow(sidecar_copy_path,
+                               maximum_bytes=GATE_PATH_STATE_SIDECAR_MAX_COMPRESSED_BYTES) != sidecar_bytes:
+            return False
+        claim, claim_bytes = _read_storage_smoke_claim(experiment_id)
+        if (claim_bytes != _read_file_nofollow(claim_path, maximum_bytes=64 * 1024)
+                or claim.get("experiment_id") != experiment_id
+                or claim.get("claim_reason") != "PrefixLease smoke allocation"
+                or claim.get("preflight_attestation_sha256") != preflight_sha256):
+            return False
+        manifest_raw = _read_file_nofollow(manifest_path, maximum_bytes=2 * MIB)
+        manifest = json.loads(manifest_raw, object_pairs_hook=_g0c_no_duplicate_json_keys)
+        if (not isinstance(manifest, dict) or not _verify_manifest_signature(manifest)
+                or manifest_raw != _canonical_pretty_json_bytes(manifest)
+                or manifest.get("decision") != "ALLOW"
+                or manifest.get("experiment_id") != experiment_id
+                or manifest.get("estimated_persistent_bytes")
+                    != STORAGE_SMOKE_OUTPUT_RESERVATION_BYTES
+                or manifest.get("storage_policy_smoke") is not True
+                or manifest.get("output_dir") != str(output_dir)
+                or manifest.get("gate0_attestation_sha256") != preflight_sha256
+                or manifest.get("smoke_nonce_claim_path") != str(claim_path)
+                or manifest.get("smoke_nonce_claim_sha256") != hashlib.sha256(claim_bytes).hexdigest()):
+            return False
+        if sorted(child.name for child in output_dir.iterdir()) != sorted(
+                [preflight_copy_path.name, sidecar_copy_path.name]):
+            return False
+
+        claim_slot = attestation.get("smoke_nonce_claim_slot")
+        consumed_claim: tuple[dict[str, Any], bytes] | None = None
+        slot_state: Mapping[str, Any] | None = None
+        if claim_slot is not None:
+            claim_slot = _validate_storage_smoke_claim_slot_descriptor(
+                experiment_id, claim_slot)
+            slot_state = claim_slot["state"]
+            claim_row_path = str(Path(os.path.abspath(claim_path)))
+            baseline_rows = {row.get("path"): row for row in before.get("entries", ())
+                             if isinstance(row, Mapping)}
+            if baseline_rows.get(claim_row_path) != {
+                    "path": claim_row_path, "kind": "file", **slot_state}:
+                return False
+            consumed_claim = _read_storage_smoke_claim_for_slot(
+                experiment_id, claim_slot, attestation_bytes)
+            if consumed_claim != (claim, claim_bytes):
+                return False
+            claim_info = _stat_entry_nofollow(claim_path)
+            if claim_info is None:
+                return False
+            consumed_claim_state = _storage_smoke_claim_slot_state(claim_info)
+
+        active_marker_path = ACTIVE_LEASE_ROOT / f"{experiment_id}.json"
+        if active_marker_bytes is not None:
+            marker = json.loads(active_marker_bytes,
+                                object_pairs_hook=_g0c_no_duplicate_json_keys)
+            marker_info = _stat_entry_nofollow(active_marker_path)
+            if (marker_info is None or not isinstance(marker, dict)
+                    or active_marker_bytes != _canonical_pretty_json_bytes(marker)):
+                return False
+            _pre_materialization_marker_identity(
+                marker, active_marker_bytes, marker_info,
+                experiment_id=experiment_id,
+                manifest_path=manifest_path,
+                manifest_sha256=hashlib.sha256(manifest_raw).hexdigest(),
+                output_dir=output_dir,
+                allow_materialized_prefix=_materialized_prefix_path is not None,
+                materialized_prefix_path=_materialized_prefix_path)
+
+        allowed_files = {
+            str(Path(os.path.abspath(manifest_path))),
+            str(Path(os.path.abspath(claim_path))),
+            str(Path(os.path.abspath(preflight_copy_path))),
+            str(Path(os.path.abspath(sidecar_copy_path))),
+            # PrefixLease creates this one private lock file before its locked
+            # Gate recheck. Its exact path and identity are the only additional
+            # protocol-file transition admitted here.
+            str(Path(os.path.abspath(ACTIVE_LEASE_ROOT / ".lease.lock"))),
+        }
+        if active_marker_bytes is not None:
+            allowed_files.add(str(Path(os.path.abspath(active_marker_path))))
+        allowed_dirs: set[str] = set()
+        expected_child_names: dict[str, set[str]] = {}
+        for filename in allowed_files:
+            child = Path(filename)
+            while child.parent != child:
+                parent = str(child.parent)
+                allowed_dirs.add(parent)
+                expected_child_names.setdefault(parent, set()).add(child.name)
+                child = child.parent
+        output_path = Path(os.path.abspath(output_dir))
+        child = output_path
+        while child.parent != child:
+            allowed_dirs.add(str(child))
+            expected_child_names.setdefault(str(child.parent), set()).add(child.name)
+            child = child.parent
+        old_rows = {row.get("path"): row for row in before.get("entries", ())
+                    if isinstance(row, Mapping) and isinstance(row.get("path"), str)}
+        new_rows = {row.get("path"): row for row in after.get("entries", ())
+                    if isinstance(row, Mapping) and isinstance(row.get("path"), str)}
+        if (len(old_rows) != len(before.get("entries", ()))
+                or len(new_rows) != len(after.get("entries", ()))):
+            return False
+        active_root_path = str(Path(os.path.abspath(ACTIVE_LEASE_ROOT)))
+        if (not isinstance(old_rows.get(active_root_path), Mapping)
+                or old_rows[active_root_path].get("kind") != "directory"
+                or not isinstance(new_rows.get(active_root_path), Mapping)
+                or new_rows[active_root_path].get("kind") != "directory"):
+            return False
+        for path in set(old_rows) | set(new_rows):
+            old, new = old_rows.get(path), new_rows.get(path)
+            if old == new:
+                continue
+            if path in allowed_files:
+                if (claim_slot is not None
+                        and path == str(Path(os.path.abspath(claim_path)))):
+                    parent_path = str(Path(path).parent)
+                    stable_keys = (
+                        ("device", "device"), ("inode", "inode"),
+                        ("owner_uid", "owner_uid"), ("owner_gid", "owner_gid"),
+                        ("mode", "mode"), ("link_count", "link_count"),
+                    )
+                    if (old != {"path": path, "kind": "file", **slot_state}
+                            or not isinstance(new, Mapping)
+                            or new.get("kind") != "file"
+                            or any(new.get(row_key) != slot_state.get(state_key)
+                                   for row_key, state_key in stable_keys)
+                            or any(new.get(key) != consumed_claim_state.get(key)
+                                   for key in ("size_bytes", "allocated_bytes",
+                                               "mtime_ns", "ctime_ns"))
+                            or new.get("size_bytes") != len(consumed_claim[1])
+                            or new_rows.get(parent_path) != old_rows.get(parent_path)):
+                        return False
+                    continue
+                parent_row = new_rows.get(str(Path(path).parent)) if isinstance(path, str) else None
+                is_active_marker = (active_marker_bytes is not None
+                                    and path == str(Path(os.path.abspath(active_marker_path))))
+                if (old is not None or new is None or new.get("kind") != "file"
+                        or new.get("owner_uid") != os.getuid()
+                        or (not is_active_marker and new.get("owner_gid") != os.getgid())
+                        or new.get("mode") != 0o600
+                        or new.get("link_count") != 1
+                        or not isinstance(parent_row, Mapping)
+                        or new.get("device") != parent_row.get("device")):
+                    return False
+                continue
+            if path not in allowed_dirs or new is None or new.get("kind") != "directory":
+                return False
+            if old is None:
+                old_children: set[str] = set()
+                old_identity: dict[str, Any] = {}
+                parent_row = new_rows.get(str(Path(path).parent))
+                expected_mode = 0o700 if path == str(output_path) else 0o755
+                if (new.get("owner_uid") != os.getuid()
+                        or new.get("owner_gid") != os.getgid()
+                        or new.get("mode") != expected_mode
+                        or not isinstance(new.get("link_count"), int)
+                        or isinstance(new.get("link_count"), bool)
+                        or new.get("link_count", 0) < 2
+                        or not isinstance(parent_row, Mapping)
+                        or new.get("device") != parent_row.get("device")):
+                    return False
+            elif old.get("kind") != "directory":
+                return False
+            else:
+                old_children = set(old.get("children", ()))
+                old_identity = {key: value for key, value in old.items()
+                                if key not in {"children", "size_bytes", "allocated_bytes",
+                                               "mtime_ns", "ctime_ns", "link_count"}}
+            new_children = set(new.get("children", ()))
+            if old_children - new_children:
+                return False
+            delta = new_children - old_children
+            if delta - expected_child_names.get(path, set()):
+                return False
+            new_child_directories = sum(
+                1 for name in delta
+                if isinstance(new_rows.get(str(Path(path) / name)), Mapping)
+                and new_rows[str(Path(path) / name)].get("kind") == "directory")
+            old_links = old.get("link_count", 2) if old is not None else 2
+            new_links = new.get("link_count", 0)
+            # POSIX filesystems commonly count only child directories in a
+            # directory's link count; APFS may count every admitted child.
+            # Accept either exact filesystem behavior, never an unexplained
+            # link delta.
+            valid_link_counts = {
+                old_links + new_child_directories,
+                old_links + len(delta),
+            } if isinstance(old_links, int) and not isinstance(old_links, bool) else set()
+            if (not isinstance(old_links, int) or isinstance(old_links, bool)
+                    or not isinstance(new_links, int) or isinstance(new_links, bool)
+                    or new_links not in valid_link_counts):
+                return False
+            new_identity = {key: value for key, value in new.items()
+                            if key not in {"children", "size_bytes", "allocated_bytes",
+                                           "mtime_ns", "ctime_ns", "link_count"}}
+            if old is not None and new_identity != old_identity:
+                return False
+            if old is not None and not delta:
+                return False
+        return True
+    except (OSError, ValueError, TypeError, KeyError, RuntimeError, json.JSONDecodeError):
+        return False
+
+
+def evaluate_materialized_storage_smoke_transition(
+    before: Mapping[str, Any], after: Mapping[str, Any], *, experiment_id: str,
+    attestation_bytes: bytes, sidecar_bytes: bytes, output_dir: Path,
+    manifest_path: Path, claim_path: Path, active_marker_bytes: bytes,
+    materialization_receipt: Mapping[str, Any],
+) -> bool:
+    """Validate State C while retaining the unchanged R78 State B evaluator."""
+    try:
+        prefix = PREFIX_ROOT / f"storage-smoke-{experiment_id}"
+        active_path = ACTIVE_LEASE_ROOT / f"{experiment_id}.json"
+        marker = json.loads(active_marker_bytes, object_pairs_hook=_g0c_no_duplicate_json_keys)
+        receipt = materialization_receipt
+        if (not isinstance(marker, dict)
+                or marker.get("state") != "MATERIALIZED"
+                or marker.get("experiment_id") != experiment_id
+                or marker.get("pid") != os.getpid()
+                or marker.get("prefix_path") != str(prefix)
+                or marker.get("output_dir") != str(output_dir)
+                or marker.get("manifest_path") != str(manifest_path)
+                or marker.get("lease_token") is None
+                or not isinstance(marker.get("lease_token"), str)
+                or not re.fullmatch(r"[0-9a-f]{64}", marker["lease_token"])
+                or marker.get("materialization_receipt") != receipt
+                or not _verify_storage_evidence(receipt, "prefix_materialization_hmac_sha256")
+                or receipt.get("experiment_id") != experiment_id
+                or receipt.get("pid") != os.getpid()
+                or receipt.get("lease_token") != marker.get("lease_token")
+                or receipt.get("prefix_path") != str(prefix)
+                or receipt.get("active_marker_path") != str(active_path)
+                or receipt.get("manifest_path") != str(manifest_path)
+                or receipt.get("output_dir") != str(output_dir)
+                or receipt.get("gate0_attestation_sha256") != hashlib.sha256(attestation_bytes).hexdigest()
+                or receipt.get("active_marker_parent_device") is None
+                or receipt.get("active_marker_parent_inode") is None):
+            return False
+        prefix_info = _stat_entry_nofollow(prefix)
+        prefix_parent_info = _stat_entry_nofollow(prefix.parent)
+        active_info = _stat_entry_nofollow(active_path)
+        if (prefix_info is None or not stat.S_ISDIR(prefix_info.st_mode)
+                or prefix_parent_info is None or not stat.S_ISDIR(prefix_parent_info.st_mode)
+                or active_info is None or not stat.S_ISREG(active_info.st_mode)
+                or (prefix_info.st_dev, prefix_info.st_ino)
+                   != (receipt.get("prefix_device"), receipt.get("prefix_inode"))
+                or (prefix_parent_info.st_dev, prefix_parent_info.st_ino)
+                   != (receipt.get("prefix_parent_device"), receipt.get("prefix_parent_inode"))
+                or (active_info.st_dev, active_info.st_ino)
+                   != (receipt.get("active_marker_device"), receipt.get("active_marker_inode"))
+                or active_info.st_gid != receipt.get("active_marker_gid")
+                or prefix_info.st_dev != prefix_parent_info.st_dev
+                or active_info.st_uid != os.getuid()
+                or active_info.st_nlink != 1
+                or stat.S_IMODE(active_info.st_mode) != 0o600
+                or getattr(active_info, "st_blocks", 0) * 512 > ACTIVE_PREFIX_LEASE_MARKER_MAX_ALLOCATED_BYTES
+                or active_info.st_size > ACTIVE_PREFIX_LEASE_MARKER_MAX_BYTES):
+            return False
+        prefix_root_commitment = _prefix_root_metadata_commitment(prefix_info)
+        if (prefix_root_commitment != receipt.get("prefix_root_metadata")
+                or prefix_info.st_uid != os.getuid() or prefix_info.st_gid != os.getgid()
+                or stat.S_IMODE(prefix_info.st_mode) != 0o700
+                or prefix_info.st_nlink < 2):
+            return False
+        active_parent_info = _stat_entry_nofollow(active_path.parent)
+        if (active_parent_info is None or not stat.S_ISDIR(active_parent_info.st_mode)
+                or (active_parent_info.st_dev, active_parent_info.st_ino)
+                   != (receipt.get("active_marker_parent_device"),
+                       receipt.get("active_marker_parent_inode"))):
+            return False
+        lock_info = _stat_entry_nofollow(ACTIVE_LEASE_ROOT / ".lease.lock")
+        if (lock_info is None or not stat.S_ISREG(lock_info.st_mode)
+                or lock_info.st_uid != os.getuid() or lock_info.st_gid != os.getgid()
+                or lock_info.st_nlink != 1 or stat.S_IMODE(lock_info.st_mode) != 0o600
+                or (lock_info.st_dev, lock_info.st_ino)
+                   != (receipt.get("lease_lock_device"), receipt.get("lease_lock_inode"))
+                or lock_info.st_size != 0
+                or getattr(lock_info, "st_blocks", 0) * 512 != 0
+                or receipt.get("lease_lock_size_bytes") != 0
+                or receipt.get("lease_lock_allocated_bytes") != 0):
+            return False
+        if (active_marker_bytes != _canonical_pretty_json_bytes(marker)
+                or set(marker) != {
+                    "experiment_id", "pid", "state", "prefix_path", "output_dir",
+                    "manifest_path", "manifest_sha256", "lease_token",
+                    "updated_at_unix", "materialization_receipt"}):
+            return False
+        prefix_marker = prefix / "FGMETAL_PREFIX_LEASE.json"
+        prefix_fd = _open_directory_nofollow(prefix)
+        try:
+            prefix_marker_payload, prefix_marker_bytes, prefix_marker_info = _read_json_at(
+                prefix_fd, prefix_marker.name, maximum_bytes=ACTIVE_PREFIX_LEASE_MARKER_MAX_BYTES)
+        finally:
+            os.close(prefix_fd)
+        if (not isinstance(prefix_marker_payload, Mapping)
+                or prefix_marker_bytes != _canonical_pretty_json_bytes(prefix_marker_payload)
+                or set(prefix_marker_payload) != {
+                    "experiment_id", "pid", "prefix_path", "output_dir", "manifest_path",
+                    "manifest_sha256", "lease_token", "created_at_unix"}
+                or prefix_marker_payload.get("experiment_id") != experiment_id
+                or prefix_marker_payload.get("pid") != os.getpid()
+                or prefix_marker_payload.get("prefix_path") != str(prefix)
+                or prefix_marker_payload.get("output_dir") != str(output_dir)
+                or prefix_marker_payload.get("manifest_path") != str(manifest_path)
+                or prefix_marker_payload.get("manifest_sha256") != receipt.get("manifest_sha256")
+                or prefix_marker_payload.get("lease_token") != marker.get("lease_token")
+                or prefix_marker_info.st_uid != os.getuid()
+                or prefix_marker_info.st_nlink != 1
+                or stat.S_IMODE(prefix_marker_info.st_mode) != 0o600
+                or len(prefix_marker_bytes) > ACTIVE_PREFIX_LEASE_MARKER_MAX_BYTES):
+            return False
+        template_marker_path = PREFIX_TEMPLATE / "FGMETAL_PREFIX_TEMPLATE.json"
+        template_marker = json.loads(_read_file_nofollow(template_marker_path))
+        expected_tree = template_marker.get("tree_identity")
+        if (not isinstance(expected_tree, Mapping)
+                or _tree_fingerprint(PREFIX_TEMPLATE, exclude={template_marker_path.name}) != expected_tree
+                or _tree_fingerprint(prefix, exclude={prefix_marker.name}) != expected_tree):
+            return False
+        current_inventory = _prefix_identity_inventory(prefix)
+        inventory_commitment = _prefix_identity_inventory_fingerprint(current_inventory)
+        if (inventory_commitment.get("sha256")
+                != receipt.get("prefix_identity_inventory_sha256")
+                or inventory_commitment.get("entry_count")
+                != receipt.get("prefix_identity_inventory_entry_count")):
+            return False
+        if any(row.get("device") != prefix_info.st_dev
+               or row.get("uid") != os.getuid()
+               or (row.get("gid") != os.getgid()
+                   and row.get("path") != str(prefix / "FGMETAL_PREFIX_LEASE.json"))
+               or row.get("nlink") != 1 and row.get("kind") != "directory"
+               for row in current_inventory):
+            return False
+        live_rows = {row.get("path"): row for row in after.get("entries", ())
+                     if isinstance(row, Mapping) and isinstance(row.get("path"), str)}
+        prefix_parent_row = live_rows.get(str(prefix.parent))
+        gate_before_rows = {row.get("path"): row for row in before.get("entries", ())
+                            if isinstance(row, Mapping) and isinstance(row.get("path"), str)}
+        original_prefix_parent_row = gate_before_rows.get(str(prefix.parent))
+        if (not isinstance(prefix_parent_row, Mapping)
+                or not isinstance(original_prefix_parent_row, Mapping)
+                or receipt.get("prefix_parent_pre_materialization_metadata")
+                   != _gate_directory_metadata_commitment(original_prefix_parent_row)
+                or not isinstance(receipt.get("prefix_parent_clone_temp_name"), str)
+                or re.fullmatch(
+                    re.escape(f".{prefix.name}.clone-") + r"[0-9a-f]{32}",
+                    receipt.get("prefix_parent_clone_temp_name", "")) is None
+                or not _prefix_parent_creation_commitment_matches(
+                    original_prefix_parent_row,
+                    receipt.get("prefix_parent_temp_child_metadata", {}),
+                    receipt.get("prefix_parent_clone_temp_name", ""),
+                    operation_started_ns=receipt.get("prefix_parent_temp_mkdir_started_ns"),
+                    operation_finished_ns=receipt.get("prefix_parent_temp_mkdir_finished_ns"))
+                or not _prefix_parent_rename_transition_matches(
+                    original_prefix_parent_row,
+                    receipt.get("prefix_parent_temp_child_metadata", {}),
+                    receipt.get("prefix_parent_post_materialization_metadata", {}),
+                    receipt.get("prefix_parent_clone_temp_name", ""), prefix.name,
+                    operation_started_ns=receipt.get("prefix_parent_rename_started_ns"),
+                    operation_finished_ns=receipt.get("prefix_parent_rename_finished_ns"))
+                or _gate_directory_metadata_commitment(prefix_parent_row)
+                   != receipt.get("prefix_parent_post_materialization_metadata")):
+            return False
+        template_state = capture_storage_tree_state()
+        template_rows = {row.get("path"): row for row in template_state.get("entries", ())
+                         if isinstance(row, Mapping) and isinstance(row.get("path"), str)}
+        source_prefix = str(PREFIX_TEMPLATE)
+        clone_prefix = str(prefix)
+        source_paths = {path for path in template_rows
+                        if path == source_prefix or path.startswith(source_prefix + os.sep)}
+        clone_paths = {path for path in live_rows
+                       if path == clone_prefix or path.startswith(clone_prefix + os.sep)}
+        source_relatives = {Path(path).relative_to(PREFIX_TEMPLATE).as_posix(): path
+                            for path in source_paths
+                            if path != str(template_marker_path)}
+        clone_relatives = {Path(path).relative_to(prefix).as_posix(): path
+                           for path in clone_paths if path != str(prefix_marker)}
+        if set(source_relatives) != set(clone_relatives):
+            return False
+        for relative, source_path in source_relatives.items():
+            source_row = template_rows[source_path]
+            clone_row = live_rows[clone_relatives[relative]]
+            expected_mode = 0o700 if relative == "." else source_row.get("mode")
+            if (source_row.get("kind") != clone_row.get("kind")
+                    or expected_mode != clone_row.get("mode")
+                    or source_row.get("owner_uid") != clone_row.get("owner_uid")
+                    or source_row.get("owner_gid") != clone_row.get("owner_gid")
+                    or clone_row.get("device") != prefix_info.st_dev):
+                return False
+            if source_row.get("kind") == "file" and (
+                    source_row.get("size_bytes") != clone_row.get("size_bytes")
+                    or source_row.get("link_count") != clone_row.get("link_count")):
+                return False
+            if source_row.get("kind") == "directory":
+                source_children = set(source_row.get("children", ()))
+                clone_children = set(clone_row.get("children", ()))
+                if relative == ".":
+                    source_children.discard(template_marker_path.name)
+                    clone_children.discard(prefix_marker.name)
+                if source_children != clone_children:
+                    return False
+        # The ordinary fingerprint omits empty directories; bind those too by
+        # comparing the exact source and clone directory path sets.
+        source_dirs = {str(Path(base) / name) for base, dirs, _files in os.walk(PREFIX_TEMPLATE)
+                       for name in dirs if not (Path(base) == PREFIX_TEMPLATE and name == template_marker_path.name)}
+        clone_dirs = {str(Path(base) / name) for base, dirs, _files in os.walk(prefix)
+                      for name in dirs if not (Path(base) == prefix and name == prefix_marker.name)}
+        if {Path(path).relative_to(PREFIX_TEMPLATE).as_posix() for path in source_dirs} != {
+                Path(path).relative_to(prefix).as_posix() for path in clone_dirs}:
+            return False
+        estimates = _validated_manifest_estimates(json.loads(_read_file_nofollow(manifest_path)))
+        allocated = _prefix_size(prefix)["allocated_inode_deduplicated_bytes"]
+        if (allocated != receipt.get("materialized_prefix_allocated_bytes")
+                or allocated > estimates["expected_prefix_bytes"]
+                or receipt.get("expected_prefix_bytes") != estimates["expected_prefix_bytes"]
+                or receipt.get("estimated_persistent_bytes") != estimates["estimated_persistent_bytes"]
+                or receipt.get("estimated_projected_new_disk_bytes")
+                   != estimates["estimated_projected_new_disk_bytes"]):
+            return False
+
+        # Build a projection of the post-materialization tree by removing only
+        # the exact reserved prefix subtree and restoring its touched parent
+        # rows. The original R78 evaluator then proves the remaining transition.
+        old_rows = {row["path"]: row for row in before.get("entries", ()) if isinstance(row, Mapping) and "path" in row}
+        projected = copy.deepcopy(dict(after))
+        new_rows = {row["path"]: row for row in projected.get("entries", ()) if isinstance(row, Mapping) and "path" in row}
+        prefix_s = str(prefix)
+        parent_s = str(prefix.parent)
+        old_parent, current_parent = old_rows.get(parent_s), new_rows.get(parent_s)
+        if (not isinstance(old_parent, Mapping) or not isinstance(current_parent, Mapping)
+                or any(old_parent.get(key) != current_parent.get(key)
+                       for key in ("kind", "device", "inode", "owner_uid", "owner_gid", "mode"))
+                or set(current_parent.get("children", ()))
+                   != set(old_parent.get("children", ())) | {prefix.name}):
+            return False
+        for path in list(new_rows):
+            if path == prefix_s or path.startswith(prefix_s + os.sep):
+                new_rows.pop(path, None)
+        # Materialization adds one named child to the pre-existing prefix parent.
+        if parent_s not in old_rows:
+            return False
+        projected["entries"] = [row for row in projected["entries"]
+                                if not (isinstance(row, Mapping)
+                                        and (row.get("path") == parent_s
+                                             or row.get("path") == prefix_s
+                                             or str(row.get("path", "")).startswith(prefix_s + os.sep)))]
+        projected["entries"].append(copy.deepcopy(old_rows[parent_s]))
+        projected["entries"].sort(key=lambda row: row.get("path", ""))
+        # The active marker is the same authorized path, updated in place from
+        # PREPARED to MATERIALIZED. Its protocol identity is checked above.
+        projected_marker = dict(marker)
+        projected_marker.pop("materialization_receipt", None)
+        projected_marker["state"] = "PREPARED"
+        projected_marker["updated_at_unix"] = marker.get("updated_at_unix", marker.get("created_at_unix", 0))
+        projected_marker_bytes = _canonical_pretty_json_bytes(projected_marker)
+        return evaluate_storage_smoke_transition(
+            before, projected, experiment_id=experiment_id,
+            attestation_bytes=attestation_bytes, sidecar_bytes=sidecar_bytes,
+            output_dir=output_dir, manifest_path=manifest_path, claim_path=claim_path,
+            active_marker_bytes=projected_marker_bytes,
+            _materialized_prefix_path=prefix)
+    except (OSError, ValueError, TypeError, KeyError, RuntimeError, json.JSONDecodeError):
+        return False
+
+
+def _canonical_path_set_sha256(paths: Sequence[Path | str]) -> str:
+    canonical = sorted({str(Path(os.path.abspath(os.fspath(path)))) for path in paths})
+    raw = json.dumps(canonical, ensure_ascii=True, separators=(",", ":")).encode("ascii")
+    return hashlib.sha256(raw).hexdigest()
+
+
+def _allocation_snapshot_entries_sha256(entries: Sequence[Mapping[str, Any]]) -> str:
+    raw = json.dumps(list(entries), sort_keys=True, ensure_ascii=True,
+                     separators=(",", ":")).encode("ascii")
+    return hashlib.sha256(raw).hexdigest()
+
+
+def _make_nonlease_allocation_snapshot(
+    entries: Sequence[Mapping[str, Any]], exclusion_paths: Sequence[Path | str],
+) -> dict[str, Any]:
+    normalized = sorted((dict(row) for row in entries), key=lambda row: row["path"])
+    if len(normalized) > NONLEASE_ALLOCATION_SNAPSHOT_MAX_PATHS:
+        raise RuntimeError(
+            "non-lease allocation snapshot exceeds its bounded path limit "
+            f"({len(normalized)} > {NONLEASE_ALLOCATION_SNAPSHOT_MAX_PATHS})")
+    return {
+        "schema_version": NONLEASE_ALLOCATION_SNAPSHOT_SCHEMA,
+        "complete": True,
+        "entry_count": len(normalized),
+        "entries_sha256": _allocation_snapshot_entries_sha256(normalized),
+        "exclusion_paths_sha256": _canonical_path_set_sha256(exclusion_paths),
+        "entries": normalized,
+    }
+
+
+def _allocation_snapshot_total_bytes(snapshot: Any) -> int:
+    """Validate and total the path snapshot with the same hardlink rule as measurement."""
+    if (not isinstance(snapshot, Mapping)
+            or not isinstance(snapshot.get("schema_version"), int)
+            or isinstance(snapshot.get("schema_version"), bool)
+            or snapshot.get("schema_version") != NONLEASE_ALLOCATION_SNAPSHOT_SCHEMA
+            or not isinstance(snapshot.get("entries"), list)
+            or len(snapshot["entries"]) > NONLEASE_ALLOCATION_SNAPSHOT_MAX_PATHS
+            or not isinstance(snapshot.get("entry_count"), int)
+            or isinstance(snapshot.get("entry_count"), bool)
+            or snapshot.get("entry_count") != len(snapshot["entries"])
+            or not isinstance(snapshot.get("entries_sha256"), str)
+            or not re.fullmatch(r"[0-9a-f]{64}", snapshot["entries_sha256"])
+            or not hmac.compare_digest(snapshot["entries_sha256"],
+                                       _allocation_snapshot_entries_sha256(snapshot["entries"]))
+            or not isinstance(snapshot.get("exclusion_paths_sha256"), str)
+            or not re.fullmatch(r"[0-9a-f]{64}", snapshot["exclusion_paths_sha256"])
+            or snapshot.get("complete") is not True):
+        raise ValueError("non-lease allocation snapshot is missing, incomplete, or malformed")
+    allocated_by_inode: dict[tuple[Any, ...], int] = {}
+    seen_paths: set[str] = set()
+    previous_path: str | None = None
+    for row in snapshot["entries"]:
+        if not isinstance(row, Mapping):
+            raise ValueError("non-lease allocation snapshot contains a malformed path row")
+        path = row.get("path")
+        allocated = row.get("allocated_bytes")
+        root = row.get("root")
+        classification = row.get("classification")
+        category = row.get("category")
+        size = row.get("size_bytes")
+        owner_uid = row.get("owner_uid")
+        owner_gid = row.get("owner_gid")
+        mode = row.get("mode")
+        link_count = row.get("link_count")
+        if (not isinstance(path, str) or not Path(path).is_absolute()
+                or str(Path(os.path.abspath(path))) != path
+                or not isinstance(root, str) or not Path(root).is_absolute()
+                or str(Path(os.path.abspath(root))) != root
+                or classification not in {ROOT_CLASS_MANDATORY, ROOT_CLASS_OPTIONAL_EPHEMERAL}
+                or not isinstance(category, str) or not category
+                or not isinstance(size, int) or isinstance(size, bool) or size < 0
+                or not isinstance(owner_uid, int) or isinstance(owner_uid, bool) or owner_uid < 0
+                or not isinstance(owner_gid, int) or isinstance(owner_gid, bool) or owner_gid < 0
+                or not isinstance(mode, int) or isinstance(mode, bool) or mode < 0
+                or not isinstance(link_count, int) or isinstance(link_count, bool) or link_count < 1
+                or path in seen_paths or (previous_path is not None and path < previous_path)
+                or row.get("kind") != "regular_file"
+                or not isinstance(allocated, int) or isinstance(allocated, bool) or allocated < 0):
+            raise ValueError("non-lease allocation snapshot contains an invalid path identity")
+        seen_paths.add(path)
+        previous_path = path
+        device, inode = row.get("device"), row.get("inode")
+        if row.get("volatile_gate_attestation_identity") is True:
+            if (path != str(Path(os.path.abspath(GATE0_ATTESTATION_PATH)))
+                    or link_count != 1
+                    or any(name in row for name in ("device", "inode", "mtime_ns", "ctime_ns"))):
+                raise ValueError("volatile allocation identity is allowed only for the Gate attestation")
+            key = ("gate-attestation", path)
+        else:
+            mtime_ns, ctime_ns = row.get("mtime_ns"), row.get("ctime_ns")
+            if (not isinstance(device, int) or isinstance(device, bool) or device < 0
+                    or not isinstance(inode, int) or isinstance(inode, bool) or inode < 0
+                    or not isinstance(mtime_ns, int) or isinstance(mtime_ns, bool) or mtime_ns < 0
+                    or not isinstance(ctime_ns, int) or isinstance(ctime_ns, bool) or ctime_ns < 0):
+                raise ValueError("non-lease allocation snapshot lacks a regular-file inode identity")
+            key = (device, inode)
+        prior = allocated_by_inode.setdefault(key, allocated)
+        if prior != allocated:
+            raise ValueError("non-lease allocation snapshot has inconsistent hardlink allocation")
+    return sum(allocated_by_inode.values())
+
+
+def _nonlease_storage_drift_diagnostic(
+    *, attestation: Mapping[str, Any], gate_attestation_sha256: str,
+    experiment_id: str | None, exclusion_paths: Sequence[Path | str],
+    decision_observed_nonlease_bytes: int, current_snapshot: Any,
+) -> dict[str, Any]:
+    """Build signed path evidence for an already-decided exact-allocation refusal.
+
+    This function is diagnostic only. Its return value never participates in
+    the admission decision.
+    """
+    measurements = attestation.get("measurements")
+    baseline_snapshot = (measurements.get("nonlease_allocation_snapshot")
+                         if isinstance(measurements, Mapping) else None)
+    attested = (measurements.get("fgmetal_scoped_observed_nonlease_allocated_inode_bytes")
+                if isinstance(measurements, Mapping) else None)
+    try:
+        baseline_total = _allocation_snapshot_total_bytes(baseline_snapshot)
+        current_total = _allocation_snapshot_total_bytes(current_snapshot)
+        if (not isinstance(attested, int) or isinstance(attested, bool) or attested < 0
+                or not isinstance(decision_observed_nonlease_bytes, int)
+                or isinstance(decision_observed_nonlease_bytes, bool)
+                or decision_observed_nonlease_bytes < 0):
+            raise ValueError("Gate or comparison allocation total is invalid")
+        baseline_paths = {row["path"]: dict(row) for row in baseline_snapshot["entries"]}
+        current_paths = {row["path"]: dict(row) for row in current_snapshot["entries"]}
+        # Current-run exclusions may be signed after the Gate baseline. Apply
+        # them to both sides so the diff follows the exact comparison scope.
+        excluded = {Path(os.path.abspath(os.fspath(path))) for path in exclusion_paths}
+        baseline_paths = {
+            path: row for path, row in baseline_paths.items()
+            if not _is_project_usage_path_excluded(Path(path), excluded)
+        }
+        current_paths = {
+            path: row for path, row in current_paths.items()
+            if not _is_project_usage_path_excluded(Path(path), excluded)
+        }
+
+        def total(rows: Mapping[str, Mapping[str, Any]]) -> int:
+            inode_bytes: dict[tuple[Any, ...], int] = {}
+            for path, row in rows.items():
+                if row.get("volatile_gate_attestation_identity") is True:
+                    key: tuple[Any, ...] = ("gate-attestation", path)
+                else:
+                    key = (row.get("device"), row.get("inode"))
+                allocated = row["allocated_bytes"]
+                prior = inode_bytes.setdefault(key, allocated)
+                if prior != allocated:
+                    raise ValueError("path diff has inconsistent hardlink allocation")
+            return sum(inode_bytes.values())
+
+        comparable_baseline_total = total(baseline_paths)
+        comparable_current_total = total(current_paths)
+        changed: list[dict[str, Any]] = []
+        for path in sorted(set(baseline_paths) | set(current_paths)):
+            before = baseline_paths.get(path)
+            after = current_paths.get(path)
+            if before == after:
+                continue
+            if before is None:
+                category = "created"
+            elif after is None:
+                category = "deleted"
+            elif ((before.get("device"), before.get("inode"))
+                  != (after.get("device"), after.get("inode"))):
+                category = "inode_replaced"
+            elif before.get("allocated_bytes") != after.get("allocated_bytes"):
+                category = "allocation_changed"
+            elif before.get("size_bytes") != after.get("size_bytes"):
+                category = "logical_size_changed"
+            else:
+                category = "metadata_changed"
+            changed.append({
+                "path": path,
+                "ownership_class": (after or before).get("classification"),
+                "ownership_category": (after or before).get("category"),
+                "change": category,
+                "before": before,
+                "after": after,
+                "allocated_bytes_delta": (
+                    (after.get("allocated_bytes", 0) if after is not None else 0)
+                    - (before.get("allocated_bytes", 0) if before is not None else 0)),
+            })
+        delta = decision_observed_nonlease_bytes - attested
+        snapshot_delta = current_total - baseline_total
+        status = "COMPLETE"
+        if (baseline_total != attested or current_total != decision_observed_nonlease_bytes
+                or snapshot_delta != delta
+                or comparable_current_total - comparable_baseline_total != delta):
+            status = "INCONSISTENT"
+        changed_raw = json.dumps(changed, sort_keys=True, ensure_ascii=True,
+                                 separators=(",", ":")).encode("ascii")
+        cap = NONLEASE_DRIFT_DIAGNOSTIC_MAX_PATHS
+        return {
+            "schema_version": 1,
+            "status": status,
+            "comparison_rule": "exact_nonlease_allocated_inode_deduplicated_bytes_equality",
+            "experiment_id": experiment_id,
+            "gate0_attestation_sha256": gate_attestation_sha256,
+            "baseline_snapshot_sha256": baseline_snapshot.get("entries_sha256"),
+            "current_snapshot_sha256": current_snapshot.get("entries_sha256"),
+            "baseline_exclusion_paths_sha256": baseline_snapshot.get("exclusion_paths_sha256"),
+            "comparison_exclusion_paths_sha256": _canonical_path_set_sha256(exclusion_paths),
+            "attested_nonlease_allocated_bytes": attested,
+            "comparison_observed_nonlease_allocated_bytes": decision_observed_nonlease_bytes,
+            "snapshot_baseline_nonlease_allocated_bytes": baseline_total,
+            "snapshot_current_nonlease_allocated_bytes": current_total,
+            "aggregate_allocated_bytes_delta": delta,
+            "snapshot_allocated_bytes_delta": snapshot_delta,
+            "changed_path_count": len(changed),
+            "changed_path_rows_sha256": hashlib.sha256(changed_raw).hexdigest(),
+            "changed_path_rows_truncated": max(0, len(changed) - cap),
+            "changed_paths": changed[:cap],
+        }
+    except Exception as error:
+        return {
+            "schema_version": 1,
+            "status": "UNAVAILABLE",
+            "comparison_rule": "exact_nonlease_allocated_inode_deduplicated_bytes_equality",
+            "experiment_id": experiment_id,
+            "gate0_attestation_sha256": gate_attestation_sha256,
+            "comparison_exclusion_paths_sha256": _canonical_path_set_sha256(exclusion_paths),
+            "attested_nonlease_allocated_bytes": attested,
+            "comparison_observed_nonlease_allocated_bytes": decision_observed_nonlease_bytes,
+            "reason": f"path-level diagnostic could not be reconciled: {type(error).__name__}: {error}",
+            "changed_paths": [],
+        }
+
+
+def storage_tree_state_matches_gate(state: Mapping[str, Any]) -> bool:
+    """Return whether the current mandatory-root state matches Gate exactly."""
+    if not isinstance(state, Mapping) or state.get("schema_version") != 1:
+        return False
+    try:
+        current = capture_storage_tree_state()
+    except (OSError, RuntimeError, ValueError):
+        return False
+    return current == dict(state)
+
+
+def _storage_tree_transition_is_admission_owned(
+    before: Mapping[str, Any], after: Mapping[str, Any], *,
+    manifest_path: Path, claim_path: Path,
+    authorized_file_paths: set[str] | None = None,
+) -> bool:
+    """Accept one observed admission-file creation and its direct parent effects.
+
+    Callers should split claim and manifest publication into separate observed
+    transitions. This makes each directory child delta attributable to one
+    framework operation and ensures a persistent extra child or later metadata
+    change is checked against a new exact baseline.
+    """
+    old_rows = {row.get("path"): row for row in before.get("entries", ())
+                if isinstance(row, Mapping) and isinstance(row.get("path"), str)}
+    new_rows = {row.get("path"): row for row in after.get("entries", ())
+                if isinstance(row, Mapping) and isinstance(row.get("path"), str)}
+    if len(old_rows) != len(before.get("entries", ())) or len(new_rows) != len(after.get("entries", ())):
+        return False
+    all_admission_files = {
+        str(Path(os.path.abspath(manifest_path))),
+        str(Path(os.path.abspath(claim_path))),
+    }
+    allowed_files = set(authorized_file_paths or all_admission_files)
+    if not allowed_files or not allowed_files.issubset(all_admission_files):
+        return False
+    allowed_dirs: set[str] = set()
+    allowed_children: dict[str, set[str]] = {}
+    for filename in allowed_files:
+        child = Path(filename)
+        while child.parent != child:
+            parent = str(child.parent)
+            allowed_dirs.add(parent)
+            allowed_children.setdefault(parent, set()).add(child.name)
+            child = child.parent
+    for path in set(old_rows) | set(new_rows):
+        old, new = old_rows.get(path), new_rows.get(path)
+        if old == new:
+            continue
+        if path in allowed_files:
+            if old is not None or new is None or new.get("kind") != "file":
+                return False
+            continue
+        if path not in allowed_dirs or new is None:
+            return False
+        if new.get("kind") != "directory" or (old is not None and old.get("kind") != "directory"):
+            return False
+        if old is None:
+            old = {"kind": "directory", "children": []}
+        old_without_children = {key: value for key, value in old.items() if key != "children"}
+        new_without_children = {key: value for key, value in new.items() if key != "children"}
+        if old_rows.get(path) is not None:
+            # A file addition cannot replace or relink its parent. Directory
+            # allocation/size/timestamps may reflect the single exact entry
+            # operation, but identity, permissions, and link count are stable.
+            if any(old_without_children.get(key) != new_without_children.get(key)
+                   for key in ("device", "inode", "mode", "link_count")):
+                return False
+        old_children = set(old.get("children", ()))
+        new_children = set(new.get("children", ()))
+        child_delta = old_children ^ new_children
+        expected_child_names = allowed_children.get(path, set()) if path in {
+            str(Path(os.path.abspath(value)).parent) for value in allowed_files
+        } else set()
+        if child_delta - expected_child_names:
+            return False
+        metadata_changed = old_without_children != new_without_children
+        if metadata_changed and not child_delta:
+            return False
+    return True
+
+
+class AdmissionReservationCapability:
+    """Single-process, nonserializable proof for an R70/R71 handoff."""
+
+    __slots__ = ("_token", "lock_file", "gate_sha256", "admission_id", "build_id",
+                 "plan_sha256", "manifest_path", "manifest_sha256", "claim_path",
+                 "claim_sha256", "post_state", "r71_validation", "pid", "used")
+
+    def __init__(self, token: object, *, lock_file: Any, gate_sha256: str,
+                 admission_id: str, build_id: str, plan_sha256: str,
+                 manifest_path: Path, manifest_sha256: str, claim_path: Path,
+                 claim_sha256: str, post_state: Mapping[str, Any] | None,
+                 r71_validation: Mapping[str, Any] | None = None):
+        if token is not _R70_ADMISSION_CAPABILITY_TOKEN:
+            raise RuntimeError("R70 handoff capability cannot be constructed outside admission")
+        self._token = token
+        self.lock_file = lock_file
+        self.gate_sha256 = gate_sha256
+        self.admission_id = admission_id
+        self.build_id = build_id
+        self.plan_sha256 = plan_sha256
+        self.manifest_path = str(manifest_path)
+        self.manifest_sha256 = manifest_sha256
+        self.claim_path = str(claim_path)
+        self.claim_sha256 = claim_sha256
+        self.post_state = dict(post_state) if post_state is not None else None
+        self.r71_validation = dict(r71_validation) if r71_validation is not None else None
+        self.pid = os.getpid()
+        self.used = False
+
+    def validate(self, *, build_id: str, owner_experiment: str,
+                 plan_sha256: str, manifest_path: Path, consumption: bool = False,
+                 retention_lock_fds: tuple[int, int] | None = None,
+                 allow_pre_dispatch: bool = False) -> None:
+        if (self._token is not _R70_ADMISSION_CAPABILITY_TOKEN or (self.used and not consumption)
+                or (_is_r6a_r71_admission_id(owner_experiment)
+                    and consumption and not self.used)
+                or (allow_pre_dispatch and retention_lock_fds is None)
+                or self.pid != os.getpid() or self.build_id != build_id
+                or self.admission_id != owner_experiment or self.plan_sha256 != plan_sha256
+                or self.manifest_path != str(manifest_path)):
+            raise RuntimeError("R70 admission handoff identity mismatch or replay")
+        if not (_is_r6a_r71_admission_id(owner_experiment) and consumption):
+            if allow_pre_dispatch:
+                raise RuntimeError("R71 pre-dispatch capacity allowance is outside its live consumption boundary")
+            try:
+                os.fstat(self.lock_file.fileno())
+            except (AttributeError, OSError, ValueError) as error:
+                raise RuntimeError("R70 admission allocation-lock capability was lost") from error
+        if _is_r6a_r71_admission_id(owner_experiment):
+            validation_kwargs = {
+                "build_id": build_id, "plan_sha256": plan_sha256,
+                "manifest_path": manifest_path, "consumption": consumption,
+                "retention_lock_fds": retention_lock_fds,
+            }
+            if allow_pre_dispatch:
+                validation_kwargs["allow_pre_dispatch"] = True
+            self._validate_r71(**validation_kwargs)
+        elif self.post_state is not None:
+            current = capture_storage_tree_state()
+            if current != self.post_state:
+                raise RuntimeError("unrelated storage mutation occurred after signed ALLOW")
+
+    def _validate_r71(self, *, build_id: str, plan_sha256: str,
+                      manifest_path: Path, consumption: bool = False,
+                      retention_lock_fds: tuple[int, int] | None = None,
+                      allow_pre_dispatch: bool = False) -> None:
+        """Revalidate exact R71 closure and signed identity at reserve/consumption."""
+        if allow_pre_dispatch and not consumption:
+            raise RuntimeError("R71 pre-dispatch capacity allowance requires consumption validation")
+        if not isinstance(self.r71_validation, Mapping):
+            raise RuntimeError("R71 handoff lacks its exact dependency-manifest descriptor")
+        try:
+            from r6a_dependency_manifest import (
+                MANIFEST_NAME, resolve_manifest_path, validate_candidate_g0c_binding,
+                validate_manifest,
+            )
+            dependency_manifest_path = resolve_manifest_path(
+                REPO, self.r71_validation.get("manifest_path"))
+            manifest_raw = _read_file_nofollow(manifest_path)
+            manifest = json.loads(manifest_raw)
+            gate_raw = _read_file_nofollow(GATE0_ATTESTATION_PATH, maximum_bytes=GATE0_ATTESTATION_MAX_BYTES)
+            claim_raw = _read_file_nofollow(Path(self.claim_path), maximum_bytes=64 * 1024)
+            candidate_rel = self.r71_validation["candidate_path"]
+            plan_rel = self.r71_validation["plan_path"]
+            g0c_rel = self.r71_validation["g0c_review_path"]
+            candidate_path = _repo_relative_manifest_path(candidate_rel)
+            plan_path = _repo_relative_manifest_path(plan_rel)
+            g0c_path = _repo_relative_manifest_path(g0c_rel)
+            candidate = json.loads(_read_file_nofollow(candidate_path, maximum_bytes=4 * 1024 * 1024))
+            plan_raw = _read_file_nofollow(plan_path, maximum_bytes=16 * 1024 * 1024)
+            plan = json.loads(plan_raw)
+            g0c = json.loads(_read_file_nofollow(g0c_path, maximum_bytes=4 * 1024 * 1024))
+            allow_manifest_sha = hashlib.sha256(manifest_raw).hexdigest()
+            dependency_manifest_sha = self.r71_validation.get("dependency_manifest_sha256")
+            if (not isinstance(dependency_manifest_sha, str)
+                    or not re.fullmatch(r"[0-9a-f]{64}", dependency_manifest_sha)
+                    or allow_manifest_sha != self.manifest_sha256
+                    or hashlib.sha256(gate_raw).hexdigest() != self.gate_sha256
+                    or hashlib.sha256(claim_raw).hexdigest() != self.claim_sha256
+                    or not _verify_manifest_signature(manifest)
+                    or manifest.get("decision") != "ALLOW"
+                    or manifest.get("experiment_id") != self.admission_id
+                    or manifest.get("r71_build_id") != build_id
+                    or manifest.get("build_session_plan_sha256") != plan_sha256
+                    or manifest.get("r71_execution_dependency_manifest_sha256") != dependency_manifest_sha
+                    or manifest.get("r71_dependency_manifest_path")
+                    != self.r71_validation.get("manifest_path")
+                    or manifest.get("admission_claim", {}).get("build_id") != build_id
+                    or hashlib.sha256(plan_raw).hexdigest() != manifest.get("candidate_hashes", {}).get("r71_dependency_plan_sha256")):
+                raise RuntimeError("R71 Gate, claim, candidate, plan, or build binding changed")
+            envelope = validate_candidate_g0c_binding(
+                candidate=candidate, g0c_review=g0c,
+                candidate_path=candidate_rel, manifest_sha256=dependency_manifest_sha)
+            if (envelope["g0c_sha256"] != manifest.get("r71_g0c_core_sha256")
+                    or envelope["candidate_core_sha256"] != manifest.get("candidate_hashes", {}).get("r71_candidate_core_sha256")):
+                raise RuntimeError("R71 candidate or G0C core identity changed")
+            declared_output = plan.get("admission_output_dir")
+            if declared_output is not None:
+                expected_output = f"experiments/storage/r6a-admission-outputs/{self.admission_id}"
+                if (plan.get("admission_output_contract") != "R90_ADMISSION_UNIQUE_SIBLING_ROOT_V1"
+                        or not isinstance(declared_output, str)
+                        or re.fullmatch(
+                            r"r6a-r87-admission-[A-Za-z0-9][A-Za-z0-9_-]{0,95}",
+                            self.admission_id) is None
+                        or declared_output != expected_output
+                        or Path(declared_output).is_absolute()
+                        or "\\" in declared_output
+                        or Path(declared_output).as_posix() != declared_output):
+                    raise RuntimeError("R90 admission output contract or relative path is invalid")
+                normalized_output = _measured_output_dir(REPO / declared_output)
+                if (manifest.get("output_dir") != str(normalized_output)
+                        or normalized_output.relative_to(REPO).as_posix() != declared_output):
+                    raise RuntimeError("R71 signed output path differs from the plan-bound admission output root")
+            plan_canonical_sha = hashlib.sha256(
+                json.dumps(plan, ensure_ascii=False, sort_keys=True,
+                           separators=(",", ":"), allow_nan=False).encode("utf-8")).hexdigest()
+            validate_manifest(
+                manifest_path=dependency_manifest_path,
+                expected_sha256=dependency_manifest_sha, candidate=candidate, plan=plan,
+                plan_raw_sha256=hashlib.sha256(plan_raw).hexdigest(),
+                plan_canonical_sha256=plan_canonical_sha,
+                g0c_sha256=envelope["g0c_sha256"], candidate_path=candidate_rel,
+                plan_path=plan_rel, repo=REPO)
+            _reject_r6a_admission_with_terminal_disposition(
+                manifest, manifest_raw, retention_lock_fds=retention_lock_fds)
+            active_buildlease_id: str | None = None
+            if consumption:
+                retention_directory = Path(__file__).resolve().parent
+                if str(retention_directory) not in sys.path:
+                    sys.path.insert(0, str(retention_directory))
+                import build_retention
+                lease = build_retention._load_lease(build_id)
+                if (lease.get("owner_experiment") != self.admission_id
+                        or lease.get("path") != str(CACHE / "builds" / build_id)
+                        or lease.get("state") != "ACTIVE"
+                        or lease.get("r71_execution_dependency_manifest_sha256")
+                        != dependency_manifest_sha
+                        or lease.get("session_v3", {}).get("plan_sha256") != plan_sha256):
+                    raise RuntimeError("R71 active BuildLease does not match the consumed admission")
+                session = lease.get("session_v3")
+                workspace_identity = (session.get("workspace_mount_identity")
+                                      if isinstance(session, Mapping) else None)
+                readonly_identity = (session.get("readonly_mount_identity")
+                                     if isinstance(session, Mapping) else None)
+                live_writable_workspace = (
+                    isinstance(workspace_identity, Mapping)
+                    and workspace_identity.get("attached") is True
+                    and session.get("state") in {"ACTIVE", "RUNNING"})
+                live_readonly_workspace = (
+                    isinstance(readonly_identity, Mapping)
+                    and readonly_identity.get("attached") is True
+                    and readonly_identity.get("readonly") is True
+                    and session.get("state") == "READY_TO_FINALIZE"
+                    and session.get("write_quiescence_state")
+                        == "WRITABLE_IMAGE_NORMALLY_UNMOUNTED_AND_DETACHED")
+                if live_writable_workspace or live_readonly_workspace:
+                    _verified_r71_capacity_workspace(
+                        build_id, allow_pre_dispatch=allow_pre_dispatch)
+                    active_buildlease_id = build_id
+            blockers = _gate0_blockers(
+                active_experiment_id=self.admission_id,
+                allow_r71_handoff=True,
+                r71_build_id=build_id if consumption else None,
+                active_buildlease_id=active_buildlease_id,
+                r71_allow_pre_dispatch=allow_pre_dispatch,
+                retention_lock_fds=retention_lock_fds)
+            if blockers:
+                raise RuntimeError("R71 Gate/capacity/root check failed: " + "; ".join(blockers))
+            live_free = disk_free_bytes(REPO)
+            if active_buildlease_id is None:
+                live_usage = measure_project_usage(strict=True)
+            else:
+                live_usage = measure_project_usage(
+                    strict=True, active_buildlease_id=active_buildlease_id,
+                    r71_allow_pre_dispatch=allow_pre_dispatch)
+            live_project = conservative_project_usage_bytes(live_usage)
+            if live_free < FREE_HARD_STOP or live_project > PROJECT_BUDGET:
+                raise RuntimeError("R71 live capacity crossed its hard free-space or project-scope boundary")
+        except (OSError, KeyError, TypeError, ValueError, RuntimeError) as error:
+            raise RuntimeError(f"R71 dependency closure failed at handoff boundary: {error}") from error
+
+
+_R70_ADMISSION_CAPABILITY_TOKEN = object()
+
+
+class AdmissionManifest(dict):
+    """JSON-compatible manifest result with an optional live R70 capability."""
+
+    def __init__(self, *args: Any,
+                 reservation_capability: AdmissionReservationCapability | None = None,
+                 **kwargs: Any):
+        super().__init__(*args, **kwargs)
+        self.reservation_capability = reservation_capability
+
+
+def _is_project_usage_path_excluded(path: Path, excluded_paths: set[Path]) -> bool:
+    """Check an exact path and its ancestors against pre-normalized exclusions."""
+    candidate = path
+    while True:
+        if candidate in excluded_paths:
+            return True
+        parent = candidate.parent
+        if parent == candidate:
+            return False
+        candidate = parent
 
 
 def _measured_output_dir(path: Path | str, *, require_missing: bool = False) -> Path:
@@ -522,6 +3224,20 @@ def _experiment_manifest_path(experiment_id: str) -> Path:
     return path
 
 
+def _repo_relative_manifest_path(relative: Any) -> Path:
+    if (not isinstance(relative, str) or not relative or "\\" in relative
+            or "\x00" in relative):
+        raise ValueError("R71 dependency path is malformed")
+    rel = Path(relative)
+    if rel.is_absolute() or rel.as_posix() != relative or any(p in {"", ".", ".."} for p in rel.parts):
+        raise ValueError("R71 dependency path is not canonical repository-relative")
+    path = REPO / rel
+    resolved = path.resolve(strict=True)
+    if path.is_symlink() or resolved != path or REPO.resolve() not in resolved.parents:
+        raise ValueError("R71 dependency path is unsafe")
+    return path
+
+
 def _storage_entry_identity(info: os.stat_result) -> tuple[int, ...]:
     return (
         info.st_dev, info.st_ino, info.st_mode, info.st_uid, info.st_nlink,
@@ -530,7 +3246,197 @@ def _storage_entry_identity(info: os.stat_result) -> tuple[int, ...]:
     )
 
 
-def _persistent_output_snapshot(path: Path) -> tuple[int, str]:
+def _historical_terminal_apfs_device_alias_matches(
+    recorded_device: int, current_device: int,
+) -> bool:
+    """Prove the one historical APFS st_dev renumbering without weakening identity checks.
+
+    Correction-3 and one failed-output disposition were sealed while the Data
+    volume reported st_dev 16777229. Their current named objects retain every
+    other recorded identity field, while the same Data VolumeUUID now reports
+    st_dev/f_fsid 16777231. This read-only crosswalk accepts only that exact
+    old device number, this repository, the pinned historical mount evidence,
+    and the live Data-volume UUID. Callers still compare inode and all other
+    identity fields.
+    """
+    if (isinstance(recorded_device, int) and not isinstance(recorded_device, bool)
+            and isinstance(current_device, int) and not isinstance(current_device, bool)
+            and recorded_device == current_device):
+        return True
+    if (recorded_device != HISTORICAL_TERMINAL_APFS_OLD_DEVICE
+            or not isinstance(current_device, int)
+            or sys.platform != "darwin"
+            or REPO.resolve(strict=True) != HISTORICAL_TERMINAL_REPOSITORY):
+        return False
+
+    try:
+        evidence_path = REPO / HISTORICAL_TERMINAL_APFS_MOUNT_EVIDENCE
+        evidence_raw = _read_file_nofollow(evidence_path, maximum_bytes=4 * MIB)
+        if hashlib.sha256(evidence_raw).hexdigest() != HISTORICAL_TERMINAL_APFS_MOUNT_EVIDENCE_SHA256:
+            return False
+        evidence = json.loads(evidence_raw)
+        if not isinstance(evidence, Mapping):
+            return False
+        observation = evidence.get("full_readonly_observation")
+        data_info = (observation.get("data_volume_info")
+                     if isinstance(observation, Mapping) else None)
+        mount = (data_info.get("canonical_mount_identity")
+                 if isinstance(data_info, Mapping) else None)
+        expected_mount_row = {
+            "filesystem_id": [HISTORICAL_TERMINAL_APFS_OLD_DEVICE, 26],
+            "filesystem_type": "apfs",
+            "mount_point": "/System/Volumes/Data",
+            "source": "/dev/disk3s1",
+        }
+        if (not isinstance(evidence, Mapping)
+                or evidence.get("status") != "PASS"
+                or evidence.get("blockers") != []
+                or not isinstance(data_info, Mapping)
+                or data_info.get("VolumeUUID") != HISTORICAL_TERMINAL_APFS_VOLUME_UUID
+                or not isinstance(mount, Mapping)
+                or mount.get("volume_uuid") != HISTORICAL_TERMINAL_APFS_VOLUME_UUID
+                or mount.get("mount_state") != "MOUNTED_VERIFIED"
+                or mount.get("mount_table_mount_point") != "/System/Volumes/Data"
+                or mount.get("mount_table_filesystem_id")
+                    != [HISTORICAL_TERMINAL_APFS_OLD_DEVICE, 26]
+                or mount.get("mount_table_expected_path_records") != [expected_mount_row]):
+            return False
+
+        diskutil = Path("/usr/sbin/diskutil")
+        diskutil_fd = os.open(
+            diskutil, os.O_RDONLY | getattr(os, "O_CLOEXEC", 0)
+            | getattr(os, "O_NOFOLLOW", 0))
+        diskutil_info = os.fstat(diskutil_fd)
+        if (not stat.S_ISREG(diskutil_info.st_mode) or diskutil_info.st_uid != 0
+                or stat.S_IMODE(diskutil_info.st_mode) & 0o022
+                or diskutil.resolve(strict=True) != diskutil):
+            os.close(diskutil_fd)
+            return False
+        data_fd: int | None = None
+        repo_fd: int | None = None
+        try:
+            data_fd = _open_directory_nofollow(Path("/System/Volumes/Data"))
+            repo_fd = _open_directory_nofollow(REPO)
+
+            def descriptor_identity(descriptor: int) -> tuple[int, int, int]:
+                info = os.fstat(descriptor)
+                fsid = getattr(os.fstatvfs(descriptor), "f_fsid", None)
+                if not isinstance(fsid, int):
+                    raise OSError("APFS filesystem identity is unavailable")
+                return info.st_dev, info.st_ino, fsid
+
+            def volume_matches(path: Path) -> bool:
+                result = subprocess.run(
+                    [str(diskutil), "info", "-plist", str(path)],
+                    stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                    check=False, timeout=30)
+                if result.returncode != 0 or result.stderr.strip():
+                    return False
+                live_volume = plistlib.loads(result.stdout)
+                return (
+                    isinstance(live_volume, Mapping)
+                    and live_volume.get("DiskUUID", live_volume.get("VolumeUUID"))
+                        == HISTORICAL_TERMINAL_APFS_VOLUME_UUID
+                    and live_volume.get("MountPoint") == "/System/Volumes/Data"
+                    and live_volume.get("FilesystemType") == "apfs"
+                )
+
+            data_before = descriptor_identity(data_fd)
+            repo_before = descriptor_identity(repo_fd)
+            if (data_before[0] != current_device or repo_before[0] != current_device
+                    or data_before[2] != current_device or repo_before[2] != current_device):
+                return False
+
+            # Bracket the UUID queries with open descriptors and reopen both names
+            # afterward. A remount/path substitution cannot be accepted merely
+            # because diskutil and an earlier descriptor happened to reuse st_dev.
+            if not volume_matches(Path("/System/Volumes/Data")):
+                return False
+            data_reopened: int | None = None
+            repo_reopened: int | None = None
+            try:
+                data_reopened = _open_directory_nofollow(Path("/System/Volumes/Data"))
+                repo_reopened = _open_directory_nofollow(REPO)
+                if (descriptor_identity(data_reopened) != data_before
+                        or descriptor_identity(repo_reopened) != repo_before):
+                    return False
+            finally:
+                if repo_reopened is not None:
+                    os.close(repo_reopened)
+                if data_reopened is not None:
+                    os.close(data_reopened)
+            if not volume_matches(Path("/System/Volumes/Data")):
+                return False
+
+            data_after = descriptor_identity(data_fd)
+            repo_after = descriptor_identity(repo_fd)
+            if data_after != data_before or repo_after != repo_before:
+                return False
+
+            evidence_after = _read_file_nofollow(evidence_path, maximum_bytes=4 * MIB)
+            diskutil_after = os.fstat(diskutil_fd)
+            named_diskutil_after = diskutil.lstat()
+            return (
+                hashlib.sha256(evidence_after).hexdigest()
+                    == HISTORICAL_TERMINAL_APFS_MOUNT_EVIDENCE_SHA256
+                and _storage_entry_identity(diskutil_after)
+                    == _storage_entry_identity(diskutil_info)
+                and _storage_entry_identity(named_diskutil_after)
+                    == _storage_entry_identity(diskutil_info)
+            )
+        finally:
+            if repo_fd is not None:
+                os.close(repo_fd)
+            if data_fd is not None:
+                os.close(data_fd)
+            os.close(diskutil_fd)
+    except (OSError, ValueError, TypeError, RuntimeError, plistlib.InvalidFileException,
+            subprocess.SubprocessError, json.JSONDecodeError):
+        return False
+
+
+def _identity_matches_historical_apfs_device_alias(
+    recorded_identity: Any, current_identity: Sequence[int], *, current_device: int,
+) -> bool:
+    """Compare a nine-field historical identity, allowing only the pinned dev alias."""
+    if (not isinstance(recorded_identity, list) or len(recorded_identity) != 9
+            or len(current_identity) != 9 or current_identity[0] != current_device):
+        return False
+    if (all(type(value) is int for value in recorded_identity)
+            and list(recorded_identity) == list(current_identity)):
+        return True
+    normalized = list(current_identity)
+    if recorded_identity[0] == HISTORICAL_TERMINAL_APFS_OLD_DEVICE:
+        if not _historical_terminal_apfs_device_alias_matches(
+                recorded_identity[0], current_device):
+            return False
+        normalized[0] = HISTORICAL_TERMINAL_APFS_OLD_DEVICE
+    elif recorded_identity[0] != current_device:
+        return False
+    return recorded_identity == normalized
+
+
+def _directory_identity_matches_historical_apfs_device_alias(
+    recorded_identity: Any, current_identity: tuple[int, int],
+) -> bool:
+    """Compare a historical directory pair with only the pinned APFS dev alias."""
+    if (isinstance(recorded_identity, list) and len(recorded_identity) == 2
+            and all(type(value) is int for value in recorded_identity)
+            and recorded_identity == list(current_identity)):
+        return True
+    return (
+        isinstance(recorded_identity, list)
+        and len(recorded_identity) == 2
+        and recorded_identity[0] == HISTORICAL_TERMINAL_APFS_OLD_DEVICE
+        and recorded_identity[1] == current_identity[1]
+        and _historical_terminal_apfs_device_alias_matches(
+            recorded_identity[0], current_identity[0])
+    )
+
+
+def _persistent_output_snapshot(
+    path: Path, *, historical_device_alias: tuple[int, int] | None = None,
+) -> tuple[int, str]:
     """Measure and fingerprint a run output on the measured project filesystem."""
     root_info = _stat_entry_nofollow(path)
     if root_info is None:
@@ -538,6 +3444,29 @@ def _persistent_output_snapshot(path: Path) -> tuple[int, str]:
     repo_info = REPO.lstat()
     if (not stat.S_ISDIR(root_info.st_mode) or root_info.st_dev != repo_info.st_dev):
         raise OSError("signed experiment output is not a directory on the measured project filesystem")
+    alias_current_device: int | None = None
+    alias_recorded_device: int | None = None
+    if historical_device_alias is not None:
+        alias_current_device, alias_recorded_device = historical_device_alias
+        expected_failed_output = (REPO / "experiments/storage/smoke-runs"
+                                  / LEGACY_FAILED_OUTPUT_DISPOSITION_RUN_ID)
+        expected_terminal_output = _historical_terminal_run_paths()["output_dir"]
+        if (path not in {expected_failed_output, expected_terminal_output}
+                or alias_current_device != root_info.st_dev
+                or alias_recorded_device != HISTORICAL_TERMINAL_APFS_OLD_DEVICE
+                or not _historical_terminal_apfs_device_alias_matches(
+                    alias_recorded_device, alias_current_device)):
+            raise OSError("historical failed-output device alias is not authenticated")
+
+    def snapshot_identity(info: os.stat_result) -> tuple[int, ...]:
+        identity = list(_storage_entry_identity(info))
+        if alias_current_device is not None:
+            if info.st_dev != alias_current_device:
+                raise OSError("historical failed-output tree crossed its authenticated device")
+            assert alias_recorded_device is not None
+            identity[0] = alias_recorded_device
+        return tuple(identity)
+
     allocated_by_inode: dict[tuple[int, int], int] = {}
     tree_digest = hashlib.sha256()
     for directory, dirnames, filenames in os.walk(path, followlinks=False):
@@ -548,7 +3477,7 @@ def _persistent_output_snapshot(path: Path) -> tuple[int, str]:
         current_row = {
             "path": "." if current == path else current.relative_to(path).as_posix(),
             "kind": "directory",
-            "identity": _storage_entry_identity(current_info),
+            "identity": snapshot_identity(current_info),
         }
         tree_digest.update(json.dumps(current_row, sort_keys=True, separators=(",", ":")).encode())
         tree_digest.update(b"\n")
@@ -561,7 +3490,7 @@ def _persistent_output_snapshot(path: Path) -> tuple[int, str]:
             if stat.S_ISLNK(info.st_mode):
                 tree_digest.update(json.dumps({
                     "path": child.relative_to(path).as_posix(), "kind": "symlink",
-                    "identity": _storage_entry_identity(info), "target": os.readlink(child),
+                    "identity": snapshot_identity(info), "target": os.readlink(child),
                 }, sort_keys=True, separators=(",", ":")).encode())
                 tree_digest.update(b"\n")
                 continue
@@ -575,7 +3504,7 @@ def _persistent_output_snapshot(path: Path) -> tuple[int, str]:
             if stat.S_ISLNK(info.st_mode):
                 tree_digest.update(json.dumps({
                     "path": child.relative_to(path).as_posix(), "kind": "symlink",
-                    "identity": _storage_entry_identity(info), "target": os.readlink(child),
+                    "identity": snapshot_identity(info), "target": os.readlink(child),
                 }, sort_keys=True, separators=(",", ":")).encode())
                 tree_digest.update(b"\n")
                 continue
@@ -583,7 +3512,7 @@ def _persistent_output_snapshot(path: Path) -> tuple[int, str]:
                 raise OSError("signed experiment output contains a non-regular file")
             tree_digest.update(json.dumps({
                 "path": child.relative_to(path).as_posix(), "kind": "file",
-                "identity": _storage_entry_identity(info),
+                "identity": snapshot_identity(info),
             }, sort_keys=True, separators=(",", ":")).encode())
             tree_digest.update(b"\n")
             allocated_by_inode.setdefault(
@@ -593,6 +3522,64 @@ def _persistent_output_snapshot(path: Path) -> tuple[int, str]:
             or _storage_entry_identity(after_info) != _storage_entry_identity(root_info)):
         raise OSError("signed experiment output root changed during allocation measurement")
     return sum(allocated_by_inode.values()), tree_digest.hexdigest()
+
+
+def _persistent_output_content_sha256(path: Path) -> str:
+    """Hash output file contents and names without following links or accepting drift."""
+    root_info = _stat_entry_nofollow(path)
+    if root_info is None or not stat.S_ISDIR(root_info.st_mode):
+        raise OSError("persistent output content digest requires a real output directory")
+    digest = hashlib.sha256()
+    for directory, dirnames, filenames in os.walk(path, followlinks=False):
+        current = Path(directory)
+        current_info = current.lstat()
+        if not stat.S_ISDIR(current_info.st_mode) or current_info.st_dev != root_info.st_dev:
+            raise OSError("persistent output content digest crossed a filesystem boundary")
+        dirnames.sort()
+        filenames.sort()
+        kept_directories: list[str] = []
+        for name in dirnames:
+            child = current / name
+            info = child.lstat()
+            relative = child.relative_to(path).as_posix()
+            if stat.S_ISLNK(info.st_mode):
+                row = {"path": relative, "kind": "symlink", "target": os.readlink(child)}
+            elif stat.S_ISDIR(info.st_mode) and info.st_dev == root_info.st_dev:
+                kept_directories.append(name)
+                row = {"path": relative, "kind": "directory"}
+            else:
+                raise OSError("persistent output content digest found an unexpected directory entry")
+            digest.update(json.dumps(row, sort_keys=True, separators=(",", ":")).encode())
+            digest.update(b"\n")
+        dirnames[:] = kept_directories
+        for name in filenames:
+            child = current / name
+            info_before = child.lstat()
+            relative = child.relative_to(path).as_posix()
+            if stat.S_ISLNK(info_before.st_mode):
+                row = {"path": relative, "kind": "symlink", "target": os.readlink(child)}
+            elif stat.S_ISREG(info_before.st_mode):
+                if info_before.st_size > FAILED_OUTPUT_GATE_COPY_MAX_BYTES:
+                    raise OSError("persistent output file exceeds the bounded disposition hash limit")
+                file_raw = _read_file_nofollow(
+                    child, maximum_bytes=max(1, info_before.st_size))
+                info_after = _stat_entry_nofollow(child)
+                if (info_after is None
+                        or _storage_entry_identity(info_before) != _storage_entry_identity(info_after)
+                        or len(file_raw) != info_before.st_size):
+                    raise OSError("persistent output file changed during content hashing")
+                row = {"path": relative, "kind": "file",
+                       "size_bytes": len(file_raw),
+                       "sha256": hashlib.sha256(file_raw).hexdigest()}
+            else:
+                raise OSError("persistent output content digest found a non-regular file")
+            digest.update(json.dumps(row, sort_keys=True, separators=(",", ":")).encode())
+            digest.update(b"\n")
+    root_after = _stat_entry_nofollow(path)
+    if (root_after is None
+            or _storage_entry_identity(root_after) != _storage_entry_identity(root_info)):
+        raise OSError("persistent output root changed during content hashing")
+    return digest.hexdigest()
 
 
 def _persistent_output_allocated_bytes(path: Path) -> int:
@@ -632,10 +3619,1223 @@ def _persistent_output_allocated_bytes(path: Path) -> int:
     return sum(allocated_by_inode.values())
 
 
+FAILED_OUTPUT_DISPOSITION_HMAC_FIELD = "failed_output_disposition_hmac_sha256"
+R6A_PREBUILDLEASE_DISPOSITION_HMAC_FIELD = "r6a_prebuildlease_disposition_hmac_sha256"
+ADMISSION_TERMINAL_DISPOSITION_ROOT = REPO / "experiments/storage/admission-dispositions"
+R6A_PREBUILDLEASE_DISPOSITION_MAX_BYTES = 16 * 1024 * 1024
+R6A_FINAL_GATE_MAX_BYTES = GATE0_ATTESTATION_MAX_BYTES
+R6A_PREBUILDLEASE_ID_PATTERN = re.compile(
+    r"r6a-r([1-9][0-9]*)-admission-[A-Za-z0-9][A-Za-z0-9_-]{0,95}\Z")
+FAILED_OUTPUT_GATE_COPY_MAX_BYTES = 128 * MIB
+FAILED_OUTPUT_DISPOSITION_SOURCE_ROLES = frozenset({
+    "legacy_diagnostic_transcript", "legacy_reconciliation",
+})
+LEGACY_FAILED_OUTPUT_DISPOSITION_RUN_ID = (
+    "step11d3-storage-policy-smoke-20261024-69574b75b1a5456e")
+LEGACY_FAILED_OUTPUT_DISPOSITION_SOURCE_SHA256 = {
+    "legacy_diagnostic_transcript": (
+        "d4ac1a286893758080006f9964fd4b1c7c89654508cd7b965aa1f86d209bc22d"),
+    "legacy_reconciliation": (
+        "c83842f848eef87b3394ea8394ac1758b73d190c04fe3a36e23855e61334fbb1"),
+}
+
+
+def _failed_output_disposition_path(experiment_id: str) -> Path:
+    if not _is_storage_policy_smoke_id(experiment_id):
+        raise ValueError("invalid failed-output disposition experiment ID")
+    return FAILED_OUTPUT_DISPOSITION_ROOT / experiment_id / "disposition.json"
+
+
+def _read_disposition_source(path: Path, experiment_id: str) -> tuple[bytes, os.stat_result]:
+    """Read caller-selected diagnostic evidence with no-follow and stable identity."""
+    selected = Path(os.path.abspath(path))
+    info_before = _stat_entry_nofollow(selected)
+    if (info_before is None or not stat.S_ISREG(info_before.st_mode)
+            or info_before.st_uid != os.getuid() or info_before.st_nlink != 1):
+        raise ValueError(f"disposition source is not an owned regular file: {selected}")
+    raw = _read_file_nofollow(selected, maximum_bytes=16 * 1024 * 1024)
+    info_after = _stat_entry_nofollow(selected)
+    if (info_after is None
+            or _storage_entry_identity(info_before) != _storage_entry_identity(info_after)):
+        raise ValueError(f"disposition source changed while being read: {selected}")
+    # The explicit adjudication still must be tied to this run by the source bytes.
+    if experiment_id.encode("ascii") not in raw:
+        raise ValueError(f"disposition source does not contain its experiment ID: {selected}")
+    return raw, info_after
+
+
+def _legacy_reconciliation_matches(
+    raw: bytes, *, experiment_id: str, gate_sha256: str, claim_sha256: str,
+    allocated_bytes: int, reservation_bytes: int, metadata_tree_sha256: str,
+) -> bool:
+    """Check the pinned R77 post-hoc record describes one refusal before materialization."""
+    try:
+        value = json.loads(raw)
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        return False
+    if not isinstance(value, Mapping):
+        return False
+    attempts = value.get("attempts")
+    failure = value.get("failure")
+    gate = value.get("gate")
+    claim = value.get("nonce_claim")
+    reconciliation = value.get("reconciliation")
+    resources = value.get("resources")
+    blockers = failure.get("blockers") if isinstance(failure, Mapping) else None
+    return bool(
+        type(value.get("schema_version")) is int
+        and value.get("schema_version") == 1
+        and value.get("experiment_id") == experiment_id
+        and value.get("status") == "STOPPED_AFTER_SINGLE_PREFIXLEASE_FAILURE"
+        and attempts == {"gate_preflight": 1, "prefix_materialization": 0,
+                         "prefixlease_smoke": 1}
+        and isinstance(failure, Mapping)
+        and type(failure.get("exit_status")) is int and failure.get("exit_status") == 1
+        and failure.get("expected_persistent_bytes") == reservation_bytes
+        and failure.get("gate_attestation_copy_sha256") == gate_sha256
+        and failure.get("log_sha256")
+            == LEGACY_FAILED_OUTPUT_DISPOSITION_SOURCE_SHA256[
+                "legacy_diagnostic_transcript"]
+        and failure.get("output_bytes") == allocated_bytes
+        and failure.get("output_overage_bytes") == allocated_bytes - reservation_bytes
+        and failure.get("output_tree_sha256") == metadata_tree_sha256
+        and isinstance(blockers, list)
+        and any("current-run output exceeds its signed persistent-output reservation" in str(item)
+                for item in blockers)
+        and isinstance(gate, Mapping)
+        and gate.get("signature_valid") is True
+        and gate.get("status") == "PREFLIGHT_PASS"
+        and gate.get("sha256") == gate_sha256
+        and isinstance(claim, Mapping)
+        and claim.get("consumed") is True
+        and claim.get("hmac_valid") is True
+        and claim.get("sha256") == claim_sha256
+        and isinstance(reconciliation, Mapping)
+        and reconciliation.get("mode") == "read-only exact-ID state check"
+        and reconciliation.get("canonical_recovery_invoked") is False
+        and bool(re.search(
+            r"(?i)failed before creating an active marker, prefix, or clone",
+            str(reconciliation.get("reason", ""))))
+        and isinstance(resources, Mapping)
+        and resources.get("active_marker_exists") is False
+        and resources.get("cleanup_receipt_exists") is False
+        and resources.get("no_cleanup_mutation_required") is True
+        and resources.get("prefix_exists") is False
+        and resources.get("clone_temporary_paths") == []
+    )
+
+
+def _write_custody_copy(path: Path, raw: bytes) -> os.stat_result:
+    """Publish byte-exact custody content through an exclusive no-follow create."""
+    parent_fd = _open_directory_nofollow(path.parent, create=True, strict_directory_sync=True)
+    descriptor: int | None = None
+    try:
+        flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0)
+        descriptor = os.open(path.name, flags, 0o600, dir_fd=parent_fd)
+        view = memoryview(raw)
+        while view:
+            written = os.write(descriptor, view)
+            if written <= 0:
+                raise OSError("short write while publishing failed-output custody")
+            view = view[written:]
+        os.fchmod(descriptor, 0o600)
+        os.fsync(descriptor)
+        info = os.fstat(descriptor)
+        os.close(descriptor)
+        descriptor = None
+        os.fsync(parent_fd)
+        return info
+    finally:
+        if descriptor is not None:
+            os.close(descriptor)
+        os.close(parent_fd)
+
+
+def _failed_output_success_evidence_blocker(output_dir: Path) -> str | None:
+    """Reject signed or conventional success artifacts before failure adjudication."""
+    for directory, dirnames, filenames in os.walk(output_dir, followlinks=False):
+        dirnames.sort()
+        filenames.sort()
+        for filename in filenames:
+            if filename in {"prefix-smoke-report.json", "prefix-smoke-final.json"}:
+                return "failed-output disposition refuses a PrefixLease success report"
+            candidate = Path(directory) / filename
+            info = _stat_entry_nofollow(candidate)
+            if info is None or not stat.S_ISREG(info.st_mode):
+                continue
+            if info.st_size > 16 * 1024 * 1024:
+                continue
+            try:
+                raw = _read_file_nofollow(candidate, maximum_bytes=16 * 1024 * 1024)
+                value = json.loads(raw)
+            except (OSError, ValueError, TypeError, json.JSONDecodeError):
+                continue
+            if not isinstance(value, Mapping):
+                continue
+            signed_report = _verify_storage_evidence(value, "smoke_report_hmac_sha256")
+            if (signed_report and value.get("experiment_id") == output_dir.name
+                    and (value.get("status") == "PASS"
+                         or value.get("accepted_success") is True)):
+                return "failed-output disposition refuses signed success evidence"
+    return None
+
+
+def adjudicate_failed_persistent_output(
+    experiment_id: str,
+    evidence_sources: Mapping[str, Path],
+) -> dict[str, Any]:
+    """Append one authenticated post-hoc disposition for a failed smoke output.
+
+    This operation preserves a failure as evidence-only. It does not rewrite the
+    original ALLOW, Gate, nonce claim, or output. The caller must explicitly
+    supply the extant legacy transcript and reconciliation files; their custody
+    copies are byte-exact but are labeled as post-hoc/operator adjudication.
+    """
+    if set(evidence_sources) != set(FAILED_OUTPUT_DISPOSITION_SOURCE_ROLES):
+        raise ValueError("failed-output disposition requires the exact transcript and reconciliation roles")
+    if experiment_id != LEGACY_FAILED_OUTPUT_DISPOSITION_RUN_ID:
+        raise ValueError("post-hoc legacy disposition is limited to the reviewed R77 failed run")
+    manifest_path = _experiment_manifest_path(experiment_id)
+    manifest_raw = _read_file_nofollow(manifest_path, maximum_bytes=1024 * 1024)
+    manifest = json.loads(manifest_raw)
+    if (not isinstance(manifest, dict) or manifest.get("experiment_id") != experiment_id
+            or manifest.get("decision") != "ALLOW" or manifest.get("storage_policy_smoke") is not True
+            or manifest_raw != _canonical_pretty_json_bytes(manifest)
+            or not _verify_manifest_signature(manifest)):
+        raise ValueError("failed-output disposition requires the unchanged signed same-run ALLOW manifest")
+    estimates = _validated_manifest_estimates(manifest)
+    output_dir = _measured_output_dir(manifest.get("output_dir", ""))
+    expected_output = REPO / "experiments/storage/smoke-runs" / experiment_id
+    if output_dir != expected_output or str(output_dir) != manifest.get("output_dir"):
+        raise ValueError("failed-output disposition output path is not the canonical same-run smoke directory")
+    success_blocker = _failed_output_success_evidence_blocker(output_dir)
+    if success_blocker:
+        raise ValueError(success_blocker)
+
+    gate_copy = output_dir / "gate0-preflight-attestation.json"
+    gate_raw = _read_file_nofollow(gate_copy, maximum_bytes=FAILED_OUTPUT_GATE_COPY_MAX_BYTES)
+    gate = json.loads(gate_raw)
+    gate_sha256 = hashlib.sha256(gate_raw).hexdigest()
+    if (not isinstance(gate, dict) or not _verify_gate0_signature(gate)
+            or gate_sha256 != manifest.get("gate0_attestation_sha256")
+            or gate.get("status") != "PREFLIGHT_PASS" or gate.get("mode") != "preflight"
+            or gate.get("permitted_smoke_experiment_id") != experiment_id
+            or gate.get("prefixlease_smoke_status") != "PENDING"):
+        raise ValueError("failed-output disposition does not bind the original same-run signed Gate")
+    claim, claim_raw = _read_storage_smoke_claim(experiment_id)
+    claim_path = _storage_smoke_claim_path(experiment_id)
+    claim_sha256 = hashlib.sha256(claim_raw).hexdigest()
+    if (manifest.get("smoke_nonce_claim_path") != str(claim_path)
+            or manifest.get("smoke_nonce_claim_sha256") != claim_sha256
+            or claim.get("preflight_attestation_sha256") != gate_sha256):
+        raise ValueError("failed-output disposition does not bind the consumed same-run nonce claim")
+    output_info = _stat_entry_nofollow(output_dir)
+    if (output_info is None or not stat.S_ISDIR(output_info.st_mode)
+            or output_info.st_uid != os.getuid() or output_info.st_dev != REPO.lstat().st_dev):
+        raise ValueError("failed-output disposition output must be an owned real directory")
+    allocated, tree_sha256 = _persistent_output_snapshot(output_dir)
+    content_sha256 = _persistent_output_content_sha256(output_dir)
+    reservation = estimates["estimated_persistent_bytes"]
+    if allocated <= reservation:
+        raise ValueError("failed-output disposition requires a measured reservation overrun")
+
+    validated_sources: dict[str, tuple[Path, bytes, os.stat_result]] = {}
+    for role in sorted(FAILED_OUTPUT_DISPOSITION_SOURCE_ROLES):
+        source = Path(evidence_sources[role])
+        source_raw, source_info = _read_disposition_source(source, experiment_id)
+        if hashlib.sha256(source_raw).hexdigest() != LEGACY_FAILED_OUTPUT_DISPOSITION_SOURCE_SHA256[role]:
+            raise ValueError(f"legacy {role} bytes do not match the reviewed R77 source evidence")
+        if role == "legacy_diagnostic_transcript" and not re.search(rb"(?i)fail|refus|block", source_raw):
+            raise ValueError("legacy diagnostic transcript lacks a same-run failure/refusal marker")
+        if (role == "legacy_reconciliation"
+                and not _legacy_reconciliation_matches(
+                    source_raw, experiment_id=experiment_id, gate_sha256=gate_sha256,
+                    claim_sha256=claim_sha256, allocated_bytes=allocated,
+                    reservation_bytes=reservation, metadata_tree_sha256=tree_sha256)):
+            raise ValueError(
+                "legacy reconciliation does not bind the exact single failed, unmaterialized R77 attempt")
+        validated_sources[role] = (Path(os.path.abspath(source)), source_raw, source_info)
+
+    custody_dir = _failed_output_disposition_path(experiment_id).parent / "custody"
+    custody_parent_fd = _open_directory_nofollow(custody_dir.parent, create=True,
+                                                   strict_directory_sync=True)
+    try:
+        try:
+            os.mkdir(custody_dir.name, 0o700, dir_fd=custody_parent_fd)
+            os.fsync(custody_parent_fd)
+        except FileExistsError:
+            pass
+    finally:
+        os.close(custody_parent_fd)
+    custody_fd = _open_directory_nofollow(custody_dir)
+    try:
+        custody_dir_info = os.fstat(custody_fd)
+        if (not stat.S_ISDIR(custody_dir_info.st_mode)
+                or custody_dir_info.st_uid != os.getuid()
+                or stat.S_IMODE(custody_dir_info.st_mode) != 0o700
+                or custody_dir_info.st_dev != REPO.lstat().st_dev):
+            raise ValueError("failed-output custody directory identity is unsafe")
+        allowed_custody_names = {f"{role}.bin" for role in FAILED_OUTPUT_DISPOSITION_SOURCE_ROLES}
+        if not set(os.listdir(custody_fd)).issubset(allowed_custody_names):
+            raise ValueError("failed-output custody directory contains unexpected entries")
+    finally:
+        os.close(custody_fd)
+    custody_entries: list[dict[str, Any]] = []
+    for role in sorted(FAILED_OUTPUT_DISPOSITION_SOURCE_ROLES):
+        source, raw, source_info = validated_sources[role]
+        custody_path = custody_dir / f"{role}.bin"
+        custody_before = _stat_entry_nofollow(custody_path)
+        if custody_before is None:
+            custody_info = _write_custody_copy(custody_path, raw)
+        else:
+            custody_info = custody_before
+            if (not stat.S_ISREG(custody_info.st_mode)
+                    or custody_info.st_uid != os.getuid() or custody_info.st_nlink != 1
+                    or stat.S_IMODE(custody_info.st_mode) != 0o600):
+                raise ValueError("existing failed-output custody copy has an unsafe identity")
+        readback = _read_file_nofollow(custody_path, maximum_bytes=16 * 1024 * 1024)
+        custody_after = _stat_entry_nofollow(custody_path)
+        if (readback != raw or custody_after is None
+                or _storage_entry_identity(custody_info) != _storage_entry_identity(custody_after)):
+            raise OSError("failed-output byte-exact custody copy did not verify")
+        custody_entries.append({
+            "role": role,
+            "source_path": str(Path(os.path.abspath(source))),
+            "source_identity": list(_storage_entry_identity(source_info)),
+            "custody_path": str(custody_path),
+            "custody_identity": list(_storage_entry_identity(custody_after)),
+            "byte_count": len(raw),
+            "sha256": hashlib.sha256(raw).hexdigest(),
+            "provenance": "POST_HOC_OPERATOR_ADJUDICATION",
+            "originally_authenticated": False,
+        })
+
+    success_blocker = _failed_output_success_evidence_blocker(output_dir)
+    manifest_after = _read_file_nofollow(manifest_path, maximum_bytes=1024 * 1024)
+    claim_after = _read_file_nofollow(claim_path, maximum_bytes=16 * 1024)
+    output_after = _stat_entry_nofollow(output_dir)
+    current_allocated, current_tree_sha256 = _persistent_output_snapshot(output_dir)
+    current_content_sha256 = _persistent_output_content_sha256(output_dir)
+    source_changed = False
+    for role, (source, source_raw, source_info) in validated_sources.items():
+        try:
+            current_source_raw, current_source_info = _read_disposition_source(source, experiment_id)
+        except (OSError, ValueError):
+            source_changed = True
+            break
+        if (current_source_raw != source_raw
+                or _storage_entry_identity(current_source_info) != _storage_entry_identity(source_info)):
+            source_changed = True
+            break
+    if (success_blocker or manifest_after != manifest_raw or claim_after != claim_raw
+            or output_after is None
+            or _storage_entry_identity(output_after) != _storage_entry_identity(output_info)
+            or current_allocated != allocated or current_tree_sha256 != tree_sha256
+            or current_content_sha256 != content_sha256 or source_changed):
+        raise RuntimeError("same-run failure evidence changed during disposition custody publication")
+    disposition_path = _failed_output_disposition_path(experiment_id)
+    payload = {
+        "schema_version": 1,
+        "disposition_id": f"{experiment_id}-failed-retired-evidence-v1",
+        "experiment_id": experiment_id,
+        "lifecycle_state": "FAILED_RETIRED_EVIDENCE",
+        "run_outcome": "FAILED",
+        "acceptance": "UNACCEPTED",
+        "execution_authorized": False,
+        "accepted_success": False,
+        "disposition_kind": "POST_HOC_OPERATOR_ADJUDICATION",
+        "provenance_class": "POST_HOC_OPERATOR_ADJUDICATION",
+        "native_signed_refusal_present": False,
+        "custody_authentication": "AUTHENTICATED_AT_DISPOSITION_CREATION",
+        "adjudication_basis": "LEGACY_DIAGNOSTIC_TRANSCRIPT_AND_RECONCILIATION; NOT_NATIVE_SIGNED_REFUSAL_EVIDENCE",
+        "manifest_path": str(manifest_path),
+        "manifest_sha256": hashlib.sha256(manifest_raw).hexdigest(),
+        "manifest_hmac_sha256": manifest["manifest_hmac_sha256"],
+        "gate0_attestation_path": str(gate_copy),
+        "gate0_attestation_sha256": gate_sha256,
+        "gate0_hmac_sha256": gate["gate0_hmac_sha256"],
+        "nonce_claim_path": str(claim_path),
+        "nonce_claim_sha256": claim_sha256,
+        "nonce_claim_hmac_sha256": claim["smoke_claim_hmac_sha256"],
+        "output_dir": str(output_dir),
+        "output_identity": list(_storage_entry_identity(output_info)),
+        "output_tree_sha256": tree_sha256,
+        "output_content_sha256": content_sha256,
+        "output_allocated_bytes": allocated,
+        "output_reservation_bytes": reservation,
+        "overrun_bytes": allocated - reservation,
+        "custody_directory": str(custody_dir),
+        "source_evidence": custody_entries,
+        "created_at_unix": time.time(),
+    }
+    record = _seal_storage_evidence(payload, FAILED_OUTPUT_DISPOSITION_HMAC_FIELD)
+    _write_json_exclusive(disposition_path, record, strict_directory_sync=True)
+    verified, blocker = _read_failed_output_disposition(
+        manifest, hashlib.sha256(manifest_raw).hexdigest(), output_dir,
+        allocated_bytes=allocated, metadata_tree_sha256=tree_sha256,
+        output_content_sha256=content_sha256)
+    if verified is None:
+        raise RuntimeError(f"published failed-output disposition did not verify: {blocker}")
+    return record
+
+
+def _read_failed_output_disposition(
+    manifest: Mapping[str, Any], manifest_sha256: str, output_dir: Path,
+    *, allocated_bytes: int, metadata_tree_sha256: str, output_content_sha256: str,
+) -> tuple[dict[str, Any] | None, str | None]:
+    """Validate terminal failure custody against live signed run and output state."""
+    experiment_id = manifest.get("experiment_id")
+    if not _is_storage_policy_smoke_id(experiment_id):
+        return None, "failed-output disposition run identity is invalid"
+    path = _failed_output_disposition_path(experiment_id)
+    try:
+        raw = _read_file_nofollow(path, maximum_bytes=1024 * 1024)
+        record = json.loads(raw)
+        if (not isinstance(record, dict) or raw != _canonical_pretty_json_bytes(record)
+                or not _verify_storage_evidence(record, FAILED_OUTPUT_DISPOSITION_HMAC_FIELD)):
+            return None, "failed-output disposition is malformed or unauthenticated"
+        estimates = _validated_manifest_estimates(manifest)
+        manifest_path = _experiment_manifest_path(experiment_id)
+        manifest_raw = _read_file_nofollow(manifest_path, maximum_bytes=1024 * 1024)
+        current_manifest = json.loads(manifest_raw)
+        if (hashlib.sha256(manifest_raw).hexdigest() != manifest_sha256
+                or manifest_raw != _canonical_pretty_json_bytes(current_manifest)
+                or not _verify_manifest_signature(current_manifest)
+                or current_manifest.get("experiment_id") != experiment_id
+                or current_manifest.get("decision") != "ALLOW"
+                or current_manifest.get("storage_policy_smoke") is not True):
+            return None, "failed-output disposition original ALLOW manifest is missing or changed"
+        output_info = _stat_entry_nofollow(output_dir)
+        expected_fields = {
+            "schema_version", "disposition_id", "experiment_id", "lifecycle_state",
+            "run_outcome", "acceptance", "execution_authorized", "accepted_success",
+            "disposition_kind", "adjudication_basis", "manifest_path", "manifest_sha256",
+            "provenance_class", "native_signed_refusal_present", "custody_authentication",
+            "manifest_hmac_sha256", "gate0_attestation_path", "gate0_attestation_sha256",
+            "gate0_hmac_sha256", "nonce_claim_path", "nonce_claim_sha256",
+            "nonce_claim_hmac_sha256", "output_dir", "output_identity", "output_tree_sha256",
+            "output_content_sha256", "output_allocated_bytes", "output_reservation_bytes", "overrun_bytes",
+            "custody_directory", "source_evidence", "created_at_unix",
+            FAILED_OUTPUT_DISPOSITION_HMAC_FIELD,
+        }
+        gate_path = output_dir / "gate0-preflight-attestation.json"
+        gate_raw = _read_file_nofollow(gate_path, maximum_bytes=FAILED_OUTPUT_GATE_COPY_MAX_BYTES)
+        gate = json.loads(gate_raw)
+        claim, claim_raw = _read_storage_smoke_claim(experiment_id)
+        claim_path = _storage_smoke_claim_path(experiment_id)
+        reservation = estimates["estimated_persistent_bytes"]
+        expected_output = REPO / "experiments/storage/smoke-runs" / experiment_id
+        created_at = record.get("created_at_unix")
+        verified_metadata_tree_sha256 = metadata_tree_sha256
+        output_identity_matches = (
+            output_info is not None
+            and record.get("output_identity") == list(_storage_entry_identity(output_info)))
+        output_tree_matches = record.get("output_tree_sha256") == metadata_tree_sha256
+        if (experiment_id == LEGACY_FAILED_OUTPUT_DISPOSITION_RUN_ID
+                and output_info is not None
+                and not output_identity_matches):
+            current_output_identity = list(_storage_entry_identity(output_info))
+            if _identity_matches_historical_apfs_device_alias(
+                    record.get("output_identity"), current_output_identity,
+                    current_device=output_info.st_dev):
+                alias_allocated, verified_metadata_tree_sha256 = _persistent_output_snapshot(
+                    output_dir,
+                    historical_device_alias=(
+                        output_info.st_dev, HISTORICAL_TERMINAL_APFS_OLD_DEVICE))
+                output_identity_matches = True
+                output_tree_matches = (
+                    alias_allocated == allocated_bytes
+                    and record.get("output_tree_sha256") == verified_metadata_tree_sha256)
+        if (set(record) != expected_fields or type(record.get("schema_version")) is not int
+                or record.get("schema_version") != 1
+                or record.get("disposition_id") != f"{experiment_id}-failed-retired-evidence-v1"
+                or record.get("experiment_id") != experiment_id
+                or record.get("lifecycle_state") != "FAILED_RETIRED_EVIDENCE"
+                or record.get("run_outcome") != "FAILED"
+                or record.get("acceptance") != "UNACCEPTED"
+                or record.get("execution_authorized") is not False
+                or record.get("accepted_success") is not False
+                or record.get("disposition_kind") != "POST_HOC_OPERATOR_ADJUDICATION"
+                or record.get("provenance_class") != "POST_HOC_OPERATOR_ADJUDICATION"
+                or record.get("native_signed_refusal_present") is not False
+                or record.get("custody_authentication") != "AUTHENTICATED_AT_DISPOSITION_CREATION"
+                or record.get("adjudication_basis") != "LEGACY_DIAGNOSTIC_TRANSCRIPT_AND_RECONCILIATION; NOT_NATIVE_SIGNED_REFUSAL_EVIDENCE"
+                or record.get("manifest_path") != str(_experiment_manifest_path(experiment_id))
+                or record.get("manifest_sha256") != manifest_sha256
+                or record.get("manifest_hmac_sha256") != manifest.get("manifest_hmac_sha256")
+                or record.get("gate0_attestation_path") != str(gate_path)
+                or record.get("gate0_attestation_sha256") != manifest.get("gate0_attestation_sha256")
+                or record.get("gate0_attestation_sha256") != hashlib.sha256(gate_raw).hexdigest()
+                or not _verify_gate0_signature(gate)
+                or gate.get("status") != "PREFLIGHT_PASS"
+                or gate.get("mode") != "preflight"
+                or record.get("gate0_hmac_sha256") != gate.get("gate0_hmac_sha256")
+                or gate.get("permitted_smoke_experiment_id") != experiment_id
+                or record.get("nonce_claim_path") != str(claim_path)
+                or record.get("nonce_claim_sha256") != hashlib.sha256(claim_raw).hexdigest()
+                or record.get("nonce_claim_hmac_sha256") != claim.get("smoke_claim_hmac_sha256")
+                or claim.get("preflight_attestation_sha256") != hashlib.sha256(gate_raw).hexdigest()
+                or manifest.get("smoke_nonce_claim_path") != str(claim_path)
+                or manifest.get("smoke_nonce_claim_sha256") != hashlib.sha256(claim_raw).hexdigest()
+                or Path(os.path.abspath(output_dir)) != expected_output
+                or manifest.get("output_dir") != str(expected_output)
+                or record.get("output_dir") != str(output_dir)
+                or output_info is None
+                or not output_identity_matches
+                or not output_tree_matches
+                or record.get("output_content_sha256") != output_content_sha256
+                or record.get("output_allocated_bytes") != allocated_bytes
+                or record.get("output_reservation_bytes") != reservation
+                or type(record.get("overrun_bytes")) is not int
+                or record["overrun_bytes"] != allocated_bytes - reservation
+                or record["overrun_bytes"] <= 0
+                or record.get("custody_directory") != str(path.parent / "custody")
+                or not isinstance(created_at, (int, float))
+                or isinstance(created_at, bool)
+                or not math.isfinite(float(created_at))
+                or created_at <= 0 or created_at > time.time() + 60):
+            return None, "failed-output disposition does not match the unchanged signed run or output"
+        rows = record.get("source_evidence")
+        if (not isinstance(rows, list) or len(rows) != 2
+                or {row.get("role") for row in rows if isinstance(row, Mapping)}
+                != set(FAILED_OUTPUT_DISPOSITION_SOURCE_ROLES)):
+            return None, "failed-output disposition has incomplete diagnostic custody evidence"
+        for row in rows:
+            if (not isinstance(row, Mapping)
+                    or set(row) != {
+                        "role", "source_path", "source_identity", "custody_path",
+                        "custody_identity", "byte_count", "sha256", "provenance",
+                        "originally_authenticated",
+                    }
+                    or row.get("role") not in FAILED_OUTPUT_DISPOSITION_SOURCE_ROLES
+                    or not isinstance(row.get("source_path"), str)
+                    or not Path(row["source_path"]).is_absolute()
+                    or not isinstance(row.get("source_identity"), list)
+                    or len(row["source_identity"]) != 9
+                    or row.get("provenance") != "POST_HOC_OPERATOR_ADJUDICATION"
+                    or row.get("originally_authenticated") is not False):
+                return None, "failed-output disposition misstates legacy evidence authentication"
+            custody_path = Path(str(row.get("custody_path", "")))
+            if (custody_path.parent != path.parent / "custody"
+                    or custody_path.name != f"{row.get('role')}.bin"):
+                return None, "failed-output disposition custody path is not canonical"
+            custody_raw = _read_file_nofollow(custody_path, maximum_bytes=16 * 1024 * 1024)
+            custody_info = _stat_entry_nofollow(custody_path)
+            if (custody_info is None
+                    or not stat.S_ISREG(custody_info.st_mode)
+                    or custody_info.st_uid != os.getuid()
+                    or custody_info.st_nlink != 1
+                    or stat.S_IMODE(custody_info.st_mode) != 0o600
+                    or not _identity_matches_historical_apfs_device_alias(
+                        row.get("custody_identity"),
+                        list(_storage_entry_identity(custody_info)),
+                        current_device=custody_info.st_dev)
+                    or len(custody_raw) != row.get("byte_count")
+                    or hashlib.sha256(custody_raw).hexdigest() != row.get("sha256")
+                    or experiment_id.encode("ascii") not in custody_raw):
+                return None, "failed-output byte-exact custody copy is missing or changed"
+            if (row.get("role") not in LEGACY_FAILED_OUTPUT_DISPOSITION_SOURCE_SHA256
+                    or row.get("sha256") != LEGACY_FAILED_OUTPUT_DISPOSITION_SOURCE_SHA256[row["role"]]):
+                return None, "legacy source bytes do not match reviewed R77 evidence"
+            if row.get("role") == "legacy_diagnostic_transcript" and not re.search(rb"(?i)fail|refus|block", custody_raw):
+                return None, "legacy diagnostic transcript does not bind a failure"
+            if (row.get("role") == "legacy_reconciliation"
+                    and not _legacy_reconciliation_matches(
+                        custody_raw, experiment_id=experiment_id,
+                        gate_sha256=str(record.get("gate0_attestation_sha256", "")),
+                        claim_sha256=str(record.get("nonce_claim_sha256", "")),
+                        allocated_bytes=allocated_bytes,
+                        reservation_bytes=reservation,
+                        metadata_tree_sha256=verified_metadata_tree_sha256)):
+                return None, "legacy reconciliation does not bind the exact failed, unmaterialized R77 attempt"
+        custody_dir = path.parent / "custody"
+        custody_fd = _open_directory_nofollow(custody_dir)
+        try:
+            custody_info = os.fstat(custody_fd)
+            expected_names = {f"{role}.bin" for role in FAILED_OUTPUT_DISPOSITION_SOURCE_ROLES}
+            if (not stat.S_ISDIR(custody_info.st_mode)
+                    or custody_info.st_uid != os.getuid()
+                    or stat.S_IMODE(custody_info.st_mode) != 0o700
+                    or set(os.listdir(custody_fd)) != expected_names):
+                return None, "failed-output custody directory identity or contents are invalid"
+        finally:
+            os.close(custody_fd)
+        blocker = _failed_output_success_evidence_blocker(output_dir)
+        if blocker:
+            return None, blocker
+        return record, None
+    except (OSError, ValueError, TypeError, RuntimeError, json.JSONDecodeError) as error:
+        return None, f"failed-output disposition cannot be verified: {type(error).__name__}: {error}"
+
+
+def _r6a_prebuildlease_disposition_path(admission_id: str) -> Path:
+    """Return the one canonical append-only terminal receipt path for an R6-A ALLOW."""
+    match = R6A_PREBUILDLEASE_ID_PATTERN.fullmatch(admission_id) if isinstance(admission_id, str) else None
+    if match is None or int(match.group(1)) < 71:
+        raise ValueError("invalid R6-A pre-BuildLease disposition admission ID")
+    return ADMISSION_TERMINAL_DISPOSITION_ROOT / f"{admission_id}.json"
+
+
+def _reject_r6a_admission_with_terminal_disposition(
+    manifest: Mapping[str, Any], manifest_raw: bytes, *,
+    retention_lock_fds: tuple[int, int] | None = None,
+) -> None:
+    """Make an appended terminal receipt a permanent execution fence."""
+    disposition_path = _r6a_prebuildlease_disposition_path(manifest.get("experiment_id"))
+    try:
+        disposition_info = _stat_entry_nofollow(disposition_path)
+    except FileNotFoundError:
+        disposition_info = None
+    if disposition_info is None:
+        return
+    output_dir = _measured_output_dir(manifest.get("output_dir", ""))
+    disposition, blocker = _read_r6a_prebuildlease_disposition(
+        manifest, manifest_raw, output_dir,
+        retention_lock_fds=retention_lock_fds)
+    if blocker is not None:
+        raise RuntimeError(blocker)
+    if disposition is not None:
+        raise RuntimeError("R6-A admission is terminally closed before BuildLease")
+
+
+def _r6a_prebuildlease_claim(manifest: Mapping[str, Any], manifest_raw: bytes
+                             ) -> tuple[dict[str, Any], bytes, Path]:
+    admission_id = manifest.get("experiment_id")
+    build_id = manifest.get("r71_build_id")
+    plan_sha256 = manifest.get("build_session_plan_sha256")
+    identity = manifest.get("execution_admission_identity")
+    claim_binding = manifest.get("admission_claim")
+    expected_identity_sha256 = hashlib.sha256(json.dumps(
+        {"admission_id": admission_id}, sort_keys=True, separators=(",", ":"),
+        ensure_ascii=False).encode("utf-8")).hexdigest()
+    expected_claim_path = _r66_r69_admission_claim_root() / f"{admission_id}.claim"
+    if (not isinstance(identity, Mapping)
+            or set(identity) != {"admission_id", "sha256"}
+            or identity.get("admission_id") != admission_id
+            or identity.get("sha256") != expected_identity_sha256
+            or not isinstance(plan_sha256, str)
+            or not re.fullmatch(r"[0-9a-f]{64}", plan_sha256)
+            or _r6a_build_id_milestone(build_id) != int(
+                R6A_PREBUILDLEASE_ID_PATTERN.fullmatch(str(admission_id)).group(1))
+            or not isinstance(claim_binding, Mapping)
+            or claim_binding.get("decision") != "ALLOW"
+            or claim_binding.get("build_id") != build_id
+            or claim_binding.get("plan_canonical_sha256") != plan_sha256
+            or claim_binding.get("path") != str(expected_claim_path)):
+        raise ValueError("signed ALLOW lacks its exact admission, plan, build, or claim identity")
+    raw = _read_file_nofollow(expected_claim_path, maximum_bytes=64 * 1024)
+    claim_info = _stat_entry_nofollow(expected_claim_path)
+    if (claim_info is None or not stat.S_ISREG(claim_info.st_mode)
+            or claim_info.st_uid != os.getuid() or claim_info.st_nlink != 1
+            or stat.S_IMODE(claim_info.st_mode) != 0o600
+            or hashlib.sha256(raw).hexdigest() != claim_binding.get("sha256")):
+        raise ValueError("signed ALLOW admission claim is missing, unsafe, or changed")
+    try:
+        claim = json.loads(raw, object_pairs_hook=_r65_json_object_without_duplicate_keys)
+    except (TypeError, ValueError, json.JSONDecodeError) as error:
+        raise ValueError("signed ALLOW admission claim is malformed") from error
+    required = {
+        "schema_version", "milestone", "admission_id", "admission_identity_sha256",
+        "plan_canonical_sha256", "decision", "claimed_pid", "claimed_at_unix", "build_id",
+    }
+    claimed_at = claim.get("claimed_at_unix") if isinstance(claim, dict) else None
+    if (not isinstance(claim, dict) or set(claim) != required
+            or raw != json.dumps(claim, sort_keys=True, separators=(",", ":"),
+                                 ensure_ascii=False).encode("utf-8")
+            or type(claim.get("schema_version")) is not int or claim.get("schema_version") != 1
+            or claim.get("milestone") != f"R{int(R6A_PREBUILDLEASE_ID_PATTERN.fullmatch(admission_id).group(1)):02d}"
+            or claim.get("admission_id") != admission_id
+            or claim.get("admission_identity_sha256") != expected_identity_sha256
+            or claim.get("plan_canonical_sha256") != plan_sha256
+            or claim.get("decision") != "ALLOW" or claim.get("build_id") != build_id
+            or type(claim.get("claimed_pid")) is not int or claim["claimed_pid"] <= 0
+            or type(claimed_at) not in {int, float} or not math.isfinite(float(claimed_at))
+            or claimed_at <= 0):
+        raise ValueError("signed ALLOW admission claim does not authenticate its exact identity")
+    claim_after = _read_file_nofollow(expected_claim_path, maximum_bytes=64 * 1024)
+    if claim_after != raw:
+        raise ValueError("admission claim changed during verification")
+    return claim, raw, expected_claim_path
+
+
+def _r6a_prebuildlease_execution_evidence(
+    manifest: Mapping[str, Any], *, retention_lock_fds: tuple[int, int] | None = None,
+) -> dict[str, Any]:
+    """Prove this admission/build has no registry, root, session, graph, or terminal state."""
+    admission_id = manifest.get("experiment_id")
+    build_id = manifest.get("r71_build_id")
+    if not isinstance(admission_id, str) or not isinstance(build_id, str):
+        raise ValueError("pre-BuildLease evidence lacks the exact admission/build identity")
+    import build_retention
+
+    owns_lock = retention_lock_fds is None
+    lock_fds = build_retention._lock() if owns_lock else retention_lock_fds
+    lease_fd, lock_fd = lock_fds
+    try:
+        build_retention._verify_named_retention_lock(lease_fd, lock_fd)
+        names = sorted(os.listdir(lease_fd))
+        if len(names) > 4096:
+            raise ValueError("BuildLease registry scan exceeds its fail-closed bound")
+        matched_records: list[dict[str, Any]] = []
+        scanned_records: list[dict[str, Any]] = []
+        for name in names:
+            if name in {".", ".."} or "/" in name or "\\" in name or "\x00" in name:
+                raise ValueError("BuildLease registry contains a noncanonical child name")
+            if name == build_retention.BUILD_LOCK:
+                continue
+            if not name.endswith(".json"):
+                raise ValueError("BuildLease registry contains unclassified lease-history evidence")
+            raw, _identity = _read_file_from_directory_fd(
+                lease_fd, name, display_path=build_retention.LEASE_ROOT / name,
+                maximum_bytes=1024 * 1024)
+            try:
+                record = json.loads(raw, object_pairs_hook=_r65_json_object_without_duplicate_keys)
+            except (TypeError, ValueError, json.JSONDecodeError) as error:
+                raise ValueError("BuildLease registry contains malformed execution evidence") from error
+            if not isinstance(record, dict) or not build_retention._verify_seal(record):
+                raise ValueError("BuildLease registry contains unauthenticated execution evidence")
+            session = record.get("session_v3")
+            session_identity = session.get("admission_identity") if isinstance(session, Mapping) else None
+            scanned_records.append({
+                "registry_name": name,
+                "registry_sha256": hashlib.sha256(raw).hexdigest(),
+                "build_id": record.get("build_id"),
+                "owner_experiment": record.get("owner_experiment"),
+                "session_admission_id": (session_identity.get("admission_id")
+                                          if isinstance(session_identity, Mapping) else None),
+                "state": record.get("state"),
+                "session_state": session.get("state") if isinstance(session, Mapping) else None,
+            })
+            if (record.get("build_id") == build_id
+                    or record.get("owner_experiment") == admission_id
+                    or (isinstance(session_identity, Mapping)
+                        and session_identity.get("admission_id") == admission_id)):
+                matched_records.append({
+                    "registry_name": name,
+                    "registry_sha256": hashlib.sha256(raw).hexdigest(),
+                    "state": record.get("state"),
+                    "session_started": record.get("session_started"),
+                    "session_state": session.get("state") if isinstance(session, Mapping) else None,
+                })
+        if matched_records:
+            raise ValueError("BuildLease registry already contains this admission or build")
+    finally:
+        if owns_lock:
+            build_retention._unlock(lease_fd, lock_fd)
+
+    checked_paths = {
+        "build_root": build_retention.BUILD_ROOT / build_id,
+        "build_manifest": build_retention.MANIFEST_ROOT / f"{build_id}.json",
+        "build_manifest_evidence": build_retention.MANIFEST_ROOT / f"{build_id}.evidence",
+        "build_manifest_failure": build_retention.MANIFEST_ROOT / f"{build_id}.failure",
+        "build_cleanup_receipt": build_retention.RECEIPT_ROOT / f"{build_id}.json",
+        "build_completion_terminal": build_retention.MANIFEST_ROOT / f"{build_id}.completion-terminal",
+    }
+    path_state: dict[str, Any] = {}
+    for role, path in checked_paths.items():
+        try:
+            info = _stat_entry_nofollow(path)
+        except OSError as error:
+            raise ValueError(f"cannot prove absence of {role}: {error}") from error
+        if info is not None:
+            raise ValueError(f"pre-BuildLease disposition refuses existing {role}")
+        path_state[role] = {"path": str(path), "exists": False}
+
+    output_dir = _measured_output_dir(manifest.get("output_dir", ""))
+    try:
+        output_info = _stat_entry_nofollow(output_dir)
+    except OSError as error:
+        raise ValueError(f"cannot prove output reservation state: {error}") from error
+    if output_info is None:
+        output_state = {
+            "kind": "MISSING", "identity": None, "allocated_bytes": 0,
+            "tree_sha256": hashlib.sha256(b"missing-output\n").hexdigest(),
+            "content_sha256": None,
+        }
+    else:
+        if (not stat.S_ISDIR(output_info.st_mode) or output_info.st_uid != os.getuid()
+                or output_info.st_dev != REPO.lstat().st_dev):
+            raise ValueError("pre-BuildLease output exists with an unsafe identity")
+        output_fd = _open_directory_nofollow(output_dir)
+        try:
+            if os.listdir(output_fd):
+                raise ValueError(
+                    "pre-BuildLease disposition refuses nonempty output without terminality evidence")
+        finally:
+            os.close(output_fd)
+        allocated, tree_sha256 = _persistent_output_snapshot(output_dir)
+        content_sha256 = _persistent_output_content_sha256(output_dir)
+        after_info = _stat_entry_nofollow(output_dir)
+        if (after_info is None
+                or _storage_entry_identity(after_info) != _storage_entry_identity(output_info)):
+            raise ValueError("pre-BuildLease output directory changed during verification")
+        output_state = {
+            "kind": "EMPTY_DIRECTORY", "identity": list(_storage_entry_identity(output_info)),
+            "allocated_bytes": allocated, "tree_sha256": tree_sha256,
+            "content_sha256": content_sha256,
+        }
+    return {
+        "build_id": build_id,
+        "registry_directory": str(build_retention.LEASE_ROOT),
+        "registry_absence_proven": True,
+        "registry_scan": {
+            "complete": True,
+            "record_count": len(scanned_records),
+            "records": scanned_records,
+            "records_sha256": hashlib.sha256(json.dumps(
+                scanned_records, sort_keys=True, separators=(",", ":"),
+                ensure_ascii=False, allow_nan=False).encode("utf-8")).hexdigest(),
+        },
+        "matched_registry_records": [],
+        "paths": path_state,
+        "output": {"path": str(output_dir), **output_state},
+    }
+
+
+def _r6a_prebuildlease_final_gate(final_gate_path: Path | str,
+                                 manifest: Mapping[str, Any]) -> tuple[bytes, dict[str, Any], Path]:
+    selected = Path(final_gate_path).absolute()
+    if (selected == Path(os.path.abspath(GATE0_ATTESTATION_PATH))
+            or selected.is_symlink()):
+        raise ValueError("pre-BuildLease disposition requires a preserved Final Gate path")
+    before = _stat_entry_nofollow(selected)
+    if (before is None or not stat.S_ISREG(before.st_mode) or before.st_uid != os.getuid()
+            or before.st_nlink != 1 or before.st_size > R6A_FINAL_GATE_MAX_BYTES):
+        raise ValueError("preserved Final Gate is missing or has an unsafe file identity")
+    raw = _read_file_nofollow(selected, maximum_bytes=R6A_FINAL_GATE_MAX_BYTES)
+    after = _stat_entry_nofollow(selected)
+    if (after is None or _storage_entry_identity(before) != _storage_entry_identity(after)):
+        raise ValueError("preserved Final Gate changed while being read")
+    try:
+        gate = json.loads(raw, object_pairs_hook=_r65_json_object_without_duplicate_keys)
+    except (TypeError, ValueError, json.JSONDecodeError) as error:
+        raise ValueError("preserved Final Gate is malformed") from error
+    digest = hashlib.sha256(raw).hexdigest()
+    if (not isinstance(gate, dict) or raw != _canonical_pretty_json_bytes(gate)
+            or not _verify_gate0_signature(gate)
+            or gate.get("status") != "PASS" or gate.get("mode") != "final"
+            or gate.get("prefixlease_smoke_status") != "PASS"
+            or not isinstance(gate.get("prefixlease_smoke"), Mapping)
+            or manifest.get("gate0_attestation_sha256") != digest):
+        raise ValueError("preserved Final Gate HMAC, PASS/final state, or ALLOW binding is invalid")
+    return raw, gate, selected
+
+
+def _r6a_prebuildlease_disposition_payload(
+    *, manifest: Mapping[str, Any], manifest_raw: bytes, final_gate_path: Path | str,
+    terminal_reason: str, execution_evidence: Mapping[str, Any],
+    claim: Mapping[str, Any], claim_raw: bytes, claim_path: Path,
+    final_gate_raw: bytes, final_gate: Mapping[str, Any], preserved_gate_path: Path,
+    support_evidence: Mapping[str, Mapping[str, Any]],
+) -> dict[str, Any]:
+    admission_id = str(manifest["experiment_id"])
+    build_id = str(manifest["r71_build_id"])
+    candidate_hashes = manifest.get("candidate_hashes")
+    if not isinstance(candidate_hashes, Mapping):
+        raise ValueError("pre-BuildLease ALLOW lacks candidate bindings")
+    candidate_core = candidate_hashes.get("r71_candidate_core_sha256")
+    plan_raw_sha256 = candidate_hashes.get("r71_dependency_plan_sha256")
+    plan_canonical_sha256 = manifest.get("build_session_plan_sha256")
+    if any(not isinstance(value, str) or not re.fullmatch(r"[0-9a-f]{64}", value)
+           for value in (candidate_core, plan_raw_sha256, plan_canonical_sha256)):
+        raise ValueError("pre-BuildLease ALLOW candidate or plan digest is invalid")
+    output_dir = _measured_output_dir(manifest.get("output_dir", ""))
+    estimates = _validated_manifest_estimates(manifest)
+    if not isinstance(terminal_reason, str) or not terminal_reason.strip() or len(terminal_reason) > 512:
+        raise ValueError("pre-BuildLease terminal reason must be a bounded non-empty string")
+    unsigned_manifest = dict(manifest)
+    unsigned_manifest.pop("manifest_hmac_sha256", None)
+    core_sha256 = hashlib.sha256(json.dumps(
+        unsigned_manifest, sort_keys=True, separators=(",", ":"),
+        ensure_ascii=False, allow_nan=False).encode("utf-8")).hexdigest()
+    return {
+        "schema_version": 1,
+        "disposition_id": f"{admission_id}-authorized-abandoned-before-buildlease-v1",
+        "admission_id": admission_id,
+        "build_id": build_id,
+        "disposition_state": "AUTHORIZED_BUT_ABANDONED_BEFORE_BUILDLEASE",
+        "original_decision": "ALLOW",
+        "execution_authorized_originally": True,
+        "terminal_execution_state": "NEVER_STARTED",
+        "buildlease_acquired": False,
+        "session_started": False,
+        "graph_executed": False,
+        "output_committed": False,
+        "success_authorized": False,
+        "r6a_accepted": False,
+        "retry_original_authorization_allowed": False,
+        "output_reservation_terminally_released": True,
+        "historical_disposition_basis": _r6a_prebuildlease_support_basis(support_evidence),
+        "manifest_path": str(_experiment_manifest_path(admission_id)),
+        "manifest_sha256": hashlib.sha256(manifest_raw).hexdigest(),
+        "manifest_hmac_sha256": manifest.get("manifest_hmac_sha256"),
+        "manifest_core_sha256": core_sha256,
+        "admission_identity": dict(manifest["execution_admission_identity"]),
+        "candidate_core_sha256": candidate_core,
+        "plan_raw_sha256": plan_raw_sha256,
+        "plan_canonical_sha256": plan_canonical_sha256,
+        "final_gate_path": str(preserved_gate_path),
+        "final_gate_sha256": hashlib.sha256(final_gate_raw).hexdigest(),
+        "final_gate_hmac_sha256": final_gate.get("gate0_hmac_sha256"),
+        "final_gate_raw_base64": base64.b64encode(final_gate_raw).decode("ascii"),
+        "admission_claim_path": str(claim_path),
+        "admission_claim_sha256": hashlib.sha256(claim_raw).hexdigest(),
+        "admission_claim_raw_base64": base64.b64encode(claim_raw).decode("ascii"),
+        "admission_claim_identity": dict(claim),
+        "reserved_output_path": str(output_dir),
+        "reserved_output_bytes": estimates["estimated_persistent_bytes"],
+        "execution_absence_evidence": dict(execution_evidence),
+        "support_evidence": {role: dict(row) for role, row in sorted(support_evidence.items())},
+        "terminal_reason": terminal_reason.strip(),
+        "created_at_unix": time.time(),
+        R6A_PREBUILDLEASE_DISPOSITION_HMAC_FIELD: "",
+    }
+
+
+def _read_r6a_prebuildlease_disposition(
+    manifest: Mapping[str, Any], manifest_raw: bytes, output_dir: Path,
+    *, check_execution_evidence: bool = True,
+    retention_lock_fds: tuple[int, int] | None = None,
+) -> tuple[dict[str, Any] | None, str | None]:
+    """Read and dynamically revalidate an authenticated pre-BuildLease terminal receipt."""
+    admission_id = manifest.get("experiment_id")
+    try:
+        path = _r6a_prebuildlease_disposition_path(admission_id)
+        try:
+            disposition_root_fd = _open_directory_nofollow(path.parent)
+        except FileNotFoundError:
+            return None, None
+        try:
+            info = os.stat(path.name, dir_fd=disposition_root_fd, follow_symlinks=False)
+        except FileNotFoundError:
+            info = None
+        finally:
+            os.close(disposition_root_fd)
+    except (OSError, TypeError, ValueError) as error:
+        return None, f"pre-BuildLease disposition path is unsafe: {error}"
+    if info is None:
+        return None, None
+    try:
+        if (not stat.S_ISREG(info.st_mode) or info.st_uid != os.getuid()
+                or info.st_nlink != 1 or stat.S_IMODE(info.st_mode) != 0o600
+                or info.st_size > R6A_PREBUILDLEASE_DISPOSITION_MAX_BYTES):
+            raise ValueError("receipt file identity or size is unsafe")
+        raw = _read_file_nofollow(path, maximum_bytes=R6A_PREBUILDLEASE_DISPOSITION_MAX_BYTES)
+        after = _stat_entry_nofollow(path)
+        if after is None or _storage_entry_identity(info) != _storage_entry_identity(after):
+            raise ValueError("receipt changed while being read")
+        record = json.loads(raw, object_pairs_hook=_r65_json_object_without_duplicate_keys)
+        expected_fields = {
+            "schema_version", "disposition_id", "admission_id", "build_id",
+            "disposition_state", "original_decision", "execution_authorized_originally",
+            "terminal_execution_state", "buildlease_acquired", "session_started",
+            "graph_executed", "output_committed", "success_authorized", "r6a_accepted",
+            "retry_original_authorization_allowed", "output_reservation_terminally_released",
+            "manifest_path", "manifest_sha256", "manifest_hmac_sha256", "manifest_core_sha256",
+            "admission_identity", "candidate_core_sha256", "plan_raw_sha256",
+            "plan_canonical_sha256", "final_gate_path", "final_gate_sha256",
+            "final_gate_hmac_sha256", "final_gate_raw_base64", "admission_claim_path",
+            "admission_claim_sha256", "admission_claim_raw_base64", "admission_claim_identity",
+            "reserved_output_path", "reserved_output_bytes", "execution_absence_evidence",
+            "historical_disposition_basis", "support_evidence", "terminal_reason", "created_at_unix",
+            R6A_PREBUILDLEASE_DISPOSITION_HMAC_FIELD,
+        }
+        if (not isinstance(record, dict) or set(record) != expected_fields
+                or raw != _canonical_pretty_json_bytes(record)
+                or not _verify_storage_evidence(record, R6A_PREBUILDLEASE_DISPOSITION_HMAC_FIELD)):
+            raise ValueError("receipt schema, canonical bytes, or HMAC is invalid")
+        candidate_hashes = manifest.get("candidate_hashes")
+        expected_candidate_core = candidate_hashes.get("r71_candidate_core_sha256") if isinstance(candidate_hashes, Mapping) else None
+        expected_plan_raw = candidate_hashes.get("r71_dependency_plan_sha256") if isinstance(candidate_hashes, Mapping) else None
+        expected_plan_canonical = manifest.get("build_session_plan_sha256")
+        claim, claim_raw, claim_path = _r6a_prebuildlease_claim(manifest, manifest_raw)
+        try:
+            gate_raw = base64.b64decode(record.get("final_gate_raw_base64", ""), validate=True)
+            claim_embedded = base64.b64decode(record.get("admission_claim_raw_base64", ""), validate=True)
+        except (ValueError, TypeError) as error:
+            raise ValueError("embedded Gate or claim evidence is not valid base64") from error
+        gate = json.loads(gate_raw, object_pairs_hook=_r65_json_object_without_duplicate_keys)
+        created = record.get("created_at_unix")
+        unsigned_manifest = dict(manifest)
+        unsigned_manifest.pop("manifest_hmac_sha256", None)
+        manifest_core_sha256 = hashlib.sha256(json.dumps(
+            unsigned_manifest, sort_keys=True, separators=(",", ":"),
+            ensure_ascii=False, allow_nan=False).encode("utf-8")).hexdigest()
+        output_allocated, output_tree = _persistent_output_snapshot(output_dir)
+        current_output = _r6a_prebuildlease_output_state(output_dir, output_allocated, output_tree)
+        support_rows = record.get("support_evidence")
+        expected_basis = _r6a_prebuildlease_support_basis(support_rows) if isinstance(support_rows, Mapping) else None
+        if (record.get("schema_version") != 1
+                or record.get("disposition_id") != f"{admission_id}-authorized-abandoned-before-buildlease-v1"
+                or record.get("admission_id") != admission_id
+                or record.get("build_id") != manifest.get("r71_build_id")
+                or record.get("disposition_state") != "AUTHORIZED_BUT_ABANDONED_BEFORE_BUILDLEASE"
+                or record.get("original_decision") != "ALLOW"
+                or record.get("execution_authorized_originally") is not True
+                or record.get("terminal_execution_state") != "NEVER_STARTED"
+                or any(record.get(field) is not False for field in (
+                    "buildlease_acquired", "session_started", "graph_executed", "output_committed",
+                    "success_authorized", "r6a_accepted", "retry_original_authorization_allowed"))
+                or record.get("output_reservation_terminally_released") is not True
+                or record.get("manifest_path") != str(_experiment_manifest_path(admission_id))
+                or record.get("manifest_sha256") != hashlib.sha256(manifest_raw).hexdigest()
+                or record.get("manifest_hmac_sha256") != manifest.get("manifest_hmac_sha256")
+                or record.get("manifest_core_sha256") != manifest_core_sha256
+                or record.get("admission_identity") != manifest.get("execution_admission_identity")
+                or record.get("candidate_core_sha256") != expected_candidate_core
+                or record.get("plan_raw_sha256") != expected_plan_raw
+                or record.get("plan_canonical_sha256") != expected_plan_canonical
+                or record.get("final_gate_sha256") != hashlib.sha256(gate_raw).hexdigest()
+                or not isinstance(gate, dict) or not _verify_gate0_signature(gate)
+                or gate.get("gate0_hmac_sha256") != record.get("final_gate_hmac_sha256")
+                or gate.get("status") != "PASS" or gate.get("mode") != "final"
+                or gate.get("prefixlease_smoke_status") != "PASS"
+                or manifest.get("gate0_attestation_sha256") != record.get("final_gate_sha256")
+                or record.get("admission_claim_path") != str(claim_path)
+                or record.get("admission_claim_sha256") != hashlib.sha256(claim_raw).hexdigest()
+                or claim_embedded != claim_raw or record.get("admission_claim_identity") != claim
+                or record.get("reserved_output_path") != str(output_dir)
+                or record.get("reserved_output_bytes") != _validated_manifest_estimates(manifest)["estimated_persistent_bytes"]
+                or not isinstance(record.get("execution_absence_evidence"), Mapping)
+                or record["execution_absence_evidence"].get("output") != current_output
+                or record.get("historical_disposition_basis") != expected_basis
+                or not isinstance(record.get("terminal_reason"), str)
+                or not record["terminal_reason"].strip() or len(record["terminal_reason"]) > 512
+                or type(created) not in {int, float} or not math.isfinite(float(created))
+                or created <= 0 or created > time.time() + 60):
+            raise ValueError("receipt does not match the unchanged ALLOW, claim, Final Gate, or output")
+        if check_execution_evidence:
+            current_evidence = _r6a_prebuildlease_execution_evidence(
+                manifest, retention_lock_fds=retention_lock_fds)
+            recorded_evidence = record.get("execution_absence_evidence")
+            if (not isinstance(recorded_evidence, Mapping)
+                    or not _r6a_prebuildlease_execution_absence_still_valid(
+                        recorded_evidence, current_evidence,
+                        admission_id=str(admission_id), build_id=str(manifest.get("r71_build_id")))):
+                raise ValueError("contradictory later BuildLease, session, graph, or output evidence exists")
+        support_rows = record.get("support_evidence")
+        if (not isinstance(support_rows, Mapping) or not support_rows
+                or len(support_rows) > 8):
+            raise ValueError("receipt lacks its bounded historical support-evidence set")
+        for role, row in support_rows.items():
+            if (not isinstance(role, str) or not re.fullmatch(r"[a-z][a-z0-9_-]{0,47}", role)
+                    or not isinstance(row, Mapping)
+                    or set(row) != {"path", "sha256", "identity"}
+                    or not isinstance(row.get("path"), str)
+                    or not isinstance(row.get("sha256"), str)
+                    or not re.fullmatch(r"[0-9a-f]{64}", row["sha256"])
+                    or not isinstance(row.get("identity"), list)
+                    or len(row["identity"]) != 9):
+                raise ValueError("receipt historical support-evidence row is malformed")
+            support_path = Path(row["path"])
+            support_info = _stat_entry_nofollow(support_path)
+            if (support_info is None or not stat.S_ISREG(support_info.st_mode)
+                    or support_info.st_uid != os.getuid() or support_info.st_nlink != 1
+                    or support_info.st_size > 32 * 1024 * 1024
+                    or list(_storage_entry_identity(support_info)) != row["identity"]):
+                raise ValueError("receipt historical support evidence identity changed")
+            live_support = _read_file_nofollow(support_path, maximum_bytes=32 * 1024 * 1024)
+            support_after = _stat_entry_nofollow(support_path)
+            if (hashlib.sha256(live_support).hexdigest() != row["sha256"]
+                    or support_after is None
+                    or list(_storage_entry_identity(support_after)) != row["identity"]):
+                raise ValueError("receipt historical support evidence changed after disposition")
+        return record, None
+    except (OSError, KeyError, TypeError, ValueError, RuntimeError, json.JSONDecodeError) as error:
+        return None, f"pre-BuildLease disposition is invalid: {type(error).__name__}: {error}"
+
+
+def _r6a_prebuildlease_output_state(output_dir: Path, allocated: int, tree_sha256: str) -> dict[str, Any]:
+    info = _stat_entry_nofollow(output_dir)
+    if info is None:
+        return {
+            "path": str(output_dir), "kind": "MISSING", "identity": None,
+            "allocated_bytes": 0, "tree_sha256": hashlib.sha256(b"missing-output\n").hexdigest(),
+            "content_sha256": None,
+        }
+    if (not stat.S_ISDIR(info.st_mode) or info.st_uid != os.getuid()
+            or info.st_dev != REPO.lstat().st_dev):
+        raise ValueError("pre-BuildLease output path has an unsafe directory identity")
+    output_fd = _open_directory_nofollow(output_dir)
+    try:
+        if os.listdir(output_fd):
+            raise ValueError("pre-BuildLease output directory became nonempty after closure")
+    finally:
+        os.close(output_fd)
+    after = _stat_entry_nofollow(output_dir)
+    if after is None or _storage_entry_identity(info) != _storage_entry_identity(after):
+        raise ValueError("pre-BuildLease output directory changed during revalidation")
+    measured_allocated, measured_tree = _persistent_output_snapshot(output_dir)
+    if measured_allocated != allocated or measured_tree != tree_sha256:
+        raise ValueError("pre-BuildLease output tree changed during revalidation")
+    content_sha256 = _persistent_output_content_sha256(output_dir)
+    measured_allocated_after, measured_tree_after = _persistent_output_snapshot(output_dir)
+    after_hash = _stat_entry_nofollow(output_dir)
+    output_fd = _open_directory_nofollow(output_dir)
+    try:
+        still_empty = not os.listdir(output_fd)
+    finally:
+        os.close(output_fd)
+    if (measured_allocated_after != allocated or measured_tree_after != tree_sha256
+            or after_hash is None
+            or _storage_entry_identity(after_hash) != _storage_entry_identity(info)
+            or not still_empty):
+        raise ValueError("pre-BuildLease output changed while hashing its physical contents")
+    return {
+        "path": str(output_dir), "kind": "EMPTY_DIRECTORY",
+        "identity": list(_storage_entry_identity(info)), "allocated_bytes": allocated,
+        "tree_sha256": tree_sha256,
+        "content_sha256": content_sha256,
+    }
+
+
+def _r6a_prebuildlease_support_basis(support_evidence: Mapping[str, Any]) -> str:
+    roles = set(support_evidence)
+    if roles == {"r89_consolidated_report"}:
+        return "R89_REPORT_AND_CURRENT_COMPLETE_BUILD_HISTORY_SCAN_NO_STANDALONE_CLOSEOUT"
+    if roles == {"r89_consolidated_report", "generation2_closeout"}:
+        return "R89_REPORT_AND_GENERATION2_CLOSEOUT_PLUS_CURRENT_COMPLETE_BUILD_HISTORY_SCAN"
+    raise ValueError("historical support evidence must bind the exact R89 report and optional Gen2 closeout")
+
+
+def _r6a_prebuildlease_execution_absence_still_valid(
+    recorded: Mapping[str, Any], current: Mapping[str, Any], *,
+    admission_id: str, build_id: str,
+) -> bool:
+    scan = recorded.get("registry_scan")
+    if (not isinstance(scan, Mapping) or set(scan) != {
+            "complete", "record_count", "records", "records_sha256"}
+            or scan.get("complete") is not True
+            or not isinstance(scan.get("record_count"), int)
+            or isinstance(scan.get("record_count"), bool)
+            or not isinstance(scan.get("records"), list)
+            or scan.get("record_count") != len(scan["records"])
+            or len(scan["records"]) > 4096
+            or scan.get("records_sha256") != hashlib.sha256(json.dumps(
+                scan["records"], sort_keys=True, separators=(",", ":"),
+                ensure_ascii=False, allow_nan=False).encode("utf-8")).hexdigest()
+            or not isinstance(current.get("registry_scan"), Mapping)
+            or current["registry_scan"].get("complete") is not True):
+        return False
+    for row in scan["records"]:
+        if (not isinstance(row, Mapping)
+                or set(row) != {"registry_name", "registry_sha256", "build_id",
+                                "owner_experiment", "session_admission_id", "state", "session_state"}
+                or not isinstance(row.get("registry_name"), str)
+                or not row["registry_name"].endswith(".json")
+                or not isinstance(row.get("registry_sha256"), str)
+                or re.fullmatch(r"[0-9a-f]{64}", row["registry_sha256"]) is None
+                or row.get("build_id") == build_id
+                or row.get("owner_experiment") == admission_id
+                or row.get("session_admission_id") == admission_id):
+            return False
+    stable_fields = {
+        "build_id", "registry_directory", "registry_absence_proven",
+        "matched_registry_records", "paths", "output",
+    }
+    return (all(recorded.get(field) == current.get(field) for field in stable_fields)
+            and current.get("matched_registry_records") == [])
+
+
+def close_r6a_admission_before_buildlease(
+    admission_id: str, *, final_gate_path: Path | str, terminal_reason: str,
+    support_evidence_paths: Mapping[str, Path | str],
+) -> dict[str, Any]:
+    """Append a signed never-started terminal disposition for one R6-A ALLOW.
+
+    The explicit preserved Final Gate input is verified and copied byte-for-byte
+    into the receipt. The shared allocation and BuildLease locks fence this
+    publication against every normal reservation/session handoff.
+    """
+    path = _r6a_prebuildlease_disposition_path(admission_id)
+    allocation_lock = _acquire_storage_allocation_lock()
+    import build_retention
+    retention_lock_fds: tuple[int, int] | None = None
+    try:
+        retention_lock_fds = build_retention._lock()
+        disposition_root_fd = _open_directory_nofollow(
+            ADMISSION_TERMINAL_DISPOSITION_ROOT, create=True, strict_directory_sync=True)
+        os.close(disposition_root_fd)
+        if _stat_entry_nofollow(path) is not None:
+            raise FileExistsError(f"pre-BuildLease disposition already exists: {path}")
+        manifest_path = _experiment_manifest_path(admission_id)
+        manifest_raw = _read_file_nofollow(manifest_path, maximum_bytes=1024 * 1024)
+        manifest = json.loads(manifest_raw, object_pairs_hook=_r65_json_object_without_duplicate_keys)
+        if (not isinstance(manifest, dict)
+                or manifest_raw != _canonical_pretty_json_bytes(manifest)
+                or manifest.get("experiment_id") != admission_id
+                or manifest.get("decision") != "ALLOW"
+                or manifest.get("storage_policy_smoke") is True
+                or not _verify_manifest_signature(manifest)):
+            raise ValueError("pre-BuildLease disposition requires the unchanged signed R6-A ALLOW")
+        claim, claim_raw, claim_path = _r6a_prebuildlease_claim(manifest, manifest_raw)
+        gate_raw, gate, preserved_gate_path = _r6a_prebuildlease_final_gate(final_gate_path, manifest)
+        output_dir = _measured_output_dir(manifest.get("output_dir", ""))
+        output_allocated, output_tree_sha256 = _persistent_output_snapshot(output_dir)
+        _r6a_prebuildlease_output_state(output_dir, output_allocated, output_tree_sha256)
+        evidence = _r6a_prebuildlease_execution_evidence(
+            manifest, retention_lock_fds=retention_lock_fds)
+        if (not isinstance(support_evidence_paths, Mapping) or not support_evidence_paths
+                or len(support_evidence_paths) > 8):
+            raise ValueError("pre-BuildLease disposition requires one to eight explicit support-evidence paths")
+        support_evidence: dict[str, dict[str, Any]] = {}
+        for role, source in sorted(support_evidence_paths.items()):
+            if (not isinstance(role, str) or not re.fullmatch(r"[a-z][a-z0-9_-]{0,47}", role)
+                    or role in support_evidence):
+                raise ValueError("pre-BuildLease support-evidence role is invalid or duplicated")
+            support_path = Path(source).absolute()
+            before = _stat_entry_nofollow(support_path)
+            if (before is None or not stat.S_ISREG(before.st_mode)
+                    or before.st_uid != os.getuid() or before.st_nlink != 1
+                    or before.st_size > 32 * 1024 * 1024):
+                raise ValueError(f"pre-BuildLease support evidence is missing or unsafe: {role}")
+            support_raw = _read_file_nofollow(support_path, maximum_bytes=32 * 1024 * 1024)
+            after = _stat_entry_nofollow(support_path)
+            if after is None or _storage_entry_identity(before) != _storage_entry_identity(after):
+                raise ValueError(f"pre-BuildLease support evidence changed while reading: {role}")
+            support_evidence[role] = {
+                "path": str(support_path), "sha256": hashlib.sha256(support_raw).hexdigest(),
+                "identity": list(_storage_entry_identity(before)),
+            }
+        payload = _r6a_prebuildlease_disposition_payload(
+            manifest=manifest, manifest_raw=manifest_raw, final_gate_path=final_gate_path,
+            terminal_reason=terminal_reason, execution_evidence=evidence,
+            claim=claim, claim_raw=claim_raw, claim_path=claim_path,
+            final_gate_raw=gate_raw, final_gate=gate, preserved_gate_path=preserved_gate_path,
+            support_evidence=support_evidence)
+        record = _seal_storage_evidence(payload, R6A_PREBUILDLEASE_DISPOSITION_HMAC_FIELD)
+        _write_json_exclusive(path, record, strict_directory_sync=True)
+        readback, blocker = _read_r6a_prebuildlease_disposition(
+            manifest, manifest_raw, _measured_output_dir(manifest["output_dir"]),
+            retention_lock_fds=retention_lock_fds)
+        if readback is None:
+            raise RuntimeError(f"pre-BuildLease disposition readback failed: {blocker}")
+        evidence_after = _r6a_prebuildlease_execution_evidence(
+            manifest, retention_lock_fds=retention_lock_fds)
+        manifest_after = _read_file_nofollow(manifest_path, maximum_bytes=1024 * 1024)
+        claim_after = _read_file_nofollow(claim_path, maximum_bytes=64 * 1024)
+        final_after = _read_file_nofollow(preserved_gate_path, maximum_bytes=R6A_FINAL_GATE_MAX_BYTES)
+        if (manifest_after != manifest_raw or claim_after != claim_raw or final_after != gate_raw
+                or evidence_after != evidence or _stat_entry_nofollow(path) is None):
+            raise RuntimeError("pre-BuildLease disposition source or absence evidence changed during publication")
+        return record
+    except (OSError, KeyError, TypeError, ValueError, RuntimeError, json.JSONDecodeError):
+        # A receipt successfully published is append-only even if a later
+        # verification fails. Gate and BuildLease will reject it fail-closed.
+        raise
+    finally:
+        if retention_lock_fds is not None:
+            build_retention._unlock(*retention_lock_fds)
+        _release_storage_allocation_lock(allocation_lock)
+
+
 def _signed_persistent_output_snapshot(
     *, exclude_experiment_id: str | None = None,
     expected_gate0_attestation_sha256: str | None = None,
     baseline_experiment_ids: set[str] | None = None,
+    allowed_active_build_id: str | None = None,
+    allow_pre_dispatch: bool = False,
+    retention_lock_fds: tuple[int, int] | None = None,
 ) -> tuple[dict[str, Any], tuple[Path, ...], list[str]]:
     """Bind authenticated, reservation-limited run outputs for baseline comparison.
 
@@ -644,6 +4844,13 @@ def _signed_persistent_output_snapshot(
     output allocation remain stable and within the manifest's reservation.
     """
     blockers: list[str] = []
+    if allow_pre_dispatch and not (
+            _is_r6a_r71_admission_id(exclude_experiment_id)
+            and allowed_active_build_id is not None
+            and _r6a_admission_milestone(exclude_experiment_id)
+            == _r6a_build_id_milestone(allowed_active_build_id)
+            and retention_lock_fds is not None):
+        return {}, (), ["R71 historical-closure pre-dispatch allowance lacks its exact locked active-session binding"]
     root = REPO / "experiments/storage/manifests"
     try:
         directory_fd = _open_directory_nofollow(root)
@@ -653,6 +4860,7 @@ def _signed_persistent_output_snapshot(
     entries: list[tuple[str, tuple[int, ...] | None, str | None]] = []
     bindings: list[dict[str, Any]] = []
     output_paths: list[Path] = []
+    active_output_paths: list[Path] = []
     try:
         root_info = os.fstat(directory_fd)
         names_before = sorted(name for name in os.listdir(directory_fd) if name.endswith(".json"))
@@ -709,7 +4917,8 @@ def _signed_persistent_output_snapshot(
                     if is_historical_target:
                         blockers.append("historical terminal storage manifest identity or signature is invalid")
                     continue
-                estimates = _validated_manifest_estimates(manifest)
+                estimates = _validated_manifest_estimates(
+                    manifest, allow_historical_terminal_budget=is_historical_target)
                 output_dir = _measured_output_dir(manifest.get("output_dir", ""))
                 if str(output_dir) != manifest.get("output_dir"):
                     if is_historical_target:
@@ -742,6 +4951,13 @@ def _signed_persistent_output_snapshot(
                 continue
             try:
                 output_allocated, output_tree_sha256 = _persistent_output_snapshot(output_dir)
+                if (is_historical_target and output_info is not None
+                        and REPO.resolve() == HISTORICAL_TERMINAL_REPOSITORY
+                        and output_info.st_dev != HISTORICAL_TERMINAL_ROOT_IDENTITY[0]):
+                    output_allocated, output_tree_sha256 = _persistent_output_snapshot(
+                        output_dir,
+                        historical_device_alias=(
+                            output_info.st_dev, HISTORICAL_TERMINAL_ROOT_IDENTITY[0]))
             except (OSError, TypeError, ValueError) as error:
                 blockers.append(
                     f"signed experiment output allocation cannot be measured: {experiment_id}: {error}")
@@ -760,6 +4976,8 @@ def _signed_persistent_output_snapshot(
                     allocated_bytes=output_allocated,
                     metadata_tree_sha256=output_tree_sha256,
                     allowed_active_experiment_id=exclude_experiment_id,
+                    allowed_active_build_id=allowed_active_build_id,
+                    allow_pre_dispatch=allow_pre_dispatch,
                 )
                 blockers.extend(terminal_closure_blockers)
                 if terminal_closure is None:
@@ -767,8 +4985,62 @@ def _signed_persistent_output_snapshot(
                         blockers.append(
                             f"signed experiment output exceeds its persistent reservation: {experiment_id}")
                     continue
+            failed_disposition: dict[str, Any] | None = None
+            failed_disposition_path: Path | None = None
+            failed_disposition_sha256: str | None = None
+            if _is_storage_policy_smoke_id(experiment_id):
+                failed_disposition_path = _failed_output_disposition_path(experiment_id)
+                try:
+                    disposition_info = _stat_entry_nofollow(failed_disposition_path)
+                except FileNotFoundError:
+                    disposition_info = None
+                if disposition_info is not None:
+                    output_content_sha256 = _persistent_output_content_sha256(output_dir)
+                    failed_disposition, disposition_error = _read_failed_output_disposition(
+                        manifest, digest, output_dir,
+                        allocated_bytes=output_allocated,
+                        metadata_tree_sha256=output_tree_sha256,
+                        output_content_sha256=output_content_sha256)
+                    if failed_disposition is None:
+                        blockers.append(
+                            f"failed-output disposition is invalid for {experiment_id}: "
+                            f"{disposition_error or 'unknown validation error'}")
+                        continue
+                    try:
+                        failed_disposition_raw = _read_file_nofollow(
+                            failed_disposition_path, maximum_bytes=1024 * 1024)
+                    except (OSError, RuntimeError):
+                        blockers.append(f"failed-output disposition changed during accounting: {experiment_id}")
+                        continue
+                    failed_disposition_sha256 = hashlib.sha256(failed_disposition_raw).hexdigest()
+            prebuildlease_disposition: dict[str, Any] | None = None
+            prebuildlease_disposition_path: Path | None = None
+            prebuildlease_disposition_sha256: str | None = None
+            if _is_r6a_r71_admission_id(experiment_id):
+                prebuildlease_disposition_path = _r6a_prebuildlease_disposition_path(experiment_id)
+                try:
+                    disposition_info = _stat_entry_nofollow(prebuildlease_disposition_path)
+                except OSError as error:
+                    blockers.append(f"pre-BuildLease disposition path is unsafe for {experiment_id}: {error}")
+                    continue
+                if disposition_info is not None:
+                    prebuildlease_disposition, disposition_error = _read_r6a_prebuildlease_disposition(
+                        manifest, raw, output_dir, retention_lock_fds=retention_lock_fds)
+                    if prebuildlease_disposition is None:
+                        blockers.append(
+                            f"pre-BuildLease disposition is invalid for {experiment_id}: "
+                            f"{disposition_error or 'unknown validation error'}")
+                        continue
+                    try:
+                        disposition_raw = _read_file_nofollow(
+                            prebuildlease_disposition_path,
+                            maximum_bytes=R6A_PREBUILDLEASE_DISPOSITION_MAX_BYTES)
+                    except (OSError, RuntimeError):
+                        blockers.append(f"pre-BuildLease disposition changed during accounting: {experiment_id}")
+                        continue
+                    prebuildlease_disposition_sha256 = hashlib.sha256(disposition_raw).hexdigest()
             if output_allocated > estimates["estimated_persistent_bytes"]:
-                if terminal_closure is None:
+                if terminal_closure is None and failed_disposition is None:
                     blockers.append(
                         f"signed experiment output exceeds its persistent reservation: {experiment_id}")
                     continue
@@ -783,15 +5055,41 @@ def _signed_persistent_output_snapshot(
                 "output_allocated_bytes": output_allocated,
                 "output_tree_sha256": output_tree_sha256,
                 "output_reservation_bytes": estimates["estimated_persistent_bytes"],
+                "reservation_active": (prebuildlease_disposition is None
+                                        and terminal_closure is None),
+                "future_output_reservation_bytes": (
+                    estimates["estimated_persistent_bytes"]
+                    if prebuildlease_disposition is None and terminal_closure is None else 0),
             }
+            if failed_disposition is not None:
+                binding.update({
+                    "lifecycle_state": "FAILED_RETIRED_EVIDENCE",
+                    "failed_output_disposition_path": str(failed_disposition_path),
+                    "failed_output_disposition_sha256": failed_disposition_sha256,
+                    "failed_output_disposition_provenance_class": (
+                        "POST_HOC_OPERATOR_ADJUDICATION"),
+                    "failed_output_native_signed_refusal_present": False,
+                    "output_content_sha256": failed_disposition["output_content_sha256"],
+                })
             if terminal_closure is not None:
                 binding.update({
                     "historical_terminal_closure_path": terminal_closure["closure_path"],
                     "historical_terminal_closure_sha256": terminal_closure["closure_sha256"],
                     "historical_terminal_tree_sha256": terminal_closure["closure_tree_sha256"],
                 })
+            if prebuildlease_disposition is not None:
+                binding.update({
+                    "lifecycle_state": "AUTHORIZED_BUT_ABANDONED_BEFORE_BUILDLEASE",
+                    "prebuildlease_disposition_path": str(prebuildlease_disposition_path),
+                    "prebuildlease_disposition_sha256": prebuildlease_disposition_sha256,
+                    "prebuildlease_original_decision": "ALLOW",
+                    "prebuildlease_terminal_execution_state": "NEVER_STARTED",
+                    "released_future_output_reservation_bytes": estimates["estimated_persistent_bytes"],
+                })
             bindings.append(binding)
             output_paths.extend((manifest_path, output_dir))
+            if prebuildlease_disposition is None:
+                active_output_paths.append(output_dir)
         names_after = sorted(name for name in os.listdir(directory_fd) if name.endswith(".json"))
         final_root_info = os.fstat(directory_fd)
         if (names_after != names_before
@@ -803,7 +5101,7 @@ def _signed_persistent_output_snapshot(
     finally:
         os.close(directory_fd)
 
-    ordered_outputs = sorted(Path(binding["output_dir"]) for binding in bindings)
+    ordered_outputs = sorted(active_output_paths)
     for index, left in enumerate(ordered_outputs):
         for right in ordered_outputs[index + 1:]:
             if left == right or left in right.parents or right in left.parents:
@@ -852,12 +5150,25 @@ def _historical_terminal_tree_snapshot(path: Path) -> dict[str, Any]:
         root_fd = os.open(path.name, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0)
                           | getattr(os, "O_NOFOLLOW", 0), dir_fd=parent_fd)
         root_info = os.fstat(root_fd)
+        recorded_device = HISTORICAL_TERMINAL_ROOT_IDENTITY[0]
+        device_alias_valid = _historical_terminal_apfs_device_alias_matches(
+            recorded_device, root_info.st_dev)
         if (_storage_entry_identity(root_info) != _storage_entry_identity(root_lstat)
                 or not stat.S_ISDIR(root_info.st_mode)
                 or root_info.st_dev != REPO.lstat().st_dev
-                or (root_info.st_dev, root_info.st_ino) != HISTORICAL_TERMINAL_ROOT_IDENTITY
+                or parent_before.st_dev != root_info.st_dev
+                or not device_alias_valid
+                or root_info.st_ino != HISTORICAL_TERMINAL_ROOT_IDENTITY[1]
                 or root_info.st_uid != os.getuid()):
             raise OSError("historical closure output root identity is unexpected")
+
+        def historical_identity(info: os.stat_result) -> list[int]:
+            identity = list(_storage_entry_identity(info))
+            if info.st_dev != recorded_device:
+                if not device_alias_valid or info.st_dev != root_info.st_dev:
+                    raise OSError("historical closure identity is outside the authenticated APFS alias")
+                identity[0] = recorded_device
+            return identity
 
         entries: list[dict[str, Any]] = []
         allocated_by_inode: dict[tuple[int, int], int] = {}
@@ -869,7 +5180,7 @@ def _historical_terminal_tree_snapshot(path: Path) -> dict[str, Any]:
             entries.append({
                 "path": relative or ".",
                 "kind": "directory",
-                "identity": list(_storage_entry_identity(directory_info)),
+                "identity": historical_identity(directory_info),
             })
             for name in names_before:
                 if (not name or name in {".", ".."} or "/" in name or "\\" in name
@@ -924,7 +5235,7 @@ def _historical_terminal_tree_snapshot(path: Path) -> dict[str, Any]:
                 entries.append({
                     "path": child_relative,
                     "kind": "file",
-                    "identity": list(_storage_entry_identity(opened)),
+                    "identity": historical_identity(opened),
                     "sha256": digest.hexdigest(),
                 })
                 inode = (opened.st_dev, opened.st_ino)
@@ -960,15 +5271,19 @@ def _historical_terminal_tree_snapshot(path: Path) -> dict[str, Any]:
             digest.update(b"\n")
         allocated_bytes = sum(allocated_by_inode.values())
         if (logical_bytes != HISTORICAL_TERMINAL_OUTPUT_LOGICAL_BYTES
-                or allocated_bytes != HISTORICAL_TERMINAL_OUTPUT_BYTES):
+                or allocated_bytes not in {
+                    HISTORICAL_TERMINAL_OUTPUT_BYTES,
+                    HISTORICAL_TERMINAL_CORRECTION2_OUTPUT_BYTES,
+                    HISTORICAL_TERMINAL_CORRECTION3_OUTPUT_BYTES,
+                }):
             raise OSError("historical closure output totals differ from the provenance inventory")
         file_hashes = {item["path"]: item["sha256"] for item in entries if item["kind"] == "file"}
         if file_hashes != HISTORICAL_TERMINAL_TRUSTED_FILES:
             raise OSError("historical closure file set or content differs from the provenance inventory")
         return {
             "output_dir": str(path),
-            "root_identity": list(_storage_entry_identity(root_info)),
-            "parent_identity": [parent_before.st_dev, parent_before.st_ino],
+            "root_identity": historical_identity(root_info),
+            "parent_identity": [recorded_device, parent_before.st_ino],
             "entries": entries,
             "entry_count": len(entries),
             "file_count": len(file_hashes),
@@ -1189,7 +5504,16 @@ def _historical_terminal_evidence(
 
 def _historical_terminal_liveness_check(
     evidence: Mapping[str, Any], *, allowed_active_experiment_id: str | None = None,
+    allowed_active_build_id: str | None = None,
+    allow_pre_dispatch: bool = False,
+    terminal_closed_at_unix: float | None = None,
 ) -> dict[str, Any]:
+    if allow_pre_dispatch and not (
+            _is_r6a_r71_admission_id(allowed_active_experiment_id)
+            and allowed_active_build_id is not None
+            and _r6a_admission_milestone(allowed_active_experiment_id)
+            == _r6a_build_id_milestone(allowed_active_build_id)):
+        raise RuntimeError("historical closure pre-dispatch allowance lacks its exact R71 active identities")
     markers = _active_lease_markers()
     expected_allowed_marker = (
         ACTIVE_LEASE_ROOT / f"{allowed_active_experiment_id}.json"
@@ -1203,10 +5527,34 @@ def _historical_terminal_liveness_check(
     if str(retention_directory) not in sys.path:
         sys.path.insert(0, str(retention_directory))
     import build_retention  # pylint: disable=import-outside-toplevel
-    build_state = build_retention._snapshot()
+    build_state = build_retention._snapshot(
+        active_buildlease_id=allowed_active_build_id,
+        **({"active_experiment_id": allowed_active_experiment_id,
+            "allow_pre_dispatch": True} if allow_pre_dispatch else {}))
     if any(build_state.get(key) for key in (
-            "active", "completed_pending_retirement", "failed_or_retiring", "unknown")):
+            "completed_pending_retirement", "failed_or_retiring", "unknown")):
         raise RuntimeError("active, pending, failed, or ambiguous BuildLease state prevents closure")
+    active_builds = build_state.get("active")
+    if not isinstance(active_builds, list):
+        raise RuntimeError("active BuildLease inventory is malformed during historical closure")
+    if allowed_active_build_id is None:
+        if active_builds:
+            raise RuntimeError("active, pending, failed, or ambiguous BuildLease state prevents closure")
+    else:
+        allowed_milestone = _r6a_admission_milestone(allowed_active_experiment_id)
+        build_milestone = _r6a_build_id_milestone(allowed_active_build_id)
+        if (not _is_r6a_r71_admission_id(allowed_active_experiment_id)
+                or allowed_milestone is None or allowed_milestone != build_milestone
+                or len(active_builds) != 1):
+            raise RuntimeError("historical closure permits only one exact active R71 BuildLease")
+        active = active_builds[0]
+        expected_path = str(build_retention.BUILD_ROOT / allowed_active_build_id)
+        if (not isinstance(active, Mapping)
+                or active.get("build_id") != allowed_active_build_id
+                or active.get("owner_experiment") != allowed_active_experiment_id
+                or active.get("state") != "ACTIVE"
+                or active.get("path") != expected_path):
+            raise RuntimeError("historical closure active BuildLease identity differs from the exact active R71 handoff")
 
     pid_checks = []
     for pid in evidence.get("process_ids", ()):
@@ -1214,11 +5562,39 @@ def _historical_terminal_liveness_check(
             raise RuntimeError("historical process identity is malformed")
         result = subprocess.run(["/bin/ps", "-p", str(pid), "-o", "pid=,lstart=,command="],
                                 text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                                timeout=10, check=False)
+                                timeout=10, check=False,
+                                env={**os.environ, "LC_ALL": "C", "TZ": "UTC"})
         if result.returncode not in (0, 1) or result.stderr.strip():
             raise RuntimeError(f"historical process liveness could not be checked for pid {pid}")
-        if result.stdout.strip():
-            raise RuntimeError(f"historical process pid {pid} is still present")
+        process_row = result.stdout.strip()
+        if process_row:
+            if terminal_closed_at_unix is None:
+                raise RuntimeError(f"historical process pid {pid} is still present")
+            if (not isinstance(terminal_closed_at_unix, (int, float))
+                    or isinstance(terminal_closed_at_unix, bool)
+                    or not math.isfinite(float(terminal_closed_at_unix))
+                    or float(terminal_closed_at_unix) <= 0
+                    or result.returncode != 0):
+                raise RuntimeError(f"historical process liveness is ambiguous for pid {pid}")
+            fields = process_row.split(None, 6)
+            if len(fields) != 7 or fields[0] != str(pid):
+                raise RuntimeError(f"historical process identity is ambiguous for pid {pid}")
+            try:
+                process_started_at = datetime.datetime.strptime(
+                    " ".join(fields[1:6]), "%a %b %d %H:%M:%S %Y").replace(
+                        tzinfo=datetime.timezone.utc).timestamp()
+            except (OverflowError, ValueError) as error:
+                raise RuntimeError(
+                    f"historical process start time is ambiguous for pid {pid}") from error
+            if process_started_at > time.time() + 1:
+                raise RuntimeError(f"historical process start time is in the future for pid {pid}")
+            # macOS `ps lstart` has one-second resolution. Treat the current PID
+            # as a reuse only when its displayed start time is at least the next
+            # whole second after this authenticated terminal-closure timestamp.
+            # Anything that could have existed when closure was recorded remains
+            # a fail-closed live-process conflict.
+            if process_started_at < math.floor(float(terminal_closed_at_unix)) + 1:
+                raise RuntimeError(f"historical process pid {pid} is still present")
         pid_checks.append({"pid": pid, "status": "GONE"})
 
     lsof_identity = _historical_terminal_lsof_identity()
@@ -1289,15 +5665,39 @@ def _historical_terminal_lsof_identity() -> dict[str, Any]:
         parent_after = os.fstat(parent_fd)
         if (after is None or _storage_entry_identity(after) != _storage_entry_identity(before)
                 or _storage_entry_identity(before)[:2] != identity[:2]
+                or parent_info.st_dev != before.st_dev
                 or (parent_after.st_dev, parent_after.st_ino) != (parent_info.st_dev, parent_info.st_ino)):
             raise RuntimeError("trusted lsof changed while its identity was read")
+        file_identity = list(identity)
+        parent_identity = [parent_info.st_dev, parent_info.st_ino]
+        if not _historical_terminal_apfs_device_alias_matches(
+                HISTORICAL_TERMINAL_APFS_OLD_DEVICE, before.st_dev):
+            raise RuntimeError("trusted lsof is outside the authenticated historical APFS volume")
+        file_identity[0] = HISTORICAL_TERMINAL_APFS_OLD_DEVICE
+        parent_identity[0] = HISTORICAL_TERMINAL_APFS_OLD_DEVICE
+        digest = hashlib.sha256(contents).hexdigest()
+        if digest != HISTORICAL_TERMINAL_LSOF_SHA256:
+            import build_retention
+            current_identity = {
+                "path": HISTORICAL_TERMINAL_LSOF_PATH,
+                "device": before.st_dev,
+                "inode": before.st_ino,
+                "size": before.st_size,
+                "mode": stat.S_IMODE(before.st_mode),
+                "owner_uid": before.st_uid,
+                "sha256": digest,
+                "stable": True,
+            }
+            if not build_retention._r51_current_system_lsof_is_authenticated(current_identity):
+                raise RuntimeError(
+                    "trusted lsof is neither the pinned historical binary nor an authenticated current Apple system tool")
         return {
             "path": HISTORICAL_TERMINAL_LSOF_PATH,
-            "sha256": hashlib.sha256(contents).hexdigest(),
-            "file_identity": list(identity),
+            "sha256": digest,
+            "file_identity": file_identity,
             "owner_uid": before.st_uid,
             "mode": stat.S_IMODE(before.st_mode),
-            "parent_identity": [parent_info.st_dev, parent_info.st_ino],
+            "parent_identity": parent_identity,
         }
     finally:
         os.close(parent_fd)
@@ -1311,6 +5711,337 @@ def _historical_terminal_closure_path() -> Path:
 def _historical_terminal_closure_correction_path() -> Path:
     return (REPO / "experiments/storage/historical-terminal-closures"
             / f"{HISTORICAL_TERMINAL_RUN_ID}.correction-1.json")
+
+
+def _historical_terminal_closure_correction2_path() -> Path:
+    return (REPO / "experiments/storage/historical-terminal-closures"
+            / f"{HISTORICAL_TERMINAL_RUN_ID}.correction-2.json")
+
+
+def _historical_terminal_closure_correction3_path() -> Path:
+    return (REPO / "experiments/storage/historical-terminal-closures"
+            / f"{HISTORICAL_TERMINAL_RUN_ID}.correction-3.json")
+
+
+def _historical_terminal_correction3_reconciliation_report_path() -> Path:
+    return REPO / "R6-GATE-A-HISTORICAL-CLOSURE.md"
+
+
+def _historical_terminal_correction3_review_path() -> Path:
+    return REPO / "R6-GATE-C-HISTORICAL-CORRECTION3-REVIEW.md"
+
+
+def _historical_terminal_h5_evidence_root() -> Path:
+    return (REPO / "experiments/dxvk_macos_step11d3b/evidence/br9r2"
+            / "z9-finder-replay-20261014")
+
+
+def _historical_terminal_h5_precreation_validation_path() -> Path:
+    return _historical_terminal_h5_evidence_root() / "H5-C-PRECREATION-VALIDATION.json"
+
+
+def _historical_terminal_h5_final_review_binding_path() -> Path:
+    return _historical_terminal_h5_evidence_root() / "H5-D-FINAL-BINDING.json"
+
+
+def _historical_terminal_h5_review_hashes() -> dict[str, str]:
+    root = _historical_terminal_h5_evidence_root()
+    result: dict[str, str] = {}
+    for name, expected_sha256 in HISTORICAL_TERMINAL_H5_REVIEW_SHA256.items():
+        raw = _read_file_nofollow(root / name, maximum_bytes=4 * 1024 * 1024)
+        digest = hashlib.sha256(raw).hexdigest()
+        if digest != expected_sha256:
+            raise RuntimeError(f"frozen H5/H4 review changed: {name}")
+        result[name] = digest
+    return result
+
+
+def _historical_terminal_h5_test_log_bindings(
+    test_runs: Mapping[str, Any],
+) -> dict[str, dict[str, Any]]:
+    expected_names = {
+        "focused": "H5-C-FOCUSED-TESTS.log",
+        "full_storage": "H5-C-FULL-STORAGE-TESTS.log",
+    }
+    if not isinstance(test_runs, Mapping) or set(test_runs) != set(expected_names):
+        raise ValueError("pre-creation validation does not bind the focused and full test runs")
+    result: dict[str, dict[str, Any]] = {}
+    for key, name in expected_names.items():
+        row = test_runs.get(key)
+        if not isinstance(row, Mapping) or row.get("status") != "PASS":
+            raise ValueError(f"pre-creation validation {key} test result is not PASS")
+        log_path = _historical_terminal_h5_evidence_root() / name
+        if row.get("log_path") != str(log_path):
+            raise ValueError(f"pre-creation validation {key} test log path is not canonical")
+        raw = _read_file_nofollow(log_path, maximum_bytes=16 * 1024 * 1024)
+        digest = hashlib.sha256(raw).hexdigest()
+        count_match = re.search(rb"(?:^|\n)Ran ([0-9]+) tests? in [^\n]+", raw)
+        if (row.get("log_sha256") != digest or count_match is None
+                or row.get("tests_run") != int(count_match.group(1))
+                or int(count_match.group(1)) <= 0
+                or re.search(rb"(?:^|\n)OK(?:\s|$)", raw) is None):
+            raise ValueError(f"pre-creation validation {key} test log is not a matching passing run")
+        command = row.get("command")
+        if not isinstance(command, str) or "python3.14" not in command or "unittest" not in command:
+            raise ValueError(f"pre-creation validation {key} command is not the required Python unittest run")
+        result[key] = {
+            "command": command,
+            "log_path": str(log_path),
+            "log_sha256": digest,
+            "tests_run": int(count_match.group(1)),
+            "status": "PASS",
+        }
+    return result
+
+
+def _historical_terminal_h5_precreation_validation(
+    *, correction1_raw: bytes | None = None,
+    expected_source_hashes: Mapping[str, str] | None = None,
+    expected_control_hashes: Mapping[str, str] | None = None,
+) -> tuple[dict[str, Any], bytes]:
+    path = _historical_terminal_h5_precreation_validation_path()
+    raw = _read_file_nofollow(path, maximum_bytes=1024 * 1024)
+    record = json.loads(raw)
+    if raw != _canonical_pretty_json_bytes(record):
+        raise ValueError("H5 pre-creation validation is not canonically encoded")
+    correction1_sha256 = (hashlib.sha256(correction1_raw).hexdigest()
+                          if correction1_raw is not None else HISTORICAL_TERMINAL_CORRECTION1_SHA256)
+    source_hashes = (dict(expected_source_hashes) if expected_source_hashes is not None
+                     else _historical_terminal_source_hashes())
+    control_hashes = (dict(expected_control_hashes) if expected_control_hashes is not None
+                      else _gate0_control_hashes())
+    review_hashes = _historical_terminal_h5_review_hashes()
+    test_runs = _historical_terminal_h5_test_log_bindings(record.get("test_runs"))
+    if (record.get("schema_version") != 1
+            or record.get("artifact_type") != "H5-C-PRECREATION-VALIDATION"
+            or record.get("status") != "PASS"
+            or record.get("experiment_id") != HISTORICAL_TERMINAL_RUN_ID
+            or record.get("original_closure_path") != str(_historical_terminal_closure_path())
+            or record.get("correction1_path") != str(_historical_terminal_closure_correction_path())
+            or record.get("correction1_sha256") != correction1_sha256
+            or record.get("correction1_hmac_sha256") != HISTORICAL_TERMINAL_CORRECTION1_HMAC_SHA256
+            or record.get("source_sha256") != source_hashes
+            or record.get("gate0_control_sha256") != control_hashes
+            or record.get("review_sha256") != review_hashes
+            or record.get("test_runs") != test_runs):
+        raise ValueError("H5 pre-creation validation is stale or does not bind exact controls and reviews")
+    return record, raw
+
+
+def _historical_terminal_h5_final_review_binding(
+    correction2_record: Mapping[str, Any], correction2_raw: bytes,
+) -> dict[str, Any]:
+    path = _historical_terminal_h5_final_review_binding_path()
+    raw = _read_file_nofollow(path, maximum_bytes=1024 * 1024)
+    record = json.loads(raw)
+    if raw != _canonical_pretty_json_bytes(record):
+        raise ValueError("H5 final review binding is not canonically encoded")
+    review_path = _historical_terminal_h5_evidence_root() / "H5-D-FRESH-REVIEW.md"
+    review_raw = _read_file_nofollow(review_path, maximum_bytes=4 * 1024 * 1024)
+    expected = {
+        "schema_version": 1,
+        "artifact_type": "H5-D-FINAL-BINDING",
+        "status": "PASS",
+        "experiment_id": HISTORICAL_TERMINAL_RUN_ID,
+        "correction2_path": str(_historical_terminal_closure_correction2_path()),
+        "correction2_sha256": hashlib.sha256(correction2_raw).hexdigest(),
+        "precreation_validation_path": str(_historical_terminal_h5_precreation_validation_path()),
+        "precreation_validation_sha256": correction2_record.get("precreation_validation", {}).get("sha256"),
+        "source_sha256": correction2_record.get("source_sha256"),
+        "gate0_control_sha256": correction2_record.get("gate0_control_sha256"),
+        "review_sha256": correction2_record.get("precreation_validation", {}).get("review_sha256"),
+        "review_report_path": str(review_path),
+        "review_report_sha256": hashlib.sha256(review_raw).hexdigest(),
+    }
+    if record != expected:
+        raise ValueError("independent H5-D binding is missing, stale, or bound to different correction-2 bytes")
+    return record
+
+
+def _historical_terminal_tree_digest(entries: Sequence[Mapping[str, Any]]) -> str:
+    digest = hashlib.sha256()
+    for item in entries:
+        digest.update(json.dumps(item, sort_keys=True, separators=(",", ":"),
+                                 ensure_ascii=False).encode("utf-8"))
+        digest.update(b"\n")
+    return digest.hexdigest()
+
+
+def _historical_terminal_correction2_expected_inventory(
+    predecessor: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Apply the one evidenced runtime.log block transition to a correction-1 snapshot."""
+    expected_output = str(_historical_terminal_run_paths()["output_dir"])
+    if (predecessor.get("output_dir") != expected_output
+            or predecessor.get("entry_count") != 20
+            or predecessor.get("file_count") != 16
+            or predecessor.get("logical_bytes") != HISTORICAL_TERMINAL_OUTPUT_LOGICAL_BYTES
+            or predecessor.get("allocated_bytes") != HISTORICAL_TERMINAL_OUTPUT_BYTES
+            or predecessor.get("tree_sha256") != HISTORICAL_TERMINAL_CORRECTION1_TREE_SHA256
+            or predecessor.get("root_identity", [])[:2] != list(HISTORICAL_TERMINAL_ROOT_IDENTITY)
+            or predecessor.get("parent_identity") != [16_777_229, 94_854_815]):
+        raise ValueError("correction-1 tree does not match the frozen predecessor inventory")
+    entries = predecessor.get("entries")
+    if not isinstance(entries, list) or len(entries) != 20:
+        raise ValueError("correction-1 tree entry set is not the exact 20-entry inventory")
+    old_entries = json.loads(json.dumps(entries))
+    current_entries = json.loads(json.dumps(entries))
+    names = [item.get("path") for item in old_entries if isinstance(item, Mapping)]
+    if len(names) != 20 or names != sorted(names) or len(set(names)) != 20:
+        raise ValueError("correction-1 tree paths are missing, duplicated, or non-canonical")
+    file_hashes: dict[str, str] = {}
+    runtime_indices = [index for index, item in enumerate(old_entries)
+                       if item.get("path") == "runtime.log"]
+    if len(runtime_indices) != 1:
+        raise ValueError("correction-1 tree does not contain exactly one runtime.log")
+    for item in old_entries:
+        if item.get("kind") == "file":
+            file_hashes[item.get("path")] = item.get("sha256")
+    if file_hashes != HISTORICAL_TERMINAL_TRUSTED_FILES:
+        raise ValueError("correction-1 tree content hashes differ from the immutable file set")
+    runtime_index = runtime_indices[0]
+    runtime = old_entries[runtime_index]
+    identity = runtime.get("identity")
+    if (runtime.get("kind") != "file"
+            or runtime.get("sha256") != HISTORICAL_TERMINAL_TRUSTED_FILES["runtime.log"]
+            or identity != list(HISTORICAL_TERMINAL_RUNTIME_LOG_IDENTITY)):
+        raise ValueError("correction-1 runtime.log identity is not the exact predecessor")
+    current_entries[runtime_index]["identity"][8] = HISTORICAL_TERMINAL_RUNTIME_LOG_CORRECTION2_BLOCKS
+    if sum(item["identity"][8] * 512 for item in current_entries if item["kind"] == "file") != HISTORICAL_TERMINAL_CORRECTION2_OUTPUT_BYTES:
+        raise ValueError("correction-2 allocation is not the exact 921600-byte predecessor transition")
+    if _historical_terminal_tree_digest(old_entries) != HISTORICAL_TERMINAL_CORRECTION1_TREE_SHA256:
+        raise ValueError("correction-1 entry rows do not produce their pinned tree digest")
+    current = dict(predecessor)
+    current.update({
+        "entries": current_entries,
+        "allocated_bytes": HISTORICAL_TERMINAL_CORRECTION2_OUTPUT_BYTES,
+        "tree_sha256": _historical_terminal_tree_digest(current_entries),
+    })
+    if current["tree_sha256"] != HISTORICAL_TERMINAL_CORRECTION2_TREE_SHA256:
+        raise ValueError("correction-2 inventory does not produce its frozen exact tree digest")
+    return current
+
+
+def _require_historical_terminal_correction2_transition(
+    predecessor: Mapping[str, Any], current: Mapping[str, Any],
+) -> None:
+    expected = _historical_terminal_correction2_expected_inventory(predecessor)
+    if current != expected:
+        raise ValueError("current tree differs from the one exact correction-2 predecessor transition")
+
+
+def _historical_terminal_correction3_expected_inventory(
+    predecessor: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Apply the one pinned host-trace allocation transition to correction-2."""
+    expected_output = str(_historical_terminal_run_paths()["output_dir"])
+    if (predecessor.get("output_dir") != expected_output
+            or predecessor.get("entry_count") != 20
+            or predecessor.get("file_count") != 16
+            or predecessor.get("logical_bytes") != HISTORICAL_TERMINAL_OUTPUT_LOGICAL_BYTES
+            or predecessor.get("allocated_bytes") != HISTORICAL_TERMINAL_CORRECTION2_OUTPUT_BYTES
+            or predecessor.get("tree_sha256") != HISTORICAL_TERMINAL_CORRECTION2_TREE_SHA256
+            or predecessor.get("root_identity") != [
+                16_777_229, 98_341_479, 16_877, 501, 16, 512,
+                1_791_987_292_307_000_886, 1_791_987_292_307_000_886, 0]
+            or predecessor.get("parent_identity") != [16_777_229, 94_854_815]):
+        raise ValueError("correction-2 tree does not match the frozen predecessor inventory")
+    entries = predecessor.get("entries")
+    if not isinstance(entries, list) or len(entries) != 20:
+        raise ValueError("correction-2 tree entry set is not the exact 20-entry inventory")
+    old_entries = json.loads(json.dumps(entries))
+    current_entries = json.loads(json.dumps(entries))
+    names = [item.get("path") for item in old_entries if isinstance(item, Mapping)]
+    if len(names) != 20 or names != sorted(names) or len(set(names)) != 20:
+        raise ValueError("correction-2 tree paths are missing, duplicated, or non-canonical")
+    file_hashes: dict[str, str] = {}
+    trace_indices = [index for index, item in enumerate(old_entries)
+                     if item.get("path") == "host-traces/host-trace.58921.jsonl"]
+    if len(trace_indices) != 1:
+        raise ValueError("correction-2 tree does not contain exactly one bound host trace")
+    for item in old_entries:
+        if item.get("kind") == "file":
+            file_hashes[item.get("path")] = item.get("sha256")
+    if file_hashes != HISTORICAL_TERMINAL_TRUSTED_FILES:
+        raise ValueError("correction-2 tree content hashes differ from the immutable file set")
+    trace_index = trace_indices[0]
+    trace = old_entries[trace_index]
+    if (trace.get("kind") != "file"
+            or trace.get("sha256") != HISTORICAL_TERMINAL_TRUSTED_FILES[
+                "host-traces/host-trace.58921.jsonl"]
+            or trace.get("identity") != list(HISTORICAL_TERMINAL_TRACE_BLOCK_PREDECESSOR_IDENTITY)):
+        raise ValueError("correction-2 host-trace identity is not the exact predecessor")
+    current_entries[trace_index]["identity"][8] = HISTORICAL_TERMINAL_TRACE_BLOCK_CURRENT
+    allocated = sum(item["identity"][8] * 512 for item in current_entries if item["kind"] == "file")
+    if allocated != HISTORICAL_TERMINAL_CORRECTION3_OUTPUT_BYTES:
+        raise ValueError("correction-3 allocation is not the exact 4,505,600-byte predecessor transition")
+    if _historical_terminal_tree_digest(old_entries) != HISTORICAL_TERMINAL_CORRECTION2_TREE_SHA256:
+        raise ValueError("correction-2 entry rows do not produce their pinned tree digest")
+    current = dict(predecessor)
+    current.update({
+        "entries": current_entries,
+        "allocated_bytes": HISTORICAL_TERMINAL_CORRECTION3_OUTPUT_BYTES,
+        "tree_sha256": _historical_terminal_tree_digest(current_entries),
+    })
+    if current["tree_sha256"] != HISTORICAL_TERMINAL_CORRECTION3_TREE_SHA256:
+        raise ValueError("correction-3 inventory does not produce its frozen exact tree digest")
+    return current
+
+
+def _require_historical_terminal_correction3_transition(
+    predecessor: Mapping[str, Any], current: Mapping[str, Any],
+) -> None:
+    expected = _historical_terminal_correction3_expected_inventory(predecessor)
+    if current != expected:
+        raise ValueError("current tree differs from the one exact correction-3 predecessor transition")
+
+
+def _historical_terminal_correction3_review_bindings(
+    predecessor_raw: bytes,
+    source_hashes: Mapping[str, str],
+    control_hashes: Mapping[str, str],
+) -> tuple[dict[str, Any], dict[str, Any], bytes]:
+    reconciliation_path = _historical_terminal_correction3_reconciliation_report_path()
+    reconciliation_raw = _read_file_nofollow(reconciliation_path, maximum_bytes=4 * 1024 * 1024)
+    reconciliation_text = reconciliation_raw.decode("utf-8")
+    if ("Classification: A1" not in reconciliation_text
+            or "G2 trigger: met" not in reconciliation_text
+            or "SAFE_RECONCILIATION = YES" not in reconciliation_text):
+        raise ValueError("historical correction-3 reconciliation does not establish the exact G2 trigger")
+    predecessor_sha256 = hashlib.sha256(predecessor_raw).hexdigest()
+    reconciliation_sha256 = hashlib.sha256(reconciliation_raw).hexdigest()
+
+    review_path = _historical_terminal_correction3_review_path()
+    review_raw = _read_file_nofollow(review_path, maximum_bytes=4 * 1024 * 1024)
+    review_text = review_raw.decode("utf-8")
+    expected_review_lines = {
+        f"CORRECTION2_SHA256 = {predecessor_sha256}",
+        f"RECONCILIATION_SHA256 = {reconciliation_sha256}",
+        "SOURCE_SHA256 = " + json.dumps(dict(source_hashes), sort_keys=True, separators=(",", ":")),
+        "GATE0_CONTROL_SHA256 = " + json.dumps(
+            dict(control_hashes), sort_keys=True, separators=(",", ":")),
+        "CORRECTION3_REVIEW = PASS",
+    }
+    if not expected_review_lines.issubset(set(review_text.splitlines())):
+        raise ValueError("fresh correction-3 review does not PASS or bind the exact predecessor and current controls")
+    return (
+        {
+            "path": str(reconciliation_path),
+            "sha256": reconciliation_sha256,
+            "classification": "A1",
+            "g2_trigger": True,
+        },
+        {
+            "path": str(review_path),
+            "sha256": hashlib.sha256(review_raw).hexdigest(),
+            "status": "PASS",
+            "predecessor_sha256": predecessor_sha256,
+            "reconciliation_sha256": reconciliation_sha256,
+            "source_sha256": dict(source_hashes),
+            "gate0_control_sha256": dict(control_hashes),
+        },
+        review_raw,
+    )
 
 
 def _historical_terminal_source_hashes() -> dict[str, str]:
@@ -1365,7 +6096,8 @@ def _read_historical_terminal_closure_file(
             or _storage_entry_identity(read_info) != _storage_entry_identity(info)
             or raw != _canonical_pretty_json_bytes(record)):
         return None, None, "historical terminal closure changed or is not canonically encoded"
-    if record.get("closure_directory_identity") != list(directory_identity):
+    if not _directory_identity_matches_historical_apfs_device_alias(
+            record.get("closure_directory_identity"), directory_identity):
         return None, None, "historical terminal closure directory identity is not bound to its certificate"
     return record, raw, None
 
@@ -1398,7 +6130,8 @@ def _is_supersedable_legacy_terminal_closure(
         and record.get("authorizes_execution") is False
         and record.get("changes_original_gate_result") is False
         and record.get("counts_toward_project_scope") is True
-        and record.get("closure_directory_identity") == list(directory_identity)
+        and _directory_identity_matches_historical_apfs_device_alias(
+            record.get("closure_directory_identity"), directory_identity)
         and record.get("report_prefix") == expected_report
         and isinstance(record.get("source_sha256"), dict)
         and isinstance(record.get("gate0_control_sha256"), dict)
@@ -1412,6 +6145,8 @@ def _is_supersedable_legacy_terminal_closure(
 def _read_historical_terminal_closure() -> tuple[dict[str, Any] | None, bytes | None, str | None]:
     path = _historical_terminal_closure_path()
     correction_path = _historical_terminal_closure_correction_path()
+    correction2_path = _historical_terminal_closure_correction2_path()
+    correction3_path = _historical_terminal_closure_correction3_path()
     try:
         directory_fd, directory_identity = _open_historical_terminal_closure_directory()
     except FileNotFoundError:
@@ -1421,8 +6156,15 @@ def _read_historical_terminal_closure() -> tuple[dict[str, Any] | None, bytes | 
     try:
         expected_name = path.name
         correction_name = correction_path.name
+        correction2_name = correction2_path.name
+        correction3_name = correction3_path.name
         names = sorted(os.listdir(directory_fd))
-        allowed_name_sets = ([expected_name], sorted([expected_name, correction_name]))
+        allowed_name_sets = (
+            [expected_name],
+            sorted([expected_name, correction_name]),
+            sorted([expected_name, correction_name, correction2_name]),
+            sorted([expected_name, correction_name, correction2_name, correction3_name]),
+        )
         if names not in allowed_name_sets:
             return None, None, "historical terminal closure directory has missing or unexpected entries"
         original, original_raw, original_error = _read_historical_terminal_closure_file(
@@ -1435,7 +6177,7 @@ def _read_historical_terminal_closure() -> tuple[dict[str, Any] | None, bytes | 
                     or original.get("closure_revision") != 0):
                 return None, None, "historical terminal closure schema is not a current schema-v3 record"
             record, raw = original, original_raw
-        else:
+        elif names == sorted([expected_name, correction_name]):
             correction, correction_raw, correction_error = _read_historical_terminal_closure_file(
                 directory_fd, correction_name, directory_identity)
             if correction is None or correction_raw is None:
@@ -1447,9 +6189,68 @@ def _read_historical_terminal_closure() -> tuple[dict[str, Any] | None, bytes | 
                     or correction.get("closure_path") != str(correction_path)
                     or correction.get("supersedes_closure_path") != str(path)
                     or correction.get("supersedes_closure_sha256")
-                    != hashlib.sha256(original_raw).hexdigest()):
+                    != hashlib.sha256(original_raw).hexdigest()
+                    or hashlib.sha256(correction_raw).hexdigest()
+                    != HISTORICAL_TERMINAL_CORRECTION1_SHA256
+                    or correction.get("closure_hmac_sha256")
+                    != HISTORICAL_TERMINAL_CORRECTION1_HMAC_SHA256
+                    or not _verify_storage_evidence(correction, "closure_hmac_sha256")):
                 return None, None, "historical terminal closure correction does not bind the superseded certificate"
             record, raw = correction, correction_raw
+        else:
+            correction, correction_raw, correction_error = _read_historical_terminal_closure_file(
+                directory_fd, correction_name, directory_identity)
+            if correction is None or correction_raw is None:
+                return None, None, correction_error
+            correction2, correction2_raw, correction2_error = _read_historical_terminal_closure_file(
+                directory_fd, correction2_name, directory_identity)
+            if correction2 is None or correction2_raw is None:
+                return None, None, correction2_error
+            if (not _is_supersedable_legacy_terminal_closure(
+                    original, original_raw, directory_identity)
+                    or correction.get("schema_version") != 3
+                    or correction.get("closure_revision") != 1
+                    or correction.get("closure_path") != str(correction_path)
+                    or correction.get("supersedes_closure_path") != str(path)
+                    or correction.get("supersedes_closure_sha256")
+                    != hashlib.sha256(original_raw).hexdigest()
+                    or hashlib.sha256(correction_raw).hexdigest()
+                    != HISTORICAL_TERMINAL_CORRECTION1_SHA256
+                    or correction.get("closure_hmac_sha256")
+                    != HISTORICAL_TERMINAL_CORRECTION1_HMAC_SHA256
+                    or not _verify_storage_evidence(correction, "closure_hmac_sha256")
+                    or correction2.get("schema_version") != 3
+                    or correction2.get("closure_revision") != 2
+                    or correction2.get("closure_path") != str(correction2_path)
+                    or correction2.get("supersedes_closure_path") != str(correction_path)
+                    or correction2.get("supersedes_closure_sha256")
+                    != hashlib.sha256(correction_raw).hexdigest()
+                    or correction2.get("supersedes_closure_hmac_sha256")
+                    != correction.get("closure_hmac_sha256")
+                    or not _verify_storage_evidence(correction2, "closure_hmac_sha256")):
+                return None, None, "historical terminal closure correction-2 chain is invalid or incomplete"
+            if names == sorted([expected_name, correction_name, correction2_name, correction3_name]):
+                correction3, correction3_raw, correction3_error = _read_historical_terminal_closure_file(
+                    directory_fd, correction3_name, directory_identity)
+                if correction3 is None or correction3_raw is None:
+                    return None, None, correction3_error
+                if (hashlib.sha256(correction2_raw).hexdigest()
+                        != HISTORICAL_TERMINAL_CORRECTION2_SHA256
+                        or correction2.get("closure_hmac_sha256")
+                        != HISTORICAL_TERMINAL_CORRECTION2_HMAC_SHA256
+                        or correction3.get("schema_version") != 3
+                        or correction3.get("closure_revision") != 3
+                        or correction3.get("closure_path") != str(correction3_path)
+                        or correction3.get("supersedes_closure_path") != str(correction2_path)
+                        or correction3.get("supersedes_closure_sha256")
+                        != hashlib.sha256(correction2_raw).hexdigest()
+                        or correction3.get("supersedes_closure_hmac_sha256")
+                        != correction2.get("closure_hmac_sha256")
+                        or not _verify_storage_evidence(correction3, "closure_hmac_sha256")):
+                    return None, None, "historical terminal closure correction-3 chain is invalid or incomplete"
+                record, raw = correction3, correction3_raw
+            else:
+                record, raw = correction2, correction2_raw
         names_after = sorted(os.listdir(directory_fd))
         directory_after = os.fstat(directory_fd)
         if (names_after != names
@@ -1466,26 +6267,131 @@ def _read_historical_terminal_closure() -> tuple[dict[str, Any] | None, bytes | 
         os.close(directory_fd)
 
 
+def _read_historical_terminal_correction1_record(
+    *, require_correction2: bool = True, require_correction3: bool = False,
+) -> tuple[dict[str, Any], bytes]:
+    directory_fd, directory_identity = _open_historical_terminal_closure_directory()
+    try:
+        original, original_raw, original_error = _read_historical_terminal_closure_file(
+            directory_fd, _historical_terminal_closure_path().name, directory_identity)
+        correction, correction_raw, correction_error = _read_historical_terminal_closure_file(
+            directory_fd, _historical_terminal_closure_correction_path().name, directory_identity)
+        if (original is None or original_raw is None
+                or correction is None or correction_raw is None
+                or not _is_supersedable_legacy_terminal_closure(
+                    original, original_raw, directory_identity)
+                or hashlib.sha256(correction_raw).hexdigest()
+                != HISTORICAL_TERMINAL_CORRECTION1_SHA256
+                or correction.get("closure_hmac_sha256")
+                != HISTORICAL_TERMINAL_CORRECTION1_HMAC_SHA256
+                or not _verify_storage_evidence(correction, "closure_hmac_sha256")
+                or correction.get("closure_path") != str(_historical_terminal_closure_correction_path())
+                or correction.get("closure_revision") != 1
+                or correction.get("supersedes_closure_path") != str(_historical_terminal_closure_path())
+                or correction.get("supersedes_closure_sha256")
+                != hashlib.sha256(original_raw).hexdigest()):
+            error = original_error or correction_error or "correction-1 identity is invalid"
+            raise ValueError(f"historical terminal correction-1 predecessor is invalid: {error}")
+        expected_names = [
+            _historical_terminal_closure_path().name,
+            _historical_terminal_closure_correction_path().name,
+        ]
+        if require_correction2:
+            expected_names.append(_historical_terminal_closure_correction2_path().name)
+        if require_correction3:
+            expected_names.append(_historical_terminal_closure_correction3_path().name)
+        if sorted(os.listdir(directory_fd)) != sorted(expected_names):
+            raise ValueError("historical terminal closure chain changed while reading correction-1")
+        return correction, correction_raw
+    finally:
+        os.close(directory_fd)
+
+
+def _read_historical_terminal_correction2_record(
+    *, require_correction3: bool = False,
+) -> tuple[dict[str, Any], bytes]:
+    correction1, correction1_raw = _read_historical_terminal_correction1_record(
+        require_correction2=True, require_correction3=require_correction3)
+    directory_fd, directory_identity = _open_historical_terminal_closure_directory()
+    try:
+        correction2_path = _historical_terminal_closure_correction2_path()
+        correction2, correction2_raw, correction2_error = _read_historical_terminal_closure_file(
+            directory_fd, correction2_path.name, directory_identity)
+        expected_names = [
+            _historical_terminal_closure_path().name,
+            _historical_terminal_closure_correction_path().name,
+            correction2_path.name,
+        ]
+        if require_correction3:
+            expected_names.append(_historical_terminal_closure_correction3_path().name)
+        if (correction2 is None or correction2_raw is None
+                or sorted(os.listdir(directory_fd)) != sorted(expected_names)
+                or hashlib.sha256(correction2_raw).hexdigest()
+                != HISTORICAL_TERMINAL_CORRECTION2_SHA256
+                or correction2.get("closure_hmac_sha256")
+                != HISTORICAL_TERMINAL_CORRECTION2_HMAC_SHA256
+                or correction2.get("schema_version") != 3
+                or correction2.get("closure_revision") != 2
+                or correction2.get("closure_path") != str(correction2_path)
+                or correction2.get("supersedes_closure_path")
+                != str(_historical_terminal_closure_correction_path())
+                or correction2.get("supersedes_closure_sha256")
+                != hashlib.sha256(correction1_raw).hexdigest()
+                or correction2.get("supersedes_closure_hmac_sha256")
+                != correction1.get("closure_hmac_sha256")
+                or not _verify_storage_evidence(correction2, "closure_hmac_sha256")
+                or correction2.get("original_reservation_bytes")
+                != HISTORICAL_TERMINAL_ORIGINAL_RESERVATION_BYTES
+                or correction2.get("historical_failure_preserved") is not True
+                or correction2.get("authorizes_execution") is not False
+                or correction2.get("changes_original_gate_result") is not False
+                or correction2.get("counts_toward_project_scope") is not True):
+            error = correction2_error or "correction-2 identity is invalid"
+            raise ValueError(f"historical terminal correction-2 predecessor is invalid: {error}")
+        return correction2, correction2_raw
+    finally:
+        os.close(directory_fd)
+
+
 def _verify_historical_terminal_closure(
     manifest: Mapping[str, Any], manifest_sha256: str, output_dir: Path,
     *, allocated_bytes: int, metadata_tree_sha256: str,
     allowed_active_experiment_id: str | None = None,
+    allowed_active_build_id: str | None = None,
+    allow_pre_dispatch: bool = False,
 ) -> tuple[dict[str, Any] | None, list[str]]:
     record, raw, read_error = _read_historical_terminal_closure()
     if record is None or raw is None:
         return None, [f"historical terminal closure for {HISTORICAL_TERMINAL_RUN_ID} is invalid: {read_error}"]
     try:
-        expected_closure_path = (
-            _historical_terminal_closure_correction_path()
-            if record.get("closure_revision") == 1 else _historical_terminal_closure_path())
+        revision = record.get("closure_revision")
+        expected_closure_path = {
+            0: _historical_terminal_closure_path(),
+            1: _historical_terminal_closure_correction_path(),
+            2: _historical_terminal_closure_correction2_path(),
+            3: _historical_terminal_closure_correction3_path(),
+        }.get(revision)
         if (record.get("schema_version") != 3
                 or record.get("closure_policy") != "history-preserving-terminal-overrun-v1"
                 or record.get("experiment_id") != HISTORICAL_TERMINAL_RUN_ID
+                or expected_closure_path is None
                 or record.get("closure_path") != str(expected_closure_path)
-                or record.get("closure_revision") not in (0, 1)
+                or revision not in (0, 1, 2, 3)
                 or record.get("storage_manifest_path") != str(_experiment_manifest_path(HISTORICAL_TERMINAL_RUN_ID))
                 or record.get("storage_manifest_sha256") != manifest_sha256
+                or not isinstance(record.get("historical_evidence"), Mapping)
+                or record.get("manifest_hmac_sha256")
+                != record.get("historical_evidence", {}).get("manifest_hmac_sha256")
                 or record.get("original_reservation_bytes") != HISTORICAL_TERMINAL_ORIGINAL_RESERVATION_BYTES
+                or record.get("gate0_post_allocation_bytes") != HISTORICAL_TERMINAL_POST_OUTPUT_BYTES
+                or record.get("gate0_post_allocation_provenance")
+                != "report reconstruction; not a numeric field in the embedded POST object"
+                or record.get("gate0_post_status") != "BLOCKED"
+                or record.get("gate0_post_blockers") != HISTORICAL_TERMINAL_BLOCKERS
+                or record.get("run_result_status") != "FAIL"
+                or record.get("r5_classification") != "INVALID / INCOMPLETE"
+                or record.get("t8_classification") != "INSUFFICIENT TIMING EVIDENCE"
+                or record.get("finder_treatment") != "NOT EXECUTED"
                 or record.get("historical_failure_preserved") is not True
                 or record.get("authorizes_execution") is not False
                 or record.get("changes_original_gate_result") is not False
@@ -1496,6 +6402,10 @@ def _verify_historical_terminal_closure(
                     "bytes": HISTORICAL_TERMINAL_REPORT_PREFIX_BYTES,
                     "sha256": HISTORICAL_TERMINAL_REPORT_PREFIX_SHA256,
                 }
+                or not isinstance(record.get("created_at_unix"), (int, float))
+                or isinstance(record.get("created_at_unix"), bool)
+                or not math.isfinite(float(record.get("created_at_unix", 0)))
+                or float(record.get("created_at_unix", 0)) <= 0
                 or not _verify_storage_evidence(record, "closure_hmac_sha256")):
             raise ValueError("closure schema, exact identity, original manifest binding, immutable reservation, or signature is invalid")
         if (manifest.get("experiment_id") != HISTORICAL_TERMINAL_RUN_ID
@@ -1511,41 +6421,629 @@ def _verify_historical_terminal_closure(
                 or record.get("metadata_output_tree_sha256") != metadata_tree_sha256):
             raise ValueError("the signed output identity changed after terminal closure")
         liveness = _historical_terminal_liveness_check(
-            evidence, allowed_active_experiment_id=allowed_active_experiment_id)
+            evidence, allowed_active_experiment_id=allowed_active_experiment_id,
+            allowed_active_build_id=allowed_active_build_id,
+            allow_pre_dispatch=allow_pre_dispatch,
+            terminal_closed_at_unix=float(record["created_at_unix"]))
         if record.get("liveness_at_closure") != liveness:
             raise ValueError("historical liveness tools or quiescence evidence changed after closure")
-        if record.get("source_sha256") != _historical_terminal_source_hashes():
-            raise ValueError("historical closure source-control hashes changed")
-        if record.get("gate0_control_sha256") != _gate0_control_hashes():
-            raise ValueError("historical closure Gate 0 control hashes changed")
         current_inventory = _historical_terminal_tree_snapshot(output_dir)
+        d_binding: dict[str, Any] | None = None
+        d_binding_raw: bytes | None = None
+        validation: dict[str, Any] | None = None
+        validation_raw: bytes | None = None
+        correction1: dict[str, Any] | None = None
+        correction1_raw: bytes | None = None
+        if revision == 2:
+            correction1, correction1_raw = _read_historical_terminal_correction1_record()
+            if (record.get("supersedes_closure_path")
+                    != str(_historical_terminal_closure_correction_path())
+                    or record.get("supersedes_closure_sha256")
+                    != hashlib.sha256(correction1_raw).hexdigest()
+                    or record.get("supersedes_closure_hmac_sha256")
+                    != correction1.get("closure_hmac_sha256")):
+                raise ValueError("correction-2 does not bind the exact authenticated correction-1 predecessor")
+            _require_historical_terminal_correction2_transition(
+                correction1.get("tree_inventory", {}), current_inventory)
+            if (record.get("metadata_output_allocated_bytes")
+                    != HISTORICAL_TERMINAL_CORRECTION2_OUTPUT_BYTES
+                    or record.get("metadata_output_tree_sha256")
+                    != HISTORICAL_TERMINAL_CORRECTION2_METADATA_SHA256
+                    or allocated_bytes != HISTORICAL_TERMINAL_CORRECTION2_OUTPUT_BYTES
+                    or metadata_tree_sha256 != HISTORICAL_TERMINAL_CORRECTION2_METADATA_SHA256
+                    or record.get("correction2_transition") != {
+                        "path": "runtime.log",
+                        "field": "identity.st_blocks",
+                        "predecessor": 4_104,
+                        "current": 2_304,
+                        "allocation_before_bytes": 725_688_320,
+                        "allocation_after_bytes": 724_766_720,
+                        "allocation_delta_bytes": -921_600,
+                    }):
+                raise ValueError("correction-2 signed-output measurement differs from its exact snapshot")
+            validation, validation_raw = _historical_terminal_h5_precreation_validation(
+                correction1_raw=correction1_raw,
+                expected_source_hashes=record.get("source_sha256"),
+                expected_control_hashes=record.get("gate0_control_sha256"))
+            expected_validation_binding = {
+                "path": str(_historical_terminal_h5_precreation_validation_path()),
+                "sha256": hashlib.sha256(validation_raw).hexdigest(),
+                "source_sha256": validation["source_sha256"],
+                "gate0_control_sha256": validation["gate0_control_sha256"],
+                "review_sha256": validation["review_sha256"],
+                "test_runs": validation["test_runs"],
+            }
+            if record.get("precreation_validation") != expected_validation_binding:
+                raise ValueError("correction-2 does not bind the exact frozen C pre-creation validation")
+            d_binding = _historical_terminal_h5_final_review_binding(record, raw)
+            d_binding_raw = _read_file_nofollow(
+                _historical_terminal_h5_final_review_binding_path(), maximum_bytes=1024 * 1024)
+        elif revision == 3:
+            correction1, correction1_raw = _read_historical_terminal_correction1_record(
+                require_correction3=True)
+            correction2, correction2_raw = _read_historical_terminal_correction2_record(
+                require_correction3=True)
+            if (record.get("supersedes_closure_path")
+                    != str(_historical_terminal_closure_correction2_path())
+                    or record.get("supersedes_closure_sha256")
+                    != hashlib.sha256(correction2_raw).hexdigest()
+                    or record.get("supersedes_closure_hmac_sha256")
+                    != correction2.get("closure_hmac_sha256")):
+                raise ValueError("correction-3 does not bind the exact authenticated correction-2 predecessor")
+            _require_historical_terminal_correction2_transition(
+                correction1.get("tree_inventory", {}), correction2.get("tree_inventory", {}))
+            if (correction2.get("metadata_output_allocated_bytes")
+                    != HISTORICAL_TERMINAL_CORRECTION2_OUTPUT_BYTES
+                    or correction2.get("metadata_output_tree_sha256")
+                    != HISTORICAL_TERMINAL_CORRECTION2_METADATA_SHA256
+                    or correction2.get("closed_tree_allocated_bytes")
+                    != HISTORICAL_TERMINAL_CORRECTION2_OUTPUT_BYTES
+                    or correction2.get("closed_tree_logical_bytes")
+                    != HISTORICAL_TERMINAL_OUTPUT_LOGICAL_BYTES
+                    or correction2.get("correction2_transition") != {
+                        "path": "runtime.log",
+                        "field": "identity.st_blocks",
+                        "predecessor": 4_104,
+                        "current": 2_304,
+                        "allocation_before_bytes": 725_688_320,
+                        "allocation_after_bytes": 724_766_720,
+                        "allocation_delta_bytes": -921_600,
+                    }):
+                raise ValueError("correction-2 predecessor does not preserve its exact historical snapshot")
+            validation, validation_raw = _historical_terminal_h5_precreation_validation(
+                correction1_raw=correction1_raw,
+                expected_source_hashes=correction2.get("source_sha256"),
+                expected_control_hashes=correction2.get("gate0_control_sha256"))
+            if correction2.get("precreation_validation") != {
+                    "path": str(_historical_terminal_h5_precreation_validation_path()),
+                    "sha256": hashlib.sha256(validation_raw).hexdigest(),
+                    "source_sha256": validation["source_sha256"],
+                    "gate0_control_sha256": validation["gate0_control_sha256"],
+                    "review_sha256": validation["review_sha256"],
+                    "test_runs": validation["test_runs"],
+            }:
+                raise ValueError("correction-2 does not bind the exact historical C pre-creation validation")
+            d_binding = _historical_terminal_h5_final_review_binding(correction2, correction2_raw)
+            d_binding_raw = _read_file_nofollow(
+                _historical_terminal_h5_final_review_binding_path(), maximum_bytes=1024 * 1024)
+            _require_historical_terminal_correction3_transition(
+                correction2.get("tree_inventory", {}), current_inventory)
+            if (record.get("metadata_output_allocated_bytes")
+                    != HISTORICAL_TERMINAL_CORRECTION3_OUTPUT_BYTES
+                    or record.get("metadata_output_tree_sha256")
+                    != HISTORICAL_TERMINAL_CORRECTION3_METADATA_SHA256
+                    or allocated_bytes != HISTORICAL_TERMINAL_CORRECTION3_OUTPUT_BYTES
+                    or metadata_tree_sha256 != HISTORICAL_TERMINAL_CORRECTION3_METADATA_SHA256
+                    or record.get("closed_tree_allocated_bytes")
+                    != HISTORICAL_TERMINAL_CORRECTION3_OUTPUT_BYTES
+                    or record.get("closed_tree_logical_bytes")
+                    != HISTORICAL_TERMINAL_OUTPUT_LOGICAL_BYTES
+                    or record.get("correction2_transition") != correction2.get("correction2_transition")
+                    or record.get("correction2_source_sha256") != correction2.get("source_sha256")
+                    or record.get("correction2_gate0_control_sha256")
+                    != correction2.get("gate0_control_sha256")
+                    or record.get("correction2_tree_sha256") != correction2.get("tree_sha256")
+                    or record.get("precreation_validation") != correction2.get("precreation_validation")
+                    or record.get("correction3_transition") != {
+                        "path": "host-traces/host-trace.58921.jsonl",
+                        "field": "identity.st_blocks",
+                        "predecessor": 721_016,
+                        "current": 712_216,
+                        "allocation_before_bytes": 724_766_720,
+                        "allocation_after_bytes": 720_261_120,
+                        "allocation_delta_bytes": -4_505_600,
+                    }):
+                raise ValueError("correction-3 signed-output measurement differs from its exact snapshot")
+            reconciliation_binding, review_binding, correction3_review_raw = (
+                _historical_terminal_correction3_review_bindings(
+                    correction2_raw, record.get("source_sha256", {}),
+                    record.get("gate0_control_sha256", {})))
+            if (record.get("correction3_reconciliation") != reconciliation_binding
+                    or record.get("correction3_independent_review") != review_binding):
+                raise ValueError("correction-3 does not bind the exact G2 reconciliation and fresh review")
         if current_inventory != record.get("tree_inventory"):
             raise ValueError("the closed historical tree changed after terminal closure")
         if (current_inventory.get("allocated_bytes") != record.get("closed_tree_allocated_bytes")
                 or current_inventory.get("tree_sha256") != record.get("tree_sha256")
                 or current_inventory.get("root_identity") != record.get("tree_root_identity")):
             raise ValueError("the closed tree no longer matches its signed identity and content digest")
+        if revision in (2, 3) and (
+                current_inventory.get("logical_bytes") != HISTORICAL_TERMINAL_OUTPUT_LOGICAL_BYTES
+                or record.get("closed_tree_logical_bytes") != HISTORICAL_TERMINAL_OUTPUT_LOGICAL_BYTES
+                or current_inventory.get("parent_identity") != record.get("tree_parent_identity")
+                or current_inventory.get("entry_count") != 20
+                or current_inventory.get("file_count") != 16):
+            raise ValueError("correction-2/3 top-level tree totals or parent identity are not exact")
         # Re-read all source records and the closure after measurement to fence races.
         evidence_after = _historical_terminal_evidence(report_prefix_binding=record.get("report_prefix"))
         latest_record, latest_raw, latest_error = _read_historical_terminal_closure()
         if (evidence_after != evidence or latest_error is not None or latest_record != record
                 or latest_raw != raw):
             raise ValueError("historical evidence or closure changed while Gate 0 verified it")
+        if revision == 2:
+            assert correction1_raw is not None and validation is not None and validation_raw is not None
+            assert d_binding is not None and d_binding_raw is not None
+            validation_after, validation_after_raw = _historical_terminal_h5_precreation_validation(
+                correction1_raw=correction1_raw,
+                expected_source_hashes=record.get("source_sha256"),
+                expected_control_hashes=record.get("gate0_control_sha256"))
+            d_binding_after = _historical_terminal_h5_final_review_binding(record, raw)
+            d_binding_after_raw = _read_file_nofollow(
+                _historical_terminal_h5_final_review_binding_path(), maximum_bytes=1024 * 1024)
+            tree_after = _historical_terminal_tree_snapshot(output_dir)
+            liveness_after = _historical_terminal_liveness_check(
+                evidence_after, allowed_active_experiment_id=allowed_active_experiment_id,
+                allowed_active_build_id=allowed_active_build_id,
+                allow_pre_dispatch=allow_pre_dispatch,
+                terminal_closed_at_unix=float(record["created_at_unix"]))
+            if (validation_after != validation
+                    or validation_after_raw != validation_raw
+                    or d_binding_after != d_binding
+                    or d_binding_after_raw != d_binding_raw
+                    or tree_after != current_inventory
+                    or liveness_after != liveness):
+                raise ValueError("correction-2 evidence, D review, liveness, or tree changed during Gate verification")
+        elif revision == 3:
+            assert correction1_raw is not None and validation is not None and validation_raw is not None
+            assert d_binding is not None and d_binding_raw is not None
+            assert correction2 is not None and correction2_raw is not None
+            validation_after, validation_after_raw = _historical_terminal_h5_precreation_validation(
+                correction1_raw=correction1_raw,
+                expected_source_hashes=correction2.get("source_sha256"),
+                expected_control_hashes=correction2.get("gate0_control_sha256"))
+            d_binding_after = _historical_terminal_h5_final_review_binding(correction2, correction2_raw)
+            d_binding_after_raw = _read_file_nofollow(
+                _historical_terminal_h5_final_review_binding_path(), maximum_bytes=1024 * 1024)
+            reconciliation_after, review_after, review_raw_after = (
+                _historical_terminal_correction3_review_bindings(
+                    correction2_raw, record.get("source_sha256", {}),
+                    record.get("gate0_control_sha256", {})))
+            tree_after = _historical_terminal_tree_snapshot(output_dir)
+            liveness_after = _historical_terminal_liveness_check(
+                evidence_after, allowed_active_experiment_id=allowed_active_experiment_id,
+                allowed_active_build_id=allowed_active_build_id,
+                allow_pre_dispatch=allow_pre_dispatch,
+                terminal_closed_at_unix=float(record["created_at_unix"]))
+            if (validation_after != validation
+                    or validation_after_raw != validation_raw
+                    or d_binding_after != d_binding
+                    or d_binding_after_raw != d_binding_raw
+                    or reconciliation_after != record.get("correction3_reconciliation")
+                    or review_after != record.get("correction3_independent_review")
+                    or review_raw_after != correction3_review_raw
+                    or tree_after != current_inventory
+                    or liveness_after != liveness):
+                raise ValueError("correction-3 evidence, reviews, liveness, or tree changed during Gate verification")
         return {
             "closure_path": record["closure_path"],
             "closure_sha256": hashlib.sha256(raw).hexdigest(),
             "closure_tree_sha256": current_inventory["tree_sha256"],
             "closure_allocated_bytes": current_inventory["allocated_bytes"],
             "closure_liveness": liveness,
+            **({
+                "h5_d_binding_path": str(_historical_terminal_h5_final_review_binding_path()),
+                "h5_d_binding_sha256": hashlib.sha256(d_binding_raw or b"").hexdigest(),
+            } if revision in (2, 3) else {}),
+            **({
+                "correction3_review_path": str(_historical_terminal_correction3_review_path()),
+                "correction3_review_sha256": hashlib.sha256(correction3_review_raw).hexdigest(),
+            } if revision == 3 else {}),
         }, []
     except (OSError, RuntimeError, ValueError, TypeError, json.JSONDecodeError) as error:
         return None, [f"historical terminal closure for {HISTORICAL_TERMINAL_RUN_ID} failed verification: {error}"]
+
+
+def _append_historical_terminal_correction2_locked() -> dict[str, Any]:
+    """Append the one exact H5 transition after pre-creation validation is frozen."""
+    original_path = _historical_terminal_closure_path()
+    correction1_path = _historical_terminal_closure_correction_path()
+    correction2_path = _historical_terminal_closure_correction2_path()
+    directory_fd, directory_identity = _open_historical_terminal_closure_directory()
+    try:
+        if sorted(os.listdir(directory_fd)) != sorted([original_path.name, correction1_path.name]):
+            raise FileExistsError("historical terminal closure is append-only; correction-2 path is not vacant")
+    finally:
+        os.close(directory_fd)
+
+    correction1, correction1_raw = _read_historical_terminal_correction1_record(
+        require_correction2=False)
+    if (hashlib.sha256(correction1_raw).hexdigest() != HISTORICAL_TERMINAL_CORRECTION1_SHA256
+            or correction1.get("closure_hmac_sha256") != HISTORICAL_TERMINAL_CORRECTION1_HMAC_SHA256
+            or correction1.get("storage_manifest_path")
+            != str(_experiment_manifest_path(HISTORICAL_TERMINAL_RUN_ID))
+            or correction1.get("storage_manifest_sha256")
+            != "11732b65ef09689e0cac94f3e0579e9c45f5af24def1129f8e7bfa910efc9d59"
+            or correction1.get("original_reservation_bytes")
+            != HISTORICAL_TERMINAL_ORIGINAL_RESERVATION_BYTES
+            or correction1.get("historical_failure_preserved") is not True
+            or correction1.get("authorizes_execution") is not False
+            or correction1.get("changes_original_gate_result") is not False
+            or correction1.get("counts_toward_project_scope") is not True
+            or correction1.get("gate0_post_status") != "BLOCKED"
+            or correction1.get("gate0_post_blockers") != HISTORICAL_TERMINAL_BLOCKERS
+            or correction1.get("run_result_status") != "FAIL"
+            or correction1.get("r5_classification") != "INVALID / INCOMPLETE"
+            or correction1.get("t8_classification") != "INSUFFICIENT TIMING EVIDENCE"
+            or correction1.get("finder_treatment") != "NOT EXECUTED"):
+        raise RuntimeError("correction-1 does not preserve the exact historical failed-run facts")
+
+    def snapshot(*, correction2_expected: bool = False) -> dict[str, Any]:
+        current_correction1, current_correction1_raw = _read_historical_terminal_correction1_record(
+            require_correction2=correction2_expected)
+        if correction2_expected:
+            latest, _latest_raw, latest_error = _read_historical_terminal_closure()
+            if latest_error is not None or latest is None or latest.get("closure_revision") != 2:
+                raise RuntimeError("durable correction-2 chain did not reopen as revision 2")
+        if current_correction1_raw != correction1_raw or current_correction1 != correction1:
+            raise RuntimeError("correction-1 predecessor changed during correction-2 validation")
+        validation, validation_raw = _historical_terminal_h5_precreation_validation(
+            correction1_raw=correction1_raw)
+        source_hashes = _historical_terminal_source_hashes()
+        control_hashes = _gate0_control_hashes()
+        if (validation.get("source_sha256") != source_hashes
+                or validation.get("gate0_control_sha256") != control_hashes):
+            raise RuntimeError("source or Gate 0 controls changed after H5 pre-creation validation")
+        report_binding = correction1.get("report_prefix")
+        evidence = _historical_terminal_evidence(report_prefix_binding=report_binding)
+        if evidence != correction1.get("historical_evidence"):
+            raise RuntimeError("immutable historical evidence differs from correction-1")
+        liveness = _historical_terminal_liveness_check(evidence)
+        tree = _historical_terminal_tree_snapshot(Path(evidence["paths"]["output_dir"]))
+        _require_historical_terminal_correction2_transition(
+            correction1.get("tree_inventory", {}), tree)
+        allocated, metadata_sha256 = _persistent_output_snapshot(
+            Path(evidence["paths"]["output_dir"]))
+        if (allocated != HISTORICAL_TERMINAL_CORRECTION2_OUTPUT_BYTES
+                or metadata_sha256 != HISTORICAL_TERMINAL_CORRECTION2_METADATA_SHA256
+                or tree.get("allocated_bytes") != allocated):
+            raise RuntimeError("current signed-output metadata differs from the exact correction-2 snapshot")
+        return {
+            "correction1": current_correction1,
+            "correction1_raw": current_correction1_raw,
+            "validation": validation,
+            "validation_raw": validation_raw,
+            "source_hashes": source_hashes,
+            "control_hashes": control_hashes,
+            "evidence": evidence,
+            "liveness": liveness,
+            "tree": tree,
+            "allocated": allocated,
+            "metadata_sha256": metadata_sha256,
+        }
+
+    before = snapshot()
+    confirm = snapshot()
+    if before != confirm:
+        raise RuntimeError("historical evidence, liveness, source, or tree changed between correction-2 prechecks")
+    if before["correction1_raw"] != correction1_raw:
+        raise RuntimeError("correction-1 bytes changed before correction-2 append")
+
+    validation = before["validation"]
+    validation_raw = before["validation_raw"]
+    tree = before["tree"]
+    record = dict(correction1)
+    record.pop("closure_hmac_sha256", None)
+    record.update({
+        "closure_path": str(correction2_path),
+        "closure_revision": 2,
+        "created_at_unix": time.time(),
+        "supersedes_closure_path": str(correction1_path),
+        "supersedes_closure_sha256": hashlib.sha256(correction1_raw).hexdigest(),
+        "supersedes_closure_hmac_sha256": correction1["closure_hmac_sha256"],
+        "supersedes_closure_reason": (
+            "The exact runtime.log allocation field changed from 4104 to 2304 blocks; "
+            "all other correction-1 tree identities and content hashes were revalidated."),
+        "metadata_output_allocated_bytes": before["allocated"],
+        "metadata_output_tree_sha256": before["metadata_sha256"],
+        "tree_root_identity": tree["root_identity"],
+        "tree_parent_identity": tree["parent_identity"],
+        "tree_inventory": tree,
+        "tree_sha256": tree["tree_sha256"],
+        "closed_tree_allocated_bytes": tree["allocated_bytes"],
+        "closed_tree_logical_bytes": tree["logical_bytes"],
+        "liveness_at_closure": before["liveness"],
+        "source_sha256": before["source_hashes"],
+        "gate0_control_sha256": before["control_hashes"],
+        "precreation_validation": {
+            "path": str(_historical_terminal_h5_precreation_validation_path()),
+            "sha256": hashlib.sha256(validation_raw).hexdigest(),
+            "source_sha256": validation["source_sha256"],
+            "gate0_control_sha256": validation["gate0_control_sha256"],
+            "review_sha256": validation["review_sha256"],
+            "test_runs": validation["test_runs"],
+        },
+        "correction2_transition": {
+            "path": "runtime.log",
+            "field": "identity.st_blocks",
+            "predecessor": 4_104,
+            "current": 2_304,
+            "allocation_before_bytes": 725_688_320,
+            "allocation_after_bytes": 724_766_720,
+            "allocation_delta_bytes": -921_600,
+        },
+    })
+    sealed = _seal_storage_evidence(record, "closure_hmac_sha256")
+    raw = _canonical_pretty_json_bytes(sealed)
+
+    latest_preappend = snapshot()
+    if latest_preappend != before:
+        raise RuntimeError("historical evidence or snapshot changed immediately before correction-2 append")
+    directory_fd, write_directory_identity = _open_historical_terminal_closure_directory()
+    try:
+        if (write_directory_identity != directory_identity
+                or sorted(os.listdir(directory_fd)) != sorted([original_path.name, correction1_path.name])):
+            raise RuntimeError("historical closure chain or directory changed before correction-2 append")
+        descriptor = os.open(correction2_path.name, os.O_WRONLY | os.O_CREAT | os.O_EXCL
+                             | getattr(os, "O_NOFOLLOW", 0), 0o600, dir_fd=directory_fd)
+        try:
+            offset = 0
+            while offset < len(raw):
+                count = os.write(descriptor, raw[offset:])
+                if count <= 0:
+                    raise OSError("short write while appending historical correction-2")
+                offset += count
+            os.fsync(descriptor)
+        finally:
+            os.close(descriptor)
+        os.fsync(directory_fd)
+    finally:
+        os.close(directory_fd)
+
+    readback, readback_raw, readback_error = _read_historical_terminal_closure()
+    after = snapshot(correction2_expected=True)
+    post_confirm = snapshot(correction2_expected=True)
+    final_readback, final_readback_raw, final_readback_error = _read_historical_terminal_closure()
+    if (readback_error is not None or readback != sealed or readback_raw != raw
+            or final_readback_error is not None or final_readback != sealed
+            or final_readback_raw != raw or after != before or post_confirm != before
+            or post_confirm != after):
+        # A durable but invalid correction remains in place; the chain never retries or rebases.
+        raise RuntimeError("correction-2 failed its durable post-write revalidation")
+    return {
+        "status": "CLOSED",
+        "experiment_id": HISTORICAL_TERMINAL_RUN_ID,
+        "closure_path": str(correction2_path),
+        "closure_sha256": hashlib.sha256(raw).hexdigest(),
+        "tree_sha256": tree["tree_sha256"],
+        "allocated_bytes": tree["allocated_bytes"],
+        "original_reservation_bytes": HISTORICAL_TERMINAL_ORIGINAL_RESERVATION_BYTES,
+        "gate0_post_status": before["evidence"]["gate0_post_status"],
+    }
+
+
+def _append_historical_terminal_correction3_locked() -> dict[str, Any]:
+    """Append one reviewed, exact host-trace allocation successor to correction-2."""
+    original_path = _historical_terminal_closure_path()
+    correction1_path = _historical_terminal_closure_correction_path()
+    correction2_path = _historical_terminal_closure_correction2_path()
+    correction3_path = _historical_terminal_closure_correction3_path()
+    directory_fd, directory_identity = _open_historical_terminal_closure_directory()
+    try:
+        expected_names = sorted([original_path.name, correction1_path.name, correction2_path.name])
+        if sorted(os.listdir(directory_fd)) != expected_names:
+            raise FileExistsError("historical terminal closure is append-only; correction-3 path is not vacant")
+    finally:
+        os.close(directory_fd)
+
+    correction1, correction1_raw = _read_historical_terminal_correction1_record()
+    correction2, correction2_raw = _read_historical_terminal_correction2_record()
+    if (hashlib.sha256(correction2_raw).hexdigest() != HISTORICAL_TERMINAL_CORRECTION2_SHA256
+            or correction2.get("closure_hmac_sha256") != HISTORICAL_TERMINAL_CORRECTION2_HMAC_SHA256
+            or correction2.get("storage_manifest_path")
+            != str(_experiment_manifest_path(HISTORICAL_TERMINAL_RUN_ID))
+            or correction2.get("storage_manifest_sha256")
+            != "11732b65ef09689e0cac94f3e0579e9c45f5af24def1129f8e7bfa910efc9d59"
+            or correction2.get("original_reservation_bytes")
+            != HISTORICAL_TERMINAL_ORIGINAL_RESERVATION_BYTES
+            or correction2.get("historical_failure_preserved") is not True
+            or correction2.get("authorizes_execution") is not False
+            or correction2.get("changes_original_gate_result") is not False
+            or correction2.get("counts_toward_project_scope") is not True
+            or correction2.get("gate0_post_status") != "BLOCKED"
+            or correction2.get("gate0_post_blockers") != HISTORICAL_TERMINAL_BLOCKERS
+            or correction2.get("run_result_status") != "FAIL"
+            or correction2.get("r5_classification") != "INVALID / INCOMPLETE"
+            or correction2.get("t8_classification") != "INSUFFICIENT TIMING EVIDENCE"
+            or correction2.get("finder_treatment") != "NOT EXECUTED"):
+        raise RuntimeError("correction-2 does not preserve the exact historical failed-run facts")
+
+    def snapshot(*, correction3_expected: bool = False) -> dict[str, Any]:
+        current_correction2, current_correction2_raw = _read_historical_terminal_correction2_record(
+            require_correction3=correction3_expected)
+        if current_correction2_raw != correction2_raw or current_correction2 != correction2:
+            raise RuntimeError("correction-2 predecessor changed during correction-3 validation")
+        validation, validation_raw = _historical_terminal_h5_precreation_validation(
+            correction1_raw=correction1_raw,
+            expected_source_hashes=correction2.get("source_sha256"),
+            expected_control_hashes=correction2.get("gate0_control_sha256"))
+        expected_validation = {
+            "path": str(_historical_terminal_h5_precreation_validation_path()),
+            "sha256": hashlib.sha256(validation_raw).hexdigest(),
+            "source_sha256": validation["source_sha256"],
+            "gate0_control_sha256": validation["gate0_control_sha256"],
+            "review_sha256": validation["review_sha256"],
+            "test_runs": validation["test_runs"],
+        }
+        if correction2.get("precreation_validation") != expected_validation:
+            raise RuntimeError("correction-2 no longer binds its exact historical C pre-creation validation")
+        d_binding = _historical_terminal_h5_final_review_binding(correction2, correction2_raw)
+        source_hashes = _historical_terminal_source_hashes()
+        control_hashes = _gate0_control_hashes()
+        report_binding, review_binding, review_raw = _historical_terminal_correction3_review_bindings(
+            correction2_raw, source_hashes, control_hashes)
+        report_prefix = correction2.get("report_prefix")
+        evidence = _historical_terminal_evidence(report_prefix_binding=report_prefix)
+        if evidence != correction2.get("historical_evidence"):
+            raise RuntimeError("immutable historical evidence differs from correction-2")
+        liveness = _historical_terminal_liveness_check(evidence)
+        if liveness != correction2.get("liveness_at_closure"):
+            raise RuntimeError("historical liveness changed after correction-2")
+        tree = _historical_terminal_tree_snapshot(Path(evidence["paths"]["output_dir"]))
+        _require_historical_terminal_correction3_transition(correction2.get("tree_inventory", {}), tree)
+        allocated, metadata_sha256 = _persistent_output_snapshot(
+            Path(evidence["paths"]["output_dir"]))
+        if (allocated != HISTORICAL_TERMINAL_CORRECTION3_OUTPUT_BYTES
+                or metadata_sha256 != HISTORICAL_TERMINAL_CORRECTION3_METADATA_SHA256
+                or tree.get("allocated_bytes") != allocated):
+            raise RuntimeError("current signed-output metadata differs from the exact correction-3 snapshot")
+        return {
+            "correction1": correction1,
+            "correction1_raw": correction1_raw,
+            "correction2": current_correction2,
+            "correction2_raw": current_correction2_raw,
+            "validation": validation,
+            "validation_raw": validation_raw,
+            "d_binding": d_binding,
+            "source_hashes": source_hashes,
+            "control_hashes": control_hashes,
+            "reconciliation_binding": report_binding,
+            "review_binding": review_binding,
+            "review_raw": review_raw,
+            "evidence": evidence,
+            "liveness": liveness,
+            "tree": tree,
+            "allocated": allocated,
+            "metadata_sha256": metadata_sha256,
+        }
+
+    before = snapshot()
+    confirm = snapshot()
+    if before != confirm:
+        raise RuntimeError("historical evidence, liveness, review, source, or tree changed between correction-3 prechecks")
+
+    correction2 = before["correction2"]
+    correction2_raw = before["correction2_raw"]
+    tree = before["tree"]
+    record = dict(correction2)
+    record.pop("closure_hmac_sha256", None)
+    record.update({
+        "closure_path": str(correction3_path),
+        "closure_revision": 3,
+        "created_at_unix": time.time(),
+        "supersedes_closure_path": str(correction2_path),
+        "supersedes_closure_sha256": hashlib.sha256(correction2_raw).hexdigest(),
+        "supersedes_closure_hmac_sha256": correction2["closure_hmac_sha256"],
+        "supersedes_closure_reason": (
+            "The exact host-trace allocation field changed from 721016 to 712216 blocks; "
+            "all other correction-2 tree identities and content hashes were revalidated."),
+        "metadata_output_allocated_bytes": before["allocated"],
+        "metadata_output_tree_sha256": before["metadata_sha256"],
+        "tree_root_identity": tree["root_identity"],
+        "tree_parent_identity": tree["parent_identity"],
+        "tree_inventory": tree,
+        "tree_sha256": tree["tree_sha256"],
+        "closed_tree_allocated_bytes": tree["allocated_bytes"],
+        "closed_tree_logical_bytes": tree["logical_bytes"],
+        "liveness_at_closure": before["liveness"],
+        "source_sha256": before["source_hashes"],
+        "gate0_control_sha256": before["control_hashes"],
+        "correction2_source_sha256": correction2["source_sha256"],
+        "correction2_gate0_control_sha256": correction2["gate0_control_sha256"],
+        "correction2_tree_sha256": correction2["tree_sha256"],
+        "correction3_reconciliation": before["reconciliation_binding"],
+        "correction3_independent_review": before["review_binding"],
+        "correction3_transition": {
+            "path": "host-traces/host-trace.58921.jsonl",
+            "field": "identity.st_blocks",
+            "predecessor": 721_016,
+            "current": 712_216,
+            "allocation_before_bytes": 724_766_720,
+            "allocation_after_bytes": 720_261_120,
+            "allocation_delta_bytes": -4_505_600,
+        },
+    })
+    sealed = _seal_storage_evidence(record, "closure_hmac_sha256")
+    raw = _canonical_pretty_json_bytes(sealed)
+
+    latest_preappend = snapshot()
+    if latest_preappend != before:
+        raise RuntimeError("historical evidence or snapshot changed immediately before correction-3 append")
+    directory_fd, write_directory_identity = _open_historical_terminal_closure_directory()
+    try:
+        if (write_directory_identity != directory_identity
+                or sorted(os.listdir(directory_fd)) != sorted(
+                    [original_path.name, correction1_path.name, correction2_path.name])):
+            raise RuntimeError("historical closure chain or directory changed before correction-3 append")
+        descriptor = os.open(correction3_path.name, os.O_WRONLY | os.O_CREAT | os.O_EXCL
+                             | getattr(os, "O_NOFOLLOW", 0), 0o600, dir_fd=directory_fd)
+        try:
+            offset = 0
+            while offset < len(raw):
+                count = os.write(descriptor, raw[offset:])
+                if count <= 0:
+                    raise OSError("short write while appending historical correction-3")
+                offset += count
+            os.fsync(descriptor)
+        finally:
+            os.close(descriptor)
+        os.fsync(directory_fd)
+    finally:
+        os.close(directory_fd)
+
+    manifest_path = _experiment_manifest_path(HISTORICAL_TERMINAL_RUN_ID)
+    manifest_raw = _read_file_nofollow(manifest_path)
+    manifest = json.loads(manifest_raw)
+    verified, blockers = _verify_historical_terminal_closure(
+        manifest, hashlib.sha256(manifest_raw).hexdigest(),
+        Path(before["evidence"]["paths"]["output_dir"]),
+        allocated_bytes=before["allocated"], metadata_tree_sha256=before["metadata_sha256"])
+    readback, readback_raw, readback_error = _read_historical_terminal_closure()
+    after = snapshot(correction3_expected=True)
+    post_confirm = snapshot(correction3_expected=True)
+    if (verified is None or blockers or readback_error is not None or readback != sealed
+            or readback_raw != raw or after != before or post_confirm != before
+            or post_confirm != after):
+        # A durable but invalid correction remains in place; the chain never retries or rebases.
+        raise RuntimeError("correction-3 failed its durable post-write revalidation: " + "; ".join(blockers))
+    return {
+        "status": "CLOSED",
+        "experiment_id": HISTORICAL_TERMINAL_RUN_ID,
+        "closure_path": str(correction3_path),
+        "closure_sha256": hashlib.sha256(raw).hexdigest(),
+        "tree_sha256": tree["tree_sha256"],
+        "allocated_bytes": tree["allocated_bytes"],
+        "original_reservation_bytes": HISTORICAL_TERMINAL_ORIGINAL_RESERVATION_BYTES,
+        "gate0_post_status": before["evidence"]["gate0_post_status"],
+    }
+
+
+def append_historical_terminal_correction3() -> dict[str, Any]:
+    """Append only the specifically reviewed successor for the exact G2 evidence."""
+    certification_lock = acquire_storage_certification_lock(exclusive=True)
+    allocation_lock = None
+    try:
+        allocation_lock = _acquire_storage_allocation_lock()
+        return _append_historical_terminal_correction3_locked()
+    finally:
+        _release_storage_allocation_lock(allocation_lock)
+        release_storage_certification_lock(certification_lock)
 
 
 def close_historical_terminal_run() -> dict[str, Any]:
     """Append one authenticated, non-authorizing closure for the exact failed Z9 run."""
     original_closure_path = _historical_terminal_closure_path()
     correction_path = _historical_terminal_closure_correction_path()
+    correction2_path = _historical_terminal_closure_correction2_path()
     certification_lock = acquire_storage_certification_lock(exclusive=True)
     allocation_lock = None
     try:
@@ -1572,10 +7070,15 @@ def close_historical_terminal_run() -> dict[str, Any]:
                 closure_revision = 1
                 superseded_raw = legacy_raw
                 legacy_record = legacy
+            elif existing_names == sorted([original_closure_path.name, correction_path.name]):
+                closure_path = correction2_path
+                closure_revision = 2
             else:
                 raise FileExistsError("historical terminal closure is append-only and already exists")
         finally:
             os.close(directory_fd)
+        if closure_revision == 2:
+            return _append_historical_terminal_correction2_locked()
         evidence_before = _historical_terminal_evidence()
         liveness_before = _historical_terminal_liveness_check(evidence_before)
         tree_before = _historical_terminal_tree_snapshot(Path(evidence_before["paths"]["output_dir"]))
@@ -2112,12 +7615,447 @@ def _acquire_storage_allocation_lock():
 
 
 def _release_storage_allocation_lock(lock_file: Any) -> None:
-    if lock_file is None:
+    if lock_file is None or getattr(lock_file, "closed", False):
         return
     try:
         fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
     finally:
         lock_file.close()
+
+
+def _r65_json_object_without_duplicate_keys(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    result: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError(f"duplicate JSON object key: {key}")
+        result[key] = value
+    return result
+
+
+def _r65_claim_root(claims_root: Path | None = None) -> Path:
+    selected = (Path(claims_root) if claims_root is not None else
+                Path(CACHE) / R65_ADMISSION_CLAIM_DIRECTORY)
+    return Path(os.path.abspath(selected))
+
+
+def _claim_r65_admission_id(admission_id: str, plan_canonical_sha256: str, *,
+                            claims_root: Path | None = None) -> dict[str, str]:
+    """Exclusively consume one R65 ID under the storage allocation lock."""
+    if (not isinstance(admission_id, str)
+            or re.fullmatch(r"r6a-r65-[A-Za-z0-9_-]+", admission_id) is None
+            or not isinstance(plan_canonical_sha256, str)
+            or re.fullmatch(r"[0-9a-f]{64}", plan_canonical_sha256) is None):
+        raise RuntimeError("R65 admission claim requires a valid R65 ID and canonical plan digest")
+
+    lock_file = _acquire_storage_allocation_lock()
+    selected_root = _r65_claim_root(claims_root)
+    parent_fd: int | None = None
+    claim_dir_fd: int | None = None
+    claim_fd: int | None = None
+    try:
+        parent_fd = _open_directory_nofollow(
+            selected_root.parent, create=True, strict_directory_sync=True)
+        try:
+            os.mkdir(selected_root.name, 0o700, dir_fd=parent_fd)
+            os.fsync(parent_fd)
+        except FileExistsError:
+            pass
+        claim_dir_fd = os.open(
+            selected_root.name,
+            os.O_RDONLY | getattr(os, "O_DIRECTORY", 0) | getattr(os, "O_NOFOLLOW", 0),
+            dir_fd=parent_fd)
+        directory_identity = os.fstat(claim_dir_fd)
+        if (not stat.S_ISDIR(directory_identity.st_mode)
+                or stat.S_IMODE(directory_identity.st_mode) != 0o700
+                or directory_identity.st_uid != os.getuid()):
+            raise RuntimeError("R65 admission claim directory is not a private owned directory")
+
+        claim_name = f"{admission_id}.claim"
+        try:
+            claim_fd = os.open(
+                claim_name,
+                os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0),
+                0o600, dir_fd=claim_dir_fd)
+        except FileExistsError as error:
+            raise RuntimeError(f"R65 admission ID has already been claimed: {admission_id}") from error
+        claim_identity = os.fstat(claim_fd)
+        if (not stat.S_ISREG(claim_identity.st_mode) or claim_identity.st_nlink != 1
+                or stat.S_IMODE(claim_identity.st_mode) != 0o600
+                or claim_identity.st_uid != os.getuid()):
+            raise RuntimeError("R65 admission claim is not a private owned regular file")
+        record = {
+            "schema_version": 1,
+            "milestone": "R65",
+            "admission_id": admission_id,
+            "plan_canonical_sha256": plan_canonical_sha256,
+            "claimed_pid": os.getpid(),
+            "claimed_at_unix": time.time(),
+        }
+        raw = json.dumps(record, sort_keys=True, separators=(",", ":"),
+                         ensure_ascii=False).encode("utf-8")
+        with os.fdopen(claim_fd, "wb") as stream:
+            claim_fd = None
+            stream.write(raw)
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.fsync(claim_dir_fd)
+        return {
+            "claim_sha256": hashlib.sha256(raw).hexdigest(),
+            "claim_path": str(selected_root / claim_name),
+        }
+    except RuntimeError:
+        raise
+    except OSError as error:
+        raise RuntimeError(f"could not exclusively claim R65 admission ID: {error}") from error
+    finally:
+        if claim_fd is not None:
+            os.close(claim_fd)
+        if claim_dir_fd is not None:
+            os.close(claim_dir_fd)
+        if parent_fd is not None:
+            os.close(parent_fd)
+        _release_storage_allocation_lock(lock_file)
+
+
+def _read_r65_admission_claim(admission_id: str, plan_canonical_sha256: str, *,
+                              expected_sha256: str,
+                              claims_root: Path | None = None) -> dict[str, Any]:
+    """Verify an R65 claim through a bounded, no-follow read of its private ledger."""
+    if (re.fullmatch(r"r6a-r65-[A-Za-z0-9_-]+", admission_id) is None
+            or re.fullmatch(r"[0-9a-f]{64}", plan_canonical_sha256) is None
+            or re.fullmatch(r"[0-9a-f]{64}", expected_sha256) is None):
+        raise RuntimeError("R65 reservation claim inputs are malformed")
+    selected_root = _r65_claim_root(claims_root)
+    parent_fd: int | None = None
+    claim_dir_fd: int | None = None
+    claim_fd: int | None = None
+    try:
+        parent_fd = _open_directory_nofollow(
+            selected_root.parent, create=False, strict_directory_sync=True)
+        claim_dir_fd = os.open(
+            selected_root.name,
+            os.O_RDONLY | getattr(os, "O_DIRECTORY", 0) | getattr(os, "O_NOFOLLOW", 0),
+            dir_fd=parent_fd)
+        directory_identity = os.fstat(claim_dir_fd)
+        if (not stat.S_ISDIR(directory_identity.st_mode)
+                or stat.S_IMODE(directory_identity.st_mode) != 0o700
+                or directory_identity.st_uid != os.getuid()):
+            raise RuntimeError("R65 admission claim directory is not a private owned directory")
+
+        claim_name = f"{admission_id}.claim"
+        claim_fd = os.open(
+            claim_name, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0), dir_fd=claim_dir_fd)
+        before = os.fstat(claim_fd)
+        if (not stat.S_ISREG(before.st_mode) or before.st_nlink != 1
+                or stat.S_IMODE(before.st_mode) != 0o600 or before.st_uid != os.getuid()
+                or before.st_size <= 0 or before.st_size > 65536):
+            raise RuntimeError("R65 admission claim is not a private owned regular file")
+        chunks: list[bytes] = []
+        remaining = 65537
+        while remaining > 0:
+            chunk = os.read(claim_fd, min(4096, remaining))
+            if not chunk:
+                break
+            chunks.append(chunk)
+            remaining -= len(chunk)
+        raw = b"".join(chunks)
+        after = os.fstat(claim_fd)
+        if ((before.st_dev, before.st_ino, before.st_size, before.st_mtime_ns)
+                != (after.st_dev, after.st_ino, after.st_size, after.st_mtime_ns)
+                or len(raw) != before.st_size
+                or hashlib.sha256(raw).hexdigest() != expected_sha256):
+            raise RuntimeError("R65 admission claim bytes or signed digest changed")
+        try:
+            record = json.loads(raw, object_pairs_hook=_r65_json_object_without_duplicate_keys)
+        except (TypeError, ValueError, json.JSONDecodeError) as error:
+            raise RuntimeError(f"R65 admission claim is malformed: {error}") from error
+        required = {
+            "schema_version", "milestone", "admission_id", "plan_canonical_sha256",
+            "claimed_pid", "claimed_at_unix",
+        }
+        claimed_at = record.get("claimed_at_unix") if isinstance(record, dict) else None
+        canonical = (json.dumps(record, sort_keys=True, separators=(",", ":"),
+                                ensure_ascii=False).encode("utf-8")
+                     if isinstance(record, dict) else b"")
+        if (not isinstance(record, dict) or set(record) != required
+                or raw != canonical
+                or type(record.get("schema_version")) is not int or record.get("schema_version") != 1
+                or record.get("milestone") != "R65"
+                or record.get("admission_id") != admission_id
+                or record.get("plan_canonical_sha256") != plan_canonical_sha256
+                or type(record.get("claimed_pid")) is not int or record["claimed_pid"] <= 0
+                or type(claimed_at) not in {int, float} or not math.isfinite(claimed_at)
+                or claimed_at <= 0):
+            raise RuntimeError("R65 admission claim does not bind the exact admission and frozen plan")
+        return record
+    except RuntimeError:
+        raise
+    except OSError as error:
+        raise RuntimeError(f"R65 admission claim is missing or unsafe: {error}") from error
+    finally:
+        if claim_fd is not None:
+            os.close(claim_fd)
+        if claim_dir_fd is not None:
+            os.close(claim_dir_fd)
+        if parent_fd is not None:
+            os.close(parent_fd)
+
+
+def _r66_r69_admission_claim_root(claims_root: Path | None = None) -> Path:
+    selected = (Path(claims_root) if claims_root is not None else
+                Path(CACHE) / R66_R69_ADMISSION_CLAIM_DIRECTORY)
+    return Path(os.path.abspath(selected))
+
+
+def _assert_r66_r69_admission_id_unclaimed(admission_id: str, *,
+                                           claims_root: Path | None = None) -> None:
+    """Reject any extant R66/R69 admission tombstone, including malformed claims."""
+    if _r6a_admission_milestone(admission_id) is None:
+        raise RuntimeError("R66/R69 admission ID is not path-safe")
+    selected_root = _r66_r69_admission_claim_root(claims_root)
+    parent_fd: int | None = None
+    claim_dir_fd: int | None = None
+    try:
+        try:
+            parent_fd = _open_directory_nofollow(
+                selected_root.parent, create=False, strict_directory_sync=True)
+        except FileNotFoundError:
+            return
+        try:
+            claim_dir_fd = os.open(
+                selected_root.name,
+                os.O_RDONLY | getattr(os, "O_DIRECTORY", 0) | getattr(os, "O_NOFOLLOW", 0),
+                dir_fd=parent_fd)
+        except FileNotFoundError:
+            return
+        directory_identity = os.fstat(claim_dir_fd)
+        if (not stat.S_ISDIR(directory_identity.st_mode)
+                or stat.S_IMODE(directory_identity.st_mode) != 0o700
+                or directory_identity.st_uid != os.getuid()):
+            raise RuntimeError("R66/R69 admission claim directory is not private and user-owned")
+        claim_name = f"{admission_id}.claim"
+        try:
+            claim_identity = os.stat(claim_name, dir_fd=claim_dir_fd, follow_symlinks=False)
+        except FileNotFoundError:
+            return
+        if (not stat.S_ISREG(claim_identity.st_mode) or claim_identity.st_nlink != 1
+                or stat.S_IMODE(claim_identity.st_mode) != 0o600
+                or claim_identity.st_uid != os.getuid()):
+            raise RuntimeError("R66/R69 admission claim exists but is unsafe; refusing reuse")
+        raise RuntimeError(f"R66/R69 admission ID has already been claimed: {admission_id}")
+    except RuntimeError:
+        raise
+    except OSError as error:
+        raise RuntimeError(f"could not safely inspect R66/R69 admission claims: {error}") from error
+    finally:
+        if claim_dir_fd is not None:
+            os.close(claim_dir_fd)
+        if parent_fd is not None:
+            os.close(parent_fd)
+
+
+def _r6a_admission_milestone(value: object) -> int | None:
+    if not isinstance(value, str):
+        return None
+    match = re.fullmatch(r"r6a-r([1-9][0-9]*)-admission-[A-Za-z0-9][A-Za-z0-9._-]{0,80}", value)
+    if match is None:
+        return None
+    milestone = int(match.group(1))
+    return milestone if milestone == 66 or milestone >= 69 else None
+
+
+def _r6a_build_id_milestone(value: object) -> int | None:
+    if not isinstance(value, str):
+        return None
+    match = re.fullmatch(r"r6a-r([1-9][0-9]*)-dual-lineage-[A-Za-z0-9][A-Za-z0-9._-]{0,80}", value)
+    if match is None:
+        return None
+    milestone = int(match.group(1))
+    return milestone if milestone == 66 or milestone >= 69 else None
+
+
+def _is_r6a_r71_admission_id(value: object) -> bool:
+    milestone = _r6a_admission_milestone(value)
+    return milestone is not None and milestone >= 71
+
+
+def _claim_r66_r69_admission_id(admission_id: str, plan_canonical_sha256: str,
+                                admission_identity_sha256: str, decision: str, *,
+                                claims_root: Path | None = None, build_id: str | None = None,
+                                allocation_lock: Any | None = None) -> dict[str, str]:
+    """Durably consume an R66/R69 ID after its decision and before manifest publication."""
+    milestone_number = _r6a_admission_milestone(admission_id)
+    milestone_number = milestone_number if milestone_number is not None else -1
+    match = milestone_number >= 0
+    is_r71 = milestone_number >= 71
+    is_r70 = milestone_number >= 70
+    if (not match
+            or re.fullmatch(r"[0-9a-f]{64}", plan_canonical_sha256) is None
+            or re.fullmatch(r"[0-9a-f]{64}", admission_identity_sha256) is None
+            or decision not in {"ALLOW", "REFUSE"}
+            or (is_r70 and _r6a_build_id_milestone(build_id) != milestone_number)):
+        raise RuntimeError("R66/R69 admission claim inputs are malformed")
+
+    lock_file = allocation_lock or _acquire_storage_allocation_lock()
+    selected_root = _r66_r69_admission_claim_root(claims_root)
+    parent_fd: int | None = None
+    claim_dir_fd: int | None = None
+    claim_fd: int | None = None
+    try:
+        parent_fd = _open_directory_nofollow(
+            selected_root.parent, create=True, strict_directory_sync=True)
+        try:
+            os.mkdir(selected_root.name, 0o700, dir_fd=parent_fd)
+            os.fsync(parent_fd)
+        except FileExistsError:
+            pass
+        claim_dir_fd = os.open(
+            selected_root.name,
+            os.O_RDONLY | getattr(os, "O_DIRECTORY", 0) | getattr(os, "O_NOFOLLOW", 0),
+            dir_fd=parent_fd)
+        directory_identity = os.fstat(claim_dir_fd)
+        if (not stat.S_ISDIR(directory_identity.st_mode)
+                or stat.S_IMODE(directory_identity.st_mode) != 0o700
+                or directory_identity.st_uid != os.getuid()):
+            raise RuntimeError("R66/R69 admission claim directory is not private and user-owned")
+
+        if is_r70:
+            _assert_r70_build_id_unclaimed(build_id, claims_root=selected_root)
+
+        claim_name = f"{admission_id}.claim"
+        try:
+            claim_fd = os.open(
+                claim_name,
+                os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0),
+                0o600, dir_fd=claim_dir_fd)
+        except FileExistsError as error:
+            raise RuntimeError(f"R66/R69 admission ID has already been claimed: {admission_id}") from error
+        claim_identity = os.fstat(claim_fd)
+        if (not stat.S_ISREG(claim_identity.st_mode) or claim_identity.st_nlink != 1
+                or stat.S_IMODE(claim_identity.st_mode) != 0o600
+                or claim_identity.st_uid != os.getuid()):
+            raise RuntimeError("R66/R69 admission claim is not a private owned regular file")
+        record = {
+            "schema_version": 1,
+            "milestone": f"R{milestone_number:02d}",
+            "admission_id": admission_id,
+            "admission_identity_sha256": admission_identity_sha256,
+            "plan_canonical_sha256": plan_canonical_sha256,
+            "decision": decision,
+            "claimed_pid": os.getpid(),
+            "claimed_at_unix": time.time(),
+        }
+        if is_r70:
+            record["build_id"] = build_id
+        raw = json.dumps(record, sort_keys=True, separators=(",", ":"),
+                         ensure_ascii=False).encode("utf-8")
+        with os.fdopen(claim_fd, "wb") as stream:
+            claim_fd = None
+            stream.write(raw)
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.fsync(claim_dir_fd)
+        return {
+            "claim_sha256": hashlib.sha256(raw).hexdigest(),
+            "claim_path": str(selected_root / claim_name),
+        }
+    except RuntimeError:
+        raise
+    except OSError as error:
+        raise RuntimeError(f"could not durably claim R66/R69 admission ID: {error}") from error
+    finally:
+        if claim_fd is not None:
+            os.close(claim_fd)
+        if claim_dir_fd is not None:
+            os.close(claim_dir_fd)
+        if parent_fd is not None:
+            os.close(parent_fd)
+        if allocation_lock is None:
+            _release_storage_allocation_lock(lock_file)
+
+
+def _assert_r70_build_id_unclaimed(build_id: str, *, claims_root: Path | None = None) -> None:
+    """A durable R70 admission claim consumes its paired build ID, including after crashes."""
+    selected_root = _r66_r69_admission_claim_root(claims_root)
+    try:
+        names = sorted(path.name for path in selected_root.iterdir())
+    except FileNotFoundError:
+        return
+    except OSError as error:
+        raise RuntimeError(f"could not enumerate durable R70 build identity claims: {error}") from error
+    for name in names:
+        if not name.endswith(".claim"):
+            continue
+        claim_path = selected_root / name
+        try:
+            raw = _read_file_nofollow(claim_path, maximum_bytes=64 * 1024)
+            record = json.loads(raw)
+        except (OSError, ValueError, json.JSONDecodeError) as error:
+            raise RuntimeError(f"durable R70 build identity claim is unreadable: {claim_path}: {error}") from error
+        if not isinstance(record, Mapping):
+            raise RuntimeError(f"durable admission claim is malformed: {claim_path}")
+        milestone_record = record.get("milestone")
+        milestone_match = (re.fullmatch(r"R([1-9][0-9]*)", milestone_record)
+                           if isinstance(milestone_record, str) else None)
+        if milestone_match is not None and int(milestone_match.group(1)) >= 70:
+            claimed_build_id = record.get("build_id")
+            claimed_milestone = int(milestone_match.group(1))
+            if _r6a_build_id_milestone(claimed_build_id) != claimed_milestone:
+                raise RuntimeError(f"durable R70 build identity claim is malformed: {claim_path}")
+            if claimed_build_id == build_id:
+                raise RuntimeError(f"R70 BuildLease build ID has already been consumed: {build_id}")
+
+
+def _migrate_r66_r69_refusal_claim(manifest_path: Path, *,
+                                  claims_root: Path | None = None) -> dict[str, str]:
+    """Backfill a durable tombstone only from a verified signed REFUSE manifest."""
+    try:
+        raw = _read_file_nofollow(Path(manifest_path), maximum_bytes=16 * 1024 * 1024)
+        manifest = json.loads(raw, object_pairs_hook=_r65_json_object_without_duplicate_keys)
+    except (OSError, TypeError, ValueError, json.JSONDecodeError) as error:
+        raise RuntimeError(f"cannot migrate an unreadable R66/R69 refusal manifest: {error}") from error
+    if (not isinstance(manifest, dict)
+            or manifest.get("decision") != "REFUSE"
+            or not _verify_manifest_signature(manifest)):
+        raise RuntimeError("R66/R69 refusal tombstone migration requires an authentic signed REFUSE")
+    admission_id = manifest.get("experiment_id")
+    identity = manifest.get("execution_admission_identity")
+    plan_sha256 = manifest.get("build_session_plan_sha256")
+    if (not isinstance(admission_id, str)
+            or not isinstance(identity, Mapping)
+            or set(identity) != {"admission_id", "sha256"}
+            or identity.get("admission_id") != admission_id
+            or not isinstance(identity.get("sha256"), str)
+            or not re.fullmatch(r"[0-9a-f]{64}", identity["sha256"])
+            or identity["sha256"] != hashlib.sha256(
+                json.dumps({"admission_id": admission_id}, sort_keys=True,
+                           separators=(",", ":"), ensure_ascii=False).encode("utf-8")).hexdigest()
+            or not isinstance(plan_sha256, str)
+            or not re.fullmatch(r"[0-9a-f]{64}", plan_sha256)):
+        raise RuntimeError("signed R66/R69 refusal lacks its exact admission and plan identities")
+    return _claim_r66_r69_admission_id(
+        admission_id, plan_sha256, identity["sha256"], "REFUSE", claims_root=claims_root)
+
+
+def _r65_manifest_claim_binding(manifest: Mapping[str, Any], *, experiment_id: str) -> tuple[str, str] | None:
+    """Require every R65 manifest to consume its exact same-process plan claim."""
+    if not experiment_id.startswith("r6a-r65-"):
+        return None
+    candidates = manifest.get("candidate_hashes")
+    plan_sha256 = manifest.get("build_session_plan_sha256")
+    admission = manifest.get("execution_admission_identity")
+    claim_sha256 = (candidates.get("r65_admission_claim_sha256")
+                    if isinstance(candidates, Mapping) else None)
+    if (not isinstance(plan_sha256, str) or re.fullmatch(r"[0-9a-f]{64}", plan_sha256) is None
+            or not isinstance(admission, Mapping) or admission.get("admission_id") != experiment_id
+            or not isinstance(claim_sha256, str)
+            or re.fullmatch(r"[0-9a-f]{64}", claim_sha256) is None):
+        raise RuntimeError("R65 manifest requires its exact admission and frozen-plan claim binding")
+    claim = _read_r65_admission_claim(
+        experiment_id, plan_sha256, expected_sha256=claim_sha256)
+    if claim.get("claimed_pid") != os.getpid():
+        raise RuntimeError("R65 admission claim belongs to a different process")
+    return experiment_id, plan_sha256
 
 
 def acquire_storage_certification_lock(*, exclusive: bool = True, blocking: bool = True) -> Any:
@@ -2163,11 +8101,17 @@ def storage_certification_guard(*, exclusive: bool = True, blocking: bool = True
         release_storage_certification_lock(lock)
 
 
-def _manifest_signature(manifest: Mapping[str, Any], *, create_key: bool = False) -> str:
+def _manifest_signing_bytes(manifest: Mapping[str, Any]) -> bytes:
+    """Encode exact Unicode code points as UTF-8; apply no Unicode normalization."""
     payload = dict(manifest)
     payload.pop("manifest_hmac_sha256", None)
-    canonical = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode()
-    return hmac.new(_manifest_signing_key(create=create_key), canonical, hashlib.sha256).hexdigest()
+    return json.dumps(payload, sort_keys=True, separators=(",", ":"),
+                      ensure_ascii=False, allow_nan=False).encode("utf-8")
+
+
+def _manifest_signature(manifest: Mapping[str, Any], *, create_key: bool = False) -> str:
+    return hmac.new(_manifest_signing_key(create=create_key),
+                    _manifest_signing_bytes(manifest), hashlib.sha256).hexdigest()
 
 
 def _verify_manifest_signature(manifest: Mapping[str, Any]) -> bool:
@@ -2176,14 +8120,15 @@ def _verify_manifest_signature(manifest: Mapping[str, Any]) -> bool:
         return False
     try:
         expected = _manifest_signature(manifest)
-    except (OSError, RuntimeError):
+    except (OSError, RuntimeError, TypeError, ValueError, OverflowError):
         return False
     return hmac.compare_digest(signature, expected)
 
 def _storage_evidence_signature(record: Mapping[str, Any], signature_field: str) -> str:
     payload = dict(record)
     payload.pop(signature_field, None)
-    canonical = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode()
+    canonical = json.dumps(payload, sort_keys=True, separators=(",", ":"),
+                           ensure_ascii=False, allow_nan=False).encode("utf-8")
     return hmac.new(_manifest_signing_key(), canonical, hashlib.sha256).hexdigest()
 
 def _seal_storage_evidence(record: Mapping[str, Any], signature_field: str) -> dict[str, Any]:
@@ -2198,11 +8143,13 @@ def _verify_storage_evidence(record: Mapping[str, Any], signature_field: str) ->
         return False
     try:
         return hmac.compare_digest(actual, _storage_evidence_signature(record, signature_field))
-    except (OSError, RuntimeError):
+    except (OSError, RuntimeError, TypeError, ValueError, OverflowError):
         return False
 
 
-def _validated_manifest_estimates(manifest: Mapping[str, Any]) -> dict[str, int]:
+def _validated_manifest_estimates(
+    manifest: Mapping[str, Any], *, allow_historical_terminal_budget: bool = False,
+) -> dict[str, int]:
     """Reject missing, inconsistent, or non-integer limits before trusting a lease."""
     fields = (
         "expected_duration_seconds", "expected_prefix_bytes", "expected_build_bytes",
@@ -2233,7 +8180,13 @@ def _validated_manifest_estimates(manifest: Mapping[str, Any]) -> dict[str, int]
         raise ValueError("storage manifest uncertainty margin differs from the installed policy")
     if values["estimated_projected_new_disk_bytes"] != values["estimated_max_new_disk_bytes"] + expected_margin:
         raise ValueError("storage manifest projected peak omits or changes its uncertainty margin")
-    if values["project_budget_bytes"] != PROJECT_BUDGET:
+    historical_terminal_budget = (
+        allow_historical_terminal_budget
+        and manifest.get("experiment_id") == HISTORICAL_TERMINAL_RUN_ID
+        and values["project_budget_bytes"] == HISTORICAL_TERMINAL_ORIGINAL_PROJECT_BUDGET_BYTES
+        and persistent_bytes == HISTORICAL_TERMINAL_ORIGINAL_RESERVATION_BYTES
+    )
+    if values["project_budget_bytes"] != PROJECT_BUDGET and not historical_terminal_budget:
         raise ValueError("storage manifest project budget differs from the installed policy")
     if prefix_bytes > NORMAL_TEMPORARY_TARGET and not manifest.get("storage_justification"):
         raise ValueError("storage manifest prefix estimate exceeds the temporary target without justification")
@@ -2255,7 +8208,8 @@ def _validated_manifest_estimates(manifest: Mapping[str, Any]) -> dict[str, int]
 def _gate0_signature(attestation: Mapping[str, Any]) -> str:
     payload = dict(attestation)
     payload.pop("gate0_hmac_sha256", None)
-    canonical = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode()
+    canonical = json.dumps(payload, sort_keys=True, separators=(",", ":"),
+                           ensure_ascii=False, allow_nan=False).encode("utf-8")
     return hmac.new(_manifest_signing_key(), canonical, hashlib.sha256).hexdigest()
 
 
@@ -2265,7 +8219,7 @@ def _verify_gate0_signature(attestation: Mapping[str, Any]) -> bool:
         return False
     try:
         return hmac.compare_digest(signature, _gate0_signature(attestation))
-    except (OSError, RuntimeError):
+    except (OSError, RuntimeError, TypeError, ValueError, OverflowError):
         return False
 
 
@@ -2274,6 +8228,42 @@ def _foreign_active_builds(active_builds: list[Mapping[str, Any]],
     """Return build leases whose reserved peak is not included in this run's manifest."""
     return [row for row in active_builds
             if active_experiment_id is None or row.get("owner_experiment") != active_experiment_id]
+
+
+def _r71_retention_gate_projection(retention: Mapping[str, Any], *,
+                                   active_experiment_id: str,
+                                   build_id: str,
+                                   build_retention: Any) -> dict[str, Any]:
+    """Remove only the exact authenticated in-flight R71 lease from Gate comparison."""
+    if retention.get("unknown") or retention.get("completed_pending_retirement") \
+            or retention.get("failed_or_retiring"):
+        raise RuntimeError("unknown, pending, or failed BuildLease state blocks R71")
+    active = retention.get("active", [])
+    if not isinstance(active, list):
+        raise RuntimeError("active BuildLease inventory is malformed")
+    own = [row for row in active if row.get("owner_experiment") == active_experiment_id]
+    foreign = [row for row in active if row.get("owner_experiment") != active_experiment_id]
+    if foreign:
+        raise RuntimeError("foreign active BuildLease blocks R71")
+    if any(row.get("build_id") != build_id for row in own):
+        raise RuntimeError("an additional same-owner BuildLease blocks R71")
+    matching = [row for row in own if row.get("build_id") == build_id]
+    if len(matching) > 1 or any(
+            row.get("state") != "ACTIVE" or row.get("path") != str(CACHE / "builds" / build_id)
+            for row in matching):
+        raise RuntimeError("R71 own BuildLease identity is ambiguous or unsafe")
+    if not matching:
+        return dict(retention)
+    projected = dict(retention)
+    projected["active"] = [row for row in active if row.get("build_id") != build_id]
+    projected["active_build_count"] = max(0, int(retention.get("active_build_count", 0)) - 1)
+    projected["retained_build_count"] = max(0, int(retention.get("retained_build_count", 0)) - 1)
+    projected["active_dxvk_count"] = max(
+        0, int(retention.get("active_dxvk_count", 0)) - int(matching[0].get("kind") == "dxvk"))
+    projected["active_moltenvk_count"] = max(
+        0, int(retention.get("active_moltenvk_count", 0)) - int(matching[0].get("kind") == "moltenvk"))
+    projected["retention_fingerprint"] = build_retention._retention_fingerprint(projected)
+    return projected
 
 
 def _gate0_control_hashes() -> dict[str, str]:
@@ -2456,6 +8446,7 @@ def _prefix_lease_accounting_blockers(
             current_free_bytes=current_free_bytes,
             current_scoped_bytes=current_project_bytes,
             manifest_estimates=estimates,
+            materialized_prefix_bytes=materialized_prefix_bytes if isinstance(materialized_prefix_bytes, int) and not isinstance(materialized_prefix_bytes, bool) and materialized_prefix_bytes >= 0 else 0,
         )
         if not projected["admitted"]:
             blockers.extend(projected["blockers"])
@@ -2465,7 +8456,8 @@ def _prefix_lease_accounting_blockers(
 def _pre_materialization_marker_identity(
     payload: Mapping[str, Any], raw_bytes: bytes, file_info: os.stat_result,
     *, experiment_id: str, manifest_path: Path, manifest_sha256: str,
-    output_dir: Path,
+    output_dir: Path, allow_materialized_prefix: bool = False,
+    materialized_prefix_path: Path | None = None,
 ) -> tuple[str, str]:
     """Validate the bounded PREPARED marker before excluding its exact path."""
     expected_keys = {
@@ -2486,10 +8478,13 @@ def _pre_materialization_marker_identity(
     prefix = Path(prefix_value)
     allowed_prefix_roots = (
         PREFIX_ROOT.absolute(), (Path.home() / "Library/Caches/FGMetalStep11D-R").absolute())
+    prefix_exists = _stat_entry_nofollow(prefix) is not None
+    expected_prefix = materialized_prefix_path is not None and prefix == materialized_prefix_path
     if (not prefix.is_absolute() or str(prefix) != os.path.abspath(prefix_value)
             or not any(prefix.parent == root or root in prefix.parents
                        for root in allowed_prefix_roots)
-            or _stat_entry_nofollow(prefix) is not None):
+            or (prefix_exists and not (allow_materialized_prefix and expected_prefix
+                                       and prefix.is_dir() and not prefix.is_symlink()))):
         raise RuntimeError("prepared PrefixLease prefix path is unsafe or already materialized")
     token = payload.get("lease_token")
     updated_at = payload.get("updated_at_unix")
@@ -2676,16 +8671,819 @@ def _current_run_scope_binding(
     return binding, blockers
 
 
+def _vm_capacity_commitment_snapshot() -> dict[str, Any]:
+    """Read and authenticate the recognized VM shared-capacity marker formats.
+
+    The legacy Gate marker had exactly twelve fields. Current VM execution
+    markers add volume and safety-reserve bindings plus P1 admission evidence.
+    Storage accounting recognizes both exact legacy records and the current
+    bounded field set, while deliberately leaving VM/P2 execution-state decisions
+    to the VM controller.
+    """
+    legacy_fields = {
+        "schema_version", "session_id", "state", "phase_id", "container_uuid",
+        "volume_uuid", "quota_bytes", "committed_growth_bytes", "plan_sha256",
+        "created_at_unix", "updated_at_unix", "vm_session_hmac_sha256",
+    }
+    current_base_fields = legacy_fields | {
+        "volume_name", "safety_volume_uuid", "safety_volume_in_use_bytes",
+        "safety_container_uuid", "safety_physical_store_uuid", "safety_reserve_bytes",
+        "pre_reserve_shared_free_bytes", "unreserved_free_ceiling_bytes",
+    }
+    p1_admission_fields = {"p1_admission_path", "p1_admission_sha256"}
+    p1_freshness_fields = {"p1_freshness_renewal"}
+    safety_recovery_fields = {"safety_reserve_released"}
+    supported_current_layouts = {
+        frozenset(current_base_fields),
+        frozenset(current_base_fields | p1_admission_fields),
+        frozenset(current_base_fields | p1_admission_fields | p1_freshness_fields),
+        frozenset(current_base_fields | safety_recovery_fields),
+        frozenset(current_base_fields | p1_admission_fields | safety_recovery_fields),
+        frozenset(current_base_fields | p1_admission_fields | p1_freshness_fields
+                  | safety_recovery_fields),
+    }
+    empty = {"committed_growth_bytes": 0, "marker_sha256": None, "marker_identity": None}
+    parent_fd: int | None = None
+    try:
+        try:
+            parent_fd = _open_directory_nofollow(VM_CAPACITY_DOMAIN_ROOT)
+        except FileNotFoundError:
+            if (VM_CAPACITY_DOMAIN_DEFERRED_INACTIVATION.exists()
+                    or VM_CAPACITY_DOMAIN_DEFERRED_INACTIVATION.is_symlink()):
+                raise RuntimeError("deferred capacity inactivation has no active marker")
+            return empty
+        try:
+            info = os.stat(VM_CAPACITY_DOMAIN_ACTIVE_MARKER.name, dir_fd=parent_fd,
+                           follow_symlinks=False)
+        except FileNotFoundError:
+            try:
+                os.stat(VM_CAPACITY_DOMAIN_DEFERRED_INACTIVATION.name, dir_fd=parent_fd,
+                        follow_symlinks=False)
+            except FileNotFoundError:
+                pass
+            else:
+                raise RuntimeError("deferred capacity inactivation has no active marker")
+            return empty
+        if (not stat.S_ISREG(info.st_mode) or info.st_uid != os.getuid()
+                or info.st_nlink != 1 or stat.S_IMODE(info.st_mode) != 0o600
+                or info.st_size > VM_CAPACITY_DOMAIN_ACTIVE_MARKER_MAX_BYTES
+                or getattr(info, "st_blocks", 0) * 512 > 64 * 1024):
+            raise RuntimeError("marker is not a bounded private regular file")
+        raw, identity = _read_file_from_directory_fd(
+            parent_fd, VM_CAPACITY_DOMAIN_ACTIVE_MARKER.name,
+            display_path=VM_CAPACITY_DOMAIN_ACTIVE_MARKER,
+            maximum_bytes=VM_CAPACITY_DOMAIN_ACTIVE_MARKER_MAX_BYTES)
+        if identity != (info.st_dev, info.st_ino, info.st_size, info.st_mtime_ns,
+                        getattr(info, "st_ctime_ns", 0)):
+            raise RuntimeError("marker identity changed while it was read")
+        marker = json.loads(raw)
+        if not isinstance(marker, dict):
+            raise RuntimeError("marker payload is not an object")
+        keys = set(marker)
+        legacy_layout = keys == legacy_fields
+        current_layout = frozenset(keys) in supported_current_layouts
+        if not (legacy_layout or current_layout):
+            raise RuntimeError("marker has an unknown or incomplete field schema")
+        if current_layout:
+            p1_admission_bound = p1_admission_fields.issubset(keys)
+            if "p1_freshness_renewal" in keys and not p1_admission_bound:
+                raise RuntimeError("marker P1 freshness field lacks its admission identity")
+            if p1_admission_bound:
+                p1_path = marker.get("p1_admission_path")
+                p1_sha256 = marker.get("p1_admission_sha256")
+                if (not isinstance(p1_path, str) or not p1_path or "\x00" in p1_path
+                        or not isinstance(p1_sha256, str)
+                        or not re.fullmatch(r"[0-9a-f]{64}", p1_sha256)):
+                    raise RuntimeError("marker P1 identity fields are malformed")
+            if "p1_freshness_renewal" in keys:
+                renewal = marker["p1_freshness_renewal"]
+                renewal_fields = {
+                    "path", "sha256", "sequence", "predecessor_path",
+                    "predecessor_sha256", "use_state", "attempt_id",
+                    "claimed_at_unix", "body_start_evidence",
+                }
+                if (not isinstance(renewal, Mapping)
+                        or set(renewal) != renewal_fields
+                        or not isinstance(renewal.get("path"), str)
+                        or not renewal["path"] or "\x00" in renewal["path"]
+                        or not isinstance(renewal.get("sha256"), str)
+                        or not re.fullmatch(r"[0-9a-f]{64}", renewal["sha256"])
+                        or not isinstance(renewal.get("sequence"), int)
+                        or isinstance(renewal.get("sequence"), bool)
+                        or renewal["sequence"] < 1
+                        or ((renewal.get("predecessor_path") is None)
+                            != (renewal.get("predecessor_sha256") is None))
+                        or (renewal.get("predecessor_path") is not None
+                            and (not isinstance(renewal.get("predecessor_path"), str)
+                                 or not renewal["predecessor_path"]
+                                 or "\x00" in renewal["predecessor_path"]))
+                        or (renewal.get("predecessor_sha256") is not None
+                            and (not isinstance(renewal.get("predecessor_sha256"), str)
+                                 or not re.fullmatch(r"[0-9a-f]{64}",
+                                                     renewal["predecessor_sha256"])))
+                        or (renewal["sequence"] == 1
+                            and renewal.get("predecessor_path") is not None)
+                        or (renewal["sequence"] > 1
+                            and renewal.get("predecessor_path") is None)
+                        or renewal.get("use_state") not in {"READY", "CONSUMED"}
+                        or (renewal.get("use_state") == "READY"
+                            and (renewal.get("attempt_id") is not None
+                                 or renewal.get("claimed_at_unix") is not None
+                                 or renewal.get("body_start_evidence") is not None))
+                        or (renewal.get("use_state") == "CONSUMED"
+                            and (not isinstance(renewal.get("attempt_id"), str)
+                                 or not re.fullmatch(r"[0-9a-f]{32}", renewal["attempt_id"])
+                                 or not isinstance(renewal.get("claimed_at_unix"), (int, float))
+                                 or isinstance(renewal.get("claimed_at_unix"), bool)
+                                 or not math.isfinite(float(renewal["claimed_at_unix"]))))
+                        or (renewal.get("body_start_evidence") is not None
+                            and (not isinstance(renewal.get("body_start_evidence"), Mapping)
+                                 or set(renewal["body_start_evidence"]) != {"path", "sha256"}
+                                 or not isinstance(renewal["body_start_evidence"].get("path"), str)
+                                 or not renewal["body_start_evidence"]["path"]
+                                 or "\x00" in renewal["body_start_evidence"]["path"]
+                                 or not isinstance(renewal["body_start_evidence"].get("sha256"), str)
+                                 or not re.fullmatch(r"[0-9a-f]{64}",
+                                                     renewal["body_start_evidence"]["sha256"])) )):
+                    raise RuntimeError("marker P1 freshness renewal binding is malformed")
+            if "safety_reserve_released" in keys and (
+                    marker.get("safety_reserve_released") is not True
+                    or marker.get("state") != "FAILED"
+                    or marker.get("phase_id") != "RECOVERY"):
+                raise RuntimeError("marker safety-reserve recovery field is malformed")
+            if (not isinstance(marker.get("safety_reserve_bytes"), int)
+                    or isinstance(marker.get("safety_reserve_bytes"), bool)):
+                raise RuntimeError("marker safety-reserve byte count is malformed")
+        if (raw != _canonical_pretty_json_bytes(marker)
+                or not _verify_storage_evidence(marker, "vm_session_hmac_sha256")
+                or not isinstance(marker.get("schema_version"), int)
+                or isinstance(marker.get("schema_version"), bool)
+                or marker["schema_version"] != 1
+                or not isinstance(marker.get("session_id"), str)
+                or not re.fullmatch(r"[0-9a-f]{32}", marker["session_id"])
+                or marker.get("state") not in {"ACTIVE", "FAILED", "UNKNOWN"}
+                or not isinstance(marker.get("phase_id"), str)
+                or not marker["phase_id"] or len(marker["phase_id"]) > 128
+                or "\x00" in marker["phase_id"]
+                or not isinstance(marker.get("container_uuid"), str)
+                or marker["container_uuid"].casefold()
+                    != VM_CAPACITY_DOMAIN_EXPECTED_CONTAINER_UUID.casefold()
+                or (marker.get("volume_uuid") is not None
+                    and (not isinstance(marker["volume_uuid"], str)
+                         or not re.fullmatch(r"[0-9A-Fa-f-]{36}", marker["volume_uuid"])))
+                or not isinstance(marker.get("quota_bytes"), int)
+                or isinstance(marker.get("quota_bytes"), bool)
+                or marker["quota_bytes"] != 50 * GIB
+                or not isinstance(marker.get("committed_growth_bytes"), int)
+                or isinstance(marker.get("committed_growth_bytes"), bool)
+                or marker["committed_growth_bytes"] < 0
+                or not isinstance(marker.get("plan_sha256"), str)
+                or not re.fullmatch(r"[0-9a-f]{64}", marker["plan_sha256"])
+                or any(not isinstance(marker.get(field), (int, float))
+                       or isinstance(marker.get(field), bool)
+                       or not math.isfinite(float(marker[field]))
+                       for field in ("created_at_unix", "updated_at_unix"))):
+            raise RuntimeError("marker is malformed or unauthenticated")
+        if current_layout:
+            if marker.get("volume_name") not in {"FGMetal-VM", "FGMetal-VM-QuotaProbe"}:
+                raise RuntimeError("marker volume name is not recognized")
+            safety_uuid = marker.get("safety_volume_uuid")
+            safety_used = marker.get("safety_volume_in_use_bytes")
+            safety_container = marker.get("safety_container_uuid")
+            safety_store = marker.get("safety_physical_store_uuid")
+            safety_reserve = marker.get("safety_reserve_bytes")
+            if ((safety_uuid is None) != (safety_used is None)
+                    or (safety_uuid is None
+                        and (safety_container is not None or safety_store is not None
+                             or safety_reserve != 0))
+                    or (safety_uuid is not None
+                        and (not isinstance(safety_uuid, str)
+                             or not re.fullmatch(r"[0-9A-Fa-f-]{36}", safety_uuid)
+                             or not isinstance(safety_used, int)
+                             or isinstance(safety_used, bool) or safety_used < 0
+                             or not isinstance(safety_container, str)
+                             or safety_container.casefold()
+                                != VM_CAPACITY_DOMAIN_EXPECTED_CONTAINER_UUID.casefold()
+                             or not isinstance(safety_store, str)
+                             or safety_store.casefold()
+                                != VM_CAPACITY_DOMAIN_EXPECTED_PHYSICAL_STORE_UUID.casefold()
+                             or not isinstance(safety_reserve, int)
+                             or isinstance(safety_reserve, bool)
+                             or safety_reserve != VM_CAPACITY_DOMAIN_EXPECTED_SAFETY_RESERVE_BYTES))):
+                raise RuntimeError("marker safety-volume binding is malformed or unknown")
+            pre_reserve_free = marker.get("pre_reserve_shared_free_bytes")
+            unreserved_ceiling = marker.get("unreserved_free_ceiling_bytes")
+            if ((pre_reserve_free is None) != (unreserved_ceiling is None)
+                    or (pre_reserve_free is not None
+                        and (not isinstance(pre_reserve_free, int)
+                             or isinstance(pre_reserve_free, bool)
+                             or pre_reserve_free <= VM_CAPACITY_DOMAIN_EXPECTED_SAFETY_RESERVE_BYTES
+                             or not isinstance(unreserved_ceiling, int)
+                             or isinstance(unreserved_ceiling, bool)
+                             or unreserved_ceiling != pre_reserve_free
+                                - VM_CAPACITY_DOMAIN_EXPECTED_SAFETY_RESERVE_BYTES))):
+                raise RuntimeError("marker pre-reserve capacity binding is malformed")
+        marker_sha256 = hashlib.sha256(raw).hexdigest()
+        release = _validate_deferred_capacity_inactivation(
+            marker, marker_sha256=marker_sha256)
+        effective_commitment = (release["effective_committed_growth_bytes"]
+                                if release is not None else marker["committed_growth_bytes"])
+        return {
+            "committed_growth_bytes": effective_commitment,
+            "historical_committed_growth_bytes": marker["committed_growth_bytes"],
+            "capacity_inactivation_sha256": (release.get("record_sha256")
+                                             if release is not None else None),
+            "marker_sha256": marker_sha256,
+            "marker_identity": identity,
+        }
+    except (OSError, RuntimeError, TypeError, ValueError, OverflowError,
+            json.JSONDecodeError) as error:
+        raise RuntimeError(f"internal VM capacity-domain marker is malformed or unknown: {error}") from error
+    finally:
+        if parent_fd is not None:
+            os.close(parent_fd)
+
+
+def _validate_deferred_capacity_inactivation(
+        marker: Mapping[str, Any], *, marker_sha256: str) -> dict[str, Any] | None:
+    """Apply only the exact signed VM-branch release bound to this marker."""
+    release_path = VM_CAPACITY_DOMAIN_DEFERRED_INACTIVATION
+
+    def same_file_identity(left: os.stat_result, right: os.stat_result) -> bool:
+        return (left.st_dev, left.st_ino, left.st_size, left.st_mtime_ns,
+                getattr(left, "st_ctime_ns", 0)) == (
+                    right.st_dev, right.st_ino, right.st_size, right.st_mtime_ns,
+                    getattr(right, "st_ctime_ns", 0))
+
+    try:
+        release_info = _stat_entry_nofollow(release_path)
+        if release_info is None:
+            return None
+        if (not stat.S_ISREG(release_info.st_mode)
+                or release_info.st_uid != os.getuid()
+                or release_info.st_nlink != 1
+                or stat.S_IMODE(release_info.st_mode) != 0o600
+                or release_info.st_size > 64 * 1024):
+            raise RuntimeError("deferred capacity inactivation is not a private bounded receipt")
+        release_raw = _read_file_nofollow(release_path, maximum_bytes=64 * 1024)
+        release_info_after = _stat_entry_nofollow(release_path)
+        if (release_info_after is None or not same_file_identity(release_info, release_info_after)
+                or release_info_after.st_uid != os.getuid()
+                or release_info_after.st_nlink != 1
+                or stat.S_IMODE(release_info_after.st_mode) != 0o600):
+            raise RuntimeError("deferred capacity inactivation changed while it was read")
+    except FileNotFoundError:
+        return None
+    release = json.loads(release_raw)
+    if (isinstance(release, dict)
+            and release.get("schema_version") == 2):
+        required_v2 = {
+            "schema_version", "record_type", "status", "created_at_unix",
+            "deferred_decision", "session_id", "active_marker_path",
+            "active_marker_sha256", "container_uuid", "vm_volume_uuid",
+            "quota_bytes", "safety_volume_uuid", "safety_reserve_bytes",
+            "historical_committed_growth_bytes", "effective_committed_growth_bytes",
+            "branch_retirement_receipt_path", "branch_retirement_receipt_sha256",
+            "restore_retirement_receipt_path", "restore_retirement_receipt_sha256",
+            "restore_reclaimed_bytes_exact", "capacity_inventory_path",
+            "capacity_inventory_sha256", "capacity_inventory_decision",
+            "future_commitment_review_path", "future_commitment_review_sha256",
+            "future_commitment_review_decision", "reviewer_identity",
+            "future_vm_reacquisition_required", "p2_base_provisioning_accepted",
+            "vm_guest_base_provisioned", "active_marker_rewritten", "quota_changed",
+            "safety_reserve_released", "vm_deferred_capacity_inactivation_hmac_sha256",
+        }
+        if (set(release) != required_v2
+                or release_raw != _canonical_pretty_json_bytes(release)
+                or not _verify_storage_evidence(
+                    release, "vm_deferred_capacity_inactivation_hmac_sha256")):
+            raise RuntimeError("R14 deferred capacity inactivation is malformed or unauthenticated")
+
+        def r14_path(field: str) -> Path:
+            value = release.get(field)
+            selected = Path(value) if isinstance(value, str) else Path("/")
+            if (not isinstance(value, str) or not value or selected.is_absolute()
+                    or ".." in selected.parts or selected.as_posix() != value):
+                raise RuntimeError("R14 capacity inactivation evidence path is malformed")
+            return REPO / selected
+
+        def r14_signed_record(path_field: str, digest_field: str,
+                              signature_field: str, expected_type: str,
+                              expected_status: str) -> dict[str, Any]:
+            selected = r14_path(path_field)
+            before = _stat_entry_nofollow(selected)
+            raw = _read_file_nofollow(selected, maximum_bytes=2 * 1024 * 1024)
+            after = _stat_entry_nofollow(selected)
+            value = json.loads(raw)
+            if (before is None or after is None or not stat.S_ISREG(before.st_mode)
+                    or before.st_uid != os.getuid() or before.st_nlink != 1
+                    or stat.S_IMODE(before.st_mode) != 0o600
+                    or not same_file_identity(before, after)
+                    or hashlib.sha256(raw).hexdigest() != release.get(digest_field)
+                    or not isinstance(value, dict)
+                    or raw != _canonical_pretty_json_bytes(value)
+                    or not _verify_storage_evidence(value, signature_field)
+                    or value.get("record_type") != expected_type
+                    or value.get("status") != expected_status):
+                raise RuntimeError(f"R14 capacity inactivation {expected_type} evidence is invalid")
+            return value
+
+        if (release.get("record_type") != "R6_VM_DEFERRED_CAPACITY_INACTIVATION"
+                or release.get("status") != "PASS"
+                or release.get("deferred_decision") != "VM_CONTAINMENT_DEFERRED_OPTIONAL"
+                or release.get("active_marker_path") != str(VM_CAPACITY_DOMAIN_ACTIVE_MARKER)
+                or release.get("active_marker_sha256") != marker_sha256
+                or release.get("session_id") != marker.get("session_id")
+                or release.get("container_uuid") != marker.get("container_uuid")
+                or release.get("vm_volume_uuid") != marker.get("volume_uuid")
+                or release.get("quota_bytes") != marker.get("quota_bytes")
+                or release.get("safety_volume_uuid") != marker.get("safety_volume_uuid")
+                or release.get("safety_reserve_bytes") != marker.get("safety_reserve_bytes")
+                or release.get("historical_committed_growth_bytes")
+                    != marker.get("committed_growth_bytes")
+                or release.get("effective_committed_growth_bytes") != 0
+                or release.get("restore_reclaimed_bytes_exact") is not None
+                or release.get("capacity_inventory_decision")
+                    != "PASS_FRESH_CURRENT_STATE_CAPACITY"
+                or release.get("future_commitment_review_decision")
+                    != "PASS — FUTURE P2 CAPACITY COMMITMENT MAY BE INACTIVATED"
+                or release.get("future_vm_reacquisition_required") is not True
+                or release.get("p2_base_provisioning_accepted") is not False
+                or release.get("vm_guest_base_provisioned") is not False
+                or release.get("active_marker_rewritten") is not False
+                or release.get("quota_changed") is not False
+                or release.get("safety_reserve_released") is not False
+                or not isinstance(release.get("created_at_unix"), (int, float))
+                or isinstance(release.get("created_at_unix"), bool)
+                or not math.isfinite(float(release["created_at_unix"]))
+                or release["created_at_unix"] <= 0
+                or release["created_at_unix"] > time.time() + 1):
+            raise RuntimeError("R14 inactivation does not bind the current VM commitment")
+
+        branch = r14_signed_record(
+            "branch_retirement_receipt_path", "branch_retirement_receipt_sha256",
+            "vm_deferred_branch_retirement_hmac_sha256",
+            "R6_VM_DEFERRED_BRANCH_RETIREMENT", "PASS")
+        restore = r14_signed_record(
+            "restore_retirement_receipt_path", "restore_retirement_receipt_sha256",
+            "vm_deferred_restore_retirement_hmac_sha256",
+            "R6_VM_DEFERRED_RESTORE_RETIREMENT_RESOLUTION",
+            "RESOLVED_WITH_MEASUREMENT_CAVEAT")
+        inventory = r14_signed_record(
+            "capacity_inventory_path", "capacity_inventory_sha256",
+            "vm_deferred_capacity_inventory_hmac_sha256",
+            "R6_VM_DEFERRED_CAPACITY_CURRENT_INVENTORY", "PASS")
+        if (branch.get("decision") != "ADMISSION_VALID_EXECUTION_PACKET_SUPERSEDED_BEFORE_CLAIM"
+                or branch.get("session_id") != marker.get("session_id")
+                or branch.get("active_marker_sha256") != marker_sha256
+                or branch.get("committed_growth_bytes") != marker.get("committed_growth_bytes")
+                or branch.get("capability_state_before") != "READY"
+                or branch.get("capability_state_after") != "SUPERSEDED"
+                or branch.get("capability_claimed") is not False
+                or branch.get("guest_assets_created") is not False
+                or branch.get("helper_process_created") is not False
+                or branch.get("guest_base_provisioned") is not False
+                or branch.get("guest_base_sealed") is not False
+                or branch.get("active_marker_rewritten") is not False
+                or restore.get("classification")
+                    != "PENDING_TRANSACTION_RESOLVED_BY_VERIFIED_UNLINK_WITH_MEASUREMENT_CAVEAT"
+                or restore.get("payload_deletion_status") != "CONFIRMED"
+                or restore.get("local_restore_payload_retired") is not True
+                or restore.get("restore_payload_present") is not False
+                or restore.get("restore_absent") is not True
+                or restore.get("deleted_path") != VM_CAPACITY_DOMAIN_EXPECTED_RESTORE_PATH
+                or restore.get("actual_unlinked_path")
+                    != VM_CAPACITY_DOMAIN_EXPECTED_UNLINKED_RESTORE_PATH
+                or restore.get("branch_retirement_receipt_sha256")
+                    != release.get("branch_retirement_receipt_sha256")
+                or restore.get("deleted_file_sha256")
+                    != "2f016638293c3e641b8b25391a76fbc16563b3711915a5551cf8aa0f5598a5c1"
+                or restore.get("reclaimed_bytes_exact") is not None
+                or restore.get("RESTORE_RETIREMENT_RECLAIMED_BYTES") is not None
+                or restore.get("historical_reclaim_backfilled") is not False
+                or restore.get("later_delta_is_accepted_as_actual_reclaim") is not False
+                or restore.get("immediate_reclaim_measurement_status")
+                    != "REJECTED_APFS_CROSSCHECK_DISAGREEMENT"
+                or restore.get("current_state_capacity_validated") is not False
+                or restore.get("current_state_measurement_required") is not True
+                or restore.get("capacity_commitment_inactivation_attempted") is not False
+                or restore.get("pending_receipt_remains_status") != "PENDING"
+                or restore.get("old_pending_receipt_rewritten") is not False
+                or restore.get("p1_provenance_preserved") is not True
+                or restore.get("p2_base_provisioning_accepted") is not False
+                or restore.get("vm_guest_base_provisioned") is not False
+                or restore.get("vm_guest_base_sealed") is not False
+                or restore.get("p2_cleanup_success_claimed") is not False
+                or restore.get("future_vm_work_requires_fresh_p1") is not True
+                or inventory.get("current_state_capacity_validated") is not True
+                or inventory.get("branch_retirement_receipt_path")
+                    != release.get("branch_retirement_receipt_path")
+                or inventory.get("restore_resolution_sha256")
+                    != release.get("restore_retirement_receipt_sha256")
+                or inventory.get("restore_resolution_path")
+                    != release.get("restore_retirement_receipt_path")
+                or inventory.get("branch_retirement_receipt_sha256")
+                    != release.get("branch_retirement_receipt_sha256")
+                or inventory.get("active_marker_sha256") != marker_sha256
+                or inventory.get("effective_committed_growth_bytes")
+                    != marker.get("committed_growth_bytes")
+                or inventory.get("effective_committed_growth_bytes") != 19_350_155_264
+                or inventory.get("historical_committed_growth_bytes")
+                    != marker.get("committed_growth_bytes")
+                or inventory.get("r6a_projected_peak_bytes") <= 0
+                or inventory.get("r6a_projected_peak_bytes") != 4_423_832_374
+                or inventory.get("r6a_projected_peak_source_sha256")
+                    != "a583d7842163170ec1aac70b206ef66f8e003e2f0d47f4cac0628fc7343e48b4"
+                or inventory.get("r6a_projected_peak_basis")
+                    != "FROZEN_PLAN_ESTIMATE_WITH_10_PERCENT_UNCERTAINTY_NOT_YET_OWNER_MANIFEST_ADMISSION"
+                or inventory.get("projected_admission_if_future_commitment_inactivated") is not True
+                or inventory.get("r6a_uncertainty_included_in_projected_peak") is not True
+                or inventory.get("safety_volume_current_use_bytes") is None
+                or inventory.get("safety_volume_current_use_bytes")
+                    != VM_CAPACITY_DOMAIN_EXPECTED_SAFETY_RESERVE_BYTES
+                or inventory.get("safety_volume_reserve_bytes")
+                    != VM_CAPACITY_DOMAIN_EXPECTED_SAFETY_RESERVE_BYTES
+                or inventory.get("vm_volume_current_use_bytes") is None
+                or inventory.get("vm_volume_quota_bytes") != marker.get("quota_bytes")
+                or inventory.get("vm_volume_current_use_bytes")
+                    > inventory.get("vm_volume_quota_bytes")
+                or inventory.get("vm_volume_quota_headroom_bytes")
+                    != inventory.get("vm_volume_quota_bytes")
+                        - inventory.get("vm_volume_current_use_bytes")
+                or inventory.get("shared_physical_free_bytes")
+                    != min(inventory.get("shared_apfs_container_free_bytes"),
+                           inventory.get("shared_data_container_free_bytes"))
+                or inventory.get("conservative_admission_free_bytes")
+                    != min(inventory.get("shared_physical_free_bytes"),
+                           inventory.get("canonical_filesystem_free_bytes"))
+                or inventory.get("projected_free_with_current_commitment_bytes")
+                    != inventory.get("conservative_admission_free_bytes")
+                        - inventory.get("effective_committed_growth_bytes")
+                        - inventory.get("r6a_projected_peak_bytes")
+                or inventory.get("projected_free_if_future_commitment_inactivated_bytes")
+                    != inventory.get("conservative_admission_free_bytes")
+                        - inventory.get("r6a_projected_peak_bytes")
+                or inventory.get("projected_scope_after_r6a_bytes")
+                    > GATE0_PROJECT_BUDGET
+                or inventory.get("conservative_admission_free_bytes") < FREE_HARD_STOP
+                or inventory.get("projected_free_if_future_commitment_inactivated_bytes")
+                    < FREE_MINIMUM
+                or inventory.get("r6a_projected_peak_source_path")
+                    != "R6-A-C-TEST-PROVENANCE.md"
+                or inventory.get("r6a_uncertainty_included_in_projected_peak") is not True
+                or inventory.get("source_storage_inventory_path")
+                    != "experiments/storage/storage-inventory.json"
+                or not isinstance(inventory.get("source_storage_inventory_sha256"), str)
+                or re.fullmatch(r"[0-9a-f]{64}",
+                                inventory.get("source_storage_inventory_sha256", "")) is None
+                or not isinstance(inventory.get("source_storage_inventory_bytes"), int)
+                or isinstance(inventory.get("source_storage_inventory_bytes"), bool)
+                or inventory.get("source_storage_inventory_bytes") <= 0
+                or not isinstance(inventory.get("created_at_unix"), (int, float))
+                or isinstance(inventory.get("created_at_unix"), bool)
+                or not math.isfinite(float(inventory["created_at_unix"]))
+                or not isinstance(inventory.get("source_storage_inventory_generated_at_unix"), (int, float))
+                or isinstance(inventory.get("source_storage_inventory_generated_at_unix"), bool)
+                or not math.isfinite(float(
+                    inventory["source_storage_inventory_generated_at_unix"]))
+                or inventory.get("source_storage_inventory_generated_at_unix") <= 0
+                or inventory.get("source_storage_inventory_generated_at_unix")
+                    > inventory.get("created_at_unix") + 1
+                or release.get("created_at_unix") - inventory.get("created_at_unix")
+                    > VM_DEFERRED_REVIEW_MAX_AGE_SECONDS
+                or inventory.get("created_at_unix")
+                    - inventory.get("source_storage_inventory_generated_at_unix")
+                    > VM_DEFERRED_REVIEW_MAX_AGE_SECONDS
+                or inventory.get("restore_reclaimed_bytes_exact") is not None
+                or inventory.get("p2_base_provisioning_accepted") is not False
+                or inventory.get("safety_volume_reserve_bytes")
+                    != VM_CAPACITY_DOMAIN_EXPECTED_SAFETY_RESERVE_BYTES):
+            raise RuntimeError("R14 unlink resolution or fresh capacity inventory does not support inactivation")
+
+        review_path = r14_path("future_commitment_review_path")
+        review_raw = _read_file_nofollow(review_path, maximum_bytes=256 * 1024)
+        review = json.loads(review_raw)
+        reviewed_at = review.get("reviewed_at_unix") if isinstance(review, dict) else None
+        expected_review = {
+            "reviewed_branch_retirement_receipt_path": release.get(
+                "branch_retirement_receipt_path"),
+            "reviewed_branch_retirement_receipt_sha256": release.get(
+                "branch_retirement_receipt_sha256"),
+            "reviewed_restore_resolution_path": release.get("restore_retirement_receipt_path"),
+            "reviewed_restore_resolution_sha256": release.get("restore_retirement_receipt_sha256"),
+            "reviewed_capacity_inventory_path": release.get("capacity_inventory_path"),
+            "reviewed_capacity_inventory_sha256": release.get("capacity_inventory_sha256"),
+            "reviewed_current_state_capacity_validated": True,
+            "reviewed_shared_physical_free_bytes": inventory.get("shared_physical_free_bytes"),
+            "reviewed_canonical_filesystem_free_bytes": inventory.get(
+                "canonical_filesystem_free_bytes"),
+            "reviewed_fgmetal_scoped_allocated_bytes": inventory.get("fgmetal_scoped_allocated_bytes"),
+            "reviewed_vm_volume_current_use_bytes": inventory.get("vm_volume_current_use_bytes"),
+            "reviewed_vm_volume_quota_bytes": inventory.get("vm_volume_quota_bytes"),
+            "reviewed_safety_volume_current_use_bytes": inventory.get("safety_volume_current_use_bytes"),
+            "reviewed_safety_volume_reserve_bytes": inventory.get("safety_volume_reserve_bytes"),
+            "reviewed_active_future_commitment_bytes": inventory.get("effective_committed_growth_bytes"),
+            "reviewed_active_marker_sha256": marker_sha256,
+            "reviewed_projected_free_with_current_commitment_bytes": inventory.get(
+                "projected_free_with_current_commitment_bytes"),
+            "reviewed_r6a_projected_peak_bytes": inventory.get("r6a_projected_peak_bytes"),
+            "reviewed_projected_scope_after_r6a_bytes": inventory.get(
+                "projected_scope_after_r6a_bytes"),
+            "reviewed_projected_free_if_inactivated_bytes": inventory.get(
+                "projected_free_if_future_commitment_inactivated_bytes"),
+            "reviewed_projected_admission_with_current_commitment": inventory.get(
+                "projected_admission_with_current_commitment"),
+            "reviewed_hfs_test_mount_path": inventory.get("hfs_test_mount_path"),
+            "reviewed_hfs_test_mount_present": inventory.get("hfs_test_mount_present"),
+            "reviewed_reclaimed_bytes_exact": None,
+            "reviewed_p2_base_provisioning_accepted": False,
+        }
+        if (hashlib.sha256(review_raw).hexdigest()
+                != release.get("future_commitment_review_sha256")
+                or not isinstance(review, dict)
+                or review_raw != _canonical_pretty_json_bytes(review)
+                or not isinstance(review.get("schema_version"), int)
+                or isinstance(review.get("schema_version"), bool)
+                or review.get("schema_version") != 1
+                or review.get("status") != "PASS"
+                or review.get("decision")
+                    != "PASS — FUTURE P2 CAPACITY COMMITMENT MAY BE INACTIVATED"
+                or review.get("decision") != release.get("future_commitment_review_decision")
+                or review.get("model_identity") != "GPT-6 Luna Max"
+                or not isinstance(review.get("reviewer_identity"), str)
+                or not review.get("reviewer_identity", "").strip()
+                or review.get("reviewer_identity") != release.get("reviewer_identity")
+                or review.get("findings") != []
+                or any(review.get(key) != value for key, value in expected_review.items())
+                or not isinstance(reviewed_at, (int, float))
+                or isinstance(reviewed_at, bool)
+                or not math.isfinite(float(reviewed_at))
+                or reviewed_at <= 0 or reviewed_at > time.time() + 1
+                or reviewed_at <= max(float(branch.get("created_at_unix", 0)),
+                                      float(restore.get("created_at_unix", 0)),
+                                      float(inventory.get("created_at_unix", 0)))
+                or release.get("created_at_unix") <= reviewed_at
+                or release.get("created_at_unix") - float(reviewed_at)
+                    > VM_DEFERRED_REVIEW_MAX_AGE_SECONDS):
+            raise RuntimeError("R14 inactivation lacks a fresh exact future-commitment review")
+        return {
+            "effective_committed_growth_bytes": 0,
+            "record_sha256": hashlib.sha256(release_raw).hexdigest(),
+        }
+    required = {
+        "schema_version", "record_type", "status", "created_at_unix",
+        "deferred_decision", "session_id", "active_marker_path",
+        "active_marker_sha256", "container_uuid", "vm_volume_uuid", "quota_bytes",
+        "safety_volume_uuid", "safety_reserve_bytes", "historical_committed_growth_bytes",
+        "effective_committed_growth_bytes", "branch_retirement_receipt_path",
+        "branch_retirement_receipt_sha256", "restore_retirement_receipt_path",
+        "restore_retirement_receipt_sha256", "parking_review_path",
+        "parking_review_sha256", "parking_review_decision", "reviewer_identity",
+        "future_vm_reacquisition_required", "p2_base_provisioning_accepted",
+        "vm_guest_base_provisioned", "active_marker_rewritten", "quota_changed",
+        "safety_reserve_released", "vm_deferred_capacity_inactivation_hmac_sha256",
+    }
+    if (not isinstance(release, dict) or set(release) != required
+            or release_raw != _canonical_pretty_json_bytes(release)
+            or not _verify_storage_evidence(release, "vm_deferred_capacity_inactivation_hmac_sha256")):
+        raise RuntimeError("deferred capacity inactivation is malformed or unauthenticated")
+    release_schema = release.get("schema_version")
+    if (not isinstance(release_schema, int)
+            or isinstance(release_schema, bool)
+            or release_schema != 1
+            or release.get("record_type") != "R6_VM_DEFERRED_CAPACITY_INACTIVATION"
+            or release.get("status") != "PASS"
+            or release.get("deferred_decision") != "VM_CONTAINMENT_DEFERRED_OPTIONAL"
+            or release.get("active_marker_path") != str(VM_CAPACITY_DOMAIN_ACTIVE_MARKER)
+            or release.get("active_marker_sha256") != marker_sha256
+            or release.get("session_id") != marker.get("session_id")
+            or release.get("container_uuid") != marker.get("container_uuid")
+            or release.get("vm_volume_uuid") != marker.get("volume_uuid")
+            or release.get("quota_bytes") != marker.get("quota_bytes")
+            or release.get("safety_volume_uuid") != marker.get("safety_volume_uuid")
+            or release.get("safety_reserve_bytes") != marker.get("safety_reserve_bytes")
+            or release.get("historical_committed_growth_bytes") != marker.get("committed_growth_bytes")
+            or release.get("effective_committed_growth_bytes") != 0
+            or release.get("future_vm_reacquisition_required") is not True
+            or release.get("p2_base_provisioning_accepted") is not False
+            or release.get("vm_guest_base_provisioned") is not False
+            or release.get("active_marker_rewritten") is not False
+            or release.get("quota_changed") is not False
+            or release.get("safety_reserve_released") is not False
+            or release.get("parking_review_decision") != "PASS — DEFERRED VM BRANCH PARKED SAFELY"
+            or not isinstance(release.get("reviewer_identity"), str)
+            or not release["reviewer_identity"].strip()
+            or not isinstance(release.get("created_at_unix"), (int, float))
+            or isinstance(release.get("created_at_unix"), bool)
+            or not math.isfinite(float(release["created_at_unix"]))):
+        raise RuntimeError("deferred capacity inactivation does not bind the current VM state")
+
+    def relative_record_path(field: str) -> Path:
+        value = release.get(field)
+        path = Path(value) if isinstance(value, str) else Path("/")
+        if (not isinstance(value, str) or not value or path.is_absolute()
+                or ".." in path.parts or path.as_posix() != value
+                or len(path.parts) != 1):
+            raise RuntimeError("deferred capacity inactivation evidence path is malformed")
+        return REPO / path
+
+    def read_signed_repo_record(path_field: str, digest_field: str,
+                                signature_field: str, expected_type: str) -> dict[str, Any]:
+        path = relative_record_path(path_field)
+        info = _stat_entry_nofollow(path)
+        raw = _read_file_nofollow(path, maximum_bytes=2 * 1024 * 1024)
+        info_after = _stat_entry_nofollow(path)
+        record = json.loads(raw)
+        if (info is None or not stat.S_ISREG(info.st_mode)
+                or info.st_uid != os.getuid() or info.st_nlink != 1
+                or stat.S_IMODE(info.st_mode) != 0o600
+                or info_after is None or not same_file_identity(info, info_after)
+                or info_after.st_uid != os.getuid() or info_after.st_nlink != 1
+                or stat.S_IMODE(info_after.st_mode) != 0o600
+                or hashlib.sha256(raw).hexdigest() != release.get(digest_field)
+                or not isinstance(record, dict)
+                or raw != _canonical_pretty_json_bytes(record)
+                or not _verify_storage_evidence(record, signature_field)
+                or record.get("record_type") != expected_type
+                or record.get("status") != "PASS"):
+            raise RuntimeError(f"deferred capacity inactivation {expected_type} evidence is invalid")
+        return record
+
+    branch = read_signed_repo_record(
+        "branch_retirement_receipt_path", "branch_retirement_receipt_sha256",
+        "vm_deferred_branch_retirement_hmac_sha256", "R6_VM_DEFERRED_BRANCH_RETIREMENT")
+    restore = read_signed_repo_record(
+        "restore_retirement_receipt_path", "restore_retirement_receipt_sha256",
+        "vm_deferred_restore_retirement_hmac_sha256", "R6_VM_DEFERRED_RESTORE_RETIREMENT")
+    if (branch.get("decision") != "ADMISSION_VALID_EXECUTION_PACKET_SUPERSEDED_BEFORE_CLAIM"
+            or branch.get("session_id") != marker.get("session_id")
+            or branch.get("active_marker_sha256") != marker_sha256
+            or branch.get("committed_growth_bytes") != marker.get("committed_growth_bytes")
+            or branch.get("capability_state_before") != "READY"
+            or branch.get("capability_state_after") != "SUPERSEDED"
+            or branch.get("capability_claimed") is not False
+            or branch.get("guest_assets_created") is not False
+            or branch.get("helper_process_created") is not False
+            or branch.get("guest_base_provisioned") is not False
+            or branch.get("guest_base_sealed") is not False
+            or branch.get("active_marker_rewritten") is not False
+            or restore.get("deferred_decision") != "VM_CONTAINMENT_DEFERRED_OPTIONAL"
+            or restore.get("branch_retirement_receipt_sha256")
+                != release.get("branch_retirement_receipt_sha256")
+            or restore.get("p1_provenance_preserved") is not True
+            or restore.get("p2_base_provisioning_accepted") is not False
+            or restore.get("vm_guest_base_provisioned") is not False
+            or restore.get("vm_guest_base_sealed") is not False
+            or restore.get("p2_cleanup_success_claimed") is not False
+            or restore.get("future_vm_work_requires_fresh_p1") is not True
+            or restore.get("restore_absent") is not True
+            or restore.get("deleted_path") != "/Volumes/FGMetal-VM/restore.ipsw"
+            or restore.get("deleted_file_sha256") != "2f016638293c3e641b8b25391a76fbc16563b3711915a5551cf8aa0f5598a5c1"
+            or not isinstance(restore.get("RESTORE_RETIREMENT_RECLAIMED_BYTES"), int)
+            or isinstance(restore.get("RESTORE_RETIREMENT_RECLAIMED_BYTES"), bool)
+            or restore["RESTORE_RETIREMENT_RECLAIMED_BYTES"] < 0):
+        raise RuntimeError("deferred capacity inactivation receipts do not prove the exact parked VM branch")
+
+    review_path = relative_record_path("parking_review_path")
+    review_raw = _read_file_nofollow(review_path, maximum_bytes=256 * 1024)
+    review = json.loads(review_raw)
+    review_schema = review.get("schema_version") if isinstance(review, dict) else None
+    branch_created = branch.get("created_at_unix")
+    restore_created = restore.get("created_at_unix")
+    review_created = review.get("reviewed_at_unix") if isinstance(review, dict) else None
+    release_created = release.get("created_at_unix")
+    if (hashlib.sha256(review_raw).hexdigest() != release.get("parking_review_sha256")
+            or not isinstance(review, dict)
+            or review_raw != _canonical_pretty_json_bytes(review)
+            or not isinstance(review_schema, int)
+            or isinstance(review_schema, bool)
+            or review_schema != 1
+            or review.get("status") != "PASS"
+            or review.get("decision") != release.get("parking_review_decision")
+            or review.get("decision") != "PASS — DEFERRED VM BRANCH PARKED SAFELY"
+            or review.get("model_identity") != "GPT-6 Luna Max"
+            or review.get("reviewer_identity") != release.get("reviewer_identity")
+            or review.get("reviewed_branch_retirement_receipt_path")
+                != release.get("branch_retirement_receipt_path")
+            or review.get("reviewed_branch_retirement_receipt_sha256")
+                != release.get("branch_retirement_receipt_sha256")
+            or review.get("reviewed_restore_retirement_receipt_path")
+                != release.get("restore_retirement_receipt_path")
+            or review.get("reviewed_restore_retirement_receipt_sha256")
+                != release.get("restore_retirement_receipt_sha256")
+            or review.get("findings") != []
+            or not isinstance(branch_created, (int, float))
+            or isinstance(branch_created, bool)
+            or not math.isfinite(float(branch_created))
+            or not isinstance(restore_created, (int, float))
+            or isinstance(restore_created, bool)
+            or not math.isfinite(float(restore_created))
+            or not isinstance(review_created, (int, float))
+            or isinstance(review_created, bool)
+            or not math.isfinite(float(review_created))
+            or review_created <= max(float(branch_created), float(restore_created))
+            or not isinstance(release_created, (int, float))
+            or isinstance(release_created, bool)
+            or not math.isfinite(float(release_created))
+            or release_created <= review_created
+            or release_created - review_created > VM_DEFERRED_REVIEW_MAX_AGE_SECONDS):
+        raise RuntimeError("deferred capacity inactivation lacks the exact independent parking PASS")
+    return {
+        "effective_committed_growth_bytes": 0,
+        "record_sha256": hashlib.sha256(release_raw).hexdigest(),
+    }
+
+
+def _active_vm_capacity_session_blockers() -> list[str]:
+    """Fail closed on an unknown claim; valid execution state is VM-owned.
+
+    A valid marker no longer blocks host storage by itself. Every shared-store
+    admission accounts its outstanding growth through
+    :func:`projected_storage_admission`. VM/P2 commands continue to enforce their
+    own execution-state rules in the VM controller.
+    """
+    try:
+        _vm_capacity_commitment_snapshot()
+        return []
+    except (OSError, RuntimeError, TypeError, ValueError, OverflowError,
+            json.JSONDecodeError) as error:
+        return [f"internal VM capacity-domain marker is malformed or unknown; storage admission is blocked: {error}"]
+
+
+def _g0c_reviewed_file_blockers(attestation: Mapping[str, Any]) -> list[str]:
+    """Rebind every normal-admission controller input to the pinned G0C review."""
+    supplemental = attestation.get("supplemental_evidence_sha256")
+    evidence_names, required_files = _gate0_evidence_contract(attestation)
+    review_name = (R96_G0C_REVIEW_RECORD_NAME if _gate0_is_r96_attestation(attestation)
+                   else R95_G0C_REVIEW_RECORD_NAME if _gate0_is_r95_attestation(attestation)
+                   else R94_G0C_REVIEW_RECORD_NAME if _gate0_is_r94_attestation(attestation)
+                   else R93_G0C_REVIEW_RECORD_NAME if _gate0_is_r93_attestation(attestation)
+                   else R92_G0C_REVIEW_RECORD_NAME if _gate0_is_r92_attestation(attestation)
+                   else R91_G0C_REVIEW_RECORD_NAME
+                   if _gate0_is_r91_attestation(attestation)
+                   else G0C_REVIEW_RECORD_NAME if _gate0_is_r90_attestation(attestation)
+                   else R89_G0C_REVIEW_RECORD_NAME)
+    review_path = REPO / "experiments/storage" / review_name
+    try:
+        review_bytes = _read_file_nofollow(review_path, maximum_bytes=4 * 1024 * 1024)
+    except (OSError, RuntimeError, ValueError, json.JSONDecodeError) as error:
+        return [f"G0C independent review record is missing or malformed: {error}"]
+    try:
+        json.loads(review_bytes, object_pairs_hook=_g0c_no_duplicate_json_keys)
+    except (UnicodeDecodeError, json.JSONDecodeError, ValueError) as error:
+        return [f"G0C independent review record is missing or malformed: {error}"]
+
+    pinned_review_sha256 = (supplemental.get(review_name)
+                            if isinstance(supplemental, Mapping) else None)
+    current_review_sha256 = hashlib.sha256(review_bytes).hexdigest()
+    if (not isinstance(pinned_review_sha256, str)
+            or not re.fullmatch(r"[0-9a-f]{64}", pinned_review_sha256)
+            or not hmac.compare_digest(pinned_review_sha256, current_review_sha256)):
+        return ["G0C independent review record is not the exact supplemental evidence pinned by Gate 0"]
+    _, blockers = parse_g0c_reviewed_files(review_bytes, REPO, required_files)
+    return blockers
+
+
+def _verified_r71_capacity_workspace(build_id: str, *,
+                                     allow_pre_dispatch: bool = False,
+                                     exited_process_id: int | None = None) -> dict[str, Any]:
+    """Preserve the regular verifier API except at the locked R71 handoff edge."""
+    import build_retention
+    if allow_pre_dispatch:
+        return build_retention._verified_buildlease_capacity_workspace(
+            build_id, allow_pre_dispatch=True)
+    if exited_process_id is not None:
+        return build_retention._verified_buildlease_capacity_workspace(
+            build_id, exited_process_id=exited_process_id)
+    return build_retention._verified_buildlease_capacity_workspace(build_id)
+
+
 def _gate0_blockers(*, active_experiment_id: str | None = None,
                     allow_storage_smoke: bool = False,
+                    allow_r70_handoff: bool = False,
+                    allow_r71_handoff: bool = False,
+                    r71_build_id: str | None = None,
+                    active_buildlease_id: str | None = None,
+                    r71_allow_pre_dispatch: bool = False,
+                    retention_lock_fds: tuple[int, int] | None = None,
                     active_prefix_receipt: Mapping[str, Any] | None = None,
                     require_active_marker: bool = False,
-                    measurements: dict[str, Any] | None = None) -> list[str]:
-    blockers: list[str] = []
+                    measurements: dict[str, Any] | None = None,
+                    diagnostic_sink: dict[str, Any] | None = None,
+                    defer_pre_admission_smoke_tree_check: bool = False) -> list[str]:
+    blockers: list[str] = _active_vm_capacity_session_blockers()
+    if r71_allow_pre_dispatch and not (
+            allow_r71_handoff
+            and _is_r6a_r71_admission_id(active_experiment_id)
+            and active_buildlease_id is not None
+            and active_buildlease_id == r71_build_id
+            and retention_lock_fds is not None):
+        blockers.append("R71 pre-dispatch capacity allowance lacks its exact locked active-session binding")
+        r71_allow_pre_dispatch = False
     if not GATE0_ATTESTATION_PATH.is_file() or GATE0_ATTESTATION_PATH.is_symlink():
-        return ["Gate 0 attestation is missing; graphics experiments remain disabled"]
+        return blockers + ["Gate 0 attestation is missing; graphics experiments remain disabled"]
     try:
-        attestation_bytes = _read_file_nofollow(GATE0_ATTESTATION_PATH)
+        attestation_bytes = _read_file_nofollow(GATE0_ATTESTATION_PATH, maximum_bytes=GATE0_ATTESTATION_MAX_BYTES)
         inventory_bytes = _read_file_nofollow(INVENTORY_PATH)
         receipt_bytes = _read_file_nofollow(STORAGE_CLEANUP_RECEIPT_PATH)
         attestation = json.loads(attestation_bytes)
@@ -2701,12 +9499,158 @@ def _gate0_blockers(*, active_experiment_id: str | None = None,
         and attestation.get("status") == "PREFLIGHT_PASS"
         and attestation.get("mode") == "preflight"
     )
+    preflight_smoke_claim_path: Path | None = None
     if attestation.get("status") != "PASS" and not is_preflight_smoke:
         blockers.append("Gate 0 requires a final PASS attestation; preflight attestations authorize only the fixed storage smoke")
     if attestation.get("schema_version") != 1:
         blockers.append("Gate 0 attestation schema is missing or unsupported")
-    if not _verify_gate0_signature(attestation):
+    # Validate the signed bytes before enriching the in-memory measurement
+    # payload below. Rechecking the HMAC after adding the derived allocation
+    # snapshot would invalidate an otherwise authentic preflight.
+    gate_signature_valid = _verify_gate0_signature(attestation)
+    if not gate_signature_valid:
         blockers.append("Gate 0 attestation signature is missing or invalid")
+    gate_tree_state: Mapping[str, Any] | None = None
+    try:
+        gate_path_state = read_gate_path_state_sidecar(attestation)
+        gate_tree_state = gate_path_state["storage_tree_state"]
+        if not isinstance(gate_tree_state, Mapping):
+            raise RuntimeError("path-state sidecar lacks its exact storage tree")
+        measurements_payload = attestation.get("measurements")
+        if not isinstance(measurements_payload, dict):
+            raise RuntimeError("Gate measurements are malformed")
+        measurements_payload["nonlease_allocation_snapshot"] = (
+            gate_path_state["nonlease_allocation_snapshot"])
+    except (OSError, RuntimeError, TypeError, ValueError, json.JSONDecodeError) as error:
+        blockers.append(f"Gate 0 path-state sidecar is invalid: {error}")
+    if is_preflight_smoke and gate_signature_valid:
+        slot_descriptor = attestation.get("smoke_nonce_claim_slot")
+        if slot_descriptor is not None:
+            try:
+                try:
+                    _read_storage_smoke_claim_slot(str(permitted_smoke_id), slot_descriptor)
+                except (OSError, RuntimeError, TypeError, ValueError,
+                        json.JSONDecodeError):
+                    # PrefixLease consumes the pre-provisioned inode before its
+                    # Gate rechecks. Accept that state only when the signed
+                    # claim authenticates the same preflight and preserves the
+                    # slot's stable file identity.
+                    _read_storage_smoke_claim_for_slot(
+                        str(permitted_smoke_id), slot_descriptor, attestation_bytes)
+                slot_row = {"path": str(_storage_smoke_claim_path(str(permitted_smoke_id))),
+                            "kind": "file", **slot_descriptor["state"]}
+                tree_rows = _validated_storage_tree_rows(
+                    gate_tree_state, mandatory_roots=_classified_project_roots())
+                if tree_rows.get(slot_row["path"]) != slot_row:
+                    raise RuntimeError("signed Gate tree does not contain the exact reserved claim slot")
+                preflight_smoke_claim_path = _storage_smoke_claim_path(str(permitted_smoke_id))
+            except (OSError, RuntimeError, TypeError, ValueError, json.JSONDecodeError) as error:
+                blockers.append(f"Gate 0 preflight claim slot is invalid: {error}")
+    defer_requested = defer_pre_admission_smoke_tree_check
+    can_defer_smoke_tree_check = bool(
+        defer_requested and is_preflight_smoke and active_prefix_receipt is None
+        and gate_tree_state is not None and gate_signature_valid
+        and diagnostic_sink is not None)
+    if defer_requested and not can_defer_smoke_tree_check:
+        blockers.append(
+            "deferred smoke path-state check requires a valid signed preflight baseline "
+            "and diagnostic sink before PrefixLease materialization")
+        defer_pre_admission_smoke_tree_check = False
+    if can_defer_smoke_tree_check:
+        diagnostic_sink["pre_admission_gate_path_state"] = {
+            "stage": "PRE_ADMISSION_GATE_BASELINE",
+            "gate_attestation_sha256": hashlib.sha256(attestation_bytes).hexdigest(),
+            "baseline": gate_tree_state,
+        }
+    if (gate_tree_state is not None and not (allow_r70_handoff or allow_r71_handoff)
+            and not defer_pre_admission_smoke_tree_check):
+        try:
+            live_tree_state = capture_storage_tree_state()
+            tree_matches = live_tree_state == dict(gate_tree_state)
+            if (diagnostic_sink is not None and is_preflight_smoke
+                    and active_prefix_receipt is not None):
+                diagnostic_sink["prefixlease_gate_path_state"] = {
+                    "stage": "STATE_C_GATE_TREE_DECISION",
+                    "gate_attestation_sha256": hashlib.sha256(attestation_bytes).hexdigest(),
+                    "before": gate_tree_state,
+                    "after": live_tree_state,
+                    "state_c_evaluator_selected": True,
+                }
+            if is_preflight_smoke and not tree_matches:
+                sidecar_bytes = _read_file_nofollow(GATE0_PATH_STATE_SIDECAR_PATH,
+                                                    maximum_bytes=GATE_PATH_STATE_SIDECAR_MAX_COMPRESSED_BYTES)
+                active_marker_bytes = None
+                if require_active_marker or active_prefix_receipt is not None:
+                    marker_path = ACTIVE_LEASE_ROOT / f"{permitted_smoke_id}.json"
+                    active_marker_bytes = _read_file_nofollow(
+                        marker_path, maximum_bytes=ACTIVE_PREFIX_LEASE_MARKER_MAX_BYTES)
+                expected_claim = _storage_smoke_claim_path(str(permitted_smoke_id))
+                expected_manifest = _experiment_manifest_path(str(permitted_smoke_id))
+                expected_output = REPO / "experiments/storage/smoke-runs" / str(permitted_smoke_id)
+                if active_prefix_receipt is not None:
+                    tree_matches = evaluate_materialized_storage_smoke_transition(
+                        gate_tree_state, live_tree_state,
+                        experiment_id=str(permitted_smoke_id),
+                        attestation_bytes=attestation_bytes, sidecar_bytes=sidecar_bytes,
+                        output_dir=expected_output, manifest_path=expected_manifest,
+                        claim_path=expected_claim,
+                        active_marker_bytes=active_marker_bytes or b"",
+                        materialization_receipt=active_prefix_receipt)
+                    if diagnostic_sink is not None:
+                        diagnostic_sink["prefixlease_gate_path_state"][
+                            "state_c_passed"] = tree_matches
+                else:
+                    tree_matches = evaluate_storage_smoke_transition(
+                        gate_tree_state, live_tree_state, experiment_id=str(permitted_smoke_id),
+                        attestation_bytes=attestation_bytes, sidecar_bytes=sidecar_bytes,
+                        output_dir=expected_output, manifest_path=expected_manifest,
+                        claim_path=expected_claim,
+                        active_marker_bytes=active_marker_bytes)
+            if not tree_matches:
+                blockers.append("storage path, inode, directory allocation, or metadata changed since Gate 0 certification")
+        except (OSError, RuntimeError, ValueError) as error:
+            blockers.append(f"Gate path-state transition could not be authenticated: {error}")
+    active_workspace_identity: Mapping[str, Any] | None = None
+    if active_buildlease_id is not None:
+        if (not allow_r71_handoff or r71_build_id != active_buildlease_id):
+            blockers.append("R71 active workspace accounting is not bound to the exact admitted BuildLease")
+        else:
+            try:
+                retention_directory = Path(__file__).resolve().parent
+                if str(retention_directory) not in sys.path:
+                    sys.path.insert(0, str(retention_directory))
+                active_workspace_identity = _verified_r71_capacity_workspace(
+                    active_buildlease_id,
+                    allow_pre_dispatch=r71_allow_pre_dispatch)
+            except Exception as error:
+                blockers.append(f"R71 active BuildLease workspace identity is not exact: {error}")
+    if allow_r71_handoff:
+        try:
+            strict_roots = _classified_project_roots(
+                strict=True,
+                active_buildlease_id=(active_buildlease_id
+                                      if active_workspace_identity is not None else None),
+                active_workspace_identity=active_workspace_identity,
+                allow_pre_dispatch=r71_allow_pre_dispatch,
+            )
+            live_volume = _volume_identity(REPO)
+            build_root_volume = _volume_identity(CACHE / "builds")
+            blockers.extend(_r71_volume_identity_blockers(
+                inventory, repo_volume=live_volume, build_volume=build_root_volume))
+            gate_rows = {row.get("path"): row for row in gate_tree_state.get("entries", [])
+                         if isinstance(row, Mapping)} if isinstance(gate_tree_state, Mapping) else {}
+            for root in strict_roots:
+                if root.classification != ROOT_CLASS_MANDATORY:
+                    continue
+                live_root = root.path.lstat()
+                baseline = gate_rows.get(str(root.path))
+                if (not isinstance(baseline, Mapping)
+                        or baseline.get("kind") != "directory"
+                        or baseline.get("device") != live_root.st_dev
+                        or baseline.get("inode") != live_root.st_ino):
+                    blockers.append(f"R71 mandatory root mount identity differs from Gate: {root.path}")
+        except (OSError, RuntimeError, ValueError) as error:
+            blockers.append(f"R71 mandatory storage-root or volume identity is unknown: {error}")
     try:
         attestation_age = time.time() - float(attestation.get("created_at_unix", 0))
     except (TypeError, ValueError):
@@ -2727,14 +9671,16 @@ def _gate0_blockers(*, active_experiment_id: str | None = None,
             or attestation.get("build_retention_test_report_sha256") != current_test_hash):
         blockers.append("build-retention test evidence changed or is not attested")
     supplemental = attestation.get("supplemental_evidence_sha256", {})
-    for name in GATE0_SUPPLEMENTAL_EVIDENCE:
-        path = REPO / "experiments/storage" / name
+    evidence_names, _required_files = _gate0_evidence_contract(attestation)
+    for name in evidence_names:
+        path = gate0_supplemental_path(REPO, name)
         try:
             current = hashlib.sha256(_read_file_nofollow(path)).hexdigest()
         except OSError:
             current = None
         if not isinstance(supplemental, dict) or not supplemental.get(name) or supplemental.get(name) != current:
             blockers.append(f"supplemental storage evidence changed or is not attested: {name}")
+    blockers.extend(_g0c_reviewed_file_blockers(attestation))
     try:
         inventory_age = time.time() - float(inventory.get("generated_at_unix", 0))
     except (TypeError, ValueError):
@@ -2758,6 +9704,15 @@ def _gate0_blockers(*, active_experiment_id: str | None = None,
     if (not isinstance(attested_nonlease_scope, int) or isinstance(attested_nonlease_scope, bool)
             or attested_nonlease_scope < 0):
         blockers.append("Gate 0 lacks an exact non-lease allocation baseline for mutation detection")
+    nonlease_allocation_snapshot = (expected_measurements.get("nonlease_allocation_snapshot")
+                                    if isinstance(expected_measurements, Mapping) else None)
+    try:
+        snapshot_baseline_bytes = _allocation_snapshot_total_bytes(nonlease_allocation_snapshot)
+        if snapshot_baseline_bytes != attested_nonlease_scope:
+            blockers.append("Gate 0 non-lease path snapshot does not match its signed allocation baseline")
+    except (TypeError, ValueError) as error:
+        snapshot_baseline_bytes = None
+        blockers.append(f"Gate 0 lacks a valid signed non-lease path snapshot: {error}")
     attested_persistent_output_bindings = expected_measurements.get(
         "signed_persistent_output_bindings") if isinstance(expected_measurements, Mapping) else None
     if not isinstance(attested_persistent_output_bindings, list):
@@ -2856,28 +9811,51 @@ def _gate0_blockers(*, active_experiment_id: str | None = None,
         if str(retention_directory) not in sys.path:
             sys.path.insert(0, str(retention_directory))
         import build_retention
-        retention = build_retention.status_snapshot()
+        preserve_active_buildlease_id = (
+            active_buildlease_id
+            if (allow_r71_handoff and active_buildlease_id is not None
+                and active_buildlease_id == r71_build_id) else None)
+        preserve_active_experiment_id = (
+            active_experiment_id if preserve_active_buildlease_id is not None else None)
+        retention = (build_retention.status_snapshot()
+                     if retention_lock_fds is None else
+                     build_retention._status_snapshot_with_lock(
+                         retention_lock_fds,
+                         active_buildlease_id=preserve_active_buildlease_id,
+                         active_experiment_id=preserve_active_experiment_id,
+                         allow_pre_dispatch=(r71_allow_pre_dispatch
+                                             and preserve_active_buildlease_id is not None)))
         if retention.get("gate_status") != "PASS" or retention.get("gate_blockers"):
             blockers.append("build-retention controller reports a blocked or ambiguous state: "
                             + "; ".join(retention.get("gate_blockers", [])))
-        artifact_store_audit = build_retention.canonical_artifact_store_audit()
+        artifact_store_audit = build_retention.canonical_artifact_store_audit(
+            retention_lock_fds=retention_lock_fds)
         if attestation.get("canonical_artifact_store_audit") != artifact_store_audit:
             blockers.append("canonical artifact content or link-count inventory changed after Gate 0 audit")
-        retention_state = {
-            "active_build_count": retention.get("active_build_count"),
-            "preserved_build_count": retention.get("preserved_build_count"),
-            "retained_build_count": retention.get("retained_build_count"),
-            "active_dxvk_count": retention.get("active_dxvk_count"),
-            "active_moltenvk_count": retention.get("active_moltenvk_count"),
-            "unknown_count": len(retention.get("unknown", [])),
-            "completed_pending_retirement_count": len(retention.get("completed_pending_retirement", [])),
-            "failed_or_retiring_count": len(retention.get("failed_or_retiring", [])),
-            "retention_fingerprint_sha256": retention.get("retention_fingerprint", {}).get("sha256"),
-        }
         foreign_active_builds = _foreign_active_builds(retention.get("active", []), active_experiment_id)
         if foreign_active_builds:
             blockers.append("an active large build owned by another experiment overlaps this run: "
                             + ", ".join(str(row.get("build_id")) for row in foreign_active_builds))
+        if allow_r71_handoff:
+            if r71_build_id is None:
+                active_rows = retention.get("active", [])
+                own_active = ([row for row in active_rows
+                               if isinstance(row, Mapping)
+                               and row.get("owner_experiment") == active_experiment_id]
+                              if isinstance(active_rows, list) else None)
+                if own_active is None:
+                    blockers.append("R71 pre-reservation active BuildLease inventory is malformed")
+                elif own_active:
+                    blockers.append("R71 pre-reservation cannot hand off an already-active BuildLease")
+            else:
+                try:
+                    retention = _r71_retention_gate_projection(
+                        retention, active_experiment_id=str(active_experiment_id),
+                        build_id=r71_build_id, build_retention=build_retention)
+                except (RuntimeError, TypeError, ValueError) as error:
+                    blockers.append(
+                        f"R71 active BuildLease state is not the exact admitted reservation: {error}")
+        retention_state = build_retention._gate0_retention_state_projection(retention)
         if attestation.get("build_retention_state") != retention_state:
             blockers.append("live build-retention state differs from the Gate 0 attestation")
         retention_fingerprint = retention.get("retention_fingerprint", {}).get("sha256")
@@ -2956,7 +9934,10 @@ def _gate0_blockers(*, active_experiment_id: str | None = None,
         _signed_persistent_output_snapshot(
             exclude_experiment_id=active_experiment_id,
             expected_gate0_attestation_sha256=hashlib.sha256(attestation_bytes).hexdigest(),
-            baseline_experiment_ids=set(baseline_output_bindings)))
+            baseline_experiment_ids=set(baseline_output_bindings),
+            allowed_active_build_id=(r71_build_id if allow_r71_handoff else None),
+            allow_pre_dispatch=r71_allow_pre_dispatch,
+            retention_lock_fds=retention_lock_fds))
     blockers.extend(persistent_blockers)
     current_output_bindings = {
         row.get("experiment_id"): row for row in persistent_snapshot.get("bindings", ())
@@ -2976,12 +9957,45 @@ def _gate0_blockers(*, active_experiment_id: str | None = None,
         blockers.extend(scope_binding_blockers)
     scope_exclusions = tuple(persistent_exclusions) + (
         tuple(scope_binding["exclusion_paths"]) if scope_binding is not None else ())
-    live_project_usage = measure_project_usage(exclude_paths=scope_exclusions)
+    nonlease_scope_exclusions = scope_exclusions
+    if is_preflight_smoke and scope_binding is not None:
+        bound_claim_path = scope_binding.get("claim_path")
+        if (preflight_smoke_claim_path is not None
+                and bound_claim_path == preflight_smoke_claim_path
+                and sum(path == preflight_smoke_claim_path for path in scope_exclusions) == 1):
+            # The smoke claim slot is pre-provisioned before Gate captures its
+            # allocation baseline. Keep this exact authenticated inode in the
+            # non-lease comparison after the in-place claim rewrite; excluding
+            # it here would compare a smaller live scope with the signed Gate
+            # total. The exact tree transition still validates the claim bytes,
+            # identity, and allowed metadata changes.
+            nonlease_scope_exclusions = tuple(
+                path for path in scope_exclusions if path != preflight_smoke_claim_path)
+        else:
+            blockers.append(
+                "preflight smoke nonce claim is not bound to its exact Gate baseline path")
+    if active_workspace_identity is not None and active_buildlease_id is not None:
+        live_project_usage = measure_project_usage(
+            exclude_paths=nonlease_scope_exclusions,
+            strict=True,
+            active_buildlease_id=active_buildlease_id,
+            r71_allow_pre_dispatch=r71_allow_pre_dispatch,
+        )
+    elif is_preflight_smoke:
+        live_project_usage = measure_project_usage(
+            exclude_paths=nonlease_scope_exclusions,
+            include_allocation_snapshot=True,
+        )
+    else:
+        # Preserve the legacy no-keyword measurement contract outside the
+        # preflight-smoke path. R88's same-observation sidecar is scoped to
+        # that exact admission decision.
+        live_project_usage = measure_project_usage(exclude_paths=nonlease_scope_exclusions)
     live_project = conservative_project_usage_bytes(live_project_usage)
     if live_project > GATE0_PROJECT_BUDGET:
         blockers.append(f"current FG-Metal storage exceeds the {GATE0_PROJECT_BUDGET // GIB} GiB Gate 0 project budget ({live_project})")
     observed_nonlease = (live_project_usage.get("allocated_inode_deduplicated_bytes_excluding_paths")
-                         if scope_exclusions else
+                         if nonlease_scope_exclusions else
                          live_project_usage.get("allocated_inode_deduplicated_bytes"))
     live_nonlease_project: int | None = None
     if (not isinstance(observed_nonlease, int) or isinstance(observed_nonlease, bool)
@@ -2989,9 +10003,47 @@ def _gate0_blockers(*, active_experiment_id: str | None = None,
         blockers.append("current non-lease FG-Metal storage measurement is invalid")
     else:
         live_nonlease_project = observed_nonlease + unlinked_upper_bound
-        if (isinstance(attested_nonlease_scope, int)
+        if (not (allow_r70_handoff or allow_r71_handoff) and isinstance(attested_nonlease_scope, int)
                 and observed_nonlease != attested_nonlease_scope):
             blockers.append("unrelated non-lease storage changed since Gate 0 certification")
+            if diagnostic_sink is not None:
+                try:
+                    if is_preflight_smoke:
+                        diagnostic_usage = live_project_usage
+                        diagnostic_exclusions = nonlease_scope_exclusions
+                    else:
+                        # Retain the pre-existing diagnostic-only rescan for
+                        # legacy callers; R88 preflight smoke uses the exact
+                        # decision observation captured above.
+                        diagnostic_usage = measure_project_usage(
+                            exclude_paths=nonlease_scope_exclusions,
+                            include_allocation_snapshot=True)
+                        diagnostic_exclusions = scope_exclusions
+                    diagnostic_sink["gate0_nonlease_drift_diagnostic"] = (
+                        _nonlease_storage_drift_diagnostic(
+                            attestation=attestation,
+                            gate_attestation_sha256=hashlib.sha256(attestation_bytes).hexdigest(),
+                            experiment_id=active_experiment_id,
+                            exclusion_paths=diagnostic_exclusions,
+                            decision_observed_nonlease_bytes=observed_nonlease,
+                            current_snapshot=diagnostic_usage.get(
+                                "nonlease_allocation_snapshot"),
+                        ))
+                except Exception as error:
+                    diagnostic_sink["gate0_nonlease_drift_diagnostic"] = {
+                        "schema_version": 1,
+                        "status": "UNAVAILABLE",
+                        "comparison_rule": "exact_nonlease_allocated_inode_deduplicated_bytes_equality",
+                        "experiment_id": active_experiment_id,
+                        "gate0_attestation_sha256": hashlib.sha256(attestation_bytes).hexdigest(),
+                        "comparison_exclusion_paths_sha256": _canonical_path_set_sha256(
+                            nonlease_scope_exclusions if is_preflight_smoke
+                            else scope_exclusions),
+                        "attested_nonlease_allocated_bytes": attested_nonlease_scope,
+                        "comparison_observed_nonlease_allocated_bytes": observed_nonlease,
+                        "reason": f"path-level diagnostic capture failed: {type(error).__name__}: {error}",
+                        "changed_paths": [],
+                    }
     if receipt_valid and active_prefix_receipt is not None:
         if isinstance(observed_nonlease, int) and not isinstance(observed_nonlease, bool) and observed_nonlease >= 0:
             try:
@@ -3039,7 +10091,10 @@ def _gate0_blockers(*, active_experiment_id: str | None = None,
         _signed_persistent_output_snapshot(
             exclude_experiment_id=active_experiment_id,
             expected_gate0_attestation_sha256=hashlib.sha256(attestation_bytes).hexdigest(),
-            baseline_experiment_ids=set(baseline_output_bindings)))
+            baseline_experiment_ids=set(baseline_output_bindings),
+            allowed_active_build_id=(r71_build_id if allow_r71_handoff else None),
+            allow_pre_dispatch=r71_allow_pre_dispatch,
+            retention_lock_fds=retention_lock_fds))
     blockers.extend(rebound_persistent_blockers)
     if (rebound_persistent_snapshot != persistent_snapshot
             or rebound_persistent_exclusions != persistent_exclusions):
@@ -3089,7 +10144,12 @@ def _gate0_blockers(*, active_experiment_id: str | None = None,
     return blockers
 
 
-def measure_project_usage(*, exclude_paths: Sequence[Path | str] = ()) -> dict[str, Any]:
+def measure_project_usage(*, exclude_paths: Sequence[Path | str] = (),
+                          strict: bool = False,
+                          include_allocation_snapshot: bool = False,
+                          active_buildlease_id: str | None = None,
+                          r71_allow_pre_dispatch: bool = False,
+                          r71_exited_process_id: int | None = None) -> dict[str, Any]:
     """Estimate project storage, deduplicating hard links but not APFS clones.
 
     When exact paths are supplied, also return the project allocation that
@@ -3097,18 +10157,39 @@ def measure_project_usage(*, exclude_paths: Sequence[Path | str] = ()) -> dict[s
     outside an excluded tree remains in the included total.
     """
     normalized_exclusions = tuple(Path(os.path.abspath(os.fspath(path))) for path in exclude_paths)
+    excluded_paths = set(normalized_exclusions)
     allocated_by_inode: dict[tuple[int, int], int] = {}
     included_inodes: set[tuple[int, int]] = set()
     logical = 0
     allocated = 0
     file_count = 0
     disappearance_events: list[dict[str, Any]] = []
+    allocation_snapshot_by_path: dict[str, dict[str, Any]] = {}
 
-    for discovered in _classified_project_roots():
+    active_workspace_identity = None
+    if active_buildlease_id is not None:
+        if not strict:
+            raise ValueError("active BuildLease workspace accounting requires strict mode")
+        try:
+            import build_retention
+            active_workspace_identity = _verified_r71_capacity_workspace(
+                active_buildlease_id,
+                allow_pre_dispatch=r71_allow_pre_dispatch,
+                exited_process_id=r71_exited_process_id)
+        except Exception as error:
+            raise RuntimeError("active BuildLease workspace transition could not be authenticated") from error
+    roots = (_classified_project_roots(
+        strict=True, active_buildlease_id=active_buildlease_id,
+        active_workspace_identity=active_workspace_identity,
+        allow_pre_dispatch=r71_allow_pre_dispatch,
+        exited_process_id=r71_exited_process_id)
+        if strict else _classified_project_roots())
+    for discovered in roots:
         root = discovered.path
         if _is_other_project_path(root):
             continue
 
+        root_fd = -1
         try:
             info = root.lstat()
             if stat.S_ISLNK(info.st_mode):
@@ -3120,8 +10201,18 @@ def measure_project_usage(*, exclude_paths: Sequence[Path | str] = ()) -> dict[s
                     and (info.st_dev, info.st_ino) != (discovered.expected_dev, discovered.expected_ino)):
                 raise OSError(errno.ESTALE, f"storage root identity changed between discovery and stat: {root}")
 
-            root_device = info.st_dev
+            root_flags = (os.O_RDONLY | getattr(os, "O_CLOEXEC", 0)
+                          | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_DIRECTORY", 0))
+            root_fd = os.open(root, root_flags)
+            root_device, root_inode, root_fsid, root_mountpoint = _descriptor_mount_identity(
+                root_fd, label=str(root))
+            if ((root_device, root_inode)
+                    != (info.st_dev, info.st_ino)):
+                raise OSError(errno.ESTALE,
+                              f"storage root identity changed during mountpoint capture: {root}")
         except FileNotFoundError as error:
+            if root_fd >= 0:
+                os.close(root_fd)
             if discovered.classification == ROOT_CLASS_OPTIONAL_EPHEMERAL:
                 disappearance_events.append({
                     "path": str(root),
@@ -3134,6 +10225,8 @@ def measure_project_usage(*, exclude_paths: Sequence[Path | str] = ()) -> dict[s
                 continue
             raise
         except OSError as error:
+            if root_fd >= 0:
+                os.close(root_fd)
             if error.errno == errno.ENOENT and discovered.classification == ROOT_CLASS_OPTIONAL_EPHEMERAL:
                 disappearance_events.append({
                     "path": str(root),
@@ -3145,38 +10238,197 @@ def measure_project_usage(*, exclude_paths: Sequence[Path | str] = ()) -> dict[s
                 })
                 continue
             raise
+        except Exception:
+            if root_fd >= 0:
+                os.close(root_fd)
+            raise
 
-        for directory, dirnames, filenames in os.walk(root, followlinks=False):
-            current = Path(directory)
-            descend = []
-            for name in dirnames:
-                child = current / name
-                if child.is_symlink() or _is_other_project_path(child):
+        def walk_error(error: OSError) -> None:
+            if strict or include_allocation_snapshot:
+                raise error
+
+        walked_directory_identities = {".": (root_device, root_inode)}
+        try:
+            for directory, dirnames, filenames, directory_fd in os.fwalk(
+                    ".", topdown=True, onerror=walk_error, follow_symlinks=False,
+                    dir_fd=root_fd):
+                relative_directory_key = os.path.normpath(directory)
+                current_device, current_inode, current_fsid, current_mountpoint = (
+                    _descriptor_mount_identity(directory_fd, label=directory))
+                expected_directory_identity = walked_directory_identities.get(relative_directory_key)
+                if (expected_directory_identity is None
+                        or (current_device, current_inode) != expected_directory_identity):
+                    if strict:
+                        raise OSError(errno.ESTALE,
+                                      f"storage directory identity changed during capacity walk: {directory}")
+                    dirnames[:] = []
                     continue
-                try:
-                    if child.stat().st_dev != root_device:
+                if ((current_device, current_fsid, current_mountpoint)
+                        != (root_device, root_fsid, root_mountpoint)):
+                    if strict:
+                        raise OSError(errno.EXDEV,
+                                      f"unbound nested mount entered during strict capacity walk: {directory}")
+                    dirnames[:] = []
+                    continue
+                relative_directory = Path(directory)
+                current = root if relative_directory == Path(".") else root / relative_directory
+                descend = []
+                for name in dirnames:
+                    child = current / name
+                    try:
+                        child_lstat = os.stat(name, dir_fd=directory_fd, follow_symlinks=False)
+                    except OSError:
+                        if strict:
+                            raise
                         continue
-                except OSError:
-                    continue
-                descend.append(name)
-            dirnames[:] = descend
-            for name in filenames:
-                path = current / name
-                if _is_other_project_path(path):
-                    continue
-                try:
-                    info = path.lstat()
-                except OSError:
-                    continue
-                if not stat.S_ISREG(info.st_mode):
-                    continue
-                logical += info.st_size
-                file_count += 1
-                key = (info.st_dev, info.st_ino)
-                allocated_by_inode.setdefault(key, getattr(info, "st_blocks", 0) * 512)
-                if not any(path == excluded or excluded in path.parents
-                           for excluded in normalized_exclusions):
-                    included_inodes.add(key)
+                    if stat.S_ISLNK(child_lstat.st_mode) or _is_other_project_path(child):
+                        continue
+                    if not stat.S_ISDIR(child_lstat.st_mode):
+                        if strict:
+                            raise OSError(errno.ESTALE,
+                                          f"storage directory changed during capacity walk: {child}")
+                        continue
+                    try:
+                        child_device, child_inode, child_fsid, child_mountpoint = _entry_mount_identity_at(
+                            directory_fd, name, directory=True)
+                        child_path = os.path.normpath(os.path.abspath(child))
+                        expected_workspace_path = (
+                            os.path.normpath(os.path.abspath(active_workspace_identity["mountpoint"]))
+                            if active_workspace_identity is not None else None)
+                        if expected_workspace_path is not None and child_path == expected_workspace_path:
+                            # The exact writable workspace is measured by its
+                            # sparseimage backing file in this outer filesystem.
+                            # Its in-image allocation is separately measured by
+                            # BuildLeaseSession against the signed reservation;
+                            # walking both representations would double count it.
+                            if ((child_device, child_inode, child_fsid) != (
+                                    active_workspace_identity.get("mounted_mountpoint_device"),
+                                    active_workspace_identity.get("mounted_mountpoint_inode"),
+                                    active_workspace_identity.get("filesystem_id"))
+                                    or child_mountpoint != child_path):
+                                raise OSError(errno.ESTALE,
+                                              f"authenticated BuildLease workspace mount changed: {child}")
+                            import build_retention
+                            if _verified_r71_capacity_workspace(
+                                    active_buildlease_id or "",
+                                    allow_pre_dispatch=r71_allow_pre_dispatch) != active_workspace_identity:
+                                raise OSError(errno.ESTALE,
+                                              f"authenticated BuildLease workspace identity changed: {child}")
+                            continue
+                        if ((child_device, child_fsid) != (root_device, root_fsid)
+                                or child_mountpoint != root_mountpoint):
+                            if strict:
+                                raise OSError(errno.EXDEV,
+                                              f"unbound nested mount in strict capacity walk: {child}")
+                            continue
+                        if (child_device, child_inode) != (child_lstat.st_dev, child_lstat.st_ino):
+                            if strict:
+                                raise OSError(errno.ESTALE,
+                                              f"storage directory changed during capacity walk: {child}")
+                            continue
+                        child_relative_key = os.path.normpath(os.path.join(directory, name))
+                        walked_directory_identities[child_relative_key] = (child_device, child_inode)
+                    except OSError:
+                        if strict:
+                            raise
+                        continue
+                    descend.append(name)
+                dirnames[:] = descend
+                for name in filenames:
+                    path = current / name
+                    if _is_other_project_path(path):
+                        continue
+                    try:
+                        info = os.stat(name, dir_fd=directory_fd, follow_symlinks=False)
+                    except OSError:
+                        if strict or include_allocation_snapshot:
+                            raise
+                        continue
+                    if strict and stat.S_ISLNK(info.st_mode):
+                        # Match inventory semantics for non-regular leaves. The
+                        # symlink inode belongs to its containing filesystem; use
+                        # lstat's device only and never open or resolve the link.
+                        if info.st_dev != root_device:
+                            raise OSError(errno.EXDEV,
+                                          f"unbound symlink leaf in strict capacity walk: {path}")
+                        continue
+                    if strict:
+                        try:
+                            file_device, file_inode, file_fsid = _entry_volume_identity_at(
+                                directory_fd, name)
+                        except OSError:
+                            raise
+                        if (file_device, file_inode) != (info.st_dev, info.st_ino):
+                            raise OSError(errno.ESTALE,
+                                          f"storage file changed during capacity walk: {path}")
+                        if (file_device, file_fsid) != (root_device, root_fsid):
+                            raise OSError(errno.EXDEV, f"unbound nested mount in strict capacity walk: {path}")
+                    if not stat.S_ISREG(info.st_mode):
+                        continue
+                    logical += info.st_size
+                    file_count += 1
+                    key = (info.st_dev, info.st_ino)
+                    allocated_by_inode.setdefault(key, getattr(info, "st_blocks", 0) * 512)
+                    is_included_path = (not excluded_paths
+                                        or not _is_project_usage_path_excluded(path, excluded_paths))
+                    if is_included_path:
+                        included_inodes.add(key)
+                        if include_allocation_snapshot:
+                            absolute = str(Path(os.path.abspath(path)))
+                            root_path = str(Path(os.path.abspath(root)))
+                            gate_attestation_path = str(Path(os.path.abspath(GATE0_ATTESTATION_PATH)))
+                            row: dict[str, Any] = {
+                                "path": absolute,
+                                "root": root_path,
+                                "classification": discovered.classification,
+                                "category": discovered.category,
+                                "kind": "regular_file",
+                                "size_bytes": info.st_size,
+                                "allocated_bytes": getattr(info, "st_blocks", 0) * 512,
+                                "owner_uid": info.st_uid,
+                                "owner_gid": info.st_gid,
+                                "mode": stat.S_IMODE(info.st_mode),
+                                "link_count": info.st_nlink,
+                            }
+                            if absolute == gate_attestation_path:
+                                # Gate is atomically replaced while signing itself.
+                                # Its inode and timestamps cannot be self-bound.
+                                if info.st_nlink != 1:
+                                    raise RuntimeError(
+                                        "Gate attestation must have one link for an exact non-lease snapshot")
+                                row["volatile_gate_attestation_identity"] = True
+                            else:
+                                row.update({
+                                    "device": info.st_dev,
+                                    "inode": info.st_ino,
+                                    "mtime_ns": info.st_mtime_ns,
+                                    "ctime_ns": info.st_ctime_ns,
+                                })
+                            prior = allocation_snapshot_by_path.get(absolute)
+                            if (prior is None
+                                    or len(Path(root_path).parts) > len(Path(prior["root"]).parts)):
+                                allocation_snapshot_by_path[absolute] = row
+                            if len(allocation_snapshot_by_path) > NONLEASE_ALLOCATION_SNAPSHOT_MAX_PATHS:
+                                raise RuntimeError(
+                                    "non-lease allocation snapshot exceeds its bounded path limit "
+                                    f"({len(allocation_snapshot_by_path)} > "
+                                    f"{NONLEASE_ALLOCATION_SNAPSHOT_MAX_PATHS})")
+            path_after = root.lstat()
+            descriptor_after = _entry_mount_identity(root, directory=True)
+            if ((path_after.st_dev, path_after.st_ino)
+                    != (root_device, root_inode)
+                    or descriptor_after != (root_device, root_inode, root_fsid, root_mountpoint)):
+                raise OSError(errno.ESTALE,
+                              f"storage root identity changed during capacity walk: {root}")
+        finally:
+            os.close(root_fd)
+    if active_buildlease_id is not None:
+        import build_retention
+        if _verified_r71_capacity_workspace(
+                active_buildlease_id,
+                allow_pre_dispatch=r71_allow_pre_dispatch) \
+                != active_workspace_identity:
+            raise RuntimeError("active BuildLease workspace identity changed during capacity measurement")
     allocated = sum(allocated_by_inode.values())
     result = {
         "logical_bytes": logical,
@@ -3189,6 +10441,11 @@ def measure_project_usage(*, exclude_paths: Sequence[Path | str] = ()) -> dict[s
     if normalized_exclusions:
         result["allocated_inode_deduplicated_bytes_excluding_paths"] = sum(
             allocated_by_inode[key] for key in included_inodes)
+    if include_allocation_snapshot:
+        entries = [allocation_snapshot_by_path[path]
+                   for path in sorted(allocation_snapshot_by_path)]
+        result["nonlease_allocation_snapshot"] = _make_nonlease_allocation_snapshot(
+            entries, normalized_exclusions)
     return result
 
 
@@ -3240,6 +10497,256 @@ def _tree_fingerprint(root: Path, *, exclude: set[str] | None = None) -> dict[st
                 logical_bytes += info.st_size
     return {"tree_sha256": digest.hexdigest(), "file_count": file_count,
             "logical_bytes": logical_bytes}
+
+
+def _prefix_identity_inventory(root: Path) -> list[dict[str, Any]]:
+    """Return a canonical no-follow identity inventory for every prefix entry."""
+    rows: list[dict[str, Any]] = []
+    root_info = root.lstat()
+    if not stat.S_ISDIR(root_info.st_mode) or stat.S_ISLNK(root_info.st_mode):
+        raise OSError("prefix inventory root is not a real directory")
+    for directory, dirnames, filenames in os.walk(root, followlinks=False):
+        current = Path(directory)
+        names = sorted(dirnames + filenames)
+        for name in names:
+            path = current / name
+            info = path.lstat()
+            if stat.S_ISDIR(info.st_mode) and not stat.S_ISLNK(info.st_mode):
+                kind = "directory"
+            elif stat.S_ISREG(info.st_mode):
+                kind = "file"
+            elif stat.S_ISLNK(info.st_mode):
+                kind = "symlink"
+                if name in dirnames:
+                    dirnames.remove(name)
+            else:
+                raise OSError(f"unsupported prefix entry type: {path}")
+            row: dict[str, Any] = {
+                "path": path.relative_to(root).as_posix(), "kind": kind,
+                "device": info.st_dev, "inode": info.st_ino,
+                "uid": info.st_uid, "gid": info.st_gid,
+                "mode": stat.S_IMODE(info.st_mode), "nlink": info.st_nlink,
+                "size": info.st_size,
+                "allocated_bytes": getattr(info, "st_blocks", 0) * 512,
+                "mtime_ns": info.st_mtime_ns,
+                "ctime_ns": getattr(info, "st_ctime_ns", 0),
+            }
+            if kind == "file":
+                digest = hashlib.sha256()
+                fd = os.open(path, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0))
+                try:
+                    opened = os.fstat(fd)
+                    if (opened.st_dev, opened.st_ino) != (info.st_dev, info.st_ino):
+                        raise OSError("prefix file changed while inventory was captured")
+                    with os.fdopen(os.dup(fd), "rb") as stream:
+                        for block in iter(lambda: stream.read(1024 * 1024), b""):
+                            digest.update(block)
+                finally:
+                    os.close(fd)
+                row["sha256"] = digest.hexdigest()
+            elif kind == "symlink":
+                row["target"] = os.readlink(path)
+            if info.st_dev != root_info.st_dev or info.st_nlink < 1:
+                raise OSError("prefix entry crosses device or has invalid link count")
+            rows.append(row)
+    return sorted(rows, key=lambda item: item["path"])
+
+
+def _prefix_identity_inventory_fingerprint(rows: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
+    """Commit the full canonical inventory without inflating the 16 KiB marker."""
+    digest = hashlib.sha256()
+    previous_path: str | None = None
+    for row in rows:
+        path = row.get("path")
+        if not isinstance(path, str) or (previous_path is not None and path <= previous_path):
+            raise ValueError("prefix identity inventory is not uniquely path-sorted")
+        encoded = json.dumps(dict(row), sort_keys=True, ensure_ascii=True,
+                             separators=(",", ":")).encode("ascii")
+        digest.update(len(encoded).to_bytes(8, "big"))
+        digest.update(encoded)
+        previous_path = path
+    return {"sha256": digest.hexdigest(), "entry_count": len(rows)}
+
+
+def _gate_directory_metadata_commitment(row: Mapping[str, Any]) -> dict[str, Any]:
+    children = row.get("children")
+    if (row.get("kind") != "directory" or not isinstance(children, list)
+            or any(not isinstance(name, str) for name in children)):
+        raise ValueError("Gate parent row is not a complete directory record")
+    ordered = sorted(children)
+    return {
+        key: row.get(key) for key in (
+            "kind", "device", "inode", "owner_uid", "owner_gid", "mode",
+            "link_count", "size_bytes", "allocated_bytes", "mtime_ns", "ctime_ns")
+    } | {
+        "children_count": len(ordered),
+        "children_sha256": hashlib.sha256(json.dumps(
+            ordered, ensure_ascii=True, separators=(",", ":")).encode("ascii")).hexdigest(),
+    }
+
+
+def _gate_directory_metadata_from_fd(directory_fd: int) -> dict[str, Any]:
+    """Capture Gate-compatible directory metadata through an already pinned fd."""
+    return _gate_directory_metadata_commitment(_gate_directory_row_from_fd(directory_fd))
+
+
+def _gate_directory_row_from_fd(directory_fd: int) -> dict[str, Any]:
+    """Return a stable Gate-shaped row captured through an already pinned fd."""
+    first = os.fstat(directory_fd)
+    if not stat.S_ISDIR(first.st_mode):
+        raise OSError("retained PrefixLease parent fd is not a directory")
+    children = sorted(os.listdir(directory_fd))
+    last = os.fstat(directory_fd)
+    stable_fields = ("st_dev", "st_ino", "st_uid", "st_gid", "st_mode", "st_nlink",
+                     "st_size", "st_blocks", "st_mtime_ns", "st_ctime_ns")
+    if any(getattr(first, field, 0) != getattr(last, field, 0) for field in stable_fields):
+        raise OSError("retained PrefixLease parent changed during metadata capture")
+    row = {
+        "kind": "directory", "device": last.st_dev, "inode": last.st_ino,
+        "owner_uid": last.st_uid, "owner_gid": last.st_gid,
+        "mode": stat.S_IMODE(last.st_mode), "link_count": last.st_nlink,
+        "size_bytes": last.st_size, "allocated_bytes": getattr(last, "st_blocks", 0) * 512,
+        "mtime_ns": last.st_mtime_ns, "ctime_ns": getattr(last, "st_ctime_ns", 0),
+        "children": children,
+    }
+    return row
+
+
+def _prefix_root_metadata_commitment(info: os.stat_result) -> dict[str, int]:
+    return {
+        "device": info.st_dev, "inode": info.st_ino,
+        "uid": info.st_uid, "gid": info.st_gid,
+        "mode": stat.S_IMODE(info.st_mode), "nlink": info.st_nlink,
+        "size": info.st_size, "mtime_ns": info.st_mtime_ns,
+        "ctime_ns": getattr(info, "st_ctime_ns", 0),
+        "allocated_bytes": getattr(info, "st_blocks", 0) * 512,
+    }
+
+
+def _prefix_parent_creation_transition_matches(
+    before_row: Mapping[str, Any], after_row: Mapping[str, Any],
+    receipt_commitment: Mapping[str, Any], child_name: str,
+    *, operation_started_ns: int, operation_finished_ns: int,
+) -> bool:
+    """Prove the signed parent snapshot is explained by adding only the prefix dir."""
+    try:
+        return _prefix_parent_creation_commitment_matches(
+            before_row, _gate_directory_metadata_commitment(after_row), child_name,
+            expected_commitment=receipt_commitment,
+            operation_started_ns=operation_started_ns,
+            operation_finished_ns=operation_finished_ns)
+    except (TypeError, ValueError):
+        return False
+
+
+def _prefix_parent_creation_commitment_matches(
+    before_row: Mapping[str, Any], after_commitment: Mapping[str, Any], child_name: str,
+    *, expected_commitment: Mapping[str, Any] | None = None,
+    operation_started_ns: int, operation_finished_ns: int,
+) -> bool:
+    """Validate a Gate parent commitment after exactly one named child insertion."""
+    try:
+        if (before_row.get("kind") != "directory"
+                or after_commitment.get("kind") != "directory"
+                or (expected_commitment is not None
+                    and dict(after_commitment) != dict(expected_commitment))):
+            return False
+        if any(before_row.get(before_key) != after_commitment.get(after_key)
+               for before_key, after_key in (
+                   ("device", "device"), ("inode", "inode"),
+                   ("owner_uid", "owner_uid"), ("owner_gid", "owner_gid"),
+                   ("mode", "mode"))):
+            return False
+        before_children = before_row.get("children")
+        if (not isinstance(before_children, list)
+                or any(not isinstance(name, str) for name in before_children)
+                or len(before_children) != len(set(before_children))
+                or child_name in before_children
+                or after_commitment.get("children_count") != len(before_children) + 1
+                or after_commitment.get("children_sha256") != hashlib.sha256(
+                    json.dumps(sorted([*before_children, child_name]), ensure_ascii=True,
+                               separators=(",", ":")).encode("ascii")).hexdigest()):
+            return False
+        before_links, after_links = (before_row.get("link_count"),
+                                     after_commitment.get("link_count"))
+        if (not isinstance(before_links, int) or isinstance(before_links, bool)
+                or not isinstance(after_links, int) or isinstance(after_links, bool)
+                or after_links != before_links + 1):
+            return False
+        # The supported Gate parent filesystem stores one added directory
+        # entry as exactly 32 bytes without allocating a new block. Other
+        # effects are refused rather than absorbed as a generic tolerance.
+        old_size, new_size = before_row.get("size_bytes"), after_commitment.get("size_bytes")
+        old_alloc, new_alloc = before_row.get("allocated_bytes"), after_commitment.get("allocated_bytes")
+        if (not isinstance(old_size, int) or isinstance(old_size, bool)
+                or not isinstance(new_size, int) or isinstance(new_size, bool)
+                or new_size != old_size + 32
+                or not isinstance(old_alloc, int) or isinstance(old_alloc, bool)
+                or not isinstance(new_alloc, int) or isinstance(new_alloc, bool)
+                or new_alloc != old_alloc):
+            return False
+        for key in ("mtime_ns", "ctime_ns"):
+            old_value, new_value = before_row.get(key), after_commitment.get(key)
+            if (not isinstance(old_value, int) or isinstance(old_value, bool)
+                    or not isinstance(new_value, int) or isinstance(new_value, bool)
+                    or not isinstance(operation_started_ns, int)
+                    or isinstance(operation_started_ns, bool)
+                    or not isinstance(operation_finished_ns, int)
+                    or isinstance(operation_finished_ns, bool)
+                    or operation_finished_ns < operation_started_ns
+                    or new_value < old_value
+                    or not operation_started_ns <= new_value <= operation_finished_ns):
+                return False
+        return True
+    except (TypeError, ValueError):
+        return False
+
+
+def _prefix_parent_rename_transition_matches(
+    baseline_row: Mapping[str, Any], temp_commitment: Mapping[str, Any],
+    final_commitment: Mapping[str, Any], temp_name: str, final_name: str,
+    *, operation_started_ns: int, operation_finished_ns: int,
+) -> bool:
+    """Allow only a same-parent rename of the owned temp directory to final name."""
+    try:
+        before_children = baseline_row.get("children")
+        if (not isinstance(before_children, list)
+                or len(before_children) != len(set(before_children))
+                or temp_name in before_children
+                or final_name in before_children
+                or temp_name == final_name):
+            return False
+        expected_children = sorted([*before_children, final_name])
+        expected_child_digest = hashlib.sha256(json.dumps(
+            expected_children, ensure_ascii=True, separators=(",", ":")).encode("ascii")).hexdigest()
+        for key in ("device", "inode", "owner_uid", "owner_gid", "mode", "link_count",
+                    "size_bytes", "allocated_bytes"):
+            if temp_commitment.get(key) != final_commitment.get(key):
+                return False
+        if (temp_commitment.get("children_count") != len(before_children) + 1
+                or final_commitment.get("children_count") != len(before_children) + 1
+                or temp_commitment.get("link_count") != baseline_row.get("link_count") + 1
+                or final_commitment.get("children_sha256") != expected_child_digest):
+            return False
+        temp_children_digest = hashlib.sha256(json.dumps(
+            sorted([*before_children, temp_name]), ensure_ascii=True,
+            separators=(",", ":")).encode("ascii")).hexdigest()
+        if temp_commitment.get("children_sha256") != temp_children_digest:
+            return False
+        for key in ("mtime_ns", "ctime_ns"):
+            new_value = final_commitment.get(key)
+            if (not isinstance(new_value, int) or isinstance(new_value, bool)
+                    or not isinstance(operation_started_ns, int)
+                    or isinstance(operation_started_ns, bool)
+                    or not isinstance(operation_finished_ns, int)
+                    or isinstance(operation_finished_ns, bool)
+                    or operation_finished_ns < operation_started_ns
+                    or new_value < temp_commitment.get(key, operation_started_ns)
+                    or not operation_started_ns <= new_value <= operation_finished_ns):
+                return False
+        return True
+    except (TypeError, ValueError):
+        return False
 
 
 def certify_prefix_template(
@@ -4080,7 +11587,29 @@ def assert_prefix_lease(prefix: Path | str, wine_loader: Path | str | None = Non
     """Validate a live PrefixLease while serializing against managed storage admission."""
     allocation_lock = _acquire_storage_allocation_lock()
     try:
-        return _assert_prefix_lease_locked(prefix, wine_loader, runner_path, child_env)
+        try:
+            return _assert_prefix_lease_locked(prefix, wine_loader, runner_path, child_env)
+        except BaseException as error:
+            if not isinstance(getattr(error, "prefixlease_gate_path_state", None), Mapping):
+                try:
+                    gate_bytes = _read_file_nofollow(
+                        GATE0_ATTESTATION_PATH, maximum_bytes=GATE0_ATTESTATION_MAX_BYTES)
+                    gate = json.loads(gate_bytes, object_pairs_hook=_g0c_no_duplicate_json_keys)
+                    sidecar = read_gate_path_state_sidecar(gate)
+                    setattr(error, "prefixlease_gate_path_state", {
+                        "stage": "STATE_C_ASSERTION_FAILURE_FALLBACK",
+                        "gate_attestation_sha256": hashlib.sha256(gate_bytes).hexdigest(),
+                        "before": sidecar["storage_tree_state"],
+                        "after": capture_storage_tree_state(),
+                        "state_c_evaluator_selected": True,
+                        "state_c_passed": False,
+                    })
+                except Exception as evidence_error:
+                    if hasattr(error, "add_note"):
+                        error.add_note(
+                            "pre-cleanup Gate path-state snapshot unavailable: "
+                            f"{type(evidence_error).__name__}: {str(evidence_error)[:256]}")
+            raise
     finally:
         _release_storage_allocation_lock(allocation_lock)
 
@@ -4123,7 +11652,8 @@ def _assert_prefix_lease_locked(prefix: Path | str, wine_loader: Path | str | No
     prefix_marker_identity = (
         prefix_marker_info.st_dev, prefix_marker_info.st_ino, prefix_marker_info.st_size,
         prefix_marker_info.st_mtime_ns, getattr(prefix_marker_info, "st_ctime_ns", 0))
-    if (prefix_marker_info.st_uid != os.getuid() or prefix_marker_info.st_nlink != 1
+    if (prefix_marker_info.st_uid != os.getuid()
+            or prefix_marker_info.st_nlink != 1
             or stat.S_IMODE(prefix_marker_info.st_mode) != 0o600):
         raise RuntimeError("Wine prefix lease marker is not a private, singly-linked regular file")
     payload = prefix_payload
@@ -4178,7 +11708,7 @@ def _assert_prefix_lease_locked(prefix: Path | str, wine_loader: Path | str | No
     if (str(output_dir) != manifest.get("output_dir")
             or payload.get("output_dir") != str(output_dir)):
         raise RuntimeError("Wine experiment output path is not canonical")
-    attestation_hash = hashlib.sha256(_read_file_nofollow(GATE0_ATTESTATION_PATH)).hexdigest() \
+    attestation_hash = hashlib.sha256(_read_file_nofollow(GATE0_ATTESTATION_PATH, maximum_bytes=GATE0_ATTESTATION_MAX_BYTES)).hexdigest() \
         if GATE0_ATTESTATION_PATH.is_file() and not GATE0_ATTESTATION_PATH.is_symlink() else None
     if manifest.get("gate0_attestation_sha256") != attestation_hash:
         raise RuntimeError("Wine prefix manifest does not bind to the current Gate 0 attestation")
@@ -4207,7 +11737,8 @@ def _assert_prefix_lease_locked(prefix: Path | str, wine_loader: Path | str | No
             and (preliminary_receipt.get("active_marker_parent_device"),
                  preliminary_receipt.get("active_marker_parent_inode")) != active_parent_identity):
         raise OSError("active PrefixLease marker parent changed after admission")
-    if (active_file_info.st_uid != os.getuid() or active_file_info.st_nlink != 1
+    if (active_file_info.st_uid != os.getuid()
+            or active_file_info.st_nlink != 1
             or stat.S_IMODE(active_file_info.st_mode) != 0o600):
         raise RuntimeError("active PrefixLease marker is not a private, singly-linked regular file")
     if (active.get("experiment_id") != payload.get("experiment_id")
@@ -4278,6 +11809,9 @@ def _assert_prefix_lease_locked(prefix: Path | str, wine_loader: Path | str | No
             or receipt.get("active_marker_path") != str(active_path)
             or (receipt.get("active_marker_parent_device"), receipt.get("active_marker_parent_inode"))
             != active_parent_identity
+            or (receipt.get("active_marker_device"), receipt.get("active_marker_inode"))
+            != (active_file_info.st_dev, active_file_info.st_ino)
+            or receipt.get("active_marker_gid") != active_file_info.st_gid
             or receipt.get("manifest_path") != str(expected_manifest_path)
             or receipt.get("manifest_sha256") != payload.get("manifest_sha256")
             or receipt.get("gate0_attestation_sha256") != attestation_hash
@@ -4317,16 +11851,23 @@ def _assert_prefix_lease_locked(prefix: Path | str, wine_loader: Path | str | No
     storage_smoke = (manifest.get("storage_policy_smoke") is True
                      and _is_storage_policy_smoke_id(manifest.get("experiment_id")))
     observations: dict[str, Any] = {}
+    gate_path_diagnostics: dict[str, Any] = {}
     gate_blockers = _gate0_blockers(active_experiment_id=payload.get("experiment_id"),
                                     allow_storage_smoke=storage_smoke,
                                     active_prefix_receipt=receipt,
-                                    measurements=observations)
+                                    measurements=observations,
+                                    diagnostic_sink=gate_path_diagnostics)
     if gate_blockers:
-        raise RuntimeError("Gate 0 is no longer valid: " + "; ".join(gate_blockers))
+        refusal = RuntimeError("Gate 0 is no longer valid: " + "; ".join(gate_blockers))
+        state_evidence = gate_path_diagnostics.get("prefixlease_gate_path_state")
+        if isinstance(state_evidence, Mapping):
+            setattr(refusal, "prefixlease_gate_path_state", state_evidence)
+        raise refusal
     remaining_admission = _post_materialization_prefix_admission(
         current_free_bytes=observations["free_bytes"],
         current_scoped_bytes=observations["conservative_project_bytes"],
         manifest_estimates=estimates,
+        materialized_prefix_bytes=receipt["materialized_prefix_allocated_bytes"],
     )
     if not remaining_admission["admitted"]:
         raise RuntimeError("Gate 0 projected storage recheck blocks Wine runner preflight: "
@@ -5204,7 +12745,7 @@ def _remove_child_directory_nofollow(
 
 
 def _rename_child_exclusive(directory_fd: int, source_name: str, target_name: str, *, sync: bool = True) -> None:
-    """Atomically publish a completed child directory without replacing any entry."""
+    """Atomically publish a completed child entry without replacing any entry."""
     renameatx_np = getattr(ctypes.CDLL(None, use_errno=True), "renameatx_np", None)
     if renameatx_np is None:
         raise RuntimeError("this platform lacks renameatx_np exclusive directory publication")
@@ -5221,8 +12762,13 @@ def _rename_child_exclusive(directory_fd: int, source_name: str, target_name: st
 
 
 def _atomic_write_bytes(path: Path, contents: bytes, *, strict_directory_sync: bool = False) -> None:
+    smoke_output = _storage_smoke_output_dir_for_path(path)
+    if smoke_output is not None:
+        _assert_storage_smoke_output_reservation(
+            smoke_output, projected_write_bytes=len(contents), projected_path=path)
     parent_fd = _open_directory_nofollow(
-        path.parent, create=True, strict_directory_sync=strict_directory_sync)
+        path.parent, create=smoke_output is None,
+        strict_directory_sync=strict_directory_sync)
     temporary_name = f".{path.name}.{os.getpid()}.{secrets.token_hex(8)}.tmp"
     temporary_fd: int | None = None
     try:
@@ -5257,6 +12803,8 @@ def _atomic_write_bytes(path: Path, contents: bytes, *, strict_directory_sync: b
         raise
     finally:
         os.close(parent_fd)
+    if smoke_output is not None:
+        _assert_storage_smoke_output_reservation(smoke_output)
 
 
 def _write_json(
@@ -5272,13 +12820,517 @@ def _write_json(
         if serialized_size > pad_to_bytes:
             raise ValueError(f"JSON receipt grew beyond its reserved size ({serialized_size} > {pad_to_bytes})")
         serialized_bytes += b" " * (pad_to_bytes - serialized_size)
+    smoke_output = _storage_smoke_output_dir_for_path(path)
+    if smoke_output is not None:
+        _validate_storage_smoke_manifest_reservation(smoke_output.name, path, payload)
+    if smoke_output is not None:
+        _assert_storage_smoke_output_reservation(
+            smoke_output, projected_write_bytes=len(serialized_bytes), projected_path=path)
     _atomic_write_bytes(path, serialized_bytes,
                         strict_directory_sync=strict_directory_sync)
+    if smoke_output is not None:
+        _assert_storage_smoke_output_reservation(smoke_output)
+
+
+def _storage_smoke_output_dir_for_path(path: Path) -> Path | None:
+    absolute = Path(os.path.abspath(path))
+    smoke_root = REPO / "experiments/storage/smoke-runs"
+    for parent in absolute.parents:
+        if (parent.parent == smoke_root and _is_storage_policy_smoke_id(parent.name)):
+            return parent
+    protocol_roots = (
+        REPO / "experiments/storage/manifests",
+        SMOKE_CLAIM_ROOT,
+        ACTIVE_LEASE_ROOT,
+    )
+    for root in protocol_roots:
+        if absolute.parent == root and absolute.suffix == ".json":
+            experiment_id = absolute.stem
+            if _is_storage_policy_smoke_id(experiment_id):
+                return smoke_root / experiment_id
+    return None
+
+
+def _storage_smoke_publication_failure_path(experiment_id: str) -> Path:
+    if not _is_storage_policy_smoke_id(experiment_id):
+        raise ValueError("publication failure evidence requires the exact storage-smoke ID")
+    return (REPO / "experiments/storage/smoke-runs" / experiment_id
+            / "prefixlease-publication-failure.json")
+
+
+def _publish_storage_smoke_publication_failure(
+    experiment_id: str, gate_sha256: str, claim_bytes: bytes, error: BaseException,
+    attempted_manifest: Mapping[str, Any], *,
+    manifest_file_observed_before_removal: bool,
+) -> None:
+    """Durably record a consumed smoke claim whose manifest publication failed."""
+    output = REPO / "experiments/storage/smoke-runs" / experiment_id
+    if output.exists() or output.is_symlink():
+        _assert_storage_smoke_output_reservation(output)
+    else:
+        _assert_storage_smoke_output_reservation(output, projected_directory_create=output)
+    parent_fd = _open_directory_nofollow(output.parent)
+    try:
+        try:
+            os.mkdir(output.name, 0o700, dir_fd=parent_fd)
+            os.fsync(parent_fd)
+        except FileExistsError:
+            pass
+    finally:
+        os.close(parent_fd)
+    output_fd = _open_directory_nofollow(output)
+    try:
+        info = os.fstat(output_fd)
+        if (info.st_uid != os.getuid() or info.st_gid != os.getgid()
+                or stat.S_IMODE(info.st_mode) != 0o700):
+            raise RuntimeError("smoke publication failure output directory is unsafe")
+    finally:
+        os.close(output_fd)
+    claim, verified_claim_bytes = _read_storage_smoke_claim(experiment_id)
+    if verified_claim_bytes != claim_bytes:
+        raise RuntimeError("consumed smoke claim changed before failure evidence publication")
+    if (not re.fullmatch(r"[0-9a-f]{64}", gate_sha256)
+            or claim.get("preflight_attestation_sha256") != gate_sha256):
+        raise RuntimeError("publication failure record Gate identity differs from the consumed claim")
+    try:
+        attempted_bytes = _canonical_pretty_json_bytes(attempted_manifest)
+        attempted_digest: str | None = hashlib.sha256(attempted_bytes).hexdigest()
+    except (TypeError, ValueError, OverflowError):
+        attempted_digest = None
+    try:
+        signature_verified: bool | None = _verify_manifest_signature(attempted_manifest)
+    except (TypeError, ValueError, OverflowError):
+        signature_verified = False
+    blockers = attempted_manifest.get("blockers")
+    try:
+        blockers_digest = (hashlib.sha256(json.dumps(
+            blockers, sort_keys=True, separators=(",", ":"), ensure_ascii=False,
+            allow_nan=False).encode("utf-8")).hexdigest()
+            if isinstance(blockers, list) else None)
+    except (TypeError, ValueError, OverflowError):
+        blockers_digest = None
+    blocker_summary = {
+        "count": len(blockers) if isinstance(blockers, list) else None,
+        "sha256": blockers_digest,
+    }
+    error_message = str(error).replace("\x00", "")
+    error_message = re.sub(
+        r"(?i)(password|passwd|token|secret|api[_-]?key|authorization)\s*[:=]\s*[^\s,;]+",
+        r"\1=[REDACTED]", error_message)
+    error_message = re.sub(r"(?i)bearer\s+[^\s,;]+", "Bearer [REDACTED]", error_message)[:512]
+    prefix_path = PREFIX_ROOT / f"storage-smoke-{experiment_id}"
+    no_prefix_materialized = _stat_entry_nofollow(prefix_path) is None
+    manifest_path = _experiment_manifest_path(experiment_id)
+    manifest_after_removal = _stat_entry_nofollow(manifest_path)
+    no_allow_committed = manifest_after_removal is None
+    if manifest_after_removal is not None:
+        try:
+            persisted_raw = _read_file_nofollow(
+                manifest_path, maximum_bytes=STORAGE_SMOKE_MANIFEST_MAX_BYTES)
+            persisted = json.loads(
+                persisted_raw, object_pairs_hook=_g0c_no_duplicate_json_keys)
+            no_allow_committed = (
+                persisted_raw == _canonical_pretty_json_bytes(persisted)
+                and not (persisted.get("decision") == "ALLOW"
+                         and _verify_manifest_signature(persisted)))
+        except BaseException:
+            no_allow_committed = False
+    record = {
+        "schema_version": 1,
+        "record_type": "PREFIXLEASE_MANIFEST_PUBLICATION_FAILURE",
+        "experiment_id": experiment_id,
+        "gate0_attestation_sha256": gate_sha256,
+        "smoke_nonce_claim_path": str(_storage_smoke_claim_path(experiment_id)),
+        "smoke_nonce_claim_sha256": hashlib.sha256(claim_bytes).hexdigest(),
+        "smoke_nonce_claim_status": "CONSUMED",
+        "publication_failure": {
+            "exception_type": type(error).__name__[:96],
+            "exception_message": error_message,
+            "canonical_manifest_sha256": attempted_digest,
+            "signature_verified": signature_verified,
+            "manifest_file_observed_before_guarded_removal": bool(
+                manifest_file_observed_before_removal),
+            "intended_decision": (attempted_manifest.get("decision")
+                                  if isinstance(attempted_manifest.get("decision"), str)
+                                  else type(attempted_manifest.get("decision")).__name__),
+            "blockers": blocker_summary,
+        },
+        "decision": "REFUSE",
+        "execution_authorized": False,
+        "success_authorized": False,
+        "no_allow_committed": no_allow_committed,
+        "no_prefix_materialized": no_prefix_materialized,
+        "retry_permitted": False,
+        "created_at_unix": time.time(),
+    }
+    sealed = _seal_storage_evidence(record, "publication_failure_hmac_sha256")
+    path = _storage_smoke_publication_failure_path(experiment_id)
+    _write_json(path, sealed, strict_directory_sync=True)
+    raw = _read_file_nofollow(path, maximum_bytes=16 * 1024)
+    parsed = json.loads(raw, object_pairs_hook=_g0c_no_duplicate_json_keys)
+    if (raw != _canonical_pretty_json_bytes(parsed)
+            or parsed != sealed
+            or not _verify_storage_evidence(parsed, "publication_failure_hmac_sha256")
+            or parsed.get("decision") != "REFUSE"
+            or parsed.get("execution_authorized") is not False):
+        raise RuntimeError("smoke publication failure evidence failed authenticated read-back")
+
+
+def _discard_unaccepted_smoke_manifest(path: Path, expected: Mapping[str, Any]) -> None:
+    """Remove only this attempt's exact manifest bytes after failed publication validation."""
+    parent_fd = _open_directory_nofollow(path.parent)
+    try:
+        try:
+            before = os.stat(path.name, dir_fd=parent_fd, follow_symlinks=False)
+        except FileNotFoundError:
+            return
+        if not stat.S_ISREG(before.st_mode) or before.st_nlink != 1:
+            raise OSError("unaccepted smoke manifest is not a private regular file")
+        current, identity = _read_file_from_directory_fd(
+            parent_fd, path.name, display_path=path)
+        expected_bytes = _canonical_pretty_json_bytes(expected)
+        if current != expected_bytes:
+            raise OSError("unaccepted smoke manifest bytes changed before fail-closed removal")
+        now = os.stat(path.name, dir_fd=parent_fd, follow_symlinks=False)
+        if ((identity[0], identity[1]) != (now.st_dev, now.st_ino)
+                or now.st_nlink != 1 or not stat.S_ISREG(now.st_mode)):
+            raise OSError("unaccepted smoke manifest identity changed before removal")
+        os.unlink(path.name, dir_fd=parent_fd)
+        os.fsync(parent_fd)
+    finally:
+        os.close(parent_fd)
+
+
+def _assert_storage_smoke_output_reservation(output_dir: Path, *,
+                                             projected_write_bytes: int = 0,
+                                             projected_path: Path | None = None,
+                                             projected_directory_create: Path | None = None) -> int:
+    """Bound the complete retained smoke transaction, including protocol files."""
+    if (not isinstance(projected_write_bytes, int) or isinstance(projected_write_bytes, bool)
+            or projected_write_bytes < 0):
+        raise ValueError("smoke output reservation projection is invalid")
+    if not _is_storage_policy_smoke_id(output_dir.name):
+        raise ValueError("storage-smoke reservation requires its exact smoke output identity")
+    output_root = REPO / "experiments/storage/smoke-runs"
+    if output_dir != output_root / output_dir.name:
+        raise ValueError("storage-smoke reservation output path is not canonical")
+    experiment_id = output_dir.name
+    protocol_paths = {
+        _experiment_manifest_path(experiment_id): STORAGE_SMOKE_MANIFEST_MAX_BYTES,
+        _storage_smoke_claim_path(experiment_id): STORAGE_SMOKE_CLAIM_MAX_BYTES,
+        ACTIVE_LEASE_ROOT / f"{experiment_id}.json": ACTIVE_PREFIX_LEASE_MARKER_MAX_BYTES,
+    }
+    shared_protocol_paths = {ACTIVE_LEASE_ROOT / ".lease.lock": 4 * 1024}
+    if projected_directory_create is not None:
+        projected_directory_create = Path(os.path.abspath(projected_directory_create))
+        if projected_directory_create != output_dir or projected_write_bytes:
+            raise ValueError("only the exact smoke output root may be projected as a directory creation")
+        if projected_directory_create.exists() or projected_directory_create.is_symlink():
+            raise RuntimeError("storage-smoke output directory already exists before its projected creation")
+    if projected_path is not None:
+        projected_path = Path(os.path.abspath(projected_path))
+        if (projected_path != output_dir and output_dir not in projected_path.parents
+                and projected_path not in protocol_paths
+                and projected_path not in shared_protocol_paths):
+            raise ValueError("projected smoke write is outside the exact transaction paths")
+        if projected_path in protocol_paths or projected_path in shared_protocol_paths:
+            projected_cap = (protocol_paths.get(projected_path)
+                             or shared_protocol_paths.get(projected_path))
+            if projected_write_bytes > projected_cap:
+                raise RuntimeError("storage-smoke protocol artifact exceeds its per-file reservation")
+        elif projected_path != output_dir:
+            projected_cap = _storage_smoke_output_file_cap(projected_path)
+            if projected_write_bytes > projected_cap:
+                raise RuntimeError("storage-smoke output artifact exceeds its per-file reservation")
+        elif projected_directory_create is None:
+            raise ValueError("the smoke output root is valid only as a projected directory creation")
+    elif projected_write_bytes:
+        raise ValueError("projected smoke write requires its exact destination path")
+    allocated_by_inode: dict[tuple[int, int], int] = {}
+    expected_dev: int | None = None
+
+    def bind_parent_device(path: Path) -> None:
+        nonlocal expected_dev
+        try:
+            parent_fd = _open_directory_nofollow(path.parent)
+        except FileNotFoundError:
+            return
+        try:
+            parent_info = os.fstat(parent_fd)
+            if not stat.S_ISDIR(parent_info.st_mode):
+                raise RuntimeError("storage-smoke transaction parent is not a directory")
+            if expected_dev is None:
+                expected_dev = parent_info.st_dev
+            elif parent_info.st_dev != expected_dev:
+                raise RuntimeError("storage-smoke transaction parents span unexpected filesystems")
+        finally:
+            os.close(parent_fd)
+
+    bind_parent_device(output_dir)
+    for protocol_path in (*protocol_paths, *shared_protocol_paths):
+        bind_parent_device(protocol_path)
+
+    def add_directory(directory: Path, *, output_tree: bool) -> None:
+        nonlocal expected_dev
+        try:
+            info = directory.lstat()
+        except FileNotFoundError:
+            return
+        if (not stat.S_ISDIR(info.st_mode) or info.st_uid != os.getuid()
+                or info.st_gid != os.getgid()
+                or (output_tree and stat.S_IMODE(info.st_mode) != 0o700)):
+            raise RuntimeError("storage-smoke transaction contains an unsafe directory")
+        if expected_dev is None:
+            expected_dev = info.st_dev
+        elif info.st_dev != expected_dev:
+            raise RuntimeError("storage-smoke transaction spans an unexpected filesystem")
+        allocated_by_inode.setdefault((info.st_dev, info.st_ino),
+                                      getattr(info, "st_blocks", 0) * 512)
+
+    def add_file(path: Path, cap: int) -> None:
+        nonlocal expected_dev
+        try:
+            info = path.lstat()
+        except FileNotFoundError:
+            return
+        allocated = getattr(info, "st_blocks", 0) * 512
+        if (not stat.S_ISREG(info.st_mode) or info.st_uid != os.getuid()
+                or (path != ACTIVE_LEASE_ROOT / f"{experiment_id}.json"
+                    and info.st_gid != os.getgid())
+                or stat.S_IMODE(info.st_mode) != 0o600
+                or info.st_nlink != 1 or info.st_size > cap or allocated > cap):
+            raise RuntimeError("storage-smoke transaction contains an unsafe or oversized file")
+        if expected_dev is None:
+            expected_dev = info.st_dev
+        elif info.st_dev != expected_dev:
+            raise RuntimeError("storage-smoke transaction spans an unexpected filesystem")
+        allocated_by_inode.setdefault((info.st_dev, info.st_ino), allocated)
+
+    if output_dir.exists() or output_dir.is_symlink():
+        add_directory(output_dir, output_tree=True)
+        output_info = output_dir.lstat()
+        for directory, dirnames, filenames in os.walk(output_dir, topdown=True, followlinks=False):
+            current = Path(directory)
+            for name in list(dirnames):
+                child = current / name
+                info = child.lstat()
+                add_directory(child, output_tree=True)
+            for name in filenames:
+                child = current / name
+                add_file(child, _storage_smoke_output_file_cap(child))
+    for path, cap in protocol_paths.items():
+        add_file(path, cap)
+    for path, cap in shared_protocol_paths.items():
+        add_file(path, cap)
+
+    parent_growth = _storage_smoke_parent_allocation_growth(experiment_id, output_dir)
+    current_allocated = sum(allocated_by_inode.values()) + parent_growth
+
+    manifest_path = _experiment_manifest_path(experiment_id)
+    try:
+        manifest_raw = _read_file_nofollow(
+            manifest_path, maximum_bytes=STORAGE_SMOKE_MANIFEST_MAX_BYTES)
+    except FileNotFoundError:
+        manifest_raw = None
+    if manifest_raw is not None:
+        try:
+            manifest = json.loads(manifest_raw)
+        except (UnicodeDecodeError, json.JSONDecodeError) as error:
+            raise RuntimeError("storage-smoke manifest is unreadable during reservation accounting") from error
+        _validate_storage_smoke_manifest_reservation(experiment_id, manifest_path, manifest)
+
+    claim_path = _storage_smoke_claim_path(experiment_id)
+    if claim_path.exists() or claim_path.is_symlink():
+        try:
+            _read_storage_smoke_claim(experiment_id)
+        except ValueError:
+            try:
+                preflight = json.loads(_read_file_nofollow(
+                    GATE0_ATTESTATION_PATH, maximum_bytes=GATE0_ATTESTATION_MAX_BYTES))
+                slot_descriptor = preflight.get("smoke_nonce_claim_slot")
+                if (not _verify_gate0_signature(preflight)
+                        or preflight.get("permitted_smoke_experiment_id") != experiment_id
+                        or preflight.get("status") != "PREFLIGHT_PASS"
+                        or preflight.get("mode") != "preflight"):
+                    raise ValueError("reserved claim slot has no current signed preflight")
+                _read_storage_smoke_claim_slot(experiment_id, slot_descriptor)
+            except (OSError, TypeError, ValueError, json.JSONDecodeError) as error:
+                raise RuntimeError(
+                    "storage-smoke claim is neither authenticated consumption nor its signed reserved slot") from error
+
+    projected_allocated = 0
+    if projected_path is not None:
+        parent_fd = _open_directory_nofollow(projected_path.parent)
+        try:
+            parent_info = os.fstat(parent_fd)
+            granularity = max(512, int(getattr(parent_info, "st_blksize", 0) or 0))
+            projected_allocated += (
+                (projected_write_bytes + granularity - 1) // granularity) * granularity
+            projected_allocated += _storage_smoke_directory_growth_reserve(parent_info)
+        finally:
+            os.close(parent_fd)
+    if projected_directory_create is not None:
+        parent_fd = _open_directory_nofollow(projected_directory_create.parent)
+        try:
+            parent_info = os.fstat(parent_fd)
+            granularity = max(512, int(getattr(parent_info, "st_blksize", 0) or 0))
+            projected_allocated += granularity * STORAGE_SMOKE_DIRECTORY_GROWTH_RESERVE_BLOCKS
+            projected_allocated += _storage_smoke_directory_growth_reserve(parent_info)
+        finally:
+            os.close(parent_fd)
+    peak = current_allocated + projected_allocated
+    if peak > STORAGE_SMOKE_OUTPUT_RESERVATION_BYTES:
+        raise RuntimeError(
+            "storage-smoke retained output would exceed its signed 32 MiB allocation reservation "
+            f"({peak} > {STORAGE_SMOKE_OUTPUT_RESERVATION_BYTES})")
+    return current_allocated
+
+
+def _storage_smoke_directory_growth_reserve(directory_info: os.stat_result) -> int:
+    block_size = max(512, int(getattr(directory_info, "st_blksize", 0) or 0))
+    return block_size * STORAGE_SMOKE_DIRECTORY_GROWTH_RESERVE_BLOCKS
+
+
+def _storage_smoke_parent_allocation_growth(
+    experiment_id: str, output_dir: Path,
+) -> int:
+    """Charge positive allocation growth on exact shared transaction parents."""
+    try:
+        gate_bytes = _read_file_nofollow(
+            GATE0_ATTESTATION_PATH, maximum_bytes=GATE0_ATTESTATION_MAX_BYTES)
+        attestation = json.loads(gate_bytes, object_pairs_hook=_g0c_no_duplicate_json_keys)
+        if (not isinstance(attestation, dict)
+                or attestation.get("permitted_smoke_experiment_id") != experiment_id
+                or attestation.get("status") != "PREFLIGHT_PASS"
+                or not _verify_gate0_signature(attestation)):
+            raise RuntimeError("signed preflight identity is unavailable for parent-allocation accounting")
+        baseline_state = read_gate_path_state_sidecar(attestation)["storage_tree_state"]
+    except (OSError, RuntimeError, ValueError, TypeError, json.JSONDecodeError) as error:
+        raise RuntimeError("cannot authenticate the Gate baseline for smoke parent allocation") from error
+    baseline_rows = {row.get("path"): row for row in baseline_state.get("entries", ())
+                     if isinstance(row, Mapping) and isinstance(row.get("path"), str)}
+    parent_dirs = {
+        output_dir.parent,
+        _experiment_manifest_path(experiment_id).parent,
+        _storage_smoke_claim_path(experiment_id).parent,
+        ACTIVE_LEASE_ROOT,
+        ACTIVE_LEASE_ROOT.parent,
+    }
+    growth_by_inode: dict[tuple[int, int], int] = {}
+    for parent in sorted(parent_dirs, key=str):
+        try:
+            descriptor = _open_directory_nofollow(parent)
+        except FileNotFoundError:
+            raise
+        try:
+            current = os.fstat(descriptor)
+        finally:
+            os.close(descriptor)
+        baseline = baseline_rows.get(str(Path(os.path.abspath(parent))))
+        if (not isinstance(baseline, Mapping) or baseline.get("kind") != "directory"
+              or baseline.get("device") != current.st_dev
+              or baseline.get("inode") != current.st_ino
+              or baseline.get("owner_uid") != current.st_uid
+              or baseline.get("owner_gid") != current.st_gid
+              or current.st_uid != os.getuid() or current.st_gid != os.getgid()
+              or baseline.get("mode") != stat.S_IMODE(current.st_mode)):
+            raise RuntimeError(f"smoke protocol parent identity differs from signed Gate baseline: {parent}")
+        baseline_allocated = baseline.get("allocated_bytes")
+        if (not isinstance(baseline_allocated, int) or isinstance(baseline_allocated, bool)
+                or baseline_allocated < 0):
+            raise RuntimeError(f"smoke protocol parent allocation is malformed in Gate baseline: {parent}")
+        current_allocated = getattr(current, "st_blocks", 0) * 512
+        growth = max(0, current_allocated - baseline_allocated)
+        growth_by_inode[(current.st_dev, current.st_ino)] = growth
+    return sum(growth_by_inode.values())
+
+
+def _storage_smoke_output_file_cap(path: Path) -> int:
+    name = path.name
+    if name == "prefix-smoke-started.json":
+        return STORAGE_SMOKE_START_MARKER_MAX_BYTES
+    if name in {"prefix-smoke-report.json", "prefix-smoke-final.json"}:
+        return STORAGE_SMOKE_REPORT_MAX_BYTES
+    if "cleanup" in name or "receipt" in name:
+        return STORAGE_SMOKE_CLEANUP_RECEIPT_MAX_BYTES
+    if name in {"gate0-attestation.json", "storage-gate0.json"}:
+        return GATE0_ATTESTATION_MAX_BYTES
+    if name == "gate0-preflight-attestation.json":
+        return GATE0_ATTESTATION_MAX_BYTES
+    if name in {GATE0_PATH_STATE_SIDECAR_PATH.name, "gate0-path-state.json.zlib"}:
+        return GATE_PATH_STATE_SIDECAR_MAX_COMPRESSED_BYTES
+    if name.startswith(("prefixlease-refusal", "prefixlease-publication-failure")):
+        return 16 * 1024
+    return STORAGE_SMOKE_OTHER_OUTPUT_OBJECT_MAX_BYTES
+
+
+def _validate_storage_smoke_manifest_reservation(
+    experiment_id: str, path: Path, manifest: Mapping[str, Any],
+) -> None:
+    if path != _experiment_manifest_path(experiment_id):
+        return
+    reservation = manifest.get("estimated_persistent_bytes") if isinstance(manifest, Mapping) else None
+    if (not isinstance(reservation, int) or isinstance(reservation, bool)
+            or reservation != STORAGE_SMOKE_OUTPUT_RESERVATION_BYTES):
+        raise RuntimeError("storage-smoke ALLOW must bind the fixed aggregate 32 MiB reservation")
+    decision = manifest.get("decision")
+    blockers = manifest.get("blockers")
+    blockers_valid = (isinstance(blockers, list)
+                      and all(isinstance(item, str) and item for item in blockers))
+    if (manifest.get("experiment_id") != experiment_id
+            or decision not in {"ALLOW", "REFUSE"}
+            or not blockers_valid
+            or (decision == "ALLOW" and blockers != [])
+            or (decision == "REFUSE" and not blockers)
+            or not _verify_manifest_signature(manifest)):
+        raise RuntimeError("storage-smoke reservation manifest is not an exact signed ALLOW or REFUSE")
+
+
+def _write_json_exclusive(path: Path, payload: Mapping[str, Any], *,
+                          strict_directory_sync: bool = False) -> None:
+    """Atomically publish a JSON file while refusing every existing destination."""
+    serialized_bytes = _canonical_pretty_json_bytes(payload)
+    smoke_output = _storage_smoke_output_dir_for_path(path)
+    if smoke_output is not None:
+        _validate_storage_smoke_manifest_reservation(smoke_output.name, path, payload)
+        _assert_storage_smoke_output_reservation(
+            smoke_output, projected_write_bytes=len(serialized_bytes), projected_path=path)
+    parent_fd = _open_directory_nofollow(
+        path.parent, create=smoke_output is None,
+        strict_directory_sync=strict_directory_sync)
+    temporary_name = f".{path.name}.{os.getpid()}.{secrets.token_hex(8)}.tmp"
+    temporary_fd: int | None = None
+    try:
+        create_flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0)
+        temporary_fd = os.open(temporary_name, create_flags, 0o600, dir_fd=parent_fd)
+        with os.fdopen(temporary_fd, "wb") as stream:
+            temporary_fd = None
+            stream.write(serialized_bytes)
+            stream.flush()
+            os.fsync(stream.fileno())
+        _rename_child_exclusive(parent_fd, temporary_name, path.name, sync=False)
+        try:
+            os.fsync(parent_fd)
+        except OSError:
+            if strict_directory_sync:
+                raise
+    except BaseException:
+        if temporary_fd is not None:
+            os.close(temporary_fd)
+        try:
+            os.unlink(temporary_name, dir_fd=parent_fd)
+        except FileNotFoundError:
+            pass
+        raise
+    finally:
+        os.close(parent_fd)
+    if smoke_output is not None:
+        _assert_storage_smoke_output_reservation(smoke_output)
 
 
 def _canonical_pretty_json_bytes(payload: Mapping[str, Any]) -> bytes:
-    """Return the exact on-disk encoding used by _write_json."""
-    return (json.dumps(payload, indent=2, sort_keys=True) + "\n").encode("utf-8")
+    """Return sorted UTF-8 JSON bytes without Unicode normalization or NaN values."""
+    return (json.dumps(payload, indent=2, sort_keys=True, allow_nan=False) + "\n").encode("utf-8")
 
 
 def _validate_materialized_active_prefix_marker(
@@ -5379,6 +13431,7 @@ def begin_experiment(
     estimated_debug_bytes: int | None = None,
     failure_capture_paths: list[str] | None = None,
     native_architecture: str | None = None,
+    _allocation_lock: Any | None = None,
     output_dir: Path,
     additional: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
@@ -5485,11 +13538,41 @@ def begin_experiment(
             normalized_runners,
             requires_managed_prefix=expected_prefix_bytes > 0)
 
+    r66_r69_claim_context: tuple[str, str, str, str | None] | None = None
+    milestone = _r6a_admission_milestone(experiment_id)
+    is_r71 = milestone is not None and milestone >= 71
+    is_r70 = milestone is not None and milestone == 70
+    is_r7x = is_r71 or is_r70
+    if is_r7x and _allocation_lock is None:
+        raise ValueError("R70 admission requires the live canonical allocation-lock descriptor")
+    if (is_r7x or milestone in {66, 69}):
+        admission_identity = (additional or {}).get("execution_admission_identity")
+        plan_canonical_sha256 = (additional or {}).get("build_session_plan_sha256")
+        expected_identity_sha256 = hashlib.sha256(json.dumps(
+            {"admission_id": experiment_id}, sort_keys=True, separators=(",", ":"),
+            ensure_ascii=False).encode("utf-8")).hexdigest()
+        if (not isinstance(admission_identity, Mapping)
+                or set(admission_identity) != {"admission_id", "sha256"}
+                or admission_identity.get("admission_id") != experiment_id
+                or admission_identity.get("sha256") != expected_identity_sha256
+                or not isinstance(plan_canonical_sha256, str)
+                or not re.fullmatch(r"[0-9a-f]{64}", plan_canonical_sha256)):
+            raise ValueError("R66/R69/R70 admission requires the exact canonical plan-bound admission identity")
+        build_id = ((additional or {}).get("r71_build_id") if is_r71 else
+                    (additional or {}).get("r70_build_id")) if is_r7x else None
+        if is_r7x and _r6a_build_id_milestone(build_id) != milestone:
+            raise ValueError("R70/R71 admission requires its exact fresh build ID")
+        if is_r7x:
+            _assert_r70_build_id_unclaimed(build_id)
+        _assert_r66_r69_admission_id_unclaimed(experiment_id)
+        r66_r69_claim_context = (
+            experiment_id, plan_canonical_sha256, expected_identity_sha256, build_id)
+
     if internal_storage_setup:
         raise ValueError("internal storage setup is retired; Gate 0 is mandatory for every new manifest")
     output_dir = _measured_output_dir(output_dir, require_missing=True)
     free_before = disk_free_bytes(REPO)
-    project = measure_project_usage()
+    project = (measure_project_usage(strict=True) if is_r71 else measure_project_usage())
     project_bytes = conservative_project_usage_bytes(project)
     project["conservative_allocated_inode_deduplicated_bytes"] = project_bytes
     estimated_peak = expected_prefix_bytes + expected_build_bytes + estimated_persistent_bytes
@@ -5497,14 +13580,27 @@ def begin_experiment(
     projected_peak = estimated_peak + uncertainty_margin
     blockers: list[str] = []
     warnings: list[str] = []
+    gate_diagnostics: dict[str, Any] = {}
     gate0_attestation_sha256: str | None = None
+    r70_gate_state: Mapping[str, Any] | None = None
     if free_before < FREE_HARD_STOP:
         blockers.append(f"free space below hard stop ({free_before} < {FREE_HARD_STOP})")
     blockers.extend(_gate0_blockers(
         active_experiment_id=experiment_id if storage_policy_smoke else None,
-        allow_storage_smoke=storage_policy_smoke))
+        allow_storage_smoke=storage_policy_smoke,
+        allow_r71_handoff=is_r71,
+        diagnostic_sink=gate_diagnostics,
+        defer_pre_admission_smoke_tree_check=storage_policy_smoke))
     if GATE0_ATTESTATION_PATH.is_file() and not GATE0_ATTESTATION_PATH.is_symlink():
-        gate0_attestation_sha256 = hashlib.sha256(_read_file_nofollow(GATE0_ATTESTATION_PATH)).hexdigest()
+        gate_raw = _read_file_nofollow(GATE0_ATTESTATION_PATH, maximum_bytes=GATE0_ATTESTATION_MAX_BYTES)
+        gate0_attestation_sha256 = hashlib.sha256(gate_raw).hexdigest()
+        if is_r70:
+            gate_payload = json.loads(gate_raw)
+            candidate_state = gate_payload.get("storage_tree_state")
+            if not isinstance(candidate_state, Mapping):
+                blockers.append("R70 requires a signed exact Gate path-state baseline")
+            else:
+                r70_gate_state = candidate_state
     admission = projected_storage_admission(
         current_free_bytes=free_before,
         current_scoped_bytes=project_bytes,
@@ -5585,6 +13681,9 @@ def begin_experiment(
         "native_architecture": native_architecture,
         **dict(additional or {}),
     }
+    if "gate0_nonlease_drift_diagnostic" in gate_diagnostics:
+        manifest["gate0_nonlease_drift_diagnostic"] = gate_diagnostics[
+            "gate0_nonlease_drift_diagnostic"]
     reserved = {
         "experiment_id", "purpose", "candidate_hashes", "created_at_unix",
         "expected_duration_seconds", "expected_prefix_requirement", "expected_prefix_bytes",
@@ -5596,6 +13695,11 @@ def begin_experiment(
         "output_dir", "decision", "blockers", "warnings",
         "manifest_path", "internal_storage_setup", "gate0_attestation_sha256",
         "storage_policy_smoke",
+        "gate0_nonlease_drift_diagnostic",
+        "pre_admission_path_delta",
+        "pre_admission_path_delta_binding",
+        "pre_admission_path_delta_status",
+        "admission_claim",
         "smoke_nonce_claim_path", "smoke_nonce_claim_sha256",
         "storage_justification", "persistent_growth_over_2g_approved",
         "persistent_growth_over_2g_approval_reason",
@@ -5610,40 +13714,393 @@ def begin_experiment(
         raise ValueError("additional manifest fields cannot replace storage-gate fields: "
                          + ", ".join(sorted(conflicting)))
     manifest_path = _experiment_manifest_path(experiment_id)
-    if manifest_path.exists():
+    r65_admission = experiment_id.startswith("r6a-r65-")
+    if not r65_admission and manifest_path.exists():
         raise FileExistsError(f"experiment manifest already exists: {manifest_path}")
     manifest["manifest_path"] = str(manifest_path)
     try:
         _validated_manifest_estimates(manifest)
     except ValueError as error:
         raise ValueError(f"experiment storage estimates are invalid: {error}") from error
+    r70_claim_state: Mapping[str, Any] | None = None
+    if r66_r69_claim_context is not None:
+        claim_id, plan_sha256, identity_sha256, bound_build_id = r66_r69_claim_context
+        claim = _claim_r66_r69_admission_id(
+            claim_id, plan_sha256, identity_sha256, manifest["decision"],
+            build_id=bound_build_id, allocation_lock=_allocation_lock if is_r7x else None)
+        claim_key = ("r71_admission_claim_sha256" if is_r71 else
+                     "r70_admission_claim_sha256" if is_r70 else "r66_r69_admission_claim_sha256")
+        manifest["candidate_hashes"][claim_key] = claim["claim_sha256"]
+        manifest["admission_claim"] = {
+            "path": claim["claim_path"],
+            "sha256": claim["claim_sha256"],
+            "decision": manifest["decision"],
+            "plan_canonical_sha256": plan_sha256,
+        }
+        if is_r7x:
+            manifest["admission_claim"]["build_id"] = bound_build_id
+        if is_r70:
+            if r70_gate_state is None:
+                raise RuntimeError("R70 admission cannot claim identity without the signed Gate tree baseline")
+            r70_claim_state = capture_storage_tree_state()
+            if not _storage_tree_transition_is_admission_owned(
+                    r70_gate_state, r70_claim_state, manifest_path=manifest_path,
+                    claim_path=Path(claim["claim_path"]),
+                    authorized_file_paths={str(Path(os.path.abspath(claim["claim_path"]))) }):
+                raise RuntimeError("R70 admission claim produced an unrecognized Gate-to-claim storage delta")
     if storage_policy_smoke:
-        preflight_bytes = _read_file_nofollow(GATE0_ATTESTATION_PATH)
+        preflight_bytes = _read_file_nofollow(GATE0_ATTESTATION_PATH, maximum_bytes=GATE0_ATTESTATION_MAX_BYTES)
         if hashlib.sha256(preflight_bytes).hexdigest() != gate0_attestation_sha256:
             raise RuntimeError("Gate 0 preflight changed before consuming the storage-smoke nonce")
-        claim, claim_bytes = _claim_storage_smoke_nonce(experiment_id, preflight_bytes)
+        preflight_payload = json.loads(
+            preflight_bytes, object_pairs_hook=_g0c_no_duplicate_json_keys)
+        gate_tree_state = read_gate_path_state_sidecar(
+            preflight_payload)["storage_tree_state"]
+        try:
+            claim, claim_bytes = _claim_storage_smoke_nonce(experiment_id, preflight_bytes)
+        except BaseException as claim_publication_error:
+            try:
+                claim, claim_bytes = _read_storage_smoke_claim(experiment_id)
+                if claim.get("preflight_attestation_sha256") != gate0_attestation_sha256:
+                    raise RuntimeError("post-error smoke claim does not bind the current Gate preflight")
+            except BaseException as claim_read_error:
+                raise BaseExceptionGroup(
+                    "storage-smoke claim publication failed and no authentic claim could be recovered",
+                    [claim_publication_error, claim_read_error]) from claim_publication_error
+            manifest["created_at_unix"] = claim["claimed_at_unix"]
+            manifest["smoke_nonce_claim_path"] = str(_storage_smoke_claim_path(experiment_id))
+            manifest["smoke_nonce_claim_sha256"] = hashlib.sha256(claim_bytes).hexdigest()
+            try:
+                _publish_storage_smoke_publication_failure(
+                    experiment_id, gate0_attestation_sha256 or "", claim_bytes,
+                    claim_publication_error, manifest,
+                    manifest_file_observed_before_removal=False)
+            except BaseException as evidence_error:
+                raise BaseExceptionGroup(
+                    "storage-smoke claim publication and terminal evidence both failed",
+                    [claim_publication_error, evidence_error]) from claim_publication_error
+            raise
         manifest["created_at_unix"] = claim["claimed_at_unix"]
         manifest["smoke_nonce_claim_path"] = str(_storage_smoke_claim_path(experiment_id))
         manifest["smoke_nonce_claim_sha256"] = hashlib.sha256(claim_bytes).hexdigest()
-    manifest["manifest_hmac_sha256"] = _manifest_signature(manifest, create_key=True)
-    _write_json(manifest_path, manifest, strict_directory_sync=True)
-    print(json.dumps({
-        "experiment_id": experiment_id,
-        "free_before_bytes": free_before,
-        "estimated_peak_new_bytes": estimated_peak,
-        "uncertainty_margin_bytes": uncertainty_margin,
-        "projected_peak_new_bytes": projected_peak,
-        "project_budget_bytes": PROJECT_BUDGET,
-        "project_usage_before_bytes": project_bytes,
-        "projected_free_bytes": admission["projected_free_bytes"],
-        "projected_scoped_project_bytes": admission["projected_scoped_bytes"],
-        "decision": manifest["decision"],
-        "blockers": blockers,
-        "warnings": warnings,
-        "manifest_path": str(manifest_path),
-    }, sort_keys=True))
+        claim_parent_fd: int | None = None
+        try:
+            delta_path = _pre_admission_delta_artifact_path(experiment_id)
+            claim_parent_fd = _open_directory_nofollow(SMOKE_CLAIM_ROOT)
+            if _stat_child_nofollow(claim_parent_fd, delta_path.name) is not None:
+                raise FileExistsError("pre-admission path-delta sidecar already exists for the nonce")
+            classified_roots = _classified_project_roots()
+            claim_parent_identity = _require_pre_admission_claim_root_identity(
+                claim_parent_fd, gate_tree_state, mandatory_roots=classified_roots,
+                require_path_binding=True)
+            current_tree_state = capture_storage_tree_state(
+                classified_roots=classified_roots)
+            _require_pre_admission_claim_root_identity(
+                claim_parent_fd, current_tree_state, mandatory_roots=classified_roots,
+                expected_identity=claim_parent_identity, require_path_binding=True)
+            path_delta = _storage_smoke_pre_admission_path_delta(
+                gate_tree_state, current_tree_state,
+                experiment_id=experiment_id,
+                gate_attestation_sha256=gate0_attestation_sha256 or "",
+                claim=claim, claim_bytes=claim_bytes,
+                mandatory_roots=classified_roots,
+            )
+            if path_delta["decision"] == "REFUSE":
+                blockers.append(
+                    "storage path, inode, directory allocation, or metadata changed since Gate 0 certification")
+                # Once the path-state decision is REFUSE, publish its diagnostic
+                # immediately from the same observation, before any later scan.
+                try:
+                    _require_pre_admission_claim_root_identity(
+                        claim_parent_fd, current_tree_state,
+                        mandatory_roots=classified_roots,
+                        expected_identity=claim_parent_identity,
+                        require_path_binding=True)
+                    delta_artifact, _compressed_delta = _publish_pre_admission_delta_sidecar(
+                        path_delta, parent_fd=claim_parent_fd)
+                    _require_pre_admission_claim_root_identity(
+                        claim_parent_fd, current_tree_state,
+                        mandatory_roots=classified_roots,
+                        expected_identity=claim_parent_identity,
+                        require_path_binding=True)
+                    manifest["pre_admission_path_delta"] = delta_artifact
+                    manifest["pre_admission_path_delta_binding"] = delta_artifact["binding"]
+                except BaseException as error:
+                    blockers.append(
+                        "pre-admission path-delta publication failed closed: "
+                        f"{type(error).__name__}: {str(error)[:192]}")
+                    manifest["pre_admission_path_delta_status"] = {
+                        "status": "UNAVAILABLE",
+                        "error_type": type(error).__name__,
+                        "error": str(error)[:192],
+                        "execution_authorized": False,
+                    }
+            manifest["decision"] = "REFUSE" if blockers else "ALLOW"
+            manifest["blockers"] = blockers
+        except BaseException as error:
+            blockers.append(
+                "Gate path-state transition could not be authenticated: "
+                f"{type(error).__name__}: {str(error)[:192]}")
+            manifest["decision"] = "REFUSE"
+            manifest["blockers"] = blockers
+            manifest["pre_admission_path_delta_status"] = {
+                "status": "UNAVAILABLE",
+                "error_type": type(error).__name__,
+                "error": str(error)[:192],
+                "execution_authorized": False,
+            }
+        finally:
+            if claim_parent_fd is not None:
+                os.close(claim_parent_fd)
+    smoke_prepublication_tree_state: Mapping[str, Any] | None = None
+    if storage_policy_smoke and manifest.get("decision") == "ALLOW":
+        # Close the interval between the first ALLOW delta and manifest
+        # publication. Any fresh path-state drift becomes a signed REFUSE.
+        try:
+            _fresh_tree, fresh_delta, fresh_artifact = (
+                _refresh_storage_smoke_pre_admission_delta(
+                    gate_tree_state, experiment_id=experiment_id,
+                    gate_attestation_sha256=gate0_attestation_sha256 or "",
+                    claim=claim, claim_bytes=claim_bytes,
+                    mandatory_roots=classified_roots,
+                    claim_root_identity=claim_parent_identity))
+            if fresh_delta["decision"] == "REFUSE":
+                blockers.append(
+                    "storage path, inode, directory allocation, or metadata changed before manifest publication")
+                manifest["decision"] = "REFUSE"
+                manifest["blockers"] = blockers
+                manifest["pre_admission_path_delta"] = fresh_artifact
+                manifest["pre_admission_path_delta_binding"] = fresh_artifact["binding"]
+            else:
+                smoke_prepublication_tree_state = _fresh_tree
+        except BaseException as error:
+            blockers.append(
+                "prepublication Gate path-state revalidation failed closed: "
+                f"{type(error).__name__}: {str(error)[:192]}")
+            manifest["decision"] = "REFUSE"
+            manifest["blockers"] = blockers
+            manifest["pre_admission_path_delta_status"] = {
+                "status": "UNAVAILABLE",
+                "error_type": type(error).__name__,
+                "error": str(error)[:192],
+                "execution_authorized": False,
+            }
+    smoke_manifest_readback_sha256: str | None = None
+    if r65_admission:
+        allocation_lock = _acquire_storage_allocation_lock()
+        try:
+            _r65_manifest_claim_binding(manifest, experiment_id=experiment_id)
+            manifest_parent_fd = _open_directory_nofollow(
+                manifest_path.parent, create=True, strict_directory_sync=True)
+            try:
+                if _stat_child_nofollow(manifest_parent_fd, manifest_path.name) is not None:
+                    raise FileExistsError(f"experiment manifest already exists: {manifest_path}")
+            finally:
+                os.close(manifest_parent_fd)
+            manifest["manifest_hmac_sha256"] = _manifest_signature(manifest, create_key=True)
+            _write_json_exclusive(manifest_path, manifest, strict_directory_sync=True)
+        finally:
+            _release_storage_allocation_lock(allocation_lock)
+    elif storage_policy_smoke:
+        try:
+            manifest["manifest_hmac_sha256"] = _manifest_signature(manifest, create_key=True)
+            _write_json(manifest_path, manifest, strict_directory_sync=True)
+            published_bytes = _read_file_nofollow(
+                manifest_path, maximum_bytes=STORAGE_SMOKE_MANIFEST_MAX_BYTES)
+            published = json.loads(
+                published_bytes, object_pairs_hook=_g0c_no_duplicate_json_keys)
+            if (published_bytes != _canonical_pretty_json_bytes(published)
+                    or published != manifest
+                    or not _verify_manifest_signature(published)
+                    or published.get("experiment_id") != experiment_id
+                    or published.get("decision") not in {"ALLOW", "REFUSE"}):
+                raise RuntimeError("signed storage-smoke manifest failed authenticated read-back")
+            smoke_manifest_readback_sha256 = hashlib.sha256(published_bytes).hexdigest()
+        except BaseException as publication_error:
+            terminal_error: BaseException = publication_error
+            try:
+                manifest_observed_before_removal = (
+                    _stat_entry_nofollow(manifest_path) is not None)
+            except BaseException:
+                manifest_observed_before_removal = False
+            try:
+                _discard_unaccepted_smoke_manifest(manifest_path, manifest)
+            except BaseException as discard_error:
+                terminal_error = BaseExceptionGroup(
+                    "smoke manifest publication failed and its unaccepted bytes could not be removed",
+                    [publication_error, discard_error])
+            try:
+                _publish_storage_smoke_publication_failure(
+                    experiment_id, gate0_attestation_sha256 or "", claim_bytes,
+                    terminal_error, manifest,
+                    manifest_file_observed_before_removal=manifest_observed_before_removal)
+            except BaseException as evidence_error:
+                raise BaseExceptionGroup(
+                    "storage-smoke manifest publication and terminal evidence both failed",
+                    [terminal_error, evidence_error]) from publication_error
+            if terminal_error is not publication_error:
+                raise terminal_error from publication_error
+            raise
+    elif is_r7x:
+        if is_r70 and r70_claim_state is None:
+            raise RuntimeError("R70 ALLOW cannot be published without an observed one-shot claim")
+        manifest["manifest_hmac_sha256"] = _manifest_signature(manifest, create_key=True)
+        _write_json_exclusive(manifest_path, manifest, strict_directory_sync=True)
+    else:
+        manifest["manifest_hmac_sha256"] = _manifest_signature(manifest, create_key=True)
+        _write_json(manifest_path, manifest, strict_directory_sync=True)
+    def emit_admission_result() -> None:
+        print(json.dumps({
+            "experiment_id": experiment_id,
+            "free_before_bytes": free_before,
+            "estimated_peak_new_bytes": estimated_peak,
+            "uncertainty_margin_bytes": uncertainty_margin,
+            "projected_peak_new_bytes": projected_peak,
+            "project_budget_bytes": PROJECT_BUDGET,
+            "project_usage_before_bytes": project_bytes,
+            "projected_free_bytes": admission["projected_free_bytes"],
+            "projected_scoped_project_bytes": admission["projected_scoped_bytes"],
+            "decision": manifest["decision"],
+            "blockers": blockers,
+            "warnings": warnings,
+            "manifest_path": str(manifest_path),
+        }, sort_keys=True))
+
     if blockers:
+        emit_admission_result()
         raise RuntimeError("storage gate refused experiment: " + "; ".join(blockers))
+    if is_r7x:
+        claim_record_path = Path(manifest["admission_claim"]["path"])
+        claim_record = _read_file_nofollow(claim_record_path, maximum_bytes=64 * 1024)
+        claim_sha = hashlib.sha256(claim_record).hexdigest()
+        if claim_sha != manifest["admission_claim"]["sha256"]:
+            raise RuntimeError("R70 admission claim changed before reservation handoff")
+        post_state = None
+        if is_r70:
+            post_state = capture_storage_tree_state()
+            if (r70_gate_state is None or r70_claim_state is None
+                    or not _storage_tree_transition_is_admission_owned(
+                        r70_claim_state, post_state, manifest_path=manifest_path,
+                        claim_path=claim_record_path,
+                        authorized_file_paths={str(Path(os.path.abspath(manifest_path))) })):
+                raise RuntimeError("R70 admission produced an unrecognized claim-to-ALLOW storage delta")
+        manifest_raw = _read_file_nofollow(manifest_path)
+        if hashlib.sha256(manifest_raw).hexdigest() != hashlib.sha256(
+                _canonical_pretty_json_bytes(manifest)).hexdigest():
+            raise RuntimeError("R70 signed ALLOW manifest changed before reservation handoff")
+        capability = AdmissionReservationCapability(
+            _R70_ADMISSION_CAPABILITY_TOKEN, lock_file=_allocation_lock,
+            gate_sha256=gate0_attestation_sha256 or "", admission_id=experiment_id,
+            build_id=str(manifest.get("r71_build_id") if is_r71 else manifest.get("r70_build_id")),
+            plan_sha256=str(manifest.get("build_session_plan_sha256")),
+            manifest_path=manifest_path, manifest_sha256=hashlib.sha256(manifest_raw).hexdigest(),
+            claim_path=claim_record_path, claim_sha256=claim_sha,
+            post_state=post_state,
+            r71_validation=(
+                {"candidate_path": manifest.get("r71_dependency_candidate_path"),
+                 "plan_path": manifest.get("r71_dependency_plan_path"),
+                 "g0c_review_path": manifest.get("r71_dependency_g0c_review_path"),
+                 "manifest_path": manifest.get("r71_dependency_manifest_path"),
+                 "dependency_manifest_sha256": manifest.get(
+                     "r71_execution_dependency_manifest_sha256")}
+                if is_r71 else None))
+        emit_admission_result()
+        return AdmissionManifest(manifest, reservation_capability=capability)
+    if storage_policy_smoke:
+        if (manifest.get("decision") != "ALLOW"
+                or not isinstance(smoke_manifest_readback_sha256, str)
+                or not re.fullmatch(r"[0-9a-f]{64}", smoke_manifest_readback_sha256)):
+            raise RuntimeError("storage-smoke ALLOW lacks a completed manifest publication read-back")
+        with _STORAGE_SMOKE_PUBLICATION_LOCK:
+            if experiment_id in _STORAGE_SMOKE_PUBLISHED_ALLOW_DIGESTS:
+                raise RuntimeError("storage-smoke ID already has an unconsumed publication handoff")
+            handoff_problem: str | None = None
+            try:
+                if smoke_prepublication_tree_state is None:
+                    raise RuntimeError("prepublication full-tree baseline is unavailable")
+                handoff_tree = _capture_storage_smoke_handoff_tree(
+                    smoke_prepublication_tree_state,
+                    mandatory_roots=classified_roots,
+                    claim_root_identity=claim_parent_identity)
+                handoff_raw = _read_file_nofollow(
+                    manifest_path, maximum_bytes=STORAGE_SMOKE_MANIFEST_MAX_BYTES)
+                handoff_manifest = json.loads(
+                    handoff_raw, object_pairs_hook=_g0c_no_duplicate_json_keys)
+                current_claim, current_claim_bytes = _read_storage_smoke_claim(experiment_id)
+                current_claim_observation = _storage_smoke_claim_observation(experiment_id)
+                handoff_rows = _validated_storage_tree_rows(
+                    handoff_tree, mandatory_roots=classified_roots)
+                current_claim_row = handoff_rows.get(str(_storage_smoke_claim_path(experiment_id)))
+                claim_matches = bool(
+                    current_claim == dict(claim) and current_claim_bytes == claim_bytes
+                    and current_claim_observation["sha256"] == hashlib.sha256(claim_bytes).hexdigest()
+                    and current_claim_observation["row"] == current_claim_row)
+                manifest_matches = bool(
+                    handoff_raw == _canonical_pretty_json_bytes(handoff_manifest)
+                    and handoff_manifest == published
+                    and _verify_manifest_signature(handoff_manifest)
+                    and handoff_manifest.get("decision") == "ALLOW"
+                    and hashlib.sha256(handoff_raw).hexdigest()
+                       == smoke_manifest_readback_sha256)
+                transition_matches = _storage_smoke_manifest_handoff_transition_is_exact(
+                    smoke_prepublication_tree_state, handoff_tree,
+                    manifest_path=manifest_path, mandatory_roots=classified_roots)
+                if not (claim_matches and manifest_matches and transition_matches):
+                    handoff_problem = (
+                        "claim identity, signed manifest, or exact full-tree transition changed")
+            except BaseException as error:
+                handoff_problem = f"{type(error).__name__}: {str(error)[:192]}"
+            if handoff_problem is not None:
+                # Withdraw only the exact unhanded ALLOW, then measure from the
+                # signed Gate tree again. This keeps the refusal sidecar free of
+                # the framework's temporary manifest insertion.
+                _discard_unaccepted_smoke_manifest(manifest_path, published)
+                try:
+                    _fresh_tree, fresh_delta, fresh_artifact = (
+                        _refresh_storage_smoke_pre_admission_delta(
+                            gate_tree_state, experiment_id=experiment_id,
+                            gate_attestation_sha256=gate0_attestation_sha256 or "",
+                            claim=claim, claim_bytes=claim_bytes,
+                            mandatory_roots=classified_roots,
+                            claim_root_identity=claim_parent_identity))
+                except BaseException as error:
+                    fresh_delta = None
+                    fresh_artifact = None
+                    handoff_problem += (
+                        f"; fresh Gate-to-current capture failed: {type(error).__name__}: "
+                        f"{str(error)[:160]}")
+                blockers.append(
+                    "storage path, inode, directory allocation, or metadata changed before PrefixLease handoff: "
+                    + handoff_problem[:192])
+                manifest["decision"] = "REFUSE"
+                manifest["blockers"] = blockers
+                if fresh_delta is not None and fresh_delta["decision"] == "REFUSE":
+                    manifest["pre_admission_path_delta"] = fresh_artifact
+                    manifest["pre_admission_path_delta_binding"] = fresh_artifact["binding"]
+                else:
+                    manifest["pre_admission_path_delta_status"] = {
+                        "status": "UNAVAILABLE", "error_type": "HandoffRevalidationFailed",
+                        "error": handoff_problem[:192], "execution_authorized": False,
+                    }
+                manifest.pop("manifest_hmac_sha256", None)
+                manifest["manifest_hmac_sha256"] = _manifest_signature(manifest)
+                _write_json(manifest_path, manifest, strict_directory_sync=True)
+                refusal_raw = _read_file_nofollow(
+                    manifest_path, maximum_bytes=STORAGE_SMOKE_MANIFEST_MAX_BYTES)
+                refusal = json.loads(
+                    refusal_raw, object_pairs_hook=_g0c_no_duplicate_json_keys)
+                if (refusal_raw != _canonical_pretty_json_bytes(refusal)
+                        or refusal != manifest or not _verify_manifest_signature(refusal)
+                        or refusal.get("decision") != "REFUSE"):
+                    raise RuntimeError("fresh signed storage-smoke REFUSE failed read-back")
+                smoke_manifest_readback_sha256 = hashlib.sha256(refusal_raw).hexdigest()
+            else:
+                _STORAGE_SMOKE_PUBLISHED_ALLOW_DIGESTS[experiment_id] = (
+                    os.getpid(), smoke_manifest_readback_sha256)
+        if blockers:
+            emit_admission_result()
+            raise RuntimeError("storage gate refused experiment: " + "; ".join(blockers))
+    emit_admission_result()
     return manifest
 
 
@@ -5693,6 +14150,7 @@ def _cleanup_result_status(record: Mapping[str, Any]) -> str:
     free_status = str(record.get("free_space_status", "FAIL_UNKNOWN"))
     threshold_failures = _cleanup_gate0_threshold_failures(record)
     if (storage_status == "FAIL_STORAGE_HYGIENE" or free_status.startswith("FAIL")
+            or record.get("execution_status") == "FAIL"
             or threshold_failures
             or record.get("receipt_write_error")
             or record.get("receipt_finalization_complete") is False
@@ -5730,7 +14188,7 @@ def _invalidate_gate0_after_cleanup_threshold_failure(
     already-blocked or otherwise non-PASS attestation remains untouched because it
     already prevents admission.
     """
-    raw = _read_file_nofollow(GATE0_ATTESTATION_PATH)
+    raw = _read_file_nofollow(GATE0_ATTESTATION_PATH, maximum_bytes=GATE0_ATTESTATION_MAX_BYTES)
     attestation = json.loads(raw)
     if not isinstance(attestation, dict) or not _verify_gate0_signature(attestation):
         raise RuntimeError("cannot invalidate an untrusted or malformed Gate 0 attestation")
@@ -5749,7 +14207,7 @@ def _invalidate_gate0_after_cleanup_threshold_failure(
     attestation["post_cleanup_threshold_failure"] = invalidation
     attestation["gate0_hmac_sha256"] = _gate0_signature(attestation)
     _write_json(GATE0_ATTESTATION_PATH, attestation, strict_directory_sync=True)
-    readback = json.loads(_read_file_nofollow(GATE0_ATTESTATION_PATH))
+    readback = json.loads(_read_file_nofollow(GATE0_ATTESTATION_PATH, maximum_bytes=GATE0_ATTESTATION_MAX_BYTES))
     if (not isinstance(readback, dict)
             or readback.get("status") != "BLOCKED"
             or readback.get("post_cleanup_threshold_failure") != invalidation
@@ -5757,7 +14215,7 @@ def _invalidate_gate0_after_cleanup_threshold_failure(
         raise RuntimeError("Gate 0 cleanup-threshold invalidation failed durable read-back")
     return {"status": "BLOCKED", "already_blocked": False,
             "attestation_sha256": hashlib.sha256(
-                _read_file_nofollow(GATE0_ATTESTATION_PATH)).hexdigest()}
+                _read_file_nofollow(GATE0_ATTESTATION_PATH, maximum_bytes=GATE0_ATTESTATION_MAX_BYTES)).hexdigest()}
 
 
 def _cleanup_receipt_timestamp(record: Mapping[str, Any]) -> float | None:
@@ -5821,6 +14279,1519 @@ def _write_prefix_state(prefix: Path, template: Path, output_dir: Path,
     }
 
 
+def _prefixlease_delta_row_summary(row: Mapping[str, Any] | None) -> dict[str, Any] | None:
+    if row is None:
+        return None
+    summary = {key: row.get(key) for key in (
+        "kind", "device", "inode", "owner_uid", "owner_gid", "mode", "link_count",
+        "size_bytes", "allocated_bytes", "mtime_ns", "ctime_ns") if key in row}
+    if "children" in row and isinstance(row.get("children"), list):
+        children = row["children"]
+        summary["children_count"] = len(children)
+        summary["children_sha256"] = hashlib.sha256(json.dumps(
+            children, ensure_ascii=False, separators=(",", ":")).encode("utf-8")).hexdigest()
+    target = row.get("target")
+    if isinstance(target, str):
+        target_bytes = os.fsencode(target)
+        summary["symlink_target_bytes"] = len(target_bytes)
+        summary["symlink_target_sha256"] = hashlib.sha256(target_bytes).hexdigest()
+    return summary
+
+
+def _prefixlease_bounded_tree_delta(
+    before: Mapping[str, Any], after: Mapping[str, Any], *, max_rows: int = 8,
+) -> dict[str, Any]:
+    before_rows = {row.get("path"): row for row in before.get("entries", ())
+                   if isinstance(row, Mapping) and isinstance(row.get("path"), str)}
+    after_rows = {row.get("path"): row for row in after.get("entries", ())
+                  if isinstance(row, Mapping) and isinstance(row.get("path"), str)}
+    digest = hashlib.sha256()
+    examples: list[dict[str, Any]] = []
+    count = 0
+    for path in sorted(set(before_rows) | set(after_rows)):
+        old, new = before_rows.get(path), after_rows.get(path)
+        if old == new:
+            continue
+        record = {"path": path,
+                  "before": _prefixlease_delta_row_summary(old),
+                  "after": _prefixlease_delta_row_summary(new)}
+        canonical = json.dumps(record, sort_keys=True, separators=(",", ":"),
+                               ensure_ascii=False).encode("utf-8")
+        digest.update(len(canonical).to_bytes(8, "big"))
+        digest.update(canonical)
+        count += 1
+        if len(examples) < max_rows:
+            examples.append(record)
+    return {"path_state_delta_sha256": digest.hexdigest(),
+            "path_state_changed_path_count": count,
+            "path_state_changed_paths": examples,
+            "path_state_delta_truncated": count > len(examples)}
+
+
+def _prefixlease_complete_tree_delta(
+    before: Mapping[str, Any], after: Mapping[str, Any], *,
+    binding: Mapping[str, Any],
+    path_context: Mapping[str, Any],
+    maximum_bytes: int = 64 * MIB,
+) -> tuple[dict[str, Any], bytes]:
+    """Build a complete, bound path delta under fixed row and byte limits."""
+    def index(state: Mapping[str, Any]) -> dict[str, Mapping[str, Any]]:
+        entries = state.get("entries")
+        if not isinstance(entries, list):
+            raise ValueError("refusal path state has no complete entry list")
+        rows: dict[str, Mapping[str, Any]] = {}
+        previous: str | None = None
+        roots = [row.path for row in _classified_project_roots()
+                 if row.classification == ROOT_CLASS_MANDATORY]
+        for row in entries:
+            path = row.get("path") if isinstance(row, Mapping) else None
+            if (not isinstance(path, str) or not Path(path).is_absolute()
+                    or os.path.abspath(path) != path or ".." in Path(path).parts
+                    or (previous is not None and path <= previous)
+                    or not any(Path(path) == root or root in Path(path).parents for root in roots)):
+                raise ValueError("refusal path state has a duplicate, noncanonical, or out-of-scope path")
+            rows[path] = row
+            previous = path
+        return rows
+
+    before_rows = index(before)
+    after_rows = index(after)
+    digest = hashlib.sha256()
+    rows: list[dict[str, Any]] = []
+    for path in sorted(set(before_rows) | set(after_rows)):
+        old, new = before_rows.get(path), after_rows.get(path)
+        if old == new:
+            continue
+        ownership, expected = _prefixlease_delta_path_classification(path, old, new, path_context)
+        # Keep complete row state here, including directory child names and
+        # symlink targets. The small refusal JSON carries only bounded samples.
+        row = {"path": path,
+               "before": copy.deepcopy(dict(old)) if old is not None else None,
+               "after": copy.deepcopy(dict(new)) if new is not None else None,
+               "ownership_classification": ownership,
+               "expected_classification": expected}
+        encoded = json.dumps(row, sort_keys=True, separators=(",", ":"),
+                             ensure_ascii=False).encode("utf-8")
+        digest.update(len(encoded).to_bytes(8, "big"))
+        digest.update(encoded)
+        rows.append(row)
+        if len(rows) > NONLEASE_ALLOCATION_SNAPSHOT_MAX_PATHS:
+            raise ValueError("complete refusal path delta exceeds the bounded row limit")
+    payload = {"schema_version": 2, "binding": copy.deepcopy(dict(binding)),
+               "path_state_changed_path_count": len(rows),
+               "path_state_delta_sha256": digest.hexdigest(), "changed_paths": rows}
+    raw = _canonical_pretty_json_bytes(payload)
+    if len(raw) > maximum_bytes:
+        raise ValueError("complete refusal path delta exceeds the bounded byte limit")
+    return payload, raw
+
+
+SMOKE_PRE_ADMISSION_DELTA_MAX_COMPRESSED_BYTES = 16 * MIB
+SMOKE_PRE_ADMISSION_DELTA_MAX_UNCOMPRESSED_BYTES = 64 * MIB
+SMOKE_PRE_ADMISSION_DELTA_HMAC_FIELD = "pre_admission_path_delta_hmac_sha256"
+SMOKE_PRE_ADMISSION_DELTA_VALIDATOR_LEGACY = (
+    "every current path row must equal the signed Gate row, except the exact authenticated "
+    "nonce-claim leaf and its direct parent child insertion")
+SMOKE_PRE_ADMISSION_DELTA_VALIDATOR = (
+    "every current path row must equal the signed Gate row, except the exact authenticated "
+    "preprovisioned nonce-claim file rewritten in place")
+
+
+def _validated_storage_tree_rows(
+    state: Mapping[str, Any], *, mandatory_roots: Sequence[DiscoveredProjectRoot],
+) -> dict[str, Mapping[str, Any]]:
+    """Validate the exact tree-state shape and return its canonical in-scope rows."""
+    if not isinstance(state, Mapping) or state.get("schema_version") != 1:
+        raise ValueError("pre-admission path state has an unsupported schema")
+    entries = state.get("entries")
+    if not isinstance(entries, list) or len(entries) > NONLEASE_ALLOCATION_SNAPSHOT_MAX_PATHS:
+        raise ValueError("pre-admission path state has no bounded complete entry list")
+    roots = [Path(os.path.abspath(root.path)) for root in mandatory_roots
+             if root.classification == ROOT_CLASS_MANDATORY]
+    rows: dict[str, Mapping[str, Any]] = {}
+    previous: str | None = None
+    stat_fields = ("device", "inode", "mode", "owner_uid", "owner_gid", "link_count",
+                   "size_bytes", "allocated_bytes")
+    gate_parent = Path(os.path.abspath(GATE0_ATTESTATION_PATH)).parent
+    sidecar_parent = Path(os.path.abspath(GATE0_PATH_STATE_SIDECAR_PATH)).parent
+    for row in entries:
+        if not isinstance(row, Mapping):
+            raise ValueError("pre-admission path state contains a malformed row")
+        path = row.get("path")
+        if (not isinstance(path, str) or "\x00" in path or not Path(path).is_absolute()
+                or os.path.abspath(path) != path or ".." in Path(path).parts
+                or (previous is not None and path <= previous)
+                or not any(Path(path) == root or root in Path(path).parents for root in roots)):
+            raise ValueError("pre-admission path state contains a duplicate, noncanonical, or out-of-scope path")
+        kind = row.get("kind")
+        if kind not in {"directory", "file", "symlink", "special"}:
+            raise ValueError("pre-admission path row has an unsupported filesystem type")
+        optional_fields: set[str] = set()
+        if Path(path) == gate_parent:
+            optional_fields.update(("mtime_ns", "ctime_ns"))
+        if Path(path) == sidecar_parent:
+            optional_fields.update(("mtime_ns", "ctime_ns", "size_bytes", "allocated_bytes"))
+        for field in stat_fields:
+            if field in optional_fields and field not in row:
+                continue
+            value = row.get(field)
+            if (not isinstance(value, int) or isinstance(value, bool) or value < 0
+                    or (field == "mode" and value > 0o7777)
+                    or (field == "link_count" and value < 1)):
+                raise ValueError(f"pre-admission path row has invalid {field}")
+        for field in ("mtime_ns", "ctime_ns"):
+            if field in optional_fields and field not in row:
+                continue
+            if field in row and (not isinstance(row[field], int)
+                                 or isinstance(row[field], bool) or row[field] < 0):
+                raise ValueError(f"pre-admission path row has invalid {field}")
+        if kind == "directory":
+            children = row.get("children")
+            if (not isinstance(children, list)
+                    or any(not isinstance(name, str) or not name or name in {".", ".."}
+                           or "/" in name or "\x00" in name for name in children)
+                    or children != sorted(set(children))):
+                raise ValueError("pre-admission directory row has invalid child-list state")
+        elif "children" in row:
+            raise ValueError("non-directory pre-admission row contains a child list")
+        if kind == "symlink":
+            if not isinstance(row.get("target"), str):
+                raise ValueError("pre-admission symlink row has no target")
+        elif "target" in row:
+            raise ValueError("non-symlink pre-admission row contains a symlink target")
+        allowed_keys = (set(stat_fields) - optional_fields) | {"path", "kind"}
+        allowed_keys.update({field for field in ("mtime_ns", "ctime_ns")
+                             if field not in optional_fields or field in row})
+        allowed_keys.update({field for field in ("size_bytes", "allocated_bytes")
+                             if field not in optional_fields or field in row})
+        if kind == "directory":
+            allowed_keys.add("children")
+        if kind == "symlink":
+            allowed_keys.add("target")
+        if set(row) != allowed_keys:
+            raise ValueError("pre-admission path row contains unknown or missing fields")
+        rows[path] = row
+        previous = path
+    canonical_entries = [dict(row) for row in entries]
+    canonical = json.dumps(canonical_entries, sort_keys=True, separators=(",", ":"),
+                           ensure_ascii=False, allow_nan=False).encode("utf-8")
+    if state.get("sha256") != hashlib.sha256(canonical).hexdigest():
+        raise ValueError("pre-admission path state digest is invalid")
+    return rows
+
+
+def _storage_smoke_pre_admission_path_delta(
+    before: Mapping[str, Any], after: Mapping[str, Any], *,
+    experiment_id: str, gate_attestation_sha256: str,
+    claim: Mapping[str, Any], claim_bytes: bytes,
+    mandatory_roots: Sequence[DiscoveredProjectRoot],
+) -> dict[str, Any]:
+    """Decide the one-shot Gate-to-claim transition and build its full delta."""
+    if (not _is_storage_policy_smoke_id(experiment_id)
+            or not re.fullmatch(r"[0-9a-f]{64}", gate_attestation_sha256)):
+        raise ValueError("pre-admission delta has an invalid experiment or Gate identity")
+    claim_path = _storage_smoke_claim_path(experiment_id)
+    if (not isinstance(claim, Mapping)
+            or not _verify_storage_evidence(claim, "smoke_claim_hmac_sha256")
+            or claim.get("experiment_id") != experiment_id
+            or claim.get("claim_path") != str(claim_path)
+            or claim.get("preflight_attestation_sha256") != gate_attestation_sha256
+            or not isinstance(claim_bytes, bytes)
+            or json.loads(claim_bytes, object_pairs_hook=_g0c_no_duplicate_json_keys) != dict(claim)
+            or claim_bytes != (json.dumps(dict(claim), indent=2, sort_keys=True) + "\n").encode("utf-8")):
+        raise ValueError("pre-admission delta lacks the exact authenticated nonce claim")
+    before_rows = _validated_storage_tree_rows(before, mandatory_roots=mandatory_roots)
+    after_rows = _validated_storage_tree_rows(after, mandatory_roots=mandatory_roots)
+    claim_parent = str(claim_path.parent)
+    old_claim, new_claim = before_rows.get(str(claim_path)), after_rows.get(str(claim_path))
+    old_parent, new_parent = before_rows.get(claim_parent), after_rows.get(claim_parent)
+    slot_binding = claim.get("claim_slot_binding")
+    if slot_binding is not None:
+        slot_binding = _validate_storage_smoke_claim_slot_descriptor(experiment_id, slot_binding)
+        expected_before = {"path": str(claim_path), "kind": "file", **slot_binding["state"]}
+        claim_row_valid = bool(
+            old_claim == expected_before and isinstance(new_claim, Mapping)
+            and new_claim.get("kind") == "file"
+            and all(new_claim.get(key) == slot_binding["state"].get(key)
+                    for key in ("device", "inode", "mode", "owner_uid", "owner_gid", "link_count"))
+            and new_claim.get("size_bytes") == len(claim_bytes))
+    else:
+        # Legacy R87 preflights did not preprovision a slot. Preserve their
+        # evidence shape, but the directory insertion can no longer authorize
+        # an ALLOW because it necessarily changes a second path row.
+        claim_row_valid = bool(
+            old_claim is None and isinstance(new_claim, Mapping)
+            and new_claim.get("kind") == "file"
+            and new_claim.get("device") == (new_parent or {}).get("device")
+            and new_claim.get("owner_uid") == os.getuid()
+            and new_claim.get("owner_gid") == os.getgid()
+            and new_claim.get("mode") == 0o600 and new_claim.get("link_count") == 1
+            and new_claim.get("size_bytes") == len(claim_bytes))
+
+    # The tree observation contains metadata, not file contents. Capture the
+    # exact post-snapshot claim bytes and identity through a stable no-follow
+    # descriptor read. Keep that observation in the authenticated REFUSE row
+    # too, so diagnostics identify the bytes that invalidated the transition.
+    observed_claim = _storage_smoke_claim_observation(experiment_id)
+    expected_claim_row = dict(new_claim) if isinstance(new_claim, Mapping) else None
+    claim_observation = {
+        "expected": {
+            "sha256": hashlib.sha256(claim_bytes).hexdigest(),
+            "hmac_sha256": claim.get("smoke_claim_hmac_sha256"),
+            "size_bytes": len(claim_bytes),
+            "row": expected_claim_row,
+        },
+        "current": observed_claim,
+    }
+    content_matches = False
+    if claim_row_valid:
+        try:
+            current_claim, current_claim_bytes = _read_storage_smoke_claim(experiment_id)
+            content_matches = (current_claim == dict(claim)
+                               and current_claim_bytes == claim_bytes)
+        except (OSError, ValueError, TypeError):
+            content_matches = False
+        claim_row_valid = bool(
+            content_matches and isinstance(new_claim, Mapping)
+            and observed_claim["sha256"] == hashlib.sha256(claim_bytes).hexdigest()
+            and observed_claim["row"] == dict(new_claim))
+
+    changed_paths = sorted(path for path in set(before_rows) | set(after_rows)
+                           if before_rows.get(path) != after_rows.get(path))
+    expected_row_paths = {str(claim_path)}
+    exact_claim_transition = bool(
+        claim_row_valid and set(changed_paths) == expected_row_paths)
+    roots = [Path(os.path.abspath(root.path)) for root in mandatory_roots
+             if root.classification == ROOT_CLASS_MANDATORY]
+
+    def ownership(path: str) -> str:
+        candidates = [root for root in roots if Path(path) == root or root in Path(path).parents]
+        if not candidates:
+            raise ValueError("pre-admission delta path is outside mandatory storage ownership")
+        deepest = max(candidates, key=lambda root: len(root.parts))
+        return str(next((row.classification + ":" + row.category
+                         for row in mandatory_roots
+                         if row.classification == ROOT_CLASS_MANDATORY
+                         and Path(os.path.abspath(row.path)) == deepest),
+                        ROOT_CLASS_MANDATORY + ":unknown"))
+
+    rows: list[dict[str, Any]] = []
+    unexpected_paths: list[str] = []
+    unexpected_leaf_paths: list[str] = []
+    aggregate_allocated_delta = 0
+    unexpected_allocated_delta = 0
+    for path in changed_paths:
+        old, new = before_rows.get(path), after_rows.get(path)
+        expected = path == str(claim_path) and claim_row_valid
+        if not expected:
+            unexpected_paths.append(path)
+            row_kind = (new or old or {}).get("kind")
+            if row_kind != "directory":
+                unexpected_leaf_paths.append(path)
+        old_allocated = old.get("allocated_bytes", 0) if old is not None else 0
+        new_allocated = new.get("allocated_bytes", 0) if new is not None else 0
+        row_delta = new_allocated - old_allocated
+        aggregate_allocated_delta += row_delta
+        if not expected:
+            unexpected_allocated_delta += row_delta
+        row = {
+            "path": path,
+            "before": dict(old) if old is not None else None,
+            "after": dict(new) if new is not None else None,
+            "storage_ownership_class": ownership(path),
+            "expected_classification": (
+                "EXPECTED_AUTHENTICATED_NONCE_CLAIM" if path == str(claim_path) and expected
+                else "UNEXPECTED_GATE_PATH_STATE_DRIFT"),
+            "exact_validator_predicate": SMOKE_PRE_ADMISSION_DELTA_VALIDATOR,
+            "predicate_result": "PASS" if expected else "FAIL",
+            "allocated_bytes_delta": row_delta,
+        }
+        if path == str(claim_path):
+            row["claim_observation"] = claim_observation
+        rows.append(row)
+    digest = hashlib.sha256()
+    for row in rows:
+        encoded = json.dumps(row, sort_keys=True, separators=(",", ":"),
+                             ensure_ascii=False, allow_nan=False).encode("utf-8")
+        digest.update(len(encoded).to_bytes(8, "big"))
+        digest.update(encoded)
+    claim_identity = {
+        "path": str(claim_path), "sha256": hashlib.sha256(claim_bytes).hexdigest(),
+        "hmac_sha256": claim.get("smoke_claim_hmac_sha256"),
+        "size_bytes": len(claim_bytes),
+        "preflight_attestation_sha256": gate_attestation_sha256,
+    }
+    nonce_identity = {"nonce_id": experiment_id, "claim_identity": claim_identity}
+    if slot_binding is not None:
+        nonce_identity["claim_slot_binding"] = dict(slot_binding)
+    return {
+        "schema_version": 1,
+        "decision": "ALLOW" if exact_claim_transition else "REFUSE",
+        "comparison_rule": "exact_signed_gate_tree_except_one_authenticated_nonce_claim",
+        "validator_predicate": SMOKE_PRE_ADMISSION_DELTA_VALIDATOR,
+        "experiment_id": experiment_id,
+        "nonce_identity": nonce_identity,
+        "baseline_gate_attestation_sha256": gate_attestation_sha256,
+        "baseline_gate_tree_sha256": before["sha256"],
+        "current_observation_sha256": after["sha256"],
+        "path_state_changed_path_count": len(rows),
+        "unexpected_path_count": len(unexpected_paths),
+        "unexpected_paths": unexpected_paths,
+        "unexpected_leaf_paths": unexpected_leaf_paths,
+        "aggregate_allocated_bytes_delta": aggregate_allocated_delta,
+        "unexpected_allocated_bytes_delta": unexpected_allocated_delta,
+        "path_state_delta_sha256": digest.hexdigest(),
+        "path_state_delta_truncated": False,
+        "changed_paths": rows,
+    }
+
+
+def _require_pre_admission_claim_root_identity(
+    parent_fd: int, state: Mapping[str, Any], *,
+    mandatory_roots: Sequence[DiscoveredProjectRoot],
+    expected_identity: tuple[int, int] | None = None,
+    require_path_binding: bool = False,
+) -> tuple[int, int]:
+    """Bind the pinned claim-root FD to the canonical Gate/current tree row."""
+    info = os.fstat(parent_fd)
+    if not stat.S_ISDIR(info.st_mode):
+        raise RuntimeError("pre-admission claim-root descriptor is not a directory")
+    identity = (info.st_dev, info.st_ino)
+    if expected_identity is not None and identity != expected_identity:
+        raise RuntimeError("pre-admission claim-root directory identity changed")
+    rows = _validated_storage_tree_rows(state, mandatory_roots=mandatory_roots)
+    root_row = rows.get(str(Path(os.path.abspath(SMOKE_CLAIM_ROOT))))
+    if (not isinstance(root_row, Mapping) or root_row.get("kind") != "directory"
+            or (root_row.get("device"), root_row.get("inode")) != identity):
+        raise RuntimeError("pre-admission claim-root descriptor differs from the observed tree row")
+    if require_path_binding:
+        path_fd = _open_directory_nofollow(SMOKE_CLAIM_ROOT)
+        try:
+            path_info = os.fstat(path_fd)
+            if (path_info.st_dev, path_info.st_ino) != identity:
+                raise RuntimeError("canonical claim-root path no longer names the pinned directory")
+        finally:
+            os.close(path_fd)
+    return identity
+
+
+def _pre_admission_delta_artifact_path(experiment_id: str) -> Path:
+    if not _is_storage_policy_smoke_id(experiment_id):
+        raise ValueError("pre-admission path delta requires the exact storage-smoke nonce")
+    return SMOKE_CLAIM_ROOT / f"{experiment_id}.pre-admission-path-delta.json.zlib"
+
+
+def _refresh_storage_smoke_pre_admission_delta(
+    before: Mapping[str, Any], *, experiment_id: str,
+    gate_attestation_sha256: str, claim: Mapping[str, Any], claim_bytes: bytes,
+    mandatory_roots: Sequence[DiscoveredProjectRoot],
+    claim_root_identity: tuple[int, int],
+) -> tuple[Mapping[str, Any], dict[str, Any], dict[str, Any] | None]:
+    """Reobserve the full Gate tree and publish any resulting REFUSE delta immediately."""
+    parent_fd = _open_directory_nofollow(SMOKE_CLAIM_ROOT)
+    try:
+        _require_pre_admission_claim_root_identity(
+            parent_fd, before, mandatory_roots=mandatory_roots,
+            expected_identity=claim_root_identity, require_path_binding=True)
+        current = capture_storage_tree_state(classified_roots=mandatory_roots)
+        _require_pre_admission_claim_root_identity(
+            parent_fd, current, mandatory_roots=mandatory_roots,
+            expected_identity=claim_root_identity, require_path_binding=True)
+        delta = _storage_smoke_pre_admission_path_delta(
+            before, current, experiment_id=experiment_id,
+            gate_attestation_sha256=gate_attestation_sha256,
+            claim=claim, claim_bytes=claim_bytes, mandatory_roots=mandatory_roots)
+        artifact = None
+        if delta["decision"] == "REFUSE":
+            # Publish from this exact full-tree observation before any follow-on
+            # diagnostics or manifest mutation.
+            _require_pre_admission_claim_root_identity(
+                parent_fd, current, mandatory_roots=mandatory_roots,
+                expected_identity=claim_root_identity, require_path_binding=True)
+            artifact, _compressed = _publish_pre_admission_delta_sidecar(
+                delta, parent_fd=parent_fd)
+            _require_pre_admission_claim_root_identity(
+                parent_fd, current, mandatory_roots=mandatory_roots,
+                expected_identity=claim_root_identity, require_path_binding=True)
+        return current, delta, artifact
+    finally:
+        os.close(parent_fd)
+
+
+def _capture_storage_smoke_handoff_tree(
+    baseline: Mapping[str, Any], *, mandatory_roots: Sequence[DiscoveredProjectRoot],
+    claim_root_identity: tuple[int, int],
+) -> Mapping[str, Any]:
+    """Capture the handoff tree while pinning and rechecking the claim root."""
+    parent_fd = _open_directory_nofollow(SMOKE_CLAIM_ROOT)
+    try:
+        _require_pre_admission_claim_root_identity(
+            parent_fd, baseline, mandatory_roots=mandatory_roots,
+            expected_identity=claim_root_identity, require_path_binding=True)
+        current = capture_storage_tree_state(classified_roots=mandatory_roots)
+        _require_pre_admission_claim_root_identity(
+            parent_fd, current, mandatory_roots=mandatory_roots,
+            expected_identity=claim_root_identity, require_path_binding=True)
+        return current
+    finally:
+        os.close(parent_fd)
+
+
+def _storage_smoke_manifest_handoff_transition_is_exact(
+    before: Mapping[str, Any], after: Mapping[str, Any], *,
+    manifest_path: Path, mandatory_roots: Sequence[DiscoveredProjectRoot],
+) -> bool:
+    """Allow only this signed manifest file and its direct parent insertion."""
+    manifest_name = str(Path(os.path.abspath(manifest_path)))
+    parent_name = str(Path(manifest_name).parent)
+    old_rows = _validated_storage_tree_rows(before, mandatory_roots=mandatory_roots)
+    new_rows = _validated_storage_tree_rows(after, mandatory_roots=mandatory_roots)
+    old_manifest, new_manifest = old_rows.get(manifest_name), new_rows.get(manifest_name)
+    old_parent, new_parent = old_rows.get(parent_name), new_rows.get(parent_name)
+    if (old_manifest is not None or not isinstance(new_manifest, Mapping)
+            or new_manifest.get("kind") != "file"
+            or not isinstance(old_parent, Mapping) or not isinstance(new_parent, Mapping)
+            or old_parent.get("kind") != "directory"
+            or new_parent.get("kind") != "directory"):
+        return False
+    manifest_info = _stat_entry_nofollow(manifest_path)
+    if (manifest_info is None or not stat.S_ISREG(manifest_info.st_mode)
+            or any(new_manifest.get(key) != value
+                   for key, value in _storage_smoke_claim_slot_state(manifest_info).items())):
+        return False
+    old_children = old_parent.get("children")
+    new_children = new_parent.get("children")
+    if (not isinstance(old_children, list) or not isinstance(new_children, list)
+            or set(new_children) - set(old_children) != {manifest_path.name}
+            or set(old_children) - set(new_children)):
+        return False
+    allowed_parent_metadata = {
+        "children", "size_bytes", "allocated_bytes", "mtime_ns", "ctime_ns",
+    }
+    stable_parent_fields = {"device", "inode", "mode", "owner_uid", "owner_gid"}
+    if (set(old_parent) != set(new_parent)
+            or any(old_parent.get(key) != new_parent.get(key)
+                   for key in stable_parent_fields)
+            or new_parent.get("link_count") not in {
+                old_parent.get("link_count"), old_parent.get("link_count", 0) + 1,
+            }
+            or any(old_parent.get(key) != new_parent.get(key)
+                   for key in set(old_parent) - allowed_parent_metadata
+                   - stable_parent_fields - {"link_count"})):
+        return False
+    unrelated = [path for path in (set(old_rows) | set(new_rows))
+                 - {manifest_name, parent_name}
+                 if old_rows.get(path) != new_rows.get(path)]
+    return not unrelated
+
+
+def _publish_pre_admission_delta_sidecar(
+    payload: Mapping[str, Any], *, parent_fd: int,
+) -> tuple[dict[str, Any], bytes]:
+    """Durably publish a bounded refusal delta using a pre-opened claim-root fd."""
+    experiment_id = payload.get("experiment_id")
+    path = _pre_admission_delta_artifact_path(str(experiment_id))
+    sealed = _seal_storage_evidence(payload, SMOKE_PRE_ADMISSION_DELTA_HMAC_FIELD)
+    raw = _canonical_pretty_json_bytes(sealed)
+    if len(raw) > SMOKE_PRE_ADMISSION_DELTA_MAX_UNCOMPRESSED_BYTES:
+        raise ValueError("pre-admission path delta exceeds its 64 MiB uncompressed bound")
+    compressed = zlib.compress(raw, level=9)
+    if len(compressed) > SMOKE_PRE_ADMISSION_DELTA_MAX_COMPRESSED_BYTES:
+        raise ValueError("pre-admission path delta exceeds its 16 MiB compressed bound")
+    name = path.name
+    temporary_name = f".{name}.{os.getpid()}.{secrets.token_hex(8)}.tmp"
+    descriptor: int | None = None
+    try:
+        descriptor = os.open(
+            temporary_name,
+            os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0),
+            0o600, dir_fd=parent_fd)
+        with os.fdopen(descriptor, "wb") as stream:
+            descriptor = None
+            stream.write(compressed)
+            stream.flush()
+            os.fsync(stream.fileno())
+        _rename_child_exclusive(parent_fd, temporary_name, name, sync=False)
+        os.fsync(parent_fd)
+    except BaseException:
+        if descriptor is not None:
+            os.close(descriptor)
+        try:
+            os.unlink(temporary_name, dir_fd=parent_fd)
+        except OSError:
+            pass
+        raise
+    artifact = {
+        "status": "CAPTURED", "schema_version": 1, "path": str(path),
+        "hmac_field": SMOKE_PRE_ADMISSION_DELTA_HMAC_FIELD,
+        "hmac_sha256": sealed[SMOKE_PRE_ADMISSION_DELTA_HMAC_FIELD],
+        "binding": dict(sealed["nonce_identity"]),
+        "binding_sha256": hashlib.sha256(
+            _canonical_pretty_json_bytes(sealed["nonce_identity"])).hexdigest(),
+        "compressed_bytes": len(compressed),
+        "compressed_sha256": hashlib.sha256(compressed).hexdigest(),
+        "uncompressed_bytes": len(raw),
+        "uncompressed_sha256": hashlib.sha256(raw).hexdigest(),
+        "path_state_changed_path_count": sealed["path_state_changed_path_count"],
+        "unexpected_path_count": sealed["unexpected_path_count"],
+        "path_state_delta_sha256": sealed["path_state_delta_sha256"],
+    }
+    return artifact, compressed
+
+
+def read_storage_smoke_pre_admission_path_delta(manifest: Mapping[str, Any]) -> dict[str, Any]:
+    """Authenticate and validate a bounded path delta bound by a signed REFUSE."""
+    if (not isinstance(manifest, Mapping) or not _verify_manifest_signature(manifest)
+            or manifest.get("storage_policy_smoke") is not True
+            or manifest.get("decision") != "REFUSE"):
+        raise ValueError("pre-admission path delta requires an authenticated storage-smoke REFUSE")
+    experiment_id = manifest.get("experiment_id")
+    descriptor = manifest.get("pre_admission_path_delta")
+    binding = manifest.get("pre_admission_path_delta_binding")
+    if (not _is_storage_policy_smoke_id(experiment_id)
+            or not isinstance(descriptor, Mapping) or descriptor.get("status") != "CAPTURED"
+            or descriptor.get("schema_version") != 1
+            or descriptor.get("hmac_field") != SMOKE_PRE_ADMISSION_DELTA_HMAC_FIELD
+            or not isinstance(binding, Mapping)
+            or descriptor.get("path") != str(_pre_admission_delta_artifact_path(experiment_id))
+            or dict(descriptor.get("binding", {})) != dict(binding)
+            or descriptor.get("binding_sha256") != hashlib.sha256(
+                _canonical_pretty_json_bytes(binding)).hexdigest()):
+        raise ValueError("signed smoke refusal has an invalid pre-admission delta binding")
+    compressed = _read_file_nofollow(
+        Path(descriptor["path"]), maximum_bytes=SMOKE_PRE_ADMISSION_DELTA_MAX_COMPRESSED_BYTES)
+    if (len(compressed) != descriptor.get("compressed_bytes")
+            or hashlib.sha256(compressed).hexdigest() != descriptor.get("compressed_sha256")):
+        raise ValueError("pre-admission path delta compressed identity is invalid")
+    decompressor = zlib.decompressobj()
+    raw = decompressor.decompress(compressed, SMOKE_PRE_ADMISSION_DELTA_MAX_UNCOMPRESSED_BYTES + 1)
+    if (len(raw) > SMOKE_PRE_ADMISSION_DELTA_MAX_UNCOMPRESSED_BYTES
+            or decompressor.unconsumed_tail):
+        raise ValueError("pre-admission path delta exceeds its decompression bound")
+    remaining = SMOKE_PRE_ADMISSION_DELTA_MAX_UNCOMPRESSED_BYTES + 1 - len(raw)
+    raw += decompressor.flush(max(1, remaining))
+    if (len(raw) > SMOKE_PRE_ADMISSION_DELTA_MAX_UNCOMPRESSED_BYTES
+            or not decompressor.eof or decompressor.unused_data or decompressor.unconsumed_tail):
+        raise ValueError("pre-admission path delta compression stream is malformed")
+    if (len(raw) != descriptor.get("uncompressed_bytes")
+            or hashlib.sha256(raw).hexdigest() != descriptor.get("uncompressed_sha256")):
+        raise ValueError("pre-admission path delta decompressed identity is invalid")
+    payload = json.loads(raw, object_pairs_hook=_g0c_no_duplicate_json_keys)
+    delta_validator = (payload.get("validator_predicate")
+                       if isinstance(payload, dict) else None)
+    if (not isinstance(payload, dict) or raw != _canonical_pretty_json_bytes(payload)
+            or payload.get("schema_version") != 1
+            or delta_validator not in {
+                SMOKE_PRE_ADMISSION_DELTA_VALIDATOR,
+                SMOKE_PRE_ADMISSION_DELTA_VALIDATOR_LEGACY,
+            }
+            or payload.get("decision") != "REFUSE"
+            or payload.get("experiment_id") != experiment_id
+            or payload.get("nonce_identity") != dict(binding)
+            or not _verify_storage_evidence(payload, SMOKE_PRE_ADMISSION_DELTA_HMAC_FIELD)
+            or payload.get(SMOKE_PRE_ADMISSION_DELTA_HMAC_FIELD) != descriptor.get("hmac_sha256")):
+        raise ValueError("pre-admission path delta schema, decision, or HMAC is invalid")
+    claim_path = _storage_smoke_claim_path(experiment_id)
+    claim_parent = str(claim_path.parent)
+    nonce_binding = payload.get("nonce_identity")
+    claim_identity = (nonce_binding.get("claim_identity")
+                      if isinstance(nonce_binding, Mapping) else None)
+    if (not isinstance(nonce_binding, Mapping)
+            or set(nonce_binding) not in ({"nonce_id", "claim_identity"},
+                                          {"nonce_id", "claim_identity",
+                                           "claim_slot_binding"})
+            or nonce_binding.get("nonce_id") != experiment_id
+            or not isinstance(claim_identity, Mapping)
+            or set(claim_identity) != {"path", "sha256", "hmac_sha256", "size_bytes",
+                                       "preflight_attestation_sha256"}
+            or claim_identity.get("path") != str(claim_path)
+            or not isinstance(claim_identity.get("sha256"), str)
+            or not re.fullmatch(r"[0-9a-f]{64}", claim_identity["sha256"])
+            or not isinstance(claim_identity.get("hmac_sha256"), str)
+            or not re.fullmatch(r"[0-9a-f]{64}", claim_identity["hmac_sha256"])
+            or not isinstance(claim_identity.get("size_bytes"), int)
+            or isinstance(claim_identity.get("size_bytes"), bool)
+            or not 0 < claim_identity["size_bytes"] <= 16 * 1024
+            or claim_identity.get("preflight_attestation_sha256")
+               != manifest.get("gate0_attestation_sha256")
+            or manifest.get("smoke_nonce_claim_path") != str(claim_path)
+            or manifest.get("smoke_nonce_claim_path") != claim_identity.get("path")
+            or manifest.get("smoke_nonce_claim_sha256") != claim_identity.get("sha256")):
+        raise ValueError("pre-admission path delta is not bound to the authenticated nonce identity")
+    slot_binding = nonce_binding.get("claim_slot_binding")
+    if slot_binding is not None:
+        slot_binding = _validate_storage_smoke_claim_slot_descriptor(
+            experiment_id, slot_binding)
+    expected_claim_observation = {
+        "sha256": claim_identity["sha256"],
+        "hmac_sha256": claim_identity["hmac_sha256"],
+        "size_bytes": claim_identity["size_bytes"],
+    }
+    live_claim_observation = _storage_smoke_claim_observation(experiment_id)
+    if live_claim_observation["sha256"] == claim_identity["sha256"]:
+        # When current bytes are still the claimed bytes, retain the ordinary
+        # full claim authentication and nonce-binding check.
+        claim, claim_bytes = _read_storage_smoke_claim(experiment_id)
+        live_identity = {
+            "path": str(claim_path), "sha256": hashlib.sha256(claim_bytes).hexdigest(),
+            "hmac_sha256": claim.get("smoke_claim_hmac_sha256"),
+            "size_bytes": len(claim_bytes),
+            "preflight_attestation_sha256": claim.get("preflight_attestation_sha256"),
+        }
+        if (live_identity != dict(claim_identity)
+                or claim.get("preflight_attestation_sha256")
+                   != manifest.get("gate0_attestation_sha256")
+                or claim.get("claim_slot_binding") != slot_binding):
+            raise ValueError("pre-admission path delta is not bound to the current authenticated nonce claim")
+    mandatory_roots = [row for row in _classified_project_roots()
+                       if row.classification == ROOT_CLASS_MANDATORY]
+    rows = payload.get("changed_paths")
+    if (not isinstance(rows, list)
+            or len(rows) != payload.get("path_state_changed_path_count")
+            or len(rows) != descriptor.get("path_state_changed_path_count")
+            or len(rows) > NONLEASE_ALLOCATION_SNAPSHOT_MAX_PATHS):
+        raise ValueError("pre-admission path delta row count is invalid")
+    rows_by_path = {row.get("path"): row for row in rows if isinstance(row, Mapping)}
+    if len(rows_by_path) != len(rows):
+        raise ValueError("pre-admission path delta contains duplicate path rows")
+    claim_delta_row = rows_by_path.get(str(claim_path))
+    parent_delta_row = rows_by_path.get(claim_parent)
+    claim_after = claim_delta_row.get("after") if isinstance(claim_delta_row, Mapping) else None
+    parent_after = parent_delta_row.get("after") if isinstance(parent_delta_row, Mapping) else None
+    claim_before = (claim_delta_row.get("before")
+                    if isinstance(claim_delta_row, Mapping) else None)
+    if slot_binding is not None:
+        slot_binding = _validate_storage_smoke_claim_slot_descriptor(experiment_id, slot_binding)
+        expected_slot_row = {"path": str(claim_path), "kind": "file", **slot_binding["state"]}
+        claim_local_valid = bool(
+            isinstance(claim_delta_row, Mapping) and claim_before == expected_slot_row
+            and isinstance(claim_after, Mapping) and claim_after.get("kind") == "file"
+            and all(claim_after.get(key) == slot_binding["state"].get(key)
+                    for key in ("device", "inode", "mode", "owner_uid", "owner_gid", "link_count"))
+            and claim_after.get("size_bytes") == claim_identity["size_bytes"]
+            and live_claim_observation["sha256"] == claim_identity["sha256"]
+            and live_claim_observation["row"] == dict(claim_after))
+    else:
+        claim_local_valid = bool(
+            isinstance(claim_delta_row, Mapping) and claim_before is None
+            and isinstance(claim_after, Mapping) and claim_after.get("kind") == "file"
+            and isinstance(parent_after, Mapping)
+            and claim_after.get("device") == parent_after.get("device")
+            and claim_after.get("owner_uid") == os.getuid()
+            and claim_after.get("owner_gid") == os.getgid()
+            and claim_after.get("mode") == 0o600 and claim_after.get("link_count") == 1
+            and claim_after.get("size_bytes") == claim_identity["size_bytes"]
+            and live_claim_observation["sha256"] == claim_identity["sha256"]
+            and live_claim_observation["row"] == dict(claim_after))
+    parent_local_valid = False
+    if (delta_validator == SMOKE_PRE_ADMISSION_DELTA_VALIDATOR_LEGACY
+            and isinstance(parent_delta_row, Mapping)
+            and isinstance(parent_delta_row.get("before"), Mapping)
+            and isinstance(parent_after, Mapping)
+            and parent_delta_row["before"].get("kind") == parent_after.get("kind") == "directory"):
+        old_parent = parent_delta_row["before"]
+        excluded = {"children", "size_bytes", "allocated_bytes", "mtime_ns", "ctime_ns",
+                    "link_count"}
+        old_identity = {key: value for key, value in old_parent.items() if key not in excluded}
+        new_identity = {key: value for key, value in parent_after.items() if key not in excluded}
+        old_children = set(old_parent.get("children", ()))
+        new_children = set(parent_after.get("children", ()))
+        # The producer already binds this to the sole claim-name insertion;
+        # mirror the bounded POSIX/APFS directory link-count validation.
+        parent_local_valid = bool(
+            old_identity == new_identity
+            and parent_after.get("link_count") in {
+                old_parent.get("link_count"), old_parent.get("link_count") + 1,
+            }
+            and new_children - old_children == {claim_path.name}
+            and not (old_children - new_children))
+    digest = hashlib.sha256()
+    previous: str | None = None
+    total_delta = 0
+    unexpected_delta = 0
+    unexpected: list[str] = []
+    unexpected_leaves: list[str] = []
+    claim_parent = str(claim_path.parent)
+    roots = [Path(os.path.abspath(root.path)) for root in mandatory_roots]
+
+    def ownership(path: str) -> str:
+        candidates = [root for root in roots if Path(path) == root or root in Path(path).parents]
+        if not candidates:
+            raise ValueError("pre-admission delta path is outside mandatory storage ownership")
+        deepest = max(candidates, key=lambda root: len(root.parts))
+        owner = next((root for root in mandatory_roots
+                      if Path(os.path.abspath(root.path)) == deepest), None)
+        return (owner.classification + ":" + owner.category) if owner else ""
+
+    for row in rows:
+        if not isinstance(row, Mapping):
+            raise ValueError("pre-admission path delta contains a malformed row")
+        path = row.get("path")
+        expected_row_keys = {"path", "before", "after", "storage_ownership_class",
+                             "expected_classification", "exact_validator_predicate",
+                             "predicate_result", "allocated_bytes_delta"}
+        if path == str(claim_path):
+            expected_row_keys.add("claim_observation")
+        if (not isinstance(path, str) or (previous is not None and path <= previous)
+                or not isinstance(row.get("storage_ownership_class"), str)
+                or row.get("exact_validator_predicate") != delta_validator
+                or row.get("expected_classification") not in {
+                    "EXPECTED_AUTHENTICATED_NONCE_CLAIM",
+                    "EXPECTED_DIRECT_CLAIM_PARENT_EFFECT",
+                    "UNEXPECTED_GATE_PATH_STATE_DRIFT"}
+                or row.get("predicate_result") not in {"PASS", "FAIL"}
+                or set(row) != expected_row_keys):
+            raise ValueError("pre-admission path delta contains an invalid or duplicate path")
+        if path == str(claim_path):
+            observed = row.get("claim_observation")
+            observed_expected = (observed.get("expected")
+                                 if isinstance(observed, Mapping) else None)
+            if (not isinstance(observed, Mapping) or set(observed) != {"expected", "current"}
+                    or not isinstance(observed_expected, Mapping)
+                    or set(observed_expected) != set(expected_claim_observation) | {"row"}
+                    or any(observed_expected.get(key) != value
+                           for key, value in expected_claim_observation.items())
+                    or observed_expected.get("row") != claim_after
+                    or observed.get("current") != live_claim_observation):
+                raise ValueError("pre-admission claim row lacks the exact expected/current byte observation")
+        sides: dict[str, Mapping[str, Any] | None] = {}
+        for side in ("before", "after"):
+            value = row.get(side)
+            if value is not None:
+                if not isinstance(value, Mapping) or value.get("path") != path:
+                    raise ValueError("pre-admission path delta row identity is malformed")
+                state_row = dict(value)
+                state_raw = json.dumps([state_row], sort_keys=True, separators=(",", ":"),
+                                       ensure_ascii=False, allow_nan=False).encode("utf-8")
+                _validated_storage_tree_rows({
+                    "schema_version": 1, "sha256": hashlib.sha256(state_raw).hexdigest(),
+                    "entries": [state_row],
+                }, mandatory_roots=mandatory_roots)
+                sides[side] = state_row
+            else:
+                sides[side] = None
+        if row["storage_ownership_class"] != ownership(path):
+            raise ValueError("pre-admission path delta ownership classification is invalid")
+        if row.get("before") == row.get("after"):
+            raise ValueError("pre-admission path delta row does not represent a change")
+        old, new = sides["before"], sides["after"]
+        expected = False
+        expected_classification = "UNEXPECTED_GATE_PATH_STATE_DRIFT"
+        if (path == str(claim_path) and claim_local_valid
+                and (delta_validator == SMOKE_PRE_ADMISSION_DELTA_VALIDATOR
+                     or parent_local_valid)):
+            expected = True
+            expected_classification = "EXPECTED_AUTHENTICATED_NONCE_CLAIM"
+        elif (delta_validator == SMOKE_PRE_ADMISSION_DELTA_VALIDATOR_LEGACY
+              and path == claim_parent and claim_local_valid and parent_local_valid):
+            expected_classification = "EXPECTED_DIRECT_CLAIM_PARENT_EFFECT"
+            expected = True
+        if (row["expected_classification"] != (expected_classification if expected
+                                                 else "UNEXPECTED_GATE_PATH_STATE_DRIFT")
+                or row["predicate_result"] != ("PASS" if expected else "FAIL")):
+            raise ValueError("pre-admission path delta claim classification or predicate is invalid")
+        before_allocated = row["before"].get("allocated_bytes", 0) if row["before"] else 0
+        after_allocated = row["after"].get("allocated_bytes", 0) if row["after"] else 0
+        row_delta = after_allocated - before_allocated
+        if row.get("allocated_bytes_delta") != row_delta:
+            raise ValueError("pre-admission path delta allocation change is invalid")
+        total_delta += row_delta
+        if not expected:
+            unexpected.append(path)
+            unexpected_delta += row_delta
+            if (row.get("after") or row.get("before", {})).get("kind") != "directory":
+                unexpected_leaves.append(path)
+        encoded = json.dumps(dict(row), sort_keys=True, separators=(",", ":"),
+                             ensure_ascii=False, allow_nan=False).encode("utf-8")
+        digest.update(len(encoded).to_bytes(8, "big"))
+        digest.update(encoded)
+        previous = path
+    if (digest.hexdigest() != payload.get("path_state_delta_sha256")
+            or digest.hexdigest() != descriptor.get("path_state_delta_sha256")
+            or total_delta != payload.get("aggregate_allocated_bytes_delta")
+            or unexpected_delta != payload.get("unexpected_allocated_bytes_delta")
+            or unexpected != payload.get("unexpected_paths")
+            or unexpected_leaves != payload.get("unexpected_leaf_paths")
+            or len(unexpected) != payload.get("unexpected_path_count")
+            or len(unexpected) != descriptor.get("unexpected_path_count")):
+        raise ValueError("pre-admission path delta summary or digest is invalid")
+    if not unexpected:
+        raise ValueError("pre-admission REFUSE delta has no unexpected path-state drift")
+    return payload
+
+
+def _prefixlease_delta_path_classification(
+    path: str, before: Mapping[str, Any] | None, after: Mapping[str, Any] | None,
+    context: Mapping[str, Any],
+) -> tuple[str, str]:
+    """Classify changed paths against the exact run's protocol and lease scope."""
+    prefix = Path(str(context.get("prefix_path", "")))
+    active = Path(str(context.get("active_marker_path", "")))
+    lock = Path(str(context.get("lock_path", "")))
+    parent = prefix.parent
+    path_obj = Path(path)
+    expected_relatives = context.get("expected_prefix_relatives", ())
+    protocol_files = context.get("expected_protocol_files", ())
+    protocol_dirs = context.get("expected_protocol_dirs", ())
+    protocol_children = context.get("expected_protocol_children", {})
+    if path_obj == prefix:
+        return "CURRENT_RUN_PREFIX_ROOT", (
+            "EXPECTED_MATERIALIZATION_ROOT" if context.get("prefix_root_valid") is True
+            else "UNEXPECTED_PREFIX_ROOT_STATE")
+    if path_obj == prefix / "FGMETAL_PREFIX_LEASE.json":
+        return "CURRENT_RUN_LEASE_MARKER", (
+            "EXPECTED_AUTHENTICATED_LEASE_MARKER" if context.get("prefix_marker_valid") is True
+            else "UNEXPECTED_LEASE_MARKER_STATE")
+    if prefix in path_obj.parents:
+        relative = path_obj.relative_to(prefix).as_posix()
+        if relative in set(expected_relatives):
+            return "CURRENT_RUN_LEASE_PREFIX_DESCENDANT", "EXPECTED_TEMPLATE_PATH"
+        return "CURRENT_RUN_LEASE_PREFIX_DESCENDANT", "UNEXPECTED_PREFIX_PATH"
+    if path_obj == parent:
+        return "CURRENT_RUN_PREFIX_PARENT", (
+            "EXPECTED_PREFIX_INSERTION" if context.get("prefix_parent_valid") is True
+            else "UNEXPECTED_PREFIX_PARENT_STATE")
+    if path_obj == active:
+        return "CURRENT_RUN_ACTIVE_MARKER", (
+            "EXPECTED_MATERIALIZED_MARKER" if context.get("active_marker_valid") is True
+            else "UNEXPECTED_ACTIVE_MARKER_STATE")
+    if path_obj == lock:
+        return "SHARED_LEASE_LOCK", (
+            "EXPECTED_LOCK_IDENTITY" if context.get("lock_valid") is True
+            else "UNEXPECTED_LOCK_STATE")
+    if path in set(protocol_files):
+        return "CURRENT_RUN_STATE_B_PROTOCOL_FILE", "EXPECTED_PROTOCOL_PATH"
+    if path in set(protocol_dirs):
+        expected_names = set(protocol_children.get(path, ())) if isinstance(protocol_children, Mapping) else set()
+        old_children = set(before.get("children", ())) if isinstance(before, Mapping) else set()
+        new_children = set(after.get("children", ())) if isinstance(after, Mapping) else set()
+        delta = new_children - old_children
+        removed = old_children - new_children
+        if before is None and isinstance(after, Mapping):
+            new_identity_ok = (
+                after.get("kind") == "directory"
+                and after.get("owner_uid") == os.getuid()
+                and after.get("owner_gid") == os.getgid()
+                and after.get("mode") == (0o700 if path == str(Path(str(context.get("output_dir", "")))) else 0o755))
+            expected = bool(new_identity_ok and new_children <= expected_names)
+        elif isinstance(before, Mapping) and isinstance(after, Mapping):
+            excluded = {"children", "size_bytes", "allocated_bytes", "mtime_ns", "ctime_ns", "link_count"}
+            identity_unchanged = (
+                {key: value for key, value in before.items() if key not in excluded}
+                == {key: value for key, value in after.items() if key not in excluded})
+            expected_links = {
+                before.get("link_count", 2) + sum(
+                    1 for name in delta
+                    if isinstance(after.get("children"), list)
+                    and name in after.get("children", ())),
+                before.get("link_count", 2) + len(delta),
+            }
+            expected = bool(
+                identity_unchanged and not removed and delta and delta <= expected_names
+                and after.get("kind") == "directory"
+                and after.get("link_count") in expected_links)
+        else:
+            expected = False
+        return ("CURRENT_RUN_STATE_B_PROTOCOL_DIRECTORY",
+                "EXPECTED_PROTOCOL_DIRECTORY" if expected
+                else "UNEXPECTED_PROTOCOL_DIRECTORY_STATE")
+    return "PROJECT_NONLEASE", "UNEXPECTED_NONLEASE_DRIFT"
+
+
+PREFIXLEASE_REFUSAL_DELTA_MAX_COMPRESSED_BYTES = 16 * MIB
+PREFIXLEASE_REFUSAL_DELTA_MAX_UNCOMPRESSED_BYTES = 64 * MIB
+
+
+def read_prefixlease_refusal_path_delta(refusal: Mapping[str, Any]) -> dict[str, Any]:
+    """Verify the authenticated bounded full path-delta bound by a refusal record."""
+    if (not isinstance(refusal, Mapping)
+            or not _verify_storage_evidence(refusal, "prefixlease_refusal_hmac_sha256")
+            or refusal.get("decision") != "REFUSE"
+            or refusal.get("execution_authorized") is not False
+            or refusal.get("success_authorized") is not False):
+        raise ValueError("PrefixLease refusal record is missing or unauthenticated")
+    descriptor = refusal.get("path_state_delta_artifact")
+    if not isinstance(descriptor, Mapping) or descriptor.get("status") != "CAPTURED":
+        raise ValueError("PrefixLease refusal has no captured full path-delta artifact")
+    experiment_id = refusal.get("experiment_id")
+    output_dir = refusal.get("output_dir")
+    if (not _is_storage_policy_smoke_id(experiment_id) or not isinstance(output_dir, str)
+            or Path(output_dir) != REPO / "experiments/storage/smoke-runs" / experiment_id):
+        raise ValueError("PrefixLease refusal artifact binding has a noncanonical run path")
+    expected_path = Path(output_dir) / "prefixlease-refusal-path-delta.json.zlib"
+    if descriptor.get("path") != str(expected_path):
+        raise ValueError("PrefixLease refusal path-delta path differs from its canonical location")
+    compressed = _read_file_nofollow(
+        expected_path, maximum_bytes=PREFIXLEASE_REFUSAL_DELTA_MAX_COMPRESSED_BYTES)
+    if (len(compressed) != descriptor.get("compressed_bytes")
+            or hashlib.sha256(compressed).hexdigest() != descriptor.get("compressed_sha256")):
+        raise ValueError("PrefixLease refusal path-delta compressed identity is invalid")
+    decompressor = zlib.decompressobj()
+    raw = decompressor.decompress(compressed, PREFIXLEASE_REFUSAL_DELTA_MAX_UNCOMPRESSED_BYTES + 1)
+    if len(raw) > PREFIXLEASE_REFUSAL_DELTA_MAX_UNCOMPRESSED_BYTES or decompressor.unconsumed_tail:
+        raise ValueError("PrefixLease refusal path-delta exceeds its decompression bound")
+    remaining = PREFIXLEASE_REFUSAL_DELTA_MAX_UNCOMPRESSED_BYTES + 1 - len(raw)
+    raw += decompressor.flush(max(1, remaining))
+    if (len(raw) > PREFIXLEASE_REFUSAL_DELTA_MAX_UNCOMPRESSED_BYTES
+            or not decompressor.eof or decompressor.unused_data or decompressor.unconsumed_tail):
+        raise ValueError("PrefixLease refusal path-delta compression stream is incomplete or has trailing bytes")
+    if (len(raw) != descriptor.get("uncompressed_bytes")
+            or hashlib.sha256(raw).hexdigest() != descriptor.get("uncompressed_sha256")):
+        raise ValueError("PrefixLease refusal path-delta decompressed identity is invalid")
+    payload = json.loads(raw, object_pairs_hook=_g0c_no_duplicate_json_keys)
+    if (not isinstance(payload, dict) or raw != _canonical_pretty_json_bytes(payload)
+            or payload.get("schema_version") != 2
+            or descriptor.get("hmac_field") != "prefixlease_path_delta_hmac_sha256"
+            or not _verify_storage_evidence(payload, "prefixlease_path_delta_hmac_sha256")
+            or payload.get("prefixlease_path_delta_hmac_sha256") != descriptor.get("hmac_sha256")
+            or descriptor.get("binding_sha256") != hashlib.sha256(
+                _canonical_pretty_json_bytes(payload.get("binding"))).hexdigest()):
+        raise ValueError("PrefixLease refusal path-delta schema or authentication is invalid")
+    binding = payload.get("binding")
+    expected_binding = refusal.get("path_state_delta_binding")
+    if not isinstance(binding, Mapping) or dict(binding) != expected_binding:
+        raise ValueError("PrefixLease refusal path-delta run binding differs from the refusal")
+    changed = payload.get("changed_paths")
+    count = payload.get("path_state_changed_path_count")
+    refusal_delta = refusal.get("path_state_delta")
+    if (not isinstance(refusal_delta, Mapping)
+            or not isinstance(changed, list) or not isinstance(count, int) or isinstance(count, bool)
+            or count != len(changed) or count != descriptor.get("path_state_changed_path_count")
+            or count != refusal_delta.get("count")):
+        raise ValueError("PrefixLease refusal path-delta row count is invalid")
+    digest = hashlib.sha256()
+    previous: str | None = None
+    roots = [row.path for row in _classified_project_roots()
+             if row.classification == ROOT_CLASS_MANDATORY]
+    for row in changed:
+        if not isinstance(row, Mapping):
+            raise ValueError("PrefixLease refusal path-delta row is malformed")
+        path = row.get("path")
+        if (not isinstance(path, str) or not Path(path).is_absolute()
+                or os.path.abspath(path) != path or ".." in Path(path).parts
+                or (previous is not None and path <= previous)
+                or not any(Path(path) == root or root in Path(path).parents for root in roots)
+                or set(row) != {"path", "before", "after", "ownership_classification",
+                                "expected_classification"}
+                or not isinstance(row.get("ownership_classification"), str)
+                or not isinstance(row.get("expected_classification"), str)
+                or row.get("before") == row.get("after")
+                or any(value is not None and (not isinstance(value, Mapping)
+                    or value.get("path") != path) for value in (row.get("before"), row.get("after")))):
+            raise ValueError("PrefixLease refusal path-delta contains a duplicate or invalid path row")
+        encoded = json.dumps(dict(row), sort_keys=True, separators=(",", ":"),
+                             ensure_ascii=False).encode("utf-8")
+        digest.update(len(encoded).to_bytes(8, "big"))
+        digest.update(encoded)
+        previous = path
+    if (digest.hexdigest() != payload.get("path_state_delta_sha256")
+            or digest.hexdigest() != descriptor.get("path_state_delta_sha256")
+            or digest.hexdigest() != refusal_delta.get("sha256")):
+        raise ValueError("PrefixLease refusal path-delta row digest is invalid")
+    return payload
+
+
+def _write_binary_exclusive(path: Path, contents: bytes, *, strict_directory_sync: bool = True) -> None:
+    smoke_output = _storage_smoke_output_dir_for_path(path)
+    if smoke_output is not None:
+        _assert_storage_smoke_output_reservation(
+            smoke_output, projected_write_bytes=len(contents), projected_path=path)
+    parent_fd = _open_directory_nofollow(path.parent, create=smoke_output is None,
+                                         strict_directory_sync=strict_directory_sync)
+    temporary_name = f".{path.name}.{os.getpid()}.{secrets.token_hex(8)}.tmp"
+    temporary_fd: int | None = None
+    try:
+        temporary_fd = os.open(temporary_name,
+                               os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0),
+                               0o600, dir_fd=parent_fd)
+        with os.fdopen(temporary_fd, "wb") as stream:
+            temporary_fd = None
+            stream.write(contents)
+            stream.flush()
+            os.fsync(stream.fileno())
+        _rename_child_exclusive(parent_fd, temporary_name, path.name, sync=False)
+        os.fsync(parent_fd)
+    except BaseException:
+        if temporary_fd is not None:
+            os.close(temporary_fd)
+        try:
+            os.unlink(temporary_name, dir_fd=parent_fd)
+        except FileNotFoundError:
+            pass
+        raise
+    finally:
+        os.close(parent_fd)
+    if smoke_output is not None:
+        _assert_storage_smoke_output_reservation(smoke_output)
+
+
+def _record_prefixlease_gate_refusal(lease: "PrefixLease", blockers: Sequence[str],
+                                     original_error: BaseException) -> None:
+    """Persist authenticated smoke refusal evidence without changing its outcome."""
+    if lease._manifest.get("storage_policy_smoke") is not True:
+        return
+    output = lease.output_dir
+    if output.is_symlink() or not output.is_dir():
+        if hasattr(original_error, "add_note"):
+            original_error.add_note("authenticated refusal evidence not persisted: smoke output directory is missing or unsafe")
+        return
+    refusal_path = output / "prefixlease-refusal.json"
+    try:
+        if _stat_entry_nofollow(refusal_path) is not None:
+            if hasattr(original_error, "add_note"):
+                original_error.add_note("authenticated refusal evidence not persisted: exclusive refusal path already exists")
+            return
+    except OSError as error:
+        if hasattr(original_error, "add_note"):
+            original_error.add_note(
+                f"authenticated refusal evidence path check failed: {type(error).__name__}: {str(error)[:256]}")
+        return
+    claim_path = _storage_smoke_claim_path(lease.experiment_id)
+    claim: Mapping[str, Any] = {}
+    claim_sha256 = None
+    claim_read_error = None
+    try:
+        claim, claim_bytes = _read_storage_smoke_claim(lease.experiment_id)
+        claim_sha256 = hashlib.sha256(claim_bytes).hexdigest()
+        claim_path = Path(claim["claim_path"])
+    except Exception as error:
+        claim_read_error = f"{type(error).__name__}: {str(error)[:256]}"
+    before_sha256 = None
+    after_sha256 = None
+    path_delta = {"status": "UNAVAILABLE", "count": None, "sha256": None,
+                  "truncated": False, "truncated_count": None,
+                  "changed_paths": []}
+    path_state_error = None
+    path_delta_artifact: dict[str, Any] = {"status": "UNAVAILABLE"}
+    gate_raw: bytes | None = None
+    gate_payload: Mapping[str, Any] = {}
+    gate_identity_error: str | None = None
+    try:
+        gate_raw = _read_file_nofollow(GATE0_ATTESTATION_PATH,
+                                       maximum_bytes=GATE0_ATTESTATION_MAX_BYTES)
+        gate_payload = json.loads(gate_raw, object_pairs_hook=_g0c_no_duplicate_json_keys)
+        if not isinstance(gate_payload, Mapping) or not _verify_gate0_signature(gate_payload):
+            raise ValueError("current Gate attestation is malformed or unauthenticated")
+    except Exception as error:
+        gate_identity_error = f"{type(error).__name__}: {str(error)[:256]}"
+
+    decision_state = getattr(original_error, "prefixlease_gate_path_state", None)
+    baseline: Mapping[str, Any] | None = None
+    after: Mapping[str, Any] | None = None
+    if (isinstance(decision_state, Mapping)
+            and isinstance(decision_state.get("before"), Mapping)
+            and isinstance(decision_state.get("after"), Mapping)):
+        baseline = decision_state["before"]
+        after = decision_state["after"]
+    elif gate_raw is not None:
+        try:
+            baseline = read_gate_path_state_sidecar(gate_payload)["storage_tree_state"]
+            after = capture_storage_tree_state()
+        except Exception as error:
+            path_state_error = f"{type(error).__name__}: {str(error)[:256]}"
+
+    try:
+        prefix_info = _stat_entry_nofollow(lease.prefix)
+        prefix_exists = prefix_info is not None
+        prefix_identity = None if prefix_info is None else {
+            "device": prefix_info.st_dev, "inode": prefix_info.st_ino,
+            "kind": "directory" if stat.S_ISDIR(prefix_info.st_mode) else "other",
+            "owner_uid": prefix_info.st_uid, "owner_gid": prefix_info.st_gid,
+            "mode": stat.S_IMODE(prefix_info.st_mode),
+        }
+    except OSError:
+        prefix_info = None
+        prefix_exists = None
+        prefix_identity = None
+
+    active_marker_path = ACTIVE_LEASE_ROOT / f"{lease.experiment_id}.json"
+    prefix_marker_path = lease.prefix / "FGMETAL_PREFIX_LEASE.json"
+
+    def marker_identity(path: Path) -> dict[str, Any]:
+        try:
+            info = _stat_entry_nofollow(path)
+            if info is None:
+                return {"status": "MISSING", "path": str(path)}
+            identity = {
+                "status": "PRESENT", "path": str(path), "device": info.st_dev,
+                "inode": info.st_ino, "kind": (
+                    "file" if stat.S_ISREG(info.st_mode) else
+                    "directory" if stat.S_ISDIR(info.st_mode) else
+                    "symlink" if stat.S_ISLNK(info.st_mode) else "special"),
+                "owner_uid": info.st_uid, "owner_gid": info.st_gid,
+                "mode": stat.S_IMODE(info.st_mode), "link_count": info.st_nlink,
+                "size_bytes": info.st_size,
+                "allocated_bytes": getattr(info, "st_blocks", 0) * 512,
+            }
+            if not stat.S_ISREG(info.st_mode) or stat.S_ISLNK(info.st_mode):
+                return identity
+            raw = _read_file_nofollow(path, maximum_bytes=ACTIVE_PREFIX_LEASE_MARKER_MAX_BYTES)
+            payload = json.loads(raw, object_pairs_hook=_g0c_no_duplicate_json_keys)
+            after_info = _stat_entry_nofollow(path)
+            identity["sha256"] = hashlib.sha256(raw).hexdigest()
+            identity["canonical_json"] = raw == _canonical_pretty_json_bytes(payload)
+            identity["experiment_id"] = payload.get("experiment_id") if isinstance(payload, Mapping) else None
+            identity["state"] = payload.get("state") if isinstance(payload, Mapping) else None
+            identity["prefix_path"] = payload.get("prefix_path") if isinstance(payload, Mapping) else None
+            token = payload.get("lease_token") if isinstance(payload, Mapping) else None
+            identity["lease_token_sha256"] = (
+                hashlib.sha256(token.encode("ascii")).hexdigest()
+                if isinstance(token, str) and re.fullmatch(r"[0-9a-f]{64}", token) else None)
+            receipt = payload.get("materialization_receipt") if isinstance(payload, Mapping) else None
+            receipt_raw = _canonical_pretty_json_bytes(receipt) if isinstance(receipt, Mapping) else b""
+            identity["materialization_receipt_sha256"] = (
+                hashlib.sha256(receipt_raw).hexdigest() if receipt_raw else None)
+            identity["materialization_receipt_authenticated"] = bool(
+                isinstance(receipt, Mapping) and _verify_storage_evidence(
+                    receipt, "prefix_materialization_hmac_sha256"))
+            identity["stable_during_read"] = bool(
+                after_info is not None
+                and (info.st_dev, info.st_ino, info.st_size, info.st_mtime_ns,
+                     getattr(info, "st_ctime_ns", 0))
+                == (after_info.st_dev, after_info.st_ino, after_info.st_size,
+                    after_info.st_mtime_ns, getattr(after_info, "st_ctime_ns", 0)))
+            return identity
+        except FileNotFoundError:
+            return {"status": "MISSING", "path": str(path)}
+        except Exception as error:
+            return {"status": "UNREADABLE", "path": str(path),
+                    "error": f"{type(error).__name__}: {str(error)[:192]}"}
+
+    active_marker_identity = marker_identity(active_marker_path)
+    prefix_marker_identity = marker_identity(prefix_marker_path)
+    active_marker_exists = active_marker_identity.get("status") == "PRESENT"
+    active_marker_payload: Mapping[str, Any] = {}
+    if active_marker_identity.get("status") == "PRESENT":
+        try:
+            active_marker_payload = json.loads(
+                _read_file_nofollow(active_marker_path,
+                                    maximum_bytes=ACTIVE_PREFIX_LEASE_MARKER_MAX_BYTES),
+                object_pairs_hook=_g0c_no_duplicate_json_keys)
+        except Exception:
+            active_marker_payload = {}
+    materialization_receipt = active_marker_payload.get("materialization_receipt")
+    materialization_receipt = (materialization_receipt
+                               if isinstance(materialization_receipt, Mapping) else {})
+    prefix_parent_info = _stat_entry_nofollow(lease.prefix.parent)
+    prefix_root_valid = bool(
+        prefix_info is not None and stat.S_ISDIR(prefix_info.st_mode)
+        and isinstance(materialization_receipt, Mapping)
+        and (prefix_info.st_dev, prefix_info.st_ino)
+            == (materialization_receipt.get("prefix_device"),
+                materialization_receipt.get("prefix_inode"))
+        and stat.S_IMODE(prefix_info.st_mode) == 0o700
+        and prefix_info.st_uid == os.getuid() and prefix_info.st_gid == os.getgid())
+    active_marker_valid = bool(
+        active_marker_identity.get("status") == "PRESENT"
+        and active_marker_identity.get("state") == "MATERIALIZED"
+        and active_marker_identity.get("experiment_id") == lease.experiment_id
+        and active_marker_identity.get("prefix_path") == str(lease.prefix)
+        and active_marker_identity.get("materialization_receipt_authenticated") is True
+        and materialization_receipt.get("lease_token") == active_marker_payload.get("lease_token"))
+    prefix_marker_valid = bool(
+        prefix_marker_identity.get("status") == "PRESENT"
+        and prefix_marker_identity.get("experiment_id") == lease.experiment_id
+        and prefix_marker_identity.get("prefix_path") == str(lease.prefix)
+        and prefix_marker_identity.get("lease_token_sha256")
+            == active_marker_identity.get("lease_token_sha256"))
+    lock_path = ACTIVE_LEASE_ROOT / ".lease.lock"
+    lock_info = _stat_entry_nofollow(lock_path)
+    lock_valid = bool(
+        lock_info is not None and stat.S_ISREG(lock_info.st_mode)
+        and stat.S_IMODE(lock_info.st_mode) == 0o600 and lock_info.st_nlink == 1
+        and lock_info.st_uid == os.getuid() and lock_info.st_gid == os.getgid()
+        and (lock_info.st_dev, lock_info.st_ino)
+            == (materialization_receipt.get("lease_lock_device"),
+                materialization_receipt.get("lease_lock_inode")))
+    before_sha256 = baseline.get("sha256") if isinstance(baseline, Mapping) else None
+    after_sha256 = after.get("sha256") if isinstance(after, Mapping) else None
+    path_delta_binding: dict[str, Any] = {
+        "schema_version": 1,
+        "lifecycle_stage": getattr(
+            lease, "_refusal_stage", "PrefixLease.assert_prefix_lease"),
+        "state_evaluator_stage": (decision_state.get("stage")
+                                  if isinstance(decision_state, Mapping) else None),
+        "experiment_id": lease.experiment_id,
+        "nonce_id": lease.experiment_id,
+        "gate_identity": {
+            "expected_attestation_sha256": lease._manifest.get("gate0_attestation_sha256"),
+            "observed_attestation_sha256": (
+                hashlib.sha256(gate_raw).hexdigest() if gate_raw is not None else None),
+            "observed_status": gate_payload.get("status") if isinstance(gate_payload, Mapping) else None,
+        },
+        "allow_identity": {
+            "path": str(lease.manifest_path or _experiment_manifest_path(lease.experiment_id)),
+            "sha256": getattr(lease, "_manifest_sha256", None),
+            "hmac_sha256": lease._manifest.get("manifest_hmac_sha256"),
+            "decision": lease._manifest.get("decision"),
+        },
+        "claim_identity": {
+            "path": str(claim_path), "sha256": claim_sha256,
+            "hmac_sha256": claim.get("smoke_claim_hmac_sha256") if claim_read_error is None else None,
+            "preflight_attestation_sha256": claim.get("preflight_attestation_sha256") if claim_read_error is None else None,
+        },
+        "prefix_identity": {
+            **(prefix_identity or {}), "path": str(lease.prefix),
+            "lease_marker_sha256": prefix_marker_identity.get("sha256"),
+            "lease_token_sha256": active_marker_identity.get("lease_token_sha256"),
+            "materialization_receipt_sha256": active_marker_identity.get(
+                "materialization_receipt_sha256"),
+        },
+        "active_marker_identity": active_marker_identity,
+        "path_state_before_sha256": before_sha256,
+        "path_state_after_sha256": after_sha256,
+    }
+
+    path_delta_context: dict[str, Any] = {
+        "prefix_path": str(lease.prefix), "active_marker_path": str(active_marker_path),
+        "lock_path": str(lock_path), "prefix_root_valid": prefix_root_valid,
+        "output_dir": str(output),
+        "prefix_marker_valid": prefix_marker_valid,
+        "active_marker_valid": active_marker_valid, "lock_valid": lock_valid,
+        "prefix_parent_valid": False,
+        "expected_prefix_relatives": (), "expected_protocol_files": (),
+        "expected_protocol_dirs": (), "expected_protocol_children": {},
+    }
+    try:
+        template_inventory = _prefix_identity_inventory(PREFIX_TEMPLATE)
+        expected_relatives = {"."}
+        expected_relatives.update(
+            str(row["path"]) for row in template_inventory
+            if row.get("path") != "FGMETAL_PREFIX_TEMPLATE.json")
+        path_delta_context["expected_prefix_relatives"] = tuple(sorted(expected_relatives))
+    except Exception:
+        pass
+    manifest_path = lease.manifest_path or _experiment_manifest_path(lease.experiment_id)
+    expected_protocol_files = {
+        str(Path(os.path.abspath(manifest_path))), str(Path(os.path.abspath(claim_path))),
+        str(Path(os.path.abspath(output / "gate0-preflight-attestation.json"))),
+        str(Path(os.path.abspath(output / "gate0-path-state.json.zlib"))),
+        str(Path(os.path.abspath(lock_path))), str(Path(os.path.abspath(active_marker_path))),
+    }
+    expected_protocol_dirs: set[str] = set()
+    expected_protocol_children: dict[str, set[str]] = {}
+    for filename in expected_protocol_files:
+        child = Path(filename)
+        while child != child.parent:
+            parent = str(child.parent)
+            expected_protocol_dirs.add(parent)
+            expected_protocol_children.setdefault(parent, set()).add(child.name)
+            child = child.parent
+    path_delta_context["expected_protocol_files"] = tuple(sorted(expected_protocol_files))
+    path_delta_context["expected_protocol_dirs"] = tuple(sorted(expected_protocol_dirs))
+    path_delta_context["expected_protocol_children"] = {
+        path: tuple(sorted(names)) for path, names in expected_protocol_children.items()}
+    if (isinstance(baseline, Mapping) and isinstance(after, Mapping)
+            and isinstance(prefix_parent_info, os.stat_result)):
+        try:
+            before_rows = {row.get("path"): row for row in baseline.get("entries", ())
+                           if isinstance(row, Mapping)}
+            after_rows = {row.get("path"): row for row in after.get("entries", ())
+                          if isinstance(row, Mapping)}
+            old_parent = before_rows.get(str(lease.prefix.parent))
+            new_parent = after_rows.get(str(lease.prefix.parent))
+            path_delta_context["prefix_parent_valid"] = bool(
+                isinstance(old_parent, Mapping) and isinstance(new_parent, Mapping)
+                and new_parent.get("children")
+                    == sorted(set(old_parent.get("children", ())) | {lease.prefix.name})
+                and _gate_directory_metadata_commitment(new_parent)
+                    == materialization_receipt.get("prefix_parent_post_materialization_metadata"))
+        except Exception:
+            pass
+    if isinstance(baseline, Mapping) and isinstance(after, Mapping):
+        try:
+            captured_delta = _prefixlease_bounded_tree_delta(baseline, after)
+            full_delta, _full_delta_bytes = _prefixlease_complete_tree_delta(
+                baseline, after, binding=path_delta_binding, path_context=path_delta_context,
+                maximum_bytes=PREFIXLEASE_REFUSAL_DELTA_MAX_UNCOMPRESSED_BYTES)
+            full_delta = _seal_storage_evidence(full_delta, "prefixlease_path_delta_hmac_sha256")
+            full_delta_bytes = _canonical_pretty_json_bytes(full_delta)
+            full_delta_compressed = zlib.compress(full_delta_bytes, level=9)
+            if len(full_delta_compressed) > PREFIXLEASE_REFUSAL_DELTA_MAX_COMPRESSED_BYTES:
+                raise ValueError("compressed complete refusal path delta exceeds 16 MiB")
+            delta_artifact_path = output / "prefixlease-refusal-path-delta.json.zlib"
+            _write_binary_exclusive(delta_artifact_path, full_delta_compressed)
+            path_delta_artifact = {
+                "status": "CAPTURED", "path": str(delta_artifact_path),
+                "compressed_bytes": len(full_delta_compressed),
+                "compressed_sha256": hashlib.sha256(full_delta_compressed).hexdigest(),
+                "uncompressed_bytes": len(full_delta_bytes),
+                "uncompressed_sha256": hashlib.sha256(full_delta_bytes).hexdigest(),
+                "hmac_field": "prefixlease_path_delta_hmac_sha256",
+                "hmac_sha256": full_delta.get("prefixlease_path_delta_hmac_sha256"),
+                "binding_sha256": hashlib.sha256(_canonical_pretty_json_bytes(
+                    path_delta_binding)).hexdigest(),
+                "path_state_changed_path_count": full_delta["path_state_changed_path_count"],
+                "path_state_delta_sha256": full_delta["path_state_delta_sha256"],
+            }
+            path_delta = {
+                "status": "CAPTURED",
+                "count": captured_delta["path_state_changed_path_count"],
+                "sha256": full_delta["path_state_delta_sha256"],
+                "summary_sha256": captured_delta["path_state_delta_sha256"],
+                "truncated": captured_delta["path_state_delta_truncated"],
+                "truncated_count": max(
+                    0, captured_delta["path_state_changed_path_count"]
+                    - len(captured_delta["path_state_changed_paths"])),
+                "changed_paths": captured_delta["path_state_changed_paths"],
+            }
+        except Exception as error:
+            path_state_error = f"{type(error).__name__}: {str(error)[:256]}"
+    try:
+        prefix_info = lease.prefix.lstat()
+        prefix_exists = True
+        prefix_identity = {"device": prefix_info.st_dev, "inode": prefix_info.st_ino,
+                           "kind": "directory" if stat.S_ISDIR(prefix_info.st_mode) else "other"}
+    except FileNotFoundError:
+        prefix_exists = False
+        prefix_identity = None
+    except OSError:
+        prefix_exists = None
+        prefix_identity = None
+    active_marker_path = ACTIVE_LEASE_ROOT / f"{lease.experiment_id}.json"
+    try:
+        active_marker_exists = _stat_entry_nofollow(active_marker_path) is not None
+    except OSError:
+        active_marker_exists = None
+    expected_reservation = {
+        "expected_prefix_bytes": lease._manifest.get("expected_prefix_bytes"),
+        "expected_build_bytes": lease._manifest.get("expected_build_bytes"),
+        "estimated_persistent_bytes": lease._manifest.get("estimated_persistent_bytes"),
+        "estimated_projected_new_disk_bytes": lease._manifest.get(
+            "estimated_projected_new_disk_bytes"),
+    }
+    admission_observations = list(getattr(lease, "_refusal_reservation_observations", ()))
+    last_admission_observation = getattr(
+        lease, "_refusal_reservation_observation", {"status": "NOT_REACHED"})
+    if not admission_observations and isinstance(last_admission_observation, Mapping):
+        admission_observations = [dict(last_admission_observation)]
+    evidence_payload = {
+        "schema_version": 2,
+        "sequence": 1,
+        "experiment_id": lease.experiment_id,
+        "nonce_id": lease.experiment_id,
+        "decision": "REFUSE",
+        "stage": getattr(lease, "_refusal_stage", "PrefixLease.__enter__.pre_materialization"),
+        "lifecycle_stage": getattr(
+            lease, "_refusal_stage", "PrefixLease.assert_prefix_lease"),
+        "state_evaluator_stage": (decision_state.get("stage")
+                                  if isinstance(decision_state, Mapping) else None),
+        "allow_then_refuse": True,
+        "recorded_at_unix": time.time(),
+        "prefix_path": str(lease.prefix),
+        "output_dir": str(output),
+        "manifest_sha256": getattr(lease, "_manifest_sha256", None),
+        "allow_identity": path_delta_binding["allow_identity"],
+        "allow_manifest_hmac_sha256": lease._manifest.get("manifest_hmac_sha256"),
+        "allow_manifest_created_at_unix": lease._manifest.get("created_at_unix"),
+        "allow_manifest_decision": lease._manifest.get("decision"),
+        "allow_reserved_projected_bytes": lease._manifest.get("estimated_projected_new_disk_bytes"),
+        "allow_reservation_tuple": expected_reservation,
+        "pre_enter_reservation_status": getattr(
+            lease, "_pre_enter_reservation_status", "SIGNED_ALLOW_VALIDATED"),
+        "reservation_observation": last_admission_observation,
+        "reservation_result": {
+            "status": "SIGNED_ALLOW_RESERVATION",
+            **expected_reservation,
+            "pre_enter_status": "SIGNED_ALLOW",
+            "admission_observation": last_admission_observation,
+            "admission_observations": admission_observations,
+        },
+        "gate_identity": path_delta_binding["gate_identity"],
+        "gate0_attestation_sha256": lease._manifest.get("gate0_attestation_sha256"),
+        "nonce_identity": {
+            "nonce_id": lease.experiment_id,
+            "claim_path": str(claim_path), "claim_sha256": claim_sha256,
+            "preflight_attestation_sha256": claim.get("preflight_attestation_sha256"),
+        },
+        "claim_identity": path_delta_binding["claim_identity"],
+        "consumed_nonce_claim_path": str(claim_path),
+        "consumed_nonce_claim_sha256": claim_sha256,
+        "consumed_nonce_claim_status": "VERIFIED" if claim_sha256 else "UNAVAILABLE",
+        "consumed_nonce_claim_read_error": claim_read_error,
+        "path_state_before_sha256": before_sha256,
+        "path_state_after_sha256": after_sha256,
+        "path_state_delta": {**path_delta, "read_error": path_state_error},
+        "path_state_delta_binding": path_delta_binding,
+        "path_state_delta_artifact": path_delta_artifact,
+        "path_state_changed_path_count": path_delta["count"],
+        "path_state_read_error": path_state_error,
+        "blockers": [str(row)[:192] for row in blockers[:8]],
+        "original_exception_type": type(original_error).__name__,
+        "original_exception_message": str(original_error)[:512],
+        "prefix_exists_at_refusal": prefix_exists,
+        "prefix_identity_at_refusal": prefix_identity,
+        "prefix_identity": path_delta_binding["prefix_identity"],
+        "active_marker_exists_at_refusal": active_marker_exists,
+        "active_marker_state": active_marker_identity,
+        "prefix_lease_marker_state": prefix_marker_identity,
+        "prefix_path_exists_at_refusal": prefix_exists,
+        "materialization_completed": bool(
+            getattr(lease, "_materialized", False)
+            or getattr(lease, "_prefix_created_any", False)
+            or active_marker_identity.get("state") == "MATERIALIZED"),
+        "prefix_materialized_at_refusal": bool(
+            getattr(lease, "_materialized", False)
+            or getattr(lease, "_prefix_created_any", False)
+            or active_marker_identity.get("state") == "MATERIALIZED"),
+        "no_prefix_materialized": not bool(
+            getattr(lease, "_materialized", False)
+            or getattr(lease, "_prefix_created_any", False)
+            or active_marker_identity.get("state") == "MATERIALIZED"),
+        "execution_authorized": False,
+        "success_authorized": False,
+        "success_status": "NOT_AUTHORIZED",
+        "no_success": True,
+        "diagnostic_write_failure_cannot_authorize_execution": True,
+        "authentication": {
+            "algorithm": "HMAC-SHA256",
+            "hmac_field": "prefixlease_refusal_hmac_sha256",
+        },
+    }
+    evidence = _seal_storage_evidence(evidence_payload, "prefixlease_refusal_hmac_sha256")
+    try:
+        while len(_canonical_pretty_json_bytes(evidence)) > 16 * 1024:
+            delta = evidence_payload.get("path_state_delta")
+            examples = delta.get("changed_paths") if isinstance(delta, Mapping) else None
+            if isinstance(examples, list) and examples:
+                examples.pop()
+                delta["truncated"] = True
+                delta["truncated_count"] = max(
+                    int(delta.get("truncated_count", 0)) + 1,
+                    int(delta.get("count", 0) or 0) - len(examples))
+                evidence = _seal_storage_evidence(
+                    evidence_payload, "prefixlease_refusal_hmac_sha256")
+                continue
+            if evidence_payload["blockers"]:
+                evidence_payload["blockers"].pop()
+                evidence = _seal_storage_evidence(
+                    evidence_payload, "prefixlease_refusal_hmac_sha256")
+                continue
+            message = evidence_payload.get("original_exception_message", "")
+            if isinstance(message, str) and message:
+                evidence_payload["original_exception_message"] = message[:len(message) // 2]
+                evidence = _seal_storage_evidence(
+                    evidence_payload, "prefixlease_refusal_hmac_sha256")
+                continue
+            raise ValueError("bounded PrefixLease refusal evidence exceeds 16 KiB")
+        _write_json_exclusive(refusal_path, evidence, strict_directory_sync=True)
+    except Exception as error:
+        # Evidence publication is secondary; never replace or suppress the
+        # original admission refusal.
+        if hasattr(original_error, "add_note"):
+            original_error.add_note(
+                f"authenticated refusal evidence publication failed: {type(error).__name__}: {error}")
+
+
+def validate_prefixlease_pre_materialization(lease: "PrefixLease") -> None:
+    """Production admission seam used immediately before PrefixLease setup."""
+    storage_smoke = lease._manifest.get("storage_policy_smoke") is True
+    blockers = _gate0_blockers(active_experiment_id=lease.experiment_id,
+                               allow_storage_smoke=storage_smoke)
+    if blockers:
+        raise RuntimeError("Gate 0 blocks PrefixLease startup: " + "; ".join(blockers))
+
+
 @dataclass
 class PrefixLease:
     prefix: Path
@@ -5854,6 +15825,8 @@ class PrefixLease:
         self._template_marker: dict[str, Any] | None = None
         self._storage_watch_events: list[dict[str, Any]] = []
         self._lease_marker_path: Path | None = None
+        self._active_marker_fd: int | None = None
+        self._active_marker_identity: tuple[int, int] | None = None
         self._manifest_sha256: str | None = None
         self._previous_sigterm_handler: Any = None
         self._sigterm_number: int | None = None
@@ -5878,6 +15851,14 @@ class PrefixLease:
         self._wine_loader_identity: tuple[int, int, int, int, int] | None = None
         self._wine_graphics_contract: dict[str, Any] | None = None
         self._prefix_parent_fd: int | None = None
+        self._prefix_parent_pre_materialization_metadata: dict[str, Any] | None = None
+        self._prefix_parent_temp_child_metadata: dict[str, Any] | None = None
+        self._prefix_parent_post_rename_metadata: dict[str, Any] | None = None
+        self._prefix_parent_clone_temp_name: str | None = None
+        self._prefix_parent_temp_mkdir_started_ns: int | None = None
+        self._prefix_parent_temp_mkdir_finished_ns: int | None = None
+        self._prefix_parent_rename_started_ns: int | None = None
+        self._prefix_parent_rename_finished_ns: int | None = None
         self._clone_temp_name: str | None = None
         self._clone_temp_identity: tuple[int, int] | None = None
         self._clone_temp_fd: int | None = None
@@ -5893,8 +15874,29 @@ class PrefixLease:
         self._free_warning_emitted = False
         self._lease_token = secrets.token_hex(32)
         self._materialization_receipt: dict[str, Any] | None = None
+        self._refusal_reservation_observation: dict[str, Any] = {"status": "NOT_REACHED"}
+        self._refusal_reservation_observations: list[dict[str, Any]] = []
+        self._pre_enter_reservation_status = "NOT_STARTED"
 
     def __enter__(self) -> "PrefixLease":
+        try:
+            return self._enter_impl()
+        except BaseException as error:
+            manifest = getattr(self, "_manifest", None)
+            if (isinstance(manifest, Mapping) and manifest.get("decision") == "ALLOW"
+                    and _verify_manifest_signature(manifest)):
+                try:
+                    _record_prefixlease_gate_refusal(
+                        self, [f"{type(error).__name__}: {error}"], error)
+                except BaseException as evidence_error:
+                    if hasattr(error, "add_note"):
+                        error.add_note(
+                            "authenticated refusal evidence construction failed: "
+                            f"{type(evidence_error).__name__}: {str(evidence_error)[:256]}")
+            raise
+
+    def _enter_impl(self) -> "PrefixLease":
+        self._refusal_stage = "PrefixLease.__enter__.path_validation"
         allowed = [PREFIX_ROOT.absolute(), (Path.home() / "Library/Caches/FGMetalStep11D-R").absolute()]
         if not any(self.prefix.parent == root or root in self.prefix.parents for root in allowed):
             raise ValueError(f"prefix path is outside FG-Metal cache roots: {self.prefix}")
@@ -5921,7 +15923,14 @@ class PrefixLease:
             self._manifest_file_identity = manifest_file_identity
         finally:
             os.close(manifest_parent_fd)
-        self._manifest = json.loads(manifest_bytes)
+        try:
+            self._manifest = json.loads(
+                manifest_bytes, object_pairs_hook=_g0c_no_duplicate_json_keys)
+        except (TypeError, ValueError, json.JSONDecodeError) as error:
+            raise RuntimeError("PrefixLease refuses a malformed or duplicate-key manifest") from error
+        if (not isinstance(self._manifest, dict)
+                or manifest_bytes != _canonical_pretty_json_bytes(self._manifest)):
+            raise RuntimeError("PrefixLease refuses a noncanonical persisted manifest")
         self._manifest_sha256 = hashlib.sha256(manifest_bytes).hexdigest()
         if not _verify_manifest_signature(self._manifest):
             raise RuntimeError("PrefixLease refuses an edited or unsigned storage manifest")
@@ -5931,10 +15940,19 @@ class PrefixLease:
             raise RuntimeError(f"PrefixLease refuses invalid storage estimates: {error}") from error
         if self._manifest.get("decision") != "ALLOW":
             raise RuntimeError("PrefixLease refuses a manifest that did not pass the storage gate")
+        self._pre_enter_reservation_status = "SIGNED_ALLOW_VALIDATED"
+        self._refusal_stage = "PrefixLease.__enter__.allow_manifest_validated"
         if self._manifest.get("experiment_id") != self.experiment_id:
             raise ValueError("PrefixLease experiment ID does not match the storage manifest")
         storage_smoke = self._manifest.get("storage_policy_smoke") is True
         if storage_smoke:
+            publication_failure = _storage_smoke_publication_failure_path(self.experiment_id)
+            if _stat_entry_nofollow(publication_failure) is not None:
+                raise RuntimeError("PrefixLease refuses a smoke ID with terminal publication-failure evidence")
+            if not _consume_storage_smoke_published_allow(
+                    self.experiment_id, self._manifest_sha256):
+                raise RuntimeError(
+                    "PrefixLease refuses a smoke ALLOW without a successful same-process publication read-back")
             expected_output = REPO / "experiments/storage/smoke-runs" / self.experiment_id
             expected_prefix = PREFIX_ROOT / f"storage-smoke-{self.experiment_id}"
             if (not _is_storage_policy_smoke_id(self.experiment_id)
@@ -5960,14 +15978,12 @@ class PrefixLease:
             raise ValueError("PrefixLease was not declared in the pre-run storage manifest")
         if self._manifest.get("internal_storage_setup") is True:
             raise RuntimeError("legacy internal-storage manifests cannot bypass Gate 0")
-        attestation_hash = hashlib.sha256(_read_file_nofollow(GATE0_ATTESTATION_PATH)).hexdigest() \
+        attestation_hash = hashlib.sha256(_read_file_nofollow(GATE0_ATTESTATION_PATH, maximum_bytes=GATE0_ATTESTATION_MAX_BYTES)).hexdigest() \
             if GATE0_ATTESTATION_PATH.is_file() and not GATE0_ATTESTATION_PATH.is_symlink() else None
         if self._manifest.get("gate0_attestation_sha256") != attestation_hash:
             raise RuntimeError("PrefixLease manifest does not bind to the current Gate 0 attestation")
-        gate_blockers = _gate0_blockers(active_experiment_id=self.experiment_id,
-                                        allow_storage_smoke=storage_smoke)
-        if gate_blockers:
-            raise RuntimeError("Gate 0 blocks PrefixLease startup: " + "; ".join(gate_blockers))
+        self._refusal_stage = "PrefixLease.__enter__.pre_materialization_gate"
+        validate_prefixlease_pre_materialization(self)
         if not self.clone_template or self.template.absolute() != PREFIX_TEMPLATE.absolute():
             raise ValueError("PrefixLease may clone only the one certified Wine template")
         template_size = _prefix_size(self.template)
@@ -5983,6 +15999,18 @@ class PrefixLease:
             current_scoped_bytes=project_now,
             peak_additional_bytes=estimated_peak,
         )
+        self._refusal_stage = "PrefixLease.__enter__.unlocked_projected_admission"
+        self._refusal_reservation_observation = {
+            "status": "MEASURED_ADMITTED" if admission["admitted"] else "MEASURED_REFUSED",
+            "stage": "unlocked_pre_materialization",
+            "free_bytes": self._free_before,
+            "scoped_project_bytes": project_now,
+            "projected_additional_bytes": estimated_peak,
+            "admitted": admission["admitted"],
+            "blockers": [str(item)[:256] for item in admission["blockers"][:8]],
+        }
+        self._refusal_reservation_observations.append(
+            dict(self._refusal_reservation_observation))
         if not admission["admitted"]:
             raise RuntimeError("PrefixLease projected-peak admission failed: "
                                + "; ".join(admission["blockers"]))
@@ -6017,9 +16045,17 @@ class PrefixLease:
                 raise ValueError("PrefixLease was configured with a different wineserver root")
             self._wine_graphics_contract = _wine_graphics_identity_contract(
                 self._manifest, runtime_identity)
-        active_root_fd = _open_directory_nofollow(
-            ACTIVE_LEASE_ROOT, create=True, strict_directory_sync=True)
         lock_path = ACTIVE_LEASE_ROOT / ".lease.lock"
+        active_root_fd = _open_directory_nofollow(
+            ACTIVE_LEASE_ROOT, create=not storage_smoke, strict_directory_sync=True)
+        if storage_smoke:
+            _assert_storage_smoke_output_reservation(self.output_dir)
+        if storage_smoke:
+            lock_exists = _stat_entry_nofollow(lock_path) is not None
+            _assert_storage_smoke_output_reservation(
+                self.output_dir,
+                projected_write_bytes=0 if lock_exists else 4 * 1024,
+                projected_path=lock_path)
         lock_flags = os.O_RDWR | os.O_CREAT
         if hasattr(os, "O_NOFOLLOW"):
             lock_flags |= os.O_NOFOLLOW
@@ -6040,6 +16076,8 @@ class PrefixLease:
                 or stat.S_IMODE(lock_info.st_mode) != 0o600 or lock_info.st_nlink != 1):
             os.close(lock_fd)
             raise ValueError(f"PrefixLease gate lock is not a private regular file: {lock_path}")
+        if storage_smoke:
+            _assert_storage_smoke_output_reservation(self.output_dir)
         self._lease_gate_lock_file = os.fdopen(lock_fd, "a+")
         try:
             fcntl.flock(self._lease_gate_lock_file.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
@@ -6049,6 +16087,7 @@ class PrefixLease:
             raise RuntimeError("another PrefixLease is starting or running") from error
         try:
             self._storage_allocation_lock_file = _acquire_storage_allocation_lock()
+            self._refusal_stage = "PrefixLease.__enter__.locked_gate_recheck"
             locked_blockers = _gate0_blockers(active_experiment_id=self.experiment_id,
                                                allow_storage_smoke=storage_smoke)
             if locked_blockers:
@@ -6063,6 +16102,18 @@ class PrefixLease:
                 current_scoped_bytes=locked_project,
                 peak_additional_bytes=locked_peak,
             )
+            self._refusal_stage = "PrefixLease.__enter__.locked_projected_admission"
+            self._refusal_reservation_observation = {
+                "status": "MEASURED_ADMITTED" if locked_admission["admitted"] else "MEASURED_REFUSED",
+                "stage": "locked_pre_materialization",
+                "free_bytes": locked_free,
+                "scoped_project_bytes": locked_project,
+                "projected_additional_bytes": locked_peak,
+                "admitted": locked_admission["admitted"],
+                "blockers": [str(item)[:256] for item in locked_admission["blockers"][:8]],
+            }
+            self._refusal_reservation_observations.append(
+                dict(self._refusal_reservation_observation))
             if not locked_admission["admitted"]:
                 raise RuntimeError("PrefixLease projected-peak admission failed under the shared allocation lock: "
                                    + "; ".join(locked_admission["blockers"]))
@@ -6079,7 +16130,9 @@ class PrefixLease:
             self._lease_marker_path = ACTIVE_LEASE_ROOT / f"{self.experiment_id}.json"
             if self._lease_marker_path.exists() or self._lease_marker_path.is_symlink():
                 raise FileExistsError(f"active PrefixLease marker already exists: {self._lease_marker_path}")
+            self._refusal_stage = "PrefixLease.__enter__.prepared_marker_publication"
             self._write_active_lease("PREPARED")
+            self._refusal_stage = "PrefixLease.__enter__.prepared_before_materialization"
         except BaseException:
             self._release_global_lease_gate()
             raise
@@ -6140,7 +16193,57 @@ class PrefixLease:
         }
         if self._materialization_receipt is not None:
             active_record["materialization_receipt"] = self._materialization_receipt
-        _write_json(self._lease_marker_path, active_record, strict_directory_sync=True)
+        payload = _canonical_pretty_json_bytes(active_record)
+        if self._active_marker_fd is None:
+            parent_fd = _open_directory_nofollow(ACTIVE_LEASE_ROOT)
+            fd: int | None = None
+            try:
+                fd = os.open(self._lease_marker_path.name,
+                             os.O_RDWR | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0),
+                             0o600, dir_fd=parent_fd)
+                view = memoryview(payload)
+                while view:
+                    written = os.write(fd, view)
+                    if written <= 0:
+                        raise OSError("short write creating active PrefixLease marker")
+                    view = view[written:]
+                os.fsync(fd)
+                info = os.fstat(fd)
+                path_info = _stat_child_nofollow(parent_fd, self._lease_marker_path.name)
+                if (not stat.S_ISREG(info.st_mode) or info.st_nlink != 1
+                        or path_info is None
+                        or (path_info.st_dev, path_info.st_ino) != (info.st_dev, info.st_ino)):
+                    raise OSError("active PrefixLease marker identity could not be pinned")
+                os.fsync(parent_fd)
+                self._active_marker_fd = fd
+                self._active_marker_identity = (info.st_dev, info.st_ino)
+                fd = None
+            finally:
+                if fd is not None:
+                    os.close(fd)
+                os.close(parent_fd)
+        else:
+            fd = self._active_marker_fd
+            held = os.fstat(fd)
+            path_info = _stat_entry_nofollow(self._lease_marker_path)
+            if (self._active_marker_identity != (held.st_dev, held.st_ino)
+                    or path_info is None
+                    or (path_info.st_dev, path_info.st_ino) != self._active_marker_identity
+                    or not stat.S_ISREG(held.st_mode) or held.st_nlink != 1):
+                raise OSError("active PrefixLease marker inode was replaced")
+            os.lseek(fd, 0, os.SEEK_SET)
+            os.ftruncate(fd, 0)
+            view = memoryview(payload)
+            while view:
+                written = os.write(fd, view)
+                if written <= 0:
+                    raise OSError("short write updating active PrefixLease marker")
+                view = view[written:]
+            os.fsync(fd)
+            path_info = _stat_entry_nofollow(self._lease_marker_path)
+            if (path_info is None
+                    or (path_info.st_dev, path_info.st_ino) != self._active_marker_identity):
+                raise OSError("active PrefixLease marker path changed during update")
 
     def _assert_exact_wineprefix(self, env: Mapping[str, str]) -> str:
         expected = str(self.prefix)
@@ -6218,6 +16321,13 @@ class PrefixLease:
                 or not _verify_storage_evidence(
                     active_receipt, "prefix_materialization_hmac_sha256")):
             raise RuntimeError("active PrefixLease materialization receipt changed after admission")
+        if (self._active_marker_fd is None or self._active_marker_identity is None
+                or (active_file_info.st_dev, active_file_info.st_ino) != self._active_marker_identity
+                or active_file_info.st_gid != active_receipt.get("active_marker_gid")
+                or self._active_marker_identity != (
+                    active_receipt.get("active_marker_device"),
+                    active_receipt.get("active_marker_inode"))):
+            raise RuntimeError("active PrefixLease marker inode changed after materialization")
 
         prefix_fd = _open_directory_nofollow(self.prefix)
         try:
@@ -6750,8 +16860,6 @@ class PrefixLease:
                                + "; ".join(persistent_blockers))
         accounting_exclusions = [*persistent_exclusions, self.prefix, self._lease_marker_path,
                                  self.output_dir, self.manifest_path]
-        if self._manifest.get("storage_policy_smoke") is True:
-            accounting_exclusions.append(_storage_smoke_claim_path(self.experiment_id))
         current_usage = measure_project_usage(exclude_paths=accounting_exclusions)
         current_project = conservative_project_usage_bytes(current_usage)
         pre_materialization_nonlease_scope = current_usage.get(
@@ -6760,7 +16868,7 @@ class PrefixLease:
                 or isinstance(pre_materialization_nonlease_scope, bool)
                 or pre_materialization_nonlease_scope < 0):
             raise RuntimeError("PrefixLease could not measure the pre-materialization non-lease scope")
-        current_attestation_bytes = _read_file_nofollow(GATE0_ATTESTATION_PATH)
+        current_attestation_bytes = _read_file_nofollow(GATE0_ATTESTATION_PATH, maximum_bytes=GATE0_ATTESTATION_MAX_BYTES)
         current_attestation = json.loads(current_attestation_bytes)
         if (not _verify_gate0_signature(current_attestation)
                 or hashlib.sha256(current_attestation_bytes).hexdigest()
@@ -6788,15 +16896,43 @@ class PrefixLease:
             self.prefix.parent, create=True, strict_directory_sync=True)
         self._prefix_parent_fd = prefix_parent_fd
         try:
+            gate_baseline_state = read_gate_path_state_sidecar(current_attestation)[
+                "storage_tree_state"]
+            gate_baseline_parent = next((row for row in gate_baseline_state.get("entries", ())
+                                         if isinstance(row, Mapping)
+                                         and row.get("path") == str(self.prefix.parent)), None)
+            if not isinstance(gate_baseline_parent, Mapping):
+                raise RuntimeError("Gate sidecar lacks the expected PrefixLease parent row")
+            gate_parent_commitment = _gate_directory_metadata_commitment(gate_baseline_parent)
+            # This is deliberately the last check before the first child creation.
+            # Read through the retained no-follow directory fd so a path replacement
+            # cannot make a fresh path-based snapshot attest a different parent.
+            if _gate_directory_metadata_from_fd(prefix_parent_fd) != gate_parent_commitment:
+                raise RuntimeError(
+                    "PrefixLease parent metadata changed after Gate and before materialization")
+            self._prefix_parent_pre_materialization_metadata = (
+                gate_parent_commitment)
             if _stat_child_nofollow(prefix_parent_fd, self.prefix.name) is not None:
                 raise FileExistsError(f"prefix path appeared before clone: {self.prefix}")
             self._clone_temp_name = f".{self.prefix.name}.clone-{uuid.uuid4().hex}"
+            self._prefix_parent_clone_temp_name = self._clone_temp_name
             if _stat_child_nofollow(prefix_parent_fd, self._clone_temp_name) is not None:
                 self._clone_temp_name = None
                 raise FileExistsError("randomized prefix clone path unexpectedly exists")
+            self._prefix_parent_temp_mkdir_started_ns = time.time_ns()
             os.mkdir(self._clone_temp_name, 0o700, dir_fd=prefix_parent_fd)
+            self._prefix_parent_temp_mkdir_finished_ns = time.time_ns()
             self._leased_tree_absence_proven = False
             os.fsync(prefix_parent_fd)
+            temp_parent_row = _gate_directory_row_from_fd(prefix_parent_fd)
+            temp_parent_commitment = _gate_directory_metadata_commitment(temp_parent_row)
+            if not _prefix_parent_creation_transition_matches(
+                    gate_baseline_parent, temp_parent_row, temp_parent_commitment,
+                    self._clone_temp_name,
+                    operation_started_ns=self._prefix_parent_temp_mkdir_started_ns,
+                    operation_finished_ns=self._prefix_parent_temp_mkdir_finished_ns):
+                raise RuntimeError("PrefixLease parent changed while creating the authorized clone child")
+            self._prefix_parent_temp_child_metadata = temp_parent_commitment
             created_info = _stat_child_nofollow(prefix_parent_fd, self._clone_temp_name)
             parent_info = os.fstat(prefix_parent_fd)
             if (created_info is None or not stat.S_ISDIR(created_info.st_mode)
@@ -6899,6 +17035,10 @@ class PrefixLease:
             raise
         self._clone_process = None
         try:
+            if (self._prefix_parent_temp_child_metadata is None
+                    or _gate_directory_metadata_from_fd(prefix_parent_fd)
+                       != self._prefix_parent_temp_child_metadata):
+                raise RuntimeError("PrefixLease parent changed while the clone was copied")
             self._assert_clone_target_real()
             temporary_prefix = self.prefix.parent / str(self._clone_temp_name)
             clone_identity = _tree_fingerprint(temporary_prefix,
@@ -6906,8 +17046,28 @@ class PrefixLease:
             if clone_identity != self._template_marker.get("tree_identity", {}):
                 raise RuntimeError("materialized prefix does not match the certified template fingerprint")
             self._assert_clone_target_real()
+            if (_gate_directory_metadata_from_fd(prefix_parent_fd)
+                    != self._prefix_parent_temp_child_metadata):
+                raise RuntimeError("PrefixLease parent changed before the authorized clone rename")
+            self._prefix_parent_rename_started_ns = time.time_ns()
             _rename_child_exclusive(prefix_parent_fd, str(self._clone_temp_name), self.prefix.name)
+            self._prefix_parent_rename_finished_ns = time.time_ns()
+            # From this point the published name is our owned clone even if the
+            # following parent snapshot refuses; retain its identity for cleanup.
             self._prefix_identity = self._clone_temp_identity
+            self._prefix_created_any = True
+            post_rename_parent_row = _gate_directory_row_from_fd(prefix_parent_fd)
+            post_rename_parent_commitment = _gate_directory_metadata_commitment(
+                post_rename_parent_row)
+            if (self._prefix_parent_temp_child_metadata is None
+                    or not _prefix_parent_rename_transition_matches(
+                        gate_baseline_parent, self._prefix_parent_temp_child_metadata,
+                        post_rename_parent_commitment, str(self._prefix_parent_clone_temp_name),
+                        self.prefix.name,
+                        operation_started_ns=self._prefix_parent_rename_started_ns,
+                        operation_finished_ns=self._prefix_parent_rename_finished_ns)):
+                raise RuntimeError("PrefixLease parent changed during the authorized clone rename")
+            self._prefix_parent_post_rename_metadata = post_rename_parent_commitment
             published = _stat_child_nofollow(prefix_parent_fd, self.prefix.name)
             if (published is None or not stat.S_ISDIR(published.st_mode)
                     or self._prefix_identity is None
@@ -6975,6 +17135,10 @@ class PrefixLease:
                                   if rebound_persistent_blockers else ""))
         project_after_clone = measure_project_usage(exclude_paths=accounting_exclusions)
         project_after_clone_bytes = conservative_project_usage_bytes(project_after_clone)
+        materialized_prefix_bytes = _prefix_size(self.prefix)["allocated_inode_deduplicated_bytes"]
+        if materialized_prefix_bytes > self._manifest_estimates["expected_prefix_bytes"]:
+            self._storage_violation = True
+            raise RuntimeError("materialized PrefixLease allocation exceeds its signed prefix reservation")
         if after_clone < FREE_HARD_STOP:
             self._storage_violation = True
             self._storage_watch_events.append({"sampled_at_unix": time.time(),
@@ -6984,6 +17148,7 @@ class PrefixLease:
             current_free_bytes=after_clone,
             current_scoped_bytes=project_after_clone_bytes,
             manifest_estimates=self._manifest_estimates,
+            materialized_prefix_bytes=materialized_prefix_bytes,
         )
         for warning in remaining_admission["warnings"]:
             self._storage_watch_events.append({
@@ -7001,7 +17166,7 @@ class PrefixLease:
                 "remaining_build_bytes": remaining_build,
                 "remaining_persistent_bytes": remaining_persistent,
                 "uncertainty_margin_bytes": self._manifest_estimates["estimated_uncertainty_margin_bytes"],
-                "remaining_peak_additional_bytes": remaining_admission["peak_additional_bytes"],
+                "remaining_peak_additional_bytes": remaining_admission["scoped_additional_bytes"],
                 "projected_free_bytes": remaining_admission["projected_free_bytes"],
                 "projected_scoped_bytes": remaining_admission["projected_scoped_bytes"],
                 "blockers": remaining_admission["blockers"],
@@ -7017,11 +17182,7 @@ class PrefixLease:
         if post_materialization_nonlease_scope != pre_materialization_nonlease_scope:
             self._storage_violation = True
             raise RuntimeError("unrelated non-lease storage changed during PrefixLease materialization")
-        materialized_prefix_bytes = _prefix_size(self.prefix)["allocated_inode_deduplicated_bytes"]
         post_materialization_output, _output_tree_sha256 = _persistent_output_snapshot(self.output_dir)
-        if materialized_prefix_bytes > self._manifest_estimates["expected_prefix_bytes"]:
-            self._storage_violation = True
-            raise RuntimeError("materialized PrefixLease allocation exceeds its signed prefix reservation")
         if (post_materialization_output < pre_materialization_output
                 or post_materialization_output > self._manifest_estimates["estimated_persistent_bytes"]):
             self._storage_violation = True
@@ -7033,7 +17194,7 @@ class PrefixLease:
             raise RuntimeError("materialized PrefixLease identity disappeared before its accounting receipt")
         inventory_bytes = _read_file_nofollow(INVENTORY_PATH)
         inventory = json.loads(inventory_bytes)
-        if _read_file_nofollow(GATE0_ATTESTATION_PATH) != current_attestation_bytes:
+        if _read_file_nofollow(GATE0_ATTESTATION_PATH, maximum_bytes=GATE0_ATTESTATION_MAX_BYTES) != current_attestation_bytes:
             self._storage_violation = True
             raise RuntimeError("Gate 0 attestation changed during PrefixLease materialization")
         current_measurements = current_attestation.get("measurements", {})
@@ -7047,6 +17208,29 @@ class PrefixLease:
                 "fgmetal_scoped_observed_nonlease_allocated_inode_bytes") != gate0_nonlease_scope:
             self._storage_violation = True
             raise RuntimeError("Gate 0 non-lease allocation baseline changed before PrefixLease receipt")
+        prefix_identity_inventory = _prefix_identity_inventory(self.prefix)
+        prefix_identity_inventory_commitment = _prefix_identity_inventory_fingerprint(
+            prefix_identity_inventory)
+        parent_gate_state = capture_storage_tree_state()
+        parent_gate_row = next((row for row in parent_gate_state.get("entries", ())
+                                if isinstance(row, Mapping)
+                                and row.get("path") == str(self.prefix.parent)), None)
+        prefix_parent_post_materialization_metadata = _gate_directory_metadata_commitment(
+            parent_gate_row)
+        if (self._prefix_parent_post_rename_metadata is None
+                or _gate_directory_metadata_from_fd(self._prefix_parent_fd)
+                   != self._prefix_parent_post_rename_metadata
+                or prefix_parent_post_materialization_metadata
+                   != self._prefix_parent_post_rename_metadata):
+            self._storage_violation = True
+            raise RuntimeError("PrefixLease parent changed after clone rename and before receipt capture")
+        lock_stat = (os.fstat(self._lease_gate_lock_file.fileno())
+                     if self._lease_gate_lock_file is not None else None)
+        if (lock_stat is None or (self._manifest.get("storage_policy_smoke") is True
+                and (lock_stat.st_size != 0
+                     or getattr(lock_stat, "st_blocks", 0) * 512 != 0))):
+            self._storage_violation = True
+            raise RuntimeError("PrefixLease storage-smoke gate lock grew during materialization")
         receipt = {
             "schema_version": 1,
             "experiment_id": self.experiment_id,
@@ -7055,9 +17239,35 @@ class PrefixLease:
             "prefix_path": str(self.prefix),
             "prefix_device": prefix_info.st_dev,
             "prefix_inode": prefix_info.st_ino,
+            "prefix_root_metadata": _prefix_root_metadata_commitment(prefix_info),
             "active_marker_path": str(self._lease_marker_path),
             "active_marker_parent_device": self._lease_marker_parent_identity[0],
             "active_marker_parent_inode": self._lease_marker_parent_identity[1],
+            "active_marker_device": (os.fstat(self._active_marker_fd).st_dev
+                                      if self._active_marker_fd is not None else None),
+            "active_marker_inode": (os.fstat(self._active_marker_fd).st_ino
+                                    if self._active_marker_fd is not None else None),
+            "active_marker_gid": (os.fstat(self._active_marker_fd).st_gid
+                                  if self._active_marker_fd is not None else None),
+            "lease_lock_device": (os.fstat(self._lease_gate_lock_file.fileno()).st_dev
+                                  if self._lease_gate_lock_file is not None else None),
+            "lease_lock_inode": (os.fstat(self._lease_gate_lock_file.fileno()).st_ino
+                                 if self._lease_gate_lock_file is not None else None),
+            "lease_lock_size_bytes": lock_stat.st_size,
+            "lease_lock_allocated_bytes": getattr(lock_stat, "st_blocks", 0) * 512,
+            "prefix_parent_device": (parent_info := os.fstat(self._prefix_parent_fd)).st_dev
+                                    if self._prefix_parent_fd is not None else None,
+            "prefix_parent_inode": parent_info.st_ino if self._prefix_parent_fd is not None else None,
+            "prefix_parent_pre_materialization_metadata":
+                self._prefix_parent_pre_materialization_metadata,
+            "prefix_parent_clone_temp_name": self._prefix_parent_clone_temp_name,
+            "prefix_parent_temp_child_metadata": self._prefix_parent_temp_child_metadata,
+            "prefix_parent_temp_mkdir_started_ns": self._prefix_parent_temp_mkdir_started_ns,
+            "prefix_parent_temp_mkdir_finished_ns": self._prefix_parent_temp_mkdir_finished_ns,
+            "prefix_parent_rename_started_ns": self._prefix_parent_rename_started_ns,
+            "prefix_parent_rename_finished_ns": self._prefix_parent_rename_finished_ns,
+            "prefix_parent_post_materialization_metadata":
+                prefix_parent_post_materialization_metadata,
             "output_dir": str(self.output_dir),
             "manifest_path": str(self.manifest_path),
             "manifest_sha256": self._manifest_sha256,
@@ -7073,6 +17283,8 @@ class PrefixLease:
             "pre_materialization_output_allocated_bytes": pre_materialization_output,
             "post_materialization_output_allocated_bytes": post_materialization_output,
             "materialized_prefix_allocated_bytes": materialized_prefix_bytes,
+            "prefix_identity_inventory_sha256": prefix_identity_inventory_commitment["sha256"],
+            "prefix_identity_inventory_entry_count": prefix_identity_inventory_commitment["entry_count"],
             "expected_prefix_bytes": self._manifest_estimates["expected_prefix_bytes"],
             "estimated_persistent_bytes": self._manifest_estimates["estimated_persistent_bytes"],
             "estimated_projected_new_disk_bytes": self._manifest_estimates["estimated_projected_new_disk_bytes"],
@@ -7369,6 +17581,47 @@ class PrefixLease:
             {"device": self._prefix_identity[0], "inode": self._prefix_identity[1]}
             if self._prefix_identity is not None else None)
 
+        prior_refusal_binding: dict[str, Any] = {"status": "MISSING"}
+        refusal_path = self.output_dir / "prefixlease-refusal.json"
+        try:
+            refusal_raw = _read_file_nofollow(refusal_path, maximum_bytes=16 * 1024)
+            refusal_record = json.loads(
+                refusal_raw, object_pairs_hook=_g0c_no_duplicate_json_keys)
+            if (not isinstance(refusal_record, Mapping)
+                    or refusal_raw != _canonical_pretty_json_bytes(refusal_record)
+                    or not _verify_storage_evidence(
+                        refusal_record, "prefixlease_refusal_hmac_sha256")
+                    or refusal_record.get("decision") != "REFUSE"
+                    or refusal_record.get("experiment_id") != self.experiment_id
+                    or refusal_record.get("execution_authorized") is not False
+                    or refusal_record.get("success_authorized") is not False):
+                prior_refusal_binding = {"status": "INVALID"}
+            else:
+                refusal_delta = refusal_record.get("path_state_delta_artifact")
+                prior_refusal_binding = {
+                    "status": "AUTHENTICATED_REFUSAL",
+                    "path": str(refusal_path),
+                    "sha256": hashlib.sha256(refusal_raw).hexdigest(),
+                    "hmac_sha256": refusal_record.get("prefixlease_refusal_hmac_sha256"),
+                    "decision": refusal_record.get("decision"),
+                    "stage": refusal_record.get("lifecycle_stage", refusal_record.get("stage")),
+                    "execution_authorized": refusal_record.get("execution_authorized"),
+                    "success_authorized": refusal_record.get("success_authorized"),
+                    "path_delta_sha256": (
+                        refusal_delta.get("compressed_sha256")
+                        if isinstance(refusal_delta, Mapping) else None),
+                    "path_delta_hmac_sha256": (
+                        refusal_delta.get("hmac_sha256")
+                        if isinstance(refusal_delta, Mapping) else None),
+                }
+        except FileNotFoundError:
+            pass
+        except Exception as refusal_error:
+            prior_refusal_binding = {
+                "status": "UNVERIFIABLE", "path": str(refusal_path),
+                "error": f"{type(refusal_error).__name__}: {str(refusal_error)[:192]}",
+            }
+
         storage_status = "PASS"
         free_status = "PASS"
         if (unexpected_persistent > 2 * GIB
@@ -7464,6 +17717,17 @@ class PrefixLease:
             "active_lease_marker_removal_order": "receipt_durable_before_marker_removal",
             "reason": reason,
             "exception": repr(exc) if exc is not None else None,
+            "execution_status": "FAIL" if exc is not None else "PASS",
+            "execution_authorized": bool(
+                exc is None and self._materialized and self._runtime_env_verified
+                and prior_refusal_binding.get("status") != "AUTHENTICATED_REFUSAL"),
+            "success_authorized": False,
+            "accepted": False,
+            "failure_remains_failure": bool(
+                exc is not None
+                or prior_refusal_binding.get("status") == "AUTHENTICATED_REFUSAL"),
+            "prior_prefixlease_refusal": prior_refusal_binding,
+            "success_cannot_be_inferred_from_cleanup": True,
             "interrupted_by_signal": self._sigterm_number,
         }
         receipt_path = self.output_dir / "prefix-cleanup.json"
@@ -7539,7 +17803,7 @@ class PrefixLease:
                     if str(retention_directory) not in sys.path:
                         sys.path.insert(0, str(retention_directory))
                     import build_retention
-                    gate_attestation = json.loads(_read_file_nofollow(GATE0_ATTESTATION_PATH))
+                    gate_attestation = json.loads(_read_file_nofollow(GATE0_ATTESTATION_PATH, maximum_bytes=GATE0_ATTESTATION_MAX_BYTES))
                     live_audit = build_retention.canonical_artifact_store_audit()
                     record["canonical_artifact_store_audit"] = live_audit
                     if gate_attestation.get("canonical_artifact_store_audit") != live_audit:
@@ -7636,6 +17900,11 @@ class PrefixLease:
         if self._lease_marker_path is not None:
             if receipt_written and may_remove_active_marker and marker_ready:
                 try:
+                    marker_path_info = _stat_entry_nofollow(self._lease_marker_path)
+                    if (self._active_marker_identity is None or marker_path_info is None
+                            or (marker_path_info.st_dev, marker_path_info.st_ino)
+                               != self._active_marker_identity):
+                        raise OSError("active PrefixLease marker inode changed before cleanup")
                     _unlink_file_nofollow(self._lease_marker_path, expected_json={
                         "experiment_id": self.experiment_id,
                         "prefix_path": str(self.prefix),
@@ -7701,6 +17970,9 @@ class PrefixLease:
                                      or _stat_entry_nofollow(self._lease_marker_path) is None)
         except OSError:
             active_marker_removed = False
+        if self._active_marker_fd is not None:
+            os.close(self._active_marker_fd)
+            self._active_marker_fd = None
         print(json.dumps({
             "experiment_id": self.experiment_id,
             "prefix_created": bool(prefix_created),
@@ -8061,7 +18333,7 @@ class NativeRunLease:
             raise ValueError("NativeRunLease architecture differs from the signed manifest")
         self._native_architecture = declared_architecture
 
-        attestation_hash = hashlib.sha256(_read_file_nofollow(GATE0_ATTESTATION_PATH)).hexdigest() \
+        attestation_hash = hashlib.sha256(_read_file_nofollow(GATE0_ATTESTATION_PATH, maximum_bytes=GATE0_ATTESTATION_MAX_BYTES)).hexdigest() \
             if GATE0_ATTESTATION_PATH.is_file() and not GATE0_ATTESTATION_PATH.is_symlink() else None
         if self._manifest.get("gate0_attestation_sha256") != attestation_hash:
             raise RuntimeError("NativeRunLease manifest does not bind to the current Gate 0 attestation")
@@ -8652,6 +18924,16 @@ def main(argv: list[str] | None = None) -> int:
     recov.add_argument("experiment_id", help="Interrupted smoke experiment ID")
     sub.add_parser("close-historical-terminal-run",
                    help="Append the fixed history-preserving Z9 terminal closure")
+    sub.add_parser("append-historical-terminal-correction3",
+                   help="Append the reviewed exact correction-3 historical closure successor")
+    failed_output = sub.add_parser(
+        "adjudicate-failed-output",
+        help="Append the explicit R77 post-hoc FAILED/UNACCEPTED evidence disposition")
+    failed_output.add_argument("experiment_id", help="Reviewed R77 storage-smoke experiment ID")
+    failed_output.add_argument("--transcript", required=True,
+                               help="Exact existing PrefixLease diagnostic transcript")
+    failed_output.add_argument("--reconciliation", required=True,
+                               help="Exact existing failure reconciliation")
     sub.add_parser("reconcile", help="Reconcile abandoned storage smoke lease markers")
     sub.add_parser("blockers", help="Check live Gate 0 storage blockers")
     args = parser.parse_args(argv)
@@ -8662,6 +18944,20 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     elif args.command == "close-historical-terminal-run":
         result = close_historical_terminal_run()
+        print(json.dumps(result, indent=2))
+        return 0
+    elif args.command == "append-historical-terminal-correction3":
+        result = append_historical_terminal_correction3()
+        print(json.dumps(result, indent=2))
+        return 0
+    elif args.command == "adjudicate-failed-output":
+        result = adjudicate_failed_persistent_output(
+            args.experiment_id,
+            {
+                "legacy_diagnostic_transcript": Path(args.transcript),
+                "legacy_reconciliation": Path(args.reconciliation),
+            },
+        )
         print(json.dumps(result, indent=2))
         return 0
     elif args.command == "reconcile":

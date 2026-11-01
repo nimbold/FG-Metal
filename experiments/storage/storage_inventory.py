@@ -25,9 +25,89 @@ DIR_KEYWORDS = ("prefix", "build", "runtime", "evidence", "artifact", "source", 
 ROOT_LABELS = {
     "FG-Metal": "MAIN_CHECKOUT",
 }
+R17_ROOT_A_PATH = Path("/private/tmp/buildlease-vz-entitlement.RVW7oO")
+R17_ROOT_A_DISPOSITION_PATH = REPO / "experiments/storage/r17-root-a-current-disposition.json"
+R17_ROOT_A_DISPOSITION_SHA256 = "b1d080cd8a2d839b82182513294cec2b57421d4e6f4786dc4502ca59dffab02a"
+R17_ROOT_A_LOSS_FINDING_PATH = "R6-A-R56-R17-PHYSICAL-LOSS-FINDING.md"
+R17_ROOT_A_LOSS_FINDING_SHA256 = "bcd68117ec8e651f45faf4089b490a4db7234960a0e0b70c9f408508135a5ea0"
+R17_ROOT_A_ACCEPTANCE_PATH = "R6-A-R57-INDEPENDENT-ACTIVE-CLAIM-REVIEW.md"
+R17_ROOT_A_ACCEPTANCE_SHA256 = "c994dd9810310cc855616ce9bfe992035c21e246b74aaee338854e0d84ab4661"
+R17_ROOT_A_ACCEPTANCE_VERDICT = (
+    "PASS WITH HISTORICAL R17 PHYSICAL-EVIDENCE LOSS CAVEAT — "
+    "CURRENT R6-A SAFETY CLAIMS DO NOT REQUIRE THE LOST PHYSICAL ROOT"
+)
+R17_ROOT_A_LOSS_STATE = "LOST_UNAUTHORIZED_HISTORICAL_EVIDENCE"
+R17_ROOT_A_LOSS_CAVEAT = (
+    "R17 physical historical evidence loss is confirmed. The original probe bytes are unavailable; "
+    "historical custody and reproducibility claims remain caveated."
+)
+_R17_DISPOSITION_UNSET = object()
 
 
-def discover_roots() -> list[tuple[Path, str]]:
+def _r17_root_walk(root_fd: int, onerror):
+    """Walk from a pinned R17 directory fd, never resolving its root path again."""
+    return os.fwalk(".", follow_symlinks=False, onerror=onerror, dir_fd=root_fd)
+
+
+def _read_regular_file_no_follow(path: Path, description: str) -> bytes:
+    """Read a pinned regular file without following a symlink or accepting a concurrent swap."""
+    flags = (os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)
+             | getattr(os, "O_NONBLOCK", 0))
+    try:
+        descriptor = os.open(path, flags)
+    except OSError as error:
+        raise RuntimeError(f"cannot read accepted {description}: {path}: {error}") from error
+    try:
+        before = os.fstat(descriptor)
+        if not stat.S_ISREG(before.st_mode):
+            raise RuntimeError(f"accepted {description} is not a regular file: {path}")
+        chunks: list[bytes] = []
+        while True:
+            chunk = os.read(descriptor, 1024 * 1024)
+            if not chunk:
+                break
+            chunks.append(chunk)
+        after = os.fstat(descriptor)
+        stable_fields = ("st_dev", "st_ino", "st_mode", "st_size", "st_mtime_ns", "st_ctime_ns")
+        if any(getattr(before, field, None) != getattr(after, field, None)
+               for field in stable_fields):
+            raise RuntimeError(f"accepted {description} changed while being read: {path}")
+        return b"".join(chunks)
+    except OSError as error:
+        raise RuntimeError(f"cannot completely read accepted {description}: {path}: {error}") from error
+    finally:
+        os.close(descriptor)
+
+
+def _read_r17_root_a_loss_disposition() -> dict[str, Any] | None:
+    """Load only the explicitly accepted, digest-pinned C1 loss disposition."""
+    import build_retention
+    return build_retention._read_r17_root_a_loss_disposition(
+        disposition_path=R17_ROOT_A_DISPOSITION_PATH,
+        expected_sha256=R17_ROOT_A_DISPOSITION_SHA256,
+    )
+
+
+def _require_lost_r17_path_unoccupied(path: Path) -> None:
+    """Reject a reused name without attributing its occupant to the old identity."""
+    import build_retention
+    build_retention._require_lost_r17_path_unoccupied(path)
+
+
+def _r17_historical_loss_inventory_row(record: dict[str, Any]) -> dict[str, Any]:
+    """Render a loss disposition as provenance, never as a scanned physical root."""
+    import build_retention
+    return build_retention._r17_historical_loss_inventory_row(record)
+
+
+def discover_roots(*, r17_loss_disposition: object = _R17_DISPOSITION_UNSET
+                   ) -> list[tuple[Path, str]]:
+    if r17_loss_disposition is _R17_DISPOSITION_UNSET:
+        r17_loss_disposition = _read_r17_root_a_loss_disposition()
+    lost_r17_path = (Path(r17_loss_disposition["historical_binding"]["path"])
+                     if isinstance(r17_loss_disposition, dict) else None)
+    if lost_r17_path is not None:
+        _require_lost_r17_path_unoccupied(lost_r17_path)
     roots: dict[str, str] = {str(REPO): "MAIN_CHECKOUT"}
     listing = subprocess.run(
         ["git", "worktree", "list", "--porcelain"], cwd=REPO,
@@ -72,7 +152,29 @@ def discover_roots() -> list[tuple[Path, str]]:
         if str(storage_scripts) not in __import__("sys").path:
             __import__("sys").path.insert(0, str(storage_scripts))
         import build_retention
+        if Path(build_retention.REPO).resolve(strict=False) == build_retention.R17_BOUND_REPO_ROOT:
+            for path_text, record in build_retention.R17_TEMP_ROOT_IDENTITIES.items():
+                path = Path(path_text)
+                if lost_r17_path is not None and path == lost_r17_path:
+                    continue
+                eval_result = build_retention.classify_r17_root(
+                    path_text, record, r17_loss_disposition=r17_loss_disposition
+                )
+                if eval_result is None:
+                    continue
+                if eval_result.root_class == build_retention.R17_CLASS_OTHER_PROJECT_PROTECTED_ABSENT:
+                    continue
+                if eval_result.is_blocking or eval_result.disposition is None:
+                    raise RuntimeError(
+                        f"storage inventory cannot verify exact R17 root identity: {path}")
+                roots[str(path)] = (
+                    "OTHER_PROJECT_TEMP_ROOT"
+                    if eval_result.accounting_scope == "OTHER_PROJECT_PROTECTED"
+                    else "PRESERVED_FGMETAL_HISTORICAL_TEMP_ROOT")
         for path in build_retention._all_root_candidates():
+            if lost_r17_path is not None and path == lost_r17_path:
+                raise RuntimeError(
+                    f"lost R17 historical pathname reappeared during root discovery: {path}")
             if path.is_symlink():
                 # Retention treats an external directory alias as UNKNOWN and
                 # blocks Gate 0.  Inventory must also refuse to claim complete
@@ -89,12 +191,19 @@ def discover_roots() -> list[tuple[Path, str]]:
             else:
                 kind = "TEMP_BUILD_ROOT_SYMLINK" if path.is_symlink() else "TEMP_BUILD_ROOT"
             if path.is_dir():
+                disposition = build_retention._r17_temp_root_disposition(path)
+                if disposition is not None:
+                    kind = ("OTHER_PROJECT_TEMP_ROOT"
+                            if disposition["accounting_scope"] == "OTHER_PROJECT_PROTECTED"
+                            else "PRESERVED_FGMETAL_HISTORICAL_TEMP_ROOT")
                 roots[str(path)] = kind
     derived = HOME / "Library/Developer/Xcode/DerivedData"
     if derived.is_dir():
         for path in derived.iterdir():
             if path.is_dir() and not path.is_symlink() and path.name.lower().startswith("moltenvkpackaging-"):
                 roots[str(path)] = "XCODE_DERIVED_DATA_BUILD"
+    if lost_r17_path is not None:
+        _require_lost_r17_path_unoccupied(lost_r17_path)
     return sorted(((Path(path), kind) for path, kind in roots.items()), key=lambda item: item[0].as_posix())
 
 
@@ -110,8 +219,17 @@ def owner_for(path: Path, root: Path) -> str:
     return root.name
 
 
+def _is_fgmetal_scope_path(path: Path, root_kind: str) -> bool:
+    """Keep exact reviewed other-project roots inventoried but outside FG-Metal scope."""
+    return (root_kind != "OTHER_PROJECT_TEMP_ROOT"
+            and not any("dxmt" in part.lower() or "framegen" in part.lower()
+                        or "step10b6_1" in part.lower() for part in path.parts))
+
+
 def classification(path: Path, root_kind: str) -> tuple[str, str]:
     low = path.as_posix().lower()
+    if root_kind == "OTHER_PROJECT_TEMP_ROOT":
+        return "OTHER PROJECT / PROTECTED WORKSTREAM", "DO_NOT_DELETE_OTHER_PROJECT_DATA"
     if any("dxmt" in part.lower() or "framegen" in part.lower() for part in path.parts):
         return "OTHER PROJECT / PROTECTED WORKSTREAM", "DO_NOT_DELETE_OTHER_PROJECT_DATA"
     if Path("/private/tmp/fgmetal-step11d2-bridge-diagnostic-c-20261006") in path.parents or path == Path(
@@ -155,6 +273,54 @@ def sha256(path: Path) -> str:
         for block in iter(lambda: stream.read(4 * 1024 * 1024), b""):
             digest.update(block)
     return digest.hexdigest()
+
+
+def _file_snapshot(info: os.stat_result) -> tuple[int | None, ...]:
+    """Fields that must stay stable while inventory hashes one file."""
+    return (
+        info.st_dev, info.st_ino, info.st_mode, info.st_nlink,
+        info.st_size, getattr(info, "st_blocks", None),
+        getattr(info, "st_mtime_ns", None), getattr(info, "st_ctime_ns", None),
+    )
+
+
+def sha256_at(root_fd: int, relative_path: Path, expected: os.stat_result) -> str:
+    """Hash a file below a pinned root without resolving its absolute pathname."""
+    if relative_path.is_absolute() or not relative_path.parts or any(
+            part in {"", ".", ".."} for part in relative_path.parts):
+        raise RuntimeError(f"invalid descriptor-relative inventory path: {relative_path}")
+    directory_fd = os.dup(root_fd)
+    file_fd: int | None = None
+    try:
+        directory_flags = (os.O_RDONLY | getattr(os, "O_DIRECTORY", 0)
+                           | getattr(os, "O_NOFOLLOW", 0))
+        for component in relative_path.parts[:-1]:
+            child_fd = os.open(component, directory_flags, dir_fd=directory_fd)
+            os.close(directory_fd)
+            directory_fd = child_fd
+        file_fd = os.open(relative_path.parts[-1],
+                          os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0),
+                          dir_fd=directory_fd)
+        before = os.fstat(file_fd)
+        if (not stat.S_ISREG(before.st_mode)
+                or _file_snapshot(before) != _file_snapshot(expected)):
+            raise RuntimeError(f"inventory file identity changed before hashing: {relative_path}")
+        digest = hashlib.sha256()
+        while True:
+            block = os.read(file_fd, 4 * 1024 * 1024)
+            if not block:
+                break
+            digest.update(block)
+        after = os.fstat(file_fd)
+        if _file_snapshot(after) != _file_snapshot(before):
+            raise RuntimeError(f"inventory file changed while hashing: {relative_path}")
+        return digest.hexdigest()
+    except OSError as error:
+        raise RuntimeError(f"inventory could not hash pinned file {relative_path}: {error}") from error
+    finally:
+        if file_fd is not None:
+            os.close(file_fd)
+        os.close(directory_fd)
 
 
 def mounted_images() -> dict[str, dict[str, Any]]:
@@ -214,7 +380,12 @@ def _unlinked_image_length(binding: dict[str, Any]) -> int | None:
 
 
 def main() -> int:
-    roots = discover_roots()
+    r17_loss_disposition = _read_r17_root_a_loss_disposition()
+    roots = discover_roots(r17_loss_disposition=r17_loss_disposition)
+    historical_root_dispositions = (
+        [_r17_historical_loss_inventory_row(r17_loss_disposition)]
+        if isinstance(r17_loss_disposition, dict) else [])
+    import build_retention
     all_roots: list[dict[str, Any]] = []
     large_paths: list[dict[str, Any]] = []
     large_directories: list[dict[str, Any]] = []
@@ -233,39 +404,95 @@ def main() -> int:
     mounted_filesystems: dict[str, dict[str, Any]] = {}
 
     for root, root_kind in roots:
-        if root.is_symlink():
-            raise RuntimeError(f"storage inventory root is a symlink: {root}")
-        if not root.is_dir():
-            continue
+        r17_root_kind = root_kind in {
+            "OTHER_PROJECT_TEMP_ROOT", "PRESERVED_FGMETAL_HISTORICAL_TEMP_ROOT",
+        }
+        r17_root_fd: int | None = None
+        r17_disposition = None
+        if r17_root_kind:
+            try:
+                r17_root_fd = build_retention._open_dir(root)
+                r17_disposition = build_retention._r17_temp_root_disposition(
+                    root, root_fd=r17_root_fd)
+            except (OSError, build_retention.RetentionError) as error:
+                if r17_root_fd is not None:
+                    os.close(r17_root_fd)
+                raise RuntimeError(f"storage inventory cannot pin exact R17 root: {root}: {error}") from error
+            if r17_disposition is None:
+                os.close(r17_root_fd)
+                raise RuntimeError(f"R17 storage-root identity changed after discovery: {root}")
+            root_info = os.fstat(r17_root_fd)
+        else:
+            if root.is_symlink():
+                raise RuntimeError(f"storage inventory root is a symlink: {root}")
+            if not root.is_dir():
+                continue
+            root_info = root.stat(follow_symlinks=False)
         root_logical = 0
         root_allocated_paths = 0
         root_unique_allocated = 0
         root_files = 0
         root_dirs = 0
-        root_mtime = root.stat().st_mtime
-        root_device = root.stat().st_dev
+        root_mtime = root_info.st_mtime
+        root_device = root_info.st_dev
         root_seen: set[tuple[int, int]] = set()
         dir_acc: dict[str, dict[str, Any]] = {}
         candidate_dirs: set[Path] = {root}
+        directory_mtimes: dict[str, float] = {}
         files: list[tuple[Path, os.stat_result]] = []
 
         def scan_error(error: OSError) -> None:
             raise RuntimeError(f"storage inventory could not completely scan {root}: {error}") from error
 
-        for dirpath, dirnames, filenames in os.walk(root, followlinks=False, onerror=scan_error):
-            directory = Path(dirpath)
+        if r17_root_fd is not None:
+            walk_rows = _r17_root_walk(r17_root_fd, scan_error)
+        else:
+            walk_rows = ((dirpath, dirnames, filenames, None)
+                         for dirpath, dirnames, filenames in
+                         os.walk(root, followlinks=False, onerror=scan_error))
+        for dirpath, dirnames, filenames, directory_fd in walk_rows:
+            directory = (root / Path(dirpath)) if r17_root_fd is not None else Path(dirpath)
+            if r17_root_fd is not None and directory_fd is not None:
+                directory_mtimes[str(directory)] = os.fstat(directory_fd).st_mtime
             descend = []
             for name in dirnames:
                 child = directory / name
-                if child.is_symlink():
-                    continue
                 try:
-                    child_stat = child.stat()
+                    if directory_fd is None:
+                        if child.is_symlink():
+                            continue
+                        child_stat = child.stat()
+                    else:
+                        child_stat = os.stat(name, dir_fd=directory_fd, follow_symlinks=False)
                 except OSError as error:
                     raise RuntimeError(f"storage inventory could not inspect {child}: {error}") from error
+                if (directory_fd is not None
+                        and (stat.S_ISLNK(child_stat.st_mode)
+                             or not stat.S_ISDIR(child_stat.st_mode))):
+                    continue
                 if child_stat.st_dev != root_device:
-                    if os.path.ismount(child):
-                        vfs = os.statvfs(child)
+                    if directory_fd is not None:
+                        try:
+                            child_fd = os.open(
+                                name, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0)
+                                | getattr(os, "O_NOFOLLOW", 0), dir_fd=directory_fd)
+                        except OSError as error:
+                            raise RuntimeError(
+                                f"storage inventory could not pin mounted child {child}: {error}") from error
+                        try:
+                            opened_child = os.fstat(child_fd)
+                            if (opened_child.st_dev, opened_child.st_ino) != (
+                                    child_stat.st_dev, child_stat.st_ino):
+                                raise RuntimeError(
+                                    f"storage inventory child identity changed during scan: {child}")
+                            vfs = os.fstatvfs(child_fd)
+                        finally:
+                            os.close(child_fd)
+                        is_mountpoint = True
+                    else:
+                        is_mountpoint = os.path.ismount(child)
+                        vfs = os.statvfs(child) if is_mountpoint else None
+                    if is_mountpoint:
                         binding = image_backings.get(str(child), {})
                         backing_path = Path(binding["image_path"]) if binding.get("image_path") else None
                         backing_exists = bool(backing_path and backing_path.is_file()
@@ -319,7 +546,8 @@ def main() -> int:
             for name in filenames:
                 path = directory / name
                 try:
-                    info = path.lstat()
+                    info = (path.lstat() if directory_fd is None
+                            else os.stat(name, dir_fd=directory_fd, follow_symlinks=False))
                 except OSError as error:
                     raise RuntimeError(f"storage inventory could not inspect {path}: {error}") from error
                 if not stat.S_ISREG(info.st_mode):
@@ -330,8 +558,7 @@ def main() -> int:
                 root_allocated_paths += getattr(info, "st_blocks", 0) * 512
                 root_mtime = max(root_mtime, info.st_mtime)
                 key = (info.st_dev, info.st_ino)
-                in_scope = not any("dxmt" in part.lower() or "framegen" in part.lower()
-                                   or "step10b6_1" in part.lower() for part in path.parts)
+                in_scope = _is_fgmetal_scope_path(path, root_kind)
                 if key not in scoped_seen:
                     allocated_bytes = getattr(info, "st_blocks", 0) * 512
                     scoped_seen[key] = (allocated_bytes, in_scope)
@@ -354,12 +581,21 @@ def main() -> int:
                 global_logical += info.st_size
                 global_path_files += 1
 
+        if r17_disposition is not None:
+            verified_disposition = build_retention._r17_temp_root_disposition(root)
+            if (verified_disposition is None
+                    or verified_disposition["filesystem_identity"]
+                    != r17_disposition["filesystem_identity"]):
+                raise RuntimeError(f"R17 storage-root identity changed during inventory: {root}")
+
         # Record aggregate stats for project roots and semantically important subtrees.
         for directory in candidate_dirs:
             dir_acc[str(directory)] = {
                 "path": str(directory), "logical_size_bytes": 0,
                 "allocated_size_bytes_unique_within_directory": 0,
-                "file_count": 0, "mtime_epoch": directory.stat().st_mtime,
+                "file_count": 0,
+                "mtime_epoch": (directory_mtimes[str(directory)] if r17_disposition is not None
+                                else directory.stat().st_mtime),
                 "_inodes": set(),
             }
         for path, info in files:
@@ -382,7 +618,12 @@ def main() -> int:
             if not (info.st_size >= 16 * 1024 * 1024 or should_hash):
                 continue
             category, deletability = classification(path, root_kind)
-            digest = sha256(path) if should_hash or info.st_size >= 128 * 1024 * 1024 else None
+            digest = None
+            if should_hash or info.st_size >= 128 * 1024 * 1024:
+                if r17_root_fd is not None:
+                    digest = sha256_at(r17_root_fd, path.relative_to(root), info)
+                else:
+                    digest = sha256(path)
             record = {
                 "path": str(path),
                 "logical_size_bytes": info.st_size,
@@ -400,9 +641,11 @@ def main() -> int:
             if digest and suffix in ARTIFACT_EXTENSIONS:
                 binary_hashes.setdefault(digest, []).append(str(path))
 
-        scoped_path = not any("dxmt" in part.lower() or "framegen" in part.lower()
-                              or "step10b6_1" in part.lower()
-                              for part in root.parts)
+        if r17_root_fd is not None:
+            os.close(r17_root_fd)
+            r17_root_fd = None
+
+        scoped_path = _is_fgmetal_scope_path(root, root_kind)
         container_category = (
             "REQUIRED ACTIVE" if root_kind in {"MAIN_CHECKOUT", "GIT_WORKTREE"}
             else "OTHER PROJECT / PROTECTED WORKSTREAM" if not scoped_path
@@ -490,17 +733,21 @@ def main() -> int:
         "filesystem": {
             "mount_path": str(REPO), "free_bytes": free,
             "total_bytes": statvfs.f_blocks * statvfs.f_frsize,
+            "volume_identity": {
+                "device": REPO.stat(follow_symlinks=False).st_dev,
+                "fsid": getattr(statvfs, "f_fsid", None),
+            },
             "warning_bytes": 50 * 1024 ** 3,
             "hard_stop_bytes": 25 * 1024 ** 3,
             "emergency_bytes": 15 * 1024 ** 3,
             "gate_minimum_bytes": 50 * 1024 ** 3,
             "preferred_free_bytes": 60 * 1024 ** 3,
             "scoped_project_warning_bytes": 52 * 1024 ** 3,
-            "scoped_project_ceiling_bytes": 55 * 1024 ** 3,
+            "scoped_project_ceiling_bytes": 60 * 1024 ** 3,
             "allocation_note": ("Root and directory allocations deduplicate hard links by device/inode. APFS clone/shared extents are not identified; "
                                 "unlinked open read-only cache images are conservatively represented by vnode-length upper bounds; "
                                 "post-cleanup df is authoritative."),
-            "project_scope_note": "FG-Metal project budget excludes DXMT/FrameGen path components; these workstreams remain inventoried and protected from deletion.",
+            "project_scope_note": ("FG-Metal project budget excludes DXMT/FrameGen path components and counts live R17 roots only after exact identity verification. Root A is separately listed as LOST_UNAUTHORIZED_HISTORICAL_EVIDENCE with zero current physical bytes and is not a current scope root; external protected roots (Roots B–E) are non-blocking when absent and excluded from FG-Metal scope when present."),
             "path_alias_note": "/tmp resolves to /private/tmp; only /private/tmp was scanned.",
         },
         "totals": {
@@ -538,11 +785,42 @@ def main() -> int:
             "build_retention": build_retention_status,
         },
         "roots": all_roots,
+        "historical_root_dispositions": historical_root_dispositions,
+        "historical_provenance_caveats": [
+            row["provenance_caveat"] for row in historical_root_dispositions
+            if row["historical_provenance_caveat_required"]
+        ],
         "mounted_filesystems": list(mounted_filesystems.values()),
         "large_directories": large_directories,
         "large_objects": large_paths,
         "duplicate_binary_hash_groups": duplicate_groups,
     }
+    r17_root_inventory: list[dict[str, Any]] = []
+    r17_root_classes_summary: dict[str, str] = {}
+    if Path(build_retention.REPO).resolve(strict=False) == build_retention.R17_BOUND_REPO_ROOT:
+        for path_text, record in build_retention.R17_TEMP_ROOT_IDENTITIES.items():
+            eval_result = build_retention.classify_r17_root(
+                path_text, record, r17_loss_disposition=r17_loss_disposition
+            )
+            current_class = eval_result.root_class if eval_result else "UNKNOWN"
+            r17_root_classes_summary[path_text] = current_class
+            r17_root_inventory.append({
+                "path": path_text,
+                "current_class": current_class,
+                "historical_classification": record.get("classification"),
+                "accounting_scope": record.get("accounting_scope"),
+                "presence_status": "PRESENT" if (eval_result and eval_result.is_present) else "ABSENT",
+                "current_physical_bytes": (
+                    eval_result.disposition.get("allocated_unique_inode_bytes", 0)
+                    if (eval_result and eval_result.disposition and isinstance(eval_result.disposition, dict)) else 0
+                ),
+                "is_blocking": eval_result.is_blocking if eval_result else True,
+            })
+    payload["r17_root_inventory"] = r17_root_inventory
+    payload["r17_root_classes"] = r17_root_classes_summary
+    if isinstance(r17_loss_disposition, dict):
+        _require_lost_r17_path_unoccupied(
+            Path(r17_loss_disposition["historical_binding"]["path"]))
     temporary = OUT.with_suffix(".json.tmp")
     temporary.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     os.replace(temporary, OUT)
@@ -555,7 +833,9 @@ def main() -> int:
                       "active_build_count": build_retention_status.get("active_build_count"),
                       "preserved_build_count": build_retention_status.get("preserved_build_count"),
                       "artifact_store_size": artifact_store_usage,
-                      "evidence_size": evidence_usage}, indent=2))
+                      "evidence_size": evidence_usage,
+                      "historical_loss_roots": len(historical_root_dispositions),
+                      "r17_root_classes": r17_root_classes_summary}, indent=2))
     return 0
 
 

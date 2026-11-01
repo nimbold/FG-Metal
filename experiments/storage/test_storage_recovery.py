@@ -259,6 +259,7 @@ class StorageRecoveryUnitTests(unittest.TestCase):
     def setUp(self) -> None:
         self.temp_dir = tempfile.TemporaryDirectory(prefix="fgmetal-test-recovery-", dir="/private/tmp")
         self.base = Path(self.temp_dir.name)
+        os.chown(self.base, os.getuid(), os.getgid())
         self.repo = self.base / "repo"
         self.cache = self.base / "cache"
         self.prefixes = self.cache / "prefixes"
@@ -267,18 +268,23 @@ class StorageRecoveryUnitTests(unittest.TestCase):
         self.reconciliation_dir = self.repo / "experiments/storage/prefix-lease-reconciliation"
         self.recovery_receipts = self.repo / "experiments/storage/prefix-recovery-receipts"
         self.manifest_dir = self.repo / "experiments/storage/manifests"
+        self.claim_dir = self.repo / "experiments/storage/smoke-claims"
         self.smoke_runs = self.repo / "experiments/storage/smoke-runs"
 
         for p in (self.repo, self.cache, self.prefixes, self.active_leases, self.retired_leases,
-                  self.reconciliation_dir, self.recovery_receipts, self.manifest_dir, self.smoke_runs):
+                  self.reconciliation_dir, self.recovery_receipts, self.manifest_dir,
+                  self.claim_dir, self.smoke_runs):
             p.mkdir(parents=True, exist_ok=True)
+            os.chown(p, os.getuid(), os.getgid())
 
         self.patches = [
             mock.patch("storage_policy.REPO", self.repo),
             mock.patch("storage_policy.CACHE", self.cache),
             mock.patch("storage_policy.PREFIX_ROOT", self.prefixes),
             mock.patch("storage_policy.ACTIVE_LEASE_ROOT", self.active_leases),
+            mock.patch("storage_policy.SMOKE_CLAIM_ROOT", self.claim_dir),
             mock.patch("storage_policy.PREFIX_RETIRED_MARKERS_ROOT", self.retired_leases),
+            mock.patch("storage_policy._storage_smoke_parent_allocation_growth", return_value=0),
             mock.patch("storage_policy.PREFIX_RECONCILIATION_ROOT", self.reconciliation_dir),
             mock.patch("storage_policy.PREFIX_RECOVERY_RECEIPTS_ROOT", self.recovery_receipts),
             mock.patch("storage_policy._manifest_signing_key", return_value=b"0" * 32),
@@ -314,6 +320,7 @@ class StorageRecoveryUnitTests(unittest.TestCase):
             "experiment_id": experiment_id,
             "storage_policy_smoke": True,
             "decision": "ALLOW",
+            "blockers": [],
             "manifest_path": str(manifest_path),
             "output_dir": str(self.smoke_runs / experiment_id),
             "expected_duration_seconds": 300,
@@ -337,7 +344,8 @@ class StorageRecoveryUnitTests(unittest.TestCase):
         manifest_bytes = manifest_path.read_bytes()
         manifest_sha = hashlib.sha256(manifest_bytes).hexdigest()
         output_dir = self.smoke_runs / experiment_id
-        output_dir.mkdir(parents=True, exist_ok=True)
+        output_dir.mkdir(parents=True, exist_ok=True, mode=0o700)
+        output_dir.chmod(0o700)
         marker_path = self.active_leases / f"{experiment_id}.json"
         marker_payload = {
             "experiment_id": experiment_id,
@@ -471,13 +479,13 @@ class StorageRecoveryUnitTests(unittest.TestCase):
             self.assertIn("live free space below threshold", str(ctx.exception))
 
     def test_refuse_project_usage_above_threshold(self) -> None:
-        """Recovery MUST refuse if scoped project usage > the 55 GiB ceiling."""
+        """Recovery MUST refuse if scoped project usage > the 60 GiB ceiling."""
         smoke_id = "step11d3-storage-policy-smoke-20261008-0000000000000009"
         self._create_interrupted_marker(smoke_id)
 
         with mock.patch("storage_policy.measure_project_usage", return_value={
-            "allocated_inode_deduplicated_bytes": 56 * GIB,
-            "logical_bytes": 56 * GIB,
+            "allocated_inode_deduplicated_bytes": 61 * GIB,
+            "logical_bytes": 61 * GIB,
             "file_count": 100,
             "disappearance_events": [],
         }):
@@ -525,11 +533,11 @@ class StorageRecoveryUnitTests(unittest.TestCase):
         manifest_path = self.manifest_dir / f"{smoke_id}.json"
         manifest_data = json.loads(manifest_path.read_text())
         manifest_data["manifest_hmac_sha256"] = "b" * 64
-        _write_json(manifest_path, manifest_data, strict_directory_sync=True)
+        manifest_path.write_bytes(json.dumps(manifest_data, sort_keys=True, indent=2).encode() + b"\n")
         # update marker sha to match tampered manifest file
         marker_data = json.loads(marker_path.read_text())
         marker_data["manifest_sha256"] = hashlib.sha256(manifest_path.read_bytes()).hexdigest()
-        _write_json(marker_path, marker_data, strict_directory_sync=True)
+        marker_path.write_bytes(json.dumps(marker_data, sort_keys=True, indent=2).encode() + b"\n")
 
         with self.assertRaises(ValueError) as ctx:
             recover_interrupted_storage_smoke_lease_marker(smoke_id)

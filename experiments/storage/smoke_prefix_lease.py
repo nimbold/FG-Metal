@@ -2,15 +2,24 @@
 """Validate template cloning and finally cleanup without launching a graphics app."""
 from __future__ import annotations
 
-import hashlib
-import json
 import os
+import sys
+
+# This script imports storage_policy below and may run live filesystem work.
+# Suppress bytecode before importing any project modules, even when the caller
+# did not set the corresponding environment variable.
+os.environ["PYTHONDONTWRITEBYTECODE"] = "1"
+sys.dont_write_bytecode = True
+
+import hashlib
+import argparse
+import json
 import re
 import stat
 import subprocess
-import sys
 import time
 from pathlib import Path
+from typing import Mapping
 
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "experiments/storage"))
@@ -18,6 +27,8 @@ import storage_policy  # noqa: E402
 from storage_policy import (  # noqa: E402
     GIB,
     GATE0_ATTESTATION_PATH,
+    GATE0_PATH_STATE_SIDECAR_PATH,
+    STORAGE_SMOKE_GATE_COPY_BUDGET_BYTES,
     MIB,
     PREFIX_ROOT,
     PREFIX_TEMPLATE,
@@ -32,6 +43,31 @@ RUNTIME = Path("/Users/nima/Library/Caches/FGMetalStep11D-R/runtime-vulkan-overl
 RUNTIME_MANIFEST = REPO / "experiments/storage/runtime-manifests/step11d_r_active_runtime.json"
 ICD = Path("/Users/nima/Library/Caches/FGMetalStep11C1R/moltenvk-1.4.2/MoltenVK/MoltenVK/dynamic/dylib/macOS/MoltenVK_icd.json")
 MOLTENVK = Path("/Users/nima/Library/Caches/FGMetalStep11C1R/moltenvk-loader-override/libMoltenVK.1.dylib")
+
+
+_UNSAFE_WINE_PARENT_ENV_PREFIXES = (
+    "WINE", "DXVK_", "FG_", "MVK_", "MTL_", "VK_", "DYLD_", "LD_",
+    "__XPC_DYLD_", "PYTHON",
+)
+
+
+def wine_child_environment(parent_env: dict[str, str]) -> dict[str, str]:
+    """Keep host startup hooks out of Wine while retaining ordinary host settings."""
+    unsafe_prefixes = tuple(prefix.upper() for prefix in _UNSAFE_WINE_PARENT_ENV_PREFIXES)
+    return {
+        key: value for key, value in parent_env.items()
+        if not key.upper().startswith(unsafe_prefixes)
+    }
+
+
+def python_test_child_environment(parent_env: Mapping[str, str]) -> dict[str, str]:
+    """Keep test children independent of the caller's live plan selector."""
+    child_env = dict(parent_env)
+    for key in list(child_env):
+        if re.fullmatch(r"FG_METAL_R[0-9]+_PLAN_PATH", key):
+            child_env.pop(key)
+    child_env["PYTHONDONTWRITEBYTECODE"] = "1"
+    return child_env
 
 
 def sha(path: Path) -> str:
@@ -180,9 +216,11 @@ def validate_prefix_state_evidence(evidence: object, experiment_id: str,
 
 def run_synthetic_policy_suite() -> dict[str, object]:
     test_file = REPO / "experiments/storage/test_storage_policy.py"
-    result = subprocess.run([sys.executable, str(test_file), "-v"], cwd=REPO,
-                            text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                            check=False)
+    child_env = python_test_child_environment(os.environ)
+    result = subprocess.run([sys.executable, "-B", str(test_file), "-v"], cwd=REPO,
+                            text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                            check=False, env=child_env)
+    status_output = getattr(result, "stderr", result.stdout)
     required = (
         "test_normal_cleanup_removes_prefix",
         "test_original_failure_still_runs_and_finishes_cleanup",
@@ -191,21 +229,24 @@ def run_synthetic_policy_suite() -> dict[str, object]:
         "test_preservation_stays_within_configured_cap",
         "test_full_preserved_cap_leaves_uncertified_prefix_for_gate_block",
     )
-    missing = [name for name in required if name not in result.stdout]
-    ran = re.search(r"^Ran ([0-9]+) tests? ", result.stdout, re.MULTILINE)
     failed_status = [name for name in required
                      if not re.search(rf"^{re.escape(name)} \([^\n]+\) \.\.\. ok$",
-                                      result.stdout, re.MULTILINE)]
-    if (result.returncode != 0 or missing or failed_status or not ran
-            or int(ran.group(1)) < len(required) or "OK" not in result.stdout
-            or "skipped=" in result.stdout or "expected failures=" in result.stdout):
+                                      status_output, re.MULTILINE)]
+    ran = re.search(r"^Ran ([0-9]+) tests? ", status_output, re.MULTILINE)
+    if (result.returncode != 0 or failed_status or not ran
+            or int(ran.group(1)) < len(required)
+            or not re.search(r"^OK$", status_output, re.MULTILINE)
+            or "skipped=" in status_output or "expected failures=" in status_output):
         raise RuntimeError("synthetic PrefixLease policy suite failed or was incomplete: "
-                           + result.stdout[-5000:])
+                           + status_output[-5000:] + "\nstdout diagnostics:\n"
+                           + result.stdout[-1000:])
     gate0_test_file = REPO / "experiments/storage/test_g0c_checks.py"
     gate0_result = subprocess.run(
-        [sys.executable, str(gate0_test_file), "-v"], cwd=REPO,
-        text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=False,
+        [sys.executable, "-B", str(gate0_test_file), "-v"], cwd=REPO,
+        text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False,
+        env=child_env,
     )
+    gate0_status_output = getattr(gate0_result, "stderr", gate0_result.stdout)
     gate0_required = (
         "test_stale_inventory_hash_rejects_admission",
         "test_stale_cleanup_receipt_hash_rejects_admission",
@@ -218,35 +259,52 @@ def run_synthetic_policy_suite() -> dict[str, object]:
         "test_wait_process_timeout_reaps_child_and_reports_timeout",
         "test_unreaped_timeout_marks_lease_unsafe",
     )
-    gate0_missing = [name for name in gate0_required if name not in gate0_result.stdout]
     gate0_failed = [name for name in gate0_required
                     if not re.search(rf"^{re.escape(name)} \([^\n]+\) \.\.\. ok$",
-                                     gate0_result.stdout, re.MULTILINE)]
-    gate0_ran = re.search(r"^Ran ([0-9]+) tests? ", gate0_result.stdout, re.MULTILINE)
-    if (gate0_result.returncode != 0 or gate0_missing or gate0_failed or not gate0_ran
-            or int(gate0_ran.group(1)) < len(gate0_required) or "OK" not in gate0_result.stdout
-            or "skipped=" in gate0_result.stdout or "expected failures=" in gate0_result.stdout):
+                                     gate0_status_output, re.MULTILINE)]
+    gate0_ran = re.search(r"^Ran ([0-9]+) tests? ", gate0_status_output, re.MULTILINE)
+    if (gate0_result.returncode != 0 or gate0_failed or not gate0_ran
+            or int(gate0_ran.group(1)) < len(gate0_required)
+            or not re.search(r"^OK$", gate0_status_output, re.MULTILINE)
+            or "skipped=" in gate0_status_output or "expected failures=" in gate0_status_output):
         raise RuntimeError("focused Gate 0 admission/cleanup suite failed or was incomplete: "
-                           + gate0_result.stdout[-5000:])
+                           + gate0_status_output[-5000:] + "\nstdout diagnostics:\n"
+                           + gate0_result.stdout[-1000:])
     return {"status": "PASS", "test_file": str(test_file),
             "sha256": sha(test_file), "test_count": int(ran.group(1)), "skipped_count": 0,
             "suite_output_sha256": hashlib.sha256(
-                result.stdout.encode("utf-8")).hexdigest(), "tests": list(required),
+                status_output.encode("utf-8") + b"\x00"
+                + result.stdout.encode("utf-8")).hexdigest(), "tests": list(required),
             "focused_gate0_checks": {
                 "status": "PASS", "test_file": str(gate0_test_file),
                 "sha256": sha(gate0_test_file),
                 "test_count": int(gate0_ran.group(1)), "skipped_count": 0,
                 "suite_output_sha256": hashlib.sha256(
-                    gate0_result.stdout.encode("utf-8")).hexdigest(),
+                    gate0_status_output.encode("utf-8") + b"\x00"
+                    + gate0_result.stdout.encode("utf-8")).hexdigest(),
                 "tests": list(gate0_required),
             }}
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(
+        description="Run the explicitly authorized storage-only PrefixLease smoke.")
+    parser.add_argument("--execute", action="store_true", required=True,
+                        help="explicitly opt in to the live storage smoke")
+    parser.add_argument("--experiment-id", required=True,
+                        help="exact nonce-bound storage-smoke ID from signed Gate 0")
+    args = parser.parse_args(argv)
+    if not storage_policy._is_storage_policy_smoke_id(args.experiment_id):
+        parser.error("--experiment-id must be the canonical storage-smoke ID")
     with storage_policy.storage_certification_guard(exclusive=True):
         policy_suite = run_synthetic_policy_suite()
-        preflight_bytes = storage_policy._read_file_nofollow(GATE0_ATTESTATION_PATH)
+        preflight_bytes = storage_policy._read_file_nofollow(
+            GATE0_ATTESTATION_PATH,
+            maximum_bytes=storage_policy.GATE0_ATTESTATION_MAX_BYTES)
         preflight = json.loads(preflight_bytes)
+        sidecar_bytes = storage_policy._read_file_nofollow(
+            GATE0_PATH_STATE_SIDECAR_PATH,
+            maximum_bytes=storage_policy.GATE_PATH_STATE_SIDECAR_MAX_COMPRESSED_BYTES)
         experiment_id = preflight.get("permitted_smoke_experiment_id")
         preflight_age = time.time() - float(preflight.get("created_at_unix", 0))
         if (not storage_policy._is_storage_policy_smoke_id(experiment_id)
@@ -256,6 +314,8 @@ def main() -> int:
                 or not storage_policy._verify_gate0_signature(preflight)
                 or preflight_age < 0 or preflight_age > storage_policy.GATE0_MAX_AGE_SECONDS):
             raise RuntimeError("storage smoke requires a fresh signed preflight with a nonce-bound run ID")
+        if experiment_id != args.experiment_id:
+            raise RuntimeError("explicit smoke experiment ID does not match signed Gate 0")
         runtime_manifest = json.loads(RUNTIME_MANIFEST.read_text(encoding="utf-8"))
         output = REPO / "experiments/storage/smoke-runs" / experiment_id
         prefix = PREFIX_ROOT / f"storage-smoke-{experiment_id}"
@@ -282,30 +342,70 @@ def main() -> int:
                 "retention_policy": "Keep only the template and one failure reproduction; remove this smoke clone in finally.",
             },
         )
-        output.mkdir(mode=0o700, parents=True, exist_ok=False)
-        preflight_copy = output / "gate0-preflight-attestation.json"
-        descriptor = os.open(preflight_copy, os.O_WRONLY | os.O_CREAT | os.O_EXCL
-                             | getattr(os, "O_NOFOLLOW", 0), 0o600)
+        output_parent_fd = storage_policy._open_directory_nofollow(output.parent)
         try:
-            view = memoryview(preflight_bytes)
-            while view:
-                written = os.write(descriptor, view)
-                if written <= 0:
-                    raise OSError("short retained preflight attestation write")
-                view = view[written:]
-            os.fsync(descriptor)
+            storage_policy._assert_storage_smoke_output_reservation(
+                output, projected_directory_create=output)
+            os.mkdir(output.name, 0o700, dir_fd=output_parent_fd)
+            os.fsync(output_parent_fd)
         finally:
-            os.close(descriptor)
-        output_fd = os.open(output, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0)
-                            | getattr(os, "O_NOFOLLOW", 0))
+            os.close(output_parent_fd)
+        storage_policy._assert_storage_smoke_output_reservation(output)
+        output_fd = storage_policy._open_directory_nofollow(output)
         try:
+            output_info = os.fstat(output_fd)
+            parent_fd = storage_policy._open_directory_nofollow(output.parent)
+            try:
+                parent_info = os.fstat(parent_fd)
+            finally:
+                os.close(parent_fd)
+            if (output_info.st_uid != os.getuid() or output_info.st_gid != os.getgid()
+                    or stat.S_IMODE(output_info.st_mode) != 0o700
+                    or output_info.st_dev != parent_info.st_dev):
+                raise RuntimeError("storage-smoke output directory has unsafe owner, mode, or device")
+            preflight_copy = output / "gate0-preflight-attestation.json"
+            sidecar_copy = output / "gate0-path-state.json.zlib"
+            if (len(preflight_bytes) + len(sidecar_bytes)
+                    > STORAGE_SMOKE_GATE_COPY_BUDGET_BYTES):
+                raise RuntimeError("retained Gate evidence exceeds the 16 MiB smoke copy sub-budget")
+            for retained_path, retained_bytes in (
+                    (preflight_copy, preflight_bytes), (sidecar_copy, sidecar_bytes)):
+                storage_policy._assert_storage_smoke_output_reservation(
+                    output, projected_write_bytes=len(retained_bytes),
+                    projected_path=retained_path)
+                descriptor = os.open(retained_path.name, os.O_WRONLY | os.O_CREAT | os.O_EXCL
+                                     | getattr(os, "O_NOFOLLOW", 0), 0o600, dir_fd=output_fd)
+                try:
+                    file_info = os.fstat(descriptor)
+                    if (not stat.S_ISREG(file_info.st_mode) or file_info.st_uid != os.getuid()
+                            or file_info.st_gid != os.getgid()
+                            or stat.S_IMODE(file_info.st_mode) != 0o600
+                            or file_info.st_nlink != 1 or file_info.st_dev != output_info.st_dev):
+                        raise RuntimeError("retained Gate evidence has unsafe file identity or mode")
+                    view = memoryview(retained_bytes)
+                    while view:
+                        written = os.write(descriptor, view)
+                        if written <= 0:
+                            raise OSError("short retained Gate evidence write")
+                        view = view[written:]
+                    os.fsync(descriptor)
+                finally:
+                    os.close(descriptor)
+                storage_policy._assert_storage_smoke_output_reservation(output)
+            retained_allocated = 0
+            for retained_path in (preflight_copy, sidecar_copy):
+                info = os.stat(retained_path.name, dir_fd=output_fd, follow_symlinks=False)
+                if (not stat.S_ISREG(info.st_mode) or info.st_uid != os.getuid()
+                        or info.st_gid != os.getgid() or stat.S_IMODE(info.st_mode) != 0o600
+                        or info.st_nlink != 1 or info.st_dev != output_info.st_dev):
+                    raise RuntimeError("retained Gate evidence identity changed after publication")
+                retained_allocated += getattr(info, "st_blocks", 0) * 512
+            if retained_allocated > STORAGE_SMOKE_GATE_COPY_BUDGET_BYTES:
+                raise RuntimeError("retained Gate evidence allocation exceeds the 16 MiB smoke copy sub-budget")
             os.fsync(output_fd)
         finally:
             os.close(output_fd)
-        env = os.environ.copy()
-        for key in list(env):
-            if key.startswith(("WINE", "DXVK_", "FG_", "MVK_", "MTL_", "VK_", "DYLD_")):
-                env.pop(key, None)
+        env = wine_child_environment(os.environ)
         runtime_paths = [
             RUNTIME / "lib/wine/x86_64-unix",
             RUNTIME / "lib/wine/x86_64-windows",
@@ -336,10 +436,16 @@ def main() -> int:
         with scoped_lease(lease):
             lease.set_env(env)
             lease.materialize()
-            assertion = storage_policy.assert_prefix_lease(
-                prefix, str(RUNTIME / "bin/wine"), Path(__file__).resolve(),
-                lease._sealed_wine_env,
-            )
+            lease._refusal_stage = "storage_smoke.assert_prefix_lease.post_materialization"
+            try:
+                assertion = storage_policy.assert_prefix_lease(
+                    prefix, str(RUNTIME / "bin/wine"), Path(__file__).resolve(),
+                    lease._sealed_wine_env,
+                )
+            except BaseException as error:
+                storage_policy._record_prefixlease_gate_refusal(
+                    lease, [f"{type(error).__name__}: {error}"], error)
+                raise
             active_payload = json.loads(storage_policy._read_file_nofollow(
                 storage_policy.ACTIVE_LEASE_ROOT / f"{experiment_id}.json"))
             materialization_receipt = active_payload.get("materialization_receipt")
@@ -358,13 +464,13 @@ def main() -> int:
                 raise RuntimeError("controlled command did not start from the materialized ACTIVE lease state")
             output.mkdir(parents=True, exist_ok=True)
             if not (output / "prefix-smoke-started.json").exists():
-                (output / "prefix-smoke-started.json").write_text(json.dumps({
+                _write_json(output / "prefix-smoke-started.json", {
                     "experiment_id": experiment_id,
                     "prefix_path": str(prefix),
                     "template_tree_sha256": json.loads((PREFIX_TEMPLATE / "FGMETAL_PREFIX_TEMPLATE.json").read_text())["tree_identity"]["tree_sha256"],
                     "graphics_experiments_run": False,
                     "wine_app_launched": False,
-                }, indent=2) + "\n", encoding="utf-8")
+                }, strict_directory_sync=True)
         after_cleanup_state = prefix_state_snapshot(prefix)
         prefix_state_evidence = {
             "baseline": baseline_state,
@@ -389,6 +495,8 @@ def main() -> int:
             "created_at_unix": time.time(),
             "preflight_attestation_path": str(preflight_copy),
             "preflight_attestation_sha256": preflight_sha256,
+            "path_state_sidecar_path": str(sidecar_copy),
+            "path_state_sidecar_sha256": hashlib.sha256(sidecar_bytes).hexdigest(),
             "smoke_nonce_claim_path": str(storage_policy._storage_smoke_claim_path(experiment_id)),
             "smoke_nonce_claim_sha256": hashlib.sha256(claim_bytes).hexdigest(),
             "cleanup_receipt": str(output / "prefix-cleanup.json"),

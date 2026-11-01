@@ -14,6 +14,14 @@ spec.loader.exec_module(runner)
 
 
 class BareWineProcessRunnerTests(unittest.TestCase):
+    def test_runner_source_passes_managed_prefix_authorization(self):
+        import storage_policy
+
+        records = storage_policy._authorized_runner_records(
+            [str(SOURCE)], requires_managed_prefix=True
+        )
+        self.assertIn(str(SOURCE), records)
+
     def exercise(self, outcome):
         temp = tempfile.TemporaryDirectory(dir='/private/tmp')
         self.addCleanup(temp.cleanup)

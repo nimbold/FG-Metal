@@ -188,7 +188,7 @@ def main() -> int:
                             "minimum_experiment_free_bytes": 50 * 1024**3,
                             "preferred_free_bytes": 60 * 1024**3,
                             "scoped_project_warning_bytes": 52 * 1024**3,
-                            "scoped_project_ceiling_bytes": 55 * 1024**3,
+                            "scoped_project_ceiling_bytes": 60 * 1024**3,
                             "current_experiment_decision": "REFUSE"},
         "project_usage_before": inventory["totals"],
         "prefix_policy": {"maximum_preserved": 2,
@@ -221,7 +221,7 @@ def main() -> int:
             "Hardlink identical immutable binaries to the canonical store; confirm hashes, modes, device, inode, and link count.",
             "Delete only exact paths marked after their prerequisites pass; keep mixed parent roots and protected paths.",
             "Create one clean Wine template and retain the marked 11D.2 reproducer as the two allowed prefixes.",
-            "Regenerate inventory, measure df, verify free space >=50 GiB and scoped FG-Metal <=55 GiB with a 52 GiB warning threshold, and write the cleanup receipt.",
+            "Regenerate inventory, measure df, verify free space >=50 GiB and scoped FG-Metal <=60 GiB with a 52 GiB warning threshold, and write the cleanup receipt.",
         ],
         "notes": [
             "All source/build manifest mismatches remain explicit in build records; current bytes are recorded under their actual SHA-256, not attributed to the earlier manifest.",

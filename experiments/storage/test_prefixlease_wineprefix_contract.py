@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import errno
 import json
 import os
 import subprocess
@@ -58,6 +59,9 @@ class PrefixLeaseWineprefixContractTests(unittest.TestCase):
         self.output.mkdir()
         self.active_root = self.base / "active leases"
         self.active_root.mkdir()
+        self.vm_capacity_root = self.base / "vm-capacity-domain"
+        self.vm_capacity_root.mkdir(mode=0o700)
+        self.vm_capacity_marker = self.vm_capacity_root / "active-session.json"
         self.manifest_parent = self.base / "manifests"
         self.manifest_parent.mkdir()
         self.manifest_path = self.manifest_parent / "wineprefix-contract.json"
@@ -134,6 +138,8 @@ class PrefixLeaseWineprefixContractTests(unittest.TestCase):
         self.patchers = [
             mock.patch.object(policy, "PREFIX_ROOT", self.prefix_root),
             mock.patch.object(policy, "ACTIVE_LEASE_ROOT", self.active_root),
+            mock.patch.object(policy, "VM_CAPACITY_DOMAIN_ROOT", self.vm_capacity_root),
+            mock.patch.object(policy, "VM_CAPACITY_DOMAIN_ACTIVE_MARKER", self.vm_capacity_marker),
             mock.patch.object(policy, "PREFIX_TEMPLATE", self.template),
             mock.patch.object(policy, "GATE0_ATTESTATION_PATH", self.gate_attestation_path),
             mock.patch.object(policy, "INVENTORY_PATH", self.inventory_path),
@@ -221,8 +227,24 @@ class PrefixLeaseWineprefixContractTests(unittest.TestCase):
         lease._sealed_wine_env = dict(lease._env)
         lease._lease_marker_path = self.active_root / f"{self.experiment_id}.json"
         lease._lease_token = "c" * 64
-        active_info = self.active_root.stat(follow_symlinks=False)
-        lease._lease_marker_parent_identity = (active_info.st_dev, active_info.st_ino)
+        active_root_fd = policy._open_directory_nofollow(self.active_root)
+        active_fd = os.open(
+            lease._lease_marker_path.name,
+            os.O_RDWR | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0),
+            0o600, dir_fd=active_root_fd)
+        active_parent_info = os.fstat(active_root_fd)
+        os.close(active_root_fd)
+        def close_active_marker() -> None:
+            try:
+                os.close(active_fd)
+            except OSError as error:
+                if error.errno != errno.EBADF:
+                    raise
+        self.addCleanup(close_active_marker)
+        lease._active_marker_fd = active_fd
+        active_info = os.fstat(active_fd)
+        lease._active_marker_identity = (active_info.st_dev, active_info.st_ino)
+        lease._lease_marker_parent_identity = (active_parent_info.st_dev, active_parent_info.st_ino)
         binding = {
             "experiment_id": self.experiment_id,
             "pid": os.getpid(),
@@ -240,8 +262,11 @@ class PrefixLeaseWineprefixContractTests(unittest.TestCase):
             "prefix_device": prefix_info.st_dev,
             "prefix_inode": prefix_info.st_ino,
             "active_marker_path": str(lease._lease_marker_path),
-            "active_marker_parent_device": active_info.st_dev,
-            "active_marker_parent_inode": active_info.st_ino,
+            "active_marker_parent_device": active_parent_info.st_dev,
+            "active_marker_parent_inode": active_parent_info.st_ino,
+            "active_marker_device": active_info.st_dev,
+            "active_marker_inode": active_info.st_ino,
+            "active_marker_gid": active_info.st_gid,
             "gate0_attestation_sha256": self.gate_attestation_sha256,
             "inventory_sha256": self.inventory_sha256,
             "inventory_generated_at_unix": self.inventory_record["generated_at_unix"],
@@ -264,12 +289,7 @@ class PrefixLeaseWineprefixContractTests(unittest.TestCase):
             **binding,
             "created_at_unix": 1.0,
         })
-        policy._write_json(lease._lease_marker_path, {
-            **binding,
-            "state": "MATERIALIZED",
-            "materialization_receipt": lease._materialization_receipt,
-            "updated_at_unix": 1.0,
-        })
+        lease._write_active_lease("MATERIALIZED")
         return lease
 
     def _start(self, lease: policy.PrefixLease, process: FakeWineProcess) -> mock.Mock:
@@ -528,7 +548,9 @@ class PrefixLeaseWineprefixContractTests(unittest.TestCase):
         child = FakeWineProcess([str(self.wine), "--synthetic-test"], returncode=23)
         child_error = subprocess.CalledProcessError(23, child.args, output="synthetic Wine failure")
         receipt = self._complete_lifecycle(lease, child, child_error)
-        self.assertEqual(receipt["status"], "PASS")
+        self.assertEqual(receipt["status"], "FAIL")
+        self.assertEqual(receipt["execution_status"], "FAIL")
+        self.assertEqual(receipt["storage_hygiene_status"], "PASS")
         self.assertIn("CalledProcessError(23", receipt["exception"])
         self.assertIn("--synthetic-test", receipt["exception"])
         self.assertEqual(receipt["wineprefix_identity"]["cleanup_WINEPREFIX"], str(self.prefix))
@@ -538,7 +560,9 @@ class PrefixLeaseWineprefixContractTests(unittest.TestCase):
         child = FakeWineProcess([str(self.wine), "--synthetic-test"], returncode=None)
         timeout = subprocess.TimeoutExpired(child.args, 0)
         receipt = self._complete_lifecycle(lease, child, timeout)
-        self.assertEqual(receipt["status"], "PASS")
+        self.assertEqual(receipt["status"], "FAIL")
+        self.assertEqual(receipt["execution_status"], "FAIL")
+        self.assertEqual(receipt["storage_hygiene_status"], "PASS")
         self.assertIn("TimeoutExpired", receipt["exception"])
         self.assertEqual(receipt["wineprefix_identity"]["launch_WINEPREFIX"], str(self.prefix))
         self.assertEqual(receipt["wineprefix_identity"]["cleanup_WINEPREFIX"], str(self.prefix))

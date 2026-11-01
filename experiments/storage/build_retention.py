@@ -9,16 +9,25 @@ allowlist used only for one-time reconciliation.
 from __future__ import annotations
 
 import argparse
+import ast
+import base64
+import binascii
+import configparser
+import contextvars
 import dataclasses
 import errno
 import fcntl
 import hashlib
 import hmac
 import json
+import math
 import os
 import plistlib
+import platform
 import re
 import shutil
+import select
+import shlex
 import signal
 import stat
 import subprocess
@@ -27,10 +36,14 @@ import tempfile
 import threading
 import time
 import uuid
+from contextlib import contextmanager
+from datetime import datetime
 from pathlib import Path
-from typing import Any, Iterable, Mapping
+from typing import Any, Callable, Iterable, Mapping
 
 REPO = Path(__file__).resolve().parents[2]
+_REPOSITORY_ROOT = REPO.resolve()
+R17_BOUND_REPO_ROOT = REPO.resolve()
 HOME = Path.home()
 CACHE_ROOT = HOME / "Library/Caches/FGMetal"
 BUILD_ROOT = CACHE_ROOT / "builds"
@@ -42,7 +55,31 @@ RECEIPT_ROOT = STORAGE_ROOT / "build-cleanup-receipts"
 BUILD_MARKER = ".fgmetal-build-lease.json"
 BUILD_EXECUTION_RECEIPT = "build-execution.json"
 BUILD_LOCK = ".retention.lock"
+ORPHANED_UNSTARTED_STATE = "ORPHANED_UNSTARTED_RETIRED"
+ORPHANED_UNSTARTED_RECEIPT_DIR = "orphaned-unstarted"
+# R23 is terminal historical evidence. Its preserved root and lease were
+# created while this APFS Data volume used st_dev/f_fsid 16777229; the same
+# APFS VolumeUUID is now mounted under a different numeric device identity.
+# These exact evidence pins authorize accounting-only recognition of that one
+# never-started terminal root. They do not authorize reopening or retirement.
+R23_ORPHANED_ROOT_BUILD_ID = "r6a-r23-dual-lineage-20261020t214331z"
+R23_ORPHANED_ROOT_REPO = Path("/Users/nima/Documents/Code/FG-Metal")
+R23_ORPHANED_ROOT_PATH = Path(
+    "/Users/nima/Library/Caches/FGMetal/builds/r6a-r23-dual-lineage-20261020t214331z")
+R23_ORPHANED_ROOT_LEASE_SHA256 = "48781e0b24c86bac7a2695d59cc836469127005606aa372ad03319723c176f2a"
+R23_ORPHANED_ROOT_RECEIPT_SHA256 = "cacd64655f11043bcfb8a0381235219e73aa0feb43564367c36f2b4f40de0584"
+R23_ORPHANED_ROOT_PIN_EVIDENCE = Path(
+    "experiments/storage/R6-A-R50-R23-PINNED-SCAN-20261022T085801Z-r50-r23.json")
+R23_ORPHANED_ROOT_PIN_EVIDENCE_SHA256 = "3d8909f6150be0d4d523a24731df760f31000d69095403cc985839c783cee8dc"
+R23_ORPHANED_ROOT_VOLUME_EVIDENCE = Path(
+    "experiments/storage/R6-VM-P0-RETRY-READINESS-MOUNT-IDENTITY-20261017T122608Z.json")
+R23_ORPHANED_ROOT_VOLUME_EVIDENCE_SHA256 = "5d230426fcab955544faafe9a88077fdda0041fca63e70e6672fd6b0bbd5509e"
+R23_ORPHANED_ROOT_VOLUME_UUID = "270E840B-FC2D-4B73-BE0F-D0ED097C4ECA"
+R23_ORPHANED_ROOT_OLD_DEVICE = 16777229
+R23_ORPHANED_ROOT_INODE = 102865819
+R23_ORPHANED_ROOT_PARENT_INODE = 93094313
 GIB = 1024 ** 3
+MAX_SESSION_PERSISTENT_OUTPUT_ALLOWANCE_BYTES = 1 * GIB
 MAX_ACTIVE_DXVK = 1
 MAX_ACTIVE_MOLTENVK = 1
 MAX_ACTIVE_LARGE_BUILDS = 2
@@ -87,6 +124,13 @@ LEGACY_STEP11D2_EVIDENCE_CORPORA = {
 LEGACY_STEP11D2_REPORT_SHA256 = "9e43b796bd96586478e6fcd931155dbb18d38787fdb0c6aa17d0fe213477f014"
 LEGACY_STEP11D2_HASHES_SHA256 = "eccbe768e28368050010cbecd1c4b0ee15d4b587b827f6d88447774148892c0b"
 SPIRV_GENERATED_TABLE_ROOT = Path("/private/tmp/fgmetal-step11b/MoltenVK/External/SPIRV-Tools/build")
+def _is_r6a_r71_admission_id(value: object) -> bool:
+    if not isinstance(value, str):
+        return False
+    match = re.fullmatch(r"r6a-r([1-9][0-9]*)-admission-[A-Za-z0-9][A-Za-z0-9._-]{0,80}", value)
+    return match is not None and int(match.group(1)) >= 71
+
+
 SPIRV_GENERATED_TABLE_FILES = {
     "build-version.inc", "core_tables_header.inc", "OpenCLDebugInfo100.h",
     "generators.inc", "DebugInfo.h", "core_tables_body.inc",
@@ -100,8 +144,232 @@ _KNOWN_PROTECTED_FRAMEGEN_ROOTS = {
     "framegen-step2-review-build", "framegen-step10-build", "fg-metal-step10b6_1-build",
 }
 
+# R17 binds these exact temporary roots to read-only ownership evidence. This
+# is a one-run reconciliation, not a prefix rule and not BuildLease history.
+# The roots remain in the storage inventory; only verified Firelink roots are
+# outside FG-Metal scope. Exact path, directory identity, and report digests
+# establish ownership. Descendant contents are measured live and are not used
+# as an admission identity because a recursive metadata walk cannot provide an
+# atomic snapshot of a mutable tree.
+R17_OWNERSHIP_REPORT_DIGESTS = {
+    "R6-A-R17-RETENTION-ROOT-OWNERSHIP.md":
+        "b5fbe0786188cd85a41d318e85282e8636b087404d86bee1c74d13f791c6d780",
+    "R6-A-R17-SCOPE-ACCOUNTING-AUDIT.md":
+        "bbf01c70d3fd5a8243469d835a7cb05cf6783cd6dc5465786ca6770a310e95a4",
+    "R6-A-R17-PROJECTED-PEAK-REVIEW.md":
+        "c30d8dbd9a7d62848c2ddd900654e4894c6f9f21353118a509027589ef3cd614",
+    "R6-A-R17-MINIMAL-RECLAMATION-REVIEW.md":
+        "188f3a071ce687e649706dc5e72557e8e6c81da87380d4385e916a775951c8fd",
+    "R6-A-R17-SCOPE-RETENTION-RECONCILIATION.md":
+        "8c3369ca163a8f1467ccb5d6363a7a5e4736065faf2d06afd724373f7792207c",
+}
+R17_TEMP_ROOT_IDENTITIES: dict[str, dict[str, Any]] = {
+    "/private/tmp/buildlease-vz-entitlement.RVW7oO": {
+        "classification": "FGMETAL_HISTORICAL_PROBE_EVIDENCE",
+        "accounting_scope": "FG_METAL_PROJECT",
+        "reason": "Exact preserved Virtualization entitlement probe; the current executable conflicts with the older no-products description.",
+        "filesystem_identity": {"device": 16777229, "inode": 99994262,
+                                "filesystem_id": 16777229, "mode": 448, "sticky": False, "owner_uid": 501},
+    },
+    "/private/tmp/firelink-aria2-release.gGghjc/aria2-1.37.0": {
+        "classification": "UNRELATED_PROJECT_TEMP",
+        "accounting_scope": "OTHER_PROJECT_PROTECTED",
+        "reason": "Exact inspected Firelink aria2 release-build tree; preserve for its project owner.",
+        "filesystem_identity": {"device": 16777229, "inode": 102051100,
+                                "filesystem_id": 16777229, "mode": 493, "sticky": False, "owner_uid": 501},
+    },
+    "/private/tmp/firelink-aria2-validation.b8C6r1": {
+        "classification": "UNRELATED_PROJECT_TEMP",
+        "accounting_scope": "OTHER_PROJECT_PROTECTED",
+        "reason": "Exact inspected Firelink aria2 validation tree; preserve for its project owner.",
+        "filesystem_identity": {"device": 16777229, "inode": 102042172,
+                                "filesystem_id": 16777229, "mode": 448, "sticky": False, "owner_uid": 501},
+    },
+    "/private/tmp/firelink-tauri3-alpha-target/debug/build": {
+        "classification": "UNRELATED_PROJECT_TEMP",
+        "accounting_scope": "OTHER_PROJECT_PROTECTED",
+        "reason": "Exact inspected Firelink Tauri/Wry build-script outputs; preserve for their project owner.",
+        "filesystem_identity": {"device": 16777229, "inode": 101046384,
+                                "filesystem_id": 16777229, "mode": 493, "sticky": False, "owner_uid": 501},
+    },
+    "/private/tmp/firelink-tauri3-alpha5-1792487343268/src-tauri/target/debug/build": {
+        "classification": "UNRELATED_PROJECT_TEMP",
+        "accounting_scope": "OTHER_PROJECT_PROTECTED",
+        "reason": "Exact inspected Firelink/Tauri plugin build-script outputs; preserve for their project owner.",
+        "filesystem_identity": {"device": 16777229, "inode": 102077563,
+                                "filesystem_id": 16777229, "mode": 493, "sticky": False, "owner_uid": 501},
+    },
+}
+
+R17_ROOT_A_PATH = Path("/private/tmp/buildlease-vz-entitlement.RVW7oO")
+R17_ROOT_A_DISPOSITION_PATH = REPO / "experiments/storage/r17-root-a-current-disposition.json"
+R17_ROOT_A_DISPOSITION_SHA256 = "b1d080cd8a2d839b82182513294cec2b57421d4e6f4786dc4502ca59dffab02a"
+R17_ROOT_A_LOSS_FINDING_PATH = "R6-A-R56-R17-PHYSICAL-LOSS-FINDING.md"
+R17_ROOT_A_LOSS_FINDING_SHA256 = "bcd68117ec8e651f45faf4089b490a4db7234960a0e0b70c9f408508135a5ea0"
+R17_ROOT_A_ACCEPTANCE_PATH = "R6-A-R57-INDEPENDENT-ACTIVE-CLAIM-REVIEW.md"
+R17_ROOT_A_ACCEPTANCE_SHA256 = "c994dd9810310cc855616ce9bfe992035c21e246b74aaee338854e0d84ab4661"
+R17_ROOT_A_ACCEPTANCE_VERDICT = (
+    "PASS WITH HISTORICAL R17 PHYSICAL-EVIDENCE LOSS CAVEAT — "
+    "CURRENT R6-A SAFETY CLAIMS DO NOT REQUIRE THE LOST PHYSICAL ROOT"
+)
+R17_ROOT_A_LOSS_STATE = "LOST_UNAUTHORIZED_HISTORICAL_EVIDENCE"
+R17_ROOT_A_LOSS_CAVEAT = (
+    "R17 physical historical evidence loss is confirmed. The original probe bytes are unavailable; "
+    "historical custody and reproducibility claims remain caveated."
+)
+R17_CLASS_CONFIRMED_LOST = "LOST_UNAUTHORIZED_HISTORICAL_EVIDENCE"
+R17_CLASS_CURRENT_FG_METAL_RETAINED = "CURRENT_FG_METAL_RETAINED"
+R17_CLASS_OTHER_PROJECT_PROTECTED_PRESENT = "OTHER_PROJECT_PROTECTED_PRESENT"
+R17_CLASS_OTHER_PROJECT_PROTECTED_ABSENT = "OTHER_PROJECT_PROTECTED_IF_PRESENT"
+R17_CLASS_PATH_REUSED_DIFFERENT_OBJECT = "PATH_REUSED_DIFFERENT_OBJECT"
+R17_CLASS_MISSING_FG_METAL_RETAINED = "MISSING_FG_METAL_RETAINED"
+_R17_DISPOSITION_UNSET = object()
+
+BUILD1_PARENT_RECEIPT_RELATIVE = Path("r6/provenance/R6-BASELINE-0-SOURCE-TO-BINARY.json")
+BUILD1_PARENT_RECEIPT_SHA256 = "6fb7428f42724917845e55aa0defa0ffbe249b7422f05651eca24f82497c91a9"
+BUILD1_FINAL_REVIEW_RELATIVE = Path("r6/provenance/R6-BASELINE-0-FINAL-RECEIPT-REVIEW.md")
+BUILD1_FINAL_REVIEW_SHA256 = "0318598847ca579723c90f49fed2967ff80dc5cbafadbe7aaf5244a1a8de0ba1"
+BUILD1_REVIEW_SUPPLEMENT_RELATIVE = Path(
+    "r6/provenance/R6-BASELINE-0-BUILD-1-REVIEW-SUPPLEMENT.json")
+BUILD1_REVIEW_SUPPLEMENT_SHA256 = "09c38a2ec17b8f9baed33d92a686d5144b628aa5f7c56159a599f39fff05c416"
+BUILD1_INDEX_RELATIVE = Path("r6/provenance/R6-BASELINE-0-BUILD-1-INDEX.json")
+BUILD1_INDEX_SHA256 = "557dfbd33a53b34248bda93cb786bf78eb2025c54021ce42fa63025f35195d9b"
+BUILD1_DIRECTORY_MANIFEST_RELATIVE = Path(
+    "r6/workspaces/R6-BASELINE-0-BUILD-1-WORKSPACE/evidence/build-state/"
+    "R6-BASELINE-0-BUILD-1-BUILD-DIRECTORY-MANIFEST.json")
+BUILD1_DIRECTORY_MANIFEST_SHA256 = "85f5d60a37d2705c3ee2bf3a54b76bd9658838dac52936fa4b02570ffc52fe28"
+BUILD1_GENERATED_INPUTS_RELATIVE = Path(
+    "r6/workspaces/R6-BASELINE-0-BUILD-1-WORKSPACE/evidence/generated/"
+    "R6-BASELINE-0-GENERATED-INPUTS.json")
+BUILD1_GENERATED_INPUTS_SHA256 = "cb1f85234f47bcc294b8a65cd46175238e90bb2105bd8de90162bd03cd97fc27"
+BUILD1_ID = "R6-BASELINE-0-BUILD-1"
+BUILD1_BASELINE_ID = "R6-BASELINE-0"
+
+REJECTED_R5_BUILDROOT_EVIDENCE_ID = "R6-A-REJECTED-R5-BUILDROOT"
+REJECTED_R5_BUILDROOT_AUTHORITY_RELATIVE = Path(
+    "r6/provenance/R6-A-REJECTED-R5-BUILDROOT-EVIDENCE.json")
+REJECTED_R5_BUILDROOT_AUTHORITY_SHA256 = "91b79a93c21fd52156039d14ade2756a32d7490a178399d99c613d3554b89c94"
+REJECTED_R5_BUILDROOT_TREE_CONTENT_SHA256 = "5b9c69bbd99ef04daa843c5066e59ff19f45c69f78640dabbae57137e6510043"
+REJECTED_R5_BUILDROOT_CRITICAL_FILE_RELATIVE = "tests/present-accounting/present-accounting.exe"
+REJECTED_R5_BUILDROOT_CRITICAL_FILE_SHA256 = "aae5ee4bffbecd11eba50215bfa36814f650f8392bc61c1db8238d805eb8ac12"
+REJECTED_R5_BUILDROOT_REQUIRED_AUTHORITY_REFERENCES = (
+    {
+        "path": "R6-A-BUILDROOT-RECONCILIATION.md",
+        "sha256": "b66aacaff24619c3dae24c5bbe790761fb1e957ec22cd96be82d543b10d5e9e3",
+        "size_bytes": 4143,
+        "role": "Prior root disposition and explicit non-acceptance boundary",
+    },
+    {
+        "path": "R6-A-BUILDROOT-INDEPENDENT-REVIEW.md",
+        "sha256": "407818bbe6f5d45cbb3e4eee27ca1ed46cc19948f51cc25484c4caf7f7142090",
+        "size_bytes": 5286,
+        "role": "Prior independent forensic review; not an acceptance review",
+    },
+    {
+        "path": "R6-A-FINAL-GPT6-ACCEPTANCE-REVIEW.md",
+        "sha256": "612cc025d16d3cb9d8c07a9dc3bcf13e62e62260ca4e7af6d67917ca7a12ac77",
+        "size_bytes": 14169,
+        "role": "Failed final GPT-6 acceptance decision",
+    },
+    {
+        "path": "r6/experiments/R6-A-ACCOUNTING-SNAPSHOT-1/provenance/"
+                "R6-A-ACCOUNTING-SNAPSHOT-1-POST-REVIEW-EVIDENCE-INDEX-R8.json",
+        "sha256": "b8d6b857d4dee0cc2aecdf2d7fbbbd9c4a9aaf24598b1b7ac2f1cd029fd97683",
+        "size_bytes": 19840,
+        "role": "Relevant immutable R8 evidence-index identity",
+    },
+    {
+        "path": "r6/experiments/R6-A-ACCOUNTING-SNAPSHOT-1/provenance/R6-A-TEST-SUMMARY.json",
+        "sha256": "9b9ef4da3bca527845ec9566ffa0470e0acaf89aaa66ff8035b653b4668c7069",
+        "size_bytes": 6794,
+        "role": "R8-indexed historical test summary with exact executable path and hash",
+    },
+    {
+        "path": "r6/experiments/R6-A-ACCOUNTING-SNAPSHOT-1/provenance/reviews/R6-A-EXECUTION-REVIEW.md",
+        "sha256": "827ce7eb4920fbe121622be4a9967efab0726f044fcafeaf795d3de60ea52af9",
+        "size_bytes": 21384,
+        "role": "R8-indexed prior path-and-hash observation; does not accept R6-A",
+    },
+    {
+        "path": "R6-A-R5-TEST-SEMANTICS-APPLICABILITY.md",
+        "sha256": "5f45c1f629e34e0986599af4ee429360596285980b7a76970fa3ba020ecda333",
+        "size_bytes": 2316,
+        "role": "R5 TEST semantic applicability artifact; semantics only",
+    },
+)
+REJECTED_R5_BUILDROOT_R8_PATH = Path(
+    "r6/experiments/R6-A-ACCOUNTING-SNAPSHOT-1/provenance/"
+    "R6-A-ACCOUNTING-SNAPSHOT-1-POST-REVIEW-EVIDENCE-INDEX-R8.json")
+REJECTED_R5_BUILDROOT_R8_REVISION = 8
+REJECTED_R5_BUILDROOT_R8_DERIVATIVE_ID = "R6-A-ACCOUNTING-SNAPSHOT-1"
+REJECTED_R5_BUILDROOT_R8_CLAIMS = (
+    {
+        "path": "r6/experiments/R6-A-ACCOUNTING-SNAPSHOT-1/provenance/R6-A-TEST-SUMMARY.json",
+        "sha256": "9b9ef4da3bca527845ec9566ffa0470e0acaf89aaa66ff8035b653b4668c7069",
+        "size_bytes": 6794,
+    },
+    {
+        "path": "r6/experiments/R6-A-ACCOUNTING-SNAPSHOT-1/provenance/reviews/R6-A-EXECUTION-REVIEW.md",
+        "sha256": "827ce7eb4920fbe121622be4a9967efab0726f044fcafeaf795d3de60ea52af9",
+        "size_bytes": 21384,
+    },
+)
+
 class RetentionError(RuntimeError):
     """The storage operation was refused or could not complete safely."""
+
+
+@dataclasses.dataclass(frozen=True)
+class ProtectedEvidenceRoot:
+    """One exact fixed-roster evidence root retained at its bound pathname."""
+
+    evidence_id: str
+    relative_path: str
+    inventory_sha256: str
+    expected_file_count: int
+    expected_logical_bytes: int
+    tree_content_sha256: str | None = None
+    critical_file_relative_path: str | None = None
+    critical_file_sha256: str | None = None
+    authority_relative_path: str | None = None
+    authority_sha256: str | None = None
+
+
+PROTECTED_EVIDENCE_ROOTS = (
+    ProtectedEvidenceRoot(
+        evidence_id="R6-A-BUILD-1-EXPLORATORY",
+        relative_path="r6/workspaces/R6-BASELINE-0-BUILD-1-WORKSPACE/build.x86_64",
+        inventory_sha256="9148ae52e2f0500baee790c202a4e19936116bc3aa3f593f0e9a9ecd32e32604",
+        expected_file_count=34,
+        expected_logical_bytes=1_193_851,
+    ),
+    ProtectedEvidenceRoot(
+        evidence_id="R6-A-BUILD-1-FINAL",
+        relative_path="r6/workspaces/R6-BASELINE-0-BUILD-1-WORKSPACE/build.x86_64-final",
+        inventory_sha256="e38e5611d750e5594b39f0be81f07b5f7c4889c175a72e272411c252f0b78c2e",
+        expected_file_count=665,
+        expected_logical_bytes=113_970_767,
+    ),
+    ProtectedEvidenceRoot(
+        evidence_id="R6-A-BUILD-1-GENERATED",
+        relative_path="r6/workspaces/R6-BASELINE-0-BUILD-1-WORKSPACE/evidence/generated/files",
+        inventory_sha256="ddcd8b6abf146c132481ce4da6118a84dcf761a58a30380b222b42f6023974bd",
+        expected_file_count=37,
+        expected_logical_bytes=1_155_955,
+    ),
+    ProtectedEvidenceRoot(
+        evidence_id=REJECTED_R5_BUILDROOT_EVIDENCE_ID,
+        relative_path="r6/workspaces/R6-A-ACCOUNTING-SNAPSHOT-1-BUILD-WORKSPACE/build.x86_64",
+        inventory_sha256="cabb6a4c177faf86024f9d1c6e62b3fb834913bbbd27ed004faffc1ffc264b9b",
+        expected_file_count=667,
+        expected_logical_bytes=127_359_989,
+        tree_content_sha256=REJECTED_R5_BUILDROOT_TREE_CONTENT_SHA256,
+        critical_file_relative_path=REJECTED_R5_BUILDROOT_CRITICAL_FILE_RELATIVE,
+        critical_file_sha256=REJECTED_R5_BUILDROOT_CRITICAL_FILE_SHA256,
+        authority_relative_path=REJECTED_R5_BUILDROOT_AUTHORITY_RELATIVE.as_posix(),
+        authority_sha256=REJECTED_R5_BUILDROOT_AUTHORITY_SHA256,
+    ),
+)
 
 
 @dataclasses.dataclass(frozen=True)
@@ -538,12 +806,91 @@ def _write_json(path: Path, payload: Mapping[str, Any], *, replace: bool = True,
     try:
         value = _seal(payload) if sealed else dict(payload)
         raw = (json.dumps(value, indent=2, sort_keys=True) + "\n").encode()
+        _reserve_finalization_output(path, len(raw), "durable JSON")
         _write_at(parent_fd, path.name, raw, replace=replace)
         if _read_at(parent_fd, path.name) != raw:
             raise RetentionError(f"durable JSON readback mismatch: {path}")
         return raw
     finally:
         os.close(parent_fd)
+
+
+FINALIZATION_OUTPUT_FILE_OVERHEAD_BYTES = 64 * 1024
+_FINALIZATION_OUTPUT_BUDGET: contextvars.ContextVar[Any | None] = contextvars.ContextVar(
+    "fgmetal_finalization_output_budget", default=None)
+
+
+class _FinalizationOutputBudget:
+    """Enforce one signed cap across R87's durable finalization writes."""
+
+    def __init__(self, *, build_path: Path, allowance_bytes: int,
+                 expected_build_bytes: int) -> None:
+        self.build_path = Path(os.path.abspath(build_path))
+        self.allowance_bytes = allowance_bytes
+        self.remaining_bytes = allowance_bytes
+        self.expected_build_bytes = expected_build_bytes
+
+    def _within_build_root(self, path: Path) -> bool:
+        absolute = Path(os.path.abspath(path))
+        return absolute == self.build_path or self.build_path in absolute.parents
+
+    def _capacity_admission(self, *, peak_output_bytes: int, where: str) -> None:
+        try:
+            import storage_policy
+            current_free = storage_policy.disk_free_bytes(REPO)
+            current_scoped = storage_policy.conservative_project_usage_bytes(
+                storage_policy.measure_project_usage(strict=True))
+            build_usage = _session_measure_tree(self.build_path)["allocated_bytes"]
+            if build_usage > self.expected_build_bytes:
+                raise RetentionError(
+                    "R87 active BuildLease allocation exceeded its signed reservation: "
+                    f"{build_usage} > {self.expected_build_bytes}")
+            if current_scoped < build_usage:
+                raise RetentionError(
+                    "R87 strict project scope is smaller than the exact active BuildLease footprint")
+            non_build_scoped = current_scoped - build_usage
+            uncertainty = storage_policy.admission_uncertainty_margin_bytes(
+                self.expected_build_bytes + self.allowance_bytes)
+            admission = storage_policy.projected_storage_admission(
+                current_free_bytes=current_free,
+                current_scoped_bytes=non_build_scoped,
+                peak_additional_bytes=(self.expected_build_bytes + peak_output_bytes
+                                       + uncertainty))
+        except BaseException as error:
+            raise RetentionError(
+                f"R87 finalization capacity could not be measured before {where}: {error}") from error
+        if not admission.get("admitted"):
+            raise RetentionError(
+                f"R87 finalization capacity blocks {where}: "
+                + "; ".join(str(item) for item in admission.get("blockers", [])))
+
+    def preflight(self) -> None:
+        self._capacity_admission(peak_output_bytes=self.remaining_bytes,
+                                 where="finalization output capture")
+
+    def reserve(self, path: Path, logical_bytes: int, label: str) -> None:
+        if self._within_build_root(path):
+            return
+        if (not isinstance(logical_bytes, int) or isinstance(logical_bytes, bool)
+                or logical_bytes < 0):
+            raise RetentionError("R87 finalization output has an invalid byte count")
+        rounded = ((logical_bytes + 4095) // 4096) * 4096
+        charge = rounded + FINALIZATION_OUTPUT_FILE_OVERHEAD_BYTES
+        if charge > self.remaining_bytes:
+            raise RetentionError(
+                f"R87 finalization output allowance exceeded before {label}: "
+                f"need {charge} bytes, have {self.remaining_bytes}")
+        self._capacity_admission(peak_output_bytes=self.remaining_bytes,
+                                 where=label)
+        # Charge before the write. A failed fsync/rename may still leave a
+        # visible object, so a failure never refunds this portion of the cap.
+        self.remaining_bytes -= charge
+
+
+def _reserve_finalization_output(path: Path, logical_bytes: int, label: str) -> None:
+    budget = _FINALIZATION_OUTPUT_BUDGET.get()
+    if isinstance(budget, _FinalizationOutputBudget):
+        budget.reserve(Path(path), logical_bytes, label)
 
 def _read_json(path: Path, *, sealed: bool = False) -> dict[str, Any]:
     parent_fd = _open_dir(path.parent)
@@ -580,6 +927,108 @@ def _hash_path(path: Path) -> str:
             os.close(fd)
     finally:
         os.close(parent_fd)
+
+def _read_file_beneath_nofollow(root: Path, relative: str | Path, *,
+                                expected_sha256: str | None = None,
+                                expected_size_bytes: int | None = None,
+                                maximum_bytes: int = 1024 * 1024 * 1024,
+                                label: str = "evidence file") -> bytes:
+    """Read a regular file through descriptor-relative, no-follow path components."""
+    relative_text = os.fspath(relative)
+    if not isinstance(relative_text, str):
+        raise RetentionError(f"{label} path must be text")
+    relative_path = _session_relative_path(relative_text, label)
+    if (expected_sha256 is not None
+            and re.fullmatch(r"[0-9a-f]{64}", expected_sha256) is None):
+        raise RetentionError(f"{label} has a malformed expected digest")
+    if (type(maximum_bytes) is not int or maximum_bytes < 0
+            or (expected_size_bytes is not None
+                and (type(expected_size_bytes) is not int or expected_size_bytes < 0))):
+        raise RetentionError(f"{label} has malformed size bounds")
+    parent_fd = -1
+    fd = -1
+    try:
+        parent_fd = _open_dir(Path(root) / relative_path.parent)
+        fd = os.open(relative_path.name,
+                     os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0), dir_fd=parent_fd)
+        before = os.fstat(fd)
+        if (not stat.S_ISREG(before.st_mode) or before.st_nlink != 1
+                or before.st_size > maximum_bytes
+                or (expected_size_bytes is not None and before.st_size != expected_size_bytes)):
+            raise RetentionError(f"{label} is linked, special, or outside its bounded size")
+        data = bytearray()
+        while True:
+            block = os.read(fd, min(4 * 1024 * 1024, maximum_bytes + 1 - len(data)))
+            if not block:
+                break
+            data.extend(block)
+            if len(data) > maximum_bytes:
+                raise RetentionError(f"{label} exceeds its bounded size")
+        after = os.fstat(fd)
+        before_identity = (before.st_dev, before.st_ino, before.st_size, before.st_nlink,
+                           before.st_mtime_ns, before.st_ctime_ns)
+        after_identity = (after.st_dev, after.st_ino, after.st_size, after.st_nlink,
+                          after.st_mtime_ns, after.st_ctime_ns)
+        if before_identity != after_identity or len(data) != after.st_size:
+            raise RetentionError(f"{label} changed while being read")
+        raw = bytes(data)
+        if expected_sha256 is not None and hashlib.sha256(raw).hexdigest() != expected_sha256:
+            raise RetentionError(f"{label} does not match its frozen digest")
+        return raw
+    except OSError as error:
+        raise RetentionError(f"{label} is unavailable through its no-follow path: {error}") from error
+    finally:
+        if fd >= 0:
+            os.close(fd)
+        if parent_fd >= 0:
+            os.close(parent_fd)
+
+def _hash_file_beneath_nofollow(root: Path, relative: str | Path, *,
+                                expected_sha256: str | None = None,
+                                expected_size_bytes: int | None = None,
+                                maximum_bytes: int = 1024 * 1024 * 1024,
+                                label: str = "evidence file") -> str:
+    """Hash a regular file through no-follow directory descriptors without buffering it."""
+    relative_text = os.fspath(relative)
+    if not isinstance(relative_text, str):
+        raise RetentionError(f"{label} path must be text")
+    relative_path = _session_relative_path(relative_text, label)
+    if (expected_sha256 is not None
+            and re.fullmatch(r"[0-9a-f]{64}", expected_sha256) is None):
+        raise RetentionError(f"{label} has a malformed expected digest")
+    if (type(maximum_bytes) is not int or maximum_bytes < 0
+            or (expected_size_bytes is not None
+                and (type(expected_size_bytes) is not int or expected_size_bytes < 0))):
+        raise RetentionError(f"{label} has malformed size bounds")
+    parent_fd = -1
+    fd = -1
+    try:
+        parent_fd = _open_dir(Path(root) / relative_path.parent)
+        fd = os.open(relative_path.name,
+                     os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0), dir_fd=parent_fd)
+        before = os.fstat(fd)
+        if (not stat.S_ISREG(before.st_mode) or before.st_nlink != 1
+                or before.st_size > maximum_bytes
+                or (expected_size_bytes is not None and before.st_size != expected_size_bytes)):
+            raise RetentionError(f"{label} is linked, special, or outside its bounded size")
+        digest = _hash_fd(fd)
+        after = os.fstat(fd)
+        before_identity = (before.st_dev, before.st_ino, before.st_size, before.st_nlink,
+                           before.st_mtime_ns, before.st_ctime_ns)
+        after_identity = (after.st_dev, after.st_ino, after.st_size, after.st_nlink,
+                          after.st_mtime_ns, after.st_ctime_ns)
+        if before_identity != after_identity:
+            raise RetentionError(f"{label} changed while being hashed")
+        if expected_sha256 is not None and digest != expected_sha256:
+            raise RetentionError(f"{label} does not match its frozen digest")
+        return digest
+    except OSError as error:
+        raise RetentionError(f"{label} is unavailable through its no-follow path: {error}") from error
+    finally:
+        if fd >= 0:
+            os.close(fd)
+        if parent_fd >= 0:
+            os.close(parent_fd)
 
 def _fs_identity(fd: int) -> dict[str, Any]:
     info = os.fstat(fd)
@@ -680,7 +1129,14 @@ def _tree_stats(fd: int, root_device: int, root_path: Path | None = None, *,
             "allocated_unique_inode_bytes": unique_allocated,
             "best_recoverable_bytes_estimate": recoverable_upper}
 
-def _tree_hash(root: Path) -> tuple[str, int]:
+def _tree_hash(root: Path, *, reject_symlinks: bool = False,
+               reject_external_hardlinks: bool = False,
+               require_internal_symlinks: bool = False,
+               include_root_git: bool = False) -> tuple[str, int]:
+    root = Path(root)
+    canonical_root = root.resolve(strict=True)
+    if require_internal_symlinks and canonical_root != root:
+        raise RetentionError(f"source tree root is not canonical: {root}")
     root_fd = _open_dir(root)
     root_dev = os.fstat(root_fd).st_dev
     root_fsid = getattr(os.fstatvfs(root_fd), "f_fsid", None)
@@ -689,20 +1145,41 @@ def _tree_hash(root: Path) -> tuple[str, int]:
         raise RetentionError(f"source tree filesystem identity is unavailable: {root}")
     digest = hashlib.sha256()
     count = 0
+    regular_links: dict[tuple[int, int], tuple[int, int]] = {}
     stack: list[tuple[int, Path]] = [(root_fd, Path())]
     try:
         while stack:
             parent_fd, relative_dir = stack.pop()
             try:
                 for name in sorted(os.listdir(parent_fd)):
-                    if relative_dir == Path() and name == ".git":
+                    if not include_root_git and relative_dir == Path() and name == ".git":
                         continue
                     info = os.stat(name, dir_fd=parent_fd, follow_symlinks=False)
                     relative = (relative_dir / name).as_posix()
                     digest.update(relative.encode("utf-8", "surrogateescape") + b"\0")
                     digest.update(oct(stat.S_IMODE(info.st_mode)).encode() + b"\0")
                     if stat.S_ISLNK(info.st_mode):
-                        digest.update(b"L\0" + os.fsencode(os.readlink(name, dir_fd=parent_fd)) + b"\n")
+                        if reject_symlinks:
+                            raise RetentionError(f"source tree contains a symlink: {relative}")
+                        raw_target = os.readlink(name, dir_fd=parent_fd)
+                        if require_internal_symlinks:
+                            link_path = root / relative
+                            try:
+                                resolved_target = link_path.resolve(strict=True)
+                            except OSError as error:
+                                raise RetentionError(
+                                    f"source tree symlink target is missing: {relative}") from error
+                            after = os.stat(name, dir_fd=parent_fd, follow_symlinks=False)
+                            if ((info.st_dev, info.st_ino, info.st_mtime_ns, raw_target)
+                                    != (after.st_dev, after.st_ino, after.st_mtime_ns,
+                                        os.readlink(name, dir_fd=parent_fd))
+                                    or (resolved_target != canonical_root
+                                        and canonical_root not in resolved_target.parents)
+                                    or resolved_target.stat().st_dev != root_dev
+                                    or not (resolved_target.is_file() or resolved_target.is_dir())):
+                                raise RetentionError(
+                                    f"source tree symlink escapes or changed during hashing: {relative}")
+                        digest.update(b"L\0" + os.fsencode(raw_target) + b"\n")
                     elif stat.S_ISDIR(info.st_mode):
                         if info.st_dev != root_dev:
                             raise RetentionError(f"source tree crosses a filesystem boundary: {relative}")
@@ -722,6 +1199,12 @@ def _tree_hash(root: Path) -> tuple[str, int]:
                             if ((now.st_dev, now.st_ino, now.st_size) != (info.st_dev, info.st_ino, info.st_size)
                                     or getattr(os.fstatvfs(child_fd), "f_fsid", None) != root_fsid):
                                 raise RetentionError(f"source file changed while hashing: {relative}")
+                            if reject_external_hardlinks:
+                                key = (now.st_dev, now.st_ino)
+                                previous = regular_links.get(key)
+                                if previous is not None and previous[0] != now.st_nlink:
+                                    raise RetentionError(f"source hardlink count changed while hashing: {relative}")
+                                regular_links[key] = (now.st_nlink, (previous[1] if previous else 0) + 1)
                             digest.update(b"F\0" + _hash_fd(child_fd).encode() + b"\n")
                         finally:
                             os.close(child_fd)
@@ -731,6 +1214,11 @@ def _tree_hash(root: Path) -> tuple[str, int]:
             finally:
                 if parent_fd != root_fd:
                     os.close(parent_fd)
+        if reject_external_hardlinks:
+            for (device, inode), (reported_links, observed_links) in regular_links.items():
+                if reported_links != observed_links:
+                    raise RetentionError(
+                        f"source file has hardlinks outside the admitted tree: {device}:{inode}")
         return digest.hexdigest(), count
     finally:
         os.close(root_fd)
@@ -782,6 +1270,523 @@ def _inventory_evidence(root: Path) -> list[dict[str, Any]]:
         return rows
     finally:
         os.close(root_fd)
+
+
+def _protected_evidence_root_inventory(root: Path) -> tuple[list[dict[str, Any]], dict[str, tuple[int, int]], int]:
+    """Hash exact protected-root membership without persisting incidental metadata."""
+    root = Path(os.path.abspath(root))
+    parent_fd = _open_dir(root.parent)
+    root_fd: int | None = None
+    root_identity: tuple[int, int] | None = None
+    root_state: tuple[int, int, int, int] | None = None
+    root_fsid: int | None = None
+    rows: list[dict[str, Any]] = []
+    file_identities: dict[str, tuple[int, int]] = {}
+    file_states: dict[str, tuple[int, int, int, int, int]] = {}
+    directory_states: dict[str, tuple[int, int, int, int]] = {}
+    open_child_fds: set[int] = set()
+    stack: list[tuple[int, Path]] = []
+    try:
+        root_info = os.stat(root.name, dir_fd=parent_fd, follow_symlinks=False)
+        if not stat.S_ISDIR(root_info.st_mode):
+            raise RetentionError(f"protected evidence root is not a real directory: {root}")
+        root_fd = os.open(root.name, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0)
+                          | getattr(os, "O_NOFOLLOW", 0), dir_fd=parent_fd)
+        opened_root = os.fstat(root_fd)
+        root_fsid = getattr(os.fstatvfs(root_fd), "f_fsid", None)
+        if (root_fsid is None or (opened_root.st_dev, opened_root.st_ino) !=
+                (root_info.st_dev, root_info.st_ino)):
+            raise RetentionError(f"protected evidence root changed while opening: {root}")
+        root_identity = (opened_root.st_dev, opened_root.st_ino)
+        root_state = (opened_root.st_dev, opened_root.st_ino, opened_root.st_mtime_ns,
+                      getattr(opened_root, "st_ctime_ns", 0))
+        root_device = opened_root.st_dev
+        logical_bytes = 0
+        stack = [(root_fd, Path())]
+        while stack:
+            directory_fd, relative_dir = stack.pop()
+            try:
+                for name in sorted(os.listdir(directory_fd)):
+                    info = os.stat(name, dir_fd=directory_fd, follow_symlinks=False)
+                    relative = (relative_dir / name).as_posix()
+                    if info.st_dev != root_device:
+                        raise RetentionError(f"protected evidence crosses a filesystem boundary: {root / relative}")
+                    if stat.S_ISDIR(info.st_mode):
+                        child_fd = os.open(name, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0)
+                                           | getattr(os, "O_NOFOLLOW", 0), dir_fd=directory_fd)
+                        child_info = os.fstat(child_fd)
+                        child_fsid = getattr(os.fstatvfs(child_fd), "f_fsid", None)
+                        if ((child_info.st_dev, child_info.st_ino) != (info.st_dev, info.st_ino)
+                                or child_fsid != root_fsid):
+                            os.close(child_fd)
+                            raise RetentionError(f"protected evidence directory changed while opening: {root / relative}")
+                        rows.append({"path": relative, "kind": "directory"})
+                        directory_states[relative] = (
+                            child_info.st_dev, child_info.st_ino, child_info.st_mtime_ns,
+                            getattr(child_info, "st_ctime_ns", 0))
+                        open_child_fds.add(child_fd)
+                        stack.append((child_fd, relative_dir / name))
+                    elif stat.S_ISREG(info.st_mode):
+                        file_fd = os.open(name, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0), dir_fd=directory_fd)
+                        try:
+                            before = os.fstat(file_fd)
+                            file_fsid = getattr(os.fstatvfs(file_fd), "f_fsid", None)
+                            digest = _hash_fd(file_fd)
+                            after = os.fstat(file_fd)
+                            if (not stat.S_ISREG(before.st_mode) or file_fsid != root_fsid
+                                    or (before.st_dev, before.st_ino, before.st_size,
+                                        before.st_mtime_ns, getattr(before, "st_ctime_ns", 0)) !=
+                                    (after.st_dev, after.st_ino, after.st_size,
+                                     after.st_mtime_ns, getattr(after, "st_ctime_ns", 0))):
+                                raise RetentionError(f"protected evidence file changed while hashing: {root / relative}")
+                        finally:
+                            os.close(file_fd)
+                        rows.append({"path": relative, "kind": "file", "size_bytes": before.st_size,
+                                     "sha256": digest})
+                        file_identities[relative] = (before.st_dev, before.st_ino)
+                        file_states[relative] = (before.st_dev, before.st_ino, before.st_size,
+                                                 before.st_mtime_ns, getattr(before, "st_ctime_ns", 0))
+                        logical_bytes += before.st_size
+                    else:
+                        raise RetentionError(f"unsupported object in protected evidence: {root / relative}")
+            finally:
+                if directory_fd != root_fd:
+                    open_child_fds.discard(directory_fd)
+                    os.close(directory_fd)
+
+        # Reopen every observed path after hashing. These identities are only
+        # race guards for this call; they are deliberately absent from the
+        # persisted content identity because BUILD-1 did not bind inodes.
+        for relative, expected in sorted(directory_states.items()):
+            directory_fd = _open_dir(root / relative)
+            try:
+                current = os.fstat(directory_fd)
+                current_state = (current.st_dev, current.st_ino, current.st_mtime_ns,
+                                 getattr(current, "st_ctime_ns", 0))
+                if current_state != expected:
+                    raise RetentionError(f"protected evidence directory was replaced during scan: {root / relative}")
+            finally:
+                os.close(directory_fd)
+        for relative, expected in sorted(file_states.items()):
+            relative_path = Path(relative)
+            containing_fd = _open_dir(root / relative_path.parent)
+            try:
+                current = os.stat(relative_path.name, dir_fd=containing_fd, follow_symlinks=False)
+                current_state = (current.st_dev, current.st_ino, current.st_size,
+                                 current.st_mtime_ns, getattr(current, "st_ctime_ns", 0))
+                if not stat.S_ISREG(current.st_mode) or current_state != expected:
+                    raise RetentionError(f"protected evidence file was replaced during scan: {root / relative}")
+            finally:
+                os.close(containing_fd)
+        current_root = os.stat(root.name, dir_fd=parent_fd, follow_symlinks=False)
+        current_root_state = (current_root.st_dev, current_root.st_ino, current_root.st_mtime_ns,
+                              getattr(current_root, "st_ctime_ns", 0))
+        if (not stat.S_ISDIR(current_root.st_mode)
+                or (current_root.st_dev, current_root.st_ino) != root_identity
+                or current_root_state != root_state):
+            raise RetentionError(f"protected evidence root changed during scan: {root}")
+        rows.sort(key=lambda row: row["path"])
+        return rows, file_identities, logical_bytes
+    except OSError as error:
+        raise RetentionError(f"cannot safely inventory protected evidence root {root}: {error}") from error
+    finally:
+        for descriptor in open_child_fds:
+            try:
+                os.close(descriptor)
+            except OSError:
+                pass
+        if root_fd is not None:
+            os.close(root_fd)
+        os.close(parent_fd)
+
+
+def _protected_pinned_bytes(relative: Path, expected_sha256: str, label: str) -> bytes:
+    if relative.is_absolute() or any(part in {"", ".", ".."} for part in relative.parts):
+        raise RetentionError(f"protected evidence authority path is not canonical: {relative}")
+    try:
+        raw = _read_file_descriptor(REPO / relative)
+    except (OSError, RetentionError) as error:
+        raise RetentionError(f"protected evidence authority is unavailable ({label}): {error}") from error
+    if not hmac.compare_digest(hashlib.sha256(raw).hexdigest(), expected_sha256):
+        raise RetentionError(f"protected evidence authority hash changed: {label}")
+    return raw
+
+
+def _protected_json(raw: bytes, label: str) -> dict[str, Any]:
+    try:
+        value = json.loads(raw)
+    except (UnicodeDecodeError, json.JSONDecodeError) as error:
+        raise RetentionError(f"protected evidence authority is invalid JSON: {label}") from error
+    if not isinstance(value, dict):
+        raise RetentionError(f"protected evidence authority is not an object: {label}")
+    return value
+
+
+def _protected_evidence_tree_content_sha256(rows: Iterable[Mapping[str, Any]]) -> str:
+    """Hash regular-file content identity using the retained R5 audit record format."""
+    digest = hashlib.sha256()
+    for row in rows:
+        if row.get("kind") != "file":
+            continue
+        relative = row.get("path")
+        size_bytes = row.get("size_bytes")
+        file_sha256 = row.get("sha256")
+        if (not isinstance(relative, str) or not relative or Path(relative).is_absolute()
+                or "\\" in relative or any(part in {"", ".", ".."} for part in relative.split("/"))
+                or not isinstance(size_bytes, int) or isinstance(size_bytes, bool) or size_bytes < 0
+                or not isinstance(file_sha256, str) or not re.fullmatch(r"[0-9a-f]{64}", file_sha256)):
+            raise RetentionError("protected evidence content tree contains an invalid file identity")
+        digest.update(relative.encode("utf-8"))
+        digest.update(b"\0")
+        digest.update(str(size_bytes).encode("ascii"))
+        digest.update(b"\0")
+        digest.update(file_sha256.encode("ascii"))
+        digest.update(b"\n")
+    return digest.hexdigest()
+
+
+def _verify_rejected_r5_buildroot_authority(
+        spec: ProtectedEvidenceRoot, root: Path, actual_rows: list[dict[str, Any]],
+        inventory_sha256: str, actual_files: Mapping[str, tuple[int, str]],
+        logical_bytes: int) -> None:
+    """Verify immutable forensic authority for the one rejected R5 build root."""
+    if (spec.evidence_id != REJECTED_R5_BUILDROOT_EVIDENCE_ID
+            or spec.authority_relative_path != REJECTED_R5_BUILDROOT_AUTHORITY_RELATIVE.as_posix()
+            or spec.authority_sha256 != REJECTED_R5_BUILDROOT_AUTHORITY_SHA256
+            or spec.tree_content_sha256 != REJECTED_R5_BUILDROOT_TREE_CONTENT_SHA256
+            or spec.critical_file_relative_path != REJECTED_R5_BUILDROOT_CRITICAL_FILE_RELATIVE
+            or spec.critical_file_sha256 != REJECTED_R5_BUILDROOT_CRITICAL_FILE_SHA256):
+        raise RetentionError("rejected R5 build-root roster authority differs from its fixed identity")
+
+    authority_raw = _protected_pinned_bytes(
+        REJECTED_R5_BUILDROOT_AUTHORITY_RELATIVE, REJECTED_R5_BUILDROOT_AUTHORITY_SHA256,
+        "rejected R5 build-root authority")
+    authority = _protected_json(authority_raw, "rejected R5 build-root authority")
+    expected_reference_rows = [dict(row) for row in REJECTED_R5_BUILDROOT_REQUIRED_AUTHORITY_REFERENCES]
+    if authority.get("authority_references") != expected_reference_rows:
+        raise RetentionError("rejected R5 build-root authority references differ from the fixed record")
+    reference_bytes: dict[str, bytes] = {}
+    for reference in expected_reference_rows:
+        relative = Path(reference["path"])
+        raw = _protected_pinned_bytes(relative, reference["sha256"], reference["role"])
+        if len(raw) != reference["size_bytes"]:
+            raise RetentionError(f"rejected R5 build-root authority size changed: {relative}")
+        reference_bytes[relative.as_posix()] = raw
+
+    r8_reference = expected_reference_rows[3]
+    r8 = _protected_json(reference_bytes[r8_reference["path"]], "R8 evidence index")
+    expected_claims = [dict(row) for row in REJECTED_R5_BUILDROOT_R8_CLAIMS]
+    expected_r8_identity = {
+        "path": REJECTED_R5_BUILDROOT_R8_PATH.as_posix(),
+        "sha256": r8_reference["sha256"],
+        "revision": REJECTED_R5_BUILDROOT_R8_REVISION,
+        "derivative_id": REJECTED_R5_BUILDROOT_R8_DERIVATIVE_ID,
+        "indexed_historical_claims": expected_claims,
+    }
+    if (authority.get("r8_evidence_index") != expected_r8_identity
+            or r8.get("schema_version") != 1
+            or r8.get("revision") != REJECTED_R5_BUILDROOT_R8_REVISION
+            or r8.get("derivative_id") != REJECTED_R5_BUILDROOT_R8_DERIVATIVE_ID
+            or not isinstance(r8.get("artifacts"), list)):
+        raise RetentionError("rejected R5 build-root authority does not bind the fixed R8 index identity")
+    for expected_claim in expected_claims:
+        matches = [row for row in r8["artifacts"]
+                   if isinstance(row, dict) and row.get("path") == expected_claim["path"]]
+        if len(matches) != 1 or any(matches[0].get(key) != value
+                                   for key, value in expected_claim.items()):
+            raise RetentionError("R8 index no longer binds the historical test-path evidence")
+
+    failed_review = reference_bytes[expected_reference_rows[2]["path"]].decode("utf-8")
+    if "FAIL — R6-A NOT ACCEPTED" not in failed_review:
+        raise RetentionError("rejected R5 build-root authority no longer identifies the failed final review")
+    summary = _protected_json(reference_bytes[expected_reference_rows[4]["path"]],
+                              "R8-indexed historical test summary")
+    windows_test = summary.get("test_binaries", {}).get("windows_x86_64_pe")
+    if (summary.get("source_revision") != "R5"
+            or summary.get("source_tree_sha256") != "488e953058160c2cc0796fc29d17086f4e0043c87eb6593ceabda93553241673"
+            or not isinstance(windows_test, dict)
+            or windows_test.get("path") != f"{spec.relative_path}/{REJECTED_R5_BUILDROOT_CRITICAL_FILE_RELATIVE}"
+            or windows_test.get("sha256") != REJECTED_R5_BUILDROOT_CRITICAL_FILE_SHA256):
+        raise RetentionError("R8-indexed test summary no longer binds the historical R5 executable")
+    prior_execution_review = reference_bytes[expected_reference_rows[5]["path"]].decode("utf-8")
+    if (f"{spec.relative_path}/{REJECTED_R5_BUILDROOT_CRITICAL_FILE_RELATIVE}" not in prior_execution_review
+            or REJECTED_R5_BUILDROOT_CRITICAL_FILE_SHA256 not in prior_execution_review):
+        raise RetentionError("R8-indexed execution review no longer binds the historical test executable")
+
+    content_sha256 = _protected_evidence_tree_content_sha256(actual_rows)
+    critical_identity = actual_files.get(REJECTED_R5_BUILDROOT_CRITICAL_FILE_RELATIVE)
+    if (authority.get("schema_version") != 1
+            or authority.get("evidence_id") != REJECTED_R5_BUILDROOT_EVIDENCE_ID
+            or authority.get("disposition") != "HISTORICAL_REJECTED_EXECUTION_EVIDENCE"
+            or authority.get("R6_A_ACCEPTANCE") is not False
+            or authority.get("execution_authorization") != "NONE"
+            or authority.get("active_BuildLease") is not False
+            or authority.get("R5_repair_admission") != "NOT_CREATED"
+            or authority.get("exact_normalized_root_path") != str(root)):
+        raise RetentionError("rejected R5 build-root authority classification or path changed")
+
+    expected_accounting = {
+        "policy": "FULLY_CHARGED",
+        "storage_credit": False,
+        "reservation_credit": False,
+        "free_space_exclusion": False,
+        "project_scope_exclusion": False,
+        "BuildLease_exemption": False,
+    }
+    if authority.get("accounting") != expected_accounting:
+        raise RetentionError("rejected R5 build-root authority changes full storage accounting")
+    expected_identity = {
+        "regular_file_count": spec.expected_file_count,
+        "directory_count": sum(row["kind"] == "directory" for row in actual_rows),
+        "logical_bytes": spec.expected_logical_bytes,
+        "symlink_count": 0,
+        "multiply_linked_regular_file_count": 0,
+        "inventory_sha256": inventory_sha256,
+        "tree_content_sha256": content_sha256,
+        "critical_executable": {
+            "relative_path": REJECTED_R5_BUILDROOT_CRITICAL_FILE_RELATIVE,
+            "sha256": REJECTED_R5_BUILDROOT_CRITICAL_FILE_SHA256,
+            "size_bytes": critical_identity[0] if critical_identity is not None else None,
+        },
+    }
+    if (authority.get("identity") != expected_identity
+            or authority.get("complete_inventory") != actual_rows
+            or len(actual_files) != spec.expected_file_count
+            or logical_bytes != spec.expected_logical_bytes
+            or inventory_sha256 != spec.inventory_sha256
+            or content_sha256 != spec.tree_content_sha256
+            or critical_identity is None
+            or critical_identity[1] != spec.critical_file_sha256):
+        raise RetentionError(f"rejected R5 build-root inventory or content identity changed: {root}")
+def _verify_protected_evidence_roots(*, include_file_identities: bool = False) -> list[dict[str, Any]]:
+    """Verify the fixed BUILD-1 parent chain and the rejected R5 evidence tree."""
+    if not PROTECTED_EVIDENCE_ROOTS:
+        return []
+    receipt_raw = _protected_pinned_bytes(
+        BUILD1_PARENT_RECEIPT_RELATIVE, BUILD1_PARENT_RECEIPT_SHA256, "BUILD-1 parent receipt")
+    review_raw = _protected_pinned_bytes(
+        BUILD1_FINAL_REVIEW_RELATIVE, BUILD1_FINAL_REVIEW_SHA256, "BUILD-1 final review")
+    supplement_raw = _protected_pinned_bytes(
+        BUILD1_REVIEW_SUPPLEMENT_RELATIVE, BUILD1_REVIEW_SUPPLEMENT_SHA256,
+        "BUILD-1 review supplement")
+    index_raw = _protected_pinned_bytes(BUILD1_INDEX_RELATIVE, BUILD1_INDEX_SHA256, "BUILD-1 index")
+    manifest_raw = _protected_pinned_bytes(
+        BUILD1_DIRECTORY_MANIFEST_RELATIVE, BUILD1_DIRECTORY_MANIFEST_SHA256,
+        "BUILD-1 directory manifest")
+    generated_raw = _protected_pinned_bytes(
+        BUILD1_GENERATED_INPUTS_RELATIVE, BUILD1_GENERATED_INPUTS_SHA256,
+        "BUILD-1 generated-inputs record")
+    receipt = _protected_json(receipt_raw, "BUILD-1 parent receipt")
+    supplement = _protected_json(supplement_raw, "BUILD-1 review supplement")
+    index = _protected_json(index_raw, "BUILD-1 index")
+    manifest = _protected_json(manifest_raw, "BUILD-1 directory manifest")
+    generated = _protected_json(generated_raw, "BUILD-1 generated-inputs record")
+
+    receipt_hash = hashlib.sha256(receipt_raw).hexdigest()
+    review_hash = hashlib.sha256(review_raw).hexdigest()
+    supplement_hash = hashlib.sha256(supplement_raw).hexdigest()
+    index_hash = hashlib.sha256(index_raw).hexdigest()
+    manifest_hash = hashlib.sha256(manifest_raw).hexdigest()
+    generated_hash = hashlib.sha256(generated_raw).hexdigest()
+    if (receipt.get("baseline_id") != BUILD1_BASELINE_ID or receipt.get("build_id") != BUILD1_ID
+            or receipt.get("closure_status") != "COMPLETE_PASS_WITH_NON_BLOCKING_CAVEATS"):
+        raise RetentionError("protected evidence parent receipt identity or closure status changed")
+    if (supplement.get("baseline_id") != BUILD1_BASELINE_ID or supplement.get("build_id") != BUILD1_ID
+            or supplement.get("parent_result") != "PARENT_RECEIPT_CLOSED"
+            or supplement.get("existing_indexes_replaced") is not False):
+        raise RetentionError("protected evidence review supplement identity or closure changed")
+    finalized_ref = supplement.get("finalized_receipt")
+    index_ref = supplement.get("prior_build_1_index")
+    review_ref = supplement.get("supplemental_review")
+    if (finalized_ref != {"path": BUILD1_PARENT_RECEIPT_RELATIVE.as_posix(),
+                          "sha256": receipt_hash, "size_bytes": len(receipt_raw)}
+            or index_ref != {"path": BUILD1_INDEX_RELATIVE.as_posix(),
+                             "sha256": index_hash, "size_bytes": len(index_raw)}
+            or not isinstance(review_ref, dict)
+            or review_ref.get("path") != BUILD1_FINAL_REVIEW_RELATIVE.as_posix()
+            or review_ref.get("sha256") != review_hash or review_ref.get("size_bytes") != len(review_raw)):
+        raise RetentionError("protected evidence review supplement does not bind its accepted parent and index")
+    if (index.get("baseline_id") != BUILD1_BASELINE_ID or index.get("build_id") != BUILD1_ID
+            or index.get("classification") != "R6_BASELINE_PASS"
+            or index.get("index_kind") != "supplemental-build"):
+        raise RetentionError("protected evidence BUILD-1 index identity changed")
+    receipt_ref = index.get("source_to_binary_receipt")
+    if (receipt_ref != {"closure_status": receipt.get("closure_status"),
+                        "path": BUILD1_PARENT_RECEIPT_RELATIVE.as_posix(),
+                        "sha256": receipt_hash, "size_bytes": len(receipt_raw)}):
+        raise RetentionError("protected evidence BUILD-1 index does not bind the finalized parent receipt")
+    artifacts = index.get("artifacts")
+    if not isinstance(artifacts, list) or index.get("artifact_count") != len(artifacts):
+        raise RetentionError("protected evidence BUILD-1 index artifact inventory is malformed")
+    manifest_ref = receipt.get("build_directory_manifest_ref")
+    generated_ref = receipt.get("generated_inputs_ref")
+    if (manifest_ref != {"path": BUILD1_DIRECTORY_MANIFEST_RELATIVE.as_posix(),
+                         "sha256": manifest_hash, "size_bytes": len(manifest_raw)}
+            or generated_ref != {"path": BUILD1_GENERATED_INPUTS_RELATIVE.as_posix(),
+                                 "sha256": generated_hash, "size_bytes": len(generated_raw)}
+            or generated.get("build_id") != BUILD1_ID):
+        raise RetentionError("protected evidence parent receipt does not bind its manifests")
+    final_spec = next((spec for spec in PROTECTED_EVIDENCE_ROOTS
+                       if spec.evidence_id == "R6-A-BUILD-1-FINAL"), None)
+    if final_spec is None:
+        raise RetentionError("protected evidence roster omits the parent build directory")
+    final_root = Path(os.path.abspath(REPO / final_spec.relative_path))
+    if (manifest.get("build_id") != BUILD1_ID
+            or manifest.get("build_directory") != str(final_root)
+            or not isinstance(manifest.get("entries"), list)):
+        raise RetentionError("protected evidence durable build-directory manifest identifies another root")
+    manifest_files: dict[str, tuple[int, str]] = {}
+    for row in manifest["entries"]:
+        if not isinstance(row, dict):
+            raise RetentionError("protected evidence build-directory manifest has a malformed entry")
+        if row.get("type") != "file":
+            continue
+        relative = row.get("path")
+        if (not isinstance(relative, str) or not relative or Path(relative).is_absolute()
+                or "\\" in relative or any(part in {"", ".", ".."} for part in relative.split("/"))
+                or not isinstance(row.get("size_bytes"), int) or row["size_bytes"] < 0
+                or not isinstance(row.get("sha256"), str)):
+            raise RetentionError("protected evidence build-directory manifest contains an unsafe file entry")
+        if relative in manifest_files:
+            raise RetentionError("protected evidence build-directory manifest repeats a file path")
+        manifest_files[relative] = (row["size_bytes"], row["sha256"])
+    if (len(manifest_files) != manifest.get("file_entry_count")
+            or sum(size for size, _digest in manifest_files.values()) != manifest.get("total_regular_file_bytes")):
+        raise RetentionError("protected evidence build-directory manifest counts are inconsistent")
+
+    specs_by_id: dict[str, ProtectedEvidenceRoot] = {}
+    specs_by_path: dict[str, ProtectedEvidenceRoot] = {}
+    for spec in PROTECTED_EVIDENCE_ROOTS:
+        normalized_rel = Path(spec.relative_path)
+        if (not spec.evidence_id or normalized_rel.is_absolute()
+                or any(part in {"", ".", ".."} for part in normalized_rel.parts)
+                or normalized_rel.as_posix() != spec.relative_path
+                or spec.evidence_id in specs_by_id or spec.relative_path in specs_by_path):
+            raise RetentionError("protected evidence root roster contains an invalid or duplicate entry")
+        specs_by_id[spec.evidence_id] = spec
+        specs_by_path[spec.relative_path] = spec
+    if set(specs_by_id) != {
+            "R6-A-BUILD-1-EXPLORATORY", "R6-A-BUILD-1-FINAL", "R6-A-BUILD-1-GENERATED",
+            REJECTED_R5_BUILDROOT_EVIDENCE_ID}:
+        raise RetentionError("protected evidence root roster differs from the exact four-root preservation set")
+
+    verified: list[dict[str, Any]] = []
+    for spec in sorted(PROTECTED_EVIDENCE_ROOTS, key=lambda value: value.relative_path):
+        root = Path(os.path.abspath(REPO / spec.relative_path))
+        prefix = spec.relative_path + "/"
+        expected_files: dict[str, tuple[int, str]] = {}
+        is_rejected_r5_root = spec.evidence_id == REJECTED_R5_BUILDROOT_EVIDENCE_ID
+        if is_rejected_r5_root != (spec.authority_relative_path is not None):
+            raise RetentionError("protected evidence authority metadata is assigned to an unexpected root")
+        if not is_rejected_r5_root:
+            for indexed_row in artifacts:
+                if not isinstance(indexed_row, dict):
+                    raise RetentionError("protected evidence BUILD-1 index has a malformed artifact row")
+                artifact_path = indexed_row.get("path")
+                if not isinstance(artifact_path, str):
+                    raise RetentionError("protected evidence BUILD-1 index has a pathless artifact row")
+                if not artifact_path.startswith(prefix):
+                    continue
+                relative = artifact_path[len(prefix):]
+                if (not relative or Path(artifact_path).is_absolute() or "\\" in artifact_path
+                        or any(part in {"", ".", ".."} for part in artifact_path.split("/"))
+                        or not isinstance(indexed_row.get("size_bytes"), int) or indexed_row["size_bytes"] < 0
+                        or not isinstance(indexed_row.get("sha256"), str)):
+                    raise RetentionError(f"protected evidence index has an unsafe path below {root}")
+                if relative in expected_files:
+                    raise RetentionError(f"protected evidence index repeats a path below {root}")
+                expected_files[relative] = (indexed_row["size_bytes"], indexed_row["sha256"])
+        actual_rows, file_identities, logical_bytes = _protected_evidence_root_inventory(root)
+        actual_files = {row["path"]: (row["size_bytes"], row["sha256"])
+                        for row in actual_rows if row["kind"] == "file"}
+        if not is_rejected_r5_root and (
+                actual_files != expected_files or len(actual_files) != spec.expected_file_count
+                or logical_bytes != spec.expected_logical_bytes):
+            raise RetentionError(f"protected evidence files differ from accepted BUILD-1 index: {root}")
+        inventory_hash = hashlib.sha256(_canonical_json(actual_rows)).hexdigest()
+        if inventory_hash != spec.inventory_sha256:
+            raise RetentionError(f"protected evidence membership/content digest changed: {root}")
+        tree_content_sha256 = None
+        if is_rejected_r5_root:
+            _verify_rejected_r5_buildroot_authority(
+                spec, root, actual_rows, inventory_hash, actual_files, logical_bytes)
+            tree_content_sha256 = _protected_evidence_tree_content_sha256(actual_rows)
+        if spec.evidence_id == "R6-A-BUILD-1-FINAL":
+            if manifest_files != actual_files:
+                raise RetentionError("protected final build files differ from the durable directory manifest")
+        row = {
+            "evidence_id": spec.evidence_id,
+            "path": str(root),
+            "parent_receipt_sha256": receipt_hash if not is_rejected_r5_root else None,
+            "final_review_sha256": review_hash if not is_rejected_r5_root else None,
+            "review_supplement_sha256": supplement_hash if not is_rejected_r5_root else None,
+            "build_index_sha256": index_hash if not is_rejected_r5_root else None,
+            "build_directory_manifest_sha256": (
+                manifest_hash if spec.evidence_id == "R6-A-BUILD-1-FINAL" else None),
+            "root_inventory_sha256": inventory_hash,
+            "file_count": len(actual_files),
+            "logical_bytes": logical_bytes,
+            "accounting_policy": "FULLY_CHARGED",
+            "mutation_policy": "FAIL_CLOSED",
+            "relocation_allowed": False,
+            "cleanup_allowed": False,
+            "cas_mutation_allowed": False,
+        }
+        if is_rejected_r5_root:
+            row.update({
+                "tree_content_sha256": tree_content_sha256,
+                "critical_file_relative_path": spec.critical_file_relative_path,
+                "critical_file_sha256": spec.critical_file_sha256,
+                "authority_metadata_path": str(REPO / REJECTED_R5_BUILDROOT_AUTHORITY_RELATIVE),
+                "authority_metadata_sha256": spec.authority_sha256,
+                "storage_credit": False,
+                "reservation_credit": False,
+                "free_space_exclusion": False,
+                "project_scope_exclusion": False,
+                "build_lease_exemption": False,
+            })
+        if include_file_identities:
+            row["_file_identities"] = file_identities
+        verified.append(row)
+    return verified
+
+
+def _protected_paths_overlap(path: Path | str) -> bool:
+    candidate = Path(os.path.abspath(os.fspath(path)))
+    for spec in PROTECTED_EVIDENCE_ROOTS:
+        protected = Path(os.path.abspath(REPO / spec.relative_path))
+        if candidate == protected or candidate in protected.parents or protected in candidate.parents:
+            return True
+    return False
+
+
+def _refuse_protected_path_mutation(path: Path | str, operation: str) -> None:
+    if _protected_paths_overlap(path):
+        raise RetentionError(f"{operation} overlaps protected in-place parent evidence: {path}")
+
+
+def _protected_identity_projection(rows: Iterable[Mapping[str, Any]]) -> list[dict[str, Any]]:
+    """Keep transient descriptor identities out of the persistent content contract."""
+    return sorted(({key: value for key, value in row.items() if not key.startswith("_")}
+                   for row in rows), key=lambda row: str(row.get("path")))
+
+
+def _gate0_retention_state_projection(snapshot: Mapping[str, Any]) -> dict[str, Any]:
+    """Return the canonical stable build-retention state stored by Gate 0."""
+    protected_evidence = snapshot.get("protected_in_place_evidence", [])
+    return {
+        "active_build_count": int(snapshot.get("active_build_count", -1)),
+        "preserved_build_count": int(snapshot.get("preserved_build_count", -1)),
+        "retained_build_count": int(snapshot.get("retained_build_count", -1)),
+        "active_dxvk_count": int(snapshot.get("active_dxvk_count", -1)),
+        "active_moltenvk_count": int(snapshot.get("active_moltenvk_count", -1)),
+        "unknown_count": len(snapshot.get("unknown", [])),
+        "completed_pending_retirement_count": len(snapshot.get("completed_pending_retirement", [])),
+        "failed_or_retiring_count": len(snapshot.get("failed_or_retiring", [])),
+        "protected_evidence_root_count": len(protected_evidence),
+        "protected_in_place_evidence": _protected_identity_projection(protected_evidence),
+        "retention_fingerprint_sha256": snapshot.get("retention_fingerprint", {}).get("sha256"),
+    }
 
 def _copy_bytes_to_store(source: Path, dest_fd: int, name: str) -> tuple[str, int, int]:
     source_parent = _open_dir(source.parent)
@@ -842,6 +1847,18 @@ def _copy_bytes_to_store(source: Path, dest_fd: int, name: str) -> tuple[str, in
         os.close(source_fd)
         os.close(source_parent)
 
+_MACHO_MAGIC_PREFIXES = frozenset({
+    b"\xfe\xed\xfa\xce", b"\xce\xfa\xed\xfe",
+    b"\xfe\xed\xfa\xcf", b"\xcf\xfa\xed\xfe",
+    b"\xca\xfe\xba\xbe", b"\xbe\xba\xfe\xca",
+    b"\xca\xfe\xba\xbf", b"\xbf\xba\xfe\xca",
+})
+_MACHO_FAT_MAGIC_PREFIXES = frozenset({
+    b"\xca\xfe\xba\xbe", b"\xbe\xba\xfe\xca",
+    b"\xca\xfe\xba\xbf", b"\xbf\xba\xfe\xca",
+})
+
+
 def _is_macho(path: Path) -> bool:
     """Recognize linkable/final Mach-O outputs while excluding ordinary .o files."""
     try:
@@ -850,7 +1867,7 @@ def _is_macho(path: Path) -> bool:
         if len(header) < 4:
             return False
         magic = header[:4]
-        if magic in {b"\xca\xfe\xba\xbe", b"\xbe\xba\xfe\xca", b"\xca\xfe\xba\xbf", b"\xbf\xba\xfe\xca"}:
+        if magic in _MACHO_FAT_MAGIC_PREFIXES:
             return True
         byte_order = {b"\xfe\xed\xfa\xce": ">", b"\xce\xfa\xed\xfe": "<",
                       b"\xfe\xed\xfa\xcf": ">", b"\xcf\xfa\xed\xfe": "<"}.get(magic)
@@ -1005,6 +2022,50 @@ def _artifact_size(manifest: Mapping[str, Any]) -> int | None:
         return None
     return value
 
+
+def _artifact_promotion_target(path: Path, digest: str, size_bytes: int) -> Path:
+    """Resolve the exact CAS target without creating or promoting an object."""
+    group = ARTIFACT_ROOT / digest
+    try:
+        group.lstat()
+    except FileNotFoundError:
+        return group / path.name
+    root_fd, group_fd = _open_artifact_group(digest)
+    try:
+        try:
+            saved = json.loads(_read_at(group_fd, "manifest.json", limit=1024 * 1024))
+        except FileNotFoundError:
+            saved = None
+        if saved is not None:
+            if not isinstance(saved, Mapping):
+                raise RetentionError(f"existing artifact manifest is malformed: {digest}")
+            canonical = Path(saved.get("canonical_path", ""))
+            saved_size = _artifact_size(saved)
+            if (saved.get("sha256") != digest
+                    or canonical.parent != group or not canonical.name
+                    or canonical.name in {".", ".."} or "/" in canonical.name or "\\" in canonical.name
+                    or saved_size != size_bytes):
+                raise RetentionError(f"existing artifact manifest conflicts with staged output: {digest}")
+            _verify_artifact_payload_at(group_fd, canonical.name, digest, saved_size)
+            return canonical
+        try:
+            info = os.stat(path.name, dir_fd=group_fd, follow_symlinks=False)
+        except FileNotFoundError:
+            return group / path.name
+        fd = os.open(path.name, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)
+                     | getattr(os, "O_NONBLOCK", 0), dir_fd=group_fd)
+        try:
+            current = os.fstat(fd)
+            if (not stat.S_ISREG(current.st_mode) or current.st_nlink != 1
+                    or current.st_size != size_bytes or _hash_fd(fd) != digest):
+                raise RetentionError(f"existing unmanifested artifact conflicts with staged output: {digest}")
+        finally:
+            os.close(fd)
+        return group / path.name
+    finally:
+        os.close(group_fd)
+        os.close(root_fd)
+
 def _verify_artifact_payload_at(group_fd: int, name: str, digest: str,
                                expected_size: int | None = None, *,
                                allow_legacy_hardlinks: bool = False) -> os.stat_result:
@@ -1121,6 +2182,7 @@ def detach_legacy_artifact_hardlinks(digests: Iterable[str], *,
     schema-v2 artifacts are already copied and must have link count one. This
     migration preserves path, size, and SHA-256 while severing those old aliases.
     """
+    protected_before = _verify_protected_evidence_roots(include_file_identities=True)
     actions: list[dict[str, Any]] = []
     lease_fd, lock_fd = _lock()
     try:
@@ -1461,9 +2523,23 @@ def detach_legacy_artifact_hardlinks(digests: Iterable[str], *,
                 os.close(root_fd)
     finally:
         _unlock(lease_fd, lock_fd)
+    protected_after = _verify_protected_evidence_roots(include_file_identities=True)
+    if (_canonical_json(_protected_identity_projection(protected_before)) !=
+            _canonical_json(_protected_identity_projection(protected_after))):
+        raise RetentionError("protected BUILD-1 evidence content or membership changed during CAS isolation")
+    protected_before_ids = {f"{row['path']}/{relative}": identity
+                            for row in protected_before
+                            for relative, identity in row.get("_file_identities", {}).items()}
+    protected_after_ids = {f"{row['path']}/{relative}": identity
+                           for row in protected_after
+                           for relative, identity in row.get("_file_identities", {}).items()}
+    if protected_before_ids != protected_after_ids:
+        raise RetentionError("CAS isolation replaced a file inside protected BUILD-1 evidence")
     return actions
 
-def legacy_artifact_hardlink_estimate(digests: Iterable[str]) -> list[dict[str, Any]]:
+def legacy_artifact_hardlink_estimate(
+        digests: Iterable[str], *,
+        retention_lock_fds: tuple[int, int] | None = None) -> list[dict[str, Any]]:
     """Return verified schema-v1 CAS copies required to isolate linked payloads.
 
     This is a no-write preflight used to prove the copy fits within Gate 0's
@@ -1471,7 +2547,20 @@ def legacy_artifact_hardlink_estimate(digests: Iterable[str]) -> list[dict[str, 
     Hash verification is repeated by the mutating detach operation.
     """
     rows: list[dict[str, Any]] = []
-    lease_fd, lock_fd = _lock()
+    owns_lock = retention_lock_fds is None
+    if owns_lock:
+        lease_fd, lock_fd = _lock()
+    else:
+        if (not isinstance(retention_lock_fds, tuple)
+                or len(retention_lock_fds) != 2):
+            raise RetentionError("CAS audit requires the exact live BuildLease lock descriptors")
+        lease_fd, lock_fd = retention_lock_fds
+        try:
+            os.fstat(lease_fd)
+            os.fstat(lock_fd)
+            _verify_named_retention_lock(lease_fd, lock_fd)
+        except (OSError, RetentionError) as error:
+            raise RetentionError("CAS audit lost the authoritative BuildLease lock") from error
     try:
         for digest in sorted(set(digests)):
             root_fd, group_fd = _open_artifact_group(digest)
@@ -1576,10 +2665,12 @@ def legacy_artifact_hardlink_estimate(digests: Iterable[str]) -> list[dict[str, 
                 os.close(group_fd)
                 os.close(root_fd)
     finally:
-        _unlock(lease_fd, lock_fd)
+        if owns_lock:
+            _unlock(lease_fd, lock_fd)
     return rows
 
-def canonical_artifact_store_audit() -> dict[str, Any]:
+def canonical_artifact_store_audit(*,
+                                   retention_lock_fds: tuple[int, int] | None = None) -> dict[str, Any]:
     """Hash and fingerprint the complete CAS identity/link-count inventory.
 
     Legacy schema-v1 objects may still share an inode with retained source or
@@ -1588,7 +2679,8 @@ def canonical_artifact_store_audit() -> dict[str, Any]:
     explicit and detects link-count/content changes before and after a run.
     """
     digests = canonical_artifact_digests()
-    rows = legacy_artifact_hardlink_estimate(digests)
+    rows = legacy_artifact_hardlink_estimate(
+        digests, retention_lock_fds=retention_lock_fds)
     normalized = [{key: row[key] for key in (
         "sha256", "size_bytes", "link_count", "copy_required", "recovery_required")}
         for row in rows]
@@ -1643,6 +2735,8 @@ def _artifactize(path: Path) -> dict[str, Any]:
                     os.close(fd)
                 size, mode = info.st_size, stat.S_IMODE(info.st_mode)
             else:
+                _reserve_finalization_output(group / name, before.st_size,
+                                             "canonical artifact payload")
                 got, size, mode = _copy_bytes_to_store(path, group_fd, name)
                 if got != digest:
                     raise RetentionError(f"artifact hash changed during canonical copy: {path}")
@@ -1651,6 +2745,8 @@ def _artifactize(path: Path) -> dict[str, Any]:
             record = {"schema_version": 2, "sha256": digest, "canonical_path": str(canonical),
                       "size_bytes": size, "stored_mode": oct(stat.S_IMODE(payload_info.st_mode)),
                       "original_mode": oct(mode), "created_at_unix": time.time()}
+            _reserve_finalization_output(group / "manifest.json", 1024 * 1024,
+                                         "canonical artifact manifest")
             _write_at(group_fd, "manifest.json", (json.dumps(record, indent=2, sort_keys=True) + "\n").encode(),
                       replace=False)
             saved = record
@@ -1707,6 +2803,7 @@ def _copy_evidence_from_fd(source_fd: int, source: Path, target: Path, *,
                 raise RetentionError(f"existing evidence conflicts with source hash: {target}")
             return {"source_path": str(source), "retained_path": str(target), "sha256": source_hash,
                     "size_bytes": src_info.st_size, "mode": oct(stat.S_IMODE(src_info.st_mode))}
+        _reserve_finalization_output(target, src_info.st_size, "retained evidence copy")
         out = os.open(temp, os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0), 0o600,
                       dir_fd=target_fd)
         digest = hashlib.sha256()
@@ -1769,6 +2866,15 @@ def _open_leased_file_fd(lease: Mapping[str, Any], relative: str) -> int:
     try:
         root_info = os.fstat(root_fd)
         root_fsid = getattr(os.fstatvfs(root_fd), "f_fsid", None)
+        session_record = lease.get("session_v3")
+        workspace_mount = (session_record.get("workspace_mount_identity")
+                           if isinstance(session_record, dict) else None)
+        if (candidate.parts[0] == BUILD_SESSION_WORKSPACE_NAME
+                and isinstance(workspace_mount, dict) and workspace_mount.get("attached") is True):
+            _verify_session_workspace_mount(root, workspace_mount)
+        workspace_path_seen = False
+        expected_device = root_info.st_dev
+        expected_fsid = root_fsid
         marker = _read_marker(root_fd)
         if ((root_info.st_dev, root_info.st_ino) != (lease.get("build_device"), lease.get("build_inode"))
                 or root_fsid != lease.get("build_filesystem_id")
@@ -1781,8 +2887,17 @@ def _open_leased_file_fd(lease: Mapping[str, Any], relative: str) -> int:
             child_fd = os.open(component, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0)
                                 | getattr(os, "O_NOFOLLOW", 0), dir_fd=parent_fd)
             child_info = os.fstat(child_fd)
-            if ((child_info.st_dev != root_info.st_dev)
-                    or getattr(os.fstatvfs(child_fd), "f_fsid", None) != root_fsid):
+            child_fsid = getattr(os.fstatvfs(child_fd), "f_fsid", None)
+            if (component == BUILD_SESSION_WORKSPACE_NAME and isinstance(workspace_mount, dict)
+                    and workspace_mount.get("attached") is True and not workspace_path_seen):
+                if (child_info.st_dev != workspace_mount.get("device")
+                        or child_fsid != workspace_mount.get("filesystem_id")):
+                    os.close(child_fd)
+                    raise RetentionError("leased session diagnostics crossed the declared workspace mount")
+                workspace_path_seen = True
+                expected_device = workspace_mount["device"]
+                expected_fsid = workspace_mount["filesystem_id"]
+            elif ((child_info.st_dev != expected_device) or child_fsid != expected_fsid):
                 os.close(child_fd)
                 raise RetentionError(f"leased diagnostic directory crosses its build filesystem: {relative}")
             directory_fds.append(child_fd)
@@ -1795,8 +2910,8 @@ def _open_leased_file_fd(lease: Mapping[str, Any], relative: str) -> int:
                 raise RetentionError(f"leased diagnostic path is a symlink: {relative}") from error
             raise
         file_info = os.fstat(file_fd)
-        if (not stat.S_ISREG(file_info.st_mode) or file_info.st_dev != root_info.st_dev
-                or getattr(os.fstatvfs(file_fd), "f_fsid", None) != root_fsid):
+        if (not stat.S_ISREG(file_info.st_mode) or file_info.st_dev != expected_device
+                or getattr(os.fstatvfs(file_fd), "f_fsid", None) != expected_fsid):
             os.close(file_fd)
             raise RetentionError(f"leased diagnostic is not a regular file on the build filesystem: {relative}")
         return file_fd
@@ -1866,6 +2981,7 @@ def _write_evidence_bytes(target: Path, contents: bytes) -> dict[str, Any]:
             if hashlib.sha256(existing).hexdigest() != digest or existing != contents:
                 raise RetentionError(f"existing evidence conflicts with new provenance: {target}")
         else:
+            _reserve_finalization_output(target, len(contents), "retained evidence record")
             _write_at(target_fd, target.name, contents, replace=False)
         return {"retained_path": str(target), "sha256": digest, "size_bytes": len(contents)}
     finally:
@@ -1875,6 +2991,14 @@ def _empty_identity() -> dict[str, Any]:
     return {"build_system": "unknown", "source_identity": None, "patch_set": None,
             "cross_file": None, "meson_options": None, "compiler_identity": None,
             "linker_identity": None, "generated_shader_identity": [], "build_type": None}
+
+
+def _ordered_meson_options(options: list[Mapping[str, Any]]) -> list[Mapping[str, Any]]:
+    """Return the canonical option order while retaining each complete Meson row."""
+    return sorted(options, key=lambda row: (
+        str(row.get("machine", "")), str(row.get("section", "")),
+        str(row.get("name", "")), _canonical_json(row)))
+
 
 def configuration_key_from_identity(identity: Mapping[str, Any], *, dependency_state: Any = None) -> str:
     """Compute the required pre-build key from frozen source/tool/configuration identity.
@@ -1890,6 +3014,8 @@ def configuration_key_from_identity(identity: Mapping[str, Any], *, dependency_s
         return compute_native_moltenvk_config_key(_dict_to_native_request(raw_request))
     source = identity.get("source_identity")
     source_hash = source.get("content_tree_sha256") if isinstance(source, Mapping) else None
+    if isinstance(source, Mapping) and "untracked_files" in source:
+        _validate_untracked_source_identity(source)
     if build_system not in {"meson", "xcode", "make"}:
         raise ValueError("configuration identity requires a recognized build system")
     if not isinstance(source_hash, str) or not re.fullmatch(r"[0-9a-f]{64}", source_hash):
@@ -1901,7 +3027,9 @@ def configuration_key_from_identity(identity: Mapping[str, Any], *, dependency_s
         options = identity.get("meson_options")
         compiler_hash = identity.get("compiler_identity_sha256")
         cross = identity.get("cross_file")
-        if not isinstance(options, list) or not options:
+        if (not isinstance(options, list) or not options
+                or any(not isinstance(row, Mapping) or not isinstance(row.get("name"), str)
+                       for row in options)):
             raise ValueError("Meson configuration identity requires recorded build options")
         if not any(isinstance(row, Mapping) and row.get("name") == "buildtype"
                    and isinstance(row.get("value"), str) and row.get("value") for row in options):
@@ -1943,9 +3071,18 @@ def configuration_key_from_identity(identity: Mapping[str, Any], *, dependency_s
         if not isinstance(row, Mapping) or not isinstance(row.get("sha256"), str):
             raise ValueError("generated shader identities require sha256 values")
         generated_keys.append((row.get("build_relative_path", row.get("path")), row["sha256"]))
+    cross_identity = identity.get("cross_file")
+    if build_system == "meson" and isinstance(cross_identity, Mapping):
+        cross_identity = {"status": cross_identity.get("status"), **(
+            {"sha256": cross_identity.get("sha256")}
+            if cross_identity.get("status") == "present" else {})}
+    if build_system == "meson":
+        # Keep raw order in the captured evidence, but use the same canonical
+        # projection for configuration keys and frozen-identity comparisons.
+        options = _ordered_meson_options(options)
     material = {"source_tree": source_hash,
                 "patches": patches,
-                "cross": identity.get("cross_file"),
+                "cross": cross_identity,
                 "options": options,
                 "compiler": compiler_hash,
                 "linker": identity.get("linker_identity"),
@@ -1960,6 +3097,44 @@ def configuration_key_from_identity(identity: Mapping[str, Any], *, dependency_s
                 "generated_shaders": sorted(generated_keys)}
     return hashlib.sha256(_canonical_json(material)).hexdigest()
 
+
+def _stable_untracked_source_rows(rows: list[Any]) -> list[dict[str, Any]]:
+    """Remove evidence-location metadata while retaining source content identity."""
+    stable_rows: list[dict[str, Any]] = []
+    for row in rows:
+        if not isinstance(row, Mapping):
+            raise ValueError("untracked source evidence rows must be objects")
+        stable = {key: value for key, value in row.items() if key != "retained_path"}
+        if row.get("type") == "directory" and isinstance(row.get("entries"), list):
+            nested = _stable_untracked_source_rows(row["entries"])
+            stable["entries"] = nested
+            stable["tree_sha256"] = hashlib.sha256(_canonical_json(nested)).hexdigest()
+            # The retained manifest bytes include retained_path fields. Its raw
+            # digest remains in the evidence row, but is not source identity.
+            stable.pop("sha256", None)
+        stable_rows.append(stable)
+    return stable_rows
+
+
+def _untracked_source_identity_hashes(rows: list[Any]) -> tuple[str, str]:
+    stable_rows = _stable_untracked_source_rows(rows)
+    return (
+        hashlib.sha256(_canonical_json(stable_rows)).hexdigest(),
+        hashlib.sha256(_canonical_json(rows)).hexdigest(),
+    )
+
+
+def _validate_untracked_source_identity(source: Mapping[str, Any]) -> None:
+    rows = source.get("untracked_files")
+    stable_digest = source.get("untracked_files_sha256")
+    evidence_digest = source.get("untracked_files_evidence_sha256")
+    if not isinstance(rows, list):
+        raise ValueError("untracked source identity requires its complete evidence rows")
+    expected_stable, expected_evidence = _untracked_source_identity_hashes(rows)
+    if (stable_digest != expected_stable
+            or evidence_digest != expected_evidence):
+        raise ValueError("untracked source identity digest differs from its complete captured rows")
+
 def _capture_untracked_source_path(source_root: Path, relative: Path, evidence: Path) -> dict[str, Any]:
     """Copy a Git-reported untracked file, link, or directory tree without following links."""
     if relative.is_absolute() or ".." in relative.parts or not relative.parts:
@@ -1972,6 +3147,7 @@ def _capture_untracked_source_path(source_root: Path, relative: Path, evidence: 
     if stat.S_ISREG(initial.st_mode) and not stat.S_ISLNK(initial.st_mode):
         retained = _copy_evidence(candidate, evidence / "source-untracked" / relative)
         return {"path": relative.as_posix(), "type": "regular", "sha256": retained["sha256"],
+                "mode": oct(stat.S_IMODE(initial.st_mode)),
                 "retained_path": retained["retained_path"]}
     if stat.S_ISLNK(initial.st_mode):
         target_text = os.readlink(candidate)
@@ -1980,6 +3156,7 @@ def _capture_untracked_source_path(source_root: Path, relative: Path, evidence: 
             _canonical_json({"path": relative.as_posix(), "target": target_text}) + b"\n")
         return {"path": relative.as_posix(), "type": "symlink", "target": target_text,
                 "target_sha256": hashlib.sha256(os.fsencode(target_text)).hexdigest(),
+                "mode": oct(stat.S_IMODE(initial.st_mode)),
                 "sha256": retained["sha256"],
                 "retained_path": retained["retained_path"]}
     if not stat.S_ISDIR(initial.st_mode):
@@ -2020,6 +3197,7 @@ def _capture_untracked_source_path(source_root: Path, relative: Path, evidence: 
                         entries.append({"path": child_relative.as_posix(), "type": "regular",
                                         "sha256": retained["sha256"],
                                         "retained_path": retained["retained_path"],
+                                        "mode": oct(stat.S_IMODE(info.st_mode)),
                                         "size_bytes": retained["size_bytes"]})
                     elif stat.S_ISLNK(info.st_mode):
                         target_text = os.readlink(name, dir_fd=parent_fd)
@@ -2031,6 +3209,7 @@ def _capture_untracked_source_path(source_root: Path, relative: Path, evidence: 
                         entries.append({"path": child_relative.as_posix(), "type": "symlink",
                                         "target": target_text,
                                         "target_sha256": hashlib.sha256(os.fsencode(target_text)).hexdigest(),
+                                        "mode": oct(stat.S_IMODE(info.st_mode)),
                                         "sha256": retained["sha256"],
                                         "retained_path": retained["retained_path"]})
                     else:
@@ -2050,11 +3229,37 @@ def _capture_untracked_source_path(source_root: Path, relative: Path, evidence: 
     descriptor.update({"retained_path": retained["retained_path"], "sha256": retained["sha256"]})
     return descriptor
 
-def _capture_identity(build: Path, evidence: Path) -> dict[str, Any]:
-    log = build / "meson-logs/meson-log.txt"
-    command_line = build / "meson-private/cmd_line.txt"
-    options_file = build / "meson-info/intro-buildoptions.json"
-    compilers_file = build / "meson-info/intro-compilers.json"
+def _capture_identity(build: Path, evidence: Path, *, session_plan: Mapping[str, Any] | None = None,
+                      require_direct_meson: bool = False,
+                      expected_cross_file: Path | None = None,
+                      enforce_cross_file: bool = False,
+                      cross_source_root: Path | None = None) -> dict[str, Any]:
+    if session_plan is not None:
+        if not _session_dual_graph_enabled(session_plan):
+            raise RetentionError("Host-v3 graph identity capture requires a dual-graph session plan")
+        return _capture_host_v3_dual_identity(build, evidence, session_plan)
+    meson_build_dir = build
+    if not (build / "meson-info/intro-buildoptions.json").is_file():
+        if require_direct_meson:
+            raise RetentionError(f"declared Meson graph is missing its own intro-buildoptions.json: {build}")
+        for candidate_name in ("build.win64-r6a", "build.native-r6a"):
+            candidate = build / candidate_name
+            if (candidate / "meson-info/intro-buildoptions.json").is_file():
+                meson_build_dir = candidate
+                break
+        else:
+            try:
+                for candidate in sorted(build.iterdir()):
+                    if candidate.is_dir() and not candidate.is_symlink() and (candidate / "meson-info/intro-buildoptions.json").is_file():
+                        meson_build_dir = candidate
+                        break
+            except OSError:
+                pass
+
+    log = meson_build_dir / "meson-logs/meson-log.txt"
+    command_line = meson_build_dir / "meson-private/cmd_line.txt"
+    options_file = meson_build_dir / "meson-info/intro-buildoptions.json"
+    compilers_file = meson_build_dir / "meson-info/intro-compilers.json"
     identity: dict[str, Any] = _empty_identity()
     if (build.name.startswith("MoltenVKPackaging-") or (build / "Info.plist").is_file()
             or (build / "Build/Products/XCFrameworkStaging").is_dir()):
@@ -2104,7 +3309,9 @@ def _capture_identity(build: Path, evidence: Path) -> dict[str, Any]:
                     rel = Path(os.fsdecode(raw_name))
                     untracked_rows.append(_capture_untracked_source_path(source_root, rel, evidence))
                 source["untracked_files"] = untracked_rows
-                source["untracked_files_sha256"] = hashlib.sha256(_canonical_json(untracked_rows)).hexdigest()
+                (source["untracked_files_sha256"],
+                 source["untracked_files_evidence_sha256"]) = _untracked_source_identity_hashes(
+                    untracked_rows)
                 identity["patch_set"] = {"staged_patch_sha256": source["staged_patch_sha256"],
                                           "unstaged_patch_sha256": source["unstaged_patch_sha256"],
                                           "patch_set_sha256": source["patch_set_sha256"],
@@ -2224,7 +3431,9 @@ def _capture_identity(build: Path, evidence: Path) -> dict[str, Any]:
                     rel = Path(os.fsdecode(raw_name))
                     untracked_rows.append(_capture_untracked_source_path(source, rel, evidence))
                 source_info["untracked_files"] = untracked_rows
-                source_info["untracked_files_sha256"] = hashlib.sha256(_canonical_json(untracked_rows)).hexdigest()
+                (source_info["untracked_files_sha256"],
+                 source_info["untracked_files_evidence_sha256"]) = _untracked_source_identity_hashes(
+                    untracked_rows)
                 submodules = subprocess.run(
                     ["git", "-C", str(source), "submodule", "status", "--recursive"],
                     stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, check=False).stdout
@@ -2266,6 +3475,9 @@ def _capture_identity(build: Path, evidence: Path) -> dict[str, Any]:
         except json.JSONDecodeError:
             pass
         identity["meson_options_sha256"] = hashlib.sha256(raw).hexdigest()
+        if require_direct_meson and isinstance(identity.get("meson_options"), list):
+            identity["meson_options_configuration_sha256"] = _meson_options_configuration_sha256(
+                identity["meson_options"])
         identity["build_type"] = next((row.get("value") for row in identity["meson_options"] or []
                                        if row.get("name") == "buildtype"), None)
         identity["meson_options_evidence"] = _copy_evidence(options_file, evidence / "configuration/meson-build-options.json")
@@ -2283,7 +3495,7 @@ def _capture_identity(build: Path, evidence: Path) -> dict[str, Any]:
                 machine: {name: row.get("version") for name, row in items.items() if isinstance(row, dict)}
                 for machine, items in identity["compiler_identity"].items() if isinstance(items, dict)}
         identity["compiler_evidence"] = _copy_evidence(compilers_file, evidence / "configuration/meson-compilers.json")
-    meson_info = build / "meson-info"
+    meson_info = meson_build_dir / "meson-info"
     dependency_evidence = None
     if meson_info.is_dir() and not meson_info.is_symlink():
         for name in ("intro-dependencies.json", "intro-targets.json", "intro-tests.json",
@@ -2302,6 +3514,8 @@ def _capture_identity(build: Path, evidence: Path) -> dict[str, Any]:
                                    (Path("build.ninja"), "configuration/build.ninja"),
                                    (Path(".ninja_log"), "logs/ninja-log.txt")):
         source_file = build / relative
+        if not source_file.is_file() and (meson_build_dir / relative).is_file():
+            source_file = meson_build_dir / relative
         if source_file.is_file() and not source_file.is_symlink():
             identity[evidence_name.replace("/", "_").replace(".", "_") + "_evidence"] = _copy_evidence(
                 source_file, evidence / evidence_name)
@@ -2365,7 +3579,25 @@ def _capture_identity(build: Path, evidence: Path) -> dict[str, Any]:
     cross = re.search(r"cross_file\s*=\s*\['([^']+)'\]", log_text)
     if not cross and command_line.is_file():
         cross = re.search(r"--cross-file(?:=|\s+)([^\s]+)", command_line.read_text(errors="replace"))
-    if cross:
+    if enforce_cross_file:
+        if expected_cross_file is None:
+            if cross:
+                raise RetentionError("native Meson graph unexpectedly records a cross file")
+            identity["cross_file"] = {"status": "absent"}
+        else:
+            if not expected_cross_file.is_file() or expected_cross_file.is_symlink():
+                raise RetentionError(f"declared graph cross file is missing or linked: {expected_cross_file}")
+            if cross:
+                recorded = Path(cross.group(1).strip("'\""))
+                if not recorded.is_absolute():
+                    if cross_source_root is None:
+                        raise RetentionError("relative Meson cross-file evidence lacks its admitted source root")
+                    recorded = cross_source_root / recorded
+                if recorded.resolve(strict=True) != expected_cross_file.resolve(strict=True):
+                    raise RetentionError("Meson graph cross-file evidence differs from its declared source input")
+            identity["cross_file"] = {"status": "present", **_copy_evidence(
+                expected_cross_file, evidence / f"configuration/cross-{expected_cross_file.name}")}
+    elif cross:
         cross_value = Path(cross.group(1).strip("'\""))
         path = cross_value if cross_value.is_absolute() else build / cross_value
         if not path.is_file() or path.is_symlink():
@@ -2409,9 +3641,12 @@ def _capture_identity(build: Path, evidence: Path) -> dict[str, Any]:
                 row = _copy_evidence(path, evidence / "generated-shaders" / relative)
                 row["build_relative_path"] = relative
                 generated.append(row)
-    identity["generated_shader_identity"] = generated
+    identity["generated_shader_identity"] = sorted(
+        generated, key=lambda row: row["build_relative_path"])
     identity["build_symlink_identity"] = sorted(symlinks, key=lambda row: row["build_relative_path"])
     build_log = build / "build.log"
+    if not build_log.is_file() and (meson_build_dir / "build.log").is_file():
+        build_log = meson_build_dir / "build.log"
     if build_log.is_file() and not build_log.is_symlink():
         retained_build_log = identity.get("logs_build_log_evidence")
         if not isinstance(retained_build_log, dict):
@@ -2422,6 +3657,8 @@ def _capture_identity(build: Path, evidence: Path) -> dict[str, Any]:
         identity["build_log_sha256"] = None
         identity["build_log_status"] = "no stdout build transcript present; configure log and Ninja execution log retained separately"
     ninja_log = build / ".ninja_log"
+    if not ninja_log.is_file() and (meson_build_dir / ".ninja_log").is_file():
+        ninja_log = meson_build_dir / ".ninja_log"
     if ninja_log.is_file() and not ninja_log.is_symlink():
         identity["ninja_log_sha256"] = _hash_path(ninja_log)
         retained_ninja_log = identity.get("logs_ninja-log_txt_evidence")
@@ -2433,6 +3670,1659 @@ def _capture_identity(build: Path, evidence: Path) -> dict[str, Any]:
     if identity["build_system"] == "meson":
         identity["ninja_execution_log_status"] = "captured" if identity.get("ninja_log_sha256") else "not-present"
     return identity
+
+
+def _dual_graph_plan_bound_configuration_key(meson_identity: Mapping[str, Any],
+                                            profile_sha256: str) -> str:
+    if not re.fullmatch(r"[0-9a-f]{64}", profile_sha256):
+        raise RetentionError("dual-graph configuration profile digest is missing or malformed")
+    try:
+        captured_key = configuration_key_from_identity(
+            meson_identity, dependency_state=meson_identity.get("dependency_state"))
+    except (TypeError, ValueError) as error:
+        raise RetentionError(f"dual-graph captured configuration key is incomplete: {error}") from error
+    return hashlib.sha256(_canonical_json({
+        "captured_configuration_key_sha256": captured_key,
+        "configuration_profile_sha256": profile_sha256,
+    })).hexdigest()
+
+
+def _dual_graph_configure_command(plan: Mapping[str, Any], declaration: Mapping[str, Any],
+                                 graph_dir: Path) -> list[str]:
+    """Return the one authorized Meson configure argv for a declared graph."""
+    if not graph_dir.is_absolute():
+        raise RetentionError("dual-graph configure directory must be absolute")
+    command = [str(plan["tools"]["meson"]["path"]), "setup",
+               "--wrap-mode=nodownload", "--backend=ninja", "--prefix=/usr",
+               f"--buildtype={plan['build_type']}"]
+    if declaration.get("graph_role") == "WINDOWS_PRODUCT":
+        cross_file = str(Path(str(plan["source_identity"]["root"]))
+                         / str(declaration["cross_file_input"]))
+        command.extend(["--cross-file", cross_file])
+    elif declaration.get("graph_role") == "NATIVE_VERIFICATION":
+        command.extend([
+            "-Denable_dxgi=true", "-Denable_d3d11=true",
+            "-Denable_d3d8=false", "-Denable_d3d9=false", "-Denable_d3d10=false",
+            "-Dnative_sdl2=enabled", "-Dnative_sdl3=disabled", "-Dnative_glfw=disabled",
+        ])
+    else:
+        raise RetentionError("dual-graph configure command has an unauthorized graph role")
+    command.extend([str(graph_dir), str(plan["source_identity"]["root"])])
+    return command
+
+
+def _meson_options_configuration_sha256(options: Any) -> str:
+    """Hash the complete Meson option rows while rejecting ambiguous identities."""
+    if not isinstance(options, list) or not options:
+        raise RetentionError("Meson configuration options must be a non-empty captured list")
+    identities: set[tuple[str, str, str]] = set()
+    normalized: list[dict[str, Any]] = []
+    for row in options:
+        if (not isinstance(row, Mapping)
+                or not isinstance(row.get("name"), str) or not row["name"]
+                or not isinstance(row.get("section"), str) or not row["section"]
+                or not isinstance(row.get("machine"), str) or not row["machine"]
+                or "value" not in row):
+            raise RetentionError("Meson option row lacks its exact name, section, machine, or value")
+        identity = (row["machine"], row["section"], row["name"])
+        if identity in identities:
+            raise RetentionError(f"Meson option identity is duplicated: {identity}")
+        identities.add(identity)
+        normalized.append(dict(row))
+    normalized.sort(key=lambda row: (
+        row["machine"], row["section"], row["name"], _canonical_json(row)))
+    return hashlib.sha256(_canonical_json(normalized)).hexdigest()
+
+
+def _validate_dual_graph_meson_command_line(plan: Mapping[str, Any],
+                                            declaration: Mapping[str, Any],
+                                            meson_identity: Mapping[str, Any],
+                                            expected_options: Mapping[str, Any],
+                                            evidence: Path | None) -> None:
+    """Require Meson's retained configure record to replay the exact closed argv profile."""
+    graph_id = str(declaration["graph_id"])
+    command_text = meson_identity.get("meson_command_line")
+    command_record = meson_identity.get("meson_command_line_evidence")
+    command_sha256 = meson_identity.get("meson_command_line_sha256")
+    if (not isinstance(command_text, str) or not command_text
+            or not isinstance(command_sha256, str)
+            or not re.fullmatch(r"[0-9a-f]{64}", command_sha256)
+            or hashlib.sha256(command_text.encode("utf-8")).hexdigest() != command_sha256):
+        raise RetentionError(f"{graph_id} Meson configure command line is missing")
+    if evidence is not None:
+        _require_completed_evidence_record(command_record, "Meson command line", evidence)
+        if command_record.get("sha256") != command_sha256:
+            raise RetentionError(f"{graph_id} Meson command line digest differs from retained evidence")
+        try:
+            retained_text = _read_completed_evidence_record(
+                command_record, "Meson command line", evidence).decode("utf-8", errors="replace")
+        except (OSError, KeyError, TypeError) as error:
+            raise RetentionError(f"{graph_id} retained Meson command line is unavailable") from error
+        if retained_text != command_text:
+            raise RetentionError(f"{graph_id} Meson command line differs from its retained evidence")
+    parser = configparser.ConfigParser(interpolation=None, strict=True)
+    parser.optionxform = str.lower
+    try:
+        parser.read_string(command_text)
+        sections = set(parser.sections())
+        if sections != {"options", "properties"}:
+            raise ValueError("unexpected Meson command-line sections")
+        actual_options = dict(parser.items("options", raw=True))
+        if set(actual_options) != set(expected_options):
+            raise ValueError("Meson command-line option names differ from the configure allowlist")
+        for name, expected in expected_options.items():
+            actual = actual_options[name]
+            if isinstance(expected, bool):
+                if actual.casefold() != ("true" if expected else "false"):
+                    raise ValueError(f"Meson configure option {name} differs from its plan value")
+            elif actual != str(expected):
+                raise ValueError(f"Meson configure option {name} differs from its plan value")
+        expected_property_names = {"cross_file"} if declaration.get("cross_file_input") else set()
+        actual_property_names = {name for name, _value in parser.items("properties", raw=True)}
+        if actual_property_names != expected_property_names:
+            raise ValueError("Meson configure properties differ from the profile allowlist")
+        if declaration.get("cross_file_input"):
+            raw_cross = parser.get("properties", "cross_file", raw=True)
+            parsed_cross = ast.literal_eval(raw_cross)
+            source_root = plan.get("source_identity", {}).get("root")
+            expected_cross = [str(Path(str(source_root)) / str(declaration["cross_file_input"]))]
+            if parsed_cross != expected_cross:
+                raise ValueError("Meson configure cross-file property differs from its plan input")
+    except (configparser.Error, ValueError, SyntaxError, TypeError) as error:
+        raise RetentionError(f"{graph_id} Meson configure command differs from its signed profile: {error}") from error
+
+
+def _dual_graph_configuration_pair_sha256(graphs: Mapping[str, Any]) -> str:
+    graph_ids = tuple(BUILD_SESSION_DUAL_GRAPH_IDS)
+    if set(graphs) != set(graph_ids):
+        raise RetentionError("completed Host-v3 identity must contain exactly the two canonical graph IDs")
+    rows = []
+    for graph_id in graph_ids:
+        graph = graphs.get(graph_id)
+        if not isinstance(graph, Mapping) or graph.get("graph_id") != graph_id:
+            raise RetentionError(f"completed Host-v3 graph identity is missing or miskeyed: {graph_id}")
+        config_key = graph.get("config_key_sha256")
+        if not isinstance(config_key, str) or not re.fullmatch(r"[0-9a-f]{64}", config_key):
+            raise RetentionError(f"completed Host-v3 graph has no valid configuration key: {graph_id}")
+        meson_identity = graph.get("meson_identity")
+        if not isinstance(meson_identity, Mapping):
+            raise RetentionError(f"completed Host-v3 graph has no captured Meson identity: {graph_id}")
+        dependency = meson_identity.get("dependency_state")
+        profile_sha256 = (dependency.get("plan_profile_sha256")
+                          if isinstance(dependency, Mapping) else None)
+        if not isinstance(profile_sha256, str):
+            raise RetentionError(f"Host-v3 graph has no plan-bound configure profile: {graph_id}")
+        recomputed = _dual_graph_plan_bound_configuration_key(meson_identity, profile_sha256)
+        if recomputed != config_key:
+            raise RetentionError(f"Host-v3 graph configuration key mismatch: {graph_id}")
+        rows.append({"graph_id": graph_id, "configuration_key_sha256": recomputed})
+    return hashlib.sha256(_canonical_json(rows)).hexdigest()
+
+
+def _dual_graph_configuration_identity(meson_identity: Mapping[str, Any]) -> dict[str, Any]:
+    """Return frozen configuration inputs without evidence-location metadata."""
+    source = meson_identity.get("source_identity")
+    stable_source_fields = (
+        "path", "git_commit", "git_tree", "content_tree_sha256", "staged_patch_sha256",
+        "unstaged_patch_sha256", "patch_set_sha256", "untracked_path_list_sha256",
+        "untracked_files_sha256", "submodule_status_sha256", "status_porcelain_v2_sha256",
+    )
+    source_identity = ({key: source[key] for key in stable_source_fields if key in source}
+                       if isinstance(source, Mapping) else None)
+    cross = meson_identity.get("cross_file")
+    cross_identity = ({"status": cross.get("status"), **(
+        {"sha256": cross.get("sha256")} if cross.get("status") == "present" else {})}
+        if isinstance(cross, Mapping) else None)
+    shader_rows = meson_identity.get("generated_shader_identity")
+    normalized_shaders = sorted((
+        {"build_relative_path": row.get("build_relative_path"), "sha256": row.get("sha256")}
+        for row in shader_rows if isinstance(row, Mapping)),
+        key=lambda row: str(row["build_relative_path"])) if isinstance(shader_rows, list) else None
+    raw_options = meson_identity.get("meson_options")
+    normalized_options = (_ordered_meson_options(raw_options)
+                          if isinstance(raw_options, list)
+                          and all(isinstance(row, Mapping) for row in raw_options)
+                          else raw_options)
+    return {
+        "build_system": meson_identity.get("build_system"),
+        "build_type": meson_identity.get("build_type"),
+        "source_identity": source_identity,
+        "patch_set": meson_identity.get("patch_set"),
+        "cross_file": cross_identity,
+        "meson_options": normalized_options,
+        "meson_options_configuration_sha256": meson_identity.get(
+            "meson_options_configuration_sha256"),
+        "compiler_identity": meson_identity.get("compiler_identity"),
+        "compiler_identity_sha256": meson_identity.get("compiler_identity_sha256"),
+        "linker_identity": meson_identity.get("linker_identity"),
+        "dependency_state": meson_identity.get("dependency_state"),
+        "generated_shader_identity": normalized_shaders,
+    }
+
+
+def _json_object_without_duplicate_keys(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    result: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError(f"duplicate JSON object key: {key}")
+        result[key] = value
+    return result
+
+
+def _read_session_prebuild_manifest(plan: Mapping[str, Any]) -> tuple[dict[str, Any], Path]:
+    """Read the repository-contained, no-follow configure-preflight manifest."""
+    descriptor = plan.get("prebuild_evidence")
+    if (not isinstance(descriptor, Mapping)
+            or set(descriptor) != {"manifest_path", "manifest_sha256", "canonical_sha256", "evidence_root"}):
+        raise RetentionError("dual-graph plan lacks its exact prebuild identity evidence binding")
+    manifest_relative = _session_relative_path(descriptor.get("manifest_path"),
+                                               "prebuild manifest path")
+    evidence_relative = _session_relative_path(descriptor.get("evidence_root"),
+                                                "prebuild evidence root")
+    if (manifest_relative.parts[:2] != ("experiments", "storage")
+            or evidence_relative.parts[:2] != ("experiments", "storage")):
+        raise RetentionError("prebuild identity evidence must be retained under experiments/storage")
+    manifest_path = REPO / manifest_relative
+    evidence_root = REPO / evidence_relative
+    try:
+        if manifest_path.resolve(strict=True) != manifest_path or evidence_root.resolve(strict=True) != evidence_root:
+            raise RetentionError("prebuild evidence paths are not canonical")
+        parent_fd = _open_dir(manifest_path.parent)
+        try:
+            raw = _read_at(parent_fd, manifest_path.name,
+                           limit=BUILD_SESSION_PREBUILD_MANIFEST_LIMIT_BYTES)
+        finally:
+            os.close(parent_fd)
+        if evidence_root.is_symlink() or not evidence_root.is_dir():
+            raise RetentionError("prebuild evidence root is missing or linked")
+        evidence_root_fd = _open_dir(evidence_root)
+        os.close(evidence_root_fd)
+        if hashlib.sha256(raw).hexdigest() != descriptor.get("manifest_sha256"):
+            raise RetentionError("prebuild identity manifest differs from the frozen plan")
+        parsed = json.loads(raw, object_pairs_hook=_json_object_without_duplicate_keys)
+    except (OSError, ValueError, json.JSONDecodeError) as error:
+        raise RetentionError(f"prebuild identity manifest is unavailable or malformed: {error}") from error
+    if (not isinstance(parsed, dict)
+            or hashlib.sha256(_canonical_json(parsed)).hexdigest() != descriptor.get("canonical_sha256")
+            or parsed.get("schema_version") != 1 or parsed.get("status") != "PASS"):
+        raise RetentionError("prebuild identity manifest lacks its exact canonical passing record")
+    return parsed, evidence_root
+
+
+def _validate_prebuild_evidence_record(evidence_root: Path,
+                                       evidence_by_path: Mapping[str, Mapping[str, Any]],
+                                       relative: Any, digest: Any, label: str) -> Path:
+    if (not isinstance(relative, str) or not isinstance(digest, str)
+            or not re.fullmatch(r"[0-9a-f]{64}", digest)):
+        raise RetentionError(f"prebuild {label} evidence record is malformed")
+    session_relative = _session_relative_path(relative, f"prebuild {label} evidence path")
+    path = evidence_root / session_relative
+    row = evidence_by_path.get(session_relative.as_posix())
+    if row is None or row.get("sha256") != digest:
+        raise RetentionError(f"prebuild {label} evidence is absent from its hash inventory")
+    _hash_file_beneath_nofollow(
+        evidence_root, session_relative.as_posix(), expected_sha256=digest,
+        expected_size_bytes=row.get("size_bytes"), label=f"prebuild {label} evidence")
+    return path
+
+
+def _validate_production_prebuild_actions(plan: Mapping[str, Any], manifest: Mapping[str, Any],
+                                          manifest_path: Path, evidence_root: Path,
+                                          evidence_by_path: Mapping[str, Mapping[str, Any]]) -> None:
+    """Independently validate that preflight executed only setup, Ninja query, and glslang."""
+    preflight = manifest.get("preflight")
+    required = {
+        "schema_version", "status", "run_key", "mode", "configure_graph_ids", "configure_receipts",
+        "compiler_probe_receipts", "generator_graph_ids", "generator_receipts", "generated_output_rows",
+        "query_receipt_paths", "executed_production_targets", "executed_ninja_build_targets",
+        "executed_non_glslang_generator_commands", "resource_bounds",
+    }
+    if (not isinstance(preflight, Mapping) or set(preflight) != required
+            or preflight.get("schema_version") != 1 or preflight.get("status") != "PASS"
+            or preflight.get("mode") != "MESON_CONFIGURE_AND_GLSLANG_GENERATOR_ONLY"):
+        raise RetentionError("prebuild action record is not the exact configure and shader-only procedure")
+    run_key = preflight.get("run_key")
+    expected_run_root = f"{BUILD_SESSION_PREBUILD_ARTIFACT_PREFIX}-{run_key}"
+    if (not isinstance(run_key, str) or not re.fullmatch(r"202[0-9]{5}T[0-9]{6}Z", run_key)
+            or manifest_path.parent.name != expected_run_root
+            or evidence_root != manifest_path.parent / "evidence"):
+        raise RetentionError("prebuild action run key differs from its canonical disposable root")
+    if (preflight.get("configure_graph_ids") != list(BUILD_SESSION_DUAL_GRAPH_IDS)
+            or preflight.get("generator_graph_ids") != list(BUILD_SESSION_DUAL_GRAPH_IDS)
+            or preflight.get("executed_production_targets") != []
+            or preflight.get("executed_ninja_build_targets") != []
+            or preflight.get("executed_non_glslang_generator_commands") != []):
+        raise RetentionError("prebuild action evidence contains a missing graph or unauthorized target")
+    bounds = {
+        "configure_timeout_seconds": 1200, "configure_cpu_seconds": 1200,
+        "ninja_query_timeout_seconds": 60, "glslang_timeout_seconds": 90,
+        "glslang_cpu_seconds": 90, "max_output_file_bytes": 1024 * 1024 * 1024,
+    }
+    if preflight.get("resource_bounds") != bounds:
+        raise RetentionError("prebuild action resource bounds differ from the reviewed fixed limits")
+    graphs = plan.get("build_graphs")
+    configure_receipts = preflight.get("configure_receipts")
+    probe_receipts = preflight.get("compiler_probe_receipts")
+    query_paths = preflight.get("query_receipt_paths")
+    generator_receipts = preflight.get("generator_receipts")
+    output_rows = preflight.get("generated_output_rows")
+    if (not isinstance(graphs, list) or not isinstance(configure_receipts, list)
+            or len(configure_receipts) != 2 or not isinstance(probe_receipts, list)
+            or len(probe_receipts) != 2 or not isinstance(query_paths, list)
+            or len(query_paths) != 2 or not isinstance(generator_receipts, list)
+            or not generator_receipts or not isinstance(output_rows, list)):
+        raise RetentionError("prebuild action receipt sets are incomplete")
+    run_root = manifest_path.parent.resolve(strict=True)
+    disposable_root = run_root / "disposable"
+    source_root = Path(str(plan["source_identity"]["root"])).resolve(strict=True)
+    tools = plan.get("tools")
+    if not isinstance(tools, Mapping):
+        raise RetentionError("prebuild action plan lacks pinned tools")
+    configure_by_graph = {row.get("graph_id"): row for row in configure_receipts
+                          if isinstance(row, Mapping)}
+    probe_by_graph = {row.get("graph_id"): row for row in probe_receipts
+                      if isinstance(row, Mapping)}
+    if set(configure_by_graph) != set(BUILD_SESSION_DUAL_GRAPH_IDS) \
+            or set(probe_by_graph) != set(BUILD_SESSION_DUAL_GRAPH_IDS):
+        raise RetentionError("prebuild configure receipts are missing or duplicated")
+    for graph in graphs:
+        graph_id = str(graph["graph_id"])
+        build_dir = disposable_root / graph_id
+        configure = configure_by_graph[graph_id]
+        expected_argv = _dual_graph_configure_command(plan, graph, build_dir)
+        if (set(configure) != {"graph_id", "command", "cwd", "returncode", "timeout_seconds",
+                               "cpu_limit_seconds", "stdout_path", "stdout_sha256", "meson_log_sha256",
+                               "probe_summary_path", "probe_summary_sha256", "probe_line_count"}
+                or configure.get("command") != expected_argv or configure.get("cwd") != str(source_root)
+                or configure.get("returncode") != 0 or configure.get("timeout_seconds") != 1200
+                or configure.get("cpu_limit_seconds") != 1200):
+            raise RetentionError(f"{graph_id} configure command or bounds differ from the exact profile")
+        stdout_path = _validate_prebuild_evidence_record(
+            evidence_root, evidence_by_path, configure.get("stdout_path"),
+            configure.get("stdout_sha256"), f"{graph_id} Meson stdout")
+        if stdout_path.relative_to(evidence_root).as_posix() != f"{graph_id}/preflight/meson-setup.stdout.log":
+            raise RetentionError(f"{graph_id} Meson stdout is outside its exact evidence slot")
+        probe = probe_by_graph[graph_id]
+        if (set(probe) != {"graph_id", "path", "sha256"}
+                or probe.get("path") != configure.get("probe_summary_path")
+                or probe.get("sha256") != configure.get("probe_summary_sha256")
+                or type(configure.get("probe_line_count")) is not int
+                or configure["probe_line_count"] < 1):
+            raise RetentionError(f"{graph_id} Meson compiler-probe summary is malformed")
+        probe_path = _validate_prebuild_evidence_record(
+            evidence_root, evidence_by_path, probe.get("path"), probe.get("sha256"),
+            f"{graph_id} compiler probe")
+        try:
+            probe_relative = Path(str(probe.get("path", "")))
+            probe_raw = _read_file_beneath_nofollow(
+                evidence_root, probe_relative, expected_sha256=probe.get("sha256"),
+                label=f"{graph_id} compiler probe")
+            probe_data = json.loads(probe_raw, object_pairs_hook=_json_object_without_duplicate_keys)
+        except (OSError, ValueError, json.JSONDecodeError) as error:
+            raise RetentionError(f"{graph_id} Meson compiler-probe summary is unreadable") from error
+        if (not isinstance(probe_data, Mapping)
+                or set(probe_data) != {"graph_id", "meson_log_sha256", "lines"}
+                or probe_data.get("graph_id") != graph_id
+                or probe_data.get("meson_log_sha256") != configure.get("meson_log_sha256")
+                or not isinstance(probe_data.get("lines"), list)
+                or len(probe_data["lines"]) != configure.get("probe_line_count")
+                or any(not isinstance(row, Mapping)
+                       or set(row) != {"line_number", "text"}
+                       or type(row.get("line_number")) is not int or row["line_number"] < 1
+                       or not isinstance(row.get("text"), str) for row in probe_data["lines"])):
+            raise RetentionError(f"{graph_id} Meson configure compiler probes are not bound to its log")
+        frozen = next((row.get("prebuild_identity") for row in graphs
+                       if row.get("graph_id") == graph_id), None)
+        meson_identity = frozen.get("meson_identity") if isinstance(frozen, Mapping) else None
+        meson_log_record = (meson_identity.get("meson_log_evidence")
+                            if isinstance(meson_identity, Mapping) else None)
+        if (not isinstance(meson_identity, Mapping)
+                or meson_identity.get("meson_log_sha256") != configure.get("meson_log_sha256")
+                or not isinstance(meson_log_record, Mapping)
+                or meson_log_record.get("sha256") != configure.get("meson_log_sha256")):
+            raise RetentionError(f"{graph_id} compiler-probe record differs from the captured Meson log")
+        meson_log_path = Path(str(meson_log_record.get("retained_path", "")))
+        try:
+            meson_log_relative = meson_log_path.relative_to(evidence_root).as_posix()
+        except ValueError as error:
+            raise RetentionError(f"{graph_id} captured Meson log escaped prebuild evidence") from error
+        _validate_prebuild_evidence_record(evidence_root, evidence_by_path,
+                                           meson_log_relative, configure.get("meson_log_sha256"),
+                                           f"{graph_id} Meson configure log")
+
+    if len(query_paths) != 2 or query_paths != [
+            f"{graph_id}/preflight/ninja-query-receipt.json" for graph_id in BUILD_SESSION_DUAL_GRAPH_IDS]:
+        raise RetentionError("prebuild Ninja query receipts differ from the ordered graph pair")
+    generator_by_graph: dict[str, list[Mapping[str, Any]]] = {graph_id: [] for graph_id in BUILD_SESSION_DUAL_GRAPH_IDS}
+    for row in generator_receipts:
+        if not isinstance(row, Mapping) or row.get("graph_id") not in generator_by_graph:
+            raise RetentionError("prebuild shader generator receipt has an unknown graph")
+        generator_by_graph[row["graph_id"]].append(row)
+    output_index = {}
+    for row in output_rows:
+        if (not isinstance(row, Mapping)
+                or set(row) != {"graph_id", "build_relative_path", "sha256"}
+                or row.get("graph_id") not in generator_by_graph
+                or not isinstance(row.get("build_relative_path"), str)
+                or not re.fullmatch(r"[0-9a-f]{64}", str(row.get("sha256", "")))):
+            raise RetentionError("prebuild generated shader output row is malformed")
+        key = (row["graph_id"], row["build_relative_path"])
+        if key in output_index:
+            raise RetentionError("prebuild generated shader output row is duplicated")
+        output_index[key] = row["sha256"]
+
+    tool = tools.get("native_glslang")
+    ninja = tools.get("ninja")
+    if not isinstance(tool, Mapping) or not isinstance(ninja, Mapping):
+        raise RetentionError("prebuild shader generator tools are not pinned")
+    all_generator_keys: set[tuple[str, str]] = set()
+    for graph_id in BUILD_SESSION_DUAL_GRAPH_IDS:
+        build_dir = disposable_root / graph_id
+        query_path_relative = f"{graph_id}/preflight/ninja-commands-query.txt"
+        query_text_path = evidence_root / query_path_relative
+        if query_text_path.is_symlink() or not query_text_path.is_file():
+            raise RetentionError(f"{graph_id} Ninja command query output is unavailable")
+        query_path_record = evidence_by_path.get(query_path_relative)
+        if query_path_record is None:
+            raise RetentionError(f"{graph_id} Ninja command query output is not hash-bound")
+        query_text_raw = _read_file_beneath_nofollow(
+            evidence_root, query_path_relative,
+            expected_sha256=query_path_record.get("sha256"),
+            expected_size_bytes=query_path_record.get("size_bytes"),
+            label=f"{graph_id} Ninja command listing")
+        query_receipt_path = _validate_prebuild_evidence_record(
+            evidence_root, evidence_by_path, query_paths[BUILD_SESSION_DUAL_GRAPH_IDS.index(graph_id)],
+            evidence_by_path.get(query_paths[BUILD_SESSION_DUAL_GRAPH_IDS.index(graph_id)], {}).get("sha256"),
+            f"{graph_id} Ninja query receipt")
+        try:
+            query_receipt_relative = query_paths[BUILD_SESSION_DUAL_GRAPH_IDS.index(graph_id)]
+            query_receipt_raw = _read_file_beneath_nofollow(
+                evidence_root, query_receipt_relative,
+                expected_sha256=evidence_by_path[query_receipt_relative].get("sha256"),
+                expected_size_bytes=evidence_by_path[query_receipt_relative].get("size_bytes"),
+                label=f"{graph_id} Ninja query receipt")
+            query_receipt = json.loads(query_receipt_raw,
+                                       object_pairs_hook=_json_object_without_duplicate_keys)
+        except (OSError, ValueError, json.JSONDecodeError) as error:
+            raise RetentionError(f"{graph_id} Ninja query receipt is unreadable") from error
+        expected_query = [str(ninja.get("path")), "-C", str(build_dir), "-t", "commands"]
+        if (not isinstance(query_receipt, Mapping)
+                or set(query_receipt) != {"graph_id", "command", "cwd", "returncode", "timeout_seconds",
+                                         "cpu_limit_seconds", "stdout_path", "stdout_sha256",
+                                         "glslang_command_count", "executed_build_targets"}
+                or query_receipt.get("graph_id") != graph_id
+                or query_receipt.get("command") != expected_query
+                or query_receipt.get("cwd") != str(source_root)
+                or query_receipt.get("returncode") != 0
+                or query_receipt.get("timeout_seconds") != 60
+                or query_receipt.get("cpu_limit_seconds") != 60
+                or query_receipt.get("stdout_path") != query_path_relative
+                or query_receipt.get("executed_build_targets") != []):
+            raise RetentionError(f"{graph_id} Ninja command query did not use the informational-only mode")
+        query_stdout = evidence_by_path.get(query_path_relative)
+        if (query_stdout is None or query_receipt.get("stdout_sha256") != query_stdout.get("sha256")):
+            raise RetentionError(f"{graph_id} Ninja command listing changed after capture")
+        listed_generators = []
+        try:
+            query_text = query_text_raw.decode("utf-8", errors="strict")
+        except UnicodeDecodeError as error:
+            raise RetentionError(f"{graph_id} Ninja command listing is not UTF-8") from error
+        for line in query_text.splitlines():
+            try:
+                argv = shlex.split(line, posix=True)
+            except ValueError as error:
+                raise RetentionError(f"{graph_id} Ninja command listing is malformed") from error
+            if not argv:
+                continue
+            if "glslang" in line.casefold():
+                if argv[0] != tool.get("path") or any(
+                        any(char in arg for char in ";&|<>`\n\r") for arg in argv):
+                    raise RetentionError("Ninja command listing contains an unpinned shader action")
+                listed_generators.append(argv)
+        receipt_argvs = []
+        for row in generator_by_graph[graph_id]:
+            if set(row) != {"graph_id", "command", "cwd", "returncode", "timeout_seconds",
+                            "cpu_limit_seconds", "source_path", "source_sha256", "output_path",
+                            "output_sha256", "output_size_bytes", "depfile_path", "depfile_sha256",
+                            "depfile_size_bytes", "stdout_path", "stdout_sha256"}:
+                raise RetentionError(f"{graph_id} glslang generator receipt has unexpected fields")
+            argv = row.get("command")
+            if (not isinstance(argv, list) or not all(isinstance(arg, str) for arg in argv)
+                    or len(argv) != 11 or argv[0] != tool.get("path")
+                    or argv[1:5] != ["--quiet", "--target-env", "vulkan1.3", "--vn"]
+                    or argv[6] != "--depfile" or argv[9] != "-o"
+                    or row.get("returncode") != 0 or row.get("timeout_seconds") != 90
+                    or row.get("cpu_limit_seconds") != 90 or row.get("cwd") != str(build_dir)):
+                raise RetentionError(f"{graph_id} glslang invocation differs from its bounded exact argv")
+            source_relative = _session_relative_path(row.get("source_path"), "shader source path")
+            source_path = (source_root / source_relative).resolve(strict=True)
+            argv_source = Path(argv[8])
+            argv_source = (argv_source if argv_source.is_absolute() else build_dir / argv_source).resolve(strict=True)
+            if (source_root not in source_path.parents or not source_path.is_file()
+                    or _hash_path(source_path) != row.get("source_sha256")
+                    or argv_source != source_path or argv[5] != source_path.stem):
+                raise RetentionError(f"{graph_id} glslang input differs from its frozen source hash")
+            output_relative = _session_relative_path(row.get("output_path"), "shader output path")
+            depfile_relative = _session_relative_path(row.get("depfile_path"), "shader depfile path")
+            output_path = (build_dir / output_relative).resolve(strict=True)
+            depfile_path = (build_dir / depfile_relative).resolve(strict=True)
+            argv_output = Path(argv[10])
+            argv_output = (argv_output if argv_output.is_absolute() else build_dir / argv_output).resolve(strict=True)
+            argv_depfile = Path(argv[7])
+            argv_depfile = (argv_depfile if argv_depfile.is_absolute() else build_dir / argv_depfile).resolve(strict=True)
+            if (build_dir.resolve(strict=True) not in output_path.parents
+                    or build_dir.resolve(strict=True) not in depfile_path.parents
+                    or output_path.name != f"{source_path.stem}.h"
+                    or depfile_path != output_path.with_name(output_path.name + ".d")
+                    or argv_output != output_path or argv_depfile != depfile_path
+                    or _hash_path(output_path) != row.get("output_sha256")
+                    or _hash_path(depfile_path) != row.get("depfile_sha256")
+                    or type(row.get("output_size_bytes")) is not int
+                    or type(row.get("depfile_size_bytes")) is not int
+                    or output_path.stat(follow_symlinks=False).st_size != row.get("output_size_bytes")
+                    or depfile_path.stat(follow_symlinks=False).st_size != row.get("depfile_size_bytes")):
+                raise RetentionError(f"{graph_id} glslang outputs escaped or changed in disposable storage")
+            for field, digest in (("stdout_path", "stdout_sha256"),):
+                _validate_prebuild_evidence_record(evidence_root, evidence_by_path,
+                                                   row.get(field), row.get(digest),
+                                                   f"{graph_id} glslang log")
+            receipt_argvs.append(argv)
+            key = (graph_id, output_relative.as_posix())
+            if key in all_generator_keys:
+                raise RetentionError("prebuild glslang output path is duplicated")
+            all_generator_keys.add(key)
+            if output_index.get(key) != row.get("output_sha256"):
+                raise RetentionError("prebuild output index differs from the glslang output receipt")
+        if (not receipt_argvs or sorted(map(_canonical_json, receipt_argvs))
+                != sorted(map(_canonical_json, listed_generators))
+                or query_receipt.get("glslang_command_count") != len(receipt_argvs)):
+            raise RetentionError(f"{graph_id} exact glslang actions differ from the read-only Ninja query")
+    if all_generator_keys != set(output_index):
+        raise RetentionError("prebuild generated output index contains missing or extra shader paths")
+    for graph in graphs:
+        graph_id = str(graph["graph_id"])
+        frozen = graph.get("prebuild_identity")
+        meson_identity = frozen.get("meson_identity") if isinstance(frozen, Mapping) else None
+        shader_rows = (meson_identity.get("generated_shader_identity")
+                       if isinstance(meson_identity, Mapping) else None)
+        if not isinstance(shader_rows, list):
+            raise RetentionError(f"{graph_id} frozen prebuild shader rows are missing")
+        observed = sorted((row.get("build_relative_path"), row.get("sha256"))
+                          for row in shader_rows if isinstance(row, Mapping))
+        expected = sorted((path, digest) for (row_graph, path), digest in output_index.items()
+                          if row_graph == graph_id)
+        if observed != expected:
+            raise RetentionError(f"{graph_id} frozen shader identity differs from exact generator outputs")
+
+
+def _validate_dual_graph_prebuild_identity(plan: Mapping[str, Any], *,
+                                           require_evidence: bool = True) -> str:
+    """Revalidate both frozen configure identities and their ordered request key."""
+    manifest, evidence_root = _read_session_prebuild_manifest(plan)
+    descriptor = plan.get("prebuild_evidence")
+    assert isinstance(descriptor, Mapping)
+    manifest_path = REPO / _session_relative_path(
+        descriptor["manifest_path"], "prebuild manifest path")
+    graphs = plan.get("build_graphs")
+    if (not isinstance(graphs, list) or len(graphs) != 2
+            or [row.get("graph_id") if isinstance(row, Mapping) else None for row in graphs]
+                != list(BUILD_SESSION_DUAL_GRAPH_IDS)):
+        raise RetentionError("prebuild identity plan does not contain the canonical graph pair")
+    manifest_graphs = manifest.get("graphs")
+    if (not isinstance(manifest_graphs, list) or len(manifest_graphs) != 2
+            or [row.get("graph_id") if isinstance(row, Mapping) else None for row in manifest_graphs]
+                != list(BUILD_SESSION_DUAL_GRAPH_IDS)):
+        raise RetentionError("prebuild manifest does not contain the canonical graph pair")
+    preflight = manifest.get("preflight")
+    if not isinstance(preflight, Mapping):
+        raise RetentionError("prebuild manifest lacks its configure and shader action record")
+    if preflight.get("mode") == "SYNTHETIC_FIXTURE":
+        if REPO.resolve() == _REPOSITORY_ROOT:
+            raise RetentionError("synthetic prebuild evidence is forbidden in the production repository")
+        if (preflight.get("status") != "PASS"
+                or preflight.get("configure_graph_ids") != list(BUILD_SESSION_DUAL_GRAPH_IDS)
+                or preflight.get("generator_graph_ids") != list(BUILD_SESSION_DUAL_GRAPH_IDS)
+                or preflight.get("executed_production_targets") != []):
+            raise RetentionError("synthetic prebuild graph fixture is incomplete")
+    elif preflight.get("mode") != "MESON_CONFIGURE_AND_GLSLANG_GENERATOR_ONLY":
+        raise RetentionError("prebuild manifest does not prove the reviewed configure and shader-only mode")
+    manifest_by_id = {row["graph_id"]: row for row in manifest_graphs}
+    graph_map: dict[str, dict[str, Any]] = {}
+    for declaration in graphs:
+        graph_id = str(declaration["graph_id"])
+        frozen = declaration.get("prebuild_identity")
+        if (not isinstance(frozen, Mapping)
+                or set(frozen) != {"configuration_profile_sha256", "config_key_sha256", "meson_identity"}
+                or not re.fullmatch(r"[0-9a-f]{64}", str(frozen.get("configuration_profile_sha256", "")))
+                or not re.fullmatch(r"[0-9a-f]{64}", str(frozen.get("config_key_sha256", "")))
+                or not isinstance(frozen.get("meson_identity"), Mapping)):
+            raise RetentionError(f"{graph_id} plan lacks its frozen prebuild Meson identity")
+        meson_identity = frozen["meson_identity"]
+        if meson_identity.get("build_system") != "meson":
+            raise RetentionError(f"{graph_id} prebuild identity is not a Meson graph")
+        manifest_row = manifest_by_id[graph_id]
+        if (set(manifest_row) != {"graph_id", "configuration_identity", "prebuild_identity",
+                                  "prebuild_identity_sha256"}
+                or manifest_row.get("prebuild_identity") != dict(frozen)):
+            raise RetentionError(f"{graph_id} complete prebuild identity differs from its manifest row")
+        if _dual_graph_configuration_identity(meson_identity) != manifest_row.get("configuration_identity"):
+            raise RetentionError(f"{graph_id} prebuild identity differs from its retained manifest row")
+        if manifest_row.get("prebuild_identity_sha256") != hashlib.sha256(
+                _canonical_json(dict(frozen))).hexdigest():
+            raise RetentionError(f"{graph_id} prebuild identity digest differs from its manifest")
+        profile_sha = _validate_dual_graph_configuration_profile(
+            plan, declaration, meson_identity, str(plan.get("build_type", "")),
+            evidence_root / graph_id if require_evidence else None)
+        if profile_sha != frozen.get("configuration_profile_sha256"):
+            raise RetentionError(f"{graph_id} prebuild profile digest differs from the frozen plan")
+        dependency = meson_identity.get("dependency_state")
+        if (not isinstance(dependency, Mapping)
+                or dependency.get("plan_profile_sha256") != profile_sha):
+            raise RetentionError(f"{graph_id} prebuild dependency state is not bound to its profile")
+        key = _dual_graph_plan_bound_configuration_key(meson_identity, profile_sha)
+        if key != frozen.get("config_key_sha256"):
+            raise RetentionError(f"{graph_id} prebuild configuration key differs from its captured identity")
+        graph_map[graph_id] = {"graph_id": graph_id, "config_key_sha256": key,
+                               "meson_identity": meson_identity}
+    pair = _dual_graph_configuration_pair_sha256(graph_map)
+    if manifest.get("graph_pair_key_sha256") != pair:
+        raise RetentionError("prebuild manifest does not bind its ordered graph-pair configuration key")
+    if preflight.get("mode") == "SYNTHETIC_FIXTURE":
+        generated_rows = preflight.get("generated_output_rows")
+        if not isinstance(generated_rows, list):
+            raise RetentionError("synthetic prebuild fixture lacks generated shader output rows")
+        expected_shader_rows = sorted(
+            (graph_id, row.get("build_relative_path"), row.get("sha256"))
+            for graph_id, graph in graph_map.items()
+            for row in graph["meson_identity"].get("generated_shader_identity", []))
+        observed_shader_rows = sorted(
+            (row.get("graph_id"), row.get("build_relative_path"), row.get("sha256"))
+            for row in generated_rows if isinstance(row, Mapping))
+        if observed_shader_rows != expected_shader_rows:
+            raise RetentionError("synthetic generated shader rows differ from both frozen graph identities")
+    if require_evidence:
+        evidence_files = manifest.get("evidence_files")
+        if not isinstance(evidence_files, list) or not evidence_files:
+            raise RetentionError("prebuild manifest has no retained evidence file inventory")
+        seen_paths: set[str] = set()
+        for row in evidence_files:
+            if (not isinstance(row, Mapping) or set(row) != {"path", "sha256", "size_bytes"}
+                    or not isinstance(row.get("path"), str) or row["path"] in seen_paths
+                    or not re.fullmatch(r"[0-9a-f]{64}", str(row.get("sha256", "")))
+                    or type(row.get("size_bytes")) is not int or row["size_bytes"] < 0):
+                raise RetentionError("prebuild evidence inventory contains a malformed or duplicate row")
+            relative = _session_relative_path(row["path"], "prebuild evidence file path")
+            if relative.parts[0] not in BUILD_SESSION_DUAL_GRAPH_IDS:
+                raise RetentionError("prebuild evidence inventory escaped its graph-local roots")
+            _hash_file_beneath_nofollow(
+                evidence_root, relative, expected_sha256=row["sha256"],
+                expected_size_bytes=row["size_bytes"], label=f"prebuild evidence file {relative}")
+            seen_paths.add(row["path"])
+        observed_paths: set[str] = set()
+        for directory, dirnames, filenames in os.walk(evidence_root, followlinks=False):
+            base = Path(directory)
+            for name in list(dirnames):
+                entry = base / name
+                info = entry.lstat()
+                if stat.S_ISLNK(info.st_mode) or not stat.S_ISDIR(info.st_mode):
+                    raise RetentionError("prebuild evidence contains a linked or special directory")
+            for name in filenames:
+                entry = base / name
+                info = entry.lstat()
+                if (stat.S_ISLNK(info.st_mode) or not stat.S_ISREG(info.st_mode)
+                        or info.st_nlink != 1 or entry.resolve(strict=True) != entry):
+                    raise RetentionError("prebuild evidence contains a linked or special file")
+                observed_paths.add(entry.relative_to(evidence_root).as_posix())
+        if observed_paths != seen_paths:
+            raise RetentionError("prebuild evidence inventory is incomplete or contains unbound files")
+        if preflight.get("mode") == "MESON_CONFIGURE_AND_GLSLANG_GENERATOR_ONLY":
+            evidence_by_path = {row["path"]: row for row in evidence_files}
+            _validate_production_prebuild_actions(plan, manifest, manifest_path,
+                                                  evidence_root, evidence_by_path)
+    if plan.get("build_configuration_key_sha256") != pair:
+        raise RetentionError("frozen build_configuration_key_sha256 is not the ordered prebuild graph-pair key")
+    if pair == hashlib.sha256(_canonical_json(dict(plan))).hexdigest():
+        raise RetentionError("session-plan SHA-256 cannot substitute for the prebuild graph-pair key")
+    return pair
+
+
+def _dual_graph_configuration_profile(plan: Mapping[str, Any],
+                                      declaration: Mapping[str, Any],
+                                      build_type: str) -> dict[str, Any]:
+    """Derive the authorized per-graph configure profile from the accepted plan."""
+    graph_id = declaration.get("graph_id")
+    role = declaration.get("graph_role")
+    configure_profile = declaration.get("configure_profile")
+    if (graph_id not in BUILD_SESSION_DUAL_GRAPH_IDS or not isinstance(build_type, str) or not build_type
+            or build_type != plan.get("build_type")):
+        raise RetentionError("dual-graph configure profile lacks an exact graph or build type")
+    if ((graph_id, role, configure_profile) == (
+            "windows-product-r6a", "WINDOWS_PRODUCT", "R6A_WINDOWS_PRODUCT")):
+        machine_role = "CROSS_WINDOWS_X86_64"
+        option_values: dict[str, Any] = {
+            "backend": "ninja", "buildtype": build_type,
+            "wrap_mode": "nodownload", "prefix": "/usr",
+        }
+        compiler_tool_ids = {
+            "build": {"c": "native_cc", "cpp": "native_cxx"},
+            "host": {"c": "mingw_cc", "cpp": "mingw_cxx"},
+        }
+        linker_ids = {"build": "ld64", "host": "ld.bfd"}
+    elif ((graph_id, role, configure_profile) == (
+            "native-verification-r6a", "NATIVE_VERIFICATION", "R6A_NATIVE_VERIFICATION_SDL2")):
+        machine_role = "NATIVE_DARWIN_HOST"
+        option_values = {
+            "backend": "ninja", "buildtype": build_type,
+            "wrap_mode": "nodownload", "prefix": "/usr",
+            "enable_dxgi": True, "enable_d3d11": True,
+            "enable_d3d8": False, "enable_d3d9": False, "enable_d3d10": False,
+            "native_sdl2": "enabled", "native_sdl3": "disabled", "native_glfw": "disabled",
+        }
+        compiler_tool_ids = {
+            "build": {"c": "native_cc", "cpp": "native_cxx"},
+            "host": {"c": "native_cc", "cpp": "native_cxx"},
+        }
+        linker_ids = {"build": "ld64", "host": "ld64"}
+    else:
+        raise RetentionError(f"dual-graph configure profile is not authorized: {graph_id}")
+    if declaration.get("machine_role") != machine_role:
+        raise RetentionError(f"dual-graph machine role differs from its configure profile: {graph_id}")
+    tool_receipts = plan.get("tools")
+    host_dependencies = plan.get("host_dependency_receipts")
+    runtime_receipts = plan.get("runtime_receipts")
+    if not isinstance(tool_receipts, Mapping) or not isinstance(host_dependencies, list) \
+            or not isinstance(runtime_receipts, list):
+        raise RetentionError("dual-graph configure profile lacks pinned tools or dependency receipts")
+    tool_ids = declaration.get("tool_receipt_ids")
+    if not isinstance(tool_ids, list) or any(tool_id not in tool_receipts for tool_id in tool_ids):
+        raise RetentionError(f"dual-graph configure profile has incomplete graph tools: {graph_id}")
+    declared_runtime_ids = declaration.get("runtime_receipt_ids")
+    if not isinstance(declared_runtime_ids, list):
+        raise RetentionError(f"dual-graph configure profile has malformed runtime receipts: {graph_id}")
+    runtime_by_id = {row.get("runtime_id"): row for row in runtime_receipts if isinstance(row, Mapping)}
+    if set(runtime_by_id) != {"SDL2_COMPAT", "SDL3"} \
+            or any(runtime_id not in runtime_by_id for runtime_id in declared_runtime_ids):
+        raise RetentionError("dual-graph configure profile runtime receipts differ from the accepted plan")
+    cross_input = declaration.get("cross_file_input")
+    cross_receipt = next((row for row in plan.get("input_receipts", [])
+                          if isinstance(row, Mapping) and row.get("path") == cross_input), None) \
+        if cross_input is not None else None
+    if cross_input is not None and not isinstance(cross_receipt, Mapping):
+        raise RetentionError(f"dual-graph configure profile has no admitted cross-file receipt: {graph_id}")
+    compiler_receipts = {
+        machine: {language: dict(tool_receipts[tool_id])
+                  for language, tool_id in languages.items()}
+        for machine, languages in compiler_tool_ids.items()
+    }
+    expected_tool_receipts = {tool_id: dict(tool_receipts[tool_id]) for tool_id in tool_ids}
+    return {
+        "graph_id": graph_id,
+        "graph_role": role,
+        "configure_profile": configure_profile,
+        "machine_role": machine_role,
+        "build_type": build_type,
+        "meson_option_values": option_values,
+        "compiler_tool_receipts": compiler_receipts,
+        "expected_linker_ids": linker_ids,
+        "cross_file_input": cross_input,
+        "cross_file_receipt": dict(cross_receipt) if cross_receipt is not None else None,
+        "source_identity": dict(plan.get("source_identity", {})),
+        "graph_tool_receipts": expected_tool_receipts,
+        "host_dependency_receipts": host_dependencies,
+        "runtime_receipts": [dict(runtime_by_id[runtime_id]) for runtime_id in declared_runtime_ids],
+        "shader_tool_receipt": dict(tool_receipts.get("native_glslang", {})),
+        "path": plan.get("environment", {}).get("PATH"),
+        "locale": {key: plan.get("environment", {}).get(key) for key in ("LANG", "LC_ALL")},
+    }
+
+
+def _validate_dual_graph_configuration_profile(plan: Mapping[str, Any],
+                                               declaration: Mapping[str, Any],
+                                               meson_identity: Mapping[str, Any],
+                                               build_type: str,
+                                               evidence: Path | None = None) -> str:
+    """Prove captured Meson/compiler/dependency inputs match the signed graph profile."""
+    profile = _dual_graph_configuration_profile(plan, declaration, build_type)
+    graph_id = str(declaration["graph_id"])
+    options = meson_identity.get("meson_options")
+    if not isinstance(options, list):
+        raise RetentionError(f"{graph_id} Meson option evidence is missing")
+    by_name: dict[str, list[Mapping[str, Any]]] = {}
+    for row in options:
+        if not isinstance(row, Mapping) or not isinstance(row.get("name"), str):
+            raise RetentionError(f"{graph_id} Meson option rows are malformed")
+        by_name.setdefault(str(row["name"]), []).append(row)
+    observed_options_sha = _meson_options_configuration_sha256(options)
+    if meson_identity.get("meson_options_configuration_sha256") != observed_options_sha:
+        raise RetentionError(f"{graph_id} complete Meson option rows differ from their captured identity digest")
+    for name, expected_value in profile["meson_option_values"].items():
+        matches = by_name.get(name, [])
+        if len(matches) != 1 or matches[0].get("value") != expected_value:
+            raise RetentionError(f"{graph_id} Meson option {name} differs from its signed configure profile")
+    _validate_dual_graph_meson_command_line(
+        plan, declaration, meson_identity, profile["meson_option_values"], evidence)
+    compiler_identity = meson_identity.get("compiler_identity")
+    if not isinstance(compiler_identity, Mapping) or set(compiler_identity) != {"build", "host"}:
+        raise RetentionError(f"{graph_id} Meson compiler machine identities are incomplete")
+    search_path = plan.get("environment", {}).get("PATH")
+    if not isinstance(search_path, str):
+        raise RetentionError(f"{graph_id} compiler profile lacks the signed tool search path")
+    for machine, languages in profile["compiler_tool_receipts"].items():
+        machine_compilers = compiler_identity.get(machine)
+        if not isinstance(machine_compilers, Mapping) or set(machine_compilers) != {"c", "cpp"}:
+            raise RetentionError(f"{graph_id} {machine} compiler set differs from its profile")
+        for language, receipt in languages.items():
+            compiler = machine_compilers.get(language)
+            if not isinstance(compiler, Mapping):
+                raise RetentionError(f"{graph_id} {machine}/{language} compiler identity is missing")
+            exelist = compiler.get("exelist")
+            linker_exelist = compiler.get("linker_exelist")
+            if (not isinstance(exelist, list) or len(exelist) != 1
+                    or not isinstance(exelist[0], str)
+                    or not isinstance(linker_exelist, list) or len(linker_exelist) != 1
+                    or not isinstance(linker_exelist[0], str)):
+                raise RetentionError(f"{graph_id} {machine}/{language} compiler has an unprofiled launcher")
+            expected_path = Path(str(receipt.get("path", "")))
+            resolved_commands = []
+            for command in (exelist[0], linker_exelist[0]):
+                resolved = Path(command) if Path(command).is_absolute() else Path(
+                    shutil.which(command, path=search_path) or "")
+                try:
+                    resolved = resolved.resolve(strict=True)
+                    expected = expected_path.resolve(strict=True)
+                except OSError as error:
+                    raise RetentionError(
+                        f"{graph_id} {machine}/{language} compiler does not resolve to its pinned receipt") from error
+                if not resolved.is_file() or resolved != expected:
+                    raise RetentionError(
+                        f"{graph_id} {machine}/{language} compiler or linker differs from its pinned receipt")
+                resolved_commands.append(resolved)
+            expected_compiler_id = "gcc" if str(receipt.get("path", "")).endswith(
+                ("x86_64-w64-mingw32-gcc", "x86_64-w64-mingw32-g++")) else "clang"
+            expected_linker_id = profile["expected_linker_ids"][machine]
+            if (compiler.get("id") != expected_compiler_id
+                    or compiler.get("linker_id") != expected_linker_id
+                    or not isinstance(compiler.get("version"), str) or not compiler["version"]
+                    or not isinstance(compiler.get("full_version"), str) or not compiler["full_version"]):
+                raise RetentionError(f"{graph_id} {machine}/{language} compiler/linker identity differs from profile")
+    linker_identity = meson_identity.get("linker_identity")
+    if (not isinstance(linker_identity, list) or not linker_identity
+            or any(not isinstance(row, str) or not row.strip() for row in linker_identity)):
+        raise RetentionError(f"{graph_id} linker identity is missing or malformed")
+    meson_log_record = meson_identity.get("meson_log_evidence")
+    if evidence is not None:
+        _require_completed_evidence_record(meson_log_record, "Meson configure log", evidence)
+        try:
+            log_text = _read_completed_evidence_record(
+                meson_log_record, "Meson configure log", evidence).decode("utf-8", errors="replace")
+        except OSError as error:
+            raise RetentionError(f"{graph_id} retained Meson linker log is unavailable") from error
+        recorded_linkers = sorted(set(re.findall(
+            r"(?:linker|linker id|ld version)[^\n:]*:?\s*([^\n]+)",
+            log_text, re.IGNORECASE)))
+        if not recorded_linkers or linker_identity != recorded_linkers:
+            raise RetentionError(f"{graph_id} linker identity differs from its retained Meson log")
+    cross = meson_identity.get("cross_file")
+    if profile["cross_file_input"] is None:
+        if not isinstance(cross, Mapping) or cross.get("status") != "absent":
+            raise RetentionError(f"{graph_id} unexpectedly captured a cross file")
+    else:
+        receipt = profile["cross_file_receipt"]
+        if (not isinstance(cross, Mapping) or cross.get("status") != "present"
+                or cross.get("sha256") != receipt.get("sha256")):
+            raise RetentionError(f"{graph_id} captured cross file differs from its admitted input")
+    dependency = meson_identity.get("dependency_state")
+    if (not isinstance(dependency, Mapping)
+            or dependency.get("status") not in {"captured", "explicitly-none"}):
+        raise RetentionError(f"{graph_id} dependency identity is missing or malformed")
+    if graph_id == "native-verification-r6a" and dependency.get("status") != "captured":
+        raise RetentionError("native verification graph must capture its signed SDL dependency inputs")
+    if dependency.get("status") == "captured":
+        dep_sha = dependency.get("intro_dependencies_sha256")
+        dep_record = meson_identity.get("intro-dependencies_json_evidence")
+        if (not isinstance(dep_sha, str) or not re.fullmatch(r"[0-9a-f]{64}", dep_sha)
+                or not isinstance(dep_record, Mapping) or dep_record.get("sha256") != dep_sha):
+            raise RetentionError(f"{graph_id} dependency identity is not bound to retained Meson evidence")
+    shader_rows = meson_identity.get("generated_shader_identity")
+    if not isinstance(shader_rows, list):
+        raise RetentionError(f"{graph_id} generated shader identity is malformed")
+    shader_paths: set[str] = set()
+    for row in shader_rows:
+        relative = row.get("build_relative_path") if isinstance(row, Mapping) else None
+        digest = row.get("sha256") if isinstance(row, Mapping) else None
+        if (not isinstance(relative, str) or relative in shader_paths
+                or not re.fullmatch(r"[0-9a-f]{64}", str(digest or ""))):
+            raise RetentionError(f"{graph_id} generated shader identity is missing or duplicated")
+        _session_relative_path(relative, f"{graph_id} generated shader path")
+        shader_paths.add(relative)
+        if evidence is not None:
+            _require_completed_evidence_record(row, "generated shader", evidence)
+    expected_shader_tool = profile["shader_tool_receipt"]
+    if (not isinstance(expected_shader_tool, Mapping)
+            or set(expected_shader_tool) != {"path", "sha256"}
+            or not re.fullmatch(r"[0-9a-f]{64}", str(expected_shader_tool.get("sha256", "")))):
+        raise RetentionError(f"{graph_id} shader compiler is not pinned by the accepted plan")
+    compiler_hash = meson_identity.get("compiler_identity_sha256")
+    compiler_record = meson_identity.get("compiler_evidence")
+    if (not isinstance(compiler_hash, str) or not re.fullmatch(r"[0-9a-f]{64}", compiler_hash)
+            or not isinstance(compiler_record, Mapping)
+            or compiler_record.get("sha256") != compiler_hash):
+        raise RetentionError(f"{graph_id} compiler identity is not bound to its retained Meson evidence")
+    options_hash = meson_identity.get("meson_options_sha256")
+    options_record = meson_identity.get("meson_options_evidence")
+    if (not isinstance(options_hash, str) or not re.fullmatch(r"[0-9a-f]{64}", options_hash)
+            or not isinstance(options_record, Mapping) or options_record.get("sha256") != options_hash):
+        raise RetentionError(f"{graph_id} Meson options are not bound to their retained evidence")
+    if evidence is not None:
+        _require_completed_evidence_record(compiler_record, "compiler identity", evidence)
+        _require_completed_evidence_record(options_record, "Meson options", evidence)
+        try:
+            retained_options = json.loads(_read_completed_evidence_record(
+                options_record, "Meson options", evidence))
+        except (OSError, json.JSONDecodeError, KeyError, TypeError) as error:
+            raise RetentionError(f"{graph_id} retained Meson option file is malformed or unreadable") from error
+        if retained_options != options:
+            raise RetentionError(f"{graph_id} Meson option rows differ from their retained raw evidence")
+        if dependency.get("status") == "captured":
+            _require_completed_evidence_record(dep_record, "Meson dependencies", evidence)
+    return hashlib.sha256(_canonical_json(profile)).hexdigest()
+
+
+def _capture_host_v3_dual_identity(build: Path, evidence: Path,
+                                   session_plan: Mapping[str, Any]) -> dict[str, Any]:
+    """Capture both declared Meson graphs by their exact plan-owned directories."""
+    graphs = session_plan.get("build_graphs")
+    if (not isinstance(graphs, list) or len(graphs) != 2
+            or [row.get("graph_id") if isinstance(row, Mapping) else None for row in graphs]
+                != list(BUILD_SESSION_DUAL_GRAPH_IDS)):
+        raise RetentionError("Host-v3 completion plan does not contain the exact canonical graph pair")
+    source_plan = session_plan.get("source_identity")
+    if not isinstance(source_plan, Mapping):
+        raise RetentionError("Host-v3 completion plan lacks its session source identity")
+    _validate_dual_graph_prebuild_identity(session_plan)
+    source_root = Path(str(source_plan.get("root", "")))
+    input_by_path = {row.get("path"): row for row in session_plan.get("input_receipts", [])
+                     if isinstance(row, Mapping)}
+    captured_graphs: dict[str, dict[str, Any]] = {}
+    shared_source: dict[str, Any] | None = None
+    build_types: set[str] = set()
+    for declaration in graphs:
+        graph_id = str(declaration["graph_id"])
+        relative_build_dir = _session_relative_path(declaration.get("build_directory"),
+                                                   f"{graph_id} build directory")
+        graph_root = _session_safe_path(build, relative_build_dir, must_exist=True, directory=True)
+        cross_input = declaration.get("cross_file_input")
+        if cross_input is None:
+            expected_cross_file = None
+        else:
+            cross_relative = _session_relative_path(cross_input, f"{graph_id} cross-file input")
+            input_receipt = input_by_path.get(cross_relative.as_posix())
+            if not isinstance(input_receipt, Mapping):
+                raise RetentionError(f"{graph_id} cross-file has no exact admitted input receipt")
+            expected_cross_file = _session_safe_path(source_root, cross_relative,
+                                                     must_exist=True, directory=False)
+            if _hash_path(expected_cross_file) != input_receipt.get("sha256"):
+                raise RetentionError(f"{graph_id} cross-file differs from its admitted input hash")
+        graph_evidence = evidence / "graphs" / graph_id
+        meson_identity = _capture_identity(
+            graph_root, graph_evidence, require_direct_meson=True,
+            expected_cross_file=expected_cross_file, enforce_cross_file=True,
+            cross_source_root=source_root)
+        captured_source = meson_identity.get("source_identity")
+        if (not isinstance(captured_source, Mapping)
+                or captured_source.get("path") != source_plan.get("root")
+                or captured_source.get("git_commit") != source_plan.get("revision")
+                or captured_source.get("content_tree_sha256") != source_plan.get("sha256")):
+            raise RetentionError(f"{graph_id} Meson source identity differs from the signed session plan")
+        if meson_identity.get("build_system") != "meson":
+            raise RetentionError(f"{graph_id} is not a directly captured Meson build graph")
+        options = meson_identity.get("meson_options")
+        if not isinstance(options, list):
+            raise RetentionError(f"{graph_id} Meson build options are missing or malformed")
+        buildtype_values = [row.get("value") for row in options
+                            if isinstance(row, Mapping) and row.get("name") == "buildtype"]
+        if len(buildtype_values) != 1 or not isinstance(buildtype_values[0], str) or not buildtype_values[0]:
+            raise RetentionError(f"{graph_id} Meson identity does not have exactly one buildtype option")
+        build_type = buildtype_values[0].casefold()
+        if build_type != str(meson_identity.get("build_type", "")).casefold():
+            raise RetentionError(f"{graph_id} Meson buildtype field conflicts with its intro-buildoptions.json")
+        build_types.add(build_type)
+        profile_sha256 = _validate_dual_graph_configuration_profile(
+            session_plan, declaration, meson_identity, build_type, graph_evidence)
+        dependency_state = meson_identity.get("dependency_state")
+        if not isinstance(dependency_state, dict):
+            raise RetentionError(f"{graph_id} Meson dependency identity is missing")
+        dependency_state["plan_profile_sha256"] = profile_sha256
+        prebuild_identity = declaration.get("prebuild_identity")
+        prebuild_meson_identity = (prebuild_identity.get("meson_identity")
+                                   if isinstance(prebuild_identity, Mapping) else None)
+        if (not isinstance(prebuild_identity, Mapping)
+                or profile_sha256 != prebuild_identity.get("configuration_profile_sha256")
+                or not isinstance(prebuild_meson_identity, Mapping)
+                or _dual_graph_configuration_identity(meson_identity)
+                    != _dual_graph_configuration_identity(prebuild_meson_identity)):
+            raise RetentionError(
+                f"{graph_id} captured configuration, patch, dependency, or shader identity differs from prebuild")
+        patch_set = meson_identity.get("patch_set")
+        if not isinstance(patch_set, Mapping) or not patch_set:
+            raise RetentionError(f"{graph_id} lacks captured source patch-state identity")
+        source_summary = {
+            "path": captured_source["path"],
+            "git_commit": captured_source["git_commit"],
+            "git_tree": captured_source.get("git_tree"),
+            "content_tree_sha256": captured_source["content_tree_sha256"],
+            "patch_set": dict(patch_set),
+        }
+        if shared_source is None:
+            shared_source = source_summary
+        elif source_summary != shared_source:
+            raise RetentionError("Windows and native Meson graphs were configured from different source states")
+        key = _dual_graph_plan_bound_configuration_key(meson_identity, profile_sha256)
+        if key != prebuild_identity.get("config_key_sha256"):
+            raise RetentionError(f"{graph_id} captured configuration key differs from its frozen prebuild key")
+        tool_ids = declaration.get("tool_receipt_ids")
+        if not isinstance(tool_ids, list):
+            raise RetentionError(f"{graph_id} plan tool receipt declaration is malformed")
+        tool_receipts = {tool_id: dict(session_plan["tools"][tool_id]) for tool_id in tool_ids}
+        graph_identity = {
+            "graph_id": graph_id,
+            "graph_role": declaration["graph_role"],
+            "build_directory": relative_build_dir.as_posix(),
+            "configure_profile": declaration["configure_profile"],
+            "machine_role": declaration["machine_role"],
+            "cross_file_input": cross_input,
+            "targets": list(declaration["targets"]),
+            "expected_outputs": [dict(row) for row in declaration["expected_outputs"]],
+            "tool_receipt_ids": list(tool_ids),
+            "tool_receipts": tool_receipts,
+            "configuration_profile_sha256": profile_sha256,
+            "shader_tool_receipt": dict(session_plan["tools"]["native_glslang"]),
+            "runtime_receipt_ids": list(declaration["runtime_receipt_ids"]),
+            "build_system": "meson",
+            "build_type": build_type,
+            "config_key_sha256": key,
+            "meson_identity": meson_identity,
+            "ninja_identity": {
+                "tool_receipt": dict(session_plan["tools"]["ninja"]),
+                "build_ninja_evidence": meson_identity.get("build_ninja_evidence"),
+                "ninja_log_evidence": meson_identity.get("ninja_log_evidence"),
+                "execution_log_status": meson_identity.get("ninja_execution_log_status"),
+            },
+            "source_identity": source_summary,
+        }
+        if not isinstance(graph_identity["ninja_identity"]["build_ninja_evidence"], Mapping):
+            raise RetentionError(f"{graph_id} has no retained graph-local build.ninja identity")
+        if (not isinstance(graph_identity["ninja_identity"]["ninja_log_evidence"], Mapping)
+                or graph_identity["ninja_identity"]["execution_log_status"] != "captured"):
+            raise RetentionError(f"{graph_id} has no retained graph-local Ninja execution identity")
+        captured_graphs[graph_id] = graph_identity
+    if len(build_types) != 1:
+        raise RetentionError("Windows and native graph build types do not match")
+    pair_key = _dual_graph_configuration_pair_sha256(captured_graphs)
+    if pair_key != session_plan.get("build_configuration_key_sha256"):
+        raise RetentionError("captured graph pair differs from the frozen prebuild request key")
+    admission = session_plan.get("admission_identity")
+    if not isinstance(admission, Mapping):
+        raise RetentionError("Host-v3 session plan has no admission identity")
+    host_identity = {
+        "native_host_profile": session_plan.get("native_host_profile"),
+        "host_dependency_receipts": session_plan.get("host_dependency_receipts"),
+        "runtime_receipts": session_plan.get("runtime_receipts"),
+        "session_tools": {name: dict(session_plan["tools"][name]) for name in ("meson", "ninja")},
+    }
+    plan_sha = hashlib.sha256(_canonical_json(dict(session_plan))).hexdigest()
+    return {
+        "executor_mode": BUILD_SESSION_EXECUTOR_MODE,
+        "build_id": session_plan.get("build_id"),
+        "session_plan": dict(session_plan),
+        "admission_identity": dict(admission),
+        "session_plan_sha256": plan_sha,
+        "source_identity": {**dict(source_plan), **(shared_source or {})},
+        "host_identity": host_identity,
+        "build_system": "meson",
+        "build_type": next(iter(build_types)),
+        "build_graph_identities": captured_graphs,
+        "graph_config_key_sha256": pair_key,
+        "graph_outputs": [],
+        "graph_test_receipts": [],
+    }
+
+
+def _validate_host_v3_dual_graph_identity(identity: Mapping[str, Any],
+                                          artifacts: list[Mapping[str, Any]] | None,
+                                          evidence: Path, *,
+                                          terminal: Mapping[str, Any] | None = None,
+                                          expected_terminal_state: str = "SUCCESS",
+                                          allow_pending_promotion: bool = False) -> None:
+    """Validate the complete retained Host-v3 graph pair and optional CAS bindings."""
+    plan = identity.get("session_plan")
+    if not isinstance(plan, Mapping) or not _session_dual_graph_enabled(plan):
+        raise RetentionError("completed Host-v3 dual identity lacks its signed session plan")
+    plan_sha = hashlib.sha256(_canonical_json(dict(plan))).hexdigest()
+    if (identity.get("executor_mode") != BUILD_SESSION_EXECUTOR_MODE
+            or identity.get("build_id") != plan.get("build_id")
+            or identity.get("session_plan_sha256") != plan_sha
+            or identity.get("admission_identity") != plan.get("admission_identity")):
+        raise RetentionError("completed Host-v3 session identity differs from its exact signed plan")
+    if not isinstance(plan.get("admission_identity"), Mapping):
+        raise RetentionError("completed Host-v3 identity lacks its admission binding")
+    expected_pair = _validate_dual_graph_prebuild_identity(plan)
+    plan_graphs = plan.get("build_graphs")
+    if (not isinstance(plan_graphs, list) or len(plan_graphs) != 2
+            or [row.get("graph_id") if isinstance(row, Mapping) else None for row in plan_graphs]
+                != list(BUILD_SESSION_DUAL_GRAPH_IDS)):
+        raise RetentionError("completed Host-v3 session plan has a missing or invalid graph pair")
+    graph_map = identity.get("build_graph_identities")
+    if not isinstance(graph_map, Mapping) or set(graph_map) != set(BUILD_SESSION_DUAL_GRAPH_IDS):
+        raise RetentionError("completed Host-v3 identity is missing one or both declared graphs")
+    source_plan = plan.get("source_identity")
+    source_identity = identity.get("source_identity")
+    if (not isinstance(source_plan, Mapping) or not isinstance(source_identity, Mapping)
+            or source_identity.get("root") != source_plan.get("root")
+            or source_identity.get("revision") != source_plan.get("revision")
+            or source_identity.get("sha256") != source_plan.get("sha256")
+            or source_identity.get("content_tree_sha256") != source_plan.get("sha256")):
+        raise RetentionError("completed Host-v3 session source identity differs from its signed plan")
+    host = identity.get("host_identity")
+    expected_host = {
+        "native_host_profile": plan.get("native_host_profile"),
+        "host_dependency_receipts": plan.get("host_dependency_receipts"),
+        "runtime_receipts": plan.get("runtime_receipts"),
+        "session_tools": {name: plan.get("tools", {}).get(name) for name in ("meson", "ninja")},
+    }
+    if host != expected_host:
+        raise RetentionError("completed Host-v3 host and session tool identities differ from the signed plan")
+    expected_declarations = {row["graph_id"]: row for row in plan_graphs}
+    shared_patch_set: Mapping[str, Any] | None = None
+    for graph_id in BUILD_SESSION_DUAL_GRAPH_IDS:
+        graph = graph_map[graph_id]
+        declaration = expected_declarations[graph_id]
+        if (not isinstance(graph, Mapping) or graph.get("graph_id") != graph_id
+                or graph.get("graph_role") != declaration.get("graph_role")
+                or graph.get("build_directory") != declaration.get("build_directory")
+                or graph.get("configure_profile") != declaration.get("configure_profile")
+                or graph.get("machine_role") != declaration.get("machine_role")
+                or graph.get("cross_file_input") != declaration.get("cross_file_input")
+                or graph.get("targets") != declaration.get("targets")
+                or graph.get("expected_outputs") != declaration.get("expected_outputs")
+                or graph.get("tool_receipt_ids") != declaration.get("tool_receipt_ids")
+                or graph.get("runtime_receipt_ids") != declaration.get("runtime_receipt_ids")
+                or graph.get("build_system") != "meson"
+                or graph.get("build_type") != identity.get("build_type")):
+            raise RetentionError(f"completed Host-v3 graph identity mismatches its plan: {graph_id}")
+        meson_identity = graph.get("meson_identity")
+        if not isinstance(meson_identity, Mapping):
+            raise RetentionError(f"completed Host-v3 Meson evidence is missing: {graph_id}")
+        profile_sha256 = _validate_dual_graph_configuration_profile(
+            plan, declaration, meson_identity, str(graph.get("build_type", "")), evidence)
+        dependency_state = meson_identity.get("dependency_state")
+        if (graph.get("configuration_profile_sha256") != profile_sha256
+                or graph.get("shader_tool_receipt") != plan.get("tools", {}).get("native_glslang")
+                or not isinstance(dependency_state, Mapping)
+                or dependency_state.get("plan_profile_sha256") != profile_sha256):
+            raise RetentionError(f"completed Host-v3 graph config differs from its signed plan: {graph_id}")
+        frozen_prebuild = declaration.get("prebuild_identity")
+        frozen_meson_identity = (frozen_prebuild.get("meson_identity")
+                                 if isinstance(frozen_prebuild, Mapping) else None)
+        if (not isinstance(frozen_prebuild, Mapping)
+                or frozen_prebuild.get("configuration_profile_sha256") != profile_sha256
+                or frozen_prebuild.get("config_key_sha256") != graph.get("config_key_sha256")
+                or not isinstance(frozen_meson_identity, Mapping)
+                or _dual_graph_configuration_identity(meson_identity)
+                    != _dual_graph_configuration_identity(frozen_meson_identity)):
+            raise RetentionError(
+                f"completed Host-v3 graph differs from its frozen prebuild source/configuration/shader identity: {graph_id}")
+        if (meson_identity.get("build_system") != "meson"
+                or str(meson_identity.get("build_type", "")).casefold()
+                    != str(graph.get("build_type", "")).casefold()):
+            raise RetentionError(f"completed Host-v3 Meson build type is mismatched: {graph_id}")
+        graph_source = graph.get("source_identity")
+        captured_source = meson_identity.get("source_identity")
+        if (not isinstance(graph_source, Mapping) or not isinstance(captured_source, Mapping)
+                or graph_source.get("path") != source_plan.get("root")
+                or graph_source.get("git_commit") != source_plan.get("revision")
+                or graph_source.get("content_tree_sha256") != source_plan.get("sha256")
+                or captured_source.get("path") != source_plan.get("root")
+                or captured_source.get("git_commit") != source_plan.get("revision")
+                or captured_source.get("content_tree_sha256") != source_plan.get("sha256")
+                or graph_source.get("patch_set") != meson_identity.get("patch_set")):
+            raise RetentionError(f"completed Host-v3 graph source or patch identity mismatches: {graph_id}")
+        if shared_patch_set is None:
+            shared_patch_set = graph_source.get("patch_set")
+        elif graph_source.get("patch_set") != shared_patch_set:
+            raise RetentionError("completed Host-v3 graphs do not share the exact captured source patch state")
+        options = meson_identity.get("meson_options")
+        buildtype_values = [row.get("value") for row in options
+                            if isinstance(row, Mapping) and row.get("name") == "buildtype"] \
+            if isinstance(options, list) else []
+        if (len(buildtype_values) != 1
+                or str(buildtype_values[0]).casefold() != str(graph.get("build_type", "")).casefold()):
+            raise RetentionError(f"completed Host-v3 graph buildtype option mismatches: {graph_id}")
+        graph_tool_receipts = graph.get("tool_receipts")
+        expected_tools = {tool_id: plan.get("tools", {}).get(tool_id)
+                          for tool_id in declaration.get("tool_receipt_ids", [])}
+        if graph_tool_receipts != expected_tools:
+            raise RetentionError(f"completed Host-v3 graph tool receipts mismatch: {graph_id}")
+        ninja = graph.get("ninja_identity")
+        if (not isinstance(ninja, Mapping)
+                or ninja.get("tool_receipt") != plan.get("tools", {}).get("ninja")
+                or ninja.get("build_ninja_evidence") != meson_identity.get("build_ninja_evidence")
+                or ninja.get("ninja_log_evidence") != meson_identity.get("ninja_log_evidence")
+                or ninja.get("execution_log_status") != "captured"):
+            raise RetentionError(f"completed Host-v3 Ninja identity mismatch: {graph_id}")
+        for key, label in (("meson_log_evidence", "Meson log"),
+                           ("meson_command_line_evidence", "Meson command line"),
+                           ("meson_options_evidence", "Meson options"),
+                           ("compiler_evidence", "compiler identity"),
+                           ("build_ninja_evidence", "Ninja graph"),
+                           ("ninja_log_evidence", "Ninja execution log")):
+            _require_completed_evidence_record(meson_identity.get(key), label, evidence)
+        cross = meson_identity.get("cross_file")
+        expected_cross = declaration.get("cross_file_input")
+        if not isinstance(cross, Mapping):
+            raise RetentionError(f"completed Host-v3 cross-file disposition is missing: {graph_id}")
+        if expected_cross is None:
+            if cross.get("status") != "absent":
+                raise RetentionError("native verification graph unexpectedly used a cross file")
+        else:
+            receipt = next((row for row in plan.get("input_receipts", [])
+                            if isinstance(row, Mapping) and row.get("path") == expected_cross), None)
+            if (cross.get("status") != "present" or not isinstance(receipt, Mapping)
+                    or cross.get("sha256") != receipt.get("sha256")):
+                raise RetentionError("Windows graph cross-file identity differs from its signed input receipt")
+            _require_completed_evidence_record(cross, "Windows cross file", evidence)
+        dependency = meson_identity.get("dependency_state")
+        if not isinstance(dependency, Mapping) or dependency.get("status") not in {"captured", "explicitly-none"}:
+            raise RetentionError(f"completed Host-v3 dependency identity is missing: {graph_id}")
+        if dependency.get("status") == "captured":
+            _require_completed_evidence_record(
+                meson_identity.get("intro-dependencies_json_evidence"), "Meson dependencies", evidence)
+        if not isinstance(meson_identity.get("generated_shader_identity"), list):
+            raise RetentionError(f"completed Host-v3 generated-shader identity is malformed: {graph_id}")
+        if not meson_identity.get("linker_identity"):
+            raise RetentionError(f"completed Host-v3 linker identity is missing: {graph_id}")
+    computed_pair = _dual_graph_configuration_pair_sha256(graph_map)
+    if (identity.get("graph_config_key_sha256") != computed_pair
+            or identity.get("config_key_sha256") != computed_pair
+            or identity.get("session_plan_sha256") == computed_pair
+            or computed_pair != expected_pair
+            or computed_pair != plan.get("build_configuration_key_sha256")):
+        raise RetentionError("completed Host-v3 graph-pair configuration key mismatch")
+    if identity.get("session_plan_sha256") in {
+            graph_map[graph_id].get("config_key_sha256") for graph_id in BUILD_SESSION_DUAL_GRAPH_IDS}:
+        raise RetentionError("Host-v3 session plan digest cannot substitute for a graph configuration key")
+    graph_outputs = identity.get("graph_outputs")
+    graph_tests = identity.get("graph_test_receipts")
+    expected_outputs = [(graph, output) for graph in plan_graphs for output in graph["expected_outputs"]]
+    if not isinstance(graph_outputs, list) or len(graph_outputs) != len(expected_outputs):
+        raise RetentionError("completed Host-v3 graph output lineage is incomplete")
+    output_by_id: dict[str, Mapping[str, Any]] = {}
+    for row in graph_outputs:
+        if not isinstance(row, Mapping) or row.get("output_id") in output_by_id:
+            raise RetentionError("completed Host-v3 graph output lineage is malformed or duplicated")
+        output_by_id[str(row["output_id"])] = row
+    if set(output_by_id) != {str(output["output_id"]) for _, output in expected_outputs}:
+        raise RetentionError("completed Host-v3 output IDs do not match the signed graph declarations")
+    for graph, output in expected_outputs:
+        row = output_by_id[output["output_id"]]
+        terminal_row = row.get("terminal_receipt")
+        if (row.get("graph_id") != graph["graph_id"]
+                or row.get("graph_role") != graph["graph_role"]
+                or row.get("producer_target_id") != output["producer_target"]
+                or row.get("path") != f"{graph['build_directory']}/{output['path']}"
+                or row.get("format") != output["format"]
+                or not re.fullmatch(r"[0-9a-f]{64}", str(row.get("sha256", "")))
+                or not isinstance(terminal_row, Mapping)
+                or terminal_row.get("graph_id") != graph["graph_id"]
+                or terminal_row.get("output_id") != output["output_id"]
+                or terminal_row.get("target_id") != output["producer_target"]
+                or terminal_row.get("path") != row.get("path")
+                or terminal_row.get("format") != row.get("format")
+                or terminal_row.get("file_identity", {}).get("sha256") != row.get("sha256")
+                or terminal_row.get("file_identity", {}).get("size_bytes") != row.get("size_bytes")
+                or row.get("terminal_graph_output_sha256")
+                    != hashlib.sha256(_canonical_json(dict(terminal_row))).hexdigest()
+                or not re.fullmatch(r"[0-9a-f]{64}", str(row.get("terminal_graph_output_sha256", "")))):
+            raise RetentionError(f"completed Host-v3 graph output has wrong graph lineage: {output['output_id']}")
+    stage_identity = identity.get("graph_stage_identity")
+    if not isinstance(stage_identity, Mapping):
+        raise RetentionError("completed Host-v3 identity lacks typed graph product staging receipts")
+    windows_stage = stage_identity.get("windows_pe_stage_identity")
+    native_stage = stage_identity.get("native_runtime_stage_identity")
+    install_stage = stage_identity.get("stage_install_tree_identity")
+    windows_output = output_by_id.get("r6a-production-path-pe")
+    if (not isinstance(windows_stage, Mapping)
+            or windows_stage.get("graph_id") != "windows-product-r6a"
+            or windows_stage.get("output_id") != "r6a-production-path-pe"
+            or windows_stage.get("format") != "PE32PLUS_X86_64"
+            or windows_stage.get("file_identity", {}).get("sha256")
+                != (windows_output or {}).get("sha256")
+            or not isinstance(native_stage, Mapping)
+            or native_stage.get("graph_id") != "native-verification-r6a"
+            or not isinstance(install_stage, Mapping)
+            or install_stage.get("graph_id") != "windows-product-r6a"
+            or install_stage.get("graph_role") != "WINDOWS_PRODUCT"
+            or not isinstance(install_stage.get("files"), list)
+            or any(row.get("graph_id") != "windows-product-r6a"
+                   or row.get("graph_role") != "WINDOWS_PRODUCT"
+                   for row in install_stage["files"])):
+        raise RetentionError("completed Host-v3 staged product lineage differs from its declared graph")
+    expected_tests = {
+        ("native-verification-r6a", "r6a-production-path-macho", "PRODUCTION_PATH"),
+        ("native-verification-r6a", "r6a-present-accounting-unit", "UNIT"),
+        ("native-verification-r6a", "r6a-present-accounting-model", "MODEL"),
+    }
+    if not isinstance(graph_tests, list) or {
+            (row.get("graph_id"), row.get("output_id"), row.get("test_class"))
+            for row in graph_tests if isinstance(row, Mapping)} != expected_tests or len(graph_tests) != 3:
+        raise RetentionError("completed Host-v3 graph test set is missing, duplicated, or mislabeled")
+    terminal_value: Mapping[str, Any]
+    if terminal is None:
+        terminal_evidence = identity.get("sandboxed_execution_evidence")
+        terminal_path = (terminal_evidence.get("retained_path")
+                         if isinstance(terminal_evidence, Mapping) else None)
+        if not isinstance(terminal_path, str):
+            raise RetentionError("completed Host-v3 identity lacks its retained terminal receipt")
+        _require_completed_evidence_record(terminal_evidence, "Host-v3 terminal receipt", evidence)
+        terminal_value = _read_json(Path(terminal_path), sealed=True)
+    else:
+        terminal_value = terminal
+    expected_terminal_binding = {
+        "executor_mode": BUILD_SESSION_EXECUTOR_MODE,
+        "executor_version": BUILD_SESSION_SCHEMA_VERSION,
+        "build_id": identity.get("build_id"),
+        "plan_sha256": plan_sha,
+        "admission_identity": plan.get("admission_identity"),
+        "source_identity": plan.get("source_identity"),
+        "state": expected_terminal_state,
+        "graph_output_identities": [
+                output_by_id[output["output_id"]]["terminal_receipt"]
+                for graph in plan_graphs for output in graph["expected_outputs"]],
+    }
+    if expected_terminal_state == "PENDING_SUCCESS":
+        expected_terminal_binding.update({
+            "acceptance_state": "UNACCEPTED_PENDING_NORMAL_READONLY_DETACH_AND_MANIFEST",
+            "write_quiescence_state": "WRITABLE_IMAGE_NORMALLY_UNMOUNTED_AND_DETACHED",
+        })
+    elif expected_terminal_state == "FINALIZING":
+        expected_terminal_binding.update({
+            "acceptance_state": "UNACCEPTED_FINALIZING_MANIFEST",
+            "write_quiescence_state": "WRITABLE_IMAGE_DETACHED_READONLY_EVIDENCE_HASHED",
+        })
+    elif expected_terminal_state == "SUCCESS":
+        expected_terminal_binding.update({
+            "acceptance_state": "HOST_BUILDLEASE_V3_WRITER_QUIESCED",
+            "write_quiescence_state": "WRITABLE_IMAGE_DETACHED_READONLY_EVIDENCE_HASHED",
+        })
+    else:
+        raise RetentionError("Host-v3 graph validation requested an unsupported terminal state")
+    if any(terminal_value.get(key) != expected for key, expected in expected_terminal_binding.items()):
+        raise RetentionError("completed Host-v3 terminal does not bind the exact plan and graph outputs")
+    if expected_terminal_state in {"FINALIZING", "SUCCESS"}:
+        readonly_detached = terminal_value.get("readonly_detached_identity")
+        if (not isinstance(readonly_detached, Mapping)
+                or readonly_detached.get("attached") is not False
+                or readonly_detached.get("detached_image_identity")
+                    != terminal_value.get("detached_image_identity")):
+            raise RetentionError("Host-v3 finalization terminal lacks verified detached read-only image identity")
+    for row in graph_tests:
+        if (row.get("build_id") != identity.get("build_id")
+                or row.get("session_plan_sha256") != plan_sha
+                or row.get("exit_status") != 0
+                or row.get("tested_output_sha256") != output_by_id[row["output_id"]].get("sha256")
+                or not re.fullmatch(r"[0-9a-f]{64}", str(row.get("command_receipt_sha256", "")))
+                or not re.fullmatch(r"[0-9a-f]{64}", str(row.get("result_receipt_sha256", "")))):
+            raise RetentionError("completed Host-v3 test receipt is not bound to its exact graph output")
+    if artifacts is None:
+        return
+    if len(artifacts) != len(expected_outputs):
+        raise RetentionError("Host-v3 manifest contains extra or missing graph artifacts")
+    artifacts_by_output: dict[str, Mapping[str, Any]] = {}
+    for row in artifacts:
+        output_id = row.get("output_id")
+        if output_id in artifacts_by_output:
+            raise RetentionError("Host-v3 manifest contains duplicate artifact output lineage")
+        artifacts_by_output[str(output_id)] = row
+    if set(artifacts_by_output) != set(output_by_id):
+        raise RetentionError("Host-v3 manifest artifacts are not exactly the declared graph outputs")
+    for graph, output in expected_outputs:
+        lineage = output_by_id[output["output_id"]]
+        artifact = artifacts_by_output[output["output_id"]]
+        if (artifact.get("graph_id") != graph["graph_id"]
+                or artifact.get("graph_role") != graph["graph_role"]
+                or artifact.get("output_id") != output["output_id"]
+                or artifact.get("producer_target_id") != output["producer_target"]
+                or artifact.get("path") != lineage.get("path")
+                or artifact.get("format") != output["format"]
+                or artifact.get("sha256") != lineage.get("sha256")
+                or artifact.get("size_bytes") != lineage.get("size_bytes")
+                or not str(artifact.get("source_build_path", "")).endswith("/" + lineage.get("path", ""))):
+            raise RetentionError(f"Host-v3 artifact manifest crosses graph lineage: {output['output_id']}")
+        artifact_path = Path(str(artifact.get("canonical_artifact_path", "")))
+        staged_for_format = artifact.get("staged_output_evidence")
+        format_path = (Path(str(staged_for_format.get("retained_path", "")))
+                       if allow_pending_promotion and isinstance(staged_for_format, Mapping)
+                       else artifact_path)
+        actual_format, _ = _session_graph_format_identity(format_path, str(output["format"]))
+        if actual_format != output["format"]:
+            raise RetentionError(f"Host-v3 artifact format binding mismatch: {output['output_id']}")
+        if allow_pending_promotion:
+            staged = artifact.get("staged_output_evidence")
+            if (artifact.get("promotion_order") != "POST_SUCCESS"
+                    or not isinstance(staged, Mapping)
+                    or staged.get("sha256") != lineage.get("sha256")
+                    or staged.get("size_bytes") != lineage.get("size_bytes")):
+                raise RetentionError(f"Host-v3 prepared artifact lacks exact retained staging evidence: {output['output_id']}")
+            _require_completed_evidence_record(
+                staged, f"staged graph output {output['output_id']}", evidence)
+            staged_path = Path(str(staged.get("retained_path", "")))
+            staged_info = staged_path.lstat()
+            if (not stat.S_ISREG(staged_info.st_mode)
+                    or staged_info.st_size != lineage.get("size_bytes")
+                    or _hash_path(staged_path) != lineage.get("sha256")):
+                raise RetentionError(f"Host-v3 prepared graph output changed: {output['output_id']}")
+            if artifact_path.exists() or artifact_path.is_symlink():
+                if not _verify_artifact(artifact):
+                    raise RetentionError(f"Host-v3 pre-existing CAS binding is invalid: {output['output_id']}")
+        elif not _verify_artifact(artifact):
+            raise RetentionError(f"Host-v3 artifact CAS binding mismatch: {output['output_id']}")
+
+
+def _read_completed_evidence_record(value: Any, label: str, evidence: Path) -> bytes:
+    retained_value = value.get("retained_path", value.get("path")) if isinstance(value, Mapping) else None
+    digest = value.get("sha256") if isinstance(value, Mapping) else None
+    if (not isinstance(retained_value, str) or not isinstance(digest, str)
+            or not re.fullmatch(r"[0-9a-f]{64}", digest)):
+        raise RetentionError(f"completed build is missing retained {label} evidence")
+    retained = Path(retained_value)
+    try:
+        relative = retained.relative_to(evidence).as_posix()
+    except ValueError as error:
+        raise RetentionError(f"completed build {label} evidence escaped its canonical evidence directory")
+    return _read_file_beneath_nofollow(
+        evidence, relative, expected_sha256=digest, label=f"completed build {label} evidence")
+
+
+def _require_completed_evidence_record(value: Any, label: str, evidence: Path) -> None:
+    retained_value = value.get("retained_path", value.get("path")) if isinstance(value, Mapping) else None
+    digest = value.get("sha256") if isinstance(value, Mapping) else None
+    if (not isinstance(retained_value, str) or not isinstance(digest, str)
+            or not re.fullmatch(r"[0-9a-f]{64}", digest)):
+        raise RetentionError(f"completed build is missing retained {label} evidence")
+    try:
+        relative = Path(retained_value).relative_to(evidence).as_posix()
+    except ValueError as error:
+        raise RetentionError(
+            f"completed build {label} evidence escaped its canonical evidence directory") from error
+    _hash_file_beneath_nofollow(
+        evidence, relative, expected_sha256=digest,
+        label=f"completed build {label} evidence")
+
+
+def _capture_dual_graph_artifacts(build: Path, build_id: str, evidence: Path,
+                                  session_plan: Mapping[str, Any], terminal: Mapping[str, Any],
+                                  identity: dict[str, Any]) -> list[dict[str, Any]]:
+    """Validate terminal lineage before writing any Host-v3 graph product to CAS."""
+    if (terminal.get("build_id") != build_id
+            or terminal.get("plan_sha256") != identity.get("session_plan_sha256")
+            or terminal.get("admission_identity") != session_plan.get("admission_identity")
+            or terminal.get("source_identity") != session_plan.get("source_identity")
+            or terminal.get("state") != "PENDING_SUCCESS"
+            or terminal.get("write_quiescence_state") != "WRITABLE_IMAGE_NORMALLY_UNMOUNTED_AND_DETACHED"):
+        raise RetentionError("Host-v3 terminal receipt does not bind the pending accepted plan and identity")
+    plan_graphs = session_plan.get("build_graphs")
+    graph_map = identity.get("build_graph_identities")
+    terminal_outputs = terminal.get("graph_output_identities")
+    if (not isinstance(plan_graphs, list) or not isinstance(graph_map, Mapping)
+            or not isinstance(terminal_outputs, list)):
+        raise RetentionError("Host-v3 completion is missing graph or terminal output records")
+    declared_by_id: dict[str, Mapping[str, Any]] = {}
+    expected_output_by_id: dict[str, tuple[Mapping[str, Any], Mapping[str, Any]]] = {}
+    for graph in plan_graphs:
+        graph_id = graph.get("graph_id")
+        if graph_id in declared_by_id:
+            raise RetentionError("Host-v3 plan contains duplicate graph identities")
+        declared_by_id[str(graph_id)] = graph
+        for output in graph.get("expected_outputs", []):
+            output_id = output.get("output_id")
+            if output_id in expected_output_by_id:
+                raise RetentionError("Host-v3 plan contains duplicate graph output identities")
+            expected_output_by_id[str(output_id)] = (graph, output)
+    if tuple(declared_by_id) != tuple(BUILD_SESSION_DUAL_GRAPH_IDS):
+        raise RetentionError("Host-v3 plan graph IDs are missing, unexpected, or out of canonical order")
+    terminal_by_output: dict[str, Mapping[str, Any]] = {}
+    for row in terminal_outputs:
+        if not isinstance(row, Mapping):
+            raise RetentionError("Host-v3 terminal graph output record is malformed")
+        output_id = row.get("output_id")
+        if output_id in terminal_by_output:
+            raise RetentionError("Host-v3 terminal contains duplicate graph output identities")
+        terminal_by_output[str(output_id)] = row
+    if set(terminal_by_output) != set(expected_output_by_id):
+        raise RetentionError("Host-v3 terminal graph output set is incomplete or contains extras")
+    raw_rows: list[tuple[Path, dict[str, Any]]] = []
+    lineage_rows: list[dict[str, Any]] = []
+    for graph_id in BUILD_SESSION_DUAL_GRAPH_IDS:
+        graph = declared_by_id[graph_id]
+        captured = graph_map.get(graph_id)
+        if not isinstance(captured, Mapping) or captured.get("graph_id") != graph_id:
+            raise RetentionError(f"Host-v3 graph capture is missing or miskeyed: {graph_id}")
+        for output in graph["expected_outputs"]:
+            output_id = output["output_id"]
+            terminal_row = terminal_by_output[output_id]
+            if (terminal_row.get("graph_id") != graph_id
+                    or terminal_row.get("graph_role") != graph["graph_role"]
+                    or terminal_row.get("target_id") != output["producer_target"]
+                    or terminal_row.get("output_id") != output_id
+                    or terminal_row.get("path") != f"{graph['build_directory']}/{output['path']}"
+                    or terminal_row.get("format") != output["format"]):
+                raise RetentionError(f"Host-v3 graph output lineage mismatch: {output_id}")
+            current = _session_graph_output_identity(build, graph, output)
+            if current != dict(terminal_row):
+                raise RetentionError(f"Host-v3 live graph output changed after its terminal receipt: {output_id}")
+            relative_path = _session_relative_path(current["path"], "terminal graph output path")
+            path = _session_safe_path(build, relative_path, must_exist=True, directory=False)
+            info = path.stat(follow_symlinks=False)
+            digest = current["file_identity"]["sha256"]
+            if (not stat.S_ISREG(info.st_mode) or _hash_path(path) != digest
+                    or current["file_identity"]["size_bytes"] != info.st_size):
+                raise RetentionError(f"Host-v3 graph product changed before artifact staging: {output_id}")
+            artifact_lineage = {
+                "graph_id": graph_id,
+                "graph_role": graph["graph_role"],
+                "output_id": output_id,
+                "producer_target_id": output["producer_target"],
+                "source_build_path": str(path),
+                "path": current["path"],
+                "format": current["format"],
+                "sha256": digest,
+                "size_bytes": info.st_size,
+                "terminal_receipt": dict(terminal_row),
+                "terminal_graph_output_sha256": hashlib.sha256(_canonical_json(dict(terminal_row))).hexdigest(),
+            }
+            raw_rows.append((path, artifact_lineage))
+            lineage_rows.append(dict(artifact_lineage))
+    tests = []
+    session_dir = Path(session_plan["build_workspace"]).parent / BUILD_SESSION_DIRECTORY
+    for index, step in enumerate(session_plan["steps"]):
+        if step.get("kind") != "test":
+            continue
+        output = terminal_by_output.get(str(step.get("output_id")))
+        if (step.get("graph_id") != "native-verification-r6a" or output is None
+                or output.get("graph_id") != "native-verification-r6a"):
+            raise RetentionError("Host-v3 test receipt is not bound to its declared native graph output")
+        command = _read_json(session_dir / "steps" / f"step-{index:03d}.command.json", sealed=True)
+        result = _read_json(session_dir / "steps" / f"step-{index:03d}.result.json", sealed=True)
+        if (command.get("build_id") != build_id or result.get("build_id") != build_id
+                or command.get("plan_sha256") != identity["session_plan_sha256"]
+                or result.get("plan_sha256") != identity["session_plan_sha256"]
+                or result.get("status") != "SUCCESS" or result.get("return_code") != 0
+                or command.get("graph_provenance", {}).get("graph_id") != step["graph_id"]
+                or command.get("graph_provenance", {}).get("output_id") != step["output_id"]
+                or result.get("graph_provenance", {}).get("graph_id") != step["graph_id"]
+                or result.get("graph_output_identities", [{}])[0].get("file_identity", {}).get("sha256")
+                    != output.get("file_identity", {}).get("sha256")):
+            raise RetentionError(f"Host-v3 native test receipt mismatch: {step.get('test_class')}")
+        tests.append({"graph_id": step["graph_id"], "output_id": step["output_id"],
+                      "test_class": step["test_class"], "build_id": build_id,
+                      "session_plan_sha256": identity["session_plan_sha256"],
+                      "exit_status": result["return_code"],
+                      "tested_output_sha256": output["file_identity"]["sha256"],
+                      "command_receipt_sha256": _hash_path(session_dir / "steps" / f"step-{index:03d}.command.json"),
+                      "result_receipt_sha256": _hash_path(session_dir / "steps" / f"step-{index:03d}.result.json")})
+    if len(tests) != 3:
+        raise RetentionError("Host-v3 dual-graph completion lacks exactly three native graph test receipts")
+    identity["graph_outputs"] = lineage_rows
+    identity["graph_test_receipts"] = tests
+    identity["graph_directory_identities"] = terminal.get("graph_directory_identities")
+    identity["graph_stage_identity"] = terminal.get("stage_operation_identity")
+    identity["pending_terminal_sha256"] = hashlib.sha256(_canonical_json(dict(terminal))).hexdigest()
+    # Validate every captured graph and product binding before `_artifactize` creates CAS objects.
+    _validate_host_v3_dual_graph_identity(
+        identity, None, evidence, terminal=terminal, expected_terminal_state="PENDING_SUCCESS")
+    return_artifacts = []
+    planned_targets: dict[str, Path] = {}
+    for path, lineage in raw_rows:
+        staged_path = (evidence / "graph-outputs" / lineage["graph_id"]
+                       / f"{lineage['output_id']}{path.suffix}")
+        staged = _copy_evidence(path, staged_path)
+        if (staged.get("sha256") != lineage["sha256"]
+                or staged.get("size_bytes") != lineage["size_bytes"]):
+            raise RetentionError(
+                f"Host-v3 graph product changed while retaining its pre-success staging copy: {lineage['output_id']}")
+        canonical = planned_targets.get(lineage["sha256"])
+        if canonical is None:
+            canonical = _artifact_promotion_target(
+                staged_path, lineage["sha256"], lineage["size_bytes"])
+            planned_targets[lineage["sha256"]] = canonical
+        artifact = {
+            "sha256": lineage["sha256"],
+            "canonical_artifact_path": str(canonical),
+            "artifact_manifest_path": str(canonical.parent / "manifest.json"),
+            "size_bytes": lineage["size_bytes"],
+            "artifact_name": canonical.name,
+            "source_build_path": lineage["source_build_path"],
+            "source_build_hard_link_count": path.stat(follow_symlinks=False).st_nlink,
+            "promotion_order": "POST_SUCCESS",
+            "staged_output_evidence": staged,
+        }
+        artifact.update({key: value for key, value in lineage.items()
+                         if key not in {"sha256", "size_bytes", "source_build_path", "terminal_receipt"}})
+        return_artifacts.append(artifact)
+    return_artifacts.sort(key=lambda row: (row["graph_id"], row["output_id"]))
+    return return_artifacts
+
+
+def _promote_dual_graph_artifacts(artifacts: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Promote already committed, hash-bound staging evidence into CAS after SUCCESS."""
+    promoted: list[dict[str, Any]] = []
+    def canonical_payload_first(row: Mapping[str, Any]) -> tuple[int, str, str]:
+        staged = row.get("staged_output_evidence")
+        staged_path = staged.get("retained_path") if isinstance(staged, Mapping) else ""
+        expected_path = row.get("canonical_artifact_path")
+        matches = (isinstance(staged_path, str) and isinstance(expected_path, str)
+                   and Path(staged_path).name == Path(expected_path).name)
+        return (0 if matches else 1, str(row.get("graph_id", "")),
+                str(row.get("output_id", "")))
+
+    for row in sorted(artifacts, key=canonical_payload_first):
+        staged = row.get("staged_output_evidence")
+        staged_path = staged.get("retained_path") if isinstance(staged, Mapping) else None
+        if (row.get("promotion_order") != "POST_SUCCESS"
+                or not isinstance(staged_path, str)
+                or not re.fullmatch(r"[0-9a-f]{64}", str(row.get("sha256", "")))):
+            raise RetentionError("Host-v3 output lacks its committed post-SUCCESS staging identity")
+        staged_file = Path(staged_path)
+        staged_info = staged_file.lstat()
+        if (not stat.S_ISREG(staged_info.st_mode)
+                or staged_info.st_size != row.get("size_bytes")
+                or _hash_path(staged_file) != row.get("sha256")
+                or staged.get("sha256") != row.get("sha256")
+                or staged.get("size_bytes") != row.get("size_bytes")):
+            raise RetentionError("Host-v3 staged output changed before post-SUCCESS CAS promotion")
+        canonical = _artifactize(staged_file)
+        expected_path = row.get("canonical_artifact_path")
+        if (canonical.get("canonical_artifact_path") != expected_path
+                or canonical.get("sha256") != row.get("sha256")
+                or canonical.get("size_bytes") != row.get("size_bytes")):
+            raise RetentionError(
+                "Host-v3 CAS promotion differs from the committed manifest target: "
+                f"expected_path={expected_path!r}, actual_path={canonical.get('canonical_artifact_path')!r}, "
+                f"expected_sha256={row.get('sha256')!r}, actual_sha256={canonical.get('sha256')!r}, "
+                f"expected_size={row.get('size_bytes')!r}, actual_size={canonical.get('size_bytes')!r}")
+        canonical.update({key: value for key, value in row.items()
+                          if key not in {"canonical_artifact_path", "artifact_manifest_path",
+                                         "sha256", "size_bytes", "artifact_name",
+                                         "source_build_path", "source_build_hard_link_count"}})
+        canonical.update({
+            "source_build_path": row["source_build_path"],
+            "source_build_hard_link_count": row["source_build_hard_link_count"],
+            "promotion_order": row["promotion_order"],
+            "staged_output_evidence": staged,
+        })
+        promoted.append(canonical)
+    promoted.sort(key=lambda row: (row["graph_id"], row["output_id"]))
+    return promoted
 
 def _manifest_id(manifest: Mapping[str, Any]) -> str:
     value = dict(manifest)
@@ -2465,7 +5355,8 @@ def _verify_artifact(row: Mapping[str, Any]) -> bool:
     except (OSError, KeyError, json.JSONDecodeError, RetentionError):
         return False
 
-def _verify_build_manifest(build_id: str) -> tuple[dict[str, Any], str]:
+def _verify_build_manifest(build_id: str, *, allow_uncommitted_host_v3: bool = False,
+                           allow_pending_promotion: bool | None = None) -> tuple[dict[str, Any], str]:
     if not re.fullmatch(r"[A-Za-z0-9._-]{1,128}", build_id):
         raise RetentionError("build manifest ID is not path-safe")
     manifest_fd = _open_dir(MANIFEST_ROOT)
@@ -2491,12 +5382,32 @@ def _verify_build_manifest(build_id: str) -> tuple[dict[str, Any], str]:
     if manifest.get("evidence_index_sha256") != evidence_index_hash:
         raise RetentionError(f"retained evidence index hash mismatch: {build_id}")
     evidence_by_path = {str(evidence_path / row["path"]): row for row in actual_evidence}
+
+    # The frozen dual-graph plan intentionally carries references to the separate,
+    # immutable configure-preflight evidence tree. Validate that tree independently
+    # before allowing its paths in the recursive build-identity evidence check.
+    prebuild_evidence_by_path: dict[str, Mapping[str, Any]] = {}
+    identity_for_evidence = manifest.get("build_identity")
+    session_plan_for_evidence = (identity_for_evidence.get("session_plan")
+                                  if isinstance(identity_for_evidence, Mapping) else None)
+    if isinstance(session_plan_for_evidence, Mapping) and _session_dual_graph_enabled(
+            session_plan_for_evidence):
+        _validate_dual_graph_prebuild_identity(session_plan_for_evidence)
+        _prebuild_manifest, prebuild_evidence_root = _read_session_prebuild_manifest(
+            session_plan_for_evidence)
+        prebuild_evidence_by_path = {
+            str(prebuild_evidence_root / row["path"]): row
+            for row in _prebuild_manifest["evidence_files"]
+        }
+
     def check_identity_records(value: Any) -> None:
         if isinstance(value, dict):
             retained_path, digest = value.get("retained_path"), value.get("sha256")
             if isinstance(retained_path, str) and isinstance(digest, str):
                 indexed = evidence_by_path.get(retained_path)
-                if indexed is None or indexed.get("sha256") != digest:
+                prebuild_indexed = prebuild_evidence_by_path.get(retained_path)
+                if ((indexed is None or indexed.get("sha256") != digest)
+                        and (prebuild_indexed is None or prebuild_indexed.get("sha256") != digest)):
                     raise RetentionError(f"build identity references unverified evidence: {retained_path}")
             for child in value.values():
                 check_identity_records(child)
@@ -2527,10 +5438,21 @@ def _verify_build_manifest(build_id: str) -> tuple[dict[str, Any], str]:
                 evidence_row = evidence_by_path.get(entry.get("evidence_path"))
                 if evidence_row is None or evidence_row.get("sha256") != entry.get("sha256"):
                     raise RetentionError(f"product tree names unverified retained file: {entry.get('path')}")
-    if not manifest.get("artifacts") or not all(_verify_artifact(row) for row in manifest["artifacts"]):
-        raise RetentionError(f"build manifest references missing/invalid canonical artifacts: {build_id}")
     identity = manifest.get("build_identity", {})
-    _validate_completed_identity(identity, manifest["artifacts"], evidence_path)
+    plan = identity.get("session_plan") if isinstance(identity, Mapping) else None
+    if allow_pending_promotion is None:
+        allow_pending_promotion = (
+            allow_uncommitted_host_v3
+            and isinstance(plan, Mapping)
+            and _session_dual_graph_enabled(plan)
+            and plan.get("persistent_output_allowance_bytes") is not None)
+    if (not manifest.get("artifacts")
+            or (not allow_pending_promotion
+                and not all(_verify_artifact(row) for row in manifest["artifacts"]))):
+        raise RetentionError(f"build manifest references missing/invalid canonical artifacts: {build_id}")
+    _validate_completed_identity(
+        identity, manifest["artifacts"], evidence_path,
+        allow_pending_promotion=allow_pending_promotion)
     adopted = manifest.get("adopted_existing") is True
     if not adopted:
         requested_build_type = manifest.get("requested_build_type")
@@ -2573,6 +5495,18 @@ def _verify_build_manifest(build_id: str) -> tuple[dict[str, Any], str]:
                              and manifest.get("configuration_key_provenance") == "legacy-debug-preservation-only"
                              and manifest.get("captured_config_key_sha256") is None
                              and manifest.get("config_key_sha256") is None)
+    elif (_session_dual_graph_enabled(identity.get("session_plan", {}))
+          and identity.get("executor_mode") == BUILD_SESSION_EXECUTOR_MODE):
+        frozen_key = identity.get("session_plan", {}).get("build_configuration_key_sha256")
+        requested_matches = (
+            manifest.get("configuration_key_provenance") == "host-v3-dual-graph-captured"
+            and manifest.get("requested_config_key_sha256") == frozen_key
+            and manifest.get("build_configuration_key_sha256") == frozen_key
+            and identity.get("session_plan_sha256") != identity.get("config_key_sha256")
+            and manifest.get("captured_config_key_sha256") == identity.get("graph_config_key_sha256")
+            and identity.get("config_key_sha256") == identity.get("graph_config_key_sha256")
+            and identity.get("graph_config_key_sha256") == frozen_key
+        )
     else:
         requested_matches = (
             manifest.get("requested_config_key_sha256") is None
@@ -2581,7 +5515,110 @@ def _verify_build_manifest(build_id: str) -> tuple[dict[str, Any], str]:
         ) if adopted else manifest.get("requested_config_key_sha256") == identity.get("config_key_sha256")
     if manifest.get("config_key_sha256") != identity.get("config_key_sha256") or not requested_matches:
         raise RetentionError(f"build manifest configuration key is not bound consistently: {build_id}")
-    return manifest, hashlib.sha256(raw).hexdigest()
+    digest = hashlib.sha256(raw).hexdigest()
+    host_v3 = (identity.get("executor_mode") == BUILD_SESSION_EXECUTOR_MODE
+               or identity.get("sandboxed_execution_executor_mode") == BUILD_SESSION_EXECUTOR_MODE)
+    if host_v3 and not allow_uncommitted_host_v3:
+        lease = _load_lease(build_id)
+        _verify_host_v3_accepted_completion(lease, manifest, digest)
+    return manifest, digest
+
+
+def _completion_terminal_path(build_id: str) -> Path:
+    if not re.fullmatch(r"[A-Za-z0-9._-]{1,128}", build_id):
+        raise RetentionError("completion terminal build ID is not path-safe")
+    return MANIFEST_ROOT / f"{build_id}.completion-terminal"
+
+
+def _verify_host_v3_accepted_completion(
+        lease: Mapping[str, Any], manifest: Mapping[str, Any], manifest_digest: str) -> None:
+    """Require the authoritative lease to bind a verified manifest and final terminal receipt."""
+    identity = manifest.get("build_identity")
+    if not isinstance(identity, Mapping) or not (
+            identity.get("executor_mode") == BUILD_SESSION_EXECUTOR_MODE
+            or identity.get("sandboxed_execution_executor_mode") == BUILD_SESSION_EXECUTOR_MODE):
+        return
+    build_id = str(manifest.get("build_id", ""))
+    state = lease.get("state")
+    retirement_origin = lease.get("retirement_from_state", state)
+    if (lease.get("build_id") != build_id
+            or state not in {"COMPLETED", "PRESERVE_DEBUG", "RETIRING"}
+            or (state == "RETIRING" and retirement_origin != "COMPLETED")
+            or lease.get("build_manifest_id") != manifest.get("build_manifest_id")
+            or lease.get("build_manifest_sha256") != manifest_digest):
+        raise RetentionError("Host-v3 manifest is not bound by an accepted lease completion")
+    session = lease.get("session_v3")
+    if (not isinstance(session, Mapping) or session.get("state") != "ACCEPTED"
+            or session.get("plan_sha256") != identity.get("session_plan_sha256")):
+        raise RetentionError("Host-v3 accepted manifest lacks its exact accepted session plan")
+
+    terminal_digest = session.get("terminal_sha256")
+    if not isinstance(terminal_digest, str) or not re.fullmatch(r"[0-9a-f]{64}", terminal_digest):
+        raise RetentionError("Host-v3 accepted lease lacks the final terminal receipt digest")
+    completion_contract = lease.get("completion_contract")
+    if completion_contract == "HOST_BUILDLEASE_V3_MANIFEST_FIRST_V1":
+        terminal_path = _completion_terminal_path(build_id)
+        if (lease.get("completion_terminal_path") != str(terminal_path)
+                or lease.get("completion_terminal_sha256") != terminal_digest
+                or session.get("completion_terminal_sha256") != terminal_digest):
+            raise RetentionError("Host-v3 lease terminal path or digest binding is inconsistent")
+        try:
+            terminal_info = terminal_path.lstat()
+            if not stat.S_ISREG(terminal_info.st_mode) or terminal_info.st_nlink != 1:
+                raise RetentionError("Host-v3 completion terminal is not one regular file")
+            terminal = _read_json(terminal_path, sealed=True)
+            observed_terminal_digest = _hash_path(terminal_path)
+        except OSError as error:
+            raise RetentionError("Host-v3 accepted completion terminal is missing") from error
+        if (observed_terminal_digest != terminal_digest
+                or terminal.get("state") != "SUCCESS"
+                or terminal.get("build_id") != build_id
+                or terminal.get("plan_sha256") != session.get("plan_sha256")
+                or terminal.get("build_manifest_id") != manifest.get("build_manifest_id")
+                or terminal.get("build_manifest_sha256") != manifest_digest
+                or terminal.get("acceptance_state") != "HOST_BUILDLEASE_V3_WRITER_QUIESCED"
+                or terminal.get("write_quiescence_state")
+                    != "WRITABLE_IMAGE_DETACHED_READONLY_EVIDENCE_HASHED"
+                or terminal.get("finalizing_terminal_sha256")
+                    != identity.get("sandboxed_execution_evidence", {}).get("sha256")
+                or terminal.get("readonly_detached_identity") != session.get("readonly_detached_identity")
+                or terminal.get("detached_image_identity") != session.get("detached_image_identity")
+                or session.get("build_manifest_id") != manifest.get("build_manifest_id")
+                or session.get("build_manifest_sha256") != manifest_digest):
+            raise RetentionError("Host-v3 success terminal does not bind its accepted manifest and session")
+        build_root = Path(str(lease.get("path", "")))
+        try:
+            build_root_info = build_root.lstat()
+        except FileNotFoundError:
+            build_root_info = None
+        if build_root_info is not None:
+            if (not stat.S_ISDIR(build_root_info.st_mode)
+                    or (build_root_info.st_dev, build_root_info.st_ino)
+                        != (lease.get("build_device"), lease.get("build_inode"))):
+                raise RetentionError("Host-v3 accepted build root identity changed")
+            canonical_terminal = build_root / BUILD_SESSION_DIRECTORY / BUILD_SESSION_TERMINAL
+            if (_hash_path(canonical_terminal) != terminal_digest
+                    or _read_json(canonical_terminal, sealed=True) != terminal):
+                raise RetentionError("Host-v3 build-root terminal differs from its durable acceptance receipt")
+        return
+    if completion_contract is not None:
+        raise RetentionError("Host-v3 accepted lease names an unknown completion contract")
+
+    # Backward compatibility for already accepted pre-R66 Host-v3 manifests:
+    # their SUCCESS terminal is embedded and lease-bound, but predates manifest
+    # digests in the terminal itself and the external post-retirement copy.
+    terminal_evidence = identity.get("sandboxed_execution_evidence")
+    if (not isinstance(terminal_evidence, Mapping)
+            or terminal_evidence.get("sha256") != terminal_digest):
+        raise RetentionError("legacy Host-v3 accepted lease is not bound to its retained terminal")
+    terminal_path = terminal_evidence.get("retained_path")
+    if not isinstance(terminal_path, str):
+        raise RetentionError("legacy Host-v3 manifest lacks its retained terminal path")
+    terminal = _read_json(Path(terminal_path), sealed=True)
+    if (terminal.get("state") != "SUCCESS"
+            or terminal.get("build_id") != build_id
+            or terminal.get("plan_sha256") != session.get("plan_sha256")):
+        raise RetentionError("legacy Host-v3 manifest terminal is not a successful accepted receipt")
 
 def find_canonical_equivalent(*, config_key_sha256: str, kind: str,
                               source_tree_hash: str | None = None,
@@ -2612,6 +5649,205 @@ def find_canonical_equivalent(*, config_key_sha256: str, kind: str,
 def _lease_files() -> list[Path]:
     return sorted(LEASE_ROOT.glob("*.json")) if LEASE_ROOT.is_dir() else []
 
+
+def _host_buildlease_p2_admission_blockers_locked(lease_fd: int) -> list[str]:
+    blockers: list[str] = []
+    names = sorted(os.listdir(lease_fd))
+    if len(names) > 4096:
+        return ["Host BuildLease state is unknown; lease registry exceeds the bounded scan"]
+    for name in names:
+        if name == BUILD_LOCK:
+            continue
+        if not name.endswith(".json") or name in {"", ".json"} or "/" in name:
+            blockers.append(
+                f"Host BuildLease state is unknown; unexpected registry entry: {name!r}")
+            continue
+        descriptor: int | None = None
+        try:
+            descriptor = os.open(
+                name, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)
+                | getattr(os, "O_NONBLOCK", 0), dir_fd=lease_fd)
+            file_info = os.fstat(descriptor)
+            if (not stat.S_ISREG(file_info.st_mode) or file_info.st_nlink != 1
+                    or file_info.st_uid != os.getuid()
+                    or stat.S_IMODE(file_info.st_mode) != 0o600
+                    or file_info.st_size > 1024 * 1024):
+                raise RetentionError("lease record is not a bounded private regular file")
+            chunks: list[bytes] = []
+            size = 0
+            while True:
+                block = os.read(descriptor, 1024 * 1024)
+                if not block:
+                    break
+                chunks.append(block)
+                size += len(block)
+                if size > 1024 * 1024:
+                    raise RetentionError("lease record exceeds the bounded read")
+            current_info = os.stat(name, dir_fd=lease_fd, follow_symlinks=False)
+            if ((current_info.st_dev, current_info.st_ino)
+                    != (file_info.st_dev, file_info.st_ino)):
+                raise RetentionError("lease record changed during descriptor read")
+            value = json.loads(b"".join(chunks))
+            build_id = value.get("build_id") if isinstance(value, dict) else None
+            created_at = value.get("created_at_unix") if isinstance(value, dict) else None
+            retired_at = value.get("retired_at_unix") if isinstance(value, dict) else None
+            if (not isinstance(value, dict) or not _verify_seal(value)
+                    or build_id != name[:-5]
+                    or not isinstance(value.get("schema_version"), int)
+                    or isinstance(value.get("schema_version"), bool)
+                    or value.get("schema_version") != 1
+                    or not isinstance(value.get("path"), str)
+                    or not Path(value["path"]).is_absolute()
+                    or not isinstance(value.get("owner_experiment"), str)
+                    or not value["owner_experiment"]
+                    or value.get("kind") not in KINDS
+                    or not isinstance(created_at, (int, float))
+                    or isinstance(created_at, bool)
+                    or not math.isfinite(float(created_at))
+                    or (retired_at is not None
+                        and (not isinstance(retired_at, (int, float))
+                             or isinstance(retired_at, bool)
+                             or not math.isfinite(float(retired_at))))):
+                raise RetentionError("lease record identity, schema, or authentication is invalid")
+            state = value.get("state")
+            retirement_status = value.get("retirement_status")
+            if retirement_status not in (None, "PENDING", "COMPLETED"):
+                raise RetentionError("lease record has an unknown retirement status")
+            retired_completion = retired_at is not None
+            if retired_completion:
+                _verify_completed_retirement(value)
+            elif retirement_status == "COMPLETED":
+                raise RetentionError("retirement is marked completed without a retirement timestamp")
+            elif retirement_status == "PENDING" and state != "RETIRING":
+                raise RetentionError("pending retirement status is not paired with RETIRING state")
+            if state == "ACTIVE":
+                blockers.append(
+                    f"active Host BuildLease prevents P2 admission: {build_id}")
+            elif state == "FAILED" and not retired_completion:
+                blockers.append(
+                    f"Host BuildLease state is unresolved; P2 admission fails closed: {build_id}")
+            elif state == "FAILED" and retired_completion:
+                # A verified retirement receipt closes cleanup; it does not
+                # reinterpret the failed execution as a successful build.
+                pass
+            elif state == "RETIRING":
+                blockers.append(
+                    f"Host BuildLease state is unresolved; P2 admission fails closed: {build_id}")
+            elif state == ORPHANED_UNSTARTED_STATE:
+                try:
+                    _verify_orphan_closeout_receipt(value)
+                    if value.get("retired_at_unix") is not None:
+                        raise RetentionError("orphan terminal record also claims physical retirement")
+                except (OSError, RetentionError, ValueError, TypeError) as error:
+                    blockers.append(
+                        f"Host BuildLease orphan closeout is invalid; P2 admission fails closed: {build_id}: {error}")
+            elif state not in {"COMPLETED", "PRESERVE_DEBUG"}:
+                raise RetentionError(f"lease record has unknown state {state!r}")
+            if value.get("retired_at_unix") is not None and state == "ACTIVE":
+                raise RetentionError("retired lease record still claims ACTIVE state")
+            session = value.get("session_v3")
+            if session is not None:
+                if (not isinstance(session, Mapping)
+                        or not isinstance(session.get("schema_version"), int)
+                        or isinstance(session.get("schema_version"), bool)
+                        or session.get("schema_version") != BUILD_SESSION_SCHEMA_VERSION
+                        or session.get("executor_mode") != BUILD_SESSION_EXECUTOR_MODE
+                        or session.get("state") not in {
+                            "RESERVED", "ACTIVE", "RUNNING", "QUIESCING",
+                            "PENDING_SUCCESS", "READY_TO_FINALIZE", "FINALIZING", "ACCEPTED", "FAILED",
+                        }):
+                    raise RetentionError("Host BuildLease v3 session identity or state is unknown")
+                if state in {"COMPLETED", "PRESERVE_DEBUG"} and session.get("state") != "ACCEPTED":
+                    is_legacy_retired_failure = (
+                        session.get("state") == "FAILED" and retired_completion
+                        and value.get("retirement_status") is None
+                        and value.get("retirement_from_state") == "FAILED")
+                    if not is_legacy_retired_failure:
+                        raise RetentionError("completed Host BuildLease v3 session is not accepted")
+                if (session.get("state") == "ACCEPTED"
+                        and state in {"COMPLETED", "PRESERVE_DEBUG", "RETIRING"}
+                        and not (state == "RETIRING"
+                                 and value.get("retirement_from_state") != "COMPLETED")):
+                    manifest, manifest_digest = _verify_build_manifest(build_id)
+                    if (value.get("build_manifest_id") != manifest.get("build_manifest_id")
+                            or value.get("build_manifest_sha256") != manifest_digest):
+                        raise RetentionError("accepted Host BuildLease v3 record has a mismatched manifest binding")
+        except (OSError, RetentionError, ValueError, TypeError, json.JSONDecodeError) as error:
+            blockers.append(
+                f"Host BuildLease state is unknown; P2 admission fails closed for {name}: {error}")
+        finally:
+            if descriptor is not None:
+                os.close(descriptor)
+    return blockers
+
+
+@contextmanager
+def host_buildlease_p2_admission_guard():
+    """Hold the read-only retention lock through the P2 marker commit.
+
+    Callers must already hold storage_policy's shared allocation lock. The
+    existing lock serializes against legacy adoption and lease state changes;
+    BuildLease.reserve and legacy adoption both order locks allocation-first.
+    This guard never creates the lease root/lock, calls status_snapshot(), or
+    reconciles pending retirement. Missing or unsafe authority fails closed.
+    """
+    lease_fd: int | None = None
+    lock_fd: int | None = None
+    lock_acquired = False
+    setup_error: str | None = None
+    try:
+        lease_fd = _open_dir(LEASE_ROOT)
+        directory_info = os.fstat(lease_fd)
+        if (not stat.S_ISDIR(directory_info.st_mode)
+                or directory_info.st_uid != os.getuid()
+                or stat.S_IMODE(directory_info.st_mode) & 0o077):
+            raise RetentionError("lease registry directory has an unknown owner, type, or mode")
+        lock_fd = os.open(
+            BUILD_LOCK, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)
+            | getattr(os, "O_NONBLOCK", 0), dir_fd=lease_fd)
+        lock_info = os.fstat(lock_fd)
+        named_lock_info = os.stat(BUILD_LOCK, dir_fd=lease_fd, follow_symlinks=False)
+        if (not stat.S_ISREG(lock_info.st_mode) or lock_info.st_nlink != 1
+                or lock_info.st_uid != os.getuid()
+                or stat.S_IMODE(lock_info.st_mode) != 0o600
+                or (lock_info.st_dev, lock_info.st_ino)
+                    != (named_lock_info.st_dev, named_lock_info.st_ino)):
+            raise RetentionError("retention lock is missing, unsafe, or changed")
+        fcntl.flock(lock_fd, fcntl.LOCK_SH | fcntl.LOCK_NB)
+        lock_acquired = True
+    except (OSError, RetentionError) as error:
+        setup_error = str(error)
+
+    if setup_error is not None:
+        if lock_fd is not None:
+            os.close(lock_fd)
+        if lease_fd is not None:
+            os.close(lease_fd)
+        yield [f"Host BuildLease state is unknown; P2 admission fails closed: {setup_error}"]
+        return
+
+    try:
+        try:
+            assert lease_fd is not None
+            blockers = _host_buildlease_p2_admission_blockers_locked(lease_fd)
+        except (OSError, RetentionError, ValueError, TypeError) as error:
+            blockers = [f"Host BuildLease state is unknown; P2 admission fails closed: {error}"]
+        yield blockers
+    finally:
+        if lock_acquired and lock_fd is not None:
+            fcntl.flock(lock_fd, fcntl.LOCK_UN)
+        if lock_fd is not None:
+            os.close(lock_fd)
+        if lease_fd is not None:
+            os.close(lease_fd)
+
+
+def host_buildlease_p2_admission_blockers() -> list[str]:
+    """Read the signed lease registry, failing closed on unknown state."""
+    with host_buildlease_p2_admission_guard() as blockers:
+        return list(blockers)
+
+
 def _load_lease(build_id: str) -> dict[str, Any]:
     return _read_json(LEASE_ROOT / f"{build_id}.json", sealed=True)
 
@@ -2619,6 +5855,27 @@ def _store_lease(lease: Mapping[str, Any]) -> dict[str, Any]:
     sealed = _seal(lease)
     _write_json(LEASE_ROOT / f"{lease['build_id']}.json", sealed)
     return sealed
+
+
+def _assert_build_id_unclaimed(build_id: str) -> None:
+    """Refuse to reuse any durable BuildLease identity or same-ID history."""
+    candidates = (
+        BUILD_ROOT / build_id,
+        LEASE_ROOT / f"{build_id}.json",
+        MANIFEST_ROOT / f"{build_id}.json",
+        MANIFEST_ROOT / f"{build_id}.failure",
+        MANIFEST_ROOT / f"{build_id}.evidence",
+        RECEIPT_ROOT / f"{build_id}.json",
+        _orphan_closeout_receipt_path(build_id),
+    )
+    for path in candidates:
+        try:
+            path.lstat()
+        except FileNotFoundError:
+            continue
+        except OSError as error:
+            raise RetentionError(f"could not verify unused BuildLease identity {build_id}: {error}") from error
+        raise RetentionError(f"BuildLease build ID has existing identity/history state: {build_id}")
 
 def _remove_unmoved_adoption_record(build_id: str, expected: Mapping[str, Any]) -> None:
     """Remove only this provisional ACTIVE legacy lease after a namespace rollback."""
@@ -2675,21 +5932,1045 @@ def _write_marker(root_fd: int, lease: Mapping[str, Any]) -> None:
               replace=True)
 
 def _read_marker(root_fd: int) -> dict[str, Any]:
-    value = json.loads(_read_at(root_fd, BUILD_MARKER, limit=1024 * 1024))
-    if not isinstance(value, dict) or not _verify_seal(value):
-        raise RetentionError("build directory marker is missing/invalid")
+    value, _digest = _read_marker_with_digest(root_fd)
     return value
 
-def _lock() -> tuple[int, int]:
+def _read_marker_with_digest(root_fd: int) -> tuple[dict[str, Any], str]:
+    raw = _read_at(root_fd, BUILD_MARKER, limit=1024 * 1024)
+    value = json.loads(raw)
+    if not isinstance(value, dict) or not _verify_seal(value):
+        raise RetentionError("build directory marker is missing/invalid")
+    return value, hashlib.sha256(raw).hexdigest()
+
+def _lock(*, nonblocking: bool = False) -> tuple[int, int]:
     lease_fd = _open_dir(LEASE_ROOT, create=True)
-    fd = os.open(BUILD_LOCK, os.O_RDWR | os.O_CREAT | getattr(os, "O_NOFOLLOW", 0), 0o600, dir_fd=lease_fd)
-    info = os.fstat(fd)
-    if not stat.S_ISREG(info.st_mode) or info.st_nlink != 1 or stat.S_IMODE(info.st_mode) != 0o600:
-        os.close(fd)
+    fd: int | None = None
+    acquired = False
+    try:
+        fd = os.open(BUILD_LOCK, os.O_RDWR | os.O_CREAT | getattr(os, "O_NOFOLLOW", 0),
+                     0o600, dir_fd=lease_fd)
+        info = os.fstat(fd)
+        if not stat.S_ISREG(info.st_mode) or info.st_nlink != 1 or stat.S_IMODE(info.st_mode) != 0o600:
+            raise RetentionError("retention lock is unsafe")
+        lock_flags = fcntl.LOCK_EX | (fcntl.LOCK_NB if nonblocking else 0)
+        try:
+            fcntl.flock(fd, lock_flags)
+        except OSError as error:
+            if nonblocking and error.errno in {errno.EACCES, errno.EAGAIN, errno.EWOULDBLOCK}:
+                raise RetentionError("authoritative retention lock is held by another process") from error
+            raise
+        acquired = True
+        _verify_named_retention_lock(lease_fd, fd)
+    except BaseException:
+        if fd is not None:
+            if acquired:
+                fcntl.flock(fd, fcntl.LOCK_UN)
+            os.close(fd)
         os.close(lease_fd)
-        raise RetentionError("retention lock is unsafe")
-    fcntl.flock(fd, fcntl.LOCK_EX)
+        raise
     return lease_fd, fd
+
+
+def _verify_named_retention_lock(lease_fd: int, lock_fd: int) -> None:
+    """Prove the locked descriptor is still the authoritative named lock inode."""
+    opened = os.fstat(lock_fd)
+    try:
+        named = os.stat(BUILD_LOCK, dir_fd=lease_fd, follow_symlinks=False)
+    except OSError as error:
+        raise RetentionError("authoritative retention lock pathname disappeared") from error
+    if (not stat.S_ISREG(opened.st_mode) or opened.st_nlink != 1
+            or stat.S_IMODE(opened.st_mode) != 0o600
+            or (opened.st_dev, opened.st_ino) != (named.st_dev, named.st_ino)
+            or not stat.S_ISREG(named.st_mode) or named.st_nlink != 1
+            or stat.S_IMODE(named.st_mode) != 0o600):
+        raise RetentionError("named retention lock no longer identifies the exclusively locked inode")
+
+
+def _process_start_time_unix(pid: int) -> float:
+    """Return a process birth time from the system process table, or fail closed."""
+    if isinstance(pid, bool) or not isinstance(pid, int) or pid <= 0:
+        raise RetentionError("orphan owner PID is invalid")
+    try:
+        result = subprocess.run(["/bin/ps", "-p", str(pid), "-o", "lstart="],
+                                env={"PATH": "/usr/bin:/bin", "LANG": "C", "LC_ALL": "C"},
+                                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                text=True, check=False, timeout=10)
+    except (OSError, subprocess.SubprocessError) as error:
+        raise RetentionError("process identity could not be established for orphan closeout") from error
+    rendered = result.stdout.strip()
+    if result.returncode != 0 or not rendered:
+        raise RetentionError("process identity could not be established for orphan closeout")
+    try:
+        return datetime.strptime(rendered, "%a %b %d %H:%M:%S %Y").timestamp()
+    except ValueError as error:
+        raise RetentionError("system process start time has an unsupported representation") from error
+
+
+def _verify_orphan_owner_absent(lease: Mapping[str, Any]) -> None:
+    pid = lease.get("owner_pid")
+    if isinstance(pid, bool) or not isinstance(pid, int) or pid <= 0:
+        raise RetentionError("orphan reservation has no authenticated owner PID")
+    try:
+        os.kill(pid, 0)
+    except ProcessLookupError:
+        return
+    except OSError as error:
+        raise RetentionError("orphan owner liveness is ambiguous") from error
+    created = lease.get("created_at_unix")
+    if (not isinstance(created, (int, float)) or isinstance(created, bool)
+            or not math.isfinite(float(created))):
+        raise RetentionError("orphan reservation creation time is invalid")
+    process_started = _process_start_time_unix(pid)
+    if process_started <= float(created):
+        raise RetentionError("reservation owner process is live or PID reuse cannot be distinguished")
+
+
+def _require_no_matching_orphan_controller(build_id: str, owner_experiment: str) -> None:
+    """Reject any other process still advertising this exact lease/controller identity."""
+    try:
+        result = subprocess.run(["/bin/ps", "-axo", "pid=,command="],
+                                env={"PATH": "/usr/bin:/bin", "LANG": "C", "LC_ALL": "C"},
+                                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                text=True, check=False, timeout=10)
+    except (OSError, subprocess.SubprocessError) as error:
+        raise RetentionError("controller/descendant process inventory is unavailable") from error
+    if result.returncode != 0:
+        raise RetentionError("controller/descendant process inventory is unavailable")
+    needles = (build_id, owner_experiment)
+    for line in result.stdout.splitlines():
+        fields = line.strip().split(None, 1)
+        if len(fields) != 2 or not fields[0].isdigit():
+            continue
+        pid, command = int(fields[0]), fields[1]
+        if pid == os.getpid():
+            continue
+        if any(re.search(rf"(?<![A-Za-z0-9._-]){re.escape(needle)}(?![A-Za-z0-9._-])",
+                         command) for needle in needles):
+            raise RetentionError("another matching BuildLease controller or descendant is still live")
+
+
+def _orphan_closeout_receipt_path(build_id: str) -> Path:
+    return RECEIPT_ROOT / ORPHANED_UNSTARTED_RECEIPT_DIR / f"{build_id}.json"
+
+
+def _verify_orphan_closeout_receipt(lease: Mapping[str, Any]) -> dict[str, Any]:
+    """Verify the additive historical receipt for a terminal never-started lease."""
+    build_id = lease.get("build_id")
+    expected_path = _orphan_closeout_receipt_path(str(build_id))
+    if (lease.get("state") != ORPHANED_UNSTARTED_STATE
+            or lease.get("orphan_closeout_receipt_path") != str(expected_path)
+            or not isinstance(build_id, str)):
+        raise RetentionError("orphan terminal lease does not name its canonical closeout receipt")
+    receipt_raw = _read_file_descriptor(expected_path)
+    try:
+        receipt = json.loads(receipt_raw)
+    except (UnicodeDecodeError, json.JSONDecodeError) as error:
+        raise RetentionError("orphan closeout receipt is malformed") from error
+    if not isinstance(receipt, dict) or not _verify_seal(receipt):
+        raise RetentionError("orphan closeout receipt is unsigned or malformed")
+    original_raw_b64 = receipt.get("original_registry_record_b64")
+    marker_raw_b64 = receipt.get("original_marker_record_b64")
+    if not isinstance(original_raw_b64, str) or not isinstance(marker_raw_b64, str):
+        raise RetentionError("orphan closeout receipt omitted exact historical record bytes")
+    try:
+        original_raw = base64.b64decode(original_raw_b64, validate=True)
+        original_marker_raw = base64.b64decode(marker_raw_b64, validate=True)
+        original = json.loads(original_raw)
+        original_marker = json.loads(original_marker_raw)
+    except (binascii.Error, ValueError, UnicodeDecodeError, json.JSONDecodeError) as error:
+        raise RetentionError("orphan closeout receipt contains malformed historical bytes") from error
+    if not isinstance(original, dict) or not isinstance(original_marker, dict):
+        raise RetentionError("orphan closeout receipt historical records are not objects")
+    original_sha = hashlib.sha256(original_raw).hexdigest()
+    marker_sha = hashlib.sha256(original_marker_raw).hexdigest()
+    session = original.get("session_v3") if isinstance(original, dict) else None
+    identity = {
+        "build_id": build_id,
+        "path": lease.get("path"),
+        "owner_experiment": lease.get("owner_experiment"),
+        "build_device": lease.get("build_device"),
+        "build_inode": lease.get("build_inode"),
+        "build_filesystem_id": lease.get("build_filesystem_id"),
+        "plan_sha256": session.get("plan_sha256") if isinstance(session, Mapping) else None,
+        "admission_identity": session.get("admission_identity") if isinstance(session, Mapping) else None,
+    }
+    if (not _verify_seal(original) or not _verify_seal(original_marker)
+            or _canonical_json(original) != _canonical_json(original_marker)
+            or original_sha != receipt.get("original_registry_record_sha256")
+            or marker_sha != receipt.get("original_marker_record_sha256")
+            or receipt.get("result") != ORPHANED_UNSTARTED_STATE
+            or receipt.get("outputs_accepted") is not False
+            or receipt.get("active_lease_charge_released") is not True
+            or receipt.get("released_reservation_bytes") != original.get("expected_bytes")
+            or receipt.get("identity") != identity
+            or lease.get("orphan_original_record_sha256") != original_sha
+            or lease.get("orphan_closeout_receipt_sha256")
+                != hashlib.sha256(receipt_raw).hexdigest()
+            or original.get("state") != "ACTIVE"
+            or original.get("build_id") != build_id
+            or original.get("path") != lease.get("path")
+            or original.get("owner_experiment") != lease.get("owner_experiment")
+            or original.get("build_device") != lease.get("build_device")
+            or original.get("build_inode") != lease.get("build_inode")
+            or original.get("build_filesystem_id") != lease.get("build_filesystem_id")
+            or original.get("session_started") not in (None, False)
+            or not isinstance(session, Mapping)
+            or session.get("state") != "RESERVED"
+            or session.get("next_step_index") != 0
+            or session.get("peak_allocated_bytes") != 0
+            or session.get("step_receipts") != []
+            or lease.get("session_v3") != session
+            or any(lease.get(key) != value for key, value in identity.items()
+                   if key not in {"plan_sha256", "admission_identity"})):
+        raise RetentionError("orphan closeout receipt conflicts with terminal lease identity")
+    return receipt
+
+
+def _r23_orphaned_root_has_authenticated_apfs_device_alias(
+        path: Path, lease: Mapping[str, Any], root_fd: int, root_info: os.stat_result) -> bool:
+    """Recognize only R23's retained terminal root across APFS device renumbering.
+
+    macOS assigns numeric ``st_dev``/``f_fsid`` values to a mounted APFS volume;
+    those values can change while the volume UUID and the exact directory inodes
+    remain stable. R23 is already terminal and has no execution authority, so
+    this read-only exception preserves its accounting classification when the
+    pinned historical crosswalk and current mounted-volume identity both match.
+    It is intentionally limited to one immutable lease/receipt/evidence tuple.
+    """
+    expected_path = R23_ORPHANED_ROOT_PATH
+    if (sys.platform != "darwin"
+            or Path(REPO).resolve(strict=False) != R23_ORPHANED_ROOT_REPO
+            or Path(os.path.abspath(os.fspath(path))) != expected_path
+            or lease.get("build_id") != R23_ORPHANED_ROOT_BUILD_ID
+            or lease.get("path") != str(expected_path)
+            or lease.get("state") != ORPHANED_UNSTARTED_STATE
+            or lease.get("build_device") != R23_ORPHANED_ROOT_OLD_DEVICE
+            or lease.get("build_filesystem_id") != R23_ORPHANED_ROOT_OLD_DEVICE
+            or lease.get("build_inode") != R23_ORPHANED_ROOT_INODE):
+        return False
+
+    try:
+        lease_path = LEASE_ROOT / f"{R23_ORPHANED_ROOT_BUILD_ID}.json"
+        receipt_path = _orphan_closeout_receipt_path(R23_ORPHANED_ROOT_BUILD_ID)
+        _verify_orphan_closeout_receipt(lease)
+        lease_raw = _read_file_descriptor(lease_path)
+        receipt_raw = _read_file_descriptor(receipt_path)
+        pin_raw = _read_file_descriptor(REPO / R23_ORPHANED_ROOT_PIN_EVIDENCE)
+        volume_raw = _read_file_descriptor(REPO / R23_ORPHANED_ROOT_VOLUME_EVIDENCE)
+        if (hashlib.sha256(lease_raw).hexdigest() != R23_ORPHANED_ROOT_LEASE_SHA256
+                or hashlib.sha256(receipt_raw).hexdigest() != R23_ORPHANED_ROOT_RECEIPT_SHA256
+                or hashlib.sha256(pin_raw).hexdigest() != R23_ORPHANED_ROOT_PIN_EVIDENCE_SHA256
+                or hashlib.sha256(volume_raw).hexdigest() != R23_ORPHANED_ROOT_VOLUME_EVIDENCE_SHA256):
+            return False
+
+        parse = lambda raw: json.loads(raw, object_pairs_hook=_json_object_without_duplicate_keys)
+        pin = parse(pin_raw)
+        volume = parse(volume_raw)
+        observation = volume.get("full_readonly_observation")
+        data_info = observation.get("data_volume_info") if isinstance(observation, Mapping) else None
+        mount_identity = data_info.get("canonical_mount_identity") if isinstance(data_info, Mapping) else None
+        historical_rows = (mount_identity.get("mount_table_expected_path_records")
+                           if isinstance(mount_identity, Mapping) else None)
+        expected_mount_row = {
+            "filesystem_id": [R23_ORPHANED_ROOT_OLD_DEVICE, 26],
+            "filesystem_type": "apfs",
+            "mount_point": "/System/Volumes/Data",
+            "source": "/dev/disk3s1",
+        }
+        root_pin = pin.get("root_pin") if isinstance(pin, Mapping) else None
+        root_revalidation = pin.get("root_revalidation") if isinstance(pin, Mapping) else None
+        parent_before = root_revalidation.get("parent_fd_before") if isinstance(root_revalidation, Mapping) else None
+        parent_after = root_revalidation.get("parent_fd_after") if isinstance(root_revalidation, Mapping) else None
+        root_before = root_pin.get("fstat_before") if isinstance(root_pin, Mapping) else None
+        root_after = root_revalidation.get("pinned_after") if isinstance(root_revalidation, Mapping) else None
+        if (not isinstance(observation, Mapping)
+                or not isinstance(data_info, Mapping)
+                or not isinstance(mount_identity, Mapping)
+                or data_info.get("VolumeUUID") != R23_ORPHANED_ROOT_VOLUME_UUID
+                or mount_identity.get("volume_uuid") != R23_ORPHANED_ROOT_VOLUME_UUID
+                or mount_identity.get("mount_table_mount_point") != "/System/Volumes/Data"
+                or mount_identity.get("mount_table_filesystem_id") != [R23_ORPHANED_ROOT_OLD_DEVICE, 26]
+                or historical_rows != [expected_mount_row]
+                or not isinstance(root_pin, Mapping)
+                or root_pin.get("canonical_root") != str(expected_path)
+                or not isinstance(root_before, Mapping)
+                or not isinstance(root_after, Mapping)
+                or not isinstance(parent_before, Mapping)
+                or not isinstance(parent_after, Mapping)
+                or not isinstance(root_revalidation, Mapping)
+                or root_revalidation.get("pinned_stable") is not True
+                or root_revalidation.get("named_stable") is not True
+                or root_revalidation.get("parent_stable") is not True
+                or root_revalidation.get("named_equals_pin_after") is not True
+                or root_before.get("device") != R23_ORPHANED_ROOT_OLD_DEVICE
+                or root_before.get("filesystem_id") != R23_ORPHANED_ROOT_OLD_DEVICE
+                or root_before.get("inode") != R23_ORPHANED_ROOT_INODE
+                or root_after.get("device") != R23_ORPHANED_ROOT_OLD_DEVICE
+                or root_after.get("filesystem_id") != R23_ORPHANED_ROOT_OLD_DEVICE
+                or root_after.get("inode") != R23_ORPHANED_ROOT_INODE
+                or parent_before.get("device") != R23_ORPHANED_ROOT_OLD_DEVICE
+                or parent_before.get("filesystem_id") != R23_ORPHANED_ROOT_OLD_DEVICE
+                or parent_before.get("inode") != R23_ORPHANED_ROOT_PARENT_INODE
+                or parent_after.get("device") != R23_ORPHANED_ROOT_OLD_DEVICE
+                or parent_after.get("filesystem_id") != R23_ORPHANED_ROOT_OLD_DEVICE
+                or parent_after.get("inode") != R23_ORPHANED_ROOT_PARENT_INODE):
+            return False
+
+        terminal_record = parse(lease_raw)
+        if (not isinstance(terminal_record, Mapping)
+                or terminal_record != lease
+                or terminal_record.get("state") != ORPHANED_UNSTARTED_STATE
+                or terminal_record.get("approved_parent") != str(expected_path.parent)
+                or terminal_record.get("approved_parent_identity", {}).get("inode")
+                    != R23_ORPHANED_ROOT_PARENT_INODE
+                or terminal_record.get("approved_parent_identity", {}).get("device")
+                    != R23_ORPHANED_ROOT_OLD_DEVICE
+                or terminal_record.get("approved_parent_identity", {}).get("filesystem_id")
+                    != R23_ORPHANED_ROOT_OLD_DEVICE):
+            return False
+
+        root_stat = os.stat(expected_path, follow_symlinks=False)
+        parent_fd = _open_dir(expected_path.parent)
+        data_fd = _open_dir("/System/Volumes/Data")
+        try:
+            parent_stat = os.fstat(parent_fd)
+            data_stat = os.fstat(data_fd)
+            root_fsid = getattr(os.fstatvfs(root_fd), "f_fsid", None)
+            parent_fsid = getattr(os.fstatvfs(parent_fd), "f_fsid", None)
+            data_fsid = getattr(os.fstatvfs(data_fd), "f_fsid", None)
+            live_volume = _session_diskutil_info("/System/Volumes/Data")
+            current_marker_raw = _read_at(root_fd, BUILD_MARKER, limit=1024 * 1024)
+            if (live_volume.get("VolumeUUID") != R23_ORPHANED_ROOT_VOLUME_UUID
+                    or live_volume.get("MountPoint") != "/System/Volumes/Data"
+                    or live_volume.get("FilesystemType") != "apfs"
+                    or (root_info.st_dev, root_info.st_ino) !=
+                        (root_stat.st_dev, R23_ORPHANED_ROOT_INODE)
+                    or root_info.st_uid != 501 or root_info.st_gid != 20
+                    or stat.S_IMODE(root_info.st_mode) != 0o700
+                    or root_info.st_nlink != 3
+                    or (parent_stat.st_dev, parent_stat.st_ino) !=
+                        (data_stat.st_dev, R23_ORPHANED_ROOT_PARENT_INODE)
+                    or parent_stat.st_uid != 501 or stat.S_IMODE(parent_stat.st_mode) != 0o700
+                    or stat.S_ISVTX & parent_stat.st_mode
+                    or root_fsid != data_fsid or parent_fsid != data_fsid
+                    or root_info.st_dev != data_stat.st_dev
+                    or sorted(os.listdir(root_fd)) != [BUILD_MARKER]
+                    or hashlib.sha256(current_marker_raw).hexdigest() != R23_ORPHANED_ROOT_LEASE_SHA256
+                    or current_marker_raw != lease_raw
+                    or expected_path.is_symlink() or os.path.ismount(expected_path)):
+                return False
+            named_root_after = expected_path.lstat()
+            named_parent_after = expected_path.parent.lstat()
+            return ((named_root_after.st_dev, named_root_after.st_ino) ==
+                    (root_info.st_dev, root_info.st_ino)
+                    and (named_parent_after.st_dev, named_parent_after.st_ino) ==
+                    (parent_stat.st_dev, parent_stat.st_ino)
+                    and getattr(os.fstatvfs(root_fd), "f_fsid", None) == data_fsid)
+        finally:
+            os.close(data_fd)
+            os.close(parent_fd)
+    except (OSError, RetentionError, ValueError, TypeError, json.JSONDecodeError, subprocess.SubprocessError):
+        return False
+
+
+R51_LSOF_PATH = "/usr/sbin/lsof"
+R51_LSOF_FIELDS = "-F0pcRftDrin"
+# Historical R51 receipts remain bound to this original binary. A later
+# execution may accept Apple's current system lsof only through the existing
+# R40 4.91/libproc version contract and its platform code signature.
+R51_LSOF_BINARY_SHA256 = "deff85c7b4750a948a69fcd48eae3b394a37575e5048e5eb4a35b7a0482c3dc8"
+R51_ACCEPTED_SCANNER_SHA256 = "27b9c03079db40d218831b576de0201927d4b704ff4d787673f7f27f76ae7c95"
+R51_ACCEPTED_SCANNER_PATH = Path(__file__).resolve().parent / "r6a_r33_live_open_capture.py"
+R51_CLOSED_CHILD_PROBE = R51_ACCEPTED_SCANNER_PATH.parent / (
+    "R6-A-R51-CLOSED-CHILD-PROBE-20261022T091606Z-r51-closed-child/probe.json")
+R51_CLOSED_CHILD_PROBE_SHA256 = "279896760fcc15c20fa677f122724c2ed802cff9f71f6b922121e6942aa80bfc"
+R51_LSOF_MAX_NAMESPACE_ITEMS = 4096
+
+
+def _r51_safe_file_sha256(path: Path, *, limit: int = 4 * 1024 * 1024) -> str:
+    """Hash a small evidence/source file while binding its name to one regular inode."""
+    path = Path(os.path.abspath(os.fspath(path)))
+    parent_fd = _open_dir(path.parent)
+    fd: int | None = None
+    try:
+        fd = os.open(path.name, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)
+                     | getattr(os, "O_NONBLOCK", 0), dir_fd=parent_fd)
+        before = os.fstat(fd)
+        if not stat.S_ISREG(before.st_mode) or before.st_size < 0 or before.st_size > limit:
+            raise RetentionError("R51 lsof evidence file is not a bounded regular file")
+        digest = _hash_fd(fd)
+        after = os.fstat(fd)
+        named = os.stat(path.name, dir_fd=parent_fd, follow_symlinks=False)
+        identity = lambda row: (
+            row.st_dev, row.st_ino, row.st_size, row.st_mtime_ns,
+            getattr(row, "st_ctime_ns", 0), stat.S_IFMT(row.st_mode))
+        if identity(before) != identity(after) or identity(before) != identity(named):
+            raise RetentionError("R51 lsof evidence file changed while its identity was captured")
+        return digest
+    except OSError as error:
+        raise RetentionError("R51 lsof evidence file could not be read safely") from error
+    finally:
+        if fd is not None:
+            os.close(fd)
+        os.close(parent_fd)
+
+
+def _r51_current_system_lsof_is_authenticated(
+        identity: Mapping[str, Any], scanner: Any | None = None) -> bool:
+    """Authenticate the current Apple lsof without changing R51's historical pin."""
+    if (sys.platform != "darwin"
+            or identity.get("path") != R51_LSOF_PATH
+            or identity.get("stable") is not True
+            or identity.get("owner_uid") != 0
+            or type(identity.get("mode")) is not int
+            or identity["mode"] & 0o111 == 0
+            or identity["mode"] & 0o022
+            or not isinstance(identity.get("sha256"), str)
+            or re.fullmatch(r"[0-9a-f]{64}", identity["sha256"]) is None):
+        return False
+    try:
+        if scanner is None:
+            scanner = _load_r51_lsof_scanner()
+        lsof_path = Path(R51_LSOF_PATH)
+        codesign_path = Path("/usr/bin/codesign")
+        if lsof_path.resolve(strict=True) != lsof_path or codesign_path.resolve(strict=True) != codesign_path:
+            return False
+        codesign_identity = scanner.executable_identity(str(codesign_path))
+        if (codesign_identity.get("path") != str(codesign_path)
+                or codesign_identity.get("owner_uid") != 0
+                or codesign_identity.get("stable") is not True
+                or codesign_identity.get("mode", 0) & 0o111 == 0
+                or codesign_identity.get("mode", 0) & 0o022):
+            return False
+        if scanner.executable_identity(R51_LSOF_PATH) != dict(identity):
+            return False
+
+        environment = {"PATH": "/usr/bin:/bin", "LANG": "C", "LC_ALL": "C"}
+        verified = subprocess.run(
+            [str(codesign_path), "--verify", "--strict", "--verbose=2", R51_LSOF_PATH],
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False,
+            timeout=10, env=environment)
+        signature = subprocess.run(
+            [str(codesign_path), "-d", "-r", "-", "--verbose=4", R51_LSOF_PATH],
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False,
+            timeout=10, env=environment)
+        version = subprocess.run(
+            [R51_LSOF_PATH, "-v"], stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            check=False, timeout=10, env=environment)
+        verified_text = (verified.stdout + verified.stderr).decode("utf-8", "replace")
+        signature_text = (signature.stdout + signature.stderr).decode("utf-8", "replace")
+        version_text = (version.stdout + version.stderr).decode("ascii", "replace")
+        if (verified.returncode != 0
+                or "valid on disk" not in verified_text
+                or "satisfies its Designated Requirement" not in verified_text
+                or signature.returncode != 0
+                or 'Identifier=com.apple.lsof' not in signature_text
+                or 'Authority=macOS Software Signing' not in signature_text
+                or 'Authority=Apple Code Signing Certification Authority' not in signature_text
+                or 'Authority=Apple Root CA' not in signature_text
+                or 'TeamIdentifier=not set' not in signature_text
+                or 'designated => identifier "com.apple.lsof" and anchor apple' not in signature_text
+                or version.returncode != 0
+                or "revision: 4.91" not in version_text
+                or "configuration info: libproc-based" not in version_text):
+            return False
+        return scanner.executable_identity(R51_LSOF_PATH) == dict(identity)
+    except (OSError, ValueError, TypeError, RetentionError, subprocess.SubprocessError):
+        return False
+
+
+def _load_r51_lsof_scanner():
+    """Load the unchanged accepted R50 structured parser from its pinned source file."""
+    import importlib.util
+
+    path = R51_ACCEPTED_SCANNER_PATH
+    if _r51_safe_file_sha256(path) != R51_ACCEPTED_SCANNER_SHA256:
+        raise RetentionError("accepted structured lsof scanner source identity changed")
+    spec = importlib.util.spec_from_file_location("_fgmetal_r51_accepted_lsof_scanner", path)
+    if spec is None or spec.loader is None:
+        raise RetentionError("accepted structured lsof scanner could not be loaded")
+    module = importlib.util.module_from_spec(spec)
+    try:
+        spec.loader.exec_module(module)
+    except Exception as error:
+        raise RetentionError("accepted structured lsof scanner could not be loaded") from error
+    if getattr(module, "__file__", None) != str(path):
+        raise RetentionError("accepted structured lsof scanner resolved to an unexpected source")
+    return module
+
+
+def _r51_pinned_namespace(root_fd: int, root_path: Path) -> dict[str, Any]:
+    """Take a bounded no-follow inventory of the exact pinned +D search boundary."""
+    root_path = Path(os.path.abspath(os.fspath(root_path)))
+    root_info = os.fstat(root_fd)
+    root_fsid = getattr(os.fstatvfs(root_fd), "f_fsid", None)
+    if not stat.S_ISDIR(root_info.st_mode) or root_fsid is None:
+        raise RetentionError("R51 pinned lsof root identity is unavailable")
+    root_device = root_info.st_dev
+    root_name = os.fsencode(str(root_path))
+    rows: list[dict[str, Any]] = []
+
+    def state(info: os.stat_result, filesystem_id: Any) -> tuple[Any, ...]:
+        return (
+            info.st_dev, info.st_ino, stat.S_IFMT(info.st_mode), stat.S_IMODE(info.st_mode),
+            info.st_uid, info.st_gid, info.st_nlink, info.st_size, info.st_mtime_ns,
+            getattr(info, "st_ctime_ns", 0), filesystem_id,
+        )
+
+    def append_item(path_bytes: bytes, info: os.stat_result, filesystem_id: Any) -> None:
+        kind = stat.S_IFMT(info.st_mode)
+        if kind == stat.S_IFDIR:
+            lsof_type = b"DIR"
+        elif kind == stat.S_IFREG:
+            lsof_type = b"REG"
+        else:
+            raise RetentionError("R51 pinned lsof inventory contains an unsupported object type")
+        rows.append({
+            "path": path_bytes,
+            "device": info.st_dev,
+            "inode": info.st_ino,
+            "mode_type": kind,
+            "lsof_type": lsof_type,
+            "state": state(info, filesystem_id),
+        })
+        if len(rows) > R51_LSOF_MAX_NAMESPACE_ITEMS:
+            raise RetentionError("R51 pinned lsof inventory exceeds its bounded item limit")
+
+    root_state = state(root_info, root_fsid)
+    append_item(root_name, root_info, root_fsid)
+    stack: list[tuple[int, bytes, tuple[Any, ...], bool]] = [(root_fd, b"", root_state, False)]
+    try:
+        while stack:
+            directory_fd, relative, before_state, close_after = stack.pop()
+            try:
+                before = os.fstat(directory_fd)
+                before_fsid = getattr(os.fstatvfs(directory_fd), "f_fsid", None)
+                if state(before, before_fsid) != before_state or before_fsid != root_fsid:
+                    raise RetentionError("R51 pinned lsof namespace directory changed before enumeration")
+                names = sorted(os.listdir(directory_fd), key=os.fsencode)
+                for name in names:
+                    name_bytes = os.fsencode(name)
+                    child_relative = relative + (b"/" if relative else b"") + name_bytes
+                    full_name = root_name + b"/" + child_relative
+                    try:
+                        entry = os.stat(name, dir_fd=directory_fd, follow_symlinks=False)
+                    except OSError as error:
+                        raise RetentionError("R51 pinned lsof namespace entry is unreadable") from error
+                    if entry.st_dev != root_device:
+                        raise RetentionError("R51 pinned lsof namespace crosses a device boundary")
+                    kind = stat.S_IFMT(entry.st_mode)
+                    if kind == stat.S_IFDIR:
+                        child_fd = os.open(
+                            name, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0)
+                            | getattr(os, "O_NOFOLLOW", 0), dir_fd=directory_fd)
+                        try:
+                            opened = os.fstat(child_fd)
+                            child_fsid = getattr(os.fstatvfs(child_fd), "f_fsid", None)
+                            if (state(entry, child_fsid) != state(opened, child_fsid)
+                                    or child_fsid != root_fsid):
+                                raise RetentionError(
+                                    "R51 pinned lsof namespace directory changed while opening")
+                            current = os.stat(name, dir_fd=directory_fd, follow_symlinks=False)
+                            if state(current, child_fsid) != state(opened, child_fsid):
+                                raise RetentionError(
+                                    "R51 pinned lsof namespace directory name changed while opening")
+                            append_item(full_name, opened, child_fsid)
+                            stack.append((
+                                child_fd, child_relative, state(opened, child_fsid), True))
+                            child_fd = -1
+                        finally:
+                            if child_fd >= 0:
+                                os.close(child_fd)
+                    elif kind == stat.S_IFREG:
+                        file_fd = os.open(
+                            name, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)
+                            | getattr(os, "O_NONBLOCK", 0), dir_fd=directory_fd)
+                        try:
+                            opened = os.fstat(file_fd)
+                            file_fsid = getattr(os.fstatvfs(file_fd), "f_fsid", None)
+                            current = os.stat(name, dir_fd=directory_fd, follow_symlinks=False)
+                            if (state(entry, file_fsid) != state(opened, file_fsid)
+                                    or state(current, file_fsid) != state(opened, file_fsid)
+                                    or file_fsid != root_fsid):
+                                raise RetentionError(
+                                    "R51 pinned lsof namespace file changed while opening")
+                            append_item(full_name, opened, file_fsid)
+                        finally:
+                            os.close(file_fd)
+                    else:
+                        raise RetentionError(
+                            "R51 pinned lsof namespace contains a symlink or unsupported object")
+                after = os.fstat(directory_fd)
+                after_fsid = getattr(os.fstatvfs(directory_fd), "f_fsid", None)
+                if state(after, after_fsid) != before_state or after_fsid != root_fsid:
+                    raise RetentionError("R51 pinned lsof namespace changed during enumeration")
+            except OSError as error:
+                raise RetentionError("R51 pinned lsof namespace could not be enumerated safely") from error
+            finally:
+                if close_after:
+                    os.close(directory_fd)
+    except BaseException:
+        for directory_fd, _relative, _state, close_after in stack:
+            if close_after:
+                try:
+                    os.close(directory_fd)
+                except OSError:
+                    pass
+        raise
+
+    rows.sort(key=lambda item: item["path"])
+    canonical_rows = [
+        {
+            "path_b64": base64.b64encode(item["path"]).decode("ascii"),
+            "device": item["device"],
+            "inode": item["inode"],
+            "mode_type": item["mode_type"],
+            "lsof_type": item["lsof_type"].decode("ascii"),
+            "state": list(item["state"]),
+        }
+        for item in rows
+    ]
+    digest = hashlib.sha256(_canonical_json(canonical_rows)).hexdigest()
+    return {"items": rows, "digest": digest, "item_count": len(rows)}
+
+
+def _r51_verify_named_pinned_root(
+        target: Path, parent_fd: int, root_fd: int,
+        expected_parent_identity: Mapping[str, Any], expected_root: Mapping[str, Any]) -> None:
+    """Require the pathname, pinned descriptors, lease identities, and filesystem to agree."""
+    if target.parent != BUILD_ROOT or target.name != expected_root.get("build_id"):
+        raise RetentionError("R51 pinned lsof root path is not the exact approved build root")
+    try:
+        parent_pinned = _fs_identity(parent_fd)
+        parent_named = _root_identity(BUILD_ROOT, create=False)
+        named_root = os.stat(target.name, dir_fd=parent_fd, follow_symlinks=False)
+        root_pinned = os.fstat(root_fd)
+        root_fsid = getattr(os.fstatvfs(root_fd), "f_fsid", None)
+    except OSError as error:
+        raise RetentionError("R51 named or pinned lsof root identity could not be revalidated") from error
+    if (parent_pinned != dict(expected_parent_identity)
+            or parent_named != dict(expected_parent_identity)
+            or not stat.S_ISDIR(named_root.st_mode)
+            or (named_root.st_dev, named_root.st_ino)
+                != (root_pinned.st_dev, root_pinned.st_ino)
+            or (root_pinned.st_dev, root_pinned.st_ino)
+                != (expected_root.get("build_device"), expected_root.get("build_inode"))
+            or root_fsid != expected_root.get("build_filesystem_id")):
+        raise RetentionError("R51 named and pinned lsof root identities differ")
+
+
+def _classify_r51_lsof_status(
+        *, returncode: Any, exact_binary: Any, root_pin_valid: Any,
+        namespace_stable: Any, stdout_complete: Any, stderr_empty: Any,
+        stream_complete: Any, parser_valid: Any, rows_bound: Any,
+        identities_stable: Any, timed_out: Any, capped: Any,
+        inventory_items: Any, represented_items: Any, probe_valid: Any) -> str:
+    """Classify the pinned Host-v3 +D search status separately from stream validity."""
+    base_valid = (
+        exact_binary is True and root_pin_valid is True and namespace_stable is True
+        and stdout_complete is True and stderr_empty is True and stream_complete is True
+        and parser_valid is True and rows_bound is True and identities_stable is True
+        and timed_out is False and capped is False
+        and type(inventory_items) is int and inventory_items > 0
+        and type(represented_items) is int and 0 <= represented_items <= inventory_items
+    )
+    if type(returncode) is not int:
+        return "OTHER_NONZERO_ERROR"
+    if returncode == 0:
+        if base_valid and represented_items == inventory_items:
+            return "STATUS_ZERO_ALL_SEARCH_ITEMS_MATCHED"
+        return "STATUS_ZERO_INCONSISTENT_OR_INCOMPLETE_EVIDENCE"
+    if returncode == 1:
+        if (base_valid and represented_items < inventory_items and probe_valid is True):
+            return "STATUS_ONE_EXPECTED_SEARCH_MISS"
+        return "STATUS_ONE_UNEXPLAINED_ERROR"
+    return "OTHER_NONZERO_ERROR"
+
+
+def _require_r51_pinned_lsof_self_only(
+        target: Path, parent_fd: int, root_fd: int,
+        expected_parent_identity: Mapping[str, Any],
+        expected_root: Mapping[str, Any]) -> dict[str, Any]:
+    """Run the one authoritative, structured Host-v3 liveness gate at the pinned root."""
+    scanner = _load_r51_lsof_scanner()
+    try:
+        executable_before = scanner.executable_identity(R51_LSOF_PATH)
+        probe_before = _r51_safe_file_sha256(R51_CLOSED_CHILD_PROBE)
+        process_before = scanner.process_snapshot()
+        _r51_verify_named_pinned_root(
+            target, parent_fd, root_fd, expected_parent_identity, expected_root)
+        namespace_before = _r51_pinned_namespace(root_fd, target)
+        argv = [R51_LSOF_PATH, R51_LSOF_FIELDS, "+D", str(target)]
+        capture = scanner.run_lsof_bounded(argv)
+        rows, stream = scanner.parse_lsof(capture.get("stdout_raw"))
+        process_after = scanner.process_snapshot()
+        namespace_after = _r51_pinned_namespace(root_fd, target)
+        _r51_verify_named_pinned_root(
+            target, parent_fd, root_fd, expected_parent_identity, expected_root)
+        executable_after = scanner.executable_identity(R51_LSOF_PATH)
+        probe_after = _r51_safe_file_sha256(R51_CLOSED_CHILD_PROBE)
+    except RetentionError:
+        raise
+    except Exception as error:
+        raise RetentionError("R51 pinned structured lsof capture or validation failed") from error
+
+    executable_before_trusted = (
+        executable_before.get("sha256") == R51_LSOF_BINARY_SHA256
+        or _r51_current_system_lsof_is_authenticated(executable_before, scanner))
+    executable_after_trusted = (
+        executable_after.get("sha256") == R51_LSOF_BINARY_SHA256
+        or _r51_current_system_lsof_is_authenticated(executable_after, scanner))
+    expected_executable = (
+        executable_before.get("path") == R51_LSOF_PATH
+        and executable_before_trusted
+        and executable_before.get("stable") is True
+        and executable_after.get("path") == R51_LSOF_PATH
+        and executable_after_trusted
+        and executable_after.get("stable") is True
+        and executable_before.get("sha256") == executable_after.get("sha256")
+        and (executable_before.get("device"), executable_before.get("inode"),
+             executable_before.get("size"))
+            == (executable_after.get("device"), executable_after.get("inode"),
+                executable_after.get("size"))
+        and _r51_safe_file_sha256(R51_ACCEPTED_SCANNER_PATH)
+            == R51_ACCEPTED_SCANNER_SHA256
+    )
+    probe_valid = (
+        probe_before == R51_CLOSED_CHILD_PROBE_SHA256
+        and probe_after == R51_CLOSED_CHILD_PROBE_SHA256
+    )
+    process_keys = ("pid", "ppid", "start_identity", "command", "cwd")
+    identities_stable = (
+        all(process_before.get(key) == process_after.get(key) for key in process_keys)
+        and process_before.get("pid") == os.getpid()
+        and process_before.get("ppid") == os.getppid()
+        and capture.get("argv") == [R51_LSOF_PATH, R51_LSOF_FIELDS, "+D", str(target)]
+        and capture.get("child_identity_error") is None
+        and isinstance(capture.get("child_identity"), Mapping)
+        and capture["child_identity"].get("pid") == capture.get("child_pid")
+        and capture["child_identity"].get("ppid") == os.getpid()
+        and type(capture.get("returncode")) is int
+    )
+    stdout_raw = capture.get("stdout_raw")
+    stderr_raw = capture.get("stderr_raw")
+    stdout_complete = (
+        isinstance(stdout_raw, bytes)
+        and type(capture.get("stdout_total_bytes")) is int
+        and type(capture.get("stdout_bytes_captured")) is int
+        and capture.get("stdout_total_bytes") == len(stdout_raw)
+        and capture.get("stdout_bytes_captured") == len(stdout_raw)
+        and capture.get("stdout_sha256") == hashlib.sha256(stdout_raw).hexdigest()
+        and capture.get("stdout_captured_sha256") == hashlib.sha256(stdout_raw).hexdigest()
+    )
+    stderr_empty = (
+        isinstance(stderr_raw, bytes) and stderr_raw == b""
+        and capture.get("stderr_total_bytes") == 0
+        and capture.get("stderr_bytes_captured") == 0
+        and capture.get("stderr_sha256") == hashlib.sha256(b"").hexdigest()
+        and capture.get("stderr_captured_sha256") == hashlib.sha256(b"").hexdigest()
+    )
+    capped = capture.get("stdout_capped") is not False or capture.get("stderr_capped") is not False
+    timed_out = capture.get("timed_out") is not False
+    stream_complete = (
+        stream.get("complete") is True
+        and stream.get("empty") is False
+        and stream.get("bytes_consumed") == len(stdout_raw or b"")
+        and stream.get("row_count") == len(rows)
+        and all(row.get("parser_status") == "PASS" for row in rows)
+    )
+    inventory_by_path = {item["path"]: item for item in namespace_before["items"]}
+    represented: set[bytes] = set()
+    rows_bound = True
+    for row in rows:
+        item = inventory_by_path.get(row.get("name_decoded"))
+        if (item is None or row.get("device") != item["device"]
+                or row.get("inode") != item["inode"]
+                or row.get("fd_type_raw") != item["lsof_type"]):
+            rows_bound = False
+            break
+        represented.add(item["path"])
+    namespace_stable = (
+        namespace_before.get("digest") == namespace_after.get("digest")
+        and namespace_before.get("item_count") == namespace_after.get("item_count")
+    )
+    pin_info = os.fstat(root_fd)
+    root_pin_rows = [
+        row for row in rows
+        if row.get("pid") == os.getpid()
+        and row.get("fd_number") == root_fd
+        and row.get("fd_raw") == str(root_fd).encode("ascii")
+        and row.get("fd_type_raw") == b"DIR"
+        and row.get("device") == pin_info.st_dev
+        and row.get("inode") == pin_info.st_ino
+        and row.get("name_decoded") == os.fsencode(str(target))
+    ]
+    root_pin_valid = len(root_pin_rows) == 1
+    classification = _classify_r51_lsof_status(
+        returncode=capture.get("returncode"),
+        exact_binary=expected_executable,
+        root_pin_valid=root_pin_valid,
+        namespace_stable=namespace_stable,
+        stdout_complete=stdout_complete,
+        stderr_empty=stderr_empty,
+        stream_complete=stream_complete,
+        parser_valid=stream.get("complete") is True,
+        rows_bound=rows_bound and len(represented) <= len(namespace_before["items"]),
+        identities_stable=identities_stable,
+        timed_out=timed_out,
+        capped=capped,
+        inventory_items=namespace_before["item_count"],
+        represented_items=len(represented),
+        probe_valid=probe_valid,
+    )
+    if classification not in {
+            "STATUS_ZERO_ALL_SEARCH_ITEMS_MATCHED", "STATUS_ONE_EXPECTED_SEARCH_MISS"}:
+        raise RetentionError(f"R51 pinned lsof status was not accepted: {classification}")
+    if len(rows) != 1 or len(root_pin_rows) != 1:
+        raise RetentionError("orphan closeout found an additional live holder in the pinned lsof rows")
+    return {
+        "classification": classification,
+        "namespace_digest": namespace_after["digest"],
+        "namespace_item_count": namespace_after["item_count"],
+        "row_count": len(rows),
+    }
+
+
+def close_orphaned_unstarted_reservation(
+        build_id: str, *, expected_path: Path | str, expected_owner_experiment: str,
+        expected_admission_identity: Mapping[str, Any], expected_plan_sha256: str,
+        expected_record_sha256: str) -> dict[str, Any]:
+    """Retire exactly one authenticated, orphaned, never-started v3 reservation.
+
+    This is a one-way closeout, not a resume or adoption API. It preserves the
+    original registry and marker bytes inside an authenticated additive receipt.
+    """
+    from storage_policy import (_acquire_storage_allocation_lock,
+                                _release_storage_allocation_lock)
+
+    if (not re.fullmatch(r"[A-Za-z0-9._-]{1,128}", build_id)
+            or not isinstance(expected_owner_experiment, str) or not expected_owner_experiment
+            or not isinstance(expected_admission_identity, Mapping)
+            or not re.fullmatch(r"[0-9a-f]{64}", expected_plan_sha256)
+            or not re.fullmatch(r"[0-9a-f]{64}", expected_record_sha256)):
+        raise RetentionError("orphan closeout requires complete exact lease, admission, and plan identities")
+    target = Path(os.path.abspath(os.fspath(expected_path)))
+    if target != BUILD_ROOT / build_id:
+        raise RetentionError("orphan closeout path is not the exact approved BuildLease root")
+
+    allocation_lock = _acquire_storage_allocation_lock()
+    lease_fd: int | None = None
+    lock_fd: int | None = None
+    parent_fd: int | None = None
+    root_fd: int | None = None
+    try:
+        lease_fd, lock_fd = _lock(nonblocking=True)
+        _verify_named_retention_lock(lease_fd, lock_fd)
+        name = f"{build_id}.json"
+        try:
+            original_raw = _read_at(lease_fd, name, limit=1024 * 1024)
+        except OSError as error:
+            raise RetentionError("orphan closeout registry record is missing or unreadable") from error
+        try:
+            lease = json.loads(original_raw)
+        except (UnicodeDecodeError, json.JSONDecodeError) as error:
+            raise RetentionError("orphan closeout registry record is malformed") from error
+        if (not isinstance(lease, dict) or not _verify_seal(lease)
+                or hashlib.sha256(original_raw).hexdigest() != expected_record_sha256):
+            raise RetentionError("orphan closeout registry authentication or exact record digest failed")
+        session = lease.get("session_v3")
+        if (lease.get("schema_version") != 1 or lease.get("build_id") != build_id
+                or lease.get("path") != str(target)
+                or lease.get("owner_experiment") != expected_owner_experiment
+                or lease.get("state") != "ACTIVE"
+                or not isinstance(session, dict) or session.get("state") != "RESERVED"
+                or session.get("next_step_index") != 0
+                or session.get("peak_allocated_bytes") != 0
+                or session.get("step_receipts") != []
+                or not isinstance(lease.get("expected_bytes"), int)
+                or isinstance(lease.get("expected_bytes"), bool)
+                or lease.get("expected_bytes") <= 0
+                or lease.get("estimated_bytes") != lease.get("expected_bytes")
+                or session.get("plan_sha256") != expected_plan_sha256
+                or session.get("admission_identity") != dict(expected_admission_identity)
+                or lease.get("session_started") not in (None, False)
+                or lease.get("session_started_at_unix") is not None
+                or session.get("started_at_unix") is not None
+                or session.get("workspace_mount_pending") is True
+                or session.get("workspace_mount_identity") is not None
+                or session.get("acceptance_state") is not None
+                or session.get("final_source_verification") is not None
+                or lease.get("build_manifest_id") is not None
+                or lease.get("build_manifest_sha256") is not None
+                or lease.get("retired_at_unix") is not None
+                or lease.get("cleanup_receipt_path") is not None
+                or lease.get("build_execution_receipt") is not None):
+            raise RetentionError("orphan closeout rejected a started, changed, or already terminal lease")
+
+        receipt_path = _orphan_closeout_receipt_path(build_id)
+        normal_receipt = RECEIPT_ROOT / f"{build_id}.json"
+        if (receipt_path.exists() or receipt_path.is_symlink()
+                or normal_receipt.exists() or normal_receipt.is_symlink()):
+            raise RetentionError("orphan closeout found a duplicate or conflicting terminal receipt")
+
+        other_records = [entry for entry in os.listdir(lease_fd)
+                         if entry.endswith(".json") and entry != name]
+        if len(other_records) > 4096:
+            raise RetentionError("orphan closeout cannot bound the competing lease scan")
+        for entry in other_records:
+            try:
+                candidate = json.loads(_read_at(lease_fd, entry, limit=1024 * 1024))
+            except (OSError, ValueError, json.JSONDecodeError) as error:
+                raise RetentionError("orphan closeout found an ambiguous competing lease record") from error
+            if not isinstance(candidate, dict) or not _verify_seal(candidate):
+                raise RetentionError("orphan closeout found an unauthenticated competing lease record")
+            candidate_session = candidate.get("session_v3")
+            if (candidate.get("state") == "ACTIVE"
+                    and (candidate.get("owner_experiment") == expected_owner_experiment
+                         or (isinstance(candidate_session, Mapping)
+                             and (candidate_session.get("plan_sha256") == expected_plan_sha256
+                                  or candidate_session.get("admission_identity")
+                                      == dict(expected_admission_identity))))):
+                raise RetentionError("orphan closeout found a competing active controller reservation")
+
+        _verify_orphan_owner_absent(lease)
+        _require_no_matching_orphan_controller(build_id, expected_owner_experiment)
+        parent_identity = _root_identity(BUILD_ROOT, create=False)
+        if lease.get("approved_parent") != str(BUILD_ROOT) or lease.get("approved_parent_identity") != parent_identity:
+            raise RetentionError("orphan closeout approved-parent identity changed")
+        parent_fd = _open_dir(BUILD_ROOT)
+        if _fs_identity(parent_fd) != parent_identity:
+            raise RetentionError("orphan closeout approved parent changed while pinning")
+        root_fd = _open_dir(target)
+        root_info = os.fstat(root_fd)
+        if ((root_info.st_dev, root_info.st_ino) != (lease.get("build_device"), lease.get("build_inode"))
+                or getattr(os.fstatvfs(root_fd), "f_fsid", None) != lease.get("build_filesystem_id")):
+            raise RetentionError("orphan closeout exact build-root identity changed")
+        _r51_verify_named_pinned_root(target, parent_fd, root_fd, parent_identity, lease)
+        marker_raw = _read_at(root_fd, BUILD_MARKER, limit=1024 * 1024)
+        try:
+            marker = json.loads(marker_raw)
+        except (UnicodeDecodeError, json.JSONDecodeError) as error:
+            raise RetentionError("orphan closeout marker is malformed") from error
+        if (not isinstance(marker, dict) or not _verify_seal(marker)
+                or _canonical_json(marker) != _canonical_json(lease)):
+            raise RetentionError("orphan closeout marker and authenticated reservation differ")
+        if sorted(os.listdir(root_fd)) != [BUILD_MARKER]:
+            raise RetentionError("orphan closeout found session, workspace, image, stage, output, or execution state")
+        workspace = target / BUILD_SESSION_WORKSPACE_NAME
+        if (os.path.ismount(workspace) or _session_image_row(target) is not None
+                or (target / BUILD_SESSION_DIRECTORY).exists()
+                or (target / BUILD_SESSION_WORKSPACE_IMAGE_NAME).exists()
+                or (target / BUILD_EXECUTION_RECEIPT).exists()
+                or (target / "build-command.json").exists() or (target / "build.log").exists()):
+            raise RetentionError("orphan closeout found a mounted workspace or execution output")
+        if any(path.exists() or path.is_symlink() for path in (
+                MANIFEST_ROOT / f"{build_id}.json", MANIFEST_ROOT / f"{build_id}.failure")):
+            raise RetentionError("orphan closeout found finalization, failure, or accepted-output evidence")
+
+        # Re-read lease and output state before the authoritative pinned liveness
+        # gate; a second state fence follows that scan immediately before writing.
+        _verify_orphan_owner_absent(lease)
+        _require_no_matching_orphan_controller(build_id, expected_owner_experiment)
+        _verify_named_retention_lock(lease_fd, lock_fd)
+        if (_read_at(lease_fd, name, limit=1024 * 1024) != original_raw
+                or _read_at(root_fd, BUILD_MARKER, limit=1024 * 1024) != marker_raw
+                or (os.fstat(root_fd).st_dev, os.fstat(root_fd).st_ino)
+                    != (lease.get("build_device"), lease.get("build_inode"))
+                or sorted(os.listdir(root_fd)) != [BUILD_MARKER]
+                or os.path.ismount(workspace)
+                or _session_image_row(target) is not None
+                or normal_receipt.exists() or normal_receipt.is_symlink()
+                or receipt_path.exists() or receipt_path.is_symlink()):
+            raise RetentionError("orphan closeout state changed or receipt appeared during validation")
+        if any(path.exists() or path.is_symlink() for path in (
+                MANIFEST_ROOT / f"{build_id}.json", MANIFEST_ROOT / f"{build_id}.failure")):
+            raise RetentionError("finalization or accepted-output evidence appeared during closeout validation")
+
+        # This is the sole authoritative liveness observation. CHECK A cannot
+        # fence a holder that starts after its earlier unpinned observation.
+        liveness = _require_r51_pinned_lsof_self_only(
+            target, parent_fd, root_fd, parent_identity, lease)
+
+        # Revalidate all mutable authority immediately after the pinned scan and
+        # before the first write. The liveness gate itself is a bounded point-in-
+        # time observation; these checks fence namespace and lease ABA changes.
+        _verify_orphan_owner_absent(lease)
+        _require_no_matching_orphan_controller(build_id, expected_owner_experiment)
+        _verify_named_retention_lock(lease_fd, lock_fd)
+        _r51_verify_named_pinned_root(target, parent_fd, root_fd, parent_identity, lease)
+        final_namespace = _r51_pinned_namespace(root_fd, target)
+        if (final_namespace.get("digest") != liveness.get("namespace_digest")
+                or _read_at(lease_fd, name, limit=1024 * 1024) != original_raw
+                or _read_at(root_fd, BUILD_MARKER, limit=1024 * 1024) != marker_raw
+                or (os.fstat(root_fd).st_dev, os.fstat(root_fd).st_ino)
+                    != (lease.get("build_device"), lease.get("build_inode"))
+                or getattr(os.fstatvfs(root_fd), "f_fsid", None)
+                    != lease.get("build_filesystem_id")
+                or sorted(os.listdir(root_fd)) != [BUILD_MARKER]
+                or os.path.ismount(workspace)
+                or _session_image_row(target) is not None
+                or normal_receipt.exists() or normal_receipt.is_symlink()
+                or receipt_path.exists() or receipt_path.is_symlink()
+                or any(path.exists() or path.is_symlink() for path in (
+                    MANIFEST_ROOT / f"{build_id}.json",
+                    MANIFEST_ROOT / f"{build_id}.failure"))):
+            raise RetentionError("orphan closeout state changed after pinned liveness validation")
+
+        receipt_payload = {
+            "schema_version": 1,
+            "result": ORPHANED_UNSTARTED_STATE,
+            "build_id": build_id,
+            "path": str(target),
+            "outputs_accepted": False,
+            "active_lease_charge_released": True,
+            "released_reservation_bytes": lease["expected_bytes"],
+            "created_at_unix": time.time(),
+            "original_registry_record_b64": base64.b64encode(original_raw).decode("ascii"),
+            "original_registry_record_sha256": hashlib.sha256(original_raw).hexdigest(),
+            "original_marker_record_b64": base64.b64encode(marker_raw).decode("ascii"),
+            "original_marker_record_sha256": hashlib.sha256(marker_raw).hexdigest(),
+            "identity": {
+                "build_id": build_id, "path": str(target),
+                "owner_experiment": expected_owner_experiment,
+                "build_device": lease.get("build_device"),
+                "build_inode": lease.get("build_inode"),
+                "build_filesystem_id": lease.get("build_filesystem_id"),
+                "plan_sha256": expected_plan_sha256,
+                "admission_identity": dict(expected_admission_identity),
+            },
+        }
+        receipt_raw = _write_json(receipt_path, receipt_payload, replace=False, sealed=True)
+        terminal = dict(lease)
+        terminal.update({
+            "state": ORPHANED_UNSTARTED_STATE,
+            "orphan_closeout_receipt_path": str(receipt_path),
+            "orphan_closeout_receipt_sha256": hashlib.sha256(receipt_raw).hexdigest(),
+            "orphan_original_record_sha256": hashlib.sha256(original_raw).hexdigest(),
+        })
+        terminal_raw = (json.dumps(_seal(terminal), indent=2, sort_keys=True) + "\n").encode()
+        _write_at(lease_fd, name, terminal_raw, replace=True)
+        _write_at(root_fd, BUILD_MARKER,
+                  (json.dumps(_seal(terminal), indent=2, sort_keys=True) + "\n").encode(), replace=True)
+        os.fsync(root_fd)
+        os.fsync(lease_fd)
+        terminal_readback = json.loads(_read_at(lease_fd, name, limit=1024 * 1024))
+        marker_readback = json.loads(_read_at(root_fd, BUILD_MARKER, limit=1024 * 1024))
+        if (not _verify_seal(terminal_readback) or not _verify_seal(marker_readback)
+                or terminal_readback.get("state") != ORPHANED_UNSTARTED_STATE
+                or _canonical_json(terminal_readback) != _canonical_json(marker_readback)
+                or _verify_orphan_closeout_receipt(terminal_readback)
+                    .get("original_registry_record_sha256")
+                    != hashlib.sha256(original_raw).hexdigest()):
+            raise RetentionError("orphan closeout terminal state failed authenticated readback")
+        return _read_json(receipt_path, sealed=True)
+    finally:
+        if root_fd is not None:
+            os.close(root_fd)
+        if parent_fd is not None:
+            os.close(parent_fd)
+        if lease_fd is not None and lock_fd is not None:
+            _unlock(lease_fd, lock_fd)
+        _release_storage_allocation_lock(allocation_lock)
 
 def _unlock(lease_fd: int, lock_fd: int) -> None:
     fcntl.flock(lock_fd, fcntl.LOCK_UN)
@@ -2787,6 +7068,7 @@ def _remove_verified_tree_at(parent_fd: int, name: str, *, expected_device: int,
     before unlink/rmdir. Same-UID processes that deliberately bypass this lock
     are outside the supported writer model.
     """
+    _refuse_protected_path_mutation(logical_path, "cleanup")
     initial = os.stat(name, dir_fd=parent_fd, follow_symlinks=False)
     if (not stat.S_ISDIR(initial.st_mode)
             or (initial.st_dev, initial.st_ino) != (expected_device, expected_inode)):
@@ -3051,6 +7333,18 @@ def _classified_non_retention_tmp_roots() -> list[dict[str, Any]]:
                      "root_mtime_ns": root_stat.st_mtime_ns,
                      "root_ctime_ns": getattr(root_stat, "st_ctime_ns", 0),
                      "action": "PRESERVE_AND_INVENTORY", **extra})
+    for path_text, record in R17_TEMP_ROOT_IDENTITIES.items():
+        disposition = _r17_temp_root_disposition(path_text)
+        if disposition is None:
+            continue
+        rows.append({
+            **disposition,
+            "action": ("PRESERVE_HISTORICAL_EVIDENCE_AND_INVENTORY"
+                       if disposition["accounting_scope"] == "FG_METAL_PROJECT"
+                       else "PRESERVE_OTHER_PROJECT_AND_INVENTORY"),
+            "root_owner": ("FG-Metal" if disposition["accounting_scope"] == "FG_METAL_PROJECT"
+                           else "Firelink"),
+        })
     return sorted(rows, key=lambda row: row["path"])
 
 def _is_wine_prefix_tree(path: Path) -> bool:
@@ -3179,8 +7473,104 @@ def _verified_cache_scan_root(path: Path,
         os.close(root_fd)
 
 
-def _all_root_candidates() -> list[Path]:
+def _r17_ownership_reports_match() -> bool:
+    # Synthetic controller tests replace REPO with an isolated fixture. The
+    # absolute temporary-root review is valid only for the checkout whose
+    # source reports were audited and whose exact roots were recorded.
+    if Path(REPO).resolve(strict=False) != R17_BOUND_REPO_ROOT:
+        return False
+    for relative, expected_sha256 in R17_OWNERSHIP_REPORT_DIGESTS.items():
+        try:
+            if _hash_path(REPO / relative) != expected_sha256:
+                return False
+        except (OSError, RetentionError):
+            return False
+    return True
+
+
+def _r17_temp_root_disposition(path: Path | str, *, root_fd: int | None = None) -> dict[str, Any] | None:
+    """Return an exact-root ownership disposition backed by the R17 reviews.
+
+    Descendant metadata is deliberately not an admission binding: recursive
+    metadata scans cannot prove an atomic snapshot of a mutable directory tree.
+    Current contents are still measured below and independently by storage
+    inventory; the reviewed identity is the absolute path plus root filesystem
+    identity and report digests.
+    """
+    candidate = Path(os.path.abspath(os.fspath(path)))
+    record = R17_TEMP_ROOT_IDENTITIES.get(str(candidate))
+    if record is None or not _r17_ownership_reports_match():
+        return None
+    owns_root_fd = root_fd is None
+    try:
+        if root_fd is None:
+            root_fd = _open_dir(candidate)
+        root_info = os.fstat(root_fd)
+        identity = _fs_identity(root_fd)
+        path_info = candidate.lstat()
+        if (not stat.S_ISDIR(path_info.st_mode)
+                or (path_info.st_dev, path_info.st_ino) != (root_info.st_dev, root_info.st_ino)
+                or identity != record["filesystem_identity"]):
+            return None
+        stats = _tree_stats(root_fd, root_info.st_dev, candidate)
+        path_info_after = candidate.lstat()
+        if ((path_info_after.st_dev, path_info_after.st_ino)
+                != (root_info.st_dev, root_info.st_ino)
+                or _fs_identity(root_fd) != identity):
+            return None
+        return {
+            "path": str(candidate),
+            "classification": record["classification"],
+            "accounting_scope": record["accounting_scope"],
+            "reason": record["reason"],
+            "filesystem_identity": identity,
+            "root_mtime_ns": root_info.st_mtime_ns,
+            "root_ctime_ns": root_info.st_ctime_ns,
+            "logical_bytes": stats["logical_bytes"],
+            "allocated_unique_inode_bytes": stats["allocated_unique_inode_bytes"],
+            "best_recoverable_bytes_estimate": stats["best_recoverable_bytes_estimate"],
+            "file_count": stats["file_count"],
+            "ownership_review_sha256": R17_OWNERSHIP_REPORT_DIGESTS[
+                "R6-A-R17-RETENTION-ROOT-OWNERSHIP.md"],
+            "scope_accounting_review_sha256": R17_OWNERSHIP_REPORT_DIGESTS[
+                "R6-A-R17-SCOPE-ACCOUNTING-AUDIT.md"],
+            "reconciliation_sha256": R17_OWNERSHIP_REPORT_DIGESTS[
+                "R6-A-R17-SCOPE-RETENTION-RECONCILIATION.md"],
+        }
+    except (OSError, RetentionError, ValueError):
+        return None
+    finally:
+        if owns_root_fd and root_fd is not None:
+            os.close(root_fd)
+
+
+def _all_root_candidates(*, active_buildlease_id: str | None = None,
+                         active_workspace_identity: Mapping[str, Any] | None = None,
+                         allow_pre_dispatch: bool = False,
+                         exited_process_id: int | None = None) -> list[Path]:
+    expected_workspace: Path | None = None
+    if active_buildlease_id is not None:
+        if not isinstance(active_workspace_identity, Mapping):
+            raise RetentionError("strict root discovery lacks an authenticated active workspace identity")
+        verified_identity = _verified_capacity_workspace(
+            active_buildlease_id, allow_pre_dispatch=allow_pre_dispatch,
+            **({"exited_process_id": exited_process_id}
+               if exited_process_id is not None else {}))
+        if dict(verified_identity) != dict(active_workspace_identity):
+            raise RetentionError("active BuildLease workspace changed before root discovery")
+        expected_workspace = Path(str(verified_identity["mountpoint"]))
+    elif active_workspace_identity is not None:
+        raise RetentionError("workspace identity cannot be supplied without an active BuildLease ID")
+
     candidates = [path for path in LEGACY_BUILD_ROOTS if path.exists() or path.is_symlink()]
+    verified_r17_roots: set[Path] = set()
+    if Path(REPO).resolve(strict=False) == R17_BOUND_REPO_ROOT:
+        for path_text in R17_TEMP_ROOT_IDENTITIES:
+            path = Path(path_text)
+            if path.exists() or path.is_symlink():
+                candidates.append(path)
+                if _r17_temp_root_disposition(path) is not None:
+                    verified_r17_roots.add(path)
     if BUILD_ROOT.exists() and not BUILD_ROOT.is_symlink():
         candidates.extend(BUILD_ROOT.iterdir())
     tmp_root = TEMP_ROOT
@@ -3200,6 +7590,9 @@ def _all_root_candidates() -> list[Path]:
         strong_dirs = {"meson-private", "CMakeFiles", "XCBuildData"}
         for directory, dirnames, filenames in os.walk(tmp_root, followlinks=False, onerror=temp_scan_error):
             base = Path(directory)
+            if any(base == root or root in base.parents for root in verified_r17_roots):
+                dirnames[:] = []
+                continue
             if _is_wine_prefix_tree(base):
                 dirnames[:] = []
                 continue
@@ -3209,6 +7602,8 @@ def _all_root_candidates() -> list[Path]:
             retained: list[str] = []
             for name in dirnames:
                 child = base / name
+                if child in verified_r17_roots:
+                    continue
                 if child.is_symlink():
                     target_text = os.readlink(child)
                     target = Path(os.path.abspath(target_text if os.path.isabs(target_text)
@@ -3252,6 +7647,8 @@ def _all_root_candidates() -> list[Path]:
 
     strong_files = {"build.ninja", ".ninja_log", ".ninja_deps", "CMakeCache.txt", "config.status"}
     strong_dirs = {"meson-private", "CMakeFiles", "XCBuildData"}
+    workspace_transition_count = 0
+    from storage_policy import _mountpoint_from_fd
     for cache_root in project_cache_roots:
         scan_roots: list[tuple[Path, tuple[int, int, int] | None]] = [(cache_root, None)]
         scanned_roots: set[Path] = set()
@@ -3263,6 +7660,18 @@ def _all_root_candidates() -> list[Path]:
             scanned_roots.add(scan_root)
             root_identity = _verified_cache_scan_root(scan_root, expected_identity)
             root_device, _root_inode, root_fsid = root_identity
+            root_fd = _open_dir(scan_root)
+            try:
+                root_info = os.fstat(root_fd)
+                opened_root_identity = (
+                    root_info.st_dev, root_info.st_ino,
+                    getattr(os.fstatvfs(root_fd), "f_fsid", None))
+                if opened_root_identity != root_identity:
+                    raise RetentionError(
+                        f"project cache mount identity changed during root scan: {scan_root}")
+                root_mountpoint = _mountpoint_from_fd(root_fd)
+            finally:
+                os.close(root_fd)
 
             def cache_scan_error(error: OSError) -> None:
                 raise RetentionError(f"cannot completely scan project cache for compiler builds: {error}") from error
@@ -3292,12 +7701,30 @@ def _all_root_candidates() -> list[Path]:
                     try:
                         child_info = os.fstat(child_fd)
                         child_fsid = getattr(os.fstatvfs(child_fd), "f_fsid", None)
-                        if child_info.st_dev != root_device or child_fsid != root_fsid:
-                            if not _known_readonly_cache_image_mount(child, cache_root):
-                                raise RetentionError(
-                                    f"project cache scan encountered an unknown filesystem transition: {child}")
-                            scan_roots.append((child, (child_info.st_dev, child_info.st_ino, child_fsid)))
-                            continue
+                        child_mountpoint = _mountpoint_from_fd(child_fd)
+                        if (child_info.st_dev != root_device or child_fsid != root_fsid
+                                or child_mountpoint != root_mountpoint):
+                            if expected_workspace is not None and child == expected_workspace:
+                                current_identity = _verified_capacity_workspace(
+                                    active_buildlease_id or "",
+                                    allow_pre_dispatch=allow_pre_dispatch)
+                                if (dict(current_identity) != dict(active_workspace_identity or {})
+                                        or (child_info.st_dev, child_info.st_ino, child_fsid)
+                                            != (current_identity.get("mounted_mountpoint_device"),
+                                                current_identity.get("mounted_mountpoint_inode"),
+                                                current_identity.get("filesystem_id"))
+                                        or child_mountpoint != str(expected_workspace)):
+                                    raise RetentionError(
+                                        f"active BuildLease workspace identity changed during root scan: {child}")
+                                workspace_transition_count += 1
+                                if workspace_transition_count != 1:
+                                    raise RetentionError("active BuildLease workspace transition was observed more than once")
+                                # This exact mount is already owned by the active
+                                # lease and its image. Do not descend into it for
+                                # independent compiler-root classification.
+                                continue
+                            raise RetentionError(
+                                f"project cache scan encountered an unknown filesystem transition: {child}")
                     finally:
                         os.close(child_fd)
                     retained.append(name)
@@ -3309,7 +7736,9 @@ def _all_root_candidates() -> list[Path]:
                 try:
                     base_info = os.fstat(base_fd)
                     base_fsid = getattr(os.fstatvfs(base_fd), "f_fsid", None)
-                    if base_info.st_dev != root_device or base_fsid != root_fsid:
+                    base_mountpoint = _mountpoint_from_fd(base_fd)
+                    if (base_info.st_dev != root_device or base_fsid != root_fsid
+                            or base_mountpoint != root_mountpoint):
                         raise RetentionError(f"project cache scan encountered a filesystem transition: {base}")
                 finally:
                     os.close(base_fd)
@@ -3323,6 +7752,13 @@ def _all_root_candidates() -> list[Path]:
                         dirnames[:] = []
             if _verified_cache_scan_root(scan_root) != root_identity:
                 raise RetentionError(f"project cache mount identity changed during scan: {scan_root}")
+    if expected_workspace is not None:
+        if workspace_transition_count != 1:
+            raise RetentionError("active BuildLease workspace mount was not found exactly once in root scan")
+        if _verified_capacity_workspace(
+                active_buildlease_id or "",
+                allow_pre_dispatch=allow_pre_dispatch) != active_workspace_identity:
+            raise RetentionError("active BuildLease workspace identity changed during root discovery")
     derived = HOME / "Library/Developer/Xcode/DerivedData"
     if derived.is_dir():
         candidates.extend(path for path in derived.iterdir() if path.is_dir() and not path.is_symlink()
@@ -3330,9 +7766,386 @@ def _all_root_candidates() -> list[Path]:
     candidates.extend(_worktree_build_root_candidates())
     return sorted(set(candidates), key=str)
 
-def _snapshot() -> dict[str, Any]:
-    active, preserved, completed, failed, unknown, nonlarge = [], [], [], [], [], []
+
+def _read_regular_file_no_follow(path: Path, description: str) -> bytes:
+    """Read a pinned regular file without following a symlink or accepting a concurrent swap."""
+    flags = (os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)
+             | getattr(os, "O_NONBLOCK", 0))
+    try:
+        descriptor = os.open(path, flags)
+    except OSError as error:
+        raise RetentionError(f"cannot read accepted {description}: {path}: {error}") from error
+    try:
+        before = os.fstat(descriptor)
+        if not stat.S_ISREG(before.st_mode):
+            raise RetentionError(f"accepted {description} is not a regular file: {path}")
+        chunks: list[bytes] = []
+        while True:
+            chunk = os.read(descriptor, 1024 * 1024)
+            if not chunk:
+                break
+            chunks.append(chunk)
+        after = os.fstat(descriptor)
+        stable_fields = ("st_dev", "st_ino", "st_mode", "st_size", "st_mtime_ns", "st_ctime_ns")
+        if any(getattr(before, field, None) != getattr(after, field, None)
+               for field in stable_fields):
+            raise RetentionError(f"accepted {description} changed while being read: {path}")
+        return b"".join(chunks)
+    except OSError as error:
+        raise RetentionError(f"cannot completely read accepted {description}: {path}: {error}") from error
+    finally:
+        os.close(descriptor)
+
+
+def _read_r17_root_a_loss_disposition(
+    *, disposition_path: Path | None = None,
+    expected_sha256: str = R17_ROOT_A_DISPOSITION_SHA256,
+) -> dict[str, Any] | None:
+    """Load only the explicitly accepted, digest-pinned C1 loss disposition.
+
+    The current filesystem is deliberately not consulted here. ENOENT, an empty directory,
+    or any other scan observation cannot create or promote a lifecycle state.
+    """
+    if Path(REPO).resolve(strict=False) != R17_BOUND_REPO_ROOT:
+        return None
+    target_path = disposition_path if disposition_path is not None else R17_ROOT_A_DISPOSITION_PATH
+    try:
+        raw = _read_regular_file_no_follow(
+            target_path, "R17 Root A lifecycle disposition")
+    except RetentionError as error:
+        if isinstance(error.__cause__, FileNotFoundError):
+            return None
+        raise
+    if hashlib.sha256(raw).hexdigest() != expected_sha256:
+        raise RetentionError("R17 Root A loss disposition digest does not match the accepted C1 record")
+    try:
+        record = json.loads(raw)
+    except (UnicodeDecodeError, json.JSONDecodeError) as error:
+        raise RetentionError(f"R17 Root A loss disposition is malformed: {error}") from error
+    if not isinstance(record, dict):
+        raise RetentionError("R17 Root A loss disposition must be a JSON object")
+
+    required_keys = {
+        "schema_version", "decision_case", "root_key", "state", "acceptance_status",
+        "historical_binding", "historical_preservation_obligation_was_violated",
+        "historical_physical_identity_preserved_in_records", "original_physical_object_available",
+        "authorized_retirement", "historical_allocated_bytes_observation",
+        "current_physical_capacity_bytes", "current_live_identity_verification_required",
+        "active_r6a_execution_blocked", "historical_provenance_caveat_required",
+        "loss_finding_ref", "acceptance_ref", "scope_note",
+    }
+    if set(record) != required_keys:
+        raise RetentionError("R17 Root A loss disposition has missing or unexpected fields")
+    expected_flags = {
+        "schema_version": 1,
+        "decision_case": "C1",
+        "root_key": "R17_ROOT_A_CURRENT_STATE",
+        "state": R17_ROOT_A_LOSS_STATE,
+        "acceptance_status": "ACCEPTED_BY_R57_INDEPENDENT_REVIEW",
+        "historical_preservation_obligation_was_violated": True,
+        "historical_physical_identity_preserved_in_records": True,
+        "original_physical_object_available": False,
+        "authorized_retirement": False,
+        "historical_allocated_bytes_observation": 73728,
+        "current_physical_capacity_bytes": 0,
+        "current_live_identity_verification_required": False,
+        "active_r6a_execution_blocked": False,
+        "historical_provenance_caveat_required": True,
+    }
+    for key, expected in expected_flags.items():
+        if record.get(key) != expected:
+            raise RetentionError(f"R17 Root A loss disposition has invalid {key}")
+
+    identity_table_record = R17_TEMP_ROOT_IDENTITIES.get(str(R17_ROOT_A_PATH))
+    if not isinstance(identity_table_record, dict):
+        raise RetentionError("immutable R17 Root A historical identity is unavailable")
+    expected_identity = identity_table_record.get("filesystem_identity")
+    if not isinstance(expected_identity, dict):
+        raise RetentionError("immutable R17 Root A historical identity is malformed")
+    expected_binding = {
+        "path": str(R17_ROOT_A_PATH),
+        "type": "directory",
+        "device": expected_identity.get("device"),
+        "inode": expected_identity.get("inode"),
+        "filesystem_id": expected_identity.get("filesystem_id"),
+        "mode": f"{expected_identity.get('mode', -1):04o}",
+        "owner_uid": expected_identity.get("owner_uid"),
+        "sticky": expected_identity.get("sticky"),
+    }
+    if record.get("historical_binding") != expected_binding:
+        raise RetentionError("R17 Root A loss disposition does not match the immutable historical binding")
+
+    loss_ref = {"path": R17_ROOT_A_LOSS_FINDING_PATH,
+                "sha256": R17_ROOT_A_LOSS_FINDING_SHA256}
+    acceptance_ref = {"path": R17_ROOT_A_ACCEPTANCE_PATH,
+                      "sha256": R17_ROOT_A_ACCEPTANCE_SHA256,
+                      "verdict": R17_ROOT_A_ACCEPTANCE_VERDICT}
+    if record.get("loss_finding_ref") != loss_ref or record.get("acceptance_ref") != acceptance_ref:
+        raise RetentionError("R17 Root A loss disposition has stale or unaccepted evidence references")
+    for relative_path, expected_sha, description in (
+            (R17_ROOT_A_LOSS_FINDING_PATH, R17_ROOT_A_LOSS_FINDING_SHA256, "R56 loss finding"),
+            (R17_ROOT_A_ACCEPTANCE_PATH, R17_ROOT_A_ACCEPTANCE_SHA256, "R57 independent review")):
+        evidence = _read_regular_file_no_follow(REPO / relative_path, description)
+        if hashlib.sha256(evidence).hexdigest() != expected_sha:
+            raise RetentionError(f"accepted {description} digest changed: {relative_path}")
+        if description == "R57 independent review":
+            try:
+                lines = evidence.decode("utf-8").splitlines()
+            except UnicodeDecodeError as error:
+                raise RetentionError("R57 independent review is not valid UTF-8") from error
+            if R17_ROOT_A_ACCEPTANCE_VERDICT not in lines:
+                raise RetentionError("R57 independent review no longer contains the exact C1 acceptance verdict")
+    return record
+
+
+def _require_lost_r17_path_unoccupied(path: Path | str) -> None:
+    """Reject a reused name without attributing its occupant to the old identity."""
+    target = Path(path)
+    try:
+        target.lstat()
+    except FileNotFoundError:
+        return
+    except OSError as error:
+        raise RetentionError(f"cannot classify current occupant at lost R17 pathname {target}: {error}") from error
+    raise RetentionError(
+        f"lost R17 historical pathname is occupied by a separate unresolved current object: {target}")
+
+
+def _r17_historical_loss_inventory_row(record: dict[str, Any]) -> dict[str, Any]:
+    """Render a loss disposition as provenance, never as a scanned physical root."""
+    return {
+        "root_key": record.get("root_key", "R17_ROOT_A_CURRENT_STATE"),
+        "lifecycle_state": record["state"],
+        "path": record["historical_binding"]["path"],
+        "historical_binding": dict(record["historical_binding"]),
+        "historical_preservation_obligation_was_violated": (
+            record["historical_preservation_obligation_was_violated"]),
+        "historical_physical_identity_preserved_in_records": (
+            record.get("historical_physical_identity_preserved_in_records", True)),
+        "original_physical_object_available": (
+            record["original_physical_object_available"]),
+        "authorized_retirement": record["authorized_retirement"],
+        "historical_allocated_bytes_observation": (
+            record["historical_allocated_bytes_observation"]),
+        "current_physical_bytes": 0,
+        "current_live_identity_verification_required": False,
+        "counts_as_current_live_scope_root": False,
+        "active_r6a_execution_blocked": (
+            record.get("active_r6a_execution_blocked", False)),
+        "historical_provenance_caveat_required": (
+            record["historical_provenance_caveat_required"]),
+        "provenance_caveat": R17_ROOT_A_LOSS_CAVEAT,
+        "loss_finding_ref": dict(record["loss_finding_ref"]),
+        "acceptance_ref": dict(record["acceptance_ref"]),
+    }
+
+
+@dataclasses.dataclass(frozen=True)
+class R17RootEvaluation:
+    path: Path
+    root_class: str
+    accounting_scope: str
+    is_external_protected: bool
+    is_present: bool
+    is_blocking: bool
+    disposition: dict[str, Any] | None = None
+    error: str | None = None
+
+
+def classify_r17_root(
+    path_input: Path | str,
+    record: dict[str, Any] | None = None,
+    *,
+    r17_loss_disposition: dict[str, Any] | None | object = _R17_DISPOSITION_UNSET,
+) -> R17RootEvaluation | None:
+    """Authoritative semantic classifier for R17 roots across storage inventory and retention."""
+    path_text = str(path_input)
+    path = Path(path_input)
+    if record is None:
+        record = R17_TEMP_ROOT_IDENTITIES.get(path_text)
+    if record is None:
+        return None
+
+    accounting_scope = record.get("accounting_scope", "FG_METAL_PROJECT")
+    is_external_protected = (
+        accounting_scope == "OTHER_PROJECT_PROTECTED"
+        or record.get("classification") in {"UNRELATED_PROJECT_TEMP", "OTHER_PROJECT_PROTECTED"}
+    )
+
+    root_a_str = str(R17_ROOT_A_PATH)
+    is_root_a = (path_text == root_a_str)
+
+    # Check presence on filesystem
+    is_present = (path.exists() or path.is_symlink())
+
+    if not is_present:
+        if is_external_protected:
+            # External protected scratch root on volatile temp. Absence is benign lifecycle completion.
+            return R17RootEvaluation(
+                path=path,
+                root_class=R17_CLASS_OTHER_PROJECT_PROTECTED_ABSENT,
+                accounting_scope=accounting_scope,
+                is_external_protected=True,
+                is_present=False,
+                is_blocking=False,
+            )
+        if is_root_a:
+            # Root A: check accepted loss disposition
+            if r17_loss_disposition is _R17_DISPOSITION_UNSET:
+                try:
+                    r17_loss_disposition = _read_r17_root_a_loss_disposition()
+                except Exception as err:
+                    return R17RootEvaluation(
+                        path=path,
+                        root_class=R17_CLASS_MISSING_FG_METAL_RETAINED,
+                        accounting_scope=accounting_scope,
+                        is_external_protected=False,
+                        is_present=False,
+                        is_blocking=True,
+                        error=f"R17 Root A loss disposition verification failed: {err}",
+                    )
+            if isinstance(r17_loss_disposition, dict):
+                return R17RootEvaluation(
+                    path=path,
+                    root_class=R17_CLASS_CONFIRMED_LOST,
+                    accounting_scope=accounting_scope,
+                    is_external_protected=False,
+                    is_present=False,
+                    is_blocking=False,
+                    disposition=r17_loss_disposition,
+                )
+            return R17RootEvaluation(
+                path=path,
+                root_class=R17_CLASS_MISSING_FG_METAL_RETAINED,
+                accounting_scope=accounting_scope,
+                is_external_protected=False,
+                is_present=False,
+                is_blocking=True,
+                error="R17 Root A is missing; exact-root identity cannot be verified and no valid loss disposition exists",
+            )
+        # Any other un-adjudicated FG-Metal retained root that is absent fails closed!
+        return R17RootEvaluation(
+            path=path,
+            root_class=R17_CLASS_MISSING_FG_METAL_RETAINED,
+            accounting_scope=accounting_scope,
+            is_external_protected=False,
+            is_present=False,
+            is_blocking=True,
+            error="R17-reviewed ownership root is missing; exact-root identity cannot be verified",
+        )
+
+    # Path is present on disk (or symlink)
+    if is_root_a:
+        # Reappeared or occupied pathname for confirmed-lost Root A
+        return R17RootEvaluation(
+            path=path,
+            root_class=R17_CLASS_PATH_REUSED_DIFFERENT_OBJECT,
+            accounting_scope=accounting_scope,
+            is_external_protected=False,
+            is_present=True,
+            is_blocking=True,
+            error=f"lost R17 historical pathname reappeared or is occupied: {path}",
+        )
+
+    # Validate exact filesystem identity
+    disposition = _r17_temp_root_disposition(path)
+    if disposition is not None:
+        if is_external_protected:
+            return R17RootEvaluation(
+                path=path,
+                root_class=R17_CLASS_OTHER_PROJECT_PROTECTED_PRESENT,
+                accounting_scope=accounting_scope,
+                is_external_protected=True,
+                is_present=True,
+                is_blocking=False,
+                disposition=disposition,
+            )
+        return R17RootEvaluation(
+            path=path,
+            root_class=R17_CLASS_CURRENT_FG_METAL_RETAINED,
+            accounting_scope=accounting_scope,
+            is_external_protected=False,
+            is_present=True,
+            is_blocking=False,
+            disposition=disposition,
+        )
+
+    # Present object failed exact identity verification (mismatched inode/dev, file, or symlink)
+    return R17RootEvaluation(
+        path=path,
+        root_class=R17_CLASS_PATH_REUSED_DIFFERENT_OBJECT,
+        accounting_scope=accounting_scope,
+        is_external_protected=is_external_protected,
+        is_present=True,
+        is_blocking=True,
+        error=f"exact R17 root identity cannot be verified for occupied path: {path}",
+    )
+
+
+def _r17_missing_root_rows() -> list[dict[str, str]]:
+    """Report every absent audited root while this checkout owns the R17 binding."""
+    if Path(REPO).resolve(strict=False) != R17_BOUND_REPO_ROOT:
+        return []
+    missing: list[dict[str, str]] = []
+
+    root_a_str = str(R17_ROOT_A_PATH)
+    root_a_in_policy = root_a_str in R17_TEMP_ROOT_IDENTITIES
+
+    r17_loss_disposition = None
+    root_a_disposition_failed = False
+
+    if root_a_in_policy:
+        try:
+            r17_loss_disposition = _read_r17_root_a_loss_disposition()
+        except Exception as error:
+            missing.append({
+                "path": root_a_str,
+                "reason": f"R17 Root A loss disposition verification failed: {error}",
+            })
+            root_a_disposition_failed = True
+            r17_loss_disposition = None
+
+    lost_r17_path = (Path(r17_loss_disposition["historical_binding"]["path"])
+                     if isinstance(r17_loss_disposition, dict) else None)
+    if lost_r17_path is not None:
+        try:
+            _require_lost_r17_path_unoccupied(lost_r17_path)
+        except Exception as error:
+            missing.append({
+                "path": str(lost_r17_path),
+                "reason": f"lost R17 historical pathname is occupied: {error}",
+            })
+
+    for path_text, record in R17_TEMP_ROOT_IDENTITIES.items():
+        if root_a_in_policy and path_text == root_a_str:
+            if root_a_disposition_failed or lost_r17_path is not None:
+                continue
+        eval_result = classify_r17_root(
+            path_text, record, r17_loss_disposition=r17_loss_disposition
+        )
+        if eval_result is not None and eval_result.is_blocking:
+            missing.append({
+                "path": path_text,
+                "reason": eval_result.error or "R17 root identity cannot be verified",
+            })
+    return missing
+
+def _snapshot(*, protected_roots: list[dict[str, Any]] | None = None,
+              active_buildlease_id: str | None = None,
+              active_experiment_id: str | None = None,
+              allow_pre_dispatch: bool = False) -> dict[str, Any]:
+    if (active_experiment_id is not None
+            and (active_buildlease_id is None
+                 or not _is_r6a_r71_admission_id(active_experiment_id))):
+        raise RetentionError("snapshot R71 workspace identity is not bound to its exact admission")
+    if allow_pre_dispatch and active_experiment_id is None:
+        raise RetentionError("snapshot pre-dispatch exception lacks its exact R71 admission")
+    if protected_roots is None:
+        protected_roots = _verify_protected_evidence_roots()
+    protected_by_path = {os.path.abspath(row["path"]): row for row in protected_roots}
+    active, preserved, completed, failed, orphaned, unknown, nonlarge = [], [], [], [], [], [], []
     by_path: dict[str, dict[str, Any]] = {}
+    unknown.extend(_r17_missing_root_rows())
     for lease_path in _lease_files():
         try:
             lease = _load_lease(lease_path.stem)
@@ -3342,34 +8155,76 @@ def _snapshot() -> dict[str, Any]:
         if lease.get("build_id") != lease_path.stem or not isinstance(lease.get("path"), str):
             unknown.append({"path": str(lease_path), "reason": "lease identity mismatch"})
             continue
-        by_path[os.path.abspath(lease["path"])] = lease
-        row = {key: lease.get(key) for key in ("build_id", "path", "kind", "state", "owner_experiment",
+        retirement_status = lease.get("retirement_status")
+        if (retirement_status not in (None, "PENDING", "COMPLETED")
+                or (retirement_status == "PENDING" and lease.get("state") != "RETIRING")
+                or (retirement_status == "COMPLETED" and lease.get("retired_at_unix") is None)):
+            unknown.append({"path": lease["path"], "reason": "invalid retirement status/state combination"})
+            continue
+        lease_absolute = os.path.abspath(lease["path"])
+        by_path[lease_absolute] = lease
+        if _protected_paths_overlap(lease_absolute):
+            unknown.append({"path": lease_absolute,
+                            "reason": "active or retained build lease overlaps protected parent evidence"})
+        row = {key: lease.get(key) for key in ("build_id", "path", "kind", "state", "retirement_status", "owner_experiment",
               "estimated_bytes", "build_device", "build_inode", "build_filesystem_id", "build_manifest_id",
               "build_manifest_sha256", "requested_config_key_sha256", "preserve_debug_expires_at_unix")}
-        if lease.get("retired_at_unix") is not None:
-            receipt_path = RECEIPT_ROOT / f"{lease_path.stem}.json"
+        session = lease.get("session_v3")
+        if (isinstance(session, Mapping) and session.get("state") == "ACCEPTED"
+                and lease.get("state") in {"COMPLETED", "PRESERVE_DEBUG", "RETIRING"}
+                and (lease.get("state") != "RETIRING"
+                     or lease.get("retirement_from_state") == "COMPLETED")):
             try:
-                if lease.get("cleanup_receipt_path") != str(receipt_path):
-                    raise RetentionError("retired lease does not reference its canonical receipt path")
-                receipt = _read_json(receipt_path, sealed=True)
-                expected = {"result": "REMOVED", "state": "REMOVED", "build_id": lease_path.stem,
-                            "path": lease.get("path"), "build_device": lease.get("build_device"),
-                            "build_inode": lease.get("build_inode"),
-                            "build_filesystem_id": lease.get("build_filesystem_id"),
-                            "build_manifest_id": lease.get("build_manifest_id"),
-                            "build_manifest_sha256": lease.get("build_manifest_sha256"),
-                            "failure_evidence_index_sha256": lease.get("failure_evidence_index_sha256")}
-                if any(receipt.get(key) != value for key, value in expected.items()):
-                    raise RetentionError("retirement receipt does not bind the exact lease identity")
-            except (OSError, RetentionError) as error:
+                manifest, manifest_digest = _verify_build_manifest(lease_path.stem)
+                if (lease.get("build_manifest_id") != manifest.get("build_manifest_id")
+                        or lease.get("build_manifest_sha256") != manifest_digest):
+                    raise RetentionError("accepted v3 lease has a mismatched manifest ID or digest")
+            except (OSError, RetentionError, ValueError, TypeError, json.JSONDecodeError) as error:
+                unknown.append({"path": lease["path"],
+                                "reason": f"accepted Host BuildLease manifest binding is invalid: {error}"})
+                continue
+        if lease.get("retired_at_unix") is not None:
+            try:
+                _verify_completed_retirement(lease)
+            except (OSError, RetentionError, ValueError, TypeError) as error:
                 unknown.append({"path": lease["path"], "reason": f"retired root receipt invalid: {error}"})
             continue
         if lease.get("state") == "ACTIVE": active.append(row)
         elif lease.get("state") == "PRESERVE_DEBUG": preserved.append(row)
         elif lease.get("state") == "COMPLETED": completed.append(row)
         elif lease.get("state") in {"FAILED", "RETIRING"}: failed.append(row)
+        elif lease.get("state") == ORPHANED_UNSTARTED_STATE:
+            try:
+                _verify_orphan_closeout_receipt(lease)
+                normal_receipt = RECEIPT_ROOT / f"{lease_path.stem}.json"
+                if (normal_receipt.exists() or normal_receipt.is_symlink()
+                        or lease.get("build_manifest_id") is not None
+                        or lease.get("build_manifest_sha256") is not None):
+                    raise RetentionError("orphan terminal lease has conflicting completion evidence")
+                orphaned.append(row)
+            except (OSError, RetentionError, ValueError, TypeError) as error:
+                unknown.append({"path": lease["path"],
+                                "reason": f"orphan closeout receipt invalid: {error}"})
         else: unknown.append({"path": lease["path"], "reason": f"unrecognized state {lease.get('state')}"})
-    for path in _all_root_candidates():
+    if active_buildlease_id is None:
+        root_candidates = _all_root_candidates()
+    else:
+        active_workspace_identity = _verified_capacity_workspace(
+            active_buildlease_id, allow_pre_dispatch=allow_pre_dispatch)
+        root_candidates = _all_root_candidates(
+            active_buildlease_id=active_buildlease_id,
+            active_workspace_identity=active_workspace_identity,
+            **({"allow_pre_dispatch": allow_pre_dispatch}
+               if allow_pre_dispatch or active_experiment_id is not None else {}))
+    for path in root_candidates:
+        absolute_path = os.path.abspath(path)
+        if absolute_path in protected_by_path:
+            continue
+        if (absolute_path not in by_path
+                and _r17_temp_root_disposition(path) is not None):
+            # This exact reviewed root is retained and inventoried; it is not
+            # an active/retired BuildLease and receives no mutation authority.
+            continue
         if path.is_symlink() or not path.is_dir():
             unknown.append({"path": str(path), "reason": "root is symlink or not a directory"})
             continue
@@ -3433,11 +8288,28 @@ def _snapshot() -> dict[str, Any]:
             try:
                 marker = _read_marker(root_fd)
                 root_info = os.fstat(root_fd)
+                recorded_root_identity_matches = (
+                    (root_info.st_dev, root_info.st_ino)
+                    == (lease.get("build_device"), lease.get("build_inode"))
+                    and getattr(os.fstatvfs(root_fd), "f_fsid", None)
+                    == lease.get("build_filesystem_id"))
+                if (not recorded_root_identity_matches
+                        and lease.get("state") == ORPHANED_UNSTARTED_STATE):
+                    recorded_root_identity_matches = (
+                        _r23_orphaned_root_has_authenticated_apfs_device_alias(
+                            path, lease, root_fd, root_info))
                 if (marker.get("build_id") != lease.get("build_id")
                         or marker.get("state") != lease.get("state")
-                        or (root_info.st_dev, root_info.st_ino) != (lease.get("build_device"), lease.get("build_inode"))
-                        or getattr(os.fstatvfs(root_fd), "f_fsid", None) != lease.get("build_filesystem_id")):
+                        or not recorded_root_identity_matches):
                     unknown.append({"path": str(path), "reason": "root marker disagrees with lease registry"})
+                elif lease.get("state") == ORPHANED_UNSTARTED_STATE:
+                    if (_canonical_json(marker) != _canonical_json(lease)
+                            or sorted(os.listdir(root_fd)) != [BUILD_MARKER]
+                            or (path / BUILD_SESSION_WORKSPACE_NAME).exists()
+                            or (path / BUILD_SESSION_WORKSPACE_IMAGE_NAME).exists()
+                            or os.path.ismount(path / BUILD_SESSION_WORKSPACE_NAME)):
+                        unknown.append({"path": str(path),
+                                        "reason": "orphan terminal root acquired workspace or changed marker state"})
             finally:
                 os.close(root_fd)
         except (OSError, RetentionError, json.JSONDecodeError) as error:
@@ -3445,16 +8317,29 @@ def _snapshot() -> dict[str, Any]:
     for key, lease in by_path.items():
         if lease.get("retired_at_unix") is None and not Path(key).exists():
             unknown.append({"path": key, "reason": "registered build root is missing without a retirement receipt"})
+    r17_loss_disposition = None
+    if str(R17_ROOT_A_PATH) in R17_TEMP_ROOT_IDENTITIES:
+        try:
+            r17_loss_disposition = _read_r17_root_a_loss_disposition()
+        except Exception:
+            r17_loss_disposition = None
+    historical_root_dispositions = (
+        [_r17_historical_loss_inventory_row(r17_loss_disposition)]
+        if isinstance(r17_loss_disposition, dict) else [])
     return {"active": active, "preserved_debug": preserved, "completed_pending_retirement": completed,
-            "failed_or_retiring": failed, "unknown": unknown, "classified_nonlarge_roots": nonlarge,
+            "failed_or_retiring": failed, "orphaned_unstarted_retired": orphaned,
+            "unknown": unknown, "classified_nonlarge_roots": nonlarge,
+            "protected_in_place_evidence": [dict(row) for row in protected_roots],
             "classified_non_retention_roots": _classified_non_retention_tmp_roots(),
+            "historical_root_dispositions": historical_root_dispositions,
             "active_build_count": len(active), "preserved_build_count": len(preserved),
             "retained_build_count": len(active) + len(preserved),
             "active_dxvk_count": sum(row.get("kind") == "dxvk" for row in active),
             "active_moltenvk_count": sum(row.get("kind") == "moltenvk" for row in active)}
 
-def capacity_blockers() -> list[str]:
-    state = _snapshot()
+def capacity_blockers(state: Mapping[str, Any] | None = None) -> list[str]:
+    if state is None:
+        state = _snapshot()
     blockers = []
     if state["unknown"]: blockers.append("ambiguous or unleased build roots require reconciliation")
     if state["completed_pending_retirement"]: blockers.append("COMPLETED build roots remain pending automatic retirement")
@@ -3484,6 +8369,10 @@ def _retention_fingerprint(state: Mapping[str, Any]) -> dict[str, Any]:
                               "best_recoverable_bytes_estimate": row.get("best_recoverable_bytes_estimate"),
                               "file_count": row.get("file_count"), "filesystem_identity": row.get("filesystem_identity"),
                               "root_mtime_ns": row.get("root_mtime_ns"), "root_ctime_ns": row.get("root_ctime_ns"),
+                              "accounting_scope": row.get("accounting_scope"),
+                              "ownership_review_sha256": row.get("ownership_review_sha256"),
+                              "scope_accounting_review_sha256": row.get("scope_accounting_review_sha256"),
+                              "reconciliation_sha256": row.get("reconciliation_sha256"),
                               "nested_build_directory_count": row.get("nested_build_directory_count"),
                               "nested_build_directory_names": row.get("nested_build_directory_names"),
                               "nested_build_content_tree_sha256": row.get("nested_build_content_tree_sha256"),
@@ -3499,48 +8388,132 @@ def _retention_fingerprint(state: Mapping[str, Any]) -> dict[str, Any]:
                         "root_mtime_ns": row.get("root_mtime_ns"), "root_ctime_ns": row.get("root_ctime_ns"),
                         "content_tree_sha256": row.get("content_tree_sha256")}
                        for row in state.get("classified_nonlarge_roots", [])), key=lambda row: str(row["path"]))
+    protected_base_fields = (
+        "evidence_id", "path", "parent_receipt_sha256", "final_review_sha256",
+        "review_supplement_sha256", "build_index_sha256", "build_directory_manifest_sha256",
+        "root_inventory_sha256", "file_count", "logical_bytes", "accounting_policy",
+        "mutation_policy", "relocation_allowed", "cleanup_allowed", "cas_mutation_allowed")
+    protected_extension_fields = (
+        "tree_content_sha256", "critical_file_relative_path", "critical_file_sha256",
+        "authority_metadata_path", "authority_metadata_sha256", "storage_credit",
+        "reservation_credit", "free_space_exclusion", "project_scope_exclusion",
+        "build_lease_exemption")
+    protected = sorted(({
+        **{key: row.get(key) for key in protected_base_fields},
+        **{key: row[key] for key in protected_extension_fields if key in row},
+    } for row in state.get("protected_in_place_evidence", [])), key=lambda row: str(row["path"]))
+    historical_dispositions = sorted(({
+        "path": row.get("path"),
+        "lifecycle_state": row.get("lifecycle_state"),
+        "historical_device": row.get("historical_binding", {}).get("device"),
+        "historical_inode": row.get("historical_binding", {}).get("inode"),
+        "current_physical_bytes": row.get("current_physical_bytes"),
+    } for row in state.get("historical_root_dispositions", [])), key=lambda r: str(r["path"]))
     material = {"build_root_identity": _root_identity(BUILD_ROOT, create=True),
                 "retained_builds": sorted(retained, key=lambda row: str(row["path"])),
-                "unknown_roots": unknown, "excluded_roots": excluded_roots, "small_roots": nonlarge}
+                "unknown_roots": unknown, "excluded_roots": excluded_roots, "small_roots": nonlarge,
+                "protected_in_place_evidence": protected,
+                "historical_root_dispositions": historical_dispositions}
     return {"sha256": hashlib.sha256(_canonical_json(material)).hexdigest(), **material}
 
-def status_snapshot() -> dict[str, Any]:
+def _status_snapshot_locked(*, active_buildlease_id: str | None = None,
+                            active_experiment_id: str | None = None,
+                            allow_pre_dispatch: bool = False) -> dict[str, Any]:
+    """Build the public retention snapshot while the caller holds BUILD_LOCK."""
+    if allow_pre_dispatch and (active_buildlease_id is None
+                               or not _is_r6a_r71_admission_id(active_experiment_id)):
+        raise RetentionError("pre-dispatch retention snapshot lacks its exact R71 active identities")
+    protected_before = _verify_protected_evidence_roots()
     reconciliation_error = None
+    try:
+        _retire_pending_locked(
+            protected_roots_verified=True,
+            preserve_active_buildlease_id=active_buildlease_id,
+            preserve_active_experiment_id=active_experiment_id,
+            **({"allow_pre_dispatch": True} if allow_pre_dispatch else {}))
+    except BaseException as error:
+        reconciliation_error = repr(error)
+    # Keep BUILD_LOCK through root enumeration and its final fingerprint.
+    # BuildLease reserve/complete/retire operations use this same lock, so a
+    # supported build writer cannot replace a prefix-pruned path mid-scan.
+    protected_after = _verify_protected_evidence_roots()
+    if _canonical_json(_protected_identity_projection(protected_before)) != _canonical_json(
+            _protected_identity_projection(protected_after)):
+        raise RetentionError("protected BUILD-1 evidence changed during retention reconciliation")
+    snapshot_kwargs: dict[str, Any] = {}
+    if allow_pre_dispatch:
+        snapshot_kwargs["active_experiment_id"] = active_experiment_id
+        snapshot_kwargs["allow_pre_dispatch"] = True
+    elif _is_r6a_r71_admission_id(active_experiment_id):
+        snapshot_kwargs["active_experiment_id"] = active_experiment_id
+    state = _snapshot(
+        protected_roots=protected_after,
+        active_buildlease_id=active_buildlease_id,
+        **snapshot_kwargs)
+    state["policy"] = {"max_active_dxvk": MAX_ACTIVE_DXVK,
+                       "max_active_moltenvk_diagnostic": MAX_ACTIVE_MOLTENVK,
+                       "max_active_large_builds_total": MAX_ACTIVE_LARGE_BUILDS,
+                       "active_large_builds_are_serialized_to_prevent_kind_aliasing": True,
+                       "max_preserved_reference_debug": MAX_PRESERVED_DEBUG,
+                       "max_global_retained": MAX_RETAINED,
+                       "large_build_root_min_bytes": LARGE_BUILD_ROOT_MIN_BYTES,
+                       "preserved_build_max_seconds": PRESERVE_DEBUG_MAX_SECONDS,
+                       "completed_builds_auto_retire_at_completion": True}
+    state["approved_new_build_root"] = str(BUILD_ROOT)
+    state["approved_legacy_reconciliation_roots"] = [str(path) for path in LEGACY_BUILD_ROOTS]
+    state["protected_or_source_root_count"] = len(state.get("classified_non_retention_roots", []))
+    state["protected_evidence_root_count"] = len(state.get("protected_in_place_evidence", []))
+    state["active_lease_markers"] = len(state.get("active", []))
+    state["retention_fingerprint"] = _retention_fingerprint(state)
+    protected_final = _verify_protected_evidence_roots()
+    if _canonical_json(_protected_identity_projection(protected_after)) != _canonical_json(
+            _protected_identity_projection(protected_final)):
+        raise RetentionError("protected BUILD-1 evidence changed while finalizing retention status")
+    state["gate_blockers"] = capacity_blockers(state)
+    if reconciliation_error:
+        state["gate_blockers"].append(f"automatic retirement reconciliation failed: {reconciliation_error}")
+    state["gate_status"] = "PASS" if not state["gate_blockers"] else "BLOCKED"
+    return state
+
+
+def _status_snapshot_with_lock(lock_fds: tuple[int, int], *,
+                               active_buildlease_id: str | None = None,
+                               active_experiment_id: str | None = None,
+                               allow_pre_dispatch: bool = False) -> dict[str, Any]:
+    """Revalidate retention state under a live BuildLease lock without reacquiring it."""
+    if not isinstance(lock_fds, tuple) or len(lock_fds) != 2:
+        raise RetentionError("locked retention snapshot requires the exact lease and lock descriptors")
+    if ((active_buildlease_id is None) != (active_experiment_id is None)
+            or (active_buildlease_id is not None
+                and not _is_r6a_r71_admission_id(active_experiment_id))):
+        raise RetentionError("R71 retention snapshot exemption lacks its exact active identities")
+    lease_fd, lock_fd = lock_fds
+    try:
+        os.fstat(lease_fd)
+        os.fstat(lock_fd)
+        _verify_named_retention_lock(lease_fd, lock_fd)
+    except (OSError, RetentionError) as error:
+        raise RetentionError("locked retention snapshot lost the authoritative BuildLease lock") from error
+    return _status_snapshot_locked(
+        active_buildlease_id=active_buildlease_id,
+        active_experiment_id=active_experiment_id,
+        **({"allow_pre_dispatch": True} if allow_pre_dispatch else {}))
+
+
+def status_snapshot() -> dict[str, Any]:
     lease_fd, lock_fd = _lock()
     try:
-        try:
-            _retire_pending_locked()
-        except BaseException as error:
-            reconciliation_error = repr(error)
-        # Keep BUILD_LOCK through root enumeration and its final fingerprint.
-        # BuildLease reserve/complete/retire operations use this same lock, so a
-        # supported build writer cannot replace a prefix-pruned path mid-scan.
-        state = _snapshot()
-        state["policy"] = {"max_active_dxvk": MAX_ACTIVE_DXVK,
-                           "max_active_moltenvk_diagnostic": MAX_ACTIVE_MOLTENVK,
-                           "max_active_large_builds_total": MAX_ACTIVE_LARGE_BUILDS,
-                           "active_large_builds_are_serialized_to_prevent_kind_aliasing": True,
-                           "max_preserved_reference_debug": MAX_PRESERVED_DEBUG,
-                           "max_global_retained": MAX_RETAINED,
-                           "large_build_root_min_bytes": LARGE_BUILD_ROOT_MIN_BYTES,
-                           "preserved_build_max_seconds": PRESERVE_DEBUG_MAX_SECONDS,
-                           "completed_builds_auto_retire_at_completion": True}
-        state["approved_new_build_root"] = str(BUILD_ROOT)
-        state["approved_legacy_reconciliation_roots"] = [str(path) for path in LEGACY_BUILD_ROOTS]
-        state["protected_or_source_root_count"] = len(state.get("classified_non_retention_roots", []))
-        state["active_lease_markers"] = len(state.get("active", []))
-        state["retention_fingerprint"] = _retention_fingerprint(state)
-        state["gate_blockers"] = capacity_blockers()
-        if reconciliation_error:
-            state["gate_blockers"].append(f"automatic retirement reconciliation failed: {reconciliation_error}")
-        state["gate_status"] = "PASS" if not state["gate_blockers"] else "BLOCKED"
-        return state
+        return _status_snapshot_locked()
     finally:
         _unlock(lease_fd, lock_fd)
 
-def _gate_blockers(*, active_experiment_id: str | None = None) -> list[str]:
+def _gate_blockers(*, active_experiment_id: str | None = None,
+                   allow_r70_handoff: bool = False,
+                   allow_r71_handoff: bool = False) -> list[str]:
     from storage_policy import _gate0_blockers
-    return _gate0_blockers(active_experiment_id=active_experiment_id)
+    return _gate0_blockers(active_experiment_id=active_experiment_id,
+                           allow_r70_handoff=allow_r70_handoff,
+                           allow_r71_handoff=allow_r71_handoff)
 
 
 def _verify_native_prepared_source(build: Path, request: NativeMoltenVKBuildRequest) -> dict[str, Any] | None:
@@ -3785,7 +8758,36 @@ def _copy_tree_artifacts_native_moltenvk(
     return outputs, identity
 
 
-def _copy_tree_artifacts(build: Path, build_id: str, evidence: Path) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+def _copy_tree_artifacts(build: Path, build_id: str, evidence: Path, *,
+                         session_plan: Mapping[str, Any] | None = None,
+                         terminal: Mapping[str, Any] | None = None,
+                         requested_config_key_sha256: str | None = None,
+                         sandbox_profile_sha256: str | None = None) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    if session_plan is not None:
+        if (not _session_dual_graph_enabled(session_plan) or terminal is None
+                or not isinstance(requested_config_key_sha256, str)
+                or not re.fullmatch(r"[0-9a-f]{64}", requested_config_key_sha256)
+                or not isinstance(sandbox_profile_sha256, str)
+                or not re.fullmatch(r"[0-9a-f]{64}", sandbox_profile_sha256)):
+            raise RetentionError("Host-v3 dual artifactization requires its plan, pending terminal, and frozen request bindings")
+        identity = _capture_identity(build, evidence, session_plan=session_plan)
+        identity.update({
+            "build_id": build_id,
+            "config_key_sha256": identity.get("graph_config_key_sha256"),
+            "requested_config_key_sha256": requested_config_key_sha256,
+            "sandboxed_execution_status": "verified_successful_seatbelt_run",
+            "sandboxed_execution_profile_sha256": sandbox_profile_sha256,
+            "sandboxed_execution_executor_mode": BUILD_SESSION_EXECUTOR_MODE,
+            "sandboxed_execution_executor_version": BUILD_SESSION_SCHEMA_VERSION,
+            "sandboxed_execution_acceptance_state": "UNACCEPTED_PENDING_NORMAL_READONLY_DETACH_AND_MANIFEST",
+            "sandboxed_execution_write_quiescence_state": (
+                "WRITABLE_IMAGE_NORMALLY_UNMOUNTED_AND_DETACHED"),
+            "meson_configuration_sha256": identity.get("graph_config_key_sha256"),
+        })
+        outputs = _capture_dual_graph_artifacts(
+            build, build_id, evidence, session_plan, terminal, identity)
+        return outputs, identity
+
     identity = _capture_identity(build, evidence)
     outputs = []
     for directory, dirnames, filenames in os.walk(build, followlinks=False):
@@ -3797,7 +8799,10 @@ def _copy_tree_artifacts(build: Path, build_id: str, evidence: Path) -> tuple[li
                 continue
             info = path.lstat()
             if stat.S_ISLNK(info.st_mode):
-                resolved = path.resolve(strict=True)
+                try:
+                    resolved = path.resolve(strict=True)
+                except (FileNotFoundError, OSError):
+                    continue
                 if _canonical_artifact_target(resolved):
                     digest = resolved.relative_to(ARTIFACT_ROOT).parts[0]
                     outputs.append({"sha256": digest, "canonical_artifact_path": str(resolved),
@@ -3907,7 +8912,20 @@ def _build_manifest(lease: Mapping[str, Any], artifacts: list[dict[str, Any]], i
     source = identity.get("source_identity") or {}
     if evidence != MANIFEST_ROOT / f"{lease['build_id']}.evidence":
         raise RetentionError("build evidence path is not canonical")
-    _validate_completed_identity(identity, artifacts, evidence)
+    if (isinstance(lease.get("owner_experiment"), str)
+            and _is_r6a_r71_admission_id(lease["owner_experiment"])
+            and (identity.get("r71_execution_dependency_manifest_sha256")
+                 != lease.get("r71_execution_dependency_manifest_sha256")
+                 or not isinstance(lease.get("r71_execution_dependency_manifest_sha256"), str)
+                 or not re.fullmatch(r"[0-9a-f]{64}", lease["r71_execution_dependency_manifest_sha256"]))):
+        raise RetentionError("R71 build manifest does not bind the reserved dependency-manifest digest")
+    plan = identity.get("session_plan")
+    allow_pending_promotion = (
+        isinstance(plan, Mapping)
+        and _session_dual_graph_enabled(plan)
+        and plan.get("persistent_output_allowance_bytes") is not None)
+    _validate_completed_identity(identity, artifacts, evidence,
+                                 allow_pending_promotion=allow_pending_promotion)
     evidence_files = _inventory_evidence(evidence)
     evidence_index_sha256 = hashlib.sha256(_canonical_json(evidence_files)).hexdigest()
     material = {"schema_version": 3, "build_id": lease["build_id"], "kind": lease["kind"],
@@ -3930,9 +8948,15 @@ def _build_manifest(lease: Mapping[str, Any], artifacts: list[dict[str, Any]], i
                 "ninja_log_sha256": identity.get("ninja_log_sha256"),
                 "build_identity": dict(identity),
                 "artifacts": artifacts, "config_key_sha256": identity.get("config_key_sha256"),
+                "build_configuration_key_sha256": (
+                    identity.get("session_plan", {}).get("build_configuration_key_sha256")
+                    if _session_dual_graph_enabled(identity.get("session_plan", {})) else None),
                 "adopted_existing": bool(lease.get("adopted_existing")),
                 "configuration_key_provenance": (
                     "legacy-debug-preservation-only" if identity.get("legacy_debug_preservation") is True else
+                    "host-v3-dual-graph-captured" if (
+                        identity.get("executor_mode") == BUILD_SESSION_EXECUTOR_MODE
+                        and _session_dual_graph_enabled(identity.get("session_plan", {}))) else
                     "artifactization-time retrospective" if lease.get("adopted_existing") else
                     "pre-build frozen request"),
                 "captured_config_key_sha256": identity.get("config_key_sha256"),
@@ -3952,7 +8976,8 @@ def _build_manifest(lease: Mapping[str, Any], artifacts: list[dict[str, Any]], i
     if path.exists() or path.is_symlink():
         if path.is_symlink() or not path.is_file():
             raise RetentionError("existing build manifest path is not a regular file")
-        existing, digest = _verify_build_manifest(lease["build_id"])
+        existing, digest = _verify_build_manifest(
+            lease["build_id"], allow_uncommitted_host_v3=True)
         comparable_existing = {key: value for key, value in existing.items()
                                if key not in {"completed_at_unix", "build_manifest_id", "manifest_sha256"}}
         comparable_current = {key: value for key, value in material.items()
@@ -3961,14 +8986,80 @@ def _build_manifest(lease: Mapping[str, Any], artifacts: list[dict[str, Any]], i
             raise RetentionError("existing verified build manifest conflicts with this completion attempt")
         return existing, digest
     _write_json(path, material, replace=False)
-    verified, digest = _verify_build_manifest(lease["build_id"])
+    verified, digest = _verify_build_manifest(
+        lease["build_id"], allow_uncommitted_host_v3=True)
     if digest != hashlib.sha256(final_raw).hexdigest():
         raise RetentionError("build manifest durability/hash verification failed")
     return verified, digest
 
 def _validate_completed_identity(identity: Mapping[str, Any], artifacts: list[dict[str, Any]],
-                                 evidence: Path) -> None:
+                                 evidence: Path, *,
+                                 allow_pending_promotion: bool = False) -> None:
     """Require reconstructable, hash-bound provenance before a build can be retired."""
+    host_v3 = (identity.get("executor_mode") == BUILD_SESSION_EXECUTOR_MODE
+               or identity.get("sandboxed_execution_executor_mode") == BUILD_SESSION_EXECUTOR_MODE)
+    if host_v3:
+        plan = identity.get("session_plan")
+        plan_sha = identity.get("session_plan_sha256")
+        terminal_evidence = identity.get("sandboxed_execution_evidence")
+        terminal_path = (terminal_evidence.get("retained_path")
+                         if isinstance(terminal_evidence, Mapping) else None)
+        if not isinstance(terminal_path, str):
+            raise RetentionError("Host-v3 completion identity lacks its retained terminal receipt")
+        _require_completed_evidence_record(terminal_evidence, "Host-v3 terminal receipt", evidence)
+        retained_terminal = _read_json(Path(terminal_path), sealed=True)
+        if retained_terminal.get("executor_mode") != BUILD_SESSION_EXECUTOR_MODE:
+            raise RetentionError("Host-v3 completion identity is not bound to a Host-v3 terminal receipt")
+        terminal_state = retained_terminal.get("state")
+        if terminal_state not in {"FINALIZING", "SUCCESS"}:
+            raise RetentionError("Host-v3 completed identity requires finalizing or historical success evidence")
+        if ((terminal_state == "FINALIZING"
+             and retained_terminal.get("build_id") != identity.get("build_id"))
+                or (terminal_state == "SUCCESS"
+                    and identity.get("build_id") not in (None, retained_terminal.get("build_id")))
+                or retained_terminal.get("plan_sha256") != plan_sha
+                or retained_terminal.get("executor_version") != BUILD_SESSION_SCHEMA_VERSION):
+            raise RetentionError("Host-v3 finalization terminal differs from the completed identity")
+        r71_dependency_sha = identity.get("r71_execution_dependency_manifest_sha256")
+        if (r71_dependency_sha is not None
+                and (not isinstance(r71_dependency_sha, str)
+                     or not re.fullmatch(r"[0-9a-f]{64}", r71_dependency_sha)
+                     or retained_terminal.get("r71_execution_dependency_manifest_sha256")
+                     != r71_dependency_sha)):
+            raise RetentionError("R71 completion terminal differs from its dependency-manifest binding")
+        if terminal_state == "FINALIZING":
+            if (retained_terminal.get("acceptance_state") != "UNACCEPTED_FINALIZING_MANIFEST"
+                    or retained_terminal.get("write_quiescence_state")
+                        != "WRITABLE_IMAGE_DETACHED_READONLY_EVIDENCE_HASHED"
+                    or retained_terminal.get("build_manifest_id") is not None
+                    or retained_terminal.get("build_manifest_sha256") is not None
+                    or not isinstance(retained_terminal.get("readonly_detached_identity"), Mapping)):
+                raise RetentionError("Host-v3 retained finalizing evidence contains invalid acceptance fields")
+        else:
+            # Pre-R66 accepted manifests retain SUCCESS without a forward manifest
+            # digest. R66 receipts carry that binding and are checked through the
+            # authoritative lease after manifest verification.
+            if (retained_terminal.get("acceptance_state") != "HOST_BUILDLEASE_V3_WRITER_QUIESCED"
+                    or retained_terminal.get("write_quiescence_state")
+                        != "WRITABLE_IMAGE_DETACHED_READONLY_EVIDENCE_HASHED"):
+                raise RetentionError("Host-v3 retained success evidence has invalid quiescence fields")
+        terminal_graph_ids = {
+            row.get("graph_id") for row in retained_terminal.get("graph_output_identities", [])
+            if isinstance(row, Mapping)}
+        recorded_dual = set(BUILD_SESSION_DUAL_GRAPH_IDS).issubset(terminal_graph_ids)
+        identity_dual = (identity.get("executor_mode") == BUILD_SESSION_EXECUTOR_MODE
+                         or (isinstance(plan, Mapping) and _session_dual_graph_enabled(plan)))
+        if recorded_dual or identity_dual:
+            if (not isinstance(plan, Mapping) or not _session_dual_graph_enabled(plan)
+                    or not isinstance(plan_sha, str)
+                    or hashlib.sha256(_canonical_json(dict(plan))).hexdigest() != plan_sha
+                    or plan.get("build_id") != identity.get("build_id")
+                    or retained_terminal.get("plan_sha256") != plan_sha):
+                raise RetentionError("Host-v3 dual completion cannot fall back to a single-graph identity")
+            _validate_host_v3_dual_graph_identity(
+                identity, artifacts, evidence, expected_terminal_state=terminal_state,
+                allow_pending_promotion=allow_pending_promotion)
+            return
     if not artifacts or not all(_verify_artifact(row) for row in artifacts):
         raise RetentionError("completed build is missing a verified canonical output")
     if identity.get("legacy_debug_preservation") is True:
@@ -4002,11 +9093,19 @@ def _validate_completed_identity(identity: Mapping[str, Any], artifacts: list[di
                for field in ("source_identity", "patch_set", "dependency_state", "compiler_identity", "linker_identity")):
             raise RetentionError("legacy debug manifest must explicitly state provenance limitations")
         return
-    try:
-        config_key = configuration_key_from_identity(
-            identity, dependency_state=identity.get("dependency_state"))
-    except (TypeError, ValueError) as error:
-        raise RetentionError(f"completed build configuration identity is incomplete: {error}") from error
+    if identity.get("session_plan_sha256") and identity.get("config_key_sha256") == identity.get("session_plan_sha256"):
+        config_key = identity["session_plan_sha256"]
+        if identity.get("graph_config_key_sha256") is not None:
+            expected_graph_key = configuration_key_from_identity(
+                identity, dependency_state=identity.get("dependency_state"))
+            if identity.get("graph_config_key_sha256") != expected_graph_key:
+                raise RetentionError("completed build graph configuration key does not match its captured identity")
+    else:
+        try:
+            config_key = configuration_key_from_identity(
+                identity, dependency_state=identity.get("dependency_state"))
+        except (TypeError, ValueError) as error:
+            raise RetentionError(f"completed build configuration identity is incomplete: {error}") from error
     if identity.get("config_key_sha256") != config_key:
         raise RetentionError("completed build configuration key does not match its captured identity")
     def require_record(value: Any, label: str) -> None:
@@ -4125,6 +9224,165 @@ def _verify_failure_evidence(lease: Mapping[str, Any]) -> dict[str, Any]:
         raise RetentionError("failed build diagnostic manifest identifies another build")
     return value
 
+
+def _verify_completed_retired_parent_identity(
+        live_identity: Mapping[str, Any], lease: Mapping[str, Any]) -> None:
+    """Verify that a completed retired lease binds an authentic approved parent directory.
+
+    Under R63 V1 legacy completed-retirement continuity, a historical APFS device/filesystem_id
+    mismatch across host reboots is tolerated ONLY when ALL required stable/security properties
+    match and the device enumeration difference is the sole mismatch.
+    """
+    approved_identity = lease.get("approved_parent_identity")
+    if not isinstance(approved_identity, Mapping):
+        raise RetentionError("retired lease approved-parent identity is malformed")
+    if approved_identity == live_identity:
+        return
+
+    # Under R63 V1 legacy completed-retirement continuity, a historical device mismatch
+    # may be tolerated ONLY when ALL required stable/security properties match and the ONLY
+    # mismatch is the session-sensitive device/filesystem_id enumeration across reboots.
+    state = lease.get("state")
+    status = lease.get("retirement_status")
+    retired_at = lease.get("retired_at_unix")
+    if (state not in {"COMPLETED", "FAILED"}
+            or status not in (None, "COMPLETED")
+            or not isinstance(retired_at, (int, float)) or isinstance(retired_at, bool)
+            or not math.isfinite(float(retired_at))):
+        raise RetentionError("retired lease state or retirement status is invalid")
+
+    approved_parent = lease.get("approved_parent")
+    if (approved_parent != str(BUILD_ROOT)
+            or not BUILD_ROOT.is_dir()
+            or BUILD_ROOT.is_symlink()
+            or os.path.realpath(str(BUILD_ROOT)) != str(BUILD_ROOT.resolve())):
+        raise RetentionError("retired lease approved parent path is not canonical or is symlinked")
+
+    build_id = lease.get("build_id")
+    if not isinstance(build_id, str) or not build_id:
+        raise RetentionError("retired lease build_id is invalid")
+    receipt_path = RECEIPT_ROOT / f"{build_id}.json"
+    if not receipt_path.is_file() or receipt_path.is_symlink():
+        raise RetentionError("retired lease cleanup receipt is missing or invalid")
+
+    if live_identity.get("inode") != approved_identity.get("inode"):
+        raise RetentionError("retired lease approved-parent inode changed")
+    if live_identity.get("mode") != approved_identity.get("mode"):
+        raise RetentionError("retired lease approved-parent mode changed")
+    if live_identity.get("owner_uid") != approved_identity.get("owner_uid"):
+        raise RetentionError("retired lease approved-parent owner changed")
+    if live_identity.get("sticky") != approved_identity.get("sticky"):
+        raise RetentionError("retired lease approved-parent sticky bit changed")
+
+    mismatched_keys = {
+        key for key in set(live_identity.keys()) | set(approved_identity.keys())
+        if live_identity.get(key) != approved_identity.get(key)
+    }
+    if not mismatched_keys.issubset({"device", "filesystem_id"}):
+        raise RetentionError("retired lease approved-parent identity changed")
+
+
+def _verify_completed_retirement(lease: Mapping[str, Any]) -> dict[str, Any]:
+    """Verify a completed cleanup without treating it as successful execution."""
+    build_id = lease.get("build_id")
+    status = lease.get("retirement_status")
+    retired_at = lease.get("retired_at_unix")
+    if (not isinstance(build_id, str) or not build_id
+            or status not in (None, "COMPLETED")
+            or not isinstance(retired_at, (int, float)) or isinstance(retired_at, bool)
+            or not math.isfinite(float(retired_at))):
+        raise RetentionError("retired lease has an invalid identity, status, or timestamp")
+    path_text = lease.get("path")
+    quarantine_name = lease.get("quarantine_name")
+    if (not isinstance(path_text, str) or not Path(path_text).is_absolute()
+            or Path(path_text).parent != BUILD_ROOT
+            or Path(path_text).name != build_id
+            or lease.get("approved_parent") != str(BUILD_ROOT)
+            or not isinstance(quarantine_name, str)
+            or not re.fullmatch(re.escape(f".retiring-{build_id}-") + r"[0-9a-f]{32}", quarantine_name)):
+        raise RetentionError("retired lease does not bind its canonical build and quarantine paths")
+    _verify_completed_retired_parent_identity(
+        _root_identity(BUILD_ROOT, create=False), lease)
+    parent_fd = _open_dir(BUILD_ROOT)
+    try:
+        if _exists_at(parent_fd, build_id) or _exists_at(parent_fd, quarantine_name):
+            raise RetentionError("retired build root or quarantine unexpectedly exists")
+    finally:
+        os.close(parent_fd)
+    receipt_path = RECEIPT_ROOT / f"{build_id}.json"
+    if lease.get("cleanup_receipt_path") != str(receipt_path):
+        raise RetentionError("retired lease does not reference its canonical receipt path")
+    receipt = _read_json(receipt_path, sealed=True)
+    expected = {
+        "result": "REMOVED", "state": "REMOVED", "build_id": build_id,
+        "path": path_text, "quarantine_path": str(BUILD_ROOT / quarantine_name),
+        "build_device": lease.get("build_device"),
+        "build_inode": lease.get("build_inode"),
+        "build_filesystem_id": lease.get("build_filesystem_id"),
+        "build_manifest_id": lease.get("build_manifest_id"),
+        "build_manifest_sha256": lease.get("build_manifest_sha256"),
+        "failure_evidence_index_sha256": lease.get("failure_evidence_index_sha256"),
+    }
+    if any(receipt.get(key) != value for key, value in expected.items()):
+        raise RetentionError("retirement receipt does not bind the exact lease identity")
+
+    origin = lease.get("retirement_from_state")
+    if origin not in ("COMPLETED", "FAILED") or receipt.get("state_before") != origin:
+        raise RetentionError("retirement receipt does not preserve the exact execution origin")
+    session = lease.get("session_v3")
+    if session is not None and not isinstance(session, Mapping):
+        raise RetentionError("retired Host BuildLease session record is malformed")
+
+    if origin == "FAILED":
+        if lease.get("state") not in {"FAILED", "COMPLETED"}:
+            raise RetentionError("failed execution changed to an invalid terminal lease state")
+        if (lease.get("state") == "COMPLETED"
+                and (status is not None or lease.get("retirement_from_state") != "FAILED")):
+            raise RetentionError("new failed execution was encoded as successful completion")
+        if isinstance(session, Mapping):
+            if (session.get("state") != "FAILED"
+                    or session.get("acceptance_state") == "ACCEPTED"):
+                raise RetentionError("retired failed execution no longer has a failed session outcome")
+        if not isinstance(lease.get("failure_evidence_index_sha256"), str):
+            raise RetentionError("retired failed execution lacks bound failure evidence")
+        if status == "COMPLETED":
+            if (isinstance(session, Mapping)
+                    and not str(session.get("acceptance_state", "")).startswith("REJECTED_")):
+                raise RetentionError("failed execution session does not record rejected output acceptance")
+            if (receipt.get("retirement_status") != "COMPLETED"
+                    or receipt.get("execution_outcome") != "FAILED"
+                    or receipt.get("outputs_accepted") is not False):
+                raise RetentionError("completed failure retirement receipt has inconsistent outcome or acceptance")
+            failure_manifest = _verify_failure_evidence(lease)
+            if failure_manifest.get("outputs_accepted") is not False:
+                raise RetentionError("failed execution evidence does not explicitly reject output acceptance")
+            if isinstance(session, Mapping):
+                first_reason_sha256 = session.get("failure_reason_sha256")
+                if (not isinstance(first_reason_sha256, str)
+                        or failure_manifest.get("failure_reason_sha256") != first_reason_sha256
+                        or lease.get("failure_reason_sha256") != first_reason_sha256):
+                    raise RetentionError("failed execution receipt changed its first failure reason")
+        else:
+            # Read historical terminal records without rewriting their signed bytes.
+            if (receipt.get("execution_outcome") not in (None, "FAILED")
+                    or receipt.get("outputs_accepted") not in (None, False)):
+                raise RetentionError("legacy failed retirement receipt claims successful output acceptance")
+    else:
+        if lease.get("state") != "COMPLETED":
+            raise RetentionError("successful execution lost its completed lease state")
+        if isinstance(session, Mapping) and session.get("state") != "ACCEPTED":
+            raise RetentionError("completed Host BuildLease v3 session is not accepted")
+        if status == "COMPLETED" and (
+                receipt.get("retirement_status") != "COMPLETED"
+                or receipt.get("execution_outcome") != "SUCCEEDED"
+                or receipt.get("outputs_accepted") is not True):
+            raise RetentionError("completed retirement receipt does not preserve successful acceptance")
+        if receipt.get("execution_outcome") not in (None, "SUCCEEDED"):
+            raise RetentionError("successful retirement receipt has an inconsistent execution outcome")
+        if receipt.get("outputs_accepted") not in (None, True):
+            raise RetentionError("successful retirement receipt rejects its accepted outputs")
+    return receipt
+
 def _read_file_descriptor(path: Path) -> bytes:
     parent_fd = _open_dir(path.parent)
     try:
@@ -4132,14 +9390,95 @@ def _read_file_descriptor(path: Path) -> bytes:
     finally:
         os.close(parent_fd)
 
+def _host_v3_preacceptance_marker_matches(marker: Mapping[str, Any],
+                                          accepted_lease: Mapping[str, Any]) -> bool:
+    """Recognize only the exact sealed FINALIZING marker that preceded acceptance."""
+    accepted_session = accepted_lease.get("session_v3")
+    marker_session = marker.get("session_v3")
+    if not isinstance(accepted_session, Mapping) or not isinstance(marker_session, Mapping):
+        return False
+    finalizing_digest = accepted_session.get("finalizing_terminal_sha256")
+    return bool(
+        accepted_lease.get("completion_contract") == "HOST_BUILDLEASE_V3_MANIFEST_FIRST_V1"
+        and accepted_lease.get("state") in {"COMPLETED", "RETIRING"}
+        and (accepted_lease.get("state") != "RETIRING"
+             or accepted_lease.get("retirement_from_state") == "COMPLETED")
+        and marker.get("state") == "ACTIVE"
+        and marker.get("build_id") == accepted_lease.get("build_id")
+        and marker.get("path") == accepted_lease.get("path")
+        and marker.get("build_device") == accepted_lease.get("build_device")
+        and marker.get("build_inode") == accepted_lease.get("build_inode")
+        and marker.get("build_filesystem_id") == accepted_lease.get("build_filesystem_id")
+        and marker.get("approved_parent_identity") == accepted_lease.get("approved_parent_identity")
+        and marker.get("build_manifest_id") is None
+        and marker.get("build_manifest_sha256") is None
+        and marker.get("completion_contract") is None
+        and marker_session.get("state") == "FINALIZING"
+        and marker_session.get("acceptance_state") == "UNACCEPTED_FINALIZING_MANIFEST"
+        and marker_session.get("write_quiescence_state")
+            == "WRITABLE_IMAGE_DETACHED_READONLY_EVIDENCE_HASHED"
+        and accepted_session.get("state") == "ACCEPTED"
+        and accepted_session.get("acceptance_state") == "HOST_BUILDLEASE_V3_WRITER_QUIESCED"
+        and accepted_session.get("plan_sha256") == marker_session.get("plan_sha256")
+        and isinstance(finalizing_digest, str)
+        and re.fullmatch(r"[0-9a-f]{64}", finalizing_digest) is not None
+        and marker_session.get("terminal_sha256") == finalizing_digest
+        and marker_session.get("finalizing_terminal_sha256") == finalizing_digest
+        and marker_session.get("build_manifest_id") is None
+        and marker_session.get("build_manifest_sha256") is None
+        and marker_session.get("completion_terminal_sha256") is None
+        and marker_session.get("detached_image_identity")
+            == accepted_session.get("detached_image_identity")
+        and marker_session.get("readonly_detached_identity")
+            == accepted_session.get("readonly_detached_identity")
+    )
+
+def _repair_accepted_host_v3_marker(root_fd: int, marker: Mapping[str, Any], marker_digest: str,
+                                    lease: Mapping[str, Any]) -> dict[str, Any] | None:
+    """Restore the accepted marker after a crash between lease and marker commits."""
+    session = lease.get("session_v3")
+    expected_stale_digest = (session.get("preacceptance_marker_sha256")
+                             if isinstance(session, Mapping) else None)
+    if (not isinstance(expected_stale_digest, str)
+            or re.fullmatch(r"[0-9a-f]{64}", expected_stale_digest) is None
+            or marker_digest != expected_stale_digest
+            or not _host_v3_preacceptance_marker_matches(marker, lease)):
+        return None
+    promoted_marker = dict(marker)
+    promoted_marker.update(lease)
+    _write_marker(root_fd, promoted_marker)
+    os.fsync(root_fd)
+    recovered, _recovered_digest = _read_marker_with_digest(root_fd)
+    if (recovered.get("build_id") != lease.get("build_id")
+            or recovered.get("path") != lease.get("path")
+            or recovered.get("state") != lease.get("state")
+            or recovered.get("build_device") != lease.get("build_device")
+            or recovered.get("build_inode") != lease.get("build_inode")
+            or recovered.get("build_manifest_id") != lease.get("build_manifest_id")
+            or recovered.get("build_manifest_sha256") != lease.get("build_manifest_sha256")
+            or recovered.get("session_v3") != lease.get("session_v3")):
+        raise RetentionError("recovered Host-v3 marker does not match its accepted lease")
+    return recovered
+
 def _retire(lease: dict[str, Any], *, reason: str) -> dict[str, Any]:
     """Quarantine, revalidate, and descriptor-delete one private leased build root."""
+    lease_path = lease.get("path")
+    if isinstance(lease_path, str):
+        _refuse_protected_path_mutation(lease_path, "retirement")
     state = lease.get("state")
     if state not in {"COMPLETED", "FAILED", "RETIRING"}:
         raise RetentionError(f"build state is not retirement-eligible: {state}")
     origin_state = lease.get("retirement_from_state", state)
     if origin_state not in {"COMPLETED", "FAILED"}:
         raise RetentionError(f"invalid retirement origin state: {origin_state}")
+    retirement_status = lease.get("retirement_status")
+    if (retirement_status not in (None, "PENDING", "COMPLETED")
+            or (retirement_status == "COMPLETED" and lease.get("retired_at_unix") is None)
+            or (retirement_status == "PENDING" and state != "RETIRING")):
+        raise RetentionError("lease retirement status is inconsistent with its cleanup state")
+    if lease.get("retired_at_unix") is not None:
+        # The exact sealed receipt is the idempotency key for a terminal cleanup.
+        return _verify_completed_retirement(lease)
     build_id = str(lease.get("build_id", ""))
     manifest: dict[str, Any] | None = None
     if origin_state == "COMPLETED":
@@ -4148,7 +9487,13 @@ def _retire(lease: dict[str, Any], *, reason: str) -> dict[str, Any]:
                 or lease.get("build_manifest_sha256") != digest):
             raise RetentionError("lease does not bind the verified build manifest")
     else:
-        _verify_failure_evidence(lease)
+        failure_evidence = _verify_failure_evidence(lease)
+        if _is_r71_pregraph_failure(lease):
+            admission_evidence = _session_start_admission_evidence(lease)
+            if (failure_evidence.get("admission_decision") != "ALLOW"
+                    or admission_evidence.get("admission_decision") != "ALLOW"):
+                raise RetentionError(
+                    "R71 pregraph failure retirement requires its authenticated signed ALLOW")
 
     path = Path(lease["path"])
     parent = Path(lease["approved_parent"])
@@ -4181,10 +9526,20 @@ def _retire(lease: dict[str, Any], *, reason: str) -> dict[str, Any]:
                     or receipt.get("build_inode") != lease.get("build_inode")
                     or receipt.get("build_filesystem_id") != lease.get("build_filesystem_id")):
                 raise RetentionError("retirement receipt does not bind the exact build identity")
+            execution_outcome = "FAILED" if origin_state == "FAILED" else "SUCCEEDED"
+            outputs_accepted = origin_state == "COMPLETED"
+            if (receipt.get("state_before") != origin_state
+                    or receipt.get("execution_outcome") not in (None, execution_outcome)
+                    or receipt.get("outputs_accepted") not in (None, outputs_accepted)
+                    or receipt.get("retirement_status") not in (None, "PENDING", "COMPLETED")):
+                raise RetentionError("retirement receipt conflicts with the immutable execution outcome")
             if receipt.get("state") == "RETIREMENT_INTENT":
                 if not lease.get("cleanup_attempted"):
                     raise RetentionError("build vanished without a recorded cleanup attempt")
                 receipt.update({"state": "REMOVED", "result": "REMOVED",
+                                "retirement_status": "COMPLETED",
+                                "execution_outcome": execution_outcome,
+                                "outputs_accepted": outputs_accepted,
                                 "filesystem_free_after_bytes": shutil.disk_usage(REPO).free,
                                 "completed_at_unix": time.time(),
                                 "recovered_after_interrupted_finalization": True})
@@ -4193,8 +9548,18 @@ def _retire(lease: dict[str, Any], *, reason: str) -> dict[str, Any]:
                 _write_json(receipt_path, receipt, replace=True, sealed=True)
             elif receipt.get("state") != "REMOVED" or receipt.get("result") != "REMOVED":
                 raise RetentionError("build is absent without a matching successful receipt")
-            _store_lease(dict(lease, state="COMPLETED", retired_at_unix=time.time(),
-                              cleanup_receipt_path=str(receipt_path)))
+            elif (receipt.get("retirement_status") != "COMPLETED"
+                  or receipt.get("execution_outcome") != execution_outcome
+                  or receipt.get("outputs_accepted") is not outputs_accepted):
+                # Upgrade a legacy R26 receipt only while recovering its already
+                # removed root and before the terminal lease write.
+                receipt.update({"retirement_status": "COMPLETED",
+                                "execution_outcome": execution_outcome,
+                                "outputs_accepted": outputs_accepted})
+                _write_json(receipt_path, receipt, replace=True, sealed=True)
+            terminal = dict(lease, state=origin_state, retirement_status="COMPLETED",
+                            retired_at_unix=time.time(), cleanup_receipt_path=str(receipt_path))
+            _store_lease(terminal)
             return _read_json(receipt_path, sealed=True)
 
         entry_name = quarantine if quarantine_exists else path.name
@@ -4210,11 +9575,19 @@ def _retire(lease: dict[str, Any], *, reason: str) -> dict[str, Any]:
                     or getattr(os.fstatvfs(target_fd), "f_fsid", None) != lease.get("build_filesystem_id")):
                 raise RetentionError("build root changed while opening for retirement")
             marker: dict[str, Any] | None = None
+            marker_digest: str | None = None
             try:
-                marker = _read_marker(target_fd)
+                marker, marker_digest = _read_marker_with_digest(target_fd)
             except (FileNotFoundError, RetentionError, json.JSONDecodeError):
                 if not lease.get("cleanup_attempted"):
                     raise RetentionError("build marker missing before a durable cleanup intent")
+            if (marker is not None and marker.get("state") not in {origin_state, "RETIRING"}
+                    and marker_digest is not None):
+                repaired_marker = _repair_accepted_host_v3_marker(
+                    target_fd, marker, marker_digest, lease)
+                if repaired_marker is None:
+                    raise RetentionError("build marker does not match the accepted lease or its exact finalizing predecessor")
+                marker = repaired_marker
             if marker is not None and (marker.get("build_id") != build_id or marker.get("path") != str(path)
                                        or marker.get("state") not in {origin_state, "RETIRING"}):
                 raise RetentionError("build ID/state marker verification failed")
@@ -4231,18 +9604,21 @@ def _retire(lease: dict[str, Any], *, reason: str) -> dict[str, Any]:
             retiring = dict(lease, state="RETIRING", retirement_from_state=origin_state,
                             retirement_reason=reason, retirement_started_unix=time.time(),
                             quarantine_name=quarantine, retirement_tree_stats=stats,
-                            cleanup_attempted=False)
+                            cleanup_attempted=False, retirement_status="PENDING")
             _store_lease(retiring)
         else:
             retiring = dict(lease)
+            retiring["retirement_status"] = "PENDING"
             retiring.setdefault("retirement_reason", reason)
             if (not isinstance(quarantine, str)
                     or not re.fullmatch(re.escape(f".retiring-{build_id}-") + r"[0-9a-f]{32}", quarantine)):
                 raise RetentionError("retirement quarantine name is not build-bound")
             retiring.setdefault("retirement_tree_stats", stats)
 
+        allow_live_host_v3_descendants = _session_has_verified_host_v3_quiescence(lease)
         if not quarantine_exists:
-            _require_no_live_process(path)
+            if not allow_live_host_v3_descendants:
+                _require_no_live_process(path)
             target_fd = os.open(path.name, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0)
                                 | getattr(os, "O_NOFOLLOW", 0), dir_fd=parent_fd)
             try:
@@ -4250,7 +9626,8 @@ def _retire(lease: dict[str, Any], *, reason: str) -> dict[str, Any]:
                 if (marker.get("build_id") != build_id or marker.get("path") != str(path)
                         or marker.get("state") not in {origin_state, "RETIRING"}):
                     raise RetentionError("build marker changed before RETIRING transition")
-                marker.update({"state": "RETIRING", "retirement_started_unix": retiring["retirement_started_unix"]})
+                marker.update({"state": "RETIRING", "retirement_status": "PENDING",
+                               "retirement_started_unix": retiring["retirement_started_unix"]})
                 _write_marker(target_fd, marker)
                 os.fsync(target_fd)
                 opened = os.fstat(target_fd)
@@ -4298,19 +9675,23 @@ def _retire(lease: dict[str, Any], *, reason: str) -> dict[str, Any]:
         finally:
             os.close(target_fd)
 
-        _require_no_live_process(parent / quarantine)
+        if not allow_live_host_v3_descendants:
+            _require_no_live_process(parent / quarantine)
         free_before = shutil.disk_usage(REPO).free
         artifact_hashes = [row["sha256"] for row in manifest["artifacts"]] if manifest else []
         try:
             intent = _read_json(receipt_path, sealed=True)
         except FileNotFoundError:
             intent = {"schema_version": 2, "state": "RETIREMENT_INTENT", "result": "PENDING",
+                      "retirement_status": "PENDING",
                       "build_id": build_id, "path": str(path), "quarantine_path": str(parent / quarantine),
                       "build_device": lease["build_device"], "build_inode": lease["build_inode"],
                       "build_filesystem_id": lease.get("build_filesystem_id"),
                       "category": "COMPLETED BUILD DIRECTORY" if origin_state == "COMPLETED"
                                   else "FAILED BUILD DIRECTORY",
                       "state_before": origin_state,
+                      "execution_outcome": "FAILED" if origin_state == "FAILED" else "SUCCEEDED",
+                      "outputs_accepted": origin_state == "COMPLETED",
                       "action": "AUTO_RETIRED_AFTER_ARTIFACT_VERIFICATION" if origin_state == "COMPLETED"
                                 else "AUTO_RETIRED_AFTER_FAILURE_EVIDENCE",
                       "logical_bytes": stats["logical_bytes"],
@@ -4334,6 +9715,12 @@ def _retire(lease: dict[str, Any], *, reason: str) -> dict[str, Any]:
                     or intent.get("build_manifest_sha256") != lease.get("build_manifest_sha256")
                     or intent.get("build_filesystem_id") != lease.get("build_filesystem_id")):
                 raise RetentionError("existing retirement receipt conflicts with build identity")
+            if (intent.get("state_before") != origin_state
+                    or intent.get("execution_outcome") not in
+                        (None, "FAILED" if origin_state == "FAILED" else "SUCCEEDED")
+                    or intent.get("outputs_accepted") not in (None, origin_state == "COMPLETED")
+                    or intent.get("retirement_status") not in (None, "PENDING", "COMPLETED")):
+                raise RetentionError("existing retirement receipt conflicts with execution outcome")
             if intent.get("quarantine_path") != str(parent / quarantine):
                 raise RetentionError("existing retirement receipt names another quarantine directory")
             if intent.get("state") == "REMOVED":
@@ -4349,7 +9736,9 @@ def _retire(lease: dict[str, Any], *, reason: str) -> dict[str, Any]:
             raise RetentionError(f"cleanup failed for {build_id}: {error}") from error
         if _exists_at(parent_fd, quarantine):
             raise RetentionError("quarantine remains after descriptor-relative cleanup")
-        final = dict(intent, state="REMOVED", result="REMOVED",
+        final = dict(intent, state="REMOVED", result="REMOVED", retirement_status="COMPLETED",
+                     execution_outcome="FAILED" if origin_state == "FAILED" else "SUCCEEDED",
+                     outputs_accepted=origin_state == "COMPLETED",
                      filesystem_free_after_bytes=shutil.disk_usage(REPO).free,
                      completed_at_unix=time.time())
         final["measured_free_delta_bytes"] = (
@@ -4358,22 +9747,400 @@ def _retire(lease: dict[str, Any], *, reason: str) -> dict[str, Any]:
         verified_receipt = _read_json(receipt_path, sealed=True)
         if verified_receipt.get("result") != "REMOVED":
             raise RetentionError("durable cleanup receipt failed readback")
-        _store_lease(dict(retiring, state="COMPLETED", retired_at_unix=time.time(),
+        _store_lease(dict(retiring, state=origin_state, retirement_status="COMPLETED",
+                          retired_at_unix=time.time(),
                           cleanup_receipt_path=str(receipt_path)))
         return verified_receipt
     finally:
         os.close(parent_fd)
 
-def _retire_pending_locked() -> list[dict[str, Any]]:
+
+def _discard_unaccepted_host_v3_completion(lease: Mapping[str, Any]) -> None:
+    """Remove only this uncommitted v3 manifest/evidence/terminal namespace after rejection."""
+    build_id = str(lease.get("build_id", ""))
+    if (not re.fullmatch(r"[A-Za-z0-9._-]{1,128}", build_id)
+            or lease.get("state") not in {"ACTIVE", "FAILED"}
+            or lease.get("build_manifest_id") is not None):
+        raise RetentionError("cannot discard completion evidence after a manifest was committed")
+    parent_fd = _open_dir(MANIFEST_ROOT)
+    try:
+        terminal_name = f"{build_id}.completion-terminal"
+        try:
+            terminal_info = os.stat(terminal_name, dir_fd=parent_fd, follow_symlinks=False)
+        except FileNotFoundError:
+            terminal_info = None
+        if terminal_info is not None:
+            if not stat.S_ISREG(terminal_info.st_mode) or terminal_info.st_nlink != 1:
+                raise RetentionError("unaccepted v3 terminal path is not one regular file")
+            os.unlink(terminal_name, dir_fd=parent_fd)
+            os.fsync(parent_fd)
+        manifest_name = f"{build_id}.json"
+        try:
+            manifest_info = os.stat(manifest_name, dir_fd=parent_fd, follow_symlinks=False)
+        except FileNotFoundError:
+            manifest_info = None
+        if manifest_info is not None:
+            if not stat.S_ISREG(manifest_info.st_mode) or manifest_info.st_nlink != 1:
+                raise RetentionError("unaccepted v3 manifest path is not one regular file")
+            os.unlink(manifest_name, dir_fd=parent_fd)
+            os.fsync(parent_fd)
+        evidence_name = f"{build_id}.evidence"
+        try:
+            evidence_info = os.stat(evidence_name, dir_fd=parent_fd, follow_symlinks=False)
+        except FileNotFoundError:
+            evidence_info = None
+        if evidence_info is not None:
+            if not stat.S_ISDIR(evidence_info.st_mode):
+                raise RetentionError("unaccepted v3 evidence path is not a real directory")
+            _remove_verified_tree_at(
+                parent_fd, evidence_name, expected_device=evidence_info.st_dev,
+                expected_inode=evidence_info.st_ino, logical_path=MANIFEST_ROOT / evidence_name,
+                expected_filesystem_id=getattr(os.fstatvfs(parent_fd), "f_fsid", None))
+    finally:
+        os.close(parent_fd)
+
+
+def _record_unaccepted_session_failure(lease: dict[str, Any], reason: str, *,
+                                      evidence_fields: Mapping[str, Any] | None = None) -> None:
+    """Write controller-only failure evidence without reading writable workspace outputs."""
+    build_id = str(lease.get("build_id", ""))
+    root = MANIFEST_ROOT / f"{build_id}.failure"
+    session = lease.get("session_v3")
+    first_reason_sha256 = session.get("failure_reason_sha256") if isinstance(session, Mapping) else None
+    if not isinstance(first_reason_sha256, str) or not re.fullmatch(r"[0-9a-f]{64}", first_reason_sha256):
+        raise RetentionError("unaccepted v3 failure lacks its immutable first-reason digest")
+    root_fd = _open_dir(root, create=True)
+    os.close(root_fd)
+    message = reason[:MAX_FAILURE_ERROR_BYTES]
+    payload = {"schema_version": 1, "build_id": build_id,
+               "executor_mode": BUILD_SESSION_EXECUTOR_MODE,
+               "executor_version": BUILD_SESSION_SCHEMA_VERSION,
+               "acceptance_state": lease.get("session_v3", {}).get("acceptance_state"),
+               "outputs_accepted": False,
+               "failure_reason": message,
+               "failure_reason_sha256": first_reason_sha256,
+               "failed_at_unix": lease.get("failed_at_unix", time.time()),
+               "failure_evidence_policy": "controller-only; no output copied from writable or uncertain image"}
+    if evidence_fields:
+        payload.update(dict(evidence_fields))
+    manifest_path = root / "failure-manifest.json"
+    if manifest_path.exists() or manifest_path.is_symlink():
+        raise RetentionError("unaccepted v3 failure manifest already exists")
+    _write_json(manifest_path, payload, replace=False)
+    files = _inventory_evidence(root)
+    raw = _read_file_descriptor(manifest_path)
+    lease.update({"failure_evidence_root": str(root),
+                  "failure_evidence_path": str(manifest_path),
+                  "failure_evidence_sha256": hashlib.sha256(raw).hexdigest(),
+                  "failure_evidence_files": files,
+                  "failure_evidence_index_sha256": hashlib.sha256(_canonical_json(files)).hexdigest()})
+    _store_lease(lease)
+
+
+def _capture_lsof_holder_evidence(path: Path) -> dict[str, Any]:
+    """Capture bounded PID-only liveness evidence for one exact path."""
+    selected = Path(path).absolute()
+    try:
+        proc = subprocess.run(["/usr/sbin/lsof", "-t", "+D", str(selected)], text=True,
+                              stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False,
+                              timeout=30)
+    except (OSError, subprocess.TimeoutExpired) as error:
+        return {"path": str(selected), "status": "ERROR", "return_code": None,
+                "process_ids": [], "process_ids_truncated": False,
+                "stderr": str(error)[:MAX_FAILURE_ERROR_BYTES]}
+    raw_pids = [row.strip() for row in proc.stdout.splitlines() if row.strip()]
+    valid_pids = [int(row) for row in raw_pids if row.isascii() and row.isdecimal()]
+    if proc.returncode == 1 and not raw_pids and not proc.stderr:
+        status = "NO_HOLDERS"
+    elif proc.returncode == 0 and valid_pids and len(valid_pids) == len(raw_pids):
+        status = "HOLDERS"
+    else:
+        status = "ERROR"
+    return {"path": str(selected), "status": status, "return_code": proc.returncode,
+            "process_ids": valid_pids[:128], "process_ids_truncated": len(valid_pids) > 128,
+            "stderr": proc.stderr[:MAX_FAILURE_ERROR_BYTES]}
+
+
+def _session_start_admission_evidence(lease: Mapping[str, Any]) -> dict[str, Any]:
+    """Return ALLOW only after verifying the exact signed admission for this lease."""
+    owner = lease.get("owner_experiment")
+    if not isinstance(owner, str) or not _is_r6a_r71_admission_id(owner):
+        return {"admission_decision": "NOT_APPLICABLE"}
+    try:
+        from storage_policy import (_experiment_manifest_path, _read_file_nofollow,
+                                    _verify_manifest_signature)
+        raw = _read_file_nofollow(Path(_experiment_manifest_path(owner)))
+        manifest = json.loads(raw)
+        claim = manifest.get("admission_claim") if isinstance(manifest, Mapping) else None
+        session = lease.get("session_v3")
+        admission_identity = (session.get("admission_identity")
+                              if isinstance(session, Mapping) else None)
+        if (not isinstance(manifest, Mapping) or not isinstance(claim, Mapping)
+                or not _verify_manifest_signature(manifest)
+                or manifest.get("decision") != "ALLOW"
+                or manifest.get("experiment_id") != owner
+                or manifest.get("r71_build_id") != lease.get("build_id")
+                or claim.get("build_id") != lease.get("build_id")
+                or (isinstance(admission_identity, Mapping)
+                    and admission_identity.get("admission_id") not in (None, owner))):
+            return {"admission_decision": "UNKNOWN",
+                    "admission_manifest_sha256": hashlib.sha256(raw).hexdigest()}
+        return {"admission_decision": "ALLOW",
+                "admission_id": owner,
+                "admission_manifest_path": str(_experiment_manifest_path(owner)),
+                "admission_manifest_sha256": hashlib.sha256(raw).hexdigest()}
+    except Exception:
+        return {"admission_decision": "UNKNOWN"}
+
+
+def _is_r71_pregraph_failure(lease: Mapping[str, Any]) -> bool:
+    """Classify an R71 pregraph failure from durable lifecycle state, not its command label."""
+    session = lease.get("session_v3")
+    return bool(
+        _is_r6a_r71_admission_id(str(lease.get("owner_experiment", "")))
+        and lease.get("session_started") is True
+        and lease.get("build_manifest_id") is None
+        and lease.get("failed_command") in (
+            ["session-start"], ["r71-admission-revalidation"],
+            ["host-buildlease-v3", "controller-crash-recovery"])
+        and isinstance(session, Mapping)
+        and session.get("state") == "FAILED"
+        and session.get("next_step_index") == 0
+        and session.get("inflight_step_index") is None
+        and session.get("failed_step_index") is None
+        and session.get("step_receipts") == []
+        and session.get("graph_outputs") in (None, {}))
+
+
+def _session_has_verified_host_v3_quiescence(lease: Mapping[str, Any]) -> bool:
+    session = lease.get("session_v3")
+    return bool(isinstance(session, Mapping)
+                and session.get("executor_mode") == BUILD_SESSION_EXECUTOR_MODE
+                and session.get("executor_version") == BUILD_SESSION_SCHEMA_VERSION
+                and session.get("state") == "ACCEPTED"
+                and session.get("write_quiescence_state") == "WRITABLE_IMAGE_DETACHED_READONLY_EVIDENCE_HASHED"
+                and session.get("acceptance_state") == "HOST_BUILDLEASE_V3_WRITER_QUIESCED"
+                and lease.get("state") in {"COMPLETED", "RETIRING"}
+                and isinstance(lease.get("build_manifest_id"), str)
+                and isinstance(lease.get("build_manifest_sha256"), str))
+
+def _recover_failed_session_workspace_detach(lease: dict[str, Any]) -> None:
+    """Retry an exact v3 workspace detach before cleanup, leaving uncertainty blocking."""
+    session = lease.get("session_v3")
+    if not isinstance(session, dict):
+        return
+    detach_uncertain = lease.get("workspace_detach_uncertain") is True
+    candidates = (session.get("readonly_mount_identity"),
+                  session.get("readonly_detached_identity"),
+                  session.get("detached_workspace_identity"),
+                  session.get("workspace_mount_identity"))
+    if not detach_uncertain and not any(
+            isinstance(item, dict) and item.get("attached") is True for item in candidates):
+        return
+    if (session.get("process_containment_uncertain") is True
+            or session.get("output_capture_uncertain") is True):
+        raise RetentionError("failed BuildLease still has uncertain process or output containment")
+    path = Path(str(lease.get("path", "")))
+    _refuse_protected_path_mutation(path, "failed session workspace detach recovery")
+    try:
+        readonly_mount = session.get("readonly_mount_identity")
+        readonly_detached = session.get("readonly_detached_identity")
+        detached_workspace = session.get("detached_workspace_identity")
+        writable_mount = session.get("workspace_mount_identity")
+        if isinstance(readonly_mount, dict) and readonly_mount.get("attached") is True:
+            if _session_image_row(path) is None:
+                detached = _verify_session_workspace_detached(path, readonly_mount)
+            else:
+                detached = _detach_session_workspace_readonly(path, readonly_mount)
+        elif isinstance(readonly_detached, dict):
+            detached = _verify_session_workspace_detached(path, readonly_detached)
+        elif isinstance(detached_workspace, dict) and _session_image_row(path) is not None:
+            row = _session_image_row(path)
+            if row is None or row.get("writeable") is not False:
+                raise RetentionError("failed BuildLease has an unknown or writable reattached image")
+            _best_effort_detach_unverified_readonly_image(path, detached_workspace)
+            detached = _verify_session_workspace_detached(path, detached_workspace)
+        elif isinstance(detached_workspace, dict):
+            detached = _verify_session_workspace_detached(path, detached_workspace)
+        elif isinstance(writable_mount, dict) and writable_mount.get("attached") is True:
+            detached = _detach_session_workspace(path, writable_mount)
+        elif _session_image_row(path) is not None:
+            raise RetentionError("failed BuildLease has an attached image without a recoverable identity")
+        else:
+            # Crash may have happened before image creation/identity persistence. No attached
+            # filesystem remains, and this rejected lease contains no acceptable outputs.
+            detached = {"attached": False, "image_path": str(path / BUILD_SESSION_WORKSPACE_IMAGE_NAME),
+                        "mountpoint": str(path / BUILD_SESSION_WORKSPACE_NAME),
+                        "detached_at_unix": time.time(), "recovery_identity_unavailable": True}
+    except BaseException as error:
+        lease["workspace_detach_uncertain"] = True
+        lease["workspace_detach_failure"] = repr(error)[:MAX_FAILURE_ERROR_BYTES]
+        lease["workspace_holder_evidence"] = _capture_lsof_holder_evidence(
+            path / BUILD_SESSION_WORKSPACE_NAME)
+        _store_lease(lease)
+        raise RetentionError(
+            f"failed BuildLease workspace remains blocking until detach can be verified: {error}") from error
+    session["workspace_mount_identity"] = detached
+    session["workspace_detached_at_unix"] = detached.get("detached_at_unix")
+    lease["workspace_cleanup_recovery"] = {
+        "status": "DETACHED",
+        "identity": (dict(writable_mount) if isinstance(writable_mount, dict) else None),
+        "result_identity": dict(detached),
+    }
+    if isinstance(session.get("readonly_mount_identity"), dict):
+        session["readonly_mount_identity"] = dict(detached)
+        session["readonly_detached_identity"] = dict(detached)
+    session["write_quiescence_state"] = "UNKNOWN_OR_FAILED"
+    session["acceptance_state"] = "REJECTED_NO_OUTPUT_PROMOTION"
+    lease["session_v3"] = session
+    lease.pop("workspace_detach_uncertain", None)
+    lease.pop("workspace_detach_failure", None)
+    _store_lease(lease)
+    root_fd = _open_dir(path)
+    try:
+        marker = _read_marker(root_fd)
+        if marker.get("build_id") != lease.get("build_id") or marker.get("state") != "FAILED":
+            raise RetentionError("failed BuildLease marker changed during workspace detach recovery")
+        marker.update(lease)
+        _write_marker(root_fd, marker)
+        os.fsync(root_fd)
+    finally:
+        os.close(root_fd)
+    holder_evidence = _capture_lsof_holder_evidence(path)
+    lease["residual_holder_evidence"] = holder_evidence
+    _store_lease(lease)
+    if holder_evidence["status"] != "NO_HOLDERS":
+        raise RetentionError(
+            "failed BuildLease workspace was detached, but residual holders remain on the lease root")
+
+
+def _reject_interrupted_host_v3_session(lease: dict[str, Any]) -> None:
+    """Convert an orphaned active session to durable failure; never resume or promote it."""
+    session = lease.get("session_v3")
+    if (lease.get("state") != "ACTIVE" or not isinstance(session, dict)
+            or lease.get("build_manifest_id") is not None):
+        raise RetentionError("interrupted BuildLease recovery found a non-active or already accepted session")
+    reason = "controller disappeared before a committed host BuildLease v3 completion"
+    failed_at = time.time()
+    session.update({"state": "FAILED", "acceptance_state": "REJECTED_CONTROLLER_CRASH_UNKNOWN",
+                    "write_quiescence_state": "UNKNOWN_OR_FAILED", "failed_at_unix": failed_at,
+                    "failure_reason": reason,
+                    "failure_reason_sha256": hashlib.sha256(reason.encode()).hexdigest()})
+    lease.update({"state": "FAILED", "session_v3": session, "failed_at_unix": failed_at,
+                  "failed_command": ["host-buildlease-v3", "controller-crash-recovery"],
+                  "return_code": -1, "workspace_detach_uncertain": True,
+                  "failure_reason_sha256": session["failure_reason_sha256"]})
+    _store_lease(lease)
+    path = Path(str(lease.get("path", "")))
+    root_fd = _open_dir(path)
+    try:
+        marker = _read_marker(root_fd)
+        if marker.get("build_id") != lease.get("build_id") or marker.get("state") != "ACTIVE":
+            raise RetentionError("interrupted v3 session marker changed during crash recovery")
+        marker.update(lease)
+        marker["state"] = "FAILED"
+        _write_marker(root_fd, marker)
+        os.fsync(root_fd)
+    finally:
+        os.close(root_fd)
+    session_dir = path / BUILD_SESSION_DIRECTORY
+    for name in (BUILD_SESSION_TERMINAL, "session-terminal.pending.json"):
+        terminal_path = session_dir / name
+        try:
+            info = terminal_path.lstat()
+        except FileNotFoundError:
+            continue
+        if not stat.S_ISREG(info.st_mode) or info.st_nlink != 1:
+            raise RetentionError("interrupted v3 terminal path is not one regular controller receipt")
+        terminal_path.unlink()
+    _discard_unaccepted_host_v3_completion(lease)
+    session = lease.get("session_v3")
+    admission_evidence = _session_start_admission_evidence(lease)
+    next_step_index = session.get("next_step_index") if isinstance(session, Mapping) else None
+    step_receipts = session.get("step_receipts") if isinstance(session, Mapping) else None
+    graph_outputs = session.get("graph_outputs") if isinstance(session, Mapping) else None
+    graph_execution_started = bool(
+        (isinstance(next_step_index, int) and not isinstance(next_step_index, bool)
+         and next_step_index > 0)
+        or (isinstance(session, Mapping)
+            and session.get("inflight_step_index") is not None)
+        or (isinstance(step_receipts, list) and step_receipts)
+        or (isinstance(graph_outputs, Mapping) and graph_outputs))
+    failure_fields: dict[str, Any] = {
+        **admission_evidence,
+        "buildlease_acquired": True,
+        "build_id": lease.get("build_id"),
+        "session_start_attempted": lease.get("session_started") is True,
+        "graph_execution_started": graph_execution_started,
+        "next_step_index": next_step_index,
+        "step_receipts": step_receipts if isinstance(step_receipts, list) else [],
+        "graph_outputs": graph_outputs if isinstance(graph_outputs, Mapping) else {},
+        "finalizing": False,
+        "success": False,
+        "r6a_accepted": False,
+        "outputs_accepted": False,
+    }
+    if (_is_r71_pregraph_failure(lease)
+            and admission_evidence.get("admission_decision") != "ALLOW"):
+        failure_fields["retirement_result"] = {
+            "status": "BLOCKED", "reason": "signed_admission_allow_unverified"}
+    else:
+        failure_fields["retirement_result"] = {"status": "PENDING_AFTER_FAILURE_EVIDENCE"}
+    _record_unaccepted_session_failure(lease, reason, evidence_fields=failure_fields)
+
+
+def _retire_pending_locked(*, protected_roots_verified: bool = False,
+                           preserve_active_buildlease_id: str | None = None,
+                           preserve_active_experiment_id: str | None = None,
+                           allow_pre_dispatch: bool = False) -> list[dict[str, Any]]:
+    if not protected_roots_verified:
+        _verify_protected_evidence_roots()
     receipts = []
     for path in _lease_files():
         lease = _load_lease(path.stem)
         if lease.get("retired_at_unix") is not None:
             continue
+        if (lease.get("build_id") == preserve_active_buildlease_id
+                and lease.get("owner_experiment") == preserve_active_experiment_id
+                and _is_r6a_r71_admission_id(preserve_active_experiment_id)
+                and lease.get("state") == "ACTIVE"
+                and lease.get("session_started") is True
+                and lease.get("retirement_status") is None
+                and lease.get("build_manifest_id") is None
+                and isinstance(lease.get("session_v3"), dict)
+                and lease["session_v3"].get("state") in {"ACTIVE", "RUNNING"}):
+            try:
+                _verified_capacity_workspace(
+                    str(preserve_active_buildlease_id),
+                    allow_pre_dispatch=allow_pre_dispatch)
+            except (OSError, RetentionError, ValueError) as error:
+                if allow_pre_dispatch:
+                    raise RetentionError(
+                        "locked R71 pre-dispatch workspace failed exact verification; "
+                        "refusing interrupted-session recovery while its controller is active") from error
+                pass
+            else:
+                # Gate validation is running under this exact BuildLease lock.
+                # Preserve only its authenticated, mounted R71 session; other
+                # active sessions still pass through normal crash recovery.
+                continue
         if lease.get("state") == "COMPLETED":
             receipts.append(_retire(lease, reason="cap-preflight-retire-completed"))
         elif lease.get("state") == "FAILED":
+            _recover_failed_session_workspace_detach(lease)
             receipts.append(_retire(lease, reason="cap-preflight-retire-failed"))
+        elif lease.get("state") == "ACTIVE" and isinstance(lease.get("session_v3"), dict):
+            session = lease["session_v3"]
+            if (session.get("state") == "RESERVED"
+                    and lease.get("session_started") is not True):
+                # A never-started reservation has no recoverable in-memory
+                # capability. Leave it charged and blocking until an explicit,
+                # reviewed orphan closeout proves it safe to terminalize.
+                continue
+            _reject_interrupted_host_v3_session(lease)
+            lease = _load_lease(path.stem)
+            _recover_failed_session_workspace_detach(lease)
+            receipts.append(_retire(lease, reason="crashed-host-v3-session-rejected"))
         elif lease.get("state") == "RETIRING":
             receipts.append(_retire(lease, reason="resume-retirement"))
         elif lease.get("state") == "PRESERVE_DEBUG":
@@ -4436,7 +10203,41 @@ def _check_legacy_adoption_capacity(path: Path, kind: str) -> None:
 def adopt_legacy(path: Path, *, kind: str, owner_experiment: str, purpose: str,
                  expected_expiry_unix: float | None = None,
                  preserve_debug_reason: str | None = None) -> dict[str, Any]:
+    """Admit an existing root under shared capacity and lease serialization."""
+    from storage_policy import (_acquire_storage_allocation_lock,
+                                _release_storage_allocation_lock,
+                                conservative_project_usage_bytes, disk_free_bytes,
+                                measure_project_usage, projected_storage_admission)
+
+    allocation_lock = _acquire_storage_allocation_lock()
+    try:
+        gate_blockers = _gate_blockers(active_experiment_id=owner_experiment)
+        if gate_blockers:
+            raise RetentionError("Gate 0 blocks legacy BuildLease adoption: "
+                                 + "; ".join(gate_blockers))
+        project_usage = measure_project_usage()
+        admission = projected_storage_admission(
+            current_free_bytes=disk_free_bytes(REPO),
+            current_scoped_bytes=conservative_project_usage_bytes(project_usage),
+            peak_additional_bytes=0,
+        )
+        if not admission["admitted"]:
+            raise RetentionError("shared capacity blocks legacy BuildLease adoption: "
+                                 + "; ".join(admission["blockers"]))
+        return _adopt_legacy_under_storage_allocation_lock(
+            path, kind=kind, owner_experiment=owner_experiment, purpose=purpose,
+            expected_expiry_unix=expected_expiry_unix,
+            preserve_debug_reason=preserve_debug_reason)
+    finally:
+        _release_storage_allocation_lock(allocation_lock)
+
+
+def _adopt_legacy_under_storage_allocation_lock(
+        path: Path, *, kind: str, owner_experiment: str, purpose: str,
+        expected_expiry_unix: float | None = None,
+        preserve_debug_reason: str | None = None) -> dict[str, Any]:
     path = Path(os.path.abspath(path))
+    _refuse_protected_path_mutation(path, "legacy adoption")
     if path not in LEGACY_BUILD_ROOTS:
         raise RetentionError(f"legacy path is not allowlisted: {path}")
     if kind not in KINDS:
@@ -5274,12 +11075,3218 @@ def _sandbox_build_command(command: list[str], build_root: Path,
     return [str(sandbox_exec), "-p", profile, *command], selected_env
 
 
+BUILD_SESSION_SCHEMA_VERSION = 3
+BUILD_SESSION_DIRECTORY = ".build-session-v3"
+BUILD_SESSION_PLAN = "session-plan.json"
+BUILD_SESSION_TERMINAL = "session-terminal.json"
+BUILD_SESSION_TERMINAL_HEADROOM_BYTES = 1024 * 1024
+BUILD_SESSION_OUTPUT_DRAIN_SECONDS = 5.0
+BUILD_SESSION_PROCESS_TERM_SECONDS = 2.0
+BUILD_SESSION_PROCESS_QUIESCE_SECONDS = 8.0
+BUILD_SESSION_PROCESS_EVIDENCE_SAMPLE_PIDS = 256
+BUILD_SESSION_WORKSPACE_NAME = "workspace"
+BUILD_SESSION_WORKSPACE_IMAGE_NAME = ".build-session-v3-workspace.sparseimage"
+BUILD_SESSION_CONTROLLER_HEADROOM_BYTES = 32 * 1024 * 1024
+BUILD_SESSION_TOTAL_LOG_LIMIT_BYTES = 8 * 1024 * 1024
+BUILD_SESSION_PLAN_LIMIT_BYTES = 256 * 1024
+BUILD_SESSION_PREBUILD_ARTIFACT_PREFIX = "r65-candidate4-preflight"
+BUILD_SESSION_PREBUILD_MANIFEST_LIMIT_BYTES = 4 * 1024 * 1024
+BUILD_SESSION_MAX_STEPS = 32
+BUILD_SESSION_CONTROLLER_EVIDENCE_LIMIT_BYTES = 16 * 1024 * 1024
+BUILD_SESSION_MAX_STORAGE_WATCH_EVENTS = BUILD_SESSION_MAX_STEPS * 4 + 16
+BUILD_SESSION_VM_BACKEND_IMPLEMENTED = False
+BUILD_SESSION_HOST_V3_POLICY_ACCEPTED = True
+BUILD_SESSION_HOST_V3_TEST_BYPASS = False
+BUILD_SESSION_EXECUTOR_MODE = "HOST_BUILDLEASE_V3"
+BUILD_SESSION_HOST_V3_POLICY_AMENDMENT_PATH = (
+    REPO / "R6-BUILDLEASE-V3-HOST-EXECUTION-POLICY-AMENDMENT.md")
+BUILD_SESSION_HOST_V3_POLICY_AMENDMENT_SHA256 = (
+    "83f57849e4ec634bfb70c6f9accb0ad5a813ebb8bbb2aaac5cea84c76049b28c")
+BUILD_SESSION_HOST_V3_LEGACY_POLICY_AMENDMENT_SHA256 = (
+    "ea434e13293726fc8c4990fd9df56ede5fd3e53b38a8f8576e6fde1f1ed23a92")
+BUILD_SESSION_HOST_V3_DUAL_GRAPH_POLICY_AMENDMENT_SHA256 = (
+    "83f57849e4ec634bfb70c6f9accb0ad5a813ebb8bbb2aaac5cea84c76049b28c")
+BUILD_SESSION_DUAL_GRAPH_CAPABILITY = 1
+BUILD_SESSION_DUAL_GRAPH_ROLES = ("WINDOWS_PRODUCT", "NATIVE_VERIFICATION")
+BUILD_SESSION_DUAL_GRAPH_IDS = ("windows-product-r6a", "native-verification-r6a")
+BUILD_SESSION_DUAL_GRAPH_PATH = os.pathsep.join((
+    "/usr/bin", "/bin", "/usr/sbin", "/sbin",
+    "/opt/homebrew/Cellar/mingw-w64/14.0.0_3/toolchain-x86_64/bin",
+    "/opt/homebrew/Cellar/glslang/16.6.0/bin",
+    "/opt/homebrew/Cellar/pkgconf/3.0.10/bin",
+    "/opt/homebrew/Cellar/ninja/1.13.2/bin",
+    "/opt/homebrew/Cellar/meson/1.12.1/bin",
+))
+BUILD_SESSION_DUAL_GRAPH_PATH_TOOL_RECEIPTS = {
+    "meson": "meson",
+    "ninja": "ninja",
+    "git": "git",
+    "x86_64-w64-mingw32-gcc": "mingw_cc",
+    "x86_64-w64-mingw32-g++": "mingw_cxx",
+    "x86_64-w64-mingw32-ar": "mingw_ar",
+    "x86_64-w64-mingw32-windres": "mingw_windres",
+    "x86_64-w64-mingw32-strip": "mingw_strip",
+    "x86_64-w64-mingw32-ld": "mingw_linker",
+    "x86_64-w64-mingw32-as": "mingw_assembler",
+    "python3": "native_python3",
+    "touch": "native_touch",
+    "false": "native_false",
+    "clang": "native_cc",
+    "clang++": "native_cxx",
+    "ld": "native_linker",
+    "ar": "native_ar",
+    "ranlib": "native_ranlib",
+    "glslang": "native_glslang",
+    "glslangValidator": "native_glslang",
+    "pkgconf": "native_pkg_config",
+    "pkg-config": "native_pkg_config",
+}
+BUILD_SESSION_DUAL_GRAPH_PATH_ABSENT_EXECUTABLES = ("edid-decode", "rc")
+BUILD_SESSION_DUAL_GRAPH_DIRECTORIES = {
+    "windows-product-r6a": "build.win64-r6a",
+    "native-verification-r6a": "build.native-r6a",
+}
+BUILD_SESSION_DUAL_GRAPH_NATIVE_RUNTIME_RELATIVE = Path(
+    "stage/native-verification/runtime")
+BUILD_SESSION_DUAL_GRAPH_WINDOWS_PE_STAGE_RELATIVE = Path(
+    "stage/windows-pe/present-accounting-production-path.exe")
+BUILD_SESSION_DUAL_GRAPH_WINDOWS_STAGE_ACTION = "STAGE_DECLARED_WINDOWS_PE_OUTPUT"
+BUILD_SESSION_DUAL_GRAPH_NATIVE_STAGE_ACTION = "STAGE_NATIVE_SDL2_RUNTIME_CLOSURE"
+BUILD_SESSION_DUAL_GRAPH_RUNTIME_SOURCE_NAMES = {
+    "SDL2_COMPAT": "libSDL2-2.0.0.dylib",
+    "SDL3": "libSDL3.0.dylib",
+}
+BUILD_SESSION_DUAL_GRAPH_RUNTIME_NAMES = {
+    "SDL2_COMPAT": "libSDL2-2.0.0.dylib",
+    "SDL3": "libSDL3.dylib",
+}
+BUILD_SESSION_DUAL_GRAPH_RUNTIME_PINS = {
+    "SDL2_COMPAT": {
+        "path": "/opt/homebrew/Cellar/sdl2-compat/2.32.74/lib/libSDL2-2.0.0.dylib",
+        "sha256": "2e0b8bd67ab49579fac23e48c6e727afe1e1bff002d883c7220bb0643ff28347",
+    },
+    "SDL3": {
+        "path": "/opt/homebrew/Cellar/sdl3/3.4.18/lib/libSDL3.0.dylib",
+        "sha256": "5fdf17e340d9123e3d57c60c4c3c41777d04fe233d09bcd00874de09281746ab",
+    },
+}
+BUILD_SESSION_DUAL_GRAPH_NATIVE_LOADER_BASENAME = "libSDL2-2.0.0.dylib"
+BUILD_SESSION_DUAL_GRAPH_NATIVE_LOADER_RESOLUTION_CLAIM = (
+    "STATIC_LOAD_COMMANDS_AND_STAGED_HASHES_BOUND; DYLD_RESOLUTION_UNPROVEN")
+BUILD_SESSION_DUAL_GRAPH_TARGETS = {
+    "DEFAULT_PRODUCTION_OUTPUTS": None,
+    "R6A_PRODUCTION_PATH_PE": "tests/present-accounting/present-accounting-production-path.exe",
+    "R6A_PRODUCTION_PATH_MACHO": "tests/present-accounting/present-accounting-production-path",
+    "R6A_PRESENT_ACCOUNTING_UNIT": "tests/present-accounting/present-accounting-unit",
+    "R6A_PRESENT_ACCOUNTING_MODEL": "tests/present-accounting/present-accounting-model",
+}
+BUILD_SESSION_DUAL_GRAPH_NATIVE_TEST_BINDINGS = {
+    "r6a-production-path-macho": {
+        "test_class": "PRODUCTION_PATH",
+        "producer_target": "R6A_PRODUCTION_PATH_MACHO",
+        "requires_sdl2_runtime": True,
+    },
+    "r6a-present-accounting-unit": {
+        "test_class": "UNIT",
+        "producer_target": "R6A_PRESENT_ACCOUNTING_UNIT",
+        "requires_sdl2_runtime": False,
+    },
+    "r6a-present-accounting-model": {
+        "test_class": "MODEL",
+        "producer_target": "R6A_PRESENT_ACCOUNTING_MODEL",
+        "requires_sdl2_runtime": False,
+    },
+}
+BUILD_SESSION_DUAL_GRAPH_TOOL_RECEIPTS = {
+    "WINDOWS_PRODUCT": {
+        "meson": "meson",
+        "ninja": "ninja",
+        "git": "git",
+        "mingw_cc": "x86_64-w64-mingw32-gcc",
+        "mingw_cxx": "x86_64-w64-mingw32-g++",
+        "mingw_ar": "x86_64-w64-mingw32-ar",
+        "mingw_windres": "x86_64-w64-mingw32-windres",
+        "mingw_strip": "x86_64-w64-mingw32-strip",
+        "mingw_linker": "x86_64-w64-mingw32-ld",
+        "mingw_assembler": "x86_64-w64-mingw32-as",
+    },
+    "NATIVE_VERIFICATION": {
+        "meson": "meson",
+        "ninja": "ninja",
+        "git": "git",
+        "meson_python": "python3.14",
+        "native_python3": "python3",
+        "native_cc": "clang",
+        "native_cxx": "clang++",
+        "native_linker": "ld",
+        "native_ar": "ar",
+        "native_ranlib": "ranlib",
+        "native_touch": "touch",
+        "native_false": "false",
+        "native_glslang": "glslang",
+        "native_pkg_config": "pkgconf",
+    },
+}
+BUILD_SESSION_DUAL_GRAPH_TOOL_PINS = {
+    "meson": {"path": "/opt/homebrew/Cellar/meson/1.12.1/bin/meson",
+              "sha256": "0a0a2edc05d1a8ae7c84885f00dc5746ee1a57cc2c746e2b05a3b7dfbca2ed7d"},
+    "ninja": {"path": "/opt/homebrew/Cellar/ninja/1.13.2/bin/ninja",
+              "sha256": "1474a6ef89624613732e0fc9e6d9fe5338b8885916cf64ab8c1c6097123f3ef6"},
+    "git": {"path": "/usr/bin/git",
+            "sha256": "34129c71a01a74f7f3b2443521519b2e5447553fa187f5fcafaaf8c42cc192e2"},
+    "sandbox": {"path": "/usr/bin/sandbox-exec",
+                "sha256": "58839ef01b4eef8aac0d2aa8f9d1c074ae45aafe3533965b030672450064acc8"},
+    "mingw_cc": {"path": "/opt/homebrew/Cellar/mingw-w64/14.0.0_3/toolchain-x86_64/bin/x86_64-w64-mingw32-gcc",
+                 "sha256": "79708a2ac50166252c813e9f9cd38ef8c03aa82d68949aabd97cad53224fae80"},
+    "mingw_cxx": {"path": "/opt/homebrew/Cellar/mingw-w64/14.0.0_3/toolchain-x86_64/bin/x86_64-w64-mingw32-g++",
+                  "sha256": "9ee663107fe2bc1acfecde511fb1936041bade5764bc51feeaed74d0b6c55b80"},
+    "mingw_ar": {"path": "/opt/homebrew/Cellar/mingw-w64/14.0.0_3/toolchain-x86_64/bin/x86_64-w64-mingw32-ar",
+                 "sha256": "763da0f341169ca08d94f66107ae00c64d875ba6755cfa9743caae13b188fb2b"},
+    "mingw_windres": {"path": "/opt/homebrew/Cellar/mingw-w64/14.0.0_3/toolchain-x86_64/bin/x86_64-w64-mingw32-windres",
+                      "sha256": "bc9c851e741de962d8e72c8c166a2993296937a66532531f47417ba485d16d8a"},
+    "mingw_strip": {"path": "/opt/homebrew/Cellar/mingw-w64/14.0.0_3/toolchain-x86_64/bin/x86_64-w64-mingw32-strip",
+                    "sha256": "4b17d36f67fc816d74ae64abc332ee6519909083486b07858568a54542266edc"},
+    "mingw_linker": {"path": "/opt/homebrew/Cellar/mingw-w64/14.0.0_3/toolchain-x86_64/bin/x86_64-w64-mingw32-ld",
+                     "sha256": "7548a92bc617896817361c7c6aac807e406bc07db213126a387bce2604090935"},
+    "mingw_assembler": {"path": "/opt/homebrew/Cellar/mingw-w64/14.0.0_3/toolchain-x86_64/bin/x86_64-w64-mingw32-as",
+                        "sha256": "90666077066960ddc926996a42691fa4443ee0ac3017ae501efc6b7b0f08015b"},
+    "meson_python": {"path": "/opt/homebrew/Cellar/python@3.14/3.14.10/Frameworks/Python.framework/Versions/3.14/bin/python3.14",
+                     "sha256": "5504147b44ff4544bb4f1039d2b4a7bed66aac3cfa4534471e32ef559687f28d"},
+    "native_cc": {"path": "/usr/bin/clang",
+                  "sha256": "34129c71a01a74f7f3b2443521519b2e5447553fa187f5fcafaaf8c42cc192e2"},
+    "native_cxx": {"path": "/usr/bin/clang++",
+                   "sha256": "34129c71a01a74f7f3b2443521519b2e5447553fa187f5fcafaaf8c42cc192e2"},
+    "native_linker": {"path": "/usr/bin/ld",
+                      "sha256": "34129c71a01a74f7f3b2443521519b2e5447553fa187f5fcafaaf8c42cc192e2"},
+    "native_ar": {"path": "/usr/bin/ar",
+                  "sha256": "34129c71a01a74f7f3b2443521519b2e5447553fa187f5fcafaaf8c42cc192e2"},
+    "native_ranlib": {"path": "/usr/bin/ranlib",
+                      "sha256": "34129c71a01a74f7f3b2443521519b2e5447553fa187f5fcafaaf8c42cc192e2"},
+    "native_python3": {"path": "/usr/bin/python3",
+                       "sha256": "34129c71a01a74f7f3b2443521519b2e5447553fa187f5fcafaaf8c42cc192e2"},
+    "native_touch": {"path": "/usr/bin/touch",
+                     "sha256": "83567bc0eb633230f8fb4d5c6ce9ec7a2084d5eeecd53a261d7932f38489d83b"},
+    "native_false": {"path": "/usr/bin/false",
+                     "sha256": "ccdd13063a974daa3ffcb707ac70104fb642eaf4aab3b621e816f36e2e8b59ab"},
+    "native_glslang": {"path": "/opt/homebrew/Cellar/glslang/16.6.0/bin/glslang",
+                       "sha256": "6d4f9f2ba82d0762fedbb9214447318342ebf10781c4f91d07cafab94989fb36"},
+    "native_pkg_config": {"path": "/opt/homebrew/Cellar/pkgconf/3.0.10/bin/pkgconf",
+                          "sha256": "9ab5b4565b097dc4c58515dbdf131adb67386ece44c48488c94670ca478b5ede"},
+}
+BUILD_SESSION_DUAL_GRAPH_MESON_PYTHON_SHEBANG = "/opt/homebrew/opt/python@3.14/bin/python3.14"
+BUILD_SESSION_DUAL_GRAPH_HOST_DEPENDENCY_PINS = {
+    "MINGW_TOOLCHAIN_TREE": {"kind": "tree_internal_symlinks",
+                             "path": "/opt/homebrew/Cellar/mingw-w64/14.0.0_3/toolchain-x86_64",
+                             "sha256": "b40aeaee50bb549fa0136fb22736d61ca512c8b7013465732f7c12eade5f93bd",
+                             "file_count": 4485},
+    "MESON_PYTHON_RUNTIME": {"kind": "file", "path": "/opt/homebrew/Cellar/python@3.14/3.14.10/Frameworks/Python.framework/Versions/3.14/Python",
+                              "sha256": "dfadcc8eac38294be0e5e7acab99fb01f37935c1bea02f1a0f7b83d9bf568a7e"},
+    "MESON_PACKAGE_TREE": {"kind": "tree", "path": "/opt/homebrew/Cellar/meson/1.12.1/lib/python3.14/site-packages/mesonbuild",
+                            "sha256": "f8fd8b940647492cf5978d0c99c8dd65f3008970ee55615942d135ab278e39ef"},
+    "MESON_DISTRIBUTION_METADATA": {"kind": "tree", "path": "/opt/homebrew/Cellar/meson/1.12.1/lib/python3.14/site-packages/meson-1.12.1.dist-info",
+                                    "sha256": "faf546f79259b17f5b8e8ada54f4a50888c27988f989003440865b1227bfed91"},
+    "SDL2_PKGCONFIG": {"kind": "file", "path": "/opt/homebrew/Cellar/sdl2-compat/2.32.74/lib/pkgconfig/sdl2-compat.pc",
+                        "sha256": "f69e0edd247c23783d339e41d1227751a2a999542fe17b382417e74cbf832caa"},
+    "SDL2_PKGCONFIG_CELLAR_ALIAS": {
+        "kind": "symlink", "path": "/opt/homebrew/Cellar/sdl2-compat/2.32.74/lib/pkgconfig/sdl2.pc",
+        "target": "sdl2-compat.pc",
+        "resolved_path": "/opt/homebrew/Cellar/sdl2-compat/2.32.74/lib/pkgconfig/sdl2-compat.pc",
+        "sha256": "f69e0edd247c23783d339e41d1227751a2a999542fe17b382417e74cbf832caa"},
+    "SDL2_PKGCONFIG_GLOBAL_ALIAS": {
+        "kind": "symlink", "path": "/opt/homebrew/lib/pkgconfig/sdl2.pc",
+        "target": "../../Cellar/sdl2-compat/2.32.74/lib/pkgconfig/sdl2.pc",
+        "resolved_path": "/opt/homebrew/Cellar/sdl2-compat/2.32.74/lib/pkgconfig/sdl2-compat.pc",
+        "sha256": "f69e0edd247c23783d339e41d1227751a2a999542fe17b382417e74cbf832caa"},
+    "SDL2_COMPAT_PKGCONFIG_GLOBAL_ALIAS": {
+        "kind": "symlink", "path": "/opt/homebrew/lib/pkgconfig/sdl2-compat.pc",
+        "target": "../../Cellar/sdl2-compat/2.32.74/lib/pkgconfig/sdl2-compat.pc",
+        "resolved_path": "/opt/homebrew/Cellar/sdl2-compat/2.32.74/lib/pkgconfig/sdl2-compat.pc",
+        "sha256": "f69e0edd247c23783d339e41d1227751a2a999542fe17b382417e74cbf832caa"},
+    "SDL2_COMPAT_LIBRARY": {
+        "kind": "file", "path": "/opt/homebrew/Cellar/sdl2-compat/2.32.74/lib/libSDL2-2.0.0.dylib",
+        "sha256": "2e0b8bd67ab49579fac23e48c6e727afe1e1bff002d883c7220bb0643ff28347"},
+    "SDL2_TEST_ARCHIVE": {
+        "kind": "file", "path": "/opt/homebrew/Cellar/sdl2-compat/2.32.74/lib/libSDL2_test.a",
+        "sha256": "7df6a2eab7cd2c357370b5b1c240eba8260c7c124cfb5f7532cf9d7ce6ae8cec"},
+    "SDL2_LIB_ALIAS_2_0_0": {
+        "kind": "symlink", "path": "/opt/homebrew/lib/libSDL2-2.0.0.dylib",
+        "target": "../Cellar/sdl2-compat/2.32.74/lib/libSDL2-2.0.0.dylib",
+        "resolved_path": "/opt/homebrew/Cellar/sdl2-compat/2.32.74/lib/libSDL2-2.0.0.dylib",
+        "sha256": "2e0b8bd67ab49579fac23e48c6e727afe1e1bff002d883c7220bb0643ff28347"},
+    "SDL2_LIB_ALIAS_2_0": {
+        "kind": "symlink", "path": "/opt/homebrew/lib/libSDL2-2.0.dylib",
+        "target": "../Cellar/sdl2-compat/2.32.74/lib/libSDL2-2.0.dylib",
+        "resolved_path": "/opt/homebrew/Cellar/sdl2-compat/2.32.74/lib/libSDL2-2.0.0.dylib",
+        "sha256": "2e0b8bd67ab49579fac23e48c6e727afe1e1bff002d883c7220bb0643ff28347"},
+    "SDL2_LIB_ALIAS": {
+        "kind": "symlink", "path": "/opt/homebrew/lib/libSDL2.dylib",
+        "target": "../Cellar/sdl2-compat/2.32.74/lib/libSDL2.dylib",
+        "resolved_path": "/opt/homebrew/Cellar/sdl2-compat/2.32.74/lib/libSDL2-2.0.0.dylib",
+        "sha256": "2e0b8bd67ab49579fac23e48c6e727afe1e1bff002d883c7220bb0643ff28347"},
+    "SDL2_TEST_LIB_ALIAS": {
+        "kind": "symlink", "path": "/opt/homebrew/lib/libSDL2_test.a",
+        "target": "../Cellar/sdl2-compat/2.32.74/lib/libSDL2_test.a",
+        "resolved_path": "/opt/homebrew/Cellar/sdl2-compat/2.32.74/lib/libSDL2_test.a",
+        "sha256": "7df6a2eab7cd2c357370b5b1c240eba8260c7c124cfb5f7532cf9d7ce6ae8cec"},
+    "SDL2_MAIN_LIB_ALIAS": {
+        "kind": "symlink", "path": "/opt/homebrew/lib/libSDL2main.a",
+        "target": "../Cellar/sdl2-compat/2.32.74/lib/libSDL2main.a",
+        "resolved_path": "/opt/homebrew/Cellar/sdl2-compat/2.32.74/lib/libSDL2main.a",
+        "sha256": "8e49faa4979c4cbbe67770f997410cdae2b2b29128c899404902821320959624"},
+    "SDL2_CELLAR_ALIAS_2_0": {
+        "kind": "symlink", "path": "/opt/homebrew/Cellar/sdl2-compat/2.32.74/lib/libSDL2-2.0.dylib",
+        "target": "libSDL2-2.0.0.dylib",
+        "resolved_path": "/opt/homebrew/Cellar/sdl2-compat/2.32.74/lib/libSDL2-2.0.0.dylib",
+        "sha256": "2e0b8bd67ab49579fac23e48c6e727afe1e1bff002d883c7220bb0643ff28347"},
+    "SDL2_CELLAR_ALIAS": {
+        "kind": "symlink", "path": "/opt/homebrew/Cellar/sdl2-compat/2.32.74/lib/libSDL2.dylib",
+        "target": "libSDL2-2.0.dylib",
+        "resolved_path": "/opt/homebrew/Cellar/sdl2-compat/2.32.74/lib/libSDL2-2.0.0.dylib",
+        "sha256": "2e0b8bd67ab49579fac23e48c6e727afe1e1bff002d883c7220bb0643ff28347"},
+    "SDL2MAIN_ARCHIVE": {"kind": "file", "path": "/opt/homebrew/Cellar/sdl2-compat/2.32.74/lib/libSDL2main.a",
+                          "sha256": "8e49faa4979c4cbbe67770f997410cdae2b2b29128c899404902821320959624"},
+    "SDL2_HEADERS": {"kind": "tree", "path": "/opt/homebrew/Cellar/sdl2-compat/2.32.74/include/SDL2",
+                      "sha256": "2c9b80aff783ad4f78b1bdab14d0c28c026ead83286b8c1dd545ec5ca7ec144d"},
+    "GLSLANG_RUNTIME": {"kind": "file", "path": "/opt/homebrew/Cellar/glslang/16.6.0/lib/libglslang.16.6.0.dylib",
+                         "sha256": "2715978bb96917ad13467db0e5daed850a77cb7dc90bde8768d7cfbb5037b42c"},
+    "GLSLANG_RESOURCE_LIMITS_RUNTIME": {"kind": "file", "path": "/opt/homebrew/Cellar/glslang/16.6.0/lib/libglslang-default-resource-limits.16.6.0.dylib",
+                                         "sha256": "8f40cf6fed194addb24002877c329ac0b9a3ba1af2da10f3b71ef91d92115d1d"},
+    "GLSLANG_SPIRV_RUNTIME": {"kind": "file", "path": "/opt/homebrew/Cellar/glslang/16.6.0/lib/libSPIRV.16.6.0.dylib",
+                              "sha256": "31c5a105638051a16c5882f8a17b39ea555c205a61a553e75d038ea9adfe1a17"},
+    "SPIRV_TOOLS_RUNTIME": {"kind": "file", "path": "/opt/homebrew/Cellar/spirv-tools/1.4.363.0/lib/libSPIRV-Tools.dylib",
+                            "sha256": "df1a0a3a8733eae75ad0e08c539c85897f7e03801b18a83ce98aedab7144bba9"},
+    "SPIRV_TOOLS_OPT_RUNTIME": {"kind": "file", "path": "/opt/homebrew/Cellar/spirv-tools/1.4.363.0/lib/libSPIRV-Tools-opt.dylib",
+                                "sha256": "84b3f6495d64c655f1208a2b04dd36c98d966d18daa45d82e6c2e3a03e34e272"},
+    "SDK_SETTINGS": {"kind": "file", "path": "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/SDKSettings.plist",
+                      "sha256": "90a738dbf3fd88e7f6d35646e19d3a8a716923b9773ce1b67260466d9ceed370"},
+    "XCODE_INFO": {"kind": "file", "path": "/Applications/Xcode.app/Contents/Info.plist",
+                    "sha256": "e3fe249ecea86908345d71c08e7c3da131ae09188a8caa100ac616f20098ecb7"},
+    "SYSTEM_VERSION": {"kind": "file", "path": "/System/Library/CoreServices/SystemVersion.plist",
+                       "sha256": "bd61e19dd67dd97ce9a27c79a2148d42cc9685a71c6f17ff27d62b819f39f983"},
+    "XCODE_SELECT": {"kind": "file", "path": "/usr/bin/xcode-select",
+                     "sha256": "49cf1e59551a8a401d86ac444aa6b2a9ab7ec6d3882c98c004dab02a0e484e53"},
+    "XCRUN": {"kind": "file", "path": "/usr/bin/xcrun",
+              "sha256": "bbe7671518a3905f9d3fce54312fbc77c2876b0d62aca74a0688fa869d31a8a9"},
+    "XCODEBUILD": {"kind": "file",
+                   "path": "/Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild",
+                   "sha256": "d37fbcb4198c2474d847e5d7d4bf8394a1a9443890ad0153a76bc3e1d5576ec1"},
+    "XCODE_CLANG": {"kind": "file",
+                    "path": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang",
+                    "sha256": "ee029330bf58ab6e481385f4237cc54602eaa8b81526242e5c5ab5b76e8c5a7e"},
+    "XCODE_CLANGXX": {"kind": "file",
+                      "path": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang",
+                      "sha256": "ee029330bf58ab6e481385f4237cc54602eaa8b81526242e5c5ab5b76e8c5a7e"},
+    "XCODE_LD": {"kind": "file",
+                 "path": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld",
+                 "sha256": "809ad9e3c137cdf6d997b4e67dd3dd2589f6bb5de612dc298504e87bc4936c7e"},
+    "XCODE_AR": {"kind": "file",
+                 "path": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ar",
+                 "sha256": "ba81a5e9c4a1fd399c7693367559e341e823a411eecef83221c3caf9f25b581b"},
+    "XCODE_RANLIB": {"kind": "file",
+                     "path": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/libtool",
+                     "sha256": "6e0a9c96cc9896ee392ee691133e51cfff0216234d9a21b8dfa53bdc3ffbc410"},
+    "XCODE_AS": {"kind": "file",
+                 "path": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/as",
+                 "sha256": "06770364632b454317238e79d670c094e27301c7322c3a488323bd42e4d0bcbc"},
+}
+BUILD_SESSION_DUAL_GRAPH_NATIVE_SELECTED_TOOL_RECEIPTS = {
+    "clang": "XCODE_CLANG",
+    "clang++": "XCODE_CLANGXX",
+    "ld": "XCODE_LD",
+    "ar": "XCODE_AR",
+    "ranlib": "XCODE_RANLIB",
+    "as": "XCODE_AS",
+}
+BUILD_SESSION_DUAL_GRAPH_NATIVE_HOST_PROFILE = {
+    "host_architecture": "arm64",
+    "os_product_version": "27.0.1",
+    "os_build": "26A434",
+    "xcode_version": "27.1",
+    "xcode_build": "27A9275",
+    "xcode_info_build": "27A9274",
+    "developer_directory": "/Applications/Xcode.app/Contents/Developer",
+    "xcrun_selected_tool_paths": {
+        "clang": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang",
+        "clang++": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++",
+        "ld": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld",
+        "ar": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ar",
+        "ranlib": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ranlib",
+        "as": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/as",
+    },
+    "sdk_path": "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk",
+    "sdk_symlink_target": "MacOSX.sdk",
+    "sdk_resolved_path": "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk",
+    "sdk_version": "27.0",
+    "sdk_settings_sha256": "90a738dbf3fd88e7f6d35646e19d3a8a716923b9773ce1b67260466d9ceed370",
+    "xcode_info_path": "/Applications/Xcode.app/Contents/Info.plist",
+    "system_version_path": "/System/Library/CoreServices/SystemVersion.plist",
+    "sdl2_header_search_path": "/opt/homebrew/include/SDL2",
+    "sdl2_header_symlink_target": "../Cellar/sdl2-compat/2.32.74/include/SDL2",
+    "sdl2_header_real_path": "/opt/homebrew/Cellar/sdl2-compat/2.32.74/include/SDL2",
+}
+BUILD_SESSION_ENVIRONMENT_KEYS = {
+    "PATH", "HOME", "LANG", "LC_ALL", "CC", "CXX", "AR", "RANLIB",
+    "PKG_CONFIG_PATH", "SDKROOT", "MACOSX_DEPLOYMENT_TARGET", "DXVK_WSI_DRIVER",
+}
+BUILD_SESSION_FORBIDDEN_ENV_KEYS = {
+    "DESTDIR", "BASH_ENV", "ENV", "PYTHONPATH", "PYTHONHOME", "VIRTUAL_ENV",
+    "DYLD_INSERT_LIBRARIES", "DYLD_LIBRARY_PATH", "LD_PRELOAD", "LD_LIBRARY_PATH",
+    "MAKEFLAGS", "NINJAFLAGS", "MESON_ARGS", "CMAKE_ARGS", "CCACHE_DIR",
+}
+BUILD_SESSION_ALLOWED_SETUP_OPTIONS = {"--prefix=/usr", "--wrap-mode=nodownload"}
+
+
+def _require_buildlease_vm_runtime(plan: Mapping[str, Any]) -> None:
+    """Require the exact v3 executor plan and the reviewed R6 policy amendment."""
+    if (plan.get("schema_version") != BUILD_SESSION_SCHEMA_VERSION
+            or plan.get("executor_mode") != BUILD_SESSION_EXECUTOR_MODE):
+        raise RetentionError("BuildLease accepts only an explicit HOST_BUILDLEASE_V3 execution plan")
+    if BUILD_SESSION_HOST_V3_TEST_BYPASS:
+        return
+    if not BUILD_SESSION_HOST_V3_POLICY_ACCEPTED:
+        raise RetentionError(
+            "HOST_BUILDLEASE_V3 is implemented but remains disabled for R6 until the additive "
+            "execution-policy amendment receives its fresh independent PASS")
+    try:
+        policy_fd = os.open(
+            BUILD_SESSION_HOST_V3_POLICY_AMENDMENT_PATH,
+            os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_CLOEXEC", 0))
+        try:
+            policy_stat = os.fstat(policy_fd)
+            if (not stat.S_ISREG(policy_stat.st_mode)
+                    or policy_stat.st_size > 1024 * 1024):
+                raise RetentionError("reviewed BuildLease v3 policy amendment is not a bounded regular file")
+            policy_hash = hashlib.sha256()
+            policy_size = 0
+            while True:
+                block = os.read(policy_fd, 64 * 1024)
+                if not block:
+                    break
+                policy_size += len(block)
+                if policy_size > 1024 * 1024:
+                    raise RetentionError("reviewed BuildLease v3 policy amendment exceeds its size limit")
+                policy_hash.update(block)
+        finally:
+            os.close(policy_fd)
+    except OSError as error:
+        raise RetentionError("reviewed BuildLease v3 policy amendment is unavailable") from error
+    if policy_hash.hexdigest() != BUILD_SESSION_HOST_V3_POLICY_AMENDMENT_SHA256:
+        raise RetentionError("reviewed BuildLease v3 policy amendment hash does not match the reviewed bytes")
+
+
+def _session_process_group_exists(process_group_id: int) -> bool:
+    try:
+        os.killpg(process_group_id, 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+    return True
+
+
+def _terminate_session_process_group(process_group_id: int) -> None:
+    """Terminate a session command group and require the group to disappear."""
+    for selected_signal in (signal.SIGTERM, signal.SIGKILL):
+        try:
+            os.killpg(process_group_id, selected_signal)
+        except ProcessLookupError:
+            return
+        except OSError as error:
+            if error.errno == errno.ESRCH:
+                return
+            raise RetentionError(f"could not signal BuildLease session process group: {error}") from error
+        deadline = time.monotonic() + BUILD_SESSION_PROCESS_TERM_SECONDS
+        while _session_process_group_exists(process_group_id):
+            if time.monotonic() >= deadline:
+                break
+            time.sleep(0.05)
+        else:
+            return
+    if _session_process_group_exists(process_group_id):
+        raise RetentionError("BuildLease session process group remained after TERM and KILL")
+
+
+def _session_sid_members(session_id: int) -> set[int]:
+    """Enumerate PIDs, then ask the kernel for SID; never trust ps's session column."""
+    result = subprocess.run(["/bin/ps", "-A", "-o", "pid="], stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE, text=True, check=False, timeout=10)
+    if result.returncode != 0:
+        raise RetentionError("could not enumerate processes for BuildLease session containment")
+    members: set[int] = set()
+    for row in result.stdout.splitlines():
+        try:
+            pid = int(row.strip())
+        except ValueError as error:
+            raise RetentionError("process inventory returned a malformed PID") from error
+        try:
+            observed_sid = os.getsid(pid)
+        except ProcessLookupError:
+            continue
+        except OSError as error:
+            if error.errno == errno.ESRCH:
+                continue
+            raise RetentionError(f"cannot verify BuildLease process SID for PID {pid}: {error}") from error
+        if observed_sid == session_id:
+            members.add(pid)
+    return members
+
+
+def _session_process_state(pid: int, session_id: int) -> str | None:
+    """Read only process state from ps after revalidating SID with the kernel."""
+    try:
+        if os.getsid(pid) != session_id:
+            return None
+    except ProcessLookupError:
+        return None
+    except OSError as error:
+        if error.errno == errno.ESRCH:
+            return None
+        raise RetentionError(f"cannot revalidate BuildLease process SID for PID {pid}: {error}") from error
+    result = subprocess.run(["/bin/ps", "-p", str(pid), "-o", "stat="],
+                            stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+                            check=False, timeout=5)
+    if result.returncode != 0 or not result.stdout.strip():
+        # A process that still has the held session ID but disappeared from ps
+        # is ambiguous.  Only an ESRCH race is safe to classify as gone.
+        try:
+            if os.getsid(pid) == session_id:
+                raise RetentionError(f"process state is unavailable for live BuildLease PID {pid}")
+        except ProcessLookupError:
+            return None
+        except OSError as error:
+            if error.errno == errno.ESRCH:
+                return None
+            raise RetentionError(f"cannot revalidate BuildLease process PID {pid}: {error}") from error
+        return None
+    return result.stdout.strip().split()[0]
+
+
+def _session_signal_pid(pid: int, session_id: int, selected_signal: int) -> bool:
+    """Signal only after a fresh kernel SID check, avoiding unrelated PID reuse."""
+    try:
+        if os.getsid(pid) != session_id:
+            return False
+        os.kill(pid, selected_signal)
+        return True
+    except ProcessLookupError:
+        return False
+    except OSError as error:
+        if error.errno == errno.ESRCH:
+            return False
+        raise RetentionError(f"could not signal BuildLease session PID {pid}: {error}") from error
+
+
+def _session_leader_exited(session_id: int) -> bool:
+    """Observe exit without reaping the session leader, keeping its SID pinned."""
+    try:
+        result = os.waitid(os.P_PID, session_id, os.WEXITED | os.WNOHANG | os.WNOWAIT)
+    except ChildProcessError as error:
+        raise RetentionError("BuildLease session leader was reaped before descendant cleanup") from error
+    return result is not None and result.si_pid == session_id
+
+
+def _contain_session_processes(session_id: int, *, timeout: float | None = None) -> dict[str, Any]:
+    """Freeze and kill every live process in one held-leader SID before it is reaped."""
+    if not isinstance(session_id, int) or isinstance(session_id, bool) or session_id <= 1:
+        raise RetentionError("BuildLease process session identity is invalid")
+    bound = BUILD_SESSION_PROCESS_QUIESCE_SECONDS if timeout is None else timeout
+    freeze_deadline = time.monotonic() + bound
+    discovered_sample: set[int] = set()
+    member_observation_count = 0
+    member_sample_truncated = False
+    member_snapshot_count = 0
+    member_snapshots_digest = hashlib.sha256()
+
+    def record_snapshot(members: set[int]) -> None:
+        nonlocal member_observation_count, member_sample_truncated, member_snapshot_count
+        ordered = sorted(members)
+        snapshot_bytes = _canonical_json(ordered)
+        member_snapshots_digest.update(len(snapshot_bytes).to_bytes(8, "big"))
+        member_snapshots_digest.update(snapshot_bytes)
+        member_snapshot_count += 1
+        member_observation_count += len(ordered)
+        sample_order = ([session_id] if session_id in members else []) + [
+            pid for pid in ordered if pid != session_id]
+        for pid in sample_order:
+            if pid in discovered_sample:
+                continue
+            if len(discovered_sample) < BUILD_SESSION_PROCESS_EVIDENCE_SAMPLE_PIDS:
+                discovered_sample.add(pid)
+            else:
+                member_sample_truncated = True
+
+    stable_stopped_rounds = 0
+    while time.monotonic() < freeze_deadline:
+        members = _session_sid_members(session_id)
+        record_snapshot(members)
+        live: set[int] = set()
+        all_stopped = True
+        for pid in sorted(members):
+            state = _session_process_state(pid, session_id)
+            if state is None or state.startswith("Z"):
+                continue
+            live.add(pid)
+            if not state.startswith(("T", "t")):
+                all_stopped = False
+                _session_signal_pid(pid, session_id, signal.SIGSTOP)
+        after = _session_sid_members(session_id)
+        record_snapshot(after)
+        after_live = {pid for pid in after
+                      if (state := _session_process_state(pid, session_id)) is not None
+                      and not state.startswith("Z")}
+        if (all_stopped and live == after_live and members == after):
+            stable_stopped_rounds += 1
+            if stable_stopped_rounds >= 2:
+                break
+        else:
+            stable_stopped_rounds = 0
+        time.sleep(0.05)
+    else:
+        raise RetentionError("BuildLease process SID did not reach a bounded stopped state")
+
+    # All live members are stopped, so no member can fork between enumeration and KILL.
+    members = _session_sid_members(session_id)
+    record_snapshot(members)
+    for pid in sorted(members):
+        state = _session_process_state(pid, session_id)
+        if state is not None and not state.startswith("Z"):
+            _session_signal_pid(pid, session_id, signal.SIGKILL)
+
+    kill_deadline = time.monotonic() + bound
+    while time.monotonic() < kill_deadline:
+        members = _session_sid_members(session_id)
+        record_snapshot(members)
+        survivors: set[int] = set()
+        for pid in sorted(members):
+            if pid == session_id and _session_leader_exited(session_id):
+                continue
+            state = _session_process_state(pid, session_id)
+            if state is not None and not state.startswith("Z"):
+                survivors.add(pid)
+                _session_signal_pid(pid, session_id, signal.SIGKILL)
+        if not survivors:
+            remaining = _session_sid_members(session_id)
+            record_snapshot(remaining)
+            descendants = remaining - {session_id}
+            if not descendants and _session_leader_exited(session_id):
+                return {"session_id": session_id, "members_seen": sorted(discovered_sample),
+                        "members_seen_sample_truncated": member_sample_truncated,
+                        "members_seen_observation_count": member_observation_count,
+                        "members_seen_snapshot_count": member_snapshot_count,
+                        "members_seen_sha256": member_snapshots_digest.hexdigest(),
+                        "survivors": [], "leader_held_unreaped": True}
+        time.sleep(0.05)
+    raise RetentionError("BuildLease process SID remained after STOP/KILL and bounded re-enumeration")
+
+
+def _session_hdiutil() -> tuple[Path, str]:
+    path = Path("/usr/bin/hdiutil")
+    if sys.platform != "darwin" or path.is_symlink() or path.resolve(strict=True) != path:
+        raise RetentionError("BuildLease fixed-cap workspace requires canonical macOS hdiutil")
+    identity = _session_hash_executable(path, _hash_path(path))
+    return path, identity["sha256"]
+
+
+def _session_hdiutil_info() -> list[dict[str, Any]]:
+    hdiutil, _digest = _session_hdiutil()
+    result = subprocess.run([str(hdiutil), "info", "-plist"], stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE, check=False, timeout=30)
+    if result.returncode != 0:
+        raise RetentionError("hdiutil could not verify attached BuildLease workspace images")
+    try:
+        parsed = plistlib.loads(result.stdout)
+    except (plistlib.InvalidFileException, ValueError) as error:
+        raise RetentionError("hdiutil returned invalid mounted-image identity data") from error
+    images = parsed.get("images") if isinstance(parsed, dict) else None
+    if not isinstance(images, list):
+        raise RetentionError("hdiutil info omitted its image inventory")
+    return [row for row in images if isinstance(row, dict)]
+
+
+def _session_diskutil() -> tuple[Path, str]:
+    path = Path("/usr/sbin/diskutil")
+    if sys.platform != "darwin" or path.is_symlink() or path.resolve(strict=True) != path:
+        raise RetentionError("BuildLease workspace identity requires canonical macOS diskutil")
+    identity = _session_hash_executable(path, _hash_path(path))
+    return path, identity["sha256"]
+
+
+def _session_diskutil_info(device_node: str) -> dict[str, Any]:
+    diskutil, _digest = _session_diskutil()
+    result = subprocess.run([str(diskutil), "info", "-plist", device_node],
+                            stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                            check=False, timeout=30)
+    if result.returncode != 0:
+        raise RetentionError("diskutil could not verify BuildLease workspace volume identity")
+    try:
+        parsed = plistlib.loads(result.stdout)
+    except (plistlib.InvalidFileException, ValueError) as error:
+        raise RetentionError("diskutil returned invalid BuildLease volume identity data") from error
+    if not isinstance(parsed, dict):
+        raise RetentionError("diskutil info omitted BuildLease volume identity")
+    return parsed
+
+
+def _session_image_row(root: Path) -> dict[str, Any] | None:
+    image = root / BUILD_SESSION_WORKSPACE_IMAGE_NAME
+    try:
+        canonical_image = str(image.resolve(strict=True))
+    except OSError:
+        return None
+    matches = []
+    for row in _session_hdiutil_info():
+        image_path = row.get("image-path")
+        if not isinstance(image_path, str):
+            continue
+        try:
+            if str(Path(image_path).resolve(strict=True)) == canonical_image:
+                matches.append(row)
+        except OSError:
+            continue
+    if len(matches) > 1:
+        raise RetentionError("BuildLease sparseimage is attached more than once")
+    return matches[0] if matches else None
+
+
+def _session_image_device(root: Path) -> str | None:
+    row = _session_image_row(root)
+    if row is None:
+        return None
+    entities = row.get("system-entities")
+    if not isinstance(entities, list):
+        raise RetentionError("hdiutil image record omitted its device entities")
+    devices = [entity.get("dev-entry") for entity in entities
+               if isinstance(entity, dict) and entity.get("content-hint") == "GUID_partition_scheme"
+               and isinstance(entity.get("dev-entry"), str)]
+    if len(devices) != 1:
+        raise RetentionError("BuildLease sparseimage has no unique whole-image device")
+    return devices[0]
+
+
+def _session_image_entity(root: Path) -> dict[str, Any] | None:
+    workspace = root / BUILD_SESSION_WORKSPACE_NAME
+    expected_mountpoint = str(workspace.resolve(strict=True))
+    row = _session_image_row(root)
+    if row is None:
+        return None
+    entities = row.get("system-entities")
+    if not isinstance(entities, list):
+        raise RetentionError("hdiutil image record omitted its system entities")
+    selected = []
+    unexpected_mounts = []
+    for entity in entities:
+        if not isinstance(entity, dict) or not isinstance(entity.get("dev-entry"), str):
+            continue
+        mountpoint = entity.get("mount-point")
+        if mountpoint is None:
+            continue
+        if isinstance(mountpoint, str) and str(Path(mountpoint).resolve(strict=False)) == expected_mountpoint:
+            selected.append(entity)
+        else:
+            unexpected_mounts.append(entity)
+    if unexpected_mounts:
+        raise RetentionError("BuildLease workspace image is attached at an unexpected mount point")
+    if len(selected) > 1:
+        raise RetentionError("BuildLease workspace image is attached at multiple matching mount points")
+    if not selected:
+        return None
+    return {**selected[0], "image-path": str((root / BUILD_SESSION_WORKSPACE_IMAGE_NAME).resolve(strict=True)),
+            "image-writeable": row.get("writeable")}
+
+
+def _session_image_entities(root: Path) -> list[dict[str, Any]]:
+    row = _session_image_row(root)
+    if row is None:
+        return []
+    system_entities = row.get("system-entities")
+    if not isinstance(system_entities, list):
+        raise RetentionError("hdiutil image record omitted its system entities")
+    canonical_image = str((root / BUILD_SESSION_WORKSPACE_IMAGE_NAME).resolve(strict=True))
+    return [{**entity, "image-path": canonical_image, "image-writeable": row.get("writeable")}
+            for entity in system_entities
+            if isinstance(entity, dict) and isinstance(entity.get("dev-entry"), str)]
+
+
+def _session_image_content_identity(image: Path) -> dict[str, Any]:
+    image = Path(image)
+    parent_fd = -1
+    image_fd = -1
+    try:
+        parent_fd = _open_dir(image.parent)
+        image_fd = os.open(image.name, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0),
+                           dir_fd=parent_fd)
+        before = os.fstat(image_fd)
+        if not stat.S_ISREG(before.st_mode) or before.st_nlink != 1:
+            raise RetentionError("BuildLease sparseimage is not one canonical regular file")
+        digest = _hash_fd(image_fd)
+        after = os.fstat(image_fd)
+        path_after = os.stat(image.name, dir_fd=parent_fd, follow_symlinks=False)
+
+        def identity(info: os.stat_result) -> tuple[int, int, int, int, int, int, int]:
+            return (info.st_dev, info.st_ino, info.st_mode, info.st_nlink, info.st_size,
+                    info.st_mtime_ns, info.st_ctime_ns)
+
+        if (identity(before) != identity(after) or identity(after) != identity(path_after)
+                or not stat.S_ISREG(path_after.st_mode) or path_after.st_nlink != 1):
+            raise RetentionError("BuildLease sparseimage changed while hashing its detached contents")
+        return {"path": str(image), "device": after.st_dev, "inode": after.st_ino,
+                "size_bytes": after.st_size, "mtime_ns": after.st_mtime_ns, "sha256": digest}
+    except OSError as error:
+        raise RetentionError("BuildLease sparseimage could not be read through its exact backing path") from error
+    finally:
+        if image_fd >= 0:
+            os.close(image_fd)
+        if parent_fd >= 0:
+            os.close(parent_fd)
+
+
+def _verify_session_workspace_mount(root: Path, identity: Mapping[str, Any]) -> dict[str, Any]:
+    root = Path(root).resolve(strict=True)
+    image = root / BUILD_SESSION_WORKSPACE_IMAGE_NAME
+    workspace = root / BUILD_SESSION_WORKSPACE_NAME
+    if identity.get("mountpoint") != str(workspace) or identity.get("image_path") != str(image):
+        raise RetentionError("BuildLease workspace mount identity names another path")
+    image_info = image.stat(follow_symlinks=False)
+    root_info = root.stat(follow_symlinks=False)
+    if (not stat.S_ISREG(image_info.st_mode) or image_info.st_nlink != 1
+            or (image_info.st_dev, image_info.st_ino)
+                != (identity.get("image_device"), identity.get("image_inode"))
+            or identity.get("mountpoint_dir_device") != root_info.st_dev
+            or not isinstance(identity.get("mountpoint_dir_inode"), int)
+            or isinstance(identity.get("mountpoint_dir_inode"), bool)
+            or identity.get("mountpoint_dir_inode", 0) <= 0
+            or not isinstance(identity.get("mounted_mountpoint_device"), int)
+            or isinstance(identity.get("mounted_mountpoint_device"), bool)
+            or identity.get("mounted_mountpoint_device", 0) <= 0
+            or not isinstance(identity.get("mounted_mountpoint_inode"), int)
+            or isinstance(identity.get("mounted_mountpoint_inode"), bool)
+            or identity.get("mounted_mountpoint_inode", 0) <= 0):
+        raise RetentionError("BuildLease sparseimage backing identity changed")
+    entity = _session_image_entity(root)
+    if (entity is None or entity.get("dev-entry") != identity.get("device_node")
+            or entity.get("image-path") != str(image)
+            or entity.get("image-writeable") is not True):
+        raise RetentionError("BuildLease workspace is not mounted from its exact sparseimage device")
+    disk_info = _session_diskutil_info(str(entity["dev-entry"]))
+    whole_image_device = _session_image_device(root)
+    if (disk_info.get("VolumeUUID") != identity.get("volume_uuid")
+            or disk_info.get("FilesystemType") != "hfs"
+            or disk_info.get("Writable") is not True
+            or disk_info.get("MountPoint") != str(workspace)
+            or not isinstance(whole_image_device, str)
+            or whole_image_device != identity.get("disk_device")
+            or disk_info.get("ParentWholeDisk") != Path(whole_image_device).name):
+        raise RetentionError("BuildLease workspace volume UUID or whole-image device lineage changed")
+    mount_fd = -1
+    try:
+        mount_fd = os.open(workspace, os.O_RDONLY | getattr(os, "O_CLOEXEC", 0)
+                           | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_DIRECTORY", 0))
+        mount_info = os.fstat(mount_fd)
+        fs = os.fstatvfs(mount_fd)
+    except OSError as error:
+        raise RetentionError("BuildLease workspace mountpoint cannot be opened without following links") from error
+    finally:
+        if mount_fd >= 0:
+            os.close(mount_fd)
+    observed = {"device": mount_info.st_dev, "filesystem_id": getattr(fs, "f_fsid", None),
+                "capacity_bytes": fs.f_blocks * fs.f_frsize,
+                "mounted_mountpoint_device": mount_info.st_dev,
+                "mounted_mountpoint_inode": mount_info.st_ino}
+    if (observed["device"] != identity.get("device")
+            or observed["filesystem_id"] != identity.get("filesystem_id")
+            or observed["mounted_mountpoint_device"] != identity.get("mounted_mountpoint_device")
+            or observed["mounted_mountpoint_inode"] != identity.get("mounted_mountpoint_inode")
+            or observed["capacity_bytes"] != identity.get("capacity_bytes")
+            or observed["capacity_bytes"] <= 0
+            or not isinstance(identity.get("requested_capacity_bytes"), int)
+            or isinstance(identity.get("requested_capacity_bytes"), bool)
+            or identity.get("requested_capacity_bytes", 0) <= 0
+            or observed["capacity_bytes"] > identity.get("requested_capacity_bytes", 0)):
+        raise RetentionError("BuildLease workspace filesystem identity or capacity changed")
+    hdiutil, digest = _session_hdiutil()
+    if str(hdiutil) != identity.get("hdiutil_path") or digest != identity.get("hdiutil_sha256"):
+        raise RetentionError("BuildLease hdiutil identity changed")
+    diskutil, diskutil_digest = _session_diskutil()
+    if (str(diskutil) != identity.get("diskutil_path")
+            or diskutil_digest != identity.get("diskutil_sha256")):
+        raise RetentionError("BuildLease diskutil identity changed")
+    return {**dict(identity), **observed}
+
+
+def _verified_buildlease_capacity_workspace(
+        build_id: str, *, allow_pre_dispatch: bool = False,
+        exited_process_id: int | None = None,
+) -> dict[str, Any]:
+    """Authenticate the exact live BuildLease workspace mount for strict accounting."""
+    if not isinstance(build_id, str) or not re.fullmatch(r"[A-Za-z0-9._-]{1,128}", build_id):
+        raise RetentionError("active BuildLease workspace authorization has an invalid build ID")
+    lease = _load_lease(build_id)
+    session = lease.get("session_v3")
+    session_state = session.get("state") if isinstance(session, dict) else None
+    writable_identity = (session.get("workspace_mount_identity")
+                         if isinstance(session, dict) else None)
+    readonly_identity = (session.get("readonly_mount_identity")
+                         if isinstance(session, dict) else None)
+    readonly_phase = (
+        session_state == "READY_TO_FINALIZE"
+        and session.get("write_quiescence_state")
+            == "WRITABLE_IMAGE_NORMALLY_UNMOUNTED_AND_DETACHED"
+        and isinstance(readonly_identity, dict)
+        and readonly_identity.get("readonly") is True
+        and readonly_identity.get("attached") is True)
+    writable_phase = (
+        session_state in {"ACTIVE", "RUNNING"}
+        and isinstance(writable_identity, dict)
+        and writable_identity.get("attached") is True)
+    if (lease.get("build_id") != build_id or lease.get("state") != "ACTIVE"
+            or lease.get("retirement_status") is not None
+            or lease.get("session_started") is not True
+            or not isinstance(session, dict)
+            or session.get("schema_version") != BUILD_SESSION_SCHEMA_VERSION
+            or session.get("executor_mode") != BUILD_SESSION_EXECUTOR_MODE
+            or session.get("workspace_mount_pending") is not None
+            or not (writable_phase or readonly_phase)):
+        raise RetentionError("BuildLease is not the exact active session workspace")
+    if writable_phase and session_state == "ACTIVE":
+        if (session.get("inflight_step_index") is not None
+                or session.get("process_session_id") is not None
+                or session.get("output_capture_uncertain") is True
+                or session.get("process_containment_uncertain") is True):
+            raise RetentionError("active BuildLease session has an unresolved in-flight operation")
+    elif writable_phase and session_state == "RUNNING":
+        next_step_index = session.get("next_step_index")
+        receipts = session.get("step_receipts")
+        process_session_id = session.get("process_session_id")
+        if (not isinstance(next_step_index, int) or isinstance(next_step_index, bool)
+                or next_step_index < 0
+                or session.get("inflight_step_index") != next_step_index
+                or (process_session_id is not None
+                    and (not isinstance(process_session_id, int)
+                         or isinstance(process_session_id, bool)
+                         or process_session_id <= 0))
+                or session.get("output_capture_uncertain") is True
+                or session.get("process_containment_uncertain") is True
+                or not isinstance(receipts, list) or len(receipts) != next_step_index):
+            raise RetentionError("running BuildLease session has inconsistent in-flight authority")
+    root = Path(str(lease.get("path", "")))
+    if root.parent != BUILD_ROOT or root.name != build_id:
+        raise RetentionError("active BuildLease workspace root is outside its exact approved lease path")
+    root_fd = _open_dir(root)
+    try:
+        root_info = os.fstat(root_fd)
+        root_fsid = getattr(os.fstatvfs(root_fd), "f_fsid", None)
+        marker = _read_marker(root_fd)
+        root_identity = {"device": root_info.st_dev, "inode": root_info.st_ino,
+                         "filesystem_id": root_fsid}
+        if (root_identity != {"device": lease.get("build_device"),
+                              "inode": lease.get("build_inode"),
+                              "filesystem_id": lease.get("build_filesystem_id")}
+                or root_identity != session.get("build_root_identity")
+                or marker.get("build_id") != build_id or marker.get("path") != str(root)
+                or marker.get("state") != "ACTIVE"
+                or marker.get("session_started") is not True
+                or marker.get("session_v3") != session):
+            raise RetentionError("active BuildLease workspace marker or root identity changed")
+    finally:
+        os.close(root_fd)
+    session_dir = root / BUILD_SESSION_DIRECTORY
+    plan_receipt = _read_json(session_dir / BUILD_SESSION_PLAN, sealed=True)
+    plan = plan_receipt.get("plan")
+    identity = readonly_identity if readonly_phase else writable_identity
+    if (not isinstance(plan, Mapping) or not isinstance(writable_identity, dict)
+            or not isinstance(identity, dict)
+            or plan_receipt.get("build_id") != build_id
+            or plan_receipt.get("plan_sha256") != session.get("plan_sha256")
+            or hashlib.sha256(_canonical_json(plan)).hexdigest() != session.get("plan_sha256")
+            or plan_receipt.get("admission_identity") != session.get("admission_identity")
+            or plan_receipt.get("source_identity") != session.get("source_identity")
+            or plan_receipt.get("build_root_identity") != session.get("build_root_identity")
+            or plan_receipt.get("workspace_mount_identity") != writable_identity
+            or Path(str(plan.get("build_workspace", "")))
+                != root / BUILD_SESSION_WORKSPACE_NAME
+            or identity.get("image_path") != str(root / BUILD_SESSION_WORKSPACE_IMAGE_NAME)
+            or identity.get("mountpoint") != str(root / BUILD_SESSION_WORKSPACE_NAME)
+            or identity.get("requested_capacity_bytes")
+                != lease.get("expected_bytes", 0) - BUILD_SESSION_CONTROLLER_HEADROOM_BYTES):
+        raise RetentionError("active BuildLease workspace plan or persisted identity is inconsistent")
+    if writable_phase and session_state == "RUNNING":
+        next_step_index = session["next_step_index"]
+        steps = plan.get("steps")
+        command_receipt_sha256 = session.get("inflight_command_receipt_sha256")
+        if (not isinstance(steps, list) or next_step_index >= len(steps)
+                or not isinstance(command_receipt_sha256, str)
+                or not re.fullmatch(r"[0-9a-f]{64}", command_receipt_sha256)):
+            raise RetentionError("running BuildLease session lacks its exact in-flight step receipt")
+        step = steps[next_step_index]
+        command_path = (root / BUILD_SESSION_DIRECTORY / "steps"
+                        / f"step-{next_step_index:03d}.command.json")
+        try:
+            command_receipt = _read_json(command_path, sealed=True)
+            observed_command_digest = _hash_path(command_path)
+        except (OSError, RetentionError) as error:
+            raise RetentionError("running BuildLease command receipt is unavailable") from error
+        expected_graph_provenance = (
+            _session_graph_provenance(plan, step) if isinstance(step, Mapping) else None)
+        process_session_id = session.get("process_session_id")
+        if (not isinstance(step, Mapping)
+                or step.get("kind") in {None, "source_verification"}
+                or observed_command_digest != command_receipt_sha256
+                or command_receipt.get("schema_version") != BUILD_SESSION_SCHEMA_VERSION
+                or command_receipt.get("build_id") != build_id
+                or command_receipt.get("executor_mode") != BUILD_SESSION_EXECUTOR_MODE
+                or command_receipt.get("executor_version") != BUILD_SESSION_SCHEMA_VERSION
+                or command_receipt.get("acceptance_state") != "UNACCEPTED_UNTIL_WHOLE_LEASE_DETACH"
+                or command_receipt.get("plan_sha256") != session.get("plan_sha256")
+                or command_receipt.get("step_index") != next_step_index
+                or command_receipt.get("kind") != step.get("kind")
+                or command_receipt.get("cwd") != str(root / BUILD_SESSION_WORKSPACE_NAME)
+                or command_receipt.get("graph_provenance") != expected_graph_provenance):
+            raise RetentionError("running BuildLease command receipt does not match its exact plan step")
+        command = command_receipt.get("command")
+        typed_stage = step.get("kind") in {"stage_windows_product", "stage_native_runtime"}
+        if typed_stage:
+            expected_action = (BUILD_SESSION_DUAL_GRAPH_WINDOWS_STAGE_ACTION
+                               if step.get("kind") == "stage_windows_product"
+                               else BUILD_SESSION_DUAL_GRAPH_NATIVE_STAGE_ACTION)
+            if (process_session_id is not None or command is not None
+                    or command_receipt.get("action") != expected_action):
+                raise RetentionError("running BuildLease typed stage receipt is inconsistent")
+        elif process_session_id is None and not allow_pre_dispatch:
+            raise RetentionError("running BuildLease command receipt lacks its exact process-session leader")
+        elif (not isinstance(command, list) or not command
+              or any(not isinstance(token, str) or not token or "\x00" in token for token in command)):
+            raise RetentionError("running BuildLease command receipt has no exact command")
+        else:
+            if exited_process_id is not None:
+                # WNOWAIT keeps this exact child PID from being recycled while
+                # post-exit capacity and workspace authority are rechecked.
+                if (not isinstance(exited_process_id, int)
+                        or isinstance(exited_process_id, bool)
+                        or exited_process_id <= 0
+                        or process_session_id != exited_process_id):
+                    raise RetentionError("post-exit BuildLease authority is not bound to its exact process")
+                try:
+                    observed_exit = os.waitid(
+                        os.P_PID, exited_process_id, os.WEXITED | os.WNOHANG | os.WNOWAIT)
+                except (AttributeError, OSError, ChildProcessError) as error:
+                    raise RetentionError(
+                        "post-exit BuildLease process identity is no longer held unreaped") from error
+                if observed_exit is None or observed_exit.si_pid != exited_process_id:
+                    raise RetentionError("post-exit BuildLease process has no exact unreaped exit evidence")
+                exit_observation = session.get("process_exit_observation")
+                observed_return_code = (observed_exit.si_status
+                                        if observed_exit.si_code == getattr(os, "CLD_EXITED", 1)
+                                        else -observed_exit.si_status)
+                if (not isinstance(exit_observation, Mapping)
+                        or exit_observation.get("schema_version") != 1
+                        or exit_observation.get("build_id") != build_id
+                        or exit_observation.get("step_index") != next_step_index
+                        or exit_observation.get("command_receipt_sha256") != command_receipt_sha256
+                        or exit_observation.get("process_session_id") != exited_process_id
+                        or not isinstance(exit_observation.get("return_code"), int)
+                        or isinstance(exit_observation.get("return_code"), bool)
+                        or exit_observation.get("return_code") != observed_return_code):
+                    raise RetentionError(
+                        "post-exit BuildLease process lacks its exact durable command-bound observation")
+            elif process_session_id is not None:
+                try:
+                    os.kill(process_session_id, 0)
+                    observed_process_session = os.getsid(process_session_id)
+                except OSError as error:
+                    raise RetentionError("running BuildLease process-session identity is no longer live") from error
+                if observed_process_session != process_session_id:
+                    raise RetentionError("running BuildLease PID is not its recorded process-session leader")
+            if _session_dual_graph_enabled(plan):
+                graph = _session_dual_graph_by_id(plan, str(step.get("graph_id", "")))
+                graph_dir = root / BUILD_SESSION_WORKSPACE_NAME / graph["build_directory"]
+                kind = step.get("kind")
+                if kind == "configure":
+                    expected_command = _dual_graph_configure_command(plan, graph, graph_dir)
+                elif kind == "build":
+                    target_id = step.get("target_id")
+                    if (target_id not in graph["targets"]
+                            or target_id not in BUILD_SESSION_DUAL_GRAPH_TARGETS):
+                        raise RetentionError("running BuildLease build target is outside its exact graph")
+                    expected_command = [plan["tools"]["ninja"]["path"], "-C", str(graph_dir)]
+                    target = BUILD_SESSION_DUAL_GRAPH_TARGETS[target_id]
+                    if target is not None:
+                        expected_command.append(target)
+                elif kind == "install":
+                    stage = root / BUILD_SESSION_WORKSPACE_NAME / _session_relative_path(
+                        plan["stage_root"], "stage_root")
+                    expected_command = [plan["tools"]["meson"]["path"], "install", "-C",
+                                        str(graph_dir), "--destdir", str(stage), "--no-rebuild"]
+                elif kind == "test":
+                    output = next((row for row in graph["expected_outputs"]
+                                   if row["output_id"] == step.get("output_id")), None)
+                    executable = (root / BUILD_SESSION_WORKSPACE_NAME / graph["build_directory"]
+                                  / _session_relative_path(output["path"], "native test output path")) \
+                        if output is not None else None
+                    registered = command_receipt.get("registered_executable_identity")
+                    executable_path = str(executable) if executable is not None else None
+                    if (not isinstance(registered, Mapping)
+                            or registered.get("executable_path") != executable_path):
+                        raise RetentionError(
+                            "running BuildLease test executable is not the declared graph output")
+                    expected_command = [executable_path]
+                else:
+                    raise RetentionError("running BuildLease graph step kind is not executable")
+            elif step.get("kind") == "test":
+                registered = command_receipt.get("registered_executable_identity")
+                if not isinstance(registered, Mapping):
+                    raise RetentionError("running BuildLease test lacks its registered executable")
+                expected_command = [registered.get("executable_path", registered.get("path"))]
+            else:
+                expected_command = step.get("argv")
+            if command != expected_command:
+                raise RetentionError("running BuildLease command differs from its exact plan step")
+    if readonly_phase:
+        if (not isinstance(session.get("detached_image_identity"), Mapping)
+                or identity.get("detached_image_identity") != session.get("detached_image_identity")
+                or identity.get("image_path") != writable_identity.get("image_path")
+                or identity.get("image_device") != writable_identity.get("image_device")
+                or identity.get("image_inode") != writable_identity.get("image_inode")
+                or identity.get("mountpoint") != writable_identity.get("mountpoint")
+                or identity.get("volume_uuid") != writable_identity.get("volume_uuid")
+                or identity.get("filesystem_type") != writable_identity.get("filesystem_type")
+                or identity.get("requested_capacity_bytes")
+                    != writable_identity.get("requested_capacity_bytes")):
+            raise RetentionError("active BuildLease read-only workspace is not bound to its exact detached image")
+        _verify_session_workspace_readonly(root, identity)
+    else:
+        verified = _verify_session_workspace_mount(root, identity)
+        if verified != identity:
+            raise RetentionError("active BuildLease workspace identity no longer matches its live mount")
+    return dict(identity)
+
+
+def _verified_capacity_workspace(build_id: str, *,
+                                 allow_pre_dispatch: bool = False,
+                                 exited_process_id: int | None = None) -> dict[str, Any]:
+    """Keep the established verifier call shape outside the narrow R71 exception."""
+    if allow_pre_dispatch:
+        return _verified_buildlease_capacity_workspace(
+            build_id, allow_pre_dispatch=True)
+    if exited_process_id is not None:
+        return _verified_buildlease_capacity_workspace(
+            build_id, exited_process_id=exited_process_id)
+    return _verified_buildlease_capacity_workspace(build_id)
+
+
+def _verify_session_workspace_detached(
+        root: Path, identity: Mapping[str, Any], *, writable_eject_completed: bool = False
+) -> dict[str, Any]:
+    """Recognize a completed detach and capture stable contents at the detached boundary.
+
+    A successful normal eject may finalize writable sparseimage metadata after the
+    post-unmount digest was captured. The caller may therefore establish a fresh
+    detached-content digest only after that eject succeeds; path, inode, mountpoint,
+    tool, and attachment checks remain mandatory.
+    """
+    root = Path(root).resolve(strict=True)
+    image = root / BUILD_SESSION_WORKSPACE_IMAGE_NAME
+    workspace = root / BUILD_SESSION_WORKSPACE_NAME
+    if (identity.get("mountpoint") != str(workspace)
+            or identity.get("image_path") != str(image)
+            or identity.get("image_device") is None or identity.get("image_inode") is None):
+        raise RetentionError("BuildLease detached workspace identity is inconsistent")
+    image_info = image.stat(follow_symlinks=False)
+    workspace_info = workspace.stat(follow_symlinks=False)
+    root_info = root.stat(follow_symlinks=False)
+    if (not stat.S_ISREG(image_info.st_mode) or image_info.st_nlink != 1
+            or (image_info.st_dev, image_info.st_ino)
+                != (identity.get("image_device"), identity.get("image_inode"))
+            or not stat.S_ISDIR(workspace_info.st_mode)
+            or workspace_info.st_dev != root_info.st_dev
+            or (workspace_info.st_dev, workspace_info.st_ino)
+                != (identity.get("mountpoint_dir_device"), identity.get("mountpoint_dir_inode"))
+            or workspace.resolve(strict=True) != workspace
+            or stat.S_IMODE(workspace_info.st_mode) != 0o500
+            or any(workspace.iterdir())):
+        raise RetentionError("BuildLease detached workspace or backing image identity changed")
+    hdiutil, digest = _session_hdiutil()
+    diskutil, diskutil_digest = _session_diskutil()
+    if (str(hdiutil) != identity.get("hdiutil_path")
+            or digest != identity.get("hdiutil_sha256")
+            or str(diskutil) != identity.get("diskutil_path")
+            or diskutil_digest != identity.get("diskutil_sha256")
+            or _session_image_row(root) is not None):
+        raise RetentionError("BuildLease workspace image remains attached or its tool identity changed")
+    image_identity = _session_image_content_identity(image)
+    expected_digest = identity.get("detached_image_identity", {}).get("sha256") \
+        if isinstance(identity.get("detached_image_identity"), Mapping) else None
+    if (not writable_eject_completed and expected_digest is not None
+            and image_identity["sha256"] != expected_digest):
+        raise RetentionError("BuildLease detached sparseimage contents changed")
+    return {**dict(identity), "attached": False, "detached_at_unix": time.time(),
+            "detached_image_identity": image_identity}
+
+
+def _verify_session_workspace_unmounted_for_eject(
+        root: Path, identity: Mapping[str, Any]) -> dict[str, Any]:
+    """Re-prove the exact original image and volume after unmount, before eject."""
+    root = Path(root).resolve(strict=True)
+    image = root / BUILD_SESSION_WORKSPACE_IMAGE_NAME
+    workspace = root / BUILD_SESSION_WORKSPACE_NAME
+    if (identity.get("attached") is not True
+            or identity.get("mountpoint") != str(workspace)
+            or identity.get("image_path") != str(image)
+            or not isinstance(identity.get("device_node"), str)
+            or not isinstance(identity.get("disk_device"), str)
+            or not isinstance(identity.get("volume_uuid"), str)
+            or not identity.get("volume_uuid")):
+        raise RetentionError("BuildLease post-unmount identity is incomplete")
+
+    image_info = image.stat(follow_symlinks=False)
+    workspace_info = workspace.stat(follow_symlinks=False)
+    root_info = root.stat(follow_symlinks=False)
+    if (not stat.S_ISREG(image_info.st_mode) or image_info.st_nlink != 1
+            or (image_info.st_dev, image_info.st_ino)
+                != (identity.get("image_device"), identity.get("image_inode"))
+            or not stat.S_ISDIR(workspace_info.st_mode)
+            or workspace_info.st_dev != root_info.st_dev
+            or (workspace_info.st_dev, workspace_info.st_ino)
+                != (identity.get("mountpoint_dir_device"), identity.get("mountpoint_dir_inode"))
+            or stat.S_IMODE(workspace_info.st_mode) != 0o500
+            or any(workspace.iterdir())):
+        raise RetentionError("BuildLease post-unmount backing image or mountpoint identity changed")
+
+    row = _session_image_row(root)
+    if row is None or row.get("writeable") is not True:
+        raise RetentionError("BuildLease post-unmount image mapping is absent, substituted, or still mounted")
+    raw_entities = row.get("system-entities")
+    if not isinstance(raw_entities, list):
+        raise RetentionError("BuildLease post-unmount image mapping omitted its device lineage")
+    canonical_image = str(image.resolve(strict=True))
+    entities = [{**entity, "image-path": canonical_image, "image-writeable": row.get("writeable")}
+                for entity in raw_entities if isinstance(entity, dict)
+                and isinstance(entity.get("dev-entry"), str)]
+    whole_devices = [entity.get("dev-entry") for entity in entities
+                     if entity.get("content-hint") == "GUID_partition_scheme"]
+    former_volume = [entity for entity in entities
+                     if entity.get("dev-entry") == identity.get("device_node")]
+    expected_disk = str(identity["disk_device"])
+    expected_slice = str(identity["device_node"])
+    if (whole_devices != [expected_disk]
+            or len(former_volume) != 1
+            or former_volume[0].get("image-path") != str(image)
+            or former_volume[0].get("image-writeable") is not True
+            or former_volume[0].get("mount-point") is not None
+            or any(entity.get("mount-point") is not None for entity in entities)):
+        raise RetentionError("BuildLease post-unmount image device lineage changed")
+
+    hdiutil, hdiutil_digest = _session_hdiutil()
+    diskutil, diskutil_digest = _session_diskutil()
+    if (str(hdiutil) != identity.get("hdiutil_path")
+            or hdiutil_digest != identity.get("hdiutil_sha256")
+            or str(diskutil) != identity.get("diskutil_path")
+            or diskutil_digest != identity.get("diskutil_sha256")):
+        raise RetentionError("BuildLease disk-image tool identity changed after unmount")
+
+    slice_info = _session_diskutil_info(expected_slice)
+    whole_info = _session_diskutil_info(expected_disk)
+    if (slice_info.get("DeviceIdentifier") != Path(expected_slice).name
+            or slice_info.get("ParentWholeDisk") != Path(expected_disk).name
+            or slice_info.get("VolumeUUID") != identity.get("volume_uuid")
+            or slice_info.get("FilesystemType") != identity.get("filesystem_type")
+            or slice_info.get("Writable") is not True
+            or slice_info.get("MountPoint") not in (None, "")
+            or whole_info.get("DeviceIdentifier") != Path(expected_disk).name):
+        raise RetentionError("BuildLease post-unmount volume UUID or whole-disk lineage changed")
+
+    image_identity = _session_image_content_identity(image)
+    if (image_identity.get("device"), image_identity.get("inode")) != (
+            identity.get("image_device"), identity.get("image_inode")):
+        raise RetentionError("BuildLease backing image was substituted after unmount")
+    final_row = _session_image_row(root)
+    final_image_info = image.stat(follow_symlinks=False)
+    if (final_row is None or final_row.get("writeable") is not True
+            or final_row.get("system-entities") != raw_entities
+            or final_row.get("image-path") != row.get("image-path")
+            or (final_image_info.st_dev, final_image_info.st_ino)
+                != (identity.get("image_device"), identity.get("image_inode"))):
+        raise RetentionError("BuildLease post-unmount image mapping changed during identity validation")
+    return {**dict(identity), "attached": False,
+            "detached_image_identity": image_identity,
+            "unmounted_at_unix": time.time()}
+
+
+def _capture_session_workspace_cleanup_identity(
+        root: Path, placeholder_identity: os.stat_result) -> dict[str, Any]:
+    """Bind a partial-setup image with or without a mounted volume entity."""
+    root = Path(root).resolve(strict=True)
+    image = root / BUILD_SESSION_WORKSPACE_IMAGE_NAME
+    workspace = root / BUILD_SESSION_WORKSPACE_NAME
+    row = _session_image_row(root)
+    if row is None or row.get("writeable") is not True:
+        raise RetentionError("partial BuildLease attachment has no exact writable image row")
+    image_info = image.stat(follow_symlinks=False)
+    disk_device = _session_image_device(root)
+    raw_entities = row.get("system-entities")
+    if not isinstance(raw_entities, list):
+        raise RetentionError("partial BuildLease image row omitted its device inventory")
+    whole_devices = [entity.get("dev-entry") for entity in raw_entities
+                     if isinstance(entity, dict)
+                     and entity.get("content-hint") == "GUID_partition_scheme"]
+    if (not stat.S_ISREG(image_info.st_mode) or image_info.st_nlink != 1
+            or not isinstance(disk_device, str) or whole_devices != [disk_device]
+            or not stat.S_ISDIR(placeholder_identity.st_mode)
+            or placeholder_identity.st_dev != root.stat(follow_symlinks=False).st_dev
+            or stat.S_IMODE(placeholder_identity.st_mode) != 0o500):
+        raise RetentionError("partial BuildLease image or workspace placeholder identity cannot be established")
+
+    image_path = str(image.resolve(strict=True))
+    entities = [entity for entity in raw_entities if isinstance(entity, dict)
+                and isinstance(entity.get("dev-entry"), str)]
+    mounted_entities = [entity for entity in entities if entity.get("mount-point") is not None]
+    if (len(mounted_entities) > 1
+            or any(entity.get("mount-point") not in (None, str(workspace))
+                   for entity in mounted_entities)):
+        raise RetentionError("partial BuildLease image is mounted at an unexpected location")
+    if mounted_entities:
+        if (len(mounted_entities) != 1
+                or str(Path(str(mounted_entities[0].get("mount-point"))).resolve(strict=False))
+                    != str(workspace)):
+            raise RetentionError("partial BuildLease volume has an ambiguous mountpoint")
+        volume_node = mounted_entities[0]["dev-entry"]
+    else:
+        current_placeholder = workspace.stat(follow_symlinks=False)
+        if ((current_placeholder.st_dev, current_placeholder.st_ino)
+                != (placeholder_identity.st_dev, placeholder_identity.st_ino)
+                or stat.S_IMODE(current_placeholder.st_mode) != 0o500
+                or any(workspace.iterdir())):
+            raise RetentionError("unmounted partial image does not expose its exact empty workspace placeholder")
+        volume_node = None
+
+    slice_nodes = [entity.get("dev-entry") for entity in entities
+                   if entity.get("dev-entry") != disk_device]
+    if len(slice_nodes) != 1:
+        raise RetentionError("partial BuildLease image has no unique volume slice")
+    slice_node = slice_nodes[0]
+    disk_info = _session_diskutil_info(str(slice_node))
+    if (disk_info.get("DeviceIdentifier") != Path(str(slice_node)).name
+            or disk_info.get("ParentWholeDisk") != Path(disk_device).name
+            or not disk_info.get("VolumeUUID")
+            or disk_info.get("FilesystemType") != "hfs"
+            or disk_info.get("Writable") is not True
+            or (volume_node is not None and disk_info.get("MountPoint") != str(workspace))
+            or (volume_node is None and disk_info.get("MountPoint") not in (None, ""))):
+        raise RetentionError("partial BuildLease volume slice or UUID lineage cannot be established")
+    if volume_node is not None and volume_node != slice_node:
+        raise RetentionError("partial BuildLease mounted volume differs from its HFS slice")
+
+    hdiutil, hdiutil_digest = _session_hdiutil()
+    diskutil, diskutil_digest = _session_diskutil()
+    final_image_info = image.stat(follow_symlinks=False)
+    final_row = _session_image_row(root)
+    if ((final_image_info.st_dev, final_image_info.st_ino)
+            != (image_info.st_dev, image_info.st_ino)
+            or final_row is None or final_row.get("writeable") is not True
+            or final_row.get("system-entities") != raw_entities):
+        raise RetentionError("partial BuildLease image identity changed during cleanup preflight")
+
+    current_workspace_info = workspace.stat(follow_symlinks=False)
+    fs = os.statvfs(workspace)
+    return {"image_path": image_path, "image_device": image_info.st_dev,
+            "image_inode": image_info.st_ino, "mountpoint": str(workspace),
+            "mountpoint_dir_device": placeholder_identity.st_dev,
+            "mountpoint_dir_inode": placeholder_identity.st_ino,
+            "device_node": str(slice_node), "volume_uuid": disk_info["VolumeUUID"],
+            "filesystem_type": disk_info["FilesystemType"],
+            "disk_device": disk_device, "device": current_workspace_info.st_dev,
+            "filesystem_id": getattr(fs, "f_fsid", None),
+            "capacity_bytes": fs.f_blocks * fs.f_frsize,
+            "hdiutil_path": str(hdiutil), "hdiutil_sha256": hdiutil_digest,
+            "diskutil_path": str(diskutil), "diskutil_sha256": diskutil_digest,
+            "attached": True}
+
+
+def _attach_session_workspace(root: Path, capacity_bytes: int) -> dict[str, Any]:
+    """Create and mount a fixed-capacity HFS+ sparseimage below one lease root."""
+    root = Path(root).resolve(strict=True)
+    if capacity_bytes < 16 * 1024 * 1024:
+        raise RetentionError("BuildLease workspace image is below the minimum supported capacity")
+    image = root / BUILD_SESSION_WORKSPACE_IMAGE_NAME
+    workspace = root / BUILD_SESSION_WORKSPACE_NAME
+    if image.exists() or image.is_symlink() or workspace.exists() or workspace.is_symlink():
+        raise RetentionError("BuildLease workspace image or mount point already exists")
+    workspace.mkdir(mode=0o500)
+    workspace.chmod(0o500)
+    mountpoint_info = workspace.stat(follow_symlinks=False)
+    root_info = root.stat(follow_symlinks=False)
+    if (not stat.S_ISDIR(mountpoint_info.st_mode)
+            or mountpoint_info.st_dev != root_info.st_dev):
+        raise RetentionError("BuildLease workspace mount point is not a directory on the lease filesystem")
+    hdiutil, digest = _session_hdiutil()
+    env = {"PATH": "/usr/bin:/bin", "HOME": str(root), "LANG": "C", "LC_ALL": "C"}
+    # hdiutil's size suffix "b" counts 512-byte sectors, not bytes. Floor to
+    # sectors so the backing image and mounted filesystem can never exceed the
+    # signed byte reservation; the mounted statvfs check below remains required.
+    capacity_sectors = capacity_bytes // 512
+    if capacity_sectors <= 0:
+        raise RetentionError("BuildLease workspace image has no whole sectors within its cap")
+    created = subprocess.run([str(hdiutil), "create", "-quiet", "-size", f"{capacity_sectors}b",
+                              "-fs", "HFS+", "-type", "SPARSE", "-volname", "FGMetalBuildWorkspace",
+                              str(image)], env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                             check=False, timeout=120)
+    if created.returncode != 0:
+        raise RetentionError("hdiutil could not create a fixed-capacity BuildLease workspace")
+    attached = False
+    try:
+        result = subprocess.run([str(hdiutil), "attach", "-quiet", "-nobrowse", "-noautoopen",
+                                 "-mountpoint", str(workspace), str(image)], env=env,
+                                stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False, timeout=120)
+        if result.returncode != 0:
+            raise RetentionError("hdiutil could not attach the fixed-capacity BuildLease workspace")
+        attached = True
+        entity = _session_image_entity(root)
+        if entity is None:
+            raise RetentionError("hdiutil attached no verifiable BuildLease workspace device")
+        disk_info = _session_diskutil_info(str(entity["dev-entry"]))
+        image_info = image.stat(follow_symlinks=False)
+        workspace_info = workspace.stat(follow_symlinks=False)
+        fs = os.statvfs(workspace)
+        capacity = fs.f_blocks * fs.f_frsize
+        hdiutil_after, digest_after = _session_hdiutil()
+        identity = {"image_path": str(image), "image_device": image_info.st_dev,
+                    "image_inode": image_info.st_ino, "mountpoint": str(workspace),
+                    "mountpoint_dir_device": mountpoint_info.st_dev,
+                    "mountpoint_dir_inode": mountpoint_info.st_ino,
+                    "mounted_mountpoint_device": workspace_info.st_dev,
+                    "mounted_mountpoint_inode": workspace_info.st_ino,
+                    "device_node": entity.get("dev-entry"), "volume_uuid": disk_info.get("VolumeUUID"),
+                    "device": workspace_info.st_dev, "filesystem_id": getattr(fs, "f_fsid", None),
+                    "capacity_bytes": capacity, "requested_capacity_bytes": capacity_bytes,
+                    "filesystem_type": disk_info.get("FilesystemType"),
+                    "mountpoint_placeholder_mode": 0o500,
+                    "disk_device": _session_image_device(root),
+                    "hdiutil_path": str(hdiutil_after), "hdiutil_sha256": digest_after,
+                    "diskutil_path": str(_session_diskutil()[0]),
+                    "diskutil_sha256": _session_diskutil()[1],
+                    "attached": True, "attached_at_unix": time.time()}
+        if (not identity["device_node"] or not identity["disk_device"]
+                or not identity["volume_uuid"] or identity["filesystem_type"] != "hfs"
+                or disk_info.get("Writable") is not True or not identity["filesystem_id"]
+                or capacity <= 0 or capacity > capacity_bytes or digest_after != digest):
+            raise RetentionError("BuildLease workspace mount identity is incomplete or exceeds its cap")
+        return _verify_session_workspace_mount(root, identity)
+    except BaseException as attach_error:
+        try:
+            # hdiutil attach can report failure after creating the attachment.
+            # Bind cleanup to this exact backing-image path instead of trusting
+            # only the command's return code.
+            row = _session_image_row(root)
+            if attached or row is not None:
+                entity = _session_image_entity(root)
+                cleanup_identity = _capture_session_workspace_cleanup_identity(root, mountpoint_info)
+                diskutil, _diskutil_digest = _session_diskutil()
+                if entity is not None:
+                    unmounted = subprocess.run(
+                        [str(diskutil), "unmount", str(workspace)],
+                        env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                        check=False, timeout=120)
+                    if unmounted.returncode != 0:
+                        raise RetentionError(
+                            "normal cleanup unmount failed ("
+                            f"diskutil {_session_hdiutil_failure_detail(unmounted)})")
+                cleanup_identity = _verify_session_workspace_unmounted_for_eject(root, cleanup_identity)
+                detached = subprocess.run([str(diskutil), "eject", cleanup_identity["disk_device"]],
+                                           env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                           check=False, timeout=120)
+                if detached.returncode != 0:
+                    raise RetentionError("normal cleanup detach failed; backing image remains attached")
+                _verify_session_workspace_detached(
+                    root, cleanup_identity, writable_eject_completed=True)
+        except BaseException as cleanup_error:
+            raise RetentionError(
+                "workspace attach failed and normal cleanup failed; backing image was preserved "
+                f"({cleanup_error})") from attach_error
+        raise
+
+
+def _session_hdiutil_failure_detail(result: subprocess.CompletedProcess[bytes]) -> str:
+    """Keep normal hdiutil failure diagnostics bounded without changing retry policy."""
+    stderr = result.stderr or b""
+    if not isinstance(stderr, bytes):
+        stderr = str(stderr).encode("utf-8", "replace")
+    preview = stderr[:2048].decode("utf-8", "replace")
+    truncation = " (truncated)" if len(stderr) > 2048 else ""
+    return f"returncode={result.returncode}; stderr={preview!r}{truncation}"
+
+
+def _detach_session_workspace(root: Path, identity: Mapping[str, Any] | None) -> dict[str, Any]:
+    """Normal-unmount, then normally detach, the exact writable v3 workspace image."""
+    root = Path(root).resolve(strict=True)
+    image = root / BUILD_SESSION_WORKSPACE_IMAGE_NAME
+    workspace = root / BUILD_SESSION_WORKSPACE_NAME
+    if identity is None:
+        if _session_image_row(root) is not None:
+            raise RetentionError("BuildLease workspace image is attached without a verified mount identity")
+        return {"attached": False, "image_path": str(image), "mountpoint": str(workspace),
+                "detached_at_unix": time.time()}
+    if identity.get("attached") is not True:
+        return _verify_session_workspace_detached(root, identity)
+    attached_row = _session_image_row(root)
+    if attached_row is None:
+        # A crash may occur after successful detach but before the caller stores
+        # the returned identity. Recovery remains failure-only and hashes the
+        # detached image again; it never resumes or accepts the interrupted run.
+        return _verify_session_workspace_detached(root, identity)
+    mounted_entity = _session_image_entity(root)
+    if mounted_entity is None:
+        # Normal unmount can succeed while normal detach is busy (for example,
+        # a process keeps cwd at the mount root). Retry only the normal detach
+        # against the same verified whole-image device.
+        image_info = image.stat(follow_symlinks=False)
+        diskutil, diskutil_digest = _session_diskutil()
+        if (attached_row.get("writeable") is not True
+                or _session_image_device(root) != identity.get("disk_device")
+                or (image_info.st_dev, image_info.st_ino)
+                    != (identity.get("image_device"), identity.get("image_inode"))
+                or str(diskutil) != identity.get("diskutil_path")
+                or diskutil_digest != identity.get("diskutil_sha256")):
+            raise RetentionError("unmounted BuildLease image no longer matches its writable identity")
+        eject_identity = _verify_session_workspace_unmounted_for_eject(root, identity)
+        result = subprocess.run([str(diskutil), "eject", str(eject_identity["disk_device"])],
+                                env={"PATH": "/usr/bin:/bin", "HOME": str(root),
+                                     "LANG": "C", "LC_ALL": "C"},
+                                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                check=False, timeout=120)
+        if result.returncode != 0:
+            raise RetentionError("BuildLease backing-image normal detach retry failed; outputs remain rejected")
+        return _verify_session_workspace_detached(
+            root, eject_identity, writable_eject_completed=True)
+    _verify_session_workspace_mount(root, identity)
+    hdiutil, digest = _session_hdiutil()
+    diskutil, diskutil_digest = _session_diskutil()
+    if identity is not None and (str(hdiutil) != identity.get("hdiutil_path")
+                                 or digest != identity.get("hdiutil_sha256")
+                                 or str(diskutil) != identity.get("diskutil_path")
+                                 or diskutil_digest != identity.get("diskutil_sha256")):
+        raise RetentionError("disk utility identity changed before workspace detach")
+    unmounted = subprocess.run([str(diskutil), "unmount", str(workspace)],
+                            env={"PATH": "/usr/bin:/bin", "HOME": str(root), "LANG": "C", "LC_ALL": "C"},
+                            stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False, timeout=120)
+    if unmounted.returncode != 0:
+        raise RetentionError(
+            "BuildLease workspace normal unmount failed; no outputs may be accepted ("
+            f"diskutil {_session_hdiutil_failure_detail(unmounted)})")
+    row = _session_image_row(root)
+    if (row is None or row.get("writeable") is not True
+            or _session_image_entity(root) is not None
+            or _session_image_device(root) != identity.get("disk_device")):
+        raise RetentionError("BuildLease normal unmount did not leave the exact image attached but unmounted")
+    eject_identity = _verify_session_workspace_unmounted_for_eject(root, identity)
+    detached = subprocess.run([str(diskutil), "eject", str(eject_identity["disk_device"])],
+                              env={"PATH": "/usr/bin:/bin", "HOME": str(root), "LANG": "C", "LC_ALL": "C"},
+                              stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False, timeout=120)
+    if detached.returncode != 0:
+        raise RetentionError("BuildLease backing-image normal detach failed; no outputs may be accepted")
+    return _verify_session_workspace_detached(
+        root, eject_identity, writable_eject_completed=True)
+
+
+def _attach_session_workspace_readonly_impl(root: Path, detached_identity: Mapping[str, Any]) -> dict[str, Any]:
+    """Reattach only the verified detached image read-only for output enumeration."""
+    root = Path(root).resolve(strict=True)
+    image = root / BUILD_SESSION_WORKSPACE_IMAGE_NAME
+    workspace = root / BUILD_SESSION_WORKSPACE_NAME
+    detached = _verify_session_workspace_detached(root, detached_identity)
+    expected_image = detached.get("detached_image_identity")
+    if not isinstance(expected_image, Mapping):
+        raise RetentionError("BuildLease detached image lacks a content identity for read-only reattach")
+    result = subprocess.run([str(_session_hdiutil()[0]), "attach", "-readonly", "-quiet", "-nobrowse",
+                             "-noautoopen", "-mountpoint", str(workspace), str(image)],
+                            env={"PATH": "/usr/bin:/bin", "HOME": str(root), "LANG": "C", "LC_ALL": "C"},
+                            stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False, timeout=120)
+    if result.returncode != 0:
+        raise RetentionError("BuildLease exact backing image could not be reattached read-only")
+    entity = _session_image_entity(root)
+    row = _session_image_row(root)
+    if entity is None or row is None or row.get("writeable") is not False:
+        raise RetentionError("BuildLease reattached image is not the exact read-only mount")
+    disk_info = _session_diskutil_info(str(entity["dev-entry"]))
+    image_identity = _session_image_content_identity(image)
+    if (image_identity != dict(expected_image)
+            or entity.get("image-path") != str(image)
+            or entity.get("image-writeable") is not False
+            or disk_info.get("Writable") is not False
+            or disk_info.get("FilesystemType") != detached_identity.get("filesystem_type")
+            or disk_info.get("VolumeUUID") != detached_identity.get("volume_uuid")
+            or disk_info.get("MountPoint") != str(workspace)):
+        raise RetentionError("BuildLease read-only reattachment does not match detached image identity")
+    workspace_info = workspace.stat(follow_symlinks=False)
+    fs = os.statvfs(workspace)
+    capacity = fs.f_blocks * fs.f_frsize
+    if (capacity != detached_identity.get("capacity_bytes")
+            or capacity <= 0 or workspace_info.st_dev == detached_identity.get("mountpoint_dir_device")):
+        raise RetentionError("BuildLease read-only filesystem capacity or device identity is invalid")
+    diskutil, diskutil_digest = _session_diskutil()
+    hdiutil, hdiutil_digest = _session_hdiutil()
+    if (str(diskutil) != detached_identity.get("diskutil_path")
+            or diskutil_digest != detached_identity.get("diskutil_sha256")
+            or str(hdiutil) != detached_identity.get("hdiutil_path")
+            or hdiutil_digest != detached_identity.get("hdiutil_sha256")):
+        raise RetentionError("BuildLease system disk-image tool identity changed during reattachment")
+    return {"image_path": str(image), "image_device": detached_identity["image_device"],
+            "image_inode": detached_identity["image_inode"], "image_size_bytes": image_identity["size_bytes"],
+            "image_sha256": image_identity["sha256"], "mountpoint": str(workspace),
+            "mountpoint_dir_device": detached_identity["mountpoint_dir_device"],
+            "mountpoint_dir_inode": detached_identity["mountpoint_dir_inode"],
+            "mountpoint_placeholder_mode": detached_identity.get("mountpoint_placeholder_mode", 0o500),
+            "detached_image_identity": dict(expected_image),
+            "device_node": entity["dev-entry"], "disk_device": _session_image_device(root),
+            "volume_uuid": disk_info["VolumeUUID"], "filesystem_type": disk_info["FilesystemType"],
+            "device": workspace_info.st_dev, "filesystem_id": getattr(fs, "f_fsid", None),
+            "capacity_bytes": capacity, "readonly": True, "attached": True,
+            "diskutil_writable": disk_info.get("Writable"),
+            "hdiutil_writeable": row.get("writeable"),
+            "hdiutil_path": str(hdiutil), "hdiutil_sha256": hdiutil_digest,
+            "diskutil_path": str(diskutil), "diskutil_sha256": diskutil_digest,
+            "attached_at_unix": time.time()}
+
+
+def _best_effort_detach_unverified_readonly_image(
+        root: Path, detached_identity: Mapping[str, Any]) -> None:
+    """Normally detach only the exact fixture-owned read-only image after failed verification."""
+    root = Path(root).resolve(strict=True)
+    image = root / BUILD_SESSION_WORKSPACE_IMAGE_NAME
+    workspace = root / BUILD_SESSION_WORKSPACE_NAME
+    if (detached_identity.get("attached") is not False
+            or detached_identity.get("image_path") != str(image)
+            or detached_identity.get("mountpoint") != str(workspace)
+            or detached_identity.get("image_device") is None
+            or detached_identity.get("image_inode") is None):
+        raise RetentionError("read-only cleanup lacks the exact detached fixture identity")
+
+    # The pathname must remain present and resolve to the exact backing inode.
+    # This is also required when no attachment is observed: disappearance or
+    # substitution is a fixture lifecycle failure, not evidence of cleanup.
+    image_info = image.stat(follow_symlinks=False)
+    if (not stat.S_ISREG(image_info.st_mode) or image_info.st_nlink != 1
+            or (image_info.st_dev, image_info.st_ino)
+                != (detached_identity.get("image_device"), detached_identity.get("image_inode"))):
+        raise RetentionError("read-only cleanup backing image identity changed")
+
+    hdiutil, hdiutil_digest = _session_hdiutil()
+    if (str(hdiutil) != detached_identity.get("hdiutil_path")
+            or hdiutil_digest != detached_identity.get("hdiutil_sha256")):
+        raise RetentionError("hdiutil identity changed before read-only cleanup")
+
+    row = _session_image_row(root)
+    if row is None:
+        _verify_session_workspace_detached(root, detached_identity)
+        return
+    if row.get("writeable") is not False:
+        raise RetentionError("refusing read-only cleanup of an image that is writable or unverified")
+    disk_device = _session_image_device(root)
+    if not isinstance(disk_device, str) or not disk_device:
+        raise RetentionError("read-only cleanup could not identify the exact attached image device")
+
+    # A mounted attachment must still be the exact image, volume lineage, and
+    # mountpoint. An unmounted image row is safe to detach only when the unique
+    # read-only image mapping and backing inode above establish its ownership.
+    entity = _session_image_entity(root)
+    if entity is not None:
+        disk_info = _session_diskutil_info(str(entity["dev-entry"]))
+        if (entity.get("image-path") != str(image)
+                or entity.get("image-writeable") is not False
+                or disk_info.get("Writable") is not False
+                or disk_info.get("VolumeUUID") != detached_identity.get("volume_uuid")
+                or disk_info.get("FilesystemType") != detached_identity.get("filesystem_type")
+                or disk_info.get("MountPoint") != str(workspace)):
+            raise RetentionError("read-only cleanup attachment does not match the fixture volume identity")
+
+    result = subprocess.run([str(hdiutil), "detach", "-quiet", disk_device],
+                            env={"PATH": "/usr/bin:/bin", "HOME": str(root), "LANG": "C", "LC_ALL": "C"},
+                            stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False, timeout=120)
+    if result.returncode != 0:
+        raise RetentionError(
+            "normal read-only image cleanup detach failed ("
+            f"hdiutil {_session_hdiutil_failure_detail(result)})")
+    if _session_image_row(root) is not None:
+        raise RetentionError("normal read-only image cleanup detach succeeded but the image remains attached")
+    _verify_session_workspace_detached(root, detached_identity)
+
+
+def _attach_session_workspace_readonly(root: Path, detached_identity: Mapping[str, Any]) -> dict[str, Any]:
+    try:
+        return _attach_session_workspace_readonly_impl(root, detached_identity)
+    except BaseException as setup_error:
+        try:
+            _best_effort_detach_unverified_readonly_image(root, detached_identity)
+        except BaseException as cleanup_error:
+            raise RetentionError(
+                "BuildLease read-only attach failed and normal cleanup failed; "
+                f"setup error: {setup_error}; cleanup error: {cleanup_error}") from setup_error
+        raise
+
+
+def _verify_session_workspace_readonly(root: Path, identity: Mapping[str, Any]) -> dict[str, Any]:
+    root = Path(root).resolve(strict=True)
+    image = root / BUILD_SESSION_WORKSPACE_IMAGE_NAME
+    workspace = root / BUILD_SESSION_WORKSPACE_NAME
+    if (identity.get("mountpoint") != str(workspace) or identity.get("image_path") != str(image)
+            or identity.get("readonly") is not True or identity.get("attached") is not True):
+        raise RetentionError("BuildLease read-only attachment identity is inconsistent")
+    image_info = image.stat(follow_symlinks=False)
+    if (image_info.st_dev, image_info.st_ino) != (identity.get("image_device"), identity.get("image_inode")):
+        raise RetentionError("BuildLease read-only attachment backing file identity changed")
+    expected_image = identity.get("detached_image_identity")
+    if not isinstance(expected_image, Mapping) or expected_image.get("path") != str(image):
+        raise RetentionError("BuildLease read-only attachment lacks its detached image identity")
+    entity = _session_image_entity(root)
+    row = _session_image_row(root)
+    if (entity is None or row is None or entity.get("dev-entry") != identity.get("device_node")
+            or _session_image_device(root) != identity.get("disk_device")
+            or entity.get("image-writeable") is not False or row.get("writeable") is not False):
+        raise RetentionError("BuildLease read-only attachment is missing, writable, or substituted")
+    disk_info = _session_diskutil_info(str(entity["dev-entry"]))
+    if (disk_info.get("Writable") is not False or disk_info.get("VolumeUUID") != identity.get("volume_uuid")
+            or disk_info.get("FilesystemType") != identity.get("filesystem_type")
+            or disk_info.get("MountPoint") != str(workspace)):
+        raise RetentionError("BuildLease diskutil read-only volume identity changed")
+    fs = os.statvfs(workspace)
+    workspace_info = workspace.stat(follow_symlinks=False)
+    if (workspace_info.st_dev != identity.get("device")
+            or getattr(fs, "f_fsid", None) != identity.get("filesystem_id")
+            or fs.f_blocks * fs.f_frsize != identity.get("capacity_bytes")):
+        raise RetentionError("BuildLease read-only mount filesystem identity or capacity changed")
+    image_identity = _session_image_content_identity(image)
+    hdiutil, hdiutil_digest = _session_hdiutil()
+    diskutil, diskutil_digest = _session_diskutil()
+    if (image_identity != dict(expected_image)
+            or image_identity.get("sha256") != identity.get("image_sha256")
+            or image_identity.get("size_bytes") != identity.get("image_size_bytes")
+            or str(hdiutil) != identity.get("hdiutil_path")
+            or hdiutil_digest != identity.get("hdiutil_sha256")
+            or str(diskutil) != identity.get("diskutil_path")
+            or diskutil_digest != identity.get("diskutil_sha256")):
+        raise RetentionError("BuildLease backing image changed after read-only reattachment")
+    return {**dict(identity), "diskutil_info": disk_info}
+
+
+def _detach_session_workspace_readonly(root: Path, identity: Mapping[str, Any]) -> dict[str, Any]:
+    """Normally detach the verified read-only evidence mount and recheck its image hash."""
+    root = Path(root).resolve(strict=True)
+    _verify_session_workspace_readonly(root, identity)
+    hdiutil, digest = _session_hdiutil()
+    if str(hdiutil) != identity.get("hdiutil_path") or digest != identity.get("hdiutil_sha256"):
+        raise RetentionError("hdiutil identity changed before read-only evidence detach")
+    result = subprocess.run([str(hdiutil), "detach", "-quiet", str(identity["disk_device"])],
+                            env={"PATH": "/usr/bin:/bin", "HOME": str(root), "LANG": "C", "LC_ALL": "C"},
+                            stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False, timeout=120)
+    if result.returncode != 0 or _session_image_row(root) is not None:
+        raise RetentionError("BuildLease read-only evidence image could not be normally detached")
+    detached = _verify_session_workspace_detached(
+        root, {**dict(identity), "attached": False,
+               "detached_image_identity": {"path": identity["image_path"],
+                                            "device": identity["image_device"],
+                                            "inode": identity["image_inode"],
+                                            "size_bytes": identity["image_size_bytes"],
+                                            "sha256": identity["image_sha256"]}})
+    return {**dict(identity), "attached": False, "detached_at_unix": time.time(),
+            "detached_image_identity": detached["detached_image_identity"]}
+
+
+def _session_plan_copy(plan: Mapping[str, Any]) -> dict[str, Any]:
+    """Freeze a caller plan as canonical JSON before it can reach reservation."""
+    if not isinstance(plan, Mapping):
+        raise RetentionError("BuildLease session plan must be a mapping")
+    try:
+        raw = _canonical_json(dict(plan))
+        if len(raw) > BUILD_SESSION_PLAN_LIMIT_BYTES:
+            raise RetentionError("BuildLease session plan exceeds its bounded controller-evidence size")
+        value = json.loads(raw)
+    except (TypeError, ValueError) as error:
+        raise RetentionError(f"BuildLease session plan is not canonical JSON: {error}") from error
+    if not isinstance(value, dict):
+        raise RetentionError("BuildLease session plan must be an object")
+    return value
+
+
+def _session_relative_path(value: Any, label: str, *, allow_dot: bool = False) -> Path:
+    if not isinstance(value, str) or not value or "\\" in value or "\x00" in value:
+        raise RetentionError(f"{label} must be a canonical relative path")
+    path = Path(value)
+    if (path.is_absolute() or any(part in {"", ".."} for part in path.parts)
+            or (not allow_dot and value in {".", "./"})
+            or path.as_posix() != value):
+        raise RetentionError(f"{label} must not contain absolute paths, aliases, or traversal")
+    return path
+
+
+def _session_dual_graph_enabled(plan: Mapping[str, Any]) -> bool:
+    return ("dual_build_graphs" in plan or "build_graphs" in plan
+            or "policy_sha256" in plan)
+
+
+def _session_dual_graph_by_id(plan: Mapping[str, Any], graph_id: str) -> Mapping[str, Any]:
+    graphs = plan.get("build_graphs")
+    if not isinstance(graphs, list):
+        raise RetentionError("dual-graph plan has no declared graph list")
+    matches = [graph for graph in graphs
+               if isinstance(graph, Mapping) and graph.get("graph_id") == graph_id]
+    if len(matches) != 1:
+        raise RetentionError(f"step references an undeclared or duplicate graph: {graph_id}")
+    return matches[0]
+
+
+def _session_graph_provenance(plan: Mapping[str, Any], step: Mapping[str, Any]) -> dict[str, Any] | None:
+    """Return the graph/step identity persisted in a command receipt."""
+    if not _session_dual_graph_enabled(plan) or step.get("kind") == "source_verification":
+        return None
+    graph = _session_dual_graph_by_id(plan, str(step.get("graph_id", "")))
+    target_id = step.get("target_id")
+    output_id = step.get("output_id")
+    runtime_ids = step.get("runtime_ids", [])
+    if step.get("kind") in {"test", "stage_windows_product"}:
+        output = next((row for row in graph["expected_outputs"]
+                       if row["output_id"] == output_id), None)
+        target_id = output["producer_target"] if output is not None else None
+    return {"graph_id": graph["graph_id"], "graph_role": graph["graph_role"],
+            "source_identity": graph["source_identity"],
+            "build_directory": graph["build_directory"],
+            "target_id": target_id,
+            "output_id": output_id,
+            "test_class": step.get("test_class"),
+            "runtime_ids": runtime_ids,
+            "stage_role": graph["stage_role"],
+            "executable_test_eligibility": graph["executable_test_eligibility"]}
+
+
+def _session_validate_dual_graphs(value: dict[str, Any], source: Mapping[str, Any],
+                                  inputs: list[Mapping[str, Any]]) -> None:
+    """Validate the single reviewed R6-A pair; graph input never supplies commands."""
+    if (value.get("dual_build_graphs") != BUILD_SESSION_DUAL_GRAPH_CAPABILITY
+            or value.get("policy_sha256") != BUILD_SESSION_HOST_V3_DUAL_GRAPH_POLICY_AMENDMENT_SHA256):
+        raise RetentionError("dual-graph capability or policy identity is not authorized")
+    graphs = value.get("build_graphs")
+    if not isinstance(graphs, list) or len(graphs) != 2:
+        raise RetentionError("dual-graph plan must declare exactly two graphs")
+    if [graph.get("graph_id") if isinstance(graph, dict) else None for graph in graphs] != list(
+            BUILD_SESSION_DUAL_GRAPH_IDS):
+        raise RetentionError("dual-graph plan must declare the fixed graph IDs in canonical order")
+
+    expected_graphs = (
+        {
+            "graph_id": "windows-product-r6a",
+            "graph_role": "WINDOWS_PRODUCT",
+            "build_directory": "build.win64-r6a",
+            "configure_profile": "R6A_WINDOWS_PRODUCT",
+            "cross_file_input": "build-win64.txt",
+            "targets": ["DEFAULT_PRODUCTION_OUTPUTS", "R6A_PRODUCTION_PATH_PE"],
+            "machine_role": "CROSS_WINDOWS_X86_64",
+            "expected_outputs": [{
+                "output_id": "r6a-production-path-pe",
+                "path": "tests/present-accounting/present-accounting-production-path.exe",
+                "format": "PE32PLUS_X86_64",
+                "producer_target": "R6A_PRODUCTION_PATH_PE",
+            }],
+            "stage_role": "WINDOWS_PRODUCT_OUTPUTS",
+            "runtime_stage_role": "NONE",
+            "executable_test_eligibility": False,
+            "tool_receipt_ids": list(BUILD_SESSION_DUAL_GRAPH_TOOL_RECEIPTS["WINDOWS_PRODUCT"]),
+            "runtime_receipt_ids": [],
+        },
+        {
+            "graph_id": "native-verification-r6a",
+            "graph_role": "NATIVE_VERIFICATION",
+            "build_directory": "build.native-r6a",
+            "configure_profile": "R6A_NATIVE_VERIFICATION_SDL2",
+            "cross_file_input": None,
+            "targets": ["R6A_PRODUCTION_PATH_MACHO", "R6A_PRESENT_ACCOUNTING_UNIT",
+                        "R6A_PRESENT_ACCOUNTING_MODEL"],
+            "machine_role": "NATIVE_DARWIN_HOST",
+            "expected_outputs": [
+                {
+                    "output_id": "r6a-production-path-macho",
+                    "path": "tests/present-accounting/present-accounting-production-path",
+                    "format": "MACHO_NATIVE_ARCH",
+                    "producer_target": "R6A_PRODUCTION_PATH_MACHO",
+                },
+                {
+                    "output_id": "r6a-present-accounting-unit",
+                    "path": "tests/present-accounting/present-accounting-unit",
+                    "format": "MACHO_NATIVE_ARCH",
+                    "producer_target": "R6A_PRESENT_ACCOUNTING_UNIT",
+                },
+                {
+                    "output_id": "r6a-present-accounting-model",
+                    "path": "tests/present-accounting/present-accounting-model",
+                    "format": "MACHO_NATIVE_ARCH",
+                    "producer_target": "R6A_PRESENT_ACCOUNTING_MODEL",
+                },
+            ],
+            "stage_role": "NATIVE_VERIFICATION_EXECUTION_ONLY",
+            "runtime_stage_role": "NATIVE_SDL2_RUNTIME_CLOSURE",
+            "executable_test_eligibility": True,
+            "tool_receipt_ids": list(BUILD_SESSION_DUAL_GRAPH_TOOL_RECEIPTS["NATIVE_VERIFICATION"]),
+            "runtime_receipt_ids": ["SDL2_COMPAT", "SDL3"],
+        },
+    )
+    input_by_path = {row.get("path"): row for row in inputs if isinstance(row, Mapping)}
+    profile = value.get("native_host_profile")
+    if profile != BUILD_SESSION_DUAL_GRAPH_NATIVE_HOST_PROFILE:
+        raise RetentionError("native graph SDK, Xcode, OS, or host architecture profile is not authorized")
+    host_dependencies = value.get("host_dependency_receipts")
+    expected_dependencies = [
+        {"input_id": input_id, **pin}
+        for input_id, pin in BUILD_SESSION_DUAL_GRAPH_HOST_DEPENDENCY_PINS.items()
+    ]
+    if host_dependencies != expected_dependencies:
+        raise RetentionError("native host dependency receipts do not match the fixed toolchain and SDK closure")
+    if (profile.get("sdk_settings_sha256")
+            != BUILD_SESSION_DUAL_GRAPH_HOST_DEPENDENCY_PINS["SDK_SETTINGS"]["sha256"]
+            or BUILD_SESSION_DUAL_GRAPH_HOST_DEPENDENCY_PINS["SDK_SETTINGS"]["path"]
+            != str(Path(profile["sdk_resolved_path"]) / "SDKSettings.plist")
+            or BUILD_SESSION_DUAL_GRAPH_HOST_DEPENDENCY_PINS["XCODE_INFO"]["path"]
+            != profile["xcode_info_path"]
+            or BUILD_SESSION_DUAL_GRAPH_HOST_DEPENDENCY_PINS["XCODEBUILD"]["path"]
+            != str(Path(profile["developer_directory"]) / "usr/bin/xcodebuild")
+            or BUILD_SESSION_DUAL_GRAPH_HOST_DEPENDENCY_PINS["SYSTEM_VERSION"]["path"]
+            != profile["system_version_path"]):
+        raise RetentionError("native SDK/Xcode/system receipts are detached from the host profile")
+    selected_tool_bin = (Path(profile["developer_directory"])
+                         / "Toolchains/XcodeDefault.xctoolchain/usr/bin")
+    for tool_name, input_id in BUILD_SESSION_DUAL_GRAPH_NATIVE_SELECTED_TOOL_RECEIPTS.items():
+        expected_reported = str(selected_tool_bin / tool_name)
+        resolved_name = {"clang++": "clang", "ranlib": "libtool"}.get(tool_name, tool_name)
+        expected_resolved = str(selected_tool_bin / resolved_name)
+        if (profile.get("xcrun_selected_tool_paths", {}).get(tool_name) != expected_reported
+                or BUILD_SESSION_DUAL_GRAPH_HOST_DEPENDENCY_PINS[input_id]["path"] != expected_resolved):
+            raise RetentionError(f"native xcrun {tool_name} path is detached from its exact tool receipt")
+    all_tools = value.get("tools")
+    if not isinstance(all_tools, Mapping) or set(all_tools) != set(BUILD_SESSION_DUAL_GRAPH_TOOL_PINS):
+        raise RetentionError("dual-graph plan must use exactly the fixed, closed tool receipt set")
+    for receipt_id, pin in BUILD_SESSION_DUAL_GRAPH_TOOL_PINS.items():
+        receipt = all_tools.get(receipt_id)
+        if (not isinstance(receipt, Mapping) or set(receipt) != {"path", "sha256"}
+                or receipt.get("path") != pin["path"] or receipt.get("sha256") != pin["sha256"]):
+            raise RetentionError(f"dual-graph tool receipt {receipt_id} does not match its fixed path and hash")
+    mingw_root = Path(BUILD_SESSION_DUAL_GRAPH_HOST_DEPENDENCY_PINS[
+        "MINGW_TOOLCHAIN_TREE"]["path"])
+    for receipt_id in ("mingw_cc", "mingw_cxx", "mingw_ar", "mingw_windres",
+                       "mingw_strip", "mingw_linker", "mingw_assembler"):
+        tool_path = Path(BUILD_SESSION_DUAL_GRAPH_TOOL_PINS[receipt_id]["path"])
+        if mingw_root not in tool_path.parents or tool_path.parent != mingw_root / "bin":
+            raise RetentionError("MinGW executable receipt is detached from the closed compiler support tree")
+    dependency_pins = BUILD_SESSION_DUAL_GRAPH_HOST_DEPENDENCY_PINS
+    alias_targets = {
+        "SDL2_PKGCONFIG_CELLAR_ALIAS": "SDL2_PKGCONFIG",
+        "SDL2_PKGCONFIG_GLOBAL_ALIAS": "SDL2_PKGCONFIG",
+        "SDL2_COMPAT_PKGCONFIG_GLOBAL_ALIAS": "SDL2_PKGCONFIG",
+        "SDL2_LIB_ALIAS_2_0_0": "SDL2_COMPAT_LIBRARY",
+        "SDL2_LIB_ALIAS_2_0": "SDL2_COMPAT_LIBRARY",
+        "SDL2_LIB_ALIAS": "SDL2_COMPAT_LIBRARY",
+        "SDL2_TEST_LIB_ALIAS": "SDL2_TEST_ARCHIVE",
+        "SDL2_MAIN_LIB_ALIAS": "SDL2MAIN_ARCHIVE",
+        "SDL2_CELLAR_ALIAS_2_0": "SDL2_COMPAT_LIBRARY",
+        "SDL2_CELLAR_ALIAS": "SDL2_COMPAT_LIBRARY",
+    }
+    for alias_id, target_id in alias_targets.items():
+        alias = dependency_pins[alias_id]
+        target = dependency_pins[target_id]
+        if alias["resolved_path"] != target["path"] or alias["sha256"] != target["sha256"]:
+            raise RetentionError(f"SDL2 linker or pkg-config alias {alias_id} is detached from its exact target")
+    if (dependency_pins["SDL2_COMPAT_LIBRARY"]["path"]
+            != BUILD_SESSION_DUAL_GRAPH_RUNTIME_PINS["SDL2_COMPAT"]["path"]
+            or dependency_pins["SDL2_COMPAT_LIBRARY"]["sha256"]
+            != BUILD_SESSION_DUAL_GRAPH_RUNTIME_PINS["SDL2_COMPAT"]["sha256"]):
+        raise RetentionError("SDL2 linker alias target differs from the staged runtime receipt")
+    for graph, expected in zip(graphs, expected_graphs):
+        if set(graph) != set(expected) | {"source_identity", "prebuild_identity"}:
+            raise RetentionError("dual-graph declaration has missing or unrecognized fields")
+        for field, required in expected.items():
+            if graph.get(field) != required:
+                raise RetentionError(f"dual-graph {graph.get('graph_id')} has invalid {field}")
+        if graph.get("source_identity") != dict(source):
+            raise RetentionError("dual-graph source identities must exactly match the shared source identity")
+        if graph["graph_role"] not in BUILD_SESSION_DUAL_GRAPH_ROLES:
+            raise RetentionError("dual-graph role is unknown")
+        if graph["cross_file_input"] is not None and graph["cross_file_input"] not in input_by_path:
+            raise RetentionError("Windows graph cross file must be an exactly receipted source input")
+        if graph["graph_role"] == "NATIVE_VERIFICATION" and graph["cross_file_input"] is not None:
+            raise RetentionError("native verification graph may not use a cross file")
+        if graph["graph_role"] == "WINDOWS_PRODUCT" and graph["cross_file_input"] != "build-win64.txt":
+            raise RetentionError("Windows product graph requires the exact admitted build-win64.txt input")
+        for receipt_id, expected_name in BUILD_SESSION_DUAL_GRAPH_TOOL_RECEIPTS[graph["graph_role"]].items():
+            receipt = value.get("tools", {}).get(receipt_id)
+            if (not isinstance(receipt, Mapping)
+                    or Path(str(receipt.get("path", ""))).name.casefold() != expected_name.casefold()
+                    or receipt.get("path") != BUILD_SESSION_DUAL_GRAPH_TOOL_PINS[receipt_id]["path"]
+                    or receipt.get("sha256") != BUILD_SESSION_DUAL_GRAPH_TOOL_PINS[receipt_id]["sha256"]):
+                raise RetentionError(
+                    f"{graph['graph_role']} toolchain receipt {receipt_id} has the wrong tool identity")
+
+    runtime_receipts = value.get("runtime_receipts")
+    if not isinstance(runtime_receipts, list):
+        raise RetentionError("dual-graph plan must bind its native runtime inputs")
+    if [row.get("runtime_id") if isinstance(row, dict) else None for row in runtime_receipts] != [
+            "SDL2_COMPAT", "SDL3"]:
+        raise RetentionError("native runtime receipt list must bind the exact SDL2 compatibility closure")
+    runtime_names = BUILD_SESSION_DUAL_GRAPH_RUNTIME_SOURCE_NAMES
+    for row in runtime_receipts:
+        if (not isinstance(row, dict) or set(row) != {"runtime_id", "path", "sha256"}
+                or not isinstance(row.get("path"), str)
+                or not Path(row["path"]).is_absolute()
+                or str(Path(row["path"])) != row["path"]
+                or Path(row["path"]).name != runtime_names[row["runtime_id"]]
+                or not re.fullmatch(r"[0-9a-f]{64}", str(row.get("sha256", "")))
+                or row["path"] != BUILD_SESSION_DUAL_GRAPH_RUNTIME_PINS[row["runtime_id"]]["path"]
+                or row["sha256"] != BUILD_SESSION_DUAL_GRAPH_RUNTIME_PINS[row["runtime_id"]]["sha256"]):
+            raise RetentionError("native runtime receipt is not an exact canonical file identity")
+    _validate_dual_graph_prebuild_identity(value)
+
+
+def _session_graph_format_identity(path: Path, expected_format: str) -> tuple[str, str | None]:
+    """Parse only the closed PE32+ x86_64 and thin native Mach-O formats."""
+    if expected_format == "PE32PLUS_X86_64":
+        try:
+            with path.open("rb") as stream:
+                header = stream.read(64)
+                if len(header) != 64 or header[:2] != b"MZ":
+                    raise RetentionError("declared Windows output is not a DOS/PE image")
+                pe_offset = int.from_bytes(header[0x3c:0x40], "little")
+                if pe_offset < 64 or pe_offset > 1024 * 1024:
+                    raise RetentionError("declared Windows output has an invalid PE header offset")
+                stream.seek(pe_offset)
+                pe_header = stream.read(26)
+        except OSError as error:
+            raise RetentionError(f"could not read declared Windows output: {error}") from error
+        if (len(pe_header) < 26 or pe_header[:4] != b"PE\0\0"
+                or int.from_bytes(pe_header[4:6], "little") != 0x8664
+                or int.from_bytes(pe_header[24:26], "little") != 0x20b):
+            raise RetentionError("declared Windows output is not PE32+ x86_64")
+        return "PE32PLUS_X86_64", "x86_64"
+    if expected_format == "MACHO_NATIVE_ARCH":
+        architecture = _thin_macho_architecture(path)
+        native = _session_native_architecture()
+        if architecture != native or _session_macho_filetype(path) != 2:
+            raise RetentionError("declared native output architecture differs from the host architecture")
+        return "MACHO_NATIVE_ARCH", architecture
+    raise RetentionError("session output format is not a closed Host-v3 format")
+
+
+def _session_native_architecture() -> str:
+    machine = platform.machine().lower()
+    return {"aarch64": "arm64", "amd64": "x86_64"}.get(machine, machine)
+
+
+def _session_macho_filetype(path: Path) -> int:
+    """Read the filetype from one thin 64-bit Mach-O header."""
+    import struct
+    try:
+        with path.open("rb") as stream:
+            header = stream.read(16)
+    except OSError as error:
+        raise RetentionError(f"cannot read Mach-O filetype for {path}: {error}") from error
+    byte_order = {b"\xcf\xfa\xed\xfe": "<", b"\xfe\xed\xfa\xcf": ">"}.get(header[:4])
+    if len(header) < 16 or byte_order is None:
+        raise RetentionError("native output must be a thin 64-bit Mach-O file")
+    return struct.unpack(f"{byte_order}I", header[12:16])[0]
+
+
+def _session_macho_dependency_identity(path: Path) -> dict[str, Any]:
+    """Read thin Mach-O architecture, file type, dylib loads, install name, and rpaths."""
+    import struct
+
+    try:
+        with path.open("rb") as stream:
+            header = stream.read(32)
+            if len(header) != 32:
+                raise RetentionError("native output must have a complete thin 64-bit Mach-O header")
+            byte_order = {b"\xcf\xfa\xed\xfe": "<", b"\xfe\xed\xfa\xcf": ">"}.get(header[:4])
+            if byte_order is None:
+                raise RetentionError("native output must be a thin 64-bit Mach-O file")
+            _magic, cpu_type, cpu_subtype, filetype, command_count, command_bytes, _flags, _reserved = \
+                struct.unpack(f"{byte_order}IIIIIIII", header)
+            if command_count > 65536 or command_bytes > 16 * 1024 * 1024:
+                raise RetentionError("Mach-O load-command table exceeds the closed parser bound")
+            commands_raw = stream.read(command_bytes)
+            if len(commands_raw) != command_bytes:
+                raise RetentionError("Mach-O load-command table is truncated")
+    except OSError as error:
+        raise RetentionError(f"could not read Mach-O dependency identity: {error}") from error
+
+    dylib_names: dict[int, str] = {
+        0xC: "LC_LOAD_DYLIB", 0x18 | 0x80000000: "LC_LOAD_WEAK_DYLIB",
+        0x1F | 0x80000000: "LC_REEXPORT_DYLIB", 0x20: "LC_LAZY_LOAD_DYLIB",
+        0x23 | 0x80000000: "LC_LOAD_UPWARD_DYLIB",
+    }
+    loads: list[dict[str, str]] = []
+    rpaths: list[str] = []
+    install_name: str | None = None
+    offset = 0
+    for _index in range(command_count):
+        if offset + 8 > len(commands_raw):
+            raise RetentionError("Mach-O load-command header is outside its declared table")
+        command, command_size = struct.unpack_from(f"{byte_order}II", commands_raw, offset)
+        if command_size < 8 or command_size % 4 != 0 or offset + command_size > len(commands_raw):
+            raise RetentionError("Mach-O load command has an invalid bounded size")
+        if command in dylib_names or command == 0xD:
+            if command_size < 24:
+                raise RetentionError("Mach-O dylib load command is truncated")
+            name_offset = struct.unpack_from(f"{byte_order}I", commands_raw, offset + 8)[0]
+            if name_offset < 24 or name_offset >= command_size:
+                raise RetentionError("Mach-O dylib name offset is outside its load command")
+            raw_name = commands_raw[offset + name_offset:offset + command_size]
+            name_bytes = raw_name.split(b"\0", 1)[0]
+            try:
+                name = name_bytes.decode("utf-8")
+            except UnicodeDecodeError as error:
+                raise RetentionError("Mach-O dylib path is not valid UTF-8") from error
+            if not name or "\x00" in name:
+                raise RetentionError("Mach-O dylib path is empty or invalid")
+            if command == 0xD:
+                if install_name is not None:
+                    raise RetentionError("Mach-O image declares duplicate install names")
+                install_name = name
+            else:
+                loads.append({"command": dylib_names[command], "path": name})
+        elif command == (0x8000001C):  # LC_RPATH
+            if command_size < 12:
+                raise RetentionError("Mach-O rpath command is truncated")
+            path_offset = struct.unpack_from(f"{byte_order}I", commands_raw, offset + 8)[0]
+            if path_offset < 12 or path_offset >= command_size:
+                raise RetentionError("Mach-O rpath offset is outside its load command")
+            raw_path = commands_raw[offset + path_offset:offset + command_size]
+            try:
+                rpath = raw_path.split(b"\0", 1)[0].decode("utf-8")
+            except UnicodeDecodeError as error:
+                raise RetentionError("Mach-O rpath is not valid UTF-8") from error
+            if not rpath:
+                raise RetentionError("Mach-O rpath is empty")
+            rpaths.append(rpath)
+        offset += command_size
+    if offset != len(commands_raw):
+        raise RetentionError("Mach-O load-command sizes do not fill the declared table")
+    architecture = {0x0100000C: "arm64", 0x01000007: "x86_64"}.get(cpu_type, f"cpu:{cpu_type:#x}")
+    return {"architecture": architecture, "cpu_subtype": cpu_subtype,
+            "filetype": filetype, "install_name": install_name,
+            "loads": loads, "rpaths": rpaths}
+
+
+def _session_macho_dependency_bindings(macho: Mapping[str, Any],
+                                       runtime_receipt_ids: Iterable[str]) -> list[dict[str, Any]]:
+    """Require each non-system Mach-O load to name one exact staged runtime receipt."""
+    allowed_runtime_ids = set(runtime_receipt_ids)
+    bindings: list[dict[str, Any]] = []
+    for load in macho.get("loads", []):
+        load_path = load.get("path")
+        if not isinstance(load_path, str) or not load_path:
+            raise RetentionError("Mach-O load command has no canonical path identity")
+        if load_path.startswith(("/System/Library/", "/usr/lib/")):
+            bindings.append({"load_path": load_path, "resolution_class": "HOST_SYSTEM_RUNTIME"})
+            continue
+        matches = [runtime_id for runtime_id in sorted(allowed_runtime_ids)
+                   if Path(load_path).name == BUILD_SESSION_DUAL_GRAPH_RUNTIME_NAMES.get(runtime_id)]
+        if len(matches) != 1:
+            raise RetentionError(f"Mach-O load command is outside the admitted system/runtime closure: {load_path}")
+        runtime_id = matches[0]
+        pin = BUILD_SESSION_DUAL_GRAPH_RUNTIME_PINS[runtime_id]
+        bindings.append({"load_path": load_path, "resolution_class": "STAGED_RUNTIME_RECEIPT",
+                         "runtime_id": runtime_id, "source_path": pin["path"],
+                         "sha256": pin["sha256"],
+                         "staged_path": (BUILD_SESSION_DUAL_GRAPH_NATIVE_RUNTIME_RELATIVE /
+                                         BUILD_SESSION_DUAL_GRAPH_RUNTIME_NAMES[runtime_id]).as_posix(),
+                         "dyld_resolution_verified": False})
+    return bindings
+
+
+def _session_graph_directory_identity(workspace: Path, graph: Mapping[str, Any], *,
+                                      must_exist: bool) -> dict[str, int] | None:
+    """Open one fixed direct-child graph directory without following aliases."""
+    relative = _session_relative_path(graph.get("build_directory"), "graph build directory")
+    if len(relative.parts) != 1 or relative.as_posix() != BUILD_SESSION_DUAL_GRAPH_DIRECTORIES.get(
+            str(graph.get("graph_id"))):
+        raise RetentionError("graph build directory is not the exact fixed workspace child")
+    workspace_fd = _open_dir(workspace)
+    try:
+        root_info = os.fstat(workspace_fd)
+        root_fsid = getattr(os.fstatvfs(workspace_fd), "f_fsid", None)
+        try:
+            info = os.stat(relative.name, dir_fd=workspace_fd, follow_symlinks=False)
+        except FileNotFoundError:
+            if must_exist:
+                raise RetentionError("declared build graph directory is missing")
+            return None
+        if not stat.S_ISDIR(info.st_mode):
+            raise RetentionError("declared build graph path is not a real directory")
+        child_fd = os.open(relative.name, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0)
+                           | getattr(os, "O_NOFOLLOW", 0), dir_fd=workspace_fd)
+        try:
+            child_info = os.fstat(child_fd)
+            child_fsid = getattr(os.fstatvfs(child_fd), "f_fsid", None)
+            if ((child_info.st_dev, child_info.st_ino) != (info.st_dev, info.st_ino)
+                    or child_info.st_dev != root_info.st_dev or child_fsid != root_fsid):
+                raise RetentionError("declared build graph directory escaped the workspace filesystem")
+            return {"device": child_info.st_dev, "inode": child_info.st_ino,
+                    "filesystem_id": child_fsid}
+        finally:
+            os.close(child_fd)
+    finally:
+        os.close(workspace_fd)
+
+
+def _session_graph_output_identity(workspace: Path, graph: Mapping[str, Any],
+                                   output: Mapping[str, Any]) -> dict[str, Any]:
+    """Record one declared graph output using no-follow file access and a format parser."""
+    graph_dir_identity = _session_graph_directory_identity(workspace, graph, must_exist=True)
+    graph_root = _session_safe_path(workspace, Path(str(graph["build_directory"])),
+                                    must_exist=True, directory=True)
+    relative = _session_relative_path(output.get("path"), "graph output path")
+    path = _session_safe_path(graph_root, relative, must_exist=True, directory=False)
+    parent_fd = _open_dir(path.parent)
+    fd = None
+    try:
+        fd = os.open(path.name, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0), dir_fd=parent_fd)
+        before = os.fstat(fd)
+        if not stat.S_ISREG(before.st_mode) or not before.st_mode & 0o111:
+            raise RetentionError("declared graph executable is not a regular executable file")
+        digest = _hash_fd(fd)
+        after = os.fstat(fd)
+        if ((before.st_dev, before.st_ino, before.st_size, before.st_mtime_ns)
+                != (after.st_dev, after.st_ino, after.st_size, after.st_mtime_ns)):
+            raise RetentionError("declared graph output changed while it was being hashed")
+    finally:
+        if fd is not None:
+            os.close(fd)
+        os.close(parent_fd)
+    actual_format, architecture = _session_graph_format_identity(path, str(output["format"]))
+    macho_dependency_identity = (_session_macho_dependency_identity(path)
+                                 if actual_format == "MACHO_NATIVE_ARCH" else None)
+    runtime_receipt_ids = list(graph["runtime_receipt_ids"])
+    macho_dependency_bindings = (_session_macho_dependency_bindings(
+        macho_dependency_identity, runtime_receipt_ids)
+        if macho_dependency_identity is not None else None)
+    test_binding = (BUILD_SESSION_DUAL_GRAPH_NATIVE_TEST_BINDINGS.get(output["output_id"])
+                    if graph["graph_role"] == "NATIVE_VERIFICATION" else None)
+    current = path.stat(follow_symlinks=False)
+    if ((before.st_dev, before.st_ino, before.st_size, before.st_mtime_ns)
+            != (current.st_dev, current.st_ino, current.st_size, current.st_mtime_ns)
+            or _hash_path(path) != digest):
+        raise RetentionError("declared graph output changed during format and identity verification")
+    return {
+        "graph_id": graph["graph_id"], "graph_role": graph["graph_role"],
+        "source_identity": graph["source_identity"],
+        "build_directory": graph["build_directory"],
+        "build_directory_identity": graph_dir_identity,
+        "target_id": output["producer_target"], "output_id": output["output_id"],
+        "path": f"{graph['build_directory']}/{relative.as_posix()}",
+        "format": actual_format, "architecture": architecture,
+        "macho_dependency_identity": macho_dependency_identity,
+        "macho_dependency_bindings": macho_dependency_bindings,
+        "runtime_dependency_contract": ({
+            "graph_id": graph["graph_id"],
+            "runtime_stage_role": graph["runtime_stage_role"],
+            "test_class": test_binding["test_class"] if test_binding is not None else None,
+            "requires_sdl2_runtime": (test_binding["requires_sdl2_runtime"]
+                                      if test_binding is not None else False),
+            "runtime_receipt_ids": runtime_receipt_ids,
+            "runtime_receipts": [{"runtime_id": runtime_id,
+                                  "source_path": BUILD_SESSION_DUAL_GRAPH_RUNTIME_PINS[runtime_id]["path"],
+                                  "sha256": BUILD_SESSION_DUAL_GRAPH_RUNTIME_PINS[runtime_id]["sha256"],
+                                  "staged_path": (BUILD_SESSION_DUAL_GRAPH_NATIVE_RUNTIME_RELATIVE /
+                                                  BUILD_SESSION_DUAL_GRAPH_RUNTIME_NAMES[runtime_id]).as_posix()}
+                                 for runtime_id in runtime_receipt_ids],
+            "test_eligible": graph["executable_test_eligibility"] and test_binding is not None,
+            "loader_basename": (BUILD_SESSION_DUAL_GRAPH_NATIVE_LOADER_BASENAME
+                                if test_binding is not None
+                                and test_binding["requires_sdl2_runtime"] else None),
+            "resolution_claim": BUILD_SESSION_DUAL_GRAPH_NATIVE_LOADER_RESOLUTION_CLAIM,
+        } if graph["graph_role"] == "NATIVE_VERIFICATION" else None),
+        "file_identity": {"device": before.st_dev, "inode": before.st_ino,
+                          "mode": stat.S_IMODE(before.st_mode), "size_bytes": before.st_size,
+                          "sha256": digest},
+    }
+
+
+def _session_regular_file_identity(path: Path, expected_sha256: str, label: str) -> dict[str, Any]:
+    """Hash one external tool/runtime input through a no-follow descriptor."""
+    if path.is_symlink() or path.resolve(strict=True) != path:
+        raise RetentionError(f"{label} path is not a canonical real file")
+    fd = os.open(path, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0))
+    try:
+        before = os.fstat(fd)
+        if not stat.S_ISREG(before.st_mode):
+            raise RetentionError(f"{label} input is not a regular file")
+        digest = _hash_fd(fd)
+        after = os.fstat(fd)
+        if ((before.st_dev, before.st_ino, before.st_size, before.st_mtime_ns)
+                != (after.st_dev, after.st_ino, after.st_size, after.st_mtime_ns)
+                or digest != expected_sha256):
+            raise RetentionError(f"{label} input changed from its admitted identity")
+        return {"path": str(path), "sha256": digest, "device": before.st_dev,
+                "inode": before.st_ino, "size_bytes": before.st_size,
+                "mode": stat.S_IMODE(before.st_mode)}
+    finally:
+        os.close(fd)
+
+
+def _session_symlink_identity(path: Path, expected_target: str, expected_resolved_path: str,
+                              expected_sha256: str, label: str) -> dict[str, Any]:
+    """Bind one exact linker/pkg-config alias and its final regular-file target."""
+    if path.parent.resolve(strict=True) != path.parent:
+        raise RetentionError(f"{label} parent directory is not canonical")
+    try:
+        before = path.stat(follow_symlinks=False)
+        raw_target = os.readlink(path)
+    except OSError as error:
+        raise RetentionError(f"{label} is not a readable symlink") from error
+    if not stat.S_ISLNK(before.st_mode) or raw_target != expected_target:
+        raise RetentionError(f"{label} target differs from its pinned linker alias")
+    try:
+        resolved = path.resolve(strict=True)
+    except OSError as error:
+        raise RetentionError(f"{label} target is missing") from error
+    if resolved != Path(expected_resolved_path) or resolved.is_symlink():
+        raise RetentionError(f"{label} resolves outside its pinned target identity")
+    target_identity = _session_regular_file_identity(resolved, expected_sha256, label)
+    after = path.stat(follow_symlinks=False)
+    if ((before.st_dev, before.st_ino, before.st_mtime_ns, before.st_mode)
+            != (after.st_dev, after.st_ino, after.st_mtime_ns, after.st_mode)
+            or os.readlink(path) != raw_target):
+        raise RetentionError(f"{label} changed while its target was verified")
+    return {"path": str(path), "target": raw_target, "resolved_path": str(resolved),
+            "sha256": target_identity["sha256"], "link_device": before.st_dev,
+            "link_inode": before.st_ino, "link_mtime_ns": before.st_mtime_ns,
+            "target_device": target_identity["device"], "target_inode": target_identity["inode"],
+            "target_size_bytes": target_identity["size_bytes"],
+            "target_mode": target_identity["mode"]}
+
+
+def _session_closed_alias_directory_identity(directory: Path, prefix: str,
+                                             expected_names: set[str], label: str) -> dict[str, Any]:
+    """Reject unreceipted alternatives in a linker/pkg-config search directory."""
+    if directory.is_symlink() or directory.resolve(strict=True) != directory or not directory.is_dir():
+        raise RetentionError(f"{label} directory is not a canonical directory")
+    before = directory.stat(follow_symlinks=False)
+    matching = {entry.name for entry in directory.iterdir() if entry.name.startswith(prefix)}
+    after = directory.stat(follow_symlinks=False)
+    if ((before.st_dev, before.st_ino, before.st_mtime_ns)
+            != (after.st_dev, after.st_ino, after.st_mtime_ns)
+            or matching != expected_names):
+        raise RetentionError(f"{label} directory contains a substituted or unreceipted alias")
+    return {"path": str(directory), "device": before.st_dev, "inode": before.st_ino,
+            "mtime_ns": before.st_mtime_ns, "mode": stat.S_IMODE(before.st_mode),
+            "owner_uid": before.st_uid, "matching_names": sorted(matching)}
+
+
+def _capture_session_native_toolchain_selection(
+        plan: Mapping[str, Any], dependency_identities: Mapping[str, Mapping[str, Any]]) -> dict[str, Any]:
+    """Probe active Xcode selection with fixed tools and a scrubbed environment."""
+    profile = plan["native_host_profile"]
+    if not isinstance(profile, Mapping):
+        raise RetentionError("native toolchain selection lacks its typed host profile")
+    xcode_select = dependency_identities.get("XCODE_SELECT")
+    xcrun = dependency_identities.get("XCRUN")
+    if not isinstance(xcode_select, Mapping) or not isinstance(xcrun, Mapping):
+        raise RetentionError("native toolchain selection tools are not pinned host dependencies")
+
+    # Never inherit DEVELOPER_DIR, SDKROOT, TOOLCHAINS, or any other user setting.
+    base_environment = {
+        "PATH": "/usr/bin:/bin:/usr/sbin:/sbin",
+        "HOME": "/var/empty",
+        "LANG": "C",
+        "LC_ALL": "C",
+    }
+
+    def probe(executable: Mapping[str, Any], arguments: list[str], label: str,
+              environment: Mapping[str, str]) -> str:
+        executable_path = str(executable["path"])
+        try:
+            result = subprocess.run([executable_path, *arguments], env=dict(environment),
+                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                    text=True, check=False, timeout=15)
+        except (OSError, subprocess.TimeoutExpired) as error:
+            raise RetentionError(f"native toolchain {label} probe could not run") from error
+        output = result.stdout.strip()
+        if (result.returncode != 0 or not output or "\n" in output or "\x00" in output):
+            raise RetentionError(f"native toolchain {label} probe returned no single successful identity")
+        return output
+
+    active_developer_directory = probe(xcode_select, ["-p"], "active developer directory",
+                                       base_environment)
+    pinned_developer_directory = str(profile["developer_directory"])
+    if active_developer_directory != pinned_developer_directory:
+        raise RetentionError("active xcode-select developer directory differs from the pinned native profile")
+
+    selected_environment = {
+        **base_environment,
+        "DEVELOPER_DIR": pinned_developer_directory,
+        "SDKROOT": str(profile["sdk_resolved_path"]),
+    }
+    selected_tools: dict[str, dict[str, str]] = {}
+    for tool_name, input_id in BUILD_SESSION_DUAL_GRAPH_NATIVE_SELECTED_TOOL_RECEIPTS.items():
+        reported_path = probe(xcrun, ["--find", tool_name], f"selected {tool_name}",
+                              selected_environment)
+        try:
+            resolved_path = Path(reported_path).resolve(strict=True)
+        except OSError as error:
+            raise RetentionError(f"xcrun selected an unavailable native {tool_name}") from error
+        receipt_identity = dependency_identities[input_id]
+        selected_identity = _session_regular_file_identity(
+            resolved_path, str(receipt_identity["sha256"]), f"xcrun-selected native {tool_name}")
+        selected_tools[tool_name] = {
+            "reported_path": reported_path,
+            "resolved_path": selected_identity["path"],
+            "sha256": selected_identity["sha256"],
+        }
+
+    sdk_path = probe(xcrun, ["--sdk", "macosx", "--show-sdk-path"],
+                     "selected macOS SDK path", selected_environment)
+    try:
+        sdk_resolved_path = str(Path(sdk_path).resolve(strict=True))
+    except OSError as error:
+        raise RetentionError("xcrun selected an unavailable macOS SDK") from error
+    sdk_version = probe(xcrun, ["--sdk", "macosx", "--show-sdk-version"],
+                         "selected macOS SDK version", selected_environment)
+
+    for input_id in ("XCODE_SELECT", "XCRUN"):
+        original = dependency_identities[input_id]
+        after = _session_regular_file_identity(
+            Path(str(original["path"])), str(original["sha256"]),
+            f"native toolchain selection utility {input_id}")
+        if ((after["device"], after["inode"], after["size_bytes"], after["sha256"])
+                != (original["device"], original["inode"], original["size_bytes"], original["sha256"])):
+            raise RetentionError(f"native toolchain selection utility {input_id} changed during probing")
+
+    return {
+        "active_developer_directory": active_developer_directory,
+        "developer_dir_environment": selected_environment["DEVELOPER_DIR"],
+        "sdkroot_environment": selected_environment["SDKROOT"],
+        "sdk_path": sdk_path,
+        "sdk_resolved_path": sdk_resolved_path,
+        "sdk_version": sdk_version,
+        "selected_tools": selected_tools,
+    }
+
+
+def _validate_session_native_toolchain_selection(
+        plan: Mapping[str, Any], dependency_identities: Mapping[str, Mapping[str, Any]],
+        observed: Mapping[str, Any]) -> dict[str, Any]:
+    """Bind active xcode-select and xcrun results to exact profile/tool receipts."""
+    profile = plan["native_host_profile"]
+    if (observed.get("active_developer_directory") != profile["developer_directory"]
+            or observed.get("developer_dir_environment") != profile["developer_directory"]
+            or observed.get("sdkroot_environment") != profile["sdk_resolved_path"]
+            or observed.get("sdk_path") != profile["sdk_path"]
+            or observed.get("sdk_resolved_path") != profile["sdk_resolved_path"]
+            or observed.get("sdk_version") != profile["sdk_version"]):
+        raise RetentionError("observed Xcode/SDK selection differs from the pinned native host profile")
+    selected_tools = observed.get("selected_tools")
+    expected_selected_paths = profile.get("xcrun_selected_tool_paths")
+    if (not isinstance(selected_tools, Mapping)
+            or not isinstance(expected_selected_paths, Mapping)
+            or set(selected_tools) != set(BUILD_SESSION_DUAL_GRAPH_NATIVE_SELECTED_TOOL_RECEIPTS)
+            or set(expected_selected_paths) != set(BUILD_SESSION_DUAL_GRAPH_NATIVE_SELECTED_TOOL_RECEIPTS)):
+        raise RetentionError("observed xcrun tool selection is incomplete")
+    for tool_name, input_id in BUILD_SESSION_DUAL_GRAPH_NATIVE_SELECTED_TOOL_RECEIPTS.items():
+        row = selected_tools.get(tool_name)
+        receipt = dependency_identities[input_id]
+        if (not isinstance(row, Mapping)
+                or row.get("reported_path") != expected_selected_paths[tool_name]
+                or row.get("resolved_path") != receipt.get("path")
+                or row.get("sha256") != receipt.get("sha256")):
+            raise RetentionError(f"xcrun-selected native {tool_name} differs from its pinned path/hash receipt")
+    return dict(observed)
+
+
+def _session_host_dependency_identities(
+        plan: Mapping[str, Any]) -> tuple[list[dict[str, Any]], dict[str, Any], dict[str, Any]]:
+    """Rehash the closed native compiler/package/SDK inputs and validate profile metadata."""
+    if not _session_dual_graph_enabled(plan):
+        return [], {}, {}
+    identities: list[dict[str, Any]] = []
+    by_id: dict[str, dict[str, Any]] = {}
+    for receipt in plan["host_dependency_receipts"]:
+        input_id = receipt["input_id"]
+        path = Path(receipt["path"])
+        if receipt["kind"] == "symlink":
+            identity = _session_symlink_identity(
+                path, receipt["target"], receipt["resolved_path"], receipt["sha256"],
+                f"native host dependency {input_id}")
+        elif path.is_symlink() or path.resolve(strict=True) != path:
+            raise RetentionError(f"native host dependency {input_id} is not a canonical path")
+        elif receipt["kind"] == "file":
+            identity = _session_regular_file_identity(path, receipt["sha256"],
+                                                     f"native host dependency {input_id}")
+        elif receipt["kind"] == "tree":
+            if not path.is_dir():
+                raise RetentionError(f"native host dependency {input_id} is not a directory")
+            before = path.stat(follow_symlinks=False)
+            digest, file_count = _tree_hash(
+                path, reject_symlinks=True, reject_external_hardlinks=True)
+            after = path.stat(follow_symlinks=False)
+            if ((before.st_dev, before.st_ino, before.st_mtime_ns)
+                    != (after.st_dev, after.st_ino, after.st_mtime_ns)
+                    or digest != receipt["sha256"]):
+                raise RetentionError(f"native host dependency {input_id} changed from its admitted identity")
+            identity = {"path": str(path), "sha256": digest, "device": before.st_dev,
+                        "inode": before.st_ino, "mode": stat.S_IMODE(before.st_mode),
+                        "file_count": file_count}
+        elif receipt["kind"] == "tree_internal_symlinks":
+            if not path.is_dir():
+                raise RetentionError(f"native host dependency {input_id} is not a directory")
+            before = path.stat(follow_symlinks=False)
+            digest, file_count = _tree_hash(
+                path, reject_external_hardlinks=True, require_internal_symlinks=True,
+                include_root_git=True)
+            after = path.stat(follow_symlinks=False)
+            if ((before.st_dev, before.st_ino, before.st_mtime_ns)
+                    != (after.st_dev, after.st_ino, after.st_mtime_ns)
+                    or digest != receipt["sha256"]
+                    or file_count != receipt.get("file_count")):
+                raise RetentionError(f"native host dependency {input_id} changed from its admitted identity")
+            identity = {"path": str(path), "sha256": digest, "device": before.st_dev,
+                        "inode": before.st_ino, "mode": stat.S_IMODE(before.st_mode),
+                        "file_count": file_count}
+        else:
+            raise RetentionError(f"native host dependency {input_id} has an unsupported receipt kind")
+        observed = {"input_id": input_id, "kind": receipt["kind"], **identity}
+        identities.append(observed)
+        by_id[input_id] = observed
+
+    alias_groups = (
+        ("SDL2 linker", "libSDL2", (
+            "SDL2_LIB_ALIAS_2_0_0", "SDL2_LIB_ALIAS_2_0", "SDL2_LIB_ALIAS",
+            "SDL2_TEST_LIB_ALIAS", "SDL2_MAIN_LIB_ALIAS"), set()),
+        ("SDL2 Cellar pkg-config", "sdl2", ("SDL2_PKGCONFIG_CELLAR_ALIAS",),
+         {"sdl2-compat.pc"}),
+        ("SDL2 pkg-config", "sdl2", (
+            "SDL2_PKGCONFIG_GLOBAL_ALIAS", "SDL2_COMPAT_PKGCONFIG_GLOBAL_ALIAS"), set()),
+    )
+    alias_directory_identities = []
+    for label, prefix, receipt_ids, extra_names in alias_groups:
+        paths = [Path(BUILD_SESSION_DUAL_GRAPH_HOST_DEPENDENCY_PINS[row]["path"])
+                 for row in receipt_ids]
+        if len({str(path.parent) for path in paths}) != 1:
+            raise RetentionError(f"{label} aliases do not share one fixed search directory")
+        directory = paths[0].parent
+        expected_names = {path.name for path in paths} | extra_names
+        alias_directory_identities.append(_session_closed_alias_directory_identity(
+            directory, prefix, expected_names, label))
+    identities.extend({"input_id": f"SDL2_ALIAS_DIRECTORY_{index}", "kind": "directory", **identity}
+                      for index, identity in enumerate(alias_directory_identities))
+
+    toolchain_selection = _validate_session_native_toolchain_selection(
+        plan, by_id, _capture_session_native_toolchain_selection(plan, by_id))
+    identities.append({"input_id": "NATIVE_TOOLCHAIN_SELECTION", "kind": "selection",
+                       "identity": toolchain_selection})
+
+    profile = plan["native_host_profile"]
+    machine = _session_native_architecture()
+    if sys.platform != "darwin" or profile["host_architecture"] != machine:
+        raise RetentionError("native host profile differs from the running Darwin architecture")
+    for field, receipt_id in (("sdk_settings_sha256", "SDK_SETTINGS"),):
+        if profile[field] != by_id[receipt_id]["sha256"]:
+            raise RetentionError("native SDK settings hash differs from its typed host dependency receipt")
+    sdk_link = Path(profile["sdk_path"])
+    header_link = Path(profile["sdl2_header_search_path"])
+    if (not sdk_link.is_symlink() or os.readlink(sdk_link) != profile["sdk_symlink_target"]
+            or sdk_link.resolve(strict=True) != Path(profile["sdk_resolved_path"])
+            or not header_link.is_symlink()
+            or os.readlink(header_link) != profile["sdl2_header_symlink_target"]
+            or header_link.resolve(strict=True) != Path(profile["sdl2_header_real_path"])):
+        raise RetentionError("native SDK or SDL2 header alias differs from its exact typed profile")
+    developer_directory = Path(profile["developer_directory"])
+    if (developer_directory.is_symlink() or developer_directory.resolve(strict=True) != developer_directory
+            or not developer_directory.is_dir()):
+        raise RetentionError("native Xcode developer directory is not its exact canonical profile path")
+
+    def read_profile_plist(input_id: str) -> Mapping[str, Any]:
+        receipt = next(row for row in plan["host_dependency_receipts"] if row["input_id"] == input_id)
+        path = Path(receipt["path"])
+        try:
+            raw = path.read_bytes()
+            parsed = plistlib.loads(raw)
+        except (OSError, plistlib.InvalidFileException) as error:
+            raise RetentionError(f"native host profile plist {input_id} is unreadable") from error
+        if (not isinstance(parsed, Mapping) or hashlib.sha256(raw).hexdigest() != receipt["sha256"]
+                or _session_regular_file_identity(path, receipt["sha256"],
+                                                  f"native host profile {input_id}")["sha256"]
+                    != hashlib.sha256(raw).hexdigest()):
+            raise RetentionError(f"native host profile plist {input_id} changed while read")
+        return parsed
+
+    sdk_settings = read_profile_plist("SDK_SETTINGS")
+    xcode_info = read_profile_plist("XCODE_INFO")
+    system_version = read_profile_plist("SYSTEM_VERSION")
+    expected_profile_values = (
+        (sdk_settings.get("Version"), profile["sdk_version"]),
+        (xcode_info.get("CFBundleShortVersionString"), profile["xcode_version"]),
+        (xcode_info.get("DTXcodeBuild"), profile["xcode_info_build"]),
+        (system_version.get("ProductVersion"), profile["os_product_version"]),
+        (system_version.get("ProductBuildVersion"), profile["os_build"]),
+    )
+    if any(actual != expected for actual, expected in expected_profile_values):
+        raise RetentionError("native SDK/Xcode/system plist values differ from the admitted host profile")
+    return identities, dict(profile), toolchain_selection
+
+
+def _session_validate_plan(plan: Mapping[str, Any], *, build_id: str, build_path: Path,
+                           source_tree_hash: str, expected_bytes: int) -> dict[str, Any]:
+    """Validate the finite v3 contract without launching or reserving anything."""
+    value = _session_plan_copy(plan)
+    dual_graph = _session_dual_graph_enabled(value)
+    allowed_plan_keys = {
+        "schema_version", "executor_mode", "admission_identity", "source_identity", "build_id", "build_workspace",
+        "reservation_bytes", "stage_root", "output_root", "environment", "tools",
+        "input_receipts", "steps", "admission_output_contract", "admission_output_dir",
+    }
+    if dual_graph:
+        allowed_plan_keys |= {"policy_sha256", "dual_build_graphs", "build_graphs", "runtime_receipts",
+                              "native_host_profile", "host_dependency_receipts", "build_type",
+                              "prebuild_evidence", "build_configuration_key_sha256",
+                              "persistent_output_allowance_bytes"}
+    if (set(value) - allowed_plan_keys
+            or not (allowed_plan_keys - {"input_receipts", "persistent_output_allowance_bytes",
+                                         "admission_output_contract", "admission_output_dir"}
+                    ).issubset(value)):
+        raise RetentionError("session plan has missing or unrecognized top-level fields")
+    output_contract_fields = {"admission_output_contract", "admission_output_dir"}
+    has_output_contract = bool(output_contract_fields & set(value))
+    if has_output_contract:
+        plan_admission = value.get("admission_identity")
+        admission_id = (plan_admission.get("admission_id")
+                        if isinstance(plan_admission, Mapping) else None)
+        expected_output_relative = (
+            f"experiments/storage/r6a-admission-outputs/{admission_id}"
+            if isinstance(admission_id, str) else None)
+        if (output_contract_fields - set(value)
+                or value.get("admission_output_contract") != "R90_ADMISSION_UNIQUE_SIBLING_ROOT_V1"
+                or not isinstance(admission_id, str)
+                or re.fullmatch(r"r6a-r87-admission-[A-Za-z0-9][A-Za-z0-9_-]{0,95}", admission_id) is None
+                or value.get("admission_output_dir") != expected_output_relative
+                or Path(value["admission_output_dir"]).is_absolute()
+                or "\\" in value["admission_output_dir"]
+                or "\x00" in value["admission_output_dir"]
+                or Path(value["admission_output_dir"]).as_posix() != value["admission_output_dir"]
+                or any(part in {"", ".", ".."} for part in Path(value["admission_output_dir"]).parts)):
+            raise RetentionError("R90 admission output contract is not canonical or does not match its admission ID")
+    if value.get("schema_version") != BUILD_SESSION_SCHEMA_VERSION:
+        raise RetentionError("unsupported BuildLease session plan version")
+    if value.get("executor_mode") != BUILD_SESSION_EXECUTOR_MODE:
+        raise RetentionError("BuildLease session plan must explicitly select HOST_BUILDLEASE_V3")
+    admission = value.get("admission_identity")
+    if (not isinstance(admission, dict)
+            or not isinstance(admission.get("admission_id"), str)
+            or not admission["admission_id"].strip()
+            or not re.fullmatch(r"[0-9a-f]{64}", str(admission.get("sha256", "")))):
+        raise RetentionError("session plan lacks a complete execution admission identity")
+    source = value.get("source_identity")
+    if not isinstance(source, dict):
+        raise RetentionError("session plan lacks an exact source identity")
+    source_path = Path(str(source.get("root", ""))).expanduser()
+    if (not source_path.is_absolute() or str(source.get("root")) != str(source_path)
+            or "\x00" in str(source_path)
+            or str(source_path) != str(Path(os.path.abspath(source_path)))
+            or str(source.get("sha256", "")) != source_tree_hash
+            or not re.fullmatch(r"[0-9a-f]{40,64}", str(source.get("revision", "")))):
+        raise RetentionError("session plan source revision, root, or digest is invalid")
+    expected_workspace = build_path / BUILD_SESSION_WORKSPACE_NAME
+    if value.get("build_id") != build_id or value.get("build_workspace") != str(expected_workspace):
+        raise RetentionError("session plan is not bound to this exact BuildLease workspace")
+    if expected_bytes <= BUILD_SESSION_CONTROLLER_HEADROOM_BYTES + 16 * 1024 * 1024:
+        raise RetentionError("session reservation cannot hold its controller evidence headroom and fixed workspace")
+    if value.get("reservation_bytes") != expected_bytes:
+        raise RetentionError("session plan reservation differs from the admitted BuildLease amount")
+    persistent_allowance = value.get("persistent_output_allowance_bytes")
+    if persistent_allowance is not None and (
+            not isinstance(persistent_allowance, int) or isinstance(persistent_allowance, bool)
+            or persistent_allowance <= 0
+            or persistent_allowance > MAX_SESSION_PERSISTENT_OUTPUT_ALLOWANCE_BYTES):
+        raise RetentionError(
+            "session persistent output allowance must be positive and no greater than 1 GiB")
+    stage_relative = _session_relative_path(value.get("stage_root"), "stage_root")
+    output_relative = _session_relative_path(value.get("output_root"), "output_root", allow_dot=True)
+    if len(stage_relative.parts) != 1 or output_relative != Path("."):
+        raise RetentionError("session stage must be one direct child and output root must be the admitted workspace")
+    if dual_graph and stage_relative != Path("stage"):
+        raise RetentionError("dual-graph staging must use the exact fixed stage root")
+    environment = value.get("environment")
+    if not isinstance(environment, dict) or any(
+            not isinstance(key, str) or not isinstance(item, str) or "\x00" in key + item
+            for key, item in environment.items()):
+        raise RetentionError("session environment must be an exact string mapping")
+    if (set(environment) - BUILD_SESSION_ENVIRONMENT_KEYS
+            or set(environment) & BUILD_SESSION_FORBIDDEN_ENV_KEYS
+            or any(key.startswith(("DYLD_", "LD_", "MESON_", "NINJA_", "CMAKE_"))
+                   for key in environment)):
+        raise RetentionError("session environment contains an uncontrolled hook or redirection")
+    if dual_graph:
+        if value.get("build_type") != "release":
+            raise RetentionError("dual-graph plan must bind the reviewed Release configure profile")
+        if set(environment) & {"CC", "CXX", "AR", "RANLIB", "PKG_CONFIG_PATH", "SDKROOT",
+                               "MACOSX_DEPLOYMENT_TARGET", "DXVK_WSI_DRIVER"}:
+            raise RetentionError("dual-graph compiler, SDK, pkg-config, and WSI variables are controller-derived")
+    elif "DXVK_WSI_DRIVER" in environment:
+        raise RetentionError("legacy single-graph environment may not select a dual-graph WSI driver")
+    required_home = str(expected_workspace / ".home")
+    if environment.get("HOME") != required_home:
+        raise RetentionError("session HOME must be the private directory inside this BuildLease")
+    search_path = environment.get("PATH")
+    if not search_path or any(not Path(part).is_absolute() for part in search_path.split(os.pathsep)):
+        raise RetentionError("session PATH must contain only explicit absolute directories")
+    if dual_graph and search_path != BUILD_SESSION_DUAL_GRAPH_PATH:
+        raise RetentionError("dual-graph PATH must equal the controller-owned closed tool search path")
+    tools = value.get("tools")
+    if not isinstance(tools, dict) or not {"meson", "ninja", "git", "sandbox"}.issubset(tools):
+        raise RetentionError("session plan must bind Meson, Ninja, Git, and Seatbelt executable receipts")
+    for name, receipt in tools.items():
+        if not isinstance(name, str) or not re.fullmatch(r"[a-z][a-z0-9_-]{0,31}", name):
+            raise RetentionError("session tool receipt name is invalid")
+        if (not isinstance(receipt, dict) or set(receipt) != {"path", "sha256"}
+                or not isinstance(receipt.get("path"), str)
+                or not Path(receipt["path"]).is_absolute()
+                or str(Path(receipt["path"])) != receipt["path"]
+                or not re.fullmatch(r"[0-9a-f]{64}", str(receipt.get("sha256", "")))):
+            raise RetentionError(f"session tool receipt is invalid: {name}")
+        expected_names = {"meson": {"meson"}, "ninja": {"ninja", "ninja-build"},
+                          "git": {"git"}, "sandbox": {"sandbox-exec"}}
+        if name in expected_names and Path(receipt["path"]).name.casefold() not in expected_names[name]:
+            raise RetentionError(f"session {name} tool path is not the direct registered executable")
+        if name == "sandbox" and receipt["path"] != "/usr/bin/sandbox-exec":
+            raise RetentionError("session Seatbelt launcher must be the canonical system sandbox-exec")
+    inputs = value.get("input_receipts", [])
+    if not isinstance(inputs, list):
+        raise RetentionError("session input_receipts must be an ordered list")
+    for row in inputs:
+        if (not isinstance(row, dict) or not isinstance(row.get("path"), str)
+                or not re.fullmatch(r"[0-9a-f]{64}", str(row.get("sha256", "")))):
+            raise RetentionError("session input receipt is invalid")
+        _session_relative_path(row["path"], "input receipt path")
+    if dual_graph:
+        _session_validate_dual_graphs(value, source, inputs)
+    steps = value.get("steps")
+    minimum_steps = 14 if dual_graph else 5
+    if not isinstance(steps, list) or len(steps) < minimum_steps or len(steps) > BUILD_SESSION_MAX_STEPS:
+        raise RetentionError("session plan must declare a finite configure/build/install/test/verification sequence")
+    if len(inputs) > 128:
+        raise RetentionError("session plan contains too many input receipts for bounded controller evidence")
+    command_bytes = 0
+    kinds = [step.get("kind") if isinstance(step, dict) else None for step in steps]
+    if dual_graph:
+        expected_steps = [
+            {"kind": "configure", "graph_id": "windows-product-r6a", "cwd": "."},
+            {"kind": "configure", "graph_id": "native-verification-r6a", "cwd": "."},
+            {"kind": "build", "graph_id": "windows-product-r6a",
+             "target_id": "DEFAULT_PRODUCTION_OUTPUTS", "cwd": "."},
+            {"kind": "build", "graph_id": "windows-product-r6a",
+             "target_id": "R6A_PRODUCTION_PATH_PE", "cwd": "."},
+            {"kind": "build", "graph_id": "native-verification-r6a",
+             "target_id": "R6A_PRODUCTION_PATH_MACHO", "cwd": "."},
+            {"kind": "build", "graph_id": "native-verification-r6a",
+             "target_id": "R6A_PRESENT_ACCOUNTING_UNIT", "cwd": "."},
+            {"kind": "build", "graph_id": "native-verification-r6a",
+             "target_id": "R6A_PRESENT_ACCOUNTING_MODEL", "cwd": "."},
+            {"kind": "install", "graph_id": "windows-product-r6a", "cwd": "."},
+            {"kind": "stage_windows_product", "graph_id": "windows-product-r6a",
+             "output_id": "r6a-production-path-pe", "cwd": "."},
+            {"kind": "stage_native_runtime", "graph_id": "native-verification-r6a",
+             "runtime_ids": ["SDL2_COMPAT", "SDL3"], "cwd": "."},
+            {"kind": "test", "graph_id": "native-verification-r6a",
+             "output_id": "r6a-production-path-macho", "test_class": "PRODUCTION_PATH",
+             "arguments": [], "cwd": "."},
+            {"kind": "test", "graph_id": "native-verification-r6a",
+             "output_id": "r6a-present-accounting-unit", "test_class": "UNIT",
+             "arguments": [], "cwd": "."},
+            {"kind": "test", "graph_id": "native-verification-r6a",
+             "output_id": "r6a-present-accounting-model", "test_class": "MODEL",
+             "arguments": [], "cwd": "."},
+            {"kind": "source_verification"},
+        ]
+        if steps != expected_steps:
+            raise RetentionError(
+                "dual-graph steps must use the fixed graph provenance, target, stage, and native test sequence")
+    elif (kinds[:3] != ["configure", "build", "install"] or kinds[-1] != "source_verification"
+          or any(kind != "test" for kind in kinds[3:-1])):
+        raise RetentionError("session plan step order must be configure, build, install, tests, source verification")
+    for index, step in enumerate(steps):
+        if not isinstance(step, dict):
+            raise RetentionError(f"session step {index} is not an object")
+        if step.get("kind") == "source_verification":
+            if set(step) != {"kind"}:
+                raise RetentionError("source verification step may not dispatch a command")
+            continue
+        allowed_fields = (set(step) if dual_graph else
+                          ({"kind", "cwd", "executable", "arguments"}
+                           if step.get("kind") == "test" else {"kind", "cwd", "argv"}))
+        if set(step) - allowed_fields:
+            raise RetentionError(f"session step {index} has unrecognized fields")
+        if step.get("cwd", ".") != ".":
+            raise RetentionError("session command cwd must be the admitted BuildLease workspace")
+        if step.get("kind") == "test":
+            if not dual_graph:
+                _session_relative_path(step.get("executable"), "test executable path")
+            arguments = step.get("arguments", [])
+            if (not isinstance(arguments, list) or any(not isinstance(arg, str) for arg in arguments)):
+                raise RetentionError("registered test arguments must be a string array")
+            command_bytes += sum(len(arg.encode("utf-8", "surrogateescape")) for arg in arguments)
+        elif not dual_graph:
+            command = step.get("argv")
+            if (not isinstance(command, list) or not command or any(not isinstance(arg, str) for arg in command)
+                    or any(any(char in token for char in ("\x00", "`", "$(", "\n", "\r")) for token in command)):
+                raise RetentionError(f"session step {index} argv is invalid")
+            command_bytes += sum(len(arg.encode("utf-8", "surrogateescape")) for arg in command)
+    if command_bytes > 64 * 1024:
+        raise RetentionError("session command plan exceeds its bounded receipt size")
+    return value
+
+
+def _session_measure_tree(root: Path, *, workspace_mount_identity: Mapping[str, Any] | None = None) -> dict[str, int]:
+    """Measure one root, optionally charging a fixed workspace mount exactly once."""
+    root = Path(root).resolve(strict=True)
+    if workspace_mount_identity is not None:
+        if workspace_mount_identity.get("readonly") is True:
+            _verify_session_workspace_readonly(root, workspace_mount_identity)
+        else:
+            _verify_session_workspace_mount(root, workspace_mount_identity)
+    root_fd = _open_dir(root)
+    root_info = os.fstat(root_fd)
+    root_fsid = getattr(os.fstatvfs(root_fd), "f_fsid", None)
+    if root_fsid is None:
+        os.close(root_fd)
+        raise RetentionError("session build root has no filesystem identity")
+    stack: list[tuple[int, Path]] = [(root_fd, Path())]
+    allocated: dict[tuple[int, int], int] = {}
+    link_counts: dict[tuple[int, int], tuple[int, int]] = {}
+    logical = 0
+    count = 0
+    workspace_mount_seen = False
+    backing_image_key: tuple[int, int] | None = None
+    backing_image_logical = 0
+    try:
+        while stack:
+            parent_fd, relative_dir = stack.pop()
+            try:
+                for name in sorted(os.listdir(parent_fd)):
+                    if relative_dir == Path() and name == BUILD_MARKER:
+                        continue
+                    info = os.stat(name, dir_fd=parent_fd, follow_symlinks=False)
+                    relative = relative_dir / name
+                    if (workspace_mount_identity is not None and relative == Path(BUILD_SESSION_WORKSPACE_NAME)):
+                        if not stat.S_ISDIR(info.st_mode):
+                            raise RetentionError("BuildLease workspace mount point is not a directory")
+                        child_fd = os.open(name, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0)
+                                           | getattr(os, "O_NOFOLLOW", 0), dir_fd=parent_fd)
+                        try:
+                            opened = os.fstat(child_fd)
+                            if ((opened.st_dev, opened.st_ino) != (info.st_dev, info.st_ino)
+                                    or opened.st_dev != workspace_mount_identity.get("device")
+                                    or getattr(os.fstatvfs(child_fd), "f_fsid", None)
+                                        != workspace_mount_identity.get("filesystem_id")):
+                                raise RetentionError("BuildLease workspace mount changed during accounting")
+                            workspace_mount_seen = True
+                        finally:
+                            os.close(child_fd)
+                        continue
+                    if info.st_dev != root_info.st_dev:
+                        raise RetentionError(f"session output crosses a filesystem boundary: {relative}")
+                    if stat.S_ISLNK(info.st_mode):
+                        raw_target = os.readlink(name, dir_fd=parent_fd)
+                        if os.path.isabs(raw_target):
+                            raise RetentionError(f"session output contains an external symlink: {relative}")
+                        resolved_rel = os.path.normpath(str(relative_dir / raw_target))
+                        if resolved_rel == ".." or resolved_rel.startswith("../"):
+                            raise RetentionError(f"session output contains an escaping symlink: {relative}")
+                        key = (info.st_dev, info.st_ino)
+                        allocated[key] = getattr(info, "st_blocks", 0) * 512
+                        logical += len(raw_target.encode("utf-8", "surrogateescape"))
+                        count += 1
+                        continue
+                    if stat.S_ISDIR(info.st_mode):
+                        child_fd = os.open(name, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0)
+                                           | getattr(os, "O_NOFOLLOW", 0), dir_fd=parent_fd)
+                        opened = os.fstat(child_fd)
+                        if ((opened.st_dev, opened.st_ino) != (info.st_dev, info.st_ino)
+                                or getattr(os.fstatvfs(child_fd), "f_fsid", None) != root_fsid):
+                            os.close(child_fd)
+                            raise RetentionError(f"session output directory changed while scanning: {relative}")
+                        stack.append((child_fd, relative))
+                    elif stat.S_ISREG(info.st_mode):
+                        key = (info.st_dev, info.st_ino)
+                        allocated[key] = getattr(info, "st_blocks", 0) * 512
+                        if relative == Path(BUILD_SESSION_WORKSPACE_IMAGE_NAME):
+                            backing_image_key = key
+                            backing_image_logical = info.st_size
+                        prior = link_counts.get(key)
+                        if prior is not None and prior[0] != info.st_nlink:
+                            raise RetentionError(f"session output hardlink count changed while scanning: {relative}")
+                        link_counts[key] = (info.st_nlink, (prior[1] if prior else 0) + 1)
+                        logical += info.st_size
+                        count += 1
+                    else:
+                        raise RetentionError(f"session output contains a special file: {relative}")
+            finally:
+                if parent_fd != root_fd:
+                    os.close(parent_fd)
+        for (device, inode), (reported, observed) in link_counts.items():
+            if reported != observed:
+                raise RetentionError(f"session output file has hardlinks outside its tree: {device}:{inode}")
+        outer_allocated = sum(allocated.values())
+        if workspace_mount_identity is None:
+            return {"allocated_bytes": outer_allocated, "logical_bytes": logical, "file_count": count}
+        if not workspace_mount_seen or backing_image_key is None:
+            raise RetentionError("session workspace mount or backing image disappeared during accounting")
+        backing_allocated = allocated[backing_image_key]
+        workspace_path = Path(str(workspace_mount_identity["mountpoint"]))
+        workspace_usage = _session_measure_tree(workspace_path)
+        non_image_outer = outer_allocated - backing_allocated
+        if non_image_outer < 0:
+            raise RetentionError("session backing image allocation is inconsistent with the outer tree")
+        return {"allocated_bytes": non_image_outer + max(backing_allocated,
+                                                           workspace_usage["allocated_bytes"]),
+                "logical_bytes": logical - backing_image_logical + workspace_usage["logical_bytes"],
+                "file_count": count - 1 + workspace_usage["file_count"],
+                "outer_allocated_bytes": outer_allocated,
+                "outer_non_image_allocated_bytes": non_image_outer,
+                "backing_image_allocated_bytes": backing_allocated,
+                "workspace_allocated_bytes": workspace_usage["allocated_bytes"],
+                "workspace_logical_bytes": workspace_usage["logical_bytes"],
+                "workspace_file_count": workspace_usage["file_count"]}
+    finally:
+        while stack:
+            pending_fd, _ = stack.pop()
+            if pending_fd != root_fd:
+                try:
+                    os.close(pending_fd)
+                except OSError:
+                    pass
+        os.close(root_fd)
+
+
+def _session_tree_digest(root: Path, *, exclude_controller_state: bool = False) -> tuple[str, int]:
+    """Hash outputs deterministically and reject symlinks/special files."""
+    root_fd = _open_dir(root)
+    root_info = os.fstat(root_fd)
+    root_fsid = getattr(os.fstatvfs(root_fd), "f_fsid", None)
+    if root_fsid is None:
+        os.close(root_fd)
+        raise RetentionError("session output root has no filesystem identity")
+    digest = hashlib.sha256()
+    count = 0
+    link_counts: dict[tuple[int, int], tuple[int, int]] = {}
+    stack: list[tuple[int, Path]] = [(root_fd, Path())]
+    try:
+        while stack:
+            parent_fd, relative_dir = stack.pop()
+            try:
+                for name in sorted(os.listdir(parent_fd)):
+                    if (exclude_controller_state and relative_dir == Path()
+                            and name in {BUILD_MARKER, BUILD_SESSION_DIRECTORY}):
+                        continue
+                    info = os.stat(name, dir_fd=parent_fd, follow_symlinks=False)
+                    relative = relative_dir / name
+                    if info.st_dev != root_info.st_dev:
+                        raise RetentionError(f"session output crosses a filesystem boundary: {relative}")
+                    digest.update(relative.as_posix().encode("utf-8", "surrogateescape") + b"\0")
+                    digest.update(oct(stat.S_IMODE(info.st_mode)).encode() + b"\0")
+                    if stat.S_ISLNK(info.st_mode):
+                        raw_target = os.readlink(name, dir_fd=parent_fd)
+                        if os.path.isabs(raw_target):
+                            raise RetentionError(f"session output contains an external symlink: {relative}")
+                        resolved_rel = os.path.normpath(str(relative_dir / raw_target))
+                        if resolved_rel == ".." or resolved_rel.startswith("../"):
+                            raise RetentionError(f"session output contains an escaping symlink: {relative}")
+                        digest.update(b"L\0" + raw_target.encode("utf-8", "surrogateescape") + b"\n")
+                        count += 1
+                        continue
+                    if stat.S_ISDIR(info.st_mode):
+                        digest.update(b"D\n")
+                        child_fd = os.open(name, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0)
+                                           | getattr(os, "O_NOFOLLOW", 0), dir_fd=parent_fd)
+                        opened = os.fstat(child_fd)
+                        if ((opened.st_dev, opened.st_ino) != (info.st_dev, info.st_ino)
+                                or getattr(os.fstatvfs(child_fd), "f_fsid", None) != root_fsid):
+                            os.close(child_fd)
+                            raise RetentionError(f"session output directory changed while hashing: {relative}")
+                        stack.append((child_fd, relative))
+                    elif stat.S_ISREG(info.st_mode):
+                        key = (info.st_dev, info.st_ino)
+                        prior = link_counts.get(key)
+                        if prior is not None and prior[0] != info.st_nlink:
+                            raise RetentionError(f"session output hardlink count changed while hashing: {relative}")
+                        link_counts[key] = (info.st_nlink, (prior[1] if prior else 0) + 1)
+                        child_fd = os.open(name, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0), dir_fd=parent_fd)
+                        try:
+                            before = os.fstat(child_fd)
+                            if ((before.st_dev, before.st_ino, before.st_size)
+                                    != (info.st_dev, info.st_ino, info.st_size)):
+                                raise RetentionError(f"session output changed while opening: {relative}")
+                            file_hash = _hash_fd(child_fd)
+                            after = os.fstat(child_fd)
+                            if ((before.st_dev, before.st_ino, before.st_size, before.st_mtime_ns)
+                                    != (after.st_dev, after.st_ino, after.st_size, after.st_mtime_ns)):
+                                raise RetentionError(f"session output changed while hashing: {relative}")
+                            digest.update(b"F\0" + file_hash.encode() + b"\n")
+                        finally:
+                            os.close(child_fd)
+                        count += 1
+                    else:
+                        raise RetentionError(f"session output contains a special file: {relative}")
+            finally:
+                if parent_fd != root_fd:
+                    os.close(parent_fd)
+        for (device, inode), (reported, observed) in link_counts.items():
+            if reported != observed:
+                raise RetentionError(f"session output file has hardlinks outside its tree: {device}:{inode}")
+        return digest.hexdigest(), count
+    finally:
+        while stack:
+            pending_fd, _ = stack.pop()
+            if pending_fd != root_fd:
+                try:
+                    os.close(pending_fd)
+                except OSError:
+                    pass
+        os.close(root_fd)
+
+
+def _session_safe_path(root: Path, relative: Path, *, must_exist: bool,
+                       directory: bool | None = None) -> Path:
+    """Resolve a relative session path while rejecting symlink components."""
+    root = root.resolve(strict=True)
+    candidate = root
+    for index, part in enumerate(relative.parts):
+        if part in {"", ".", ".."}:
+            raise RetentionError("session path contains an alias or traversal component")
+        candidate = candidate / part
+        try:
+            info = candidate.lstat()
+        except FileNotFoundError:
+            if must_exist or index != len(relative.parts) - 1:
+                raise RetentionError(f"session path is missing: {candidate}")
+            continue
+        if stat.S_ISLNK(info.st_mode):
+            raise RetentionError(f"session path contains a symlink: {candidate}")
+        if index != len(relative.parts) - 1 and not stat.S_ISDIR(info.st_mode):
+            raise RetentionError(f"session path parent is not a directory: {candidate}")
+    if candidate != root and root not in candidate.parents:
+        raise RetentionError("session path escaped its declared root")
+    if must_exist:
+        try:
+            resolved = candidate.resolve(strict=True)
+        except OSError as error:
+            raise RetentionError(f"session path is unavailable: {candidate}: {error}") from error
+        if resolved != candidate:
+            raise RetentionError(f"session path is not canonical: {candidate}")
+        info = candidate.stat(follow_symlinks=False)
+        if directory is True and not stat.S_ISDIR(info.st_mode):
+            raise RetentionError(f"session path is not a directory: {candidate}")
+        if directory is False and not stat.S_ISREG(info.st_mode):
+            raise RetentionError(f"session path is not a regular file: {candidate}")
+    return candidate
+
+
+def _session_hash_executable(path: Path, expected_sha256: str, *, require_exec: bool = True) -> dict[str, Any]:
+    selected = Path(os.path.abspath(path))
+    if selected.is_symlink() or selected.resolve(strict=True) != selected:
+        raise RetentionError(f"session executable is not canonical: {selected}")
+    info = selected.stat(follow_symlinks=False)
+    if not stat.S_ISREG(info.st_mode) or (require_exec and not info.st_mode & 0o111):
+        raise RetentionError(f"session executable is not a regular executable: {selected}")
+    digest = _hash_path(selected)
+    after = selected.stat(follow_symlinks=False)
+    if ((info.st_dev, info.st_ino, info.st_mode, info.st_size, info.st_mtime_ns)
+            != (after.st_dev, after.st_ino, after.st_mode, after.st_size, after.st_mtime_ns)):
+        raise RetentionError(f"session executable changed while hashing: {selected}")
+    if digest != expected_sha256:
+        raise RetentionError(f"session executable hash changed: {selected}")
+    return {"path": str(selected), "sha256": digest, "device": info.st_dev,
+            "inode": info.st_ino, "mode": stat.S_IMODE(info.st_mode)}
+
+
+def _sandbox_session_command(command: list[str], build_root: Path,
+                             environment: Mapping[str, str], *,
+                             write_root: Path | None = None,
+                             temporary_directory: Path | None = None) -> tuple[list[str], dict[str, str], str]:
+    """Confine v3 command writes to its exact mounted workspace subtree."""
+    if sys.platform != "darwin":
+        raise RetentionError("HOST_BUILDLEASE_V3 requires macOS Seatbelt and hdiutil")
+    if not command or any(not isinstance(arg, str) or "\x00" in arg for arg in command):
+        raise RetentionError("HOST_BUILDLEASE_V3 command must be a non-empty argv array")
+    sandbox_exec = Path("/usr/bin/sandbox-exec")
+    if (sandbox_exec.is_symlink() or not sandbox_exec.is_file()
+            or sandbox_exec.resolve(strict=True) != sandbox_exec):
+        raise RetentionError("the verified system sandbox-exec launcher is unavailable")
+    raw_workspace = Path(os.path.abspath(build_root))
+    workspace = raw_workspace.resolve(strict=True)
+    if raw_workspace != workspace or raw_workspace.is_symlink():
+        raise RetentionError("HOST_BUILDLEASE_V3 workspace path is not canonical")
+    raw_allowed_root = Path(os.path.abspath(write_root or workspace))
+    allowed_root = raw_allowed_root.resolve(strict=True)
+    if raw_allowed_root != allowed_root or raw_allowed_root.is_symlink():
+        raise RetentionError("HOST_BUILDLEASE_V3 write root is not canonical")
+    if (allowed_root != workspace and workspace not in allowed_root.parents):
+        raise RetentionError("HOST_BUILDLEASE_V3 write root must be inside the exact workspace image")
+    raw_temp_path = Path(os.path.abspath(temporary_directory or (allowed_root / ".tmp")))
+    if raw_temp_path != allowed_root and allowed_root not in raw_temp_path.parents:
+        raise RetentionError("HOST_BUILDLEASE_V3 temporary directory must be inside the write allowlist")
+    cursor = allowed_root
+    if cursor.is_symlink():
+        raise RetentionError("HOST_BUILDLEASE_V3 write root contains a symlink")
+    for part in raw_temp_path.relative_to(allowed_root).parts:
+        cursor = cursor / part
+        if cursor.is_symlink():
+            raise RetentionError("HOST_BUILDLEASE_V3 temporary path contains a symlink")
+    temp_path = raw_temp_path.resolve(strict=False)
+    if temp_path != raw_temp_path:
+        raise RetentionError("HOST_BUILDLEASE_V3 temporary path is not canonical")
+    if temp_path != allowed_root and allowed_root not in temp_path.parents:
+        raise RetentionError("HOST_BUILDLEASE_V3 temporary directory must be inside the write allowlist")
+    root_info = workspace.stat(follow_symlinks=False)
+    allowed_info = allowed_root.stat(follow_symlinks=False)
+    temp_info = temp_path.stat(follow_symlinks=False) if temp_path.exists() else None
+    if (not stat.S_ISDIR(root_info.st_mode) or not stat.S_ISDIR(allowed_info.st_mode)
+            or (temp_info is not None and not stat.S_ISDIR(temp_info.st_mode))
+            or root_info.st_dev != allowed_info.st_dev
+            or (temp_info is not None and allowed_info.st_dev != temp_info.st_dev)
+            or any(path.is_symlink() for path in (workspace, allowed_root))
+            or (temp_path.exists() and temp_path.is_symlink())):
+        raise RetentionError("HOST_BUILDLEASE_V3 write/temp paths are not real directories on one image")
+
+    home = (temp_path if write_root is not None else workspace / ".home").resolve(strict=False)
+    if home != allowed_root and allowed_root not in home.parents:
+        raise RetentionError("HOST_BUILDLEASE_V3 HOME must remain inside the exact write allowlist")
+    xdg_paths = {
+        "XDG_CACHE_HOME": home / ".cache",
+        "XDG_CONFIG_HOME": home / ".config",
+        "XDG_DATA_HOME": home / ".local" / "share",
+    }
+    for path in [home, *xdg_paths.values()]:
+        if path.exists():
+            info = path.stat(follow_symlinks=False)
+            if (not stat.S_ISDIR(info.st_mode) or info.st_dev != allowed_info.st_dev
+                    or path.is_symlink()):
+                raise RetentionError("HOST_BUILDLEASE_V3 HOME/cache paths escaped the mounted write root")
+
+    def sbpl_quote(value: str) -> str:
+        return '"' + value.replace("\\", "\\\\").replace('"', '\\"') + '"'
+
+    profile = "\n".join((
+        "(version 1)",
+        "(deny default)",
+        "(allow process*)",
+        "(allow sysctl-read)",
+        "(allow system-info)",
+        "(allow file-read*)",
+        '(allow file-write* (literal "/dev/null") (literal "/private/dev/null"))',
+        f"(allow file-write* (subpath {sbpl_quote(str(allowed_root))}))",
+    )) + "\n"
+    selected_env = dict(environment)
+    selected_env.update({"HOME": str(home), "TMPDIR": str(temp_path), "TMP": str(temp_path),
+                         "TEMP": str(temp_path),
+                         **{key: str(path) for key, path in xdg_paths.items()}})
+    return [str(sandbox_exec), "-p", profile, *command], selected_env, str(sandbox_exec)
+
+
+def _validate_r65_reservation_binding(manifest: Mapping[str, Any], *, build_id: str,
+                                      session_plan: Mapping[str, Any] | None,
+                                      session_plan_sha256: str | None) -> None:
+    """Reconcile an R65 signed dual marker with the exact current G0C binding before reserve."""
+    marker_fields = {
+        "dual_build_graph_contract_version", "dual_build_graphs",
+        "r65_g0c_binding_sha256", "dual_graph_finalization_contract_sha256",
+    }
+    admission = (session_plan.get("admission_identity")
+                 if isinstance(session_plan, Mapping) else None)
+    admission_id = admission.get("admission_id") if isinstance(admission, Mapping) else None
+    r65_admission = isinstance(admission_id, str) and admission_id.startswith("r6a-r65-")
+    r65_recovery_build = (isinstance(build_id, str)
+                          and build_id.startswith("r6a-r65-recovery-dual-lineage-"))
+    if (not r65_recovery_build and not r65_admission
+            and not any(field in manifest for field in marker_fields)):
+        return
+
+    try:
+        if (not r65_admission or session_plan is None
+                or not _session_dual_graph_enabled(session_plan)
+                or session_plan.get("build_id") != build_id
+                or not isinstance(session_plan_sha256, str)
+                or hashlib.sha256(_canonical_json(dict(session_plan))).hexdigest()
+                    != session_plan_sha256):
+            raise RetentionError("R65 admission requires its exact frozen dual-graph session plan")
+        graphs = session_plan.get("build_graphs")
+        graph_ids = ([row.get("graph_id") if isinstance(row, Mapping) else None
+                      for row in graphs] if isinstance(graphs, list) else None)
+        if graph_ids != list(BUILD_SESSION_DUAL_GRAPH_IDS):
+            raise RetentionError("R65 reservation requires the canonical ordered Windows/native graph pair")
+        if (type(manifest.get("dual_build_graph_contract_version")) is not int
+                or manifest.get("dual_build_graph_contract_version") != 2
+                or type(manifest.get("dual_build_graphs")) is not int
+                or manifest.get("dual_build_graphs") != 1
+                or manifest.get("build_session_plan_sha256") != session_plan_sha256
+                or manifest.get("build_configuration_key_sha256")
+                    != session_plan.get("build_configuration_key_sha256")
+                or manifest.get("execution_admission_identity") != admission):
+            raise RetentionError("signed R65 admission marker does not match its dual session plan")
+
+        import run_r6a_execution
+        from storage_policy import G0C_REVIEW_RECORD_NAME, _read_file_nofollow
+
+        review_path = REPO / "experiments/storage" / G0C_REVIEW_RECORD_NAME
+        review_raw = _read_file_nofollow(review_path, maximum_bytes=4 * 1024 * 1024)
+        review = json.loads(review_raw,
+                            object_pairs_hook=run_r6a_execution._json_object_without_duplicate_keys)
+        binding = review.get("r65_binding") if isinstance(review, dict) else None
+        plan_binding = binding.get("execution_plan") if isinstance(binding, dict) else None
+        plan_relative = plan_binding.get("path") if isinstance(plan_binding, dict) else None
+        if (not isinstance(plan_relative, str) or not plan_relative
+                or "\\" in plan_relative or "\x00" in plan_relative):
+            raise RetentionError("fresh R65 review has no canonical bound execution-plan path")
+        plan_relative_path = Path(plan_relative)
+        if (plan_relative_path.is_absolute() or plan_relative_path.as_posix() != plan_relative
+                or any(part in {"", ".", ".."} for part in plan_relative_path.parts)):
+            raise RetentionError("fresh R65 review execution-plan path is not repository-relative")
+        plan_path = REPO / plan_relative_path
+        plan_raw = _read_file_nofollow(plan_path, maximum_bytes=16 * 1024 * 1024)
+        bound_plan = json.loads(
+            plan_raw, object_pairs_hook=run_r6a_execution._json_object_without_duplicate_keys)
+        if (not isinstance(bound_plan, dict)
+                or _canonical_json(bound_plan) != _canonical_json(dict(session_plan))):
+            raise RetentionError("current R65 plan bytes differ from the reserved session plan")
+        run_r6a_execution._validate_r65_recovery_plan(bound_plan)
+        candidates = manifest.get("candidate_hashes")
+        claim_sha256 = (candidates.get("r65_admission_claim_sha256")
+                        if isinstance(candidates, Mapping) else None)
+        if (not isinstance(claim_sha256, str)
+                or re.fullmatch(r"[0-9a-f]{64}", claim_sha256) is None):
+            raise RetentionError("signed R65 admission lacks its exact admission-claim digest")
+        run_r6a_execution._assert_r65_admission_id_unclaimed(
+            admission_id, current_claim_sha256=claim_sha256,
+            current_manifest=dict(manifest))
+        run_r6a_execution._read_r65_admission_claim(
+            admission_id, session_plan_sha256, expected_sha256=claim_sha256)
+        verified = run_r6a_execution._validate_r65_g0c_binding(
+            review_raw, repo=REPO, plan_path=plan_path, plan_bytes=plan_raw,
+            plan_canonical_sha256=session_plan_sha256, validated_plan=bound_plan)
+
+        if (not isinstance(candidates, Mapping)
+                or candidates.get("r65_candidate_sha256") != verified["candidate_sha256"]
+                or manifest.get("r65_g0c_binding_sha256") != verified["binding_sha256"]
+                or candidates.get("r65_g0c_binding_sha256") != verified["binding_sha256"]
+                or manifest.get("dual_graph_finalization_contract_sha256")
+                    != verified["contract_sha256"]
+                or candidates.get("dual_graph_finalization_contract_sha256")
+                    != verified["contract_sha256"]
+                or candidates.get("plan_file_sha256") != hashlib.sha256(plan_raw).hexdigest()
+                or candidates.get("plan_canonical_sha256") != session_plan_sha256):
+            raise RetentionError("signed R65 admission does not bind the current G0C, contract, and exact plan")
+    except RetentionError:
+        raise
+    except Exception as error:
+        raise RetentionError(f"R65 reservation binding is missing, stale, or malformed: {error}") from error
+
+
 class BuildLease:
     """Reserve before mkdir; successful completion artifactizes and retires synchronously."""
     def __init__(self, build_id: str, *, kind: str, owner_experiment: str, purpose: str,
                  source_tree_hash: str, expected_bytes: int, metadata: Mapping[str, Any] | None = None,
                  preserve_debug_reason: str | None = None, runner_path: Path | str,
-                 configuration_key_sha256: str | None = None):
+                 configuration_key_sha256: str | None = None,
+                 session_plan: Mapping[str, Any] | None = None):
         if not re.fullmatch(r"[A-Za-z0-9._-]{1,128}", build_id):
             raise ValueError("build_id is not path-safe")
         if kind not in KINDS or not owner_experiment.strip() or not purpose.strip() or expected_bytes < 0:
@@ -5330,29 +14337,295 @@ class BuildLease:
         self.runner_path = str(resolved_runner)
         self.preserve_debug_reason = preserve_debug_reason
         self.path = BUILD_ROOT / build_id
+        self.session_plan = (_session_validate_plan(
+            session_plan, build_id=build_id, build_path=self.path,
+            source_tree_hash=source_tree_hash, expected_bytes=expected_bytes)
+            if session_plan is not None else None)
+        if (self.session_plan is not None and _session_dual_graph_enabled(self.session_plan)
+                and self.session_plan.get("build_type") != normalized_build_type):
+            raise ValueError("dual-graph BuildLease type differs from its signed configure profile")
+        if (self.session_plan is not None and _session_dual_graph_enabled(self.session_plan)
+                and self.configuration_key_sha256
+                    != self.session_plan.get("build_configuration_key_sha256")):
+            raise ValueError("dual-graph BuildLease request key differs from the frozen ordered graph pair")
+        self.session_plan_sha256 = (hashlib.sha256(_canonical_json(self.session_plan)).hexdigest()
+                                    if self.session_plan is not None else None)
+        self.session = None
+        self._session_construction_token = object()
+        self._session_creation_lock = threading.Lock()
+        self._lease_state_lock = threading.Lock()
         self.started = False
         self.reused_manifest = None
         self.lock_fds = None
         self.stop_event = None
         self.beat_thread = None
         self.storage_allocation_lock_file = None
+        self.admission_reservation_capability = None
         self.storage_admission_warnings: list[str] = []
         self.storage_watch_events: list[dict[str, Any]] = []
         self._free_warning_emitted = False
 
-    def reserve(self) -> Path | None:
+    def _assert_session_plan_binding(self) -> None:
+        if self.session_plan is None:
+            return
+        observed = hashlib.sha256(_canonical_json(self.session_plan)).hexdigest()
+        if observed != self.session_plan_sha256:
+            raise RetentionError("BuildLease session plan changed after its signed admission binding")
+
+    def _validate_session_inputs(self) -> dict[str, Any]:
+        """Revalidate source, toolchain, and declared build inputs against the signed plan."""
+        if self.session_plan is None:
+            raise RetentionError("this BuildLease has no signed v3 session plan")
+        plan = self.session_plan
+        if _session_dual_graph_enabled(plan):
+            environment = plan.get("environment")
+            if (not isinstance(environment, Mapping)
+                    or environment.get("PATH") != BUILD_SESSION_DUAL_GRAPH_PATH):
+                raise RetentionError("dual-graph PATH changed from the controller-owned closed search path")
+            _validate_dual_graph_prebuild_identity(plan)
+        source = plan["source_identity"]
+        source_root = Path(source["root"])
+        if source_root.is_symlink() or source_root.resolve(strict=True) != source_root:
+            raise RetentionError("session source root is not a canonical real directory")
+        source_info = source_root.stat(follow_symlinks=False)
+        if not stat.S_ISDIR(source_info.st_mode):
+            raise RetentionError("session source root is not a directory")
+        source_hash, source_count = _tree_hash(
+            source_root, reject_symlinks=True, reject_external_hardlinks=True)
+        if source_hash != self.source_tree_hash:
+            raise RetentionError("session source tree changed from the admitted digest")
+        tool_identities: dict[str, dict[str, Any]] = {}
+        for name, receipt in sorted(plan["tools"].items()):
+            identity = _session_hash_executable(Path(receipt["path"]), receipt["sha256"])
+            if identity["path"] != receipt["path"]:
+                raise RetentionError(f"session {name} tool path is not canonical")
+            tool_identities[name] = identity
+        git = plan["tools"]["git"]
+        result = subprocess.run(
+            [git["path"], "-C", str(source_root), "rev-parse", "--verify", "HEAD"],
+            env=dict(plan["environment"]), stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            text=True, check=False, timeout=30)
+        revision = result.stdout.strip()
+        if result.returncode != 0 or revision != source["revision"]:
+            raise RetentionError("session Git revision differs from the admitted source revision")
+        input_identities: list[dict[str, Any]] = []
+        for row in plan.get("input_receipts", []):
+            relative = _session_relative_path(row["path"], "input receipt path")
+            path = _session_safe_path(source_root, relative, must_exist=True, directory=False)
+            digest = _hash_path(path)
+            if digest != row["sha256"]:
+                raise RetentionError(f"session build input changed: {relative}")
+            info = path.stat(follow_symlinks=False)
+            input_identities.append({"path": relative.as_posix(), "sha256": digest,
+                                     "device": info.st_dev, "inode": info.st_ino})
+        graph_tool_identities: dict[str, dict[str, Any]] = {}
+        runtime_identities: list[dict[str, Any]] = []
+        host_dependency_identities: list[dict[str, Any]] = []
+        native_host_profile: dict[str, Any] = {}
+        native_toolchain_selection: dict[str, Any] = {}
+        if _session_dual_graph_enabled(plan):
+            for graph in plan["build_graphs"]:
+                graph_tool_identities[graph["graph_id"]] = {
+                    tool_id: tool_identities[tool_id]
+                    for tool_id in graph["tool_receipt_ids"]
+                }
+            for row in plan["runtime_receipts"]:
+                runtime_identities.append(_session_regular_file_identity(
+                    Path(row["path"]), row["sha256"], f"native {row['runtime_id']} runtime"))
+            (host_dependency_identities, native_host_profile,
+             native_toolchain_selection) = _session_host_dependency_identities(plan)
+        path_dirs = []
+        path_dir_identities = []
+        for raw in plan["environment"]["PATH"].split(os.pathsep):
+            path_dir = Path(raw)
+            if path_dir.is_symlink() or path_dir.resolve(strict=True) != path_dir or not path_dir.is_dir():
+                raise RetentionError(f"session PATH entry is not a canonical directory: {path_dir}")
+            if path_dir.stat().st_mode & 0o022:
+                raise RetentionError(f"session PATH entry is writable by group or other users: {path_dir}")
+            if (path_dir == self.path or self.path in path_dir.parents
+                    or path_dir == source_root or source_root in path_dir.parents):
+                raise RetentionError("session PATH may not include the mutable build or source workspace")
+            path_dirs.append(str(path_dir))
+            path_info = path_dir.stat(follow_symlinks=False)
+            path_dir_identities.append({"path": str(path_dir), "device": path_info.st_dev,
+                                        "inode": path_info.st_ino, "mode": stat.S_IMODE(path_info.st_mode),
+                                        "owner_uid": path_info.st_uid})
+        for name in ("meson", "ninja", "git"):
+            selected = shutil.which(name, path=plan["environment"]["PATH"])
+            if selected is None or Path(selected).resolve(strict=True) != Path(plan["tools"][name]["path"]):
+                raise RetentionError(f"session PATH resolves {name} to an unregistered executable")
+        if _session_dual_graph_enabled(plan):
+            if plan["environment"].get("PATH") != BUILD_SESSION_DUAL_GRAPH_PATH:
+                raise RetentionError("dual-graph PATH changed from the controller-owned closed search path")
+            meson_script = Path(plan["tools"]["meson"]["path"])
+            try:
+                with meson_script.open("rb") as meson_stream:
+                    shebang = meson_stream.readline(4096).decode("utf-8").strip()
+            except (OSError, UnicodeDecodeError) as error:
+                raise RetentionError("native Meson launcher has no readable fixed Python interpreter line") from error
+            python_alias = Path(BUILD_SESSION_DUAL_GRAPH_MESON_PYTHON_SHEBANG)
+            python_path = Path(plan["tools"]["meson_python"]["path"])
+            if (shebang != f"#!{python_alias}" or not python_alias.is_symlink()
+                    or python_alias.resolve(strict=True) != python_path):
+                raise RetentionError("native Meson launcher does not resolve to its bound Python interpreter")
+            for command_name, receipt_id in BUILD_SESSION_DUAL_GRAPH_PATH_TOOL_RECEIPTS.items():
+                selected = shutil.which(command_name, path=plan["environment"]["PATH"])
+                if (selected is None
+                        or Path(selected).resolve(strict=True) != Path(plan["tools"][receipt_id]["path"])):
+                    raise RetentionError(
+                        f"dual-graph PATH does not resolve {command_name} to its exact tool receipt")
+            for command_name in BUILD_SESSION_DUAL_GRAPH_PATH_ABSENT_EXECUTABLES:
+                if shutil.which(command_name, path=plan["environment"]["PATH"]) is not None:
+                    raise RetentionError(
+                        f"dual-graph PATH unexpectedly exposes unreceipted executable {command_name}")
+        environment_tools: dict[str, str] = {}
+        for variable in ("CC", "CXX", "AR", "RANLIB"):
+            selected = plan["environment"].get(variable)
+            if selected is None:
+                continue
+            match = next((row for row in tool_identities.values() if row["path"] == selected), None)
+            if match is None:
+                raise RetentionError(f"session {variable} is not bound to a registered tool receipt")
+            environment_tools[variable] = match["sha256"]
+        if (not _session_dual_graph_enabled(plan)
+                and not {"CC", "CXX"}.issubset(environment_tools)):
+            raise RetentionError("session must bind both C and C++ compiler executables")
+        if _session_dual_graph_enabled(plan) and environment_tools:
+            raise RetentionError("dual-graph compiler selection must be derived from the typed graph role")
+        return {"source_root": str(source_root), "source_revision": revision,
+                "source_tree_sha256": source_hash, "source_file_count": source_count,
+                "source_device": source_info.st_dev, "source_inode": source_info.st_ino,
+                "tools": tool_identities, "input_receipts": input_identities,
+                "graph_tools": graph_tool_identities, "runtime_inputs": runtime_identities,
+                "host_dependencies": host_dependency_identities,
+                "native_host_profile": native_host_profile,
+                "native_toolchain_selection": native_toolchain_selection,
+                "path_directories": path_dirs, "path_directory_identities": path_dir_identities,
+                "environment_tool_hashes": environment_tools}
+
+    def start_session(self) -> "BuildLeaseSession":
+        if not self._session_creation_lock.acquire(blocking=False):
+            raise RetentionError("BuildLease session creation is already in progress")
+        try:
+            return self._start_session_locked()
+        finally:
+            self._session_creation_lock.release()
+
+    def _start_session_locked(self) -> "BuildLeaseSession":
+        if self.session_plan is None:
+            raise RetentionError("BuildLease session API requires a separately bound v3 session plan")
+        self._assert_session_plan_binding()
+        if not self.started or self.reused_manifest is not None:
+            raise RetentionError("session start requires this BuildLease's one active reservation")
+        if self.session is not None:
+            raise RetentionError("BuildLease session was already started")
+        self._assert_live_session_reservation_capability()
+        self.session = BuildLeaseSession(self, _construction_token=self._session_construction_token)
+        try:
+            self.session.start()
+        except BaseException as error:
+            # Failures before the durable start marker are still never-started
+            # reservations. Keep them RESERVED for explicit orphan closeout after
+            # this process exits; never synthesize a generic crash failure here.
+            try:
+                started_marker = _load_lease(self.build_id).get("session_started") is True
+            except BaseException:
+                started_marker = True
+            if not started_marker:
+                raise
+            try:
+                self.session._fail(repr(error), -1, command=["session-start"])
+            except BaseException as capture_error:
+                raise RetentionError(
+                    f"session startup failed and failure capture could not finish: {capture_error}") from error
+            raise
+        return self.session
+
+    def reserve(self, *, admission_transaction: Any | None = None) -> Path | None:
         from storage_policy import (_acquire_storage_allocation_lock, _experiment_manifest_path,
                                     _read_file_nofollow, _validated_manifest_estimates,
                                     _verify_manifest_signature, GATE0_ATTESTATION_PATH,
                                     conservative_project_usage_bytes, disk_free_bytes,
+                                    _measured_output_dir, _reject_r6a_admission_with_terminal_disposition,
                                     measure_project_usage, projected_storage_admission)
-        self.storage_allocation_lock_file = _acquire_storage_allocation_lock()
+        is_r70 = (admission_transaction is not None
+                  and isinstance(self.owner_experiment, str)
+                  and self.owner_experiment.startswith("r6a-r70-admission-"))
+        owner_is_r71 = (isinstance(self.owner_experiment, str)
+                        and _is_r6a_r71_admission_id(self.owner_experiment))
+        if owner_is_r71 and admission_transaction is None:
+            raise RetentionError("R71 BuildLease reservation requires its admission capability")
+        is_r71 = owner_is_r71 and admission_transaction is not None
+        is_r7x = is_r70 or is_r71
+        if is_r7x:
+            try:
+                admission_transaction.validate(
+                    build_id=self.build_id, owner_experiment=self.owner_experiment,
+                    plan_sha256=self.session_plan_sha256 or "",
+                    manifest_path=_experiment_manifest_path(self.owner_experiment))
+                self.storage_allocation_lock_file = admission_transaction.lock_file
+                self.admission_reservation_capability = admission_transaction
+            except BaseException as error:
+                raise RetentionError(f"R70 admission/reservation handoff is invalid: {error}") from error
+        else:
+            self.storage_allocation_lock_file = _acquire_storage_allocation_lock()
         try:
             manifest_path = _experiment_manifest_path(self.owner_experiment)
             manifest_raw = _read_file_nofollow(Path(manifest_path))
             manifest = json.loads(manifest_raw)
             if not _verify_manifest_signature(manifest):
                 raise RetentionError("BuildLease owner manifest is unsigned or has been edited")
+            if is_r71 and isinstance(self.session_plan, Mapping):
+                output_contract = self.session_plan.get("admission_output_contract")
+                declared_output = self.session_plan.get("admission_output_dir")
+                if output_contract is not None or declared_output is not None:
+                    try:
+                        normalized_output = _measured_output_dir(
+                            REPO / str(declared_output), require_missing=True)
+                    except (OSError, TypeError, ValueError, RuntimeError) as error:
+                        raise RetentionError(f"R90 plan admission output root is unsafe: {error}") from error
+                    if (output_contract != "R90_ADMISSION_UNIQUE_SIBLING_ROOT_V1"
+                            or re.fullmatch(
+                                r"r6a-r87-admission-[A-Za-z0-9][A-Za-z0-9_-]{0,95}",
+                                self.owner_experiment) is None
+                            or declared_output != (
+                                f"experiments/storage/r6a-admission-outputs/{self.owner_experiment}")
+                            or manifest.get("output_dir") != str(normalized_output)
+                            or declared_output != normalized_output.relative_to(REPO).as_posix()):
+                        raise RetentionError(
+                            "R90 signed output reservation differs from the exact plan-bound admission root")
+            if is_r7x:
+                gate_raw = _read_file_nofollow(GATE0_ATTESTATION_PATH)
+                claim_path = Path(admission_transaction.claim_path)
+                claim_raw = _read_file_nofollow(claim_path, maximum_bytes=64 * 1024)
+                expected_build_id_field = "r71_build_id" if is_r71 else "r70_build_id"
+                if (hashlib.sha256(gate_raw).hexdigest() != admission_transaction.gate_sha256
+                        or hashlib.sha256(manifest_raw).hexdigest() != admission_transaction.manifest_sha256
+                        or hashlib.sha256(claim_raw).hexdigest() != admission_transaction.claim_sha256
+                        or manifest.get("decision") != "ALLOW"
+                        or manifest.get("experiment_id") != admission_transaction.admission_id
+                        or manifest.get(expected_build_id_field) != self.build_id
+                        or manifest.get("admission_claim", {}).get("build_id") != self.build_id):
+                    raise RetentionError("R70/R71 ALLOW, claim, Gate, or build identity changed before reserve")
+                if is_r71:
+                    try:
+                        _reject_r6a_admission_with_terminal_disposition(manifest, manifest_raw)
+                    except (OSError, TypeError, ValueError, RuntimeError) as error:
+                        raise RetentionError(
+                            f"R71 admission is terminally closed or its disposition is invalid: {error}") from error
+            _validate_r65_reservation_binding(
+                manifest, build_id=self.build_id, session_plan=self.session_plan,
+                session_plan_sha256=self.session_plan_sha256)
+            if self.session_plan is not None:
+                self._assert_session_plan_binding()
+                if (manifest.get("build_session_plan_sha256") != self.session_plan_sha256
+                        or manifest.get("execution_admission_identity")
+                            != self.session_plan["admission_identity"]):
+                    raise RetentionError(
+                        "session plan is not cryptographically bound to the signed execution admission")
+                self._validate_session_inputs()
+            elif manifest.get("build_session_plan_sha256") is not None:
+                raise RetentionError("signed session admission requires the separately versioned session API")
             runner_hashes = manifest.get("authorized_runner_sha256")
             try:
                 runner_hash = hashlib.sha256(_read_file_nofollow(Path(self.runner_path))).hexdigest()
@@ -5389,11 +14662,13 @@ class BuildLease:
             gate_attestation = GATE0_ATTESTATION_PATH.read_bytes()
             if manifest.get("gate0_attestation_sha256") != hashlib.sha256(gate_attestation).hexdigest():
                 raise RetentionError("BuildLease manifest does not bind to the current Gate 0 attestation")
-            blockers = _gate_blockers(active_experiment_id=self.owner_experiment)
+            blockers = _gate_blockers(active_experiment_id=self.owner_experiment,
+                                      allow_r70_handoff=is_r70,
+                                      allow_r71_handoff=is_r71)
             if blockers:
                 raise RetentionError("Gate 0 blocks build start: " + "; ".join(blockers))
             free_now = disk_free_bytes(REPO)
-            current_project_usage = measure_project_usage()
+            current_project_usage = measure_project_usage(strict=is_r71)
             current_project = conservative_project_usage_bytes(current_project_usage)
             peak = estimates["estimated_projected_new_disk_bytes"]
             admission = projected_storage_admission(
@@ -5415,11 +14690,15 @@ class BuildLease:
             raise
         lease_fd, lock_fd = self.lock_fds
         try:
+            # The retained lease, completed manifest, failure package, or cleanup
+            # receipt is a permanent identity claim even after the build directory
+            # has been removed. Check before retiring or replacing any same-ID state.
+            _assert_build_id_unclaimed(self.build_id)
             _retire_pending_locked()
-            reusable = find_canonical_equivalent(
+            reusable = (None if self.session_plan is not None else find_canonical_equivalent(
                 config_key_sha256=self.configuration_key_sha256, kind=self.kind,
                 source_tree_hash=self.source_tree_hash,
-                dependency_state=self.metadata.get("dependency_state"))
+                dependency_state=self.metadata.get("dependency_state")))
             if reusable is not None:
                 self.reused_manifest = reusable
                 self._release_lock()
@@ -5453,8 +14732,47 @@ class BuildLease:
                          "metadata": self.metadata, "owner_pid": os.getpid(), "worktree": str(REPO),
                          "preserve_debug_reason": self.preserve_debug_reason,
                          "storage_admission_warnings": self.storage_admission_warnings,
+                         "storage_admission_peak_bytes": peak,
+                         "storage_admission_project_bytes": current_project_usage.get(
+                             "allocated_inode_deduplicated_bytes"),
                          "requested_config_key_sha256": self.configuration_key_sha256}
+                if is_r71:
+                    dependency_binding = admission_transaction.r71_validation
+                    dependency_sha = (dependency_binding.get("dependency_manifest_sha256")
+                                      if isinstance(dependency_binding, Mapping) else None)
+                    dependency_path = (dependency_binding.get("manifest_path")
+                                       if isinstance(dependency_binding, Mapping) else None)
+                    if (not isinstance(dependency_sha, str)
+                            or not re.fullmatch(r"[0-9a-f]{64}", dependency_sha)
+                            or not isinstance(dependency_path, str)):
+                        raise RetentionError("R71 reservation lacks its exact dependency-manifest identity")
+                    lease["r71_execution_dependency_manifest_sha256"] = dependency_sha
+                    lease["r71_dependency_manifest_path"] = dependency_path
+                if self.session_plan is not None:
+                    lease["session_started"] = False
+                    lease["session_v3"] = {
+                        "schema_version": BUILD_SESSION_SCHEMA_VERSION,
+                        "executor_mode": BUILD_SESSION_EXECUTOR_MODE,
+                        "plan_sha256": self.session_plan_sha256,
+                        "admission_identity": self.session_plan["admission_identity"],
+                        "source_identity": self.session_plan["source_identity"],
+                        "state": "RESERVED",
+                        "next_step_index": 0,
+                        "step_receipts": [],
+                        "peak_allocated_bytes": 0,
+                    }
                 # ACTIVE registry record precedes mkdir: a crash cannot leave an invisible build.
+                if is_r7x:
+                    try:
+                        admission_transaction.validate(
+                            build_id=self.build_id, owner_experiment=self.owner_experiment,
+                            plan_sha256=self.session_plan_sha256 or "",
+                            manifest_path=_experiment_manifest_path(self.owner_experiment),
+                            retention_lock_fds=self.lock_fds)
+                    except BaseException as error:
+                        raise RetentionError(
+                            f"R70 storage changed immediately before durable reservation: {error}") from error
+                    admission_transaction.used = True
                 _store_lease(lease)
                 os.mkdir(self.path.name, 0o700, dir_fd=parent_fd)
                 os.fsync(parent_fd)
@@ -5491,6 +14809,115 @@ class BuildLease:
             except ImportError:
                 lock_file.close()
 
+    def _assert_live_session_reservation_capability(self) -> None:
+        """Validate this object's still-held descriptors immediately before v3 start."""
+        if (self.session_plan is None or not self.started or self.reused_manifest is not None
+                or self.path != BUILD_ROOT / self.build_id
+                or not isinstance(self.lock_fds, tuple) or len(self.lock_fds) != 2):
+            raise RetentionError("same-process session start lacks its live BuildLease capability")
+        lease_fd, lock_fd = self.lock_fds
+        try:
+            os.fstat(lease_fd)
+            os.fstat(lock_fd)
+        except OSError as error:
+            raise RetentionError("same-process BuildLease lock capability was lost before session start") from error
+        _verify_named_retention_lock(lease_fd, lock_fd)
+        record_raw = _read_at(lease_fd, f"{self.build_id}.json", limit=1024 * 1024)
+        try:
+            lease = json.loads(record_raw)
+        except (UnicodeDecodeError, json.JSONDecodeError) as error:
+            raise RetentionError("same-process reservation record became malformed before start") from error
+        session = lease.get("session_v3") if isinstance(lease, dict) else None
+        if (not isinstance(lease, dict) or not _verify_seal(lease)
+                or lease.get("build_id") != self.build_id or lease.get("path") != str(self.path)
+                or lease.get("owner_pid") != os.getpid() or lease.get("state") != "ACTIVE"
+                or lease.get("session_started") is not False
+                or not isinstance(session, dict) or session.get("state") != "RESERVED"
+                or session.get("plan_sha256") != self.session_plan_sha256
+                or session.get("admission_identity") != self.session_plan["admission_identity"]
+                or session.get("next_step_index") != 0 or session.get("peak_allocated_bytes") != 0
+                or session.get("step_receipts") != []):
+            raise RetentionError("same-process reservation identity or start boundary changed")
+        root_fd = _open_dir(self.path)
+        try:
+            marker = _read_marker(root_fd)
+            if _canonical_json(marker) != _canonical_json(lease):
+                raise RetentionError("same-process reservation marker changed before session start")
+        finally:
+            os.close(root_fd)
+        # Full R71 closure validation needs this exact session workspace to be
+        # mounted and bound in the durable v3 session record. The first
+        # run_next() performs that check before writing command evidence or
+        # dispatching any graph process. At this pre-mount boundary, the live
+        # lease locks, reservation marker, and projected-capacity checks above
+        # remain authoritative.
+        if (isinstance(self.owner_experiment, str)
+                and _is_r6a_r71_admission_id(self.owner_experiment)):
+            from storage_policy import (conservative_project_usage_bytes, disk_free_bytes,
+                                        measure_project_usage, projected_storage_admission)
+            admitted_peak = lease.get("storage_admission_peak_bytes")
+            if not isinstance(admitted_peak, int) or isinstance(admitted_peak, bool) or admitted_peak < 0:
+                raise RetentionError("R71 reserved lease lacks its fresh projected-capacity identity")
+            current_free = disk_free_bytes(REPO)
+            current_project = conservative_project_usage_bytes(measure_project_usage(strict=True))
+            admission = projected_storage_admission(
+                current_free_bytes=current_free, current_scoped_bytes=current_project,
+                peak_additional_bytes=admitted_peak)
+            if not admission["admitted"]:
+                raise RetentionError("R71 projected-capacity boundary blocks session start: "
+                                     + "; ".join(admission["blockers"]))
+
+    def _revalidate_r71_admission(self, *, allow_pre_dispatch: bool = False) -> None:
+        capability = self.admission_reservation_capability
+        is_r71 = (isinstance(self.owner_experiment, str)
+                  and _is_r6a_r71_admission_id(self.owner_experiment))
+        if not is_r71:
+            return
+        if capability is None:
+            raise RetentionError("R71 BuildLease lost its admission capability before session consumption")
+        if allow_pre_dispatch:
+            active_session = self.session
+            if (not isinstance(active_session, BuildLeaseSession)
+                    or active_session.lease is not self
+                    or active_session._active_process is not None
+                    or not active_session._operation_lock.locked()):
+                raise RetentionError(
+                    "pre-dispatch revalidation requires the exact idle process slot in its active R71 session")
+        if not isinstance(self.lock_fds, tuple) or len(self.lock_fds) != 2:
+            raise RetentionError("R71 BuildLease lost its live retention lock before admission revalidation")
+        try:
+            import storage_policy
+            capability.validate(
+                build_id=self.build_id, owner_experiment=self.owner_experiment,
+                plan_sha256=self.session_plan_sha256 or "",
+                manifest_path=storage_policy._experiment_manifest_path(self.owner_experiment),
+                consumption=True, retention_lock_fds=self.lock_fds,
+                allow_pre_dispatch=allow_pre_dispatch)
+        except BaseException as error:
+            raise RetentionError(f"R71 dependency closure changed before session consumption: {error}") from error
+
+    def execute_admitted_plan(self) -> dict[str, Any]:
+        """Reserve, start, execute, and finalize one frozen v3 plan in this process.
+
+        There is intentionally no callback or return boundary between a successful
+        reservation and starting a session on this exact BuildLease object.
+        """
+        if self.session_plan is None:
+            raise RetentionError("admitted-plan execution requires a frozen Host-v3 session plan")
+        if self.started or self.lock_fds is not None or self.session is not None:
+            raise RetentionError("admitted-plan execution requires a fresh BuildLease object")
+        reserved_path = self.reserve()
+        if reserved_path != self.path:
+            raise RetentionError("admitted-plan reservation did not create its exact new lease")
+        self._assert_live_session_reservation_capability()
+        session = self.start_session()
+        for step in session.plan["steps"]:
+            if step.get("kind") == "source_verification":
+                session.verify_source()
+            else:
+                session.run_next()
+        return session.finalize()
+
     def _start_heartbeat(self) -> None:
         self.stop_event = threading.Event()
         def run():
@@ -5503,29 +14930,66 @@ class BuildLease:
         self.beat_thread.start()
 
     def heartbeat(self) -> None:
-        lease = _load_lease(self.build_id)
-        if lease.get("state") != "ACTIVE" or lease.get("path") != str(self.path):
+        observed = _load_lease(self.build_id)
+        if observed.get("state") != "ACTIVE" or observed.get("path") != str(self.path):
             raise RetentionError("build lease is no longer ACTIVE")
-        lease["last_heartbeat_unix"] = time.time()
-        _store_lease(lease)
-        root_fd = _open_dir(self.path)
-        try:
-            marker = _read_marker(root_fd)
-            if marker.get("build_id") != self.build_id or marker.get("state") != "ACTIVE":
-                raise RetentionError("build marker changed")
-            marker["last_heartbeat_unix"] = lease["last_heartbeat_unix"]
-            _write_marker(root_fd, marker)
-            os.fsync(root_fd)
-        finally:
-            os.close(root_fd)
+        # The first read is only a liveness check. Re-read under the state mutex so
+        # an older snapshot can never replace a newer session state or receipt list.
+        with self._lease_state_lock:
+            lease = _load_lease(self.build_id)
+            if lease.get("state") != "ACTIVE" or lease.get("path") != str(self.path):
+                raise RetentionError("build lease is no longer ACTIVE")
+            lease["last_heartbeat_unix"] = time.time()
+            _store_lease(lease)
+            root_fd = _open_dir(self.path)
+            try:
+                marker = _read_marker(root_fd)
+                if marker.get("build_id") != self.build_id or marker.get("state") != "ACTIVE":
+                    raise RetentionError("build marker changed")
+                marker.update(lease)
+                _write_marker(root_fd, marker)
+                os.fsync(root_fd)
+            finally:
+                os.close(root_fd)
 
     def complete(self, *, preserve_debug: bool = False) -> dict[str, Any]:
+        plan = self.session_plan
+        allowance = (plan.get("persistent_output_allowance_bytes")
+                     if isinstance(plan, Mapping) else None)
+        budget = None
+        if allowance is not None:
+            try:
+                current = _load_lease(self.build_id)
+            except (OSError, RetentionError):
+                current = {}
+            session = current.get("session_v3") if isinstance(current, Mapping) else None
+            if (current.get("state") == "ACTIVE" and isinstance(session, Mapping)
+                    and session.get("state") == "READY_TO_FINALIZE"):
+                if (not _session_dual_graph_enabled(plan)
+                        or plan.get("reservation_bytes") != self.expected_bytes
+                        or allowance > MAX_SESSION_PERSISTENT_OUTPUT_ALLOWANCE_BYTES):
+                    raise RetentionError("R87 completion plan lost its signed persistent output allowance")
+                budget = _FinalizationOutputBudget(
+                    build_path=self.path, allowance_bytes=allowance,
+                    expected_build_bytes=self.expected_bytes)
+                budget.preflight()
+        if budget is None:
+            return self._complete_impl(preserve_debug=preserve_debug)
+        token = _FINALIZATION_OUTPUT_BUDGET.set(budget)
+        try:
+            return self._complete_impl(preserve_debug=preserve_debug)
+        finally:
+            _FINALIZATION_OUTPUT_BUDGET.reset(token)
+
+    def _complete_impl(self, *, preserve_debug: bool = False) -> dict[str, Any]:
         try:
             lease = _load_lease(self.build_id)
         except (OSError, RetentionError):
             raise RetentionError("cannot complete an unreserved build")
         if lease.get("path") != str(self.path):
             raise RetentionError("build lease path differs from this completion request")
+        if lease.get("session_v3") is not None and lease.get("state") != "ACTIVE":
+            raise RetentionError("a v3 BuildLease session can be finalized only once")
         if lease.get("state") in {"COMPLETED", "RETIRING"}:
             manifest, digest = _verify_build_manifest(self.build_id)
             if (lease.get("build_manifest_id") != manifest.get("build_manifest_id")
@@ -5551,8 +15015,55 @@ class BuildLease:
                     "idempotent_replay": True}
         if not self.started or lease.get("state") != "ACTIVE":
             raise RetentionError(f"cannot complete a build in state {lease.get('state')}")
+        is_r71_completion = (isinstance(self.owner_experiment, str)
+                             and _is_r6a_r71_admission_id(self.owner_experiment))
+        if is_r71_completion:
+            self._revalidate_r71_admission()
+            dependency_sha = lease.get("r71_execution_dependency_manifest_sha256")
+            if not isinstance(dependency_sha, str) or not re.fullmatch(r"[0-9a-f]{64}", dependency_sha):
+                raise RetentionError("R71 completion lacks its reserved dependency-manifest identity")
+        if preserve_debug and lease.get("session_v3") is not None:
+            raise RetentionError("v3 session workspaces cannot be preserved as debug builds")
+        is_host_v3_session = isinstance(lease.get("session_v3"), dict)
         execution = self._verified_execution_receipt(lease)
-        _require_no_live_process(self.path)
+        if is_host_v3_session:
+            if self.session is None or self.session_plan_sha256 is None:
+                raise RetentionError("v3 completion lost its owning session persistence guard")
+            with self._lease_state_lock:
+                current = _load_lease(self.build_id)
+                current_session = current.get("session_v3")
+                terminal_path = self.path / BUILD_SESSION_DIRECTORY / BUILD_SESSION_TERMINAL
+                if (current.get("state") != "ACTIVE"
+                        or current.get("path") != str(self.path)
+                        or not isinstance(current_session, dict)
+                        or current_session.get("state") != "READY_TO_FINALIZE"
+                        or current_session.get("plan_sha256") != self.session_plan_sha256
+                        or current_session.get("terminal_sha256") != _hash_path(terminal_path)):
+                    raise RetentionError("v3 finalization claim is no longer the exact ready session")
+                current_session = dict(current_session)
+                current_session.update({
+                    "state": "FINALIZING",
+                    "acceptance_state": "UNACCEPTED_FINALIZING_MANIFEST",
+                    "finalizing_started_at_unix": time.time(),
+                })
+                if is_r71_completion:
+                    current_session["r71_execution_dependency_manifest_sha256"] = dependency_sha
+                current["session_v3"] = current_session
+                _store_lease(current)
+                root_fd = _open_dir(self.path)
+                try:
+                    marker = _read_marker(root_fd)
+                    if (marker.get("build_id") != self.build_id
+                            or marker.get("state") != "ACTIVE"):
+                        raise RetentionError("v3 finalization claim found a non-active root marker")
+                    marker.update(current)
+                    _write_marker(root_fd, marker)
+                    os.fsync(root_fd)
+                finally:
+                    os.close(root_fd)
+                lease = current
+        if not is_host_v3_session:
+            _require_no_live_process(self.path)
         preserve_expiry = self.metadata.get("preserve_debug_expiry_unix")
         if preserve_debug and (not self.preserve_debug_reason or not isinstance(preserve_expiry, (int, float))
                                or isinstance(preserve_expiry, bool) or preserve_expiry <= time.time()
@@ -5567,41 +15078,227 @@ class BuildLease:
         evidence = MANIFEST_ROOT / f"{self.build_id}.evidence"
         evidence_fd = _open_dir(evidence, create=True)
         os.close(evidence_fd)
-        execution_evidence = _copy_evidence(
-            self.path / BUILD_EXECUTION_RECEIPT, evidence / "execution/build-execution.json")
-        if lease.get("metadata", {}).get("native_moltenvk_request"):
+        if not is_host_v3_session:
+            execution_evidence = _copy_evidence(
+                self.path / BUILD_EXECUTION_RECEIPT, evidence / "execution/build-execution.json")
+        artifact_root = (Path(self.session_plan["build_workspace"])
+                         if lease.get("session_v3") is not None and self.session_plan is not None
+                         else self.path)
+        dual_graph_session = (is_host_v3_session and self.session_plan is not None
+                              and _session_dual_graph_enabled(self.session_plan))
+        if dual_graph_session:
+            terminal_path = self.path / BUILD_SESSION_DIRECTORY / BUILD_SESSION_TERMINAL
+            terminal = _read_json(terminal_path, sealed=True)
+            outputs, identity = _copy_tree_artifacts(
+                artifact_root, self.build_id, evidence,
+                session_plan=self.session_plan, terminal=terminal,
+                requested_config_key_sha256=self.configuration_key_sha256,
+                sandbox_profile_sha256=execution["sandbox_profile_sha256"])
+        elif lease.get("metadata", {}).get("native_moltenvk_request"):
             native_req = _dict_to_native_request(lease["metadata"]["native_moltenvk_request"])
-            outputs, identity = _copy_tree_artifacts_native_moltenvk(self.path, self.build_id, evidence, native_req)
+            outputs, identity = _copy_tree_artifacts_native_moltenvk(artifact_root, self.build_id, evidence, native_req)
         else:
-            outputs, identity = _copy_tree_artifacts(self.path, self.build_id, evidence)
-        identity["sandboxed_execution_evidence"] = execution_evidence
+            outputs, identity = _copy_tree_artifacts(artifact_root, self.build_id, evidence)
+        if not is_host_v3_session:
+            identity["sandboxed_execution_evidence"] = execution_evidence
+        else:
+            identity["build_id"] = self.build_id
         identity["sandboxed_execution_status"] = "verified_successful_seatbelt_run"
         identity["sandboxed_execution_profile_sha256"] = execution["sandbox_profile_sha256"]
         if self.metadata.get("dependency_state") is not None:
             identity["dependency_state"] = self.metadata["dependency_state"]
         if str(identity.get("build_type", "")).casefold() != str(self.metadata.get("build_type", "")).casefold():
             raise RetentionError("completed build type differs from the signed pre-build type")
-        identity["config_key_sha256"] = configuration_key_from_identity(
-            identity, dependency_state=identity["dependency_state"])
-        if identity.get("config_key_sha256") != self.configuration_key_sha256:
+        if dual_graph_session:
+            if (self.session_plan_sha256 is None
+                    or identity.get("session_plan_sha256") != self.session_plan_sha256
+                    or self.configuration_key_sha256
+                        != self.session_plan.get("build_configuration_key_sha256")):
+                raise RetentionError("Host-v3 dual completion request does not bind its distinct frozen session plan")
+            pair_key = _dual_graph_configuration_pair_sha256(identity.get("build_graph_identities", {}))
+            if (identity.get("graph_config_key_sha256") != pair_key
+                    or identity.get("config_key_sha256") != pair_key
+                    or pair_key == self.session_plan_sha256
+                    or pair_key != self.configuration_key_sha256):
+                raise RetentionError("Host-v3 dual completion has no independently validated graph-pair key")
+        elif is_host_v3_session and self.session_plan_sha256 is not None:
+            identity["session_plan_sha256"] = self.session_plan_sha256
+            try:
+                identity["graph_config_key_sha256"] = configuration_key_from_identity(
+                    identity, dependency_state=identity["dependency_state"])
+            except Exception:
+                identity["graph_config_key_sha256"] = None
+            if self.configuration_key_sha256 == self.session_plan_sha256:
+                identity["config_key_sha256"] = self.session_plan_sha256
+            else:
+                identity["config_key_sha256"] = (
+                    identity.get("graph_config_key_sha256") or
+                    configuration_key_from_identity(identity, dependency_state=identity["dependency_state"]))
+        else:
+            identity["config_key_sha256"] = configuration_key_from_identity(
+                identity, dependency_state=identity["dependency_state"])
+        if (dual_graph_session and identity.get("requested_config_key_sha256") != self.configuration_key_sha256
+                or not dual_graph_session and identity.get("config_key_sha256") != self.configuration_key_sha256):
             raise RetentionError("completed build does not match the requested canonical configuration key")
         lease["preserve_debug_expires_at_unix"] = preserve_expiry if preserve_debug else None
+        if is_host_v3_session:
+            session_record = lease.get("session_v3")
+            if (not isinstance(session_record, dict)
+                    or session_record.get("state") != "FINALIZING"
+                    or not isinstance(session_record.get("readonly_mount_identity"), dict)):
+                raise RetentionError("v3 session lost its verified read-only image before artifact promotion")
+            if (session_record.get("acceptance_state") != "UNACCEPTED_FINALIZING_MANIFEST"
+                    or session_record.get("write_quiescence_state")
+                    != "WRITABLE_IMAGE_NORMALLY_UNMOUNTED_AND_DETACHED"):
+                raise RetentionError("v3 session acceptance advanced before its read-only evidence detach")
+            current_output = _session_safe_path(
+                artifact_root,
+                _session_relative_path(self.session_plan["output_root"], "output_root", allow_dot=True),
+                must_exist=True, directory=True)
+            output_tree, output_count = _session_tree_digest(current_output, exclude_controller_state=True)
+            terminal_path = self.path / BUILD_SESSION_DIRECTORY / BUILD_SESSION_TERMINAL
+            terminal = _read_json(terminal_path, sealed=True)
+            if (terminal.get("state") != "PENDING_SUCCESS"
+                    or terminal.get("output_tree_sha256") != output_tree
+                    or terminal.get("output_file_count") != output_count):
+                raise RetentionError("read-only BuildLease output changed before normal evidence detach")
+            final_source = self._validate_session_inputs()
+            if terminal.get("final_source_verification") != final_source:
+                raise RetentionError("accepted source changed before host v3 output promotion")
+            captured_source = identity.get("source_identity")
+            if (not isinstance(captured_source, Mapping)
+                    or captured_source.get("path") != final_source.get("source_root")
+                    or captured_source.get("content_tree_sha256") != final_source.get("source_tree_sha256")):
+                raise RetentionError("artifactized build source differs from the exact v3 source verification")
+            readonly_mount = session_record["readonly_mount_identity"]
+            _verify_session_workspace_readonly(self.path, readonly_mount)
+            detached_readonly = _detach_session_workspace_readonly(
+                self.path, readonly_mount)
+            if detached_readonly.get("detached_image_identity") != session_record.get("detached_image_identity"):
+                raise RetentionError("read-only evidence detach changed the exact accepted image contents")
+            terminal.update({"state": "FINALIZING",
+                             "executor_mode": BUILD_SESSION_EXECUTOR_MODE,
+                             "executor_version": BUILD_SESSION_SCHEMA_VERSION,
+                             "acceptance_state": "UNACCEPTED_FINALIZING_MANIFEST",
+                             "write_quiescence_state": "WRITABLE_IMAGE_DETACHED_READONLY_EVIDENCE_HASHED",
+                             "readonly_detached_identity": detached_readonly,
+                             "readonly_detached_at_unix": detached_readonly.get("detached_at_unix"),
+                             "finalizing_at_unix": time.time()})
+            if is_r71_completion:
+                self._revalidate_r71_admission()
+                terminal["r71_execution_dependency_manifest_sha256"] = dependency_sha
+                identity["r71_execution_dependency_manifest_sha256"] = dependency_sha
+            if dual_graph_session:
+                _validate_host_v3_dual_graph_identity(
+                    identity, outputs, evidence, terminal=terminal,
+                    expected_terminal_state="FINALIZING",
+                    allow_pending_promotion=(
+                        self.session_plan.get("persistent_output_allowance_bytes") is not None))
+            _write_json(terminal_path, terminal, replace=True, sealed=True)
+            session_record["terminal_sha256"] = _hash_path(terminal_path)
+            session_record["readonly_detached_identity"] = detached_readonly
+            session_record["readonly_detached_at_unix"] = detached_readonly.get("detached_at_unix")
+            session_record["write_quiescence_state"] = "WRITABLE_IMAGE_DETACHED_READONLY_EVIDENCE_HASHED"
+            session_record["finalizing_terminal_sha256"] = session_record["terminal_sha256"]
+            lease["session_v3"] = session_record
+            self.session._store(lease)
+            lease = _load_lease(self.build_id)
+            session_record = lease["session_v3"]
+            execution = {**execution, **terminal}
+            execution_evidence = _copy_evidence(
+                terminal_path, evidence / "execution/session-terminal.json")
+            identity["sandboxed_execution_evidence"] = execution_evidence
+            identity["sandboxed_execution_executor_mode"] = BUILD_SESSION_EXECUTOR_MODE
+            identity["sandboxed_execution_executor_version"] = BUILD_SESSION_SCHEMA_VERSION
+            identity["sandboxed_execution_acceptance_state"] = "UNACCEPTED_FINALIZING_MANIFEST"
+            identity["sandboxed_execution_write_quiescence_state"] = (
+                "WRITABLE_IMAGE_DETACHED_READONLY_EVIDENCE_HASHED")
+            identity["host_buildlease_v3_final_source_verification"] = final_source
+            identity["host_buildlease_v3_detached_image_identity"] = session_record["detached_image_identity"]
+            identity["host_buildlease_v3_readonly_mount_identity"] = readonly_mount
+            identity["host_buildlease_v3_readonly_detached_identity"] = detached_readonly
+            identity["host_buildlease_v3_output_tree_sha256"] = output_tree
+            identity["host_buildlease_v3_output_file_count"] = output_count
+        else:
+            identity["sandboxed_execution_executor_mode"] = "HOST_SEATBELT_V1"
+            if is_r71_completion:
+                self._revalidate_r71_admission()
+                identity["r71_execution_dependency_manifest_sha256"] = dependency_sha
+        if is_r71_completion:
+            # Rebuild the live closure at the last point before the durable
+            # completion manifest is published. FINALIZING is not acceptance.
+            self._revalidate_r71_admission()
+            if lease.get("r71_execution_dependency_manifest_sha256") != dependency_sha:
+                raise RetentionError("R71 completion dependency-manifest identity changed before publication")
         manifest, digest = _build_manifest(lease, outputs, identity, evidence,
                                            provenance_scope="captured during successful build completion")
         state = "PRESERVE_DEBUG" if preserve_debug else "COMPLETED"
+        if is_host_v3_session:
+            terminal.update({
+                "state": "SUCCESS",
+                "acceptance_state": "HOST_BUILDLEASE_V3_WRITER_QUIESCED",
+                "write_quiescence_state": "WRITABLE_IMAGE_DETACHED_READONLY_EVIDENCE_HASHED",
+                "build_manifest_id": manifest["build_manifest_id"],
+                "build_manifest_sha256": digest,
+                "finalizing_terminal_sha256": session_record["finalizing_terminal_sha256"],
+                "accepted_at_unix": time.time(),
+            })
+            terminal_path = self.path / BUILD_SESSION_DIRECTORY / BUILD_SESSION_TERMINAL
+            terminal_raw = _write_json(terminal_path, terminal, replace=True, sealed=True)
+            terminal_digest = hashlib.sha256(terminal_raw).hexdigest()
+            if _hash_path(terminal_path) != terminal_digest:
+                raise RetentionError("Host-v3 success terminal readback digest changed")
+            completion_terminal_path = _completion_terminal_path(self.build_id)
+            completion_terminal_raw = _write_json(
+                completion_terminal_path, terminal, replace=False, sealed=True)
+            completion_terminal_digest = hashlib.sha256(completion_terminal_raw).hexdigest()
+            if completion_terminal_digest != terminal_digest:
+                raise RetentionError("Host-v3 durable completion terminal differs from the build-root receipt")
+            if dual_graph_session and self.session_plan.get("persistent_output_allowance_bytes") is not None:
+                # R87 commits and verifies the FINALIZING manifest, then writes
+                # SUCCESS, then promotes the exact evidence-staged graph bytes.
+                # The lease remains ACTIVE until promotion and the strict
+                # committed-manifest verification both succeed.
+                outputs = _promote_dual_graph_artifacts(outputs)
+                promoted_manifest, promoted_digest = _verify_build_manifest(
+                    self.build_id, allow_uncommitted_host_v3=True,
+                    allow_pending_promotion=False)
+                if (promoted_manifest.get("build_manifest_id") != manifest.get("build_manifest_id")
+                        or promoted_digest != digest):
+                    raise RetentionError("R87 post-SUCCESS CAS promotion changed the committed manifest")
+            session_record = dict(lease["session_v3"])
+            session_record["terminal_sha256"] = terminal_digest
+            session_record["completion_terminal_sha256"] = terminal_digest
+            session_record["build_manifest_id"] = manifest["build_manifest_id"]
+            session_record["build_manifest_sha256"] = digest
+            session_record["acceptance_state"] = "HOST_BUILDLEASE_V3_WRITER_QUIESCED"
+            session_record["write_quiescence_state"] = "WRITABLE_IMAGE_DETACHED_READONLY_EVIDENCE_HASHED"
+            session_record["state"] = "ACCEPTED"
+            lease["session_v3"] = session_record
+            lease.update({"completion_contract": "HOST_BUILDLEASE_V3_MANIFEST_FIRST_V1",
+                          "completion_terminal_path": str(completion_terminal_path),
+                          "completion_terminal_sha256": terminal_digest})
         lease.update({"state": state, "build_manifest_id": manifest["build_manifest_id"],
                       "build_manifest_path": str(MANIFEST_ROOT / f"{self.build_id}.json"),
                       "build_manifest_sha256": digest, "completed_at_unix": time.time()})
-        _store_lease(lease)
-        root_fd = _open_dir(self.path)
-        try:
-            marker = _read_marker(root_fd)
-            marker.update({"state": state, "build_manifest_id": manifest["build_manifest_id"],
-                           "build_manifest_sha256": digest})
-            _write_marker(root_fd, marker)
-            os.fsync(root_fd)
-        finally:
-            os.close(root_fd)
+        with self._lease_state_lock:
+            root_fd = _open_dir(self.path)
+            try:
+                if is_host_v3_session:
+                    marker, marker_digest = _read_marker_with_digest(root_fd)
+                    if not _host_v3_preacceptance_marker_matches(marker, lease):
+                        raise RetentionError("Host-v3 acceptance found a changed or non-finalizing root marker")
+                    accepted_session = dict(lease["session_v3"])
+                    accepted_session["preacceptance_marker_sha256"] = marker_digest
+                    lease["session_v3"] = accepted_session
+                else:
+                    marker = _read_marker(root_fd)
+                _store_lease(lease)
+                marker.update(lease)
+                _write_marker(root_fd, marker)
+                os.fsync(root_fd)
+            finally:
+                os.close(root_fd)
         if preserve_debug:
             self._release_lock()
             return {"status": state, "build_manifest_id": manifest["build_manifest_id"],
@@ -5613,6 +15310,8 @@ class BuildLease:
 
     def _verified_execution_receipt(self, lease: Mapping[str, Any]) -> dict[str, Any]:
         """Require completion proof written only after BuildLease.run's sandboxed exit 0."""
+        if lease.get("session_v3") is not None:
+            return self._verified_session_execution_receipt(lease)
         try:
             root_fd = _open_dir(self.path)
             try:
@@ -5713,6 +15412,435 @@ class BuildLease:
                 raise RetentionError("native Xcode toolchain changed between build launch and receipt verification")
         return proof
 
+    def _verified_session_execution_receipt(self, lease: Mapping[str, Any]) -> dict[str, Any]:
+        """Verify ordered v3 evidence, explicitly refusing any legacy/session mixture."""
+        _require_buildlease_vm_runtime(self.session_plan or {})
+        session = lease.get("session_v3")
+        if (not isinstance(session, dict) or session.get("schema_version") != BUILD_SESSION_SCHEMA_VERSION
+                or session.get("state") != "READY_TO_FINALIZE"
+                or session.get("executor_mode") != BUILD_SESSION_EXECUTOR_MODE
+                or session.get("executor_version") != BUILD_SESSION_SCHEMA_VERSION
+                or session.get("acceptance_state") != "UNACCEPTED_PENDING_NORMAL_READONLY_DETACH_AND_MANIFEST"
+                or session.get("write_quiescence_state") != "WRITABLE_IMAGE_NORMALLY_UNMOUNTED_AND_DETACHED"
+                or session.get("plan_sha256") != self.session_plan_sha256
+                or self.session_plan is None):
+            raise RetentionError("v3 session is not ready for its single explicit finalization")
+        if (self.path / BUILD_EXECUTION_RECEIPT).exists() or (self.path / "build-command.json").exists():
+            raise RetentionError("legacy v1 and v3 session execution receipts may not be mixed")
+        session_dir = self.path / BUILD_SESSION_DIRECTORY
+        try:
+            plan_receipt = _read_json(session_dir / BUILD_SESSION_PLAN, sealed=True)
+            terminal = _read_json(session_dir / BUILD_SESSION_TERMINAL, sealed=True)
+            storage_watch_events = session.get("storage_watch_events")
+            if (not isinstance(storage_watch_events, list)
+                    or len(storage_watch_events) > BUILD_SESSION_MAX_STORAGE_WATCH_EVENTS
+                    or terminal.get("storage_watch_events") != storage_watch_events):
+                raise RetentionError("v3 session storage telemetry is missing, oversized, or changed")
+            if (plan_receipt.get("schema_version") != BUILD_SESSION_SCHEMA_VERSION
+                    or plan_receipt.get("executor_mode") != BUILD_SESSION_EXECUTOR_MODE
+                    or plan_receipt.get("executor_version") != BUILD_SESSION_SCHEMA_VERSION
+                    or plan_receipt.get("plan_sha256") != self.session_plan_sha256
+                    or plan_receipt.get("plan") != self.session_plan
+                    or plan_receipt.get("admission_identity") != self.session_plan["admission_identity"]
+                    or plan_receipt.get("source_identity") != self.session_plan["source_identity"]
+                    or plan_receipt.get("build_root_identity") != session.get("build_root_identity")
+                    or terminal.get("plan_sha256") != self.session_plan_sha256
+                    or terminal.get("build_id") != self.build_id
+                    or terminal.get("state") != "PENDING_SUCCESS"
+                    or terminal.get("executor_mode") != BUILD_SESSION_EXECUTOR_MODE
+                    or terminal.get("executor_version") != BUILD_SESSION_SCHEMA_VERSION
+                    or terminal.get("acceptance_state")
+                        != "UNACCEPTED_PENDING_NORMAL_READONLY_DETACH_AND_MANIFEST"
+                    or terminal.get("write_quiescence_state")
+                        != "WRITABLE_IMAGE_NORMALLY_UNMOUNTED_AND_DETACHED"
+                    or terminal.get("admission_identity") != session.get("admission_identity")
+                    or terminal.get("source_identity") != session.get("source_identity")
+                    or terminal.get("build_root_identity") != session.get("build_root_identity")
+                    or session.get("admission_identity") != self.session_plan["admission_identity"]
+                    or session.get("source_identity") != self.session_plan["source_identity"]
+                    or terminal.get("step_count") != len(self.session_plan["steps"])
+                    or terminal.get("reservation_bytes") != self.expected_bytes
+                    or terminal.get("step_receipts") != session.get("step_receipts")
+                    or len(session.get("step_receipts", [])) != len(self.session_plan["steps"])
+                    or session.get("terminal_sha256") != _hash_path(session_dir / BUILD_SESSION_TERMINAL)):
+                raise RetentionError("v3 terminal receipt does not bind its signed plan and active lease")
+            receipt_hashes: list[str] = []
+            expected_inputs = self._validate_session_inputs()
+            sandbox_profile_hashes: set[str] = set()
+            sandbox_launcher_hashes: set[str] = set()
+            last_sandbox_profile_hash: str | None = None
+            dual_graph = _session_dual_graph_enabled(self.session_plan)
+            last_stage_tree_identity = session.get("initial_stage_tree_identity") if dual_graph else None
+            windows_pe_stage_identity: Mapping[str, Any] | None = None
+            native_runtime_stage_identity: Mapping[str, Any] | None = None
+            for index, step in enumerate(self.session_plan["steps"]):
+                step_name = f"step-{index:03d}"
+                result_path = session_dir / "steps" / f"{step_name}.result.json"
+                command_path = session_dir / "steps" / f"{step_name}.command.json"
+                command_receipt = _read_json(command_path, sealed=True)
+                result_receipt = _read_json(result_path, sealed=True)
+                receipt_row = session["step_receipts"][index]
+                if (receipt_row.get("step_index") != index
+                        or command_receipt.get("schema_version") != BUILD_SESSION_SCHEMA_VERSION
+                        or command_receipt.get("executor_mode") != BUILD_SESSION_EXECUTOR_MODE
+                        or command_receipt.get("executor_version") != BUILD_SESSION_SCHEMA_VERSION
+                        or command_receipt.get("acceptance_state") != "UNACCEPTED_UNTIL_WHOLE_LEASE_DETACH"
+                        or command_receipt.get("build_id") != self.build_id
+                        or command_receipt.get("plan_sha256") != self.session_plan_sha256
+                        or command_receipt.get("step_index") != index
+                        or command_receipt.get("kind") != step["kind"]
+                        or result_receipt.get("schema_version") != BUILD_SESSION_SCHEMA_VERSION
+                        or result_receipt.get("executor_mode") != BUILD_SESSION_EXECUTOR_MODE
+                        or result_receipt.get("executor_version") != BUILD_SESSION_SCHEMA_VERSION
+                        or result_receipt.get("acceptance_state") != "UNACCEPTED_UNTIL_WHOLE_LEASE_DETACH"
+                        or result_receipt.get("build_id") != self.build_id
+                        or result_receipt.get("plan_sha256") != self.session_plan_sha256
+                        or result_receipt.get("step_index") != index
+                        or result_receipt.get("kind") != step["kind"]
+                        or result_receipt.get("status") != "SUCCESS"
+                        or result_receipt.get("return_code") != 0
+                        or command_receipt.get("source_observation") != result_receipt.get("source_observation")
+                        or result_receipt.get("command_receipt_sha256") != _hash_path(command_path)
+                        or receipt_row.get("command_receipt_sha256") != _hash_path(command_path)
+                        or receipt_row.get("result_receipt_sha256") != _hash_path(result_path)
+                        or result_receipt.get("peak_allocated_bytes", self.expected_bytes + 1) > self.expected_bytes):
+                    raise RetentionError("v3 session step sequence is missing, duplicated, or reordered")
+                if command_receipt.get("cwd") != self.session_plan["build_workspace"]:
+                    raise RetentionError("v3 command receipt cwd differs from the admitted BuildLease")
+                if step["kind"] == "source_verification":
+                    if (command_receipt.get("command") is not None
+                            or command_receipt.get("read_only") is not True
+                            or result_receipt.get("log_path") is not None
+                            or command_receipt.get("source_observation") != terminal.get("final_source_verification")
+                            or result_receipt.get("source_observation") != terminal.get("final_source_verification")):
+                        raise RetentionError("v3 final source verification is not read-only and exact")
+                    if dual_graph:
+                        if self.session is None:
+                            raise RetentionError("dual-graph final receipt verifier is unavailable")
+                        final_graph_outputs = self.session._verify_graph_outputs(session)
+                        final_stage_tree = self.session._verify_stage_outputs(session, require_complete=True)
+                        final_stage_identity = {
+                            "windows_pe_stage_identity": session.get("windows_pe_stage_identity"),
+                            "native_runtime_stage_identity": session.get("native_runtime_stage_identity"),
+                            "stage_install_tree_identity": session.get("stage_install_tree_identity"),
+                        }
+                        if (command_receipt.get("input_tool_identities") != expected_inputs["tools"]
+                                or command_receipt.get("input_receipts") != expected_inputs["input_receipts"]
+                                or command_receipt.get("graph_tool_identities") != expected_inputs["graph_tools"]
+                                or command_receipt.get("runtime_input_identities") != expected_inputs["runtime_inputs"]
+                                or command_receipt.get("graph_directory_identities")
+                                    != session.get("graph_directory_identities")
+                                or command_receipt.get("graph_output_identities") != final_graph_outputs
+                                or result_receipt.get("input_tool_identities") != expected_inputs["tools"]
+                                or result_receipt.get("input_receipts") != expected_inputs["input_receipts"]
+                                or result_receipt.get("graph_tool_identities") != expected_inputs["graph_tools"]
+                                or result_receipt.get("runtime_input_identities") != expected_inputs["runtime_inputs"]
+                                or result_receipt.get("graph_directory_identities")
+                                    != session.get("graph_directory_identities")
+                                or result_receipt.get("graph_output_identities") != final_graph_outputs
+                                or command_receipt.get("stage_operation_identity") != final_stage_identity
+                                or result_receipt.get("stage_operation_identity") != final_stage_identity
+                                or command_receipt.get("stage_tree_identity") != final_stage_tree
+                                or result_receipt.get("stage_tree_identity") != final_stage_tree
+                                or terminal.get("graph_directory_identities")
+                                    != session.get("graph_directory_identities")
+                                or terminal.get("graph_output_identities") != final_graph_outputs
+                                or terminal.get("stage_operation_identity") != final_stage_identity
+                                or terminal.get("stage_tree_identity") != final_stage_tree):
+                            raise RetentionError("dual-graph final receipt omits or changes graph/output/stage identities")
+                else:
+                    if self.session is None:
+                        raise RetentionError("v3 command verifier is unavailable")
+                    typed_stage = (dual_graph and step["kind"] in
+                                   {"stage_windows_product", "stage_native_runtime"})
+                    if typed_stage:
+                        action = (BUILD_SESSION_DUAL_GRAPH_WINDOWS_STAGE_ACTION
+                                  if step["kind"] == "stage_windows_product"
+                                  else BUILD_SESSION_DUAL_GRAPH_NATIVE_STAGE_ACTION)
+                        graph = _session_dual_graph_by_id(self.session_plan, str(step["graph_id"]))
+                        expected_graph_directory = session.get("graph_directory_identities", {}).get(
+                            graph["graph_id"])
+                        prior_output_rows = []
+                        for prior_graph in self.session_plan["build_graphs"]:
+                            for output in prior_graph["expected_outputs"]:
+                                producer_index = next((prior_index for prior_index, prior_step in
+                                                       enumerate(self.session_plan["steps"][:index])
+                                                       if prior_step.get("kind") == "build"
+                                                       and prior_step.get("graph_id") == prior_graph["graph_id"]
+                                                       and prior_step.get("target_id") == output["producer_target"]), None)
+                                if producer_index is not None:
+                                    prior_row = session.get("graph_outputs", {}).get(output["output_id"])
+                                    if not isinstance(prior_row, dict):
+                                        raise RetentionError("typed stage has no prior graph output receipt")
+                                    prior_output_rows.append(prior_row)
+                        stage_record = session.get("typed_stage_step_identities", {}).get(str(index))
+                        if not isinstance(stage_record, Mapping):
+                            raise RetentionError("typed stage step identity is absent from the active session")
+                        expected_stage_operation = stage_record.get("stage_operation_identity")
+                        expected_stage_tree = stage_record.get("stage_tree_identity")
+                        stage_mismatches = [
+                            name for name, matched in (
+                                ("action", command_receipt.get("action") == action),
+                                ("command", command_receipt.get("command") is None),
+                                ("environment", command_receipt.get("environment_sha256") is None),
+                                ("launcher_path", command_receipt.get("sandbox_launcher_path") is None),
+                                ("launcher_hash", command_receipt.get("sandbox_launcher_sha256") is None),
+                                ("sandbox_profile", command_receipt.get("sandbox_profile_sha256") is None),
+                                ("source", command_receipt.get("source_observation")
+                                 == session.get("source_start_identity")),
+                                ("tools", command_receipt.get("input_tool_identities")
+                                 == expected_inputs["tools"]),
+                                ("inputs", command_receipt.get("input_receipts")
+                                 == expected_inputs["input_receipts"]),
+                                ("graph_tools", command_receipt.get("graph_tool_identities")
+                                 == expected_inputs["graph_tools"]),
+                                ("runtime_inputs", command_receipt.get("runtime_input_identities")
+                                 == expected_inputs["runtime_inputs"]),
+                                ("result_inputs_after", result_receipt.get("input_observation_after")
+                                 == expected_inputs),
+                                ("graph_provenance", command_receipt.get("graph_provenance")
+                                 == self.session._graph_provenance(step)),
+                                ("graph_directory_before",
+                                 command_receipt.get("graph_directory_identity_before")
+                                 == expected_graph_directory),
+                                ("graph_outputs_before",
+                                 command_receipt.get("graph_output_identities_before") == prior_output_rows),
+                                ("stage_tree_before",
+                                 command_receipt.get("stage_tree_identity_before") == last_stage_tree_identity),
+                                ("pe_stage_before",
+                                 command_receipt.get("windows_pe_stage_identity_before")
+                                 == windows_pe_stage_identity),
+                                ("runtime_stage_before",
+                                 command_receipt.get("native_runtime_stage_identity_before")
+                                 == native_runtime_stage_identity),
+                                ("result_graph_provenance",
+                                 result_receipt.get("graph_provenance")
+                                 == self.session._graph_provenance(step)),
+                                ("result_graph_directory",
+                                 result_receipt.get("graph_directory_identity")
+                                 == expected_graph_directory),
+                                ("result_graph_outputs",
+                                 result_receipt.get("graph_output_identities")
+                                 == session.get("graph_step_output_rows", {}).get(str(index), [])),
+                                ("stage_operation",
+                                 result_receipt.get("stage_operation_identity") == expected_stage_operation),
+                                ("stage_tree", result_receipt.get("stage_tree_identity") == expected_stage_tree),
+                            ) if not matched
+                        ]
+                        if stage_mismatches:
+                            raise RetentionError(
+                                "typed stage receipt differs from its fixed operation or provenance: "
+                                + ",".join(stage_mismatches))
+                    else:
+                        expected_command, registered = self.session._command_for_step(step, session)
+                        if (command_receipt.get("command") != expected_command
+                                or command_receipt.get("source_observation") is None
+                                or command_receipt.get("source_observation") != session.get("source_start_identity")
+                                or command_receipt.get("input_tool_identities") != expected_inputs["tools"]
+                                or command_receipt.get("input_receipts") != expected_inputs["input_receipts"]):
+                            raise RetentionError("v3 command receipt differs from its admitted argv or tool inputs")
+                        if step["kind"] == "test":
+                            if (registered is None
+                                    or command_receipt.get("registered_executable_identity") != registered):
+                                raise RetentionError("v3 registered test identity differs from its pre-execution binding")
+                        elif command_receipt.get("registered_executable_identity") is not None:
+                            raise RetentionError("v3 non-test step carries an unexpected test executable")
+                        expected_write_root = None
+                        expected_temporary_directory = None
+                        if step["kind"] == "install":
+                            stage_relative = _session_relative_path(self.session_plan["stage_root"], "stage_root")
+                            expected_write_root = Path(self.session_plan["build_workspace"])
+                            install_stage = _session_safe_path(
+                                Path(self.session_plan["build_workspace"]), stage_relative,
+                                must_exist=True, directory=True)
+                            expected_temporary_directory = install_stage / ".buildlease-install-tmp"
+                        expected_environment = (self.session._environment_for_step(step, session)
+                                                if dual_graph else self.session_plan["environment"])
+                        expected_sandboxed, expected_effective, expected_launcher = _sandbox_session_command(
+                            expected_command, Path(self.session_plan["build_workspace"]),
+                            expected_environment,
+                            write_root=expected_write_root,
+                            temporary_directory=expected_temporary_directory)
+                        expected_launcher_identity = _session_hash_executable(
+                            Path(expected_launcher), self.session_plan["tools"]["sandbox"]["sha256"])
+                        if (command_receipt.get("sandbox_launcher_path") != expected_launcher
+                                or command_receipt.get("sandbox_launcher_sha256")
+                                    != expected_launcher_identity["sha256"]
+                                or command_receipt.get("environment_sha256")
+                                    != hashlib.sha256(_canonical_json(expected_effective)).hexdigest()
+                                or command_receipt.get("sandbox_profile_sha256")
+                                    != hashlib.sha256(expected_sandboxed[2].encode("utf-8")).hexdigest()):
+                            raise RetentionError("v3 command launcher, environment, or profile differs from its contract")
+                        if (dual_graph and step["kind"] == "test"
+                                and step.get("test_class") == "PRODUCTION_PATH"):
+                            expected_loader = self.session._native_loader_provenance(
+                                session, expected_effective["DYLD_LIBRARY_PATH"])
+                            if (command_receipt.get("native_loader_provenance") != expected_loader
+                                    or result_receipt.get("native_loader_provenance") != expected_loader):
+                                raise RetentionError(
+                                    "native test loader receipt differs from its staged runtime and graph identities")
+                        elif (command_receipt.get("native_loader_provenance") is not None
+                              or result_receipt.get("native_loader_provenance") is not None):
+                            raise RetentionError("non-native-test step carries an unexpected SDL2 loader receipt")
+                        if dual_graph:
+                            graph = _session_dual_graph_by_id(self.session_plan, str(step["graph_id"]))
+                            expected_graph_directory = session.get("graph_directory_identities", {}).get(
+                                graph["graph_id"])
+                            expected_prior_outputs = []
+                            for prior_graph in self.session_plan["build_graphs"]:
+                                for output in prior_graph["expected_outputs"]:
+                                    producer_index = next((prior_index for prior_index, prior_step in
+                                                           enumerate(self.session_plan["steps"][:index])
+                                                           if prior_step.get("kind") == "build"
+                                                           and prior_step.get("graph_id") == prior_graph["graph_id"]
+                                                           and prior_step.get("target_id") == output["producer_target"]), None)
+                                    if producer_index is not None:
+                                        expected_prior_outputs.append(
+                                            session["graph_outputs"][output["output_id"]])
+                            expected_post_outputs = session.get("graph_step_output_rows", {}).get(str(index), [])
+                            expected_stage_tree = session.get("stage_step_tree_identities", {}).get(str(index))
+                            if (command_receipt.get("graph_tool_identities") != expected_inputs["graph_tools"]
+                                    or command_receipt.get("runtime_input_identities")
+                                        != expected_inputs["runtime_inputs"]
+                                    or command_receipt.get("graph_provenance")
+                                        != self.session._graph_provenance(step)
+                                    or command_receipt.get("graph_directory_identity_before")
+                                        != (None if step["kind"] == "configure" else expected_graph_directory)
+                                    or command_receipt.get("graph_output_identities_before")
+                                        != expected_prior_outputs
+                                    or command_receipt.get("stage_tree_identity_before")
+                                        != last_stage_tree_identity
+                                    or command_receipt.get("windows_pe_stage_identity_before")
+                                        != windows_pe_stage_identity
+                                    or command_receipt.get("native_runtime_stage_identity_before")
+                                        != native_runtime_stage_identity
+                                    or result_receipt.get("graph_provenance")
+                                        != self.session._graph_provenance(step)
+                                    or result_receipt.get("graph_directory_identity") != expected_graph_directory
+                                    or result_receipt.get("graph_output_identities") != expected_post_outputs
+                                    or result_receipt.get("stage_tree_identity") != expected_stage_tree
+                                    or result_receipt.get("graph_tool_identities") != expected_inputs["graph_tools"]
+                                    or result_receipt.get("runtime_input_identities") != expected_inputs["runtime_inputs"]):
+                                raise RetentionError("dual-graph command/result receipts omit graph or output provenance")
+                            if result_receipt.get("input_observation_after") != expected_inputs:
+                                raise RetentionError("dual-graph result input identity after operation is not exact")
+                        sandbox_profile_hashes.add(command_receipt["sandbox_profile_sha256"])
+                        sandbox_launcher_hashes.add(command_receipt["sandbox_launcher_sha256"])
+                        last_sandbox_profile_hash = command_receipt["sandbox_profile_sha256"]
+                if step["kind"] == "test":
+                    if self.session is None:
+                        raise RetentionError("v3 test executable verifier is unavailable")
+                    self.session._validate_test_executable(step, session, after_execution=True)
+                log_path_text = result_receipt.get("log_path")
+                if log_path_text is not None:
+                    log_path = _session_safe_path(self.path, Path(log_path_text), must_exist=True, directory=False)
+                    if _hash_path(log_path) != result_receipt.get("log_sha256"):
+                        raise RetentionError("v3 session step log changed after its success receipt")
+                    if log_path != session_dir / "steps" / f"{step_name}.log":
+                        raise RetentionError("v3 step log is outside its exact receipt location")
+                elif step["kind"] != "source_verification":
+                    if not (dual_graph and step["kind"] in
+                            {"stage_windows_product", "stage_native_runtime"}):
+                        raise RetentionError("v3 command result is missing its bounded step log")
+                    if result_receipt.get("log_path") is not None or result_receipt.get("log_sha256") is not None:
+                        raise RetentionError("typed stage action may not claim a subprocess log")
+                if dual_graph and step["kind"] == "test":
+                    if command_receipt.get("action") is not None:
+                        raise RetentionError("native production test must be a direct executable invocation")
+                if dual_graph and step["kind"] != "source_verification":
+                    last_stage_tree_identity = result_receipt.get("stage_tree_identity")
+                    if step["kind"] == "stage_windows_product":
+                        windows_pe_stage_identity = result_receipt.get("stage_operation_identity")
+                    elif step["kind"] == "stage_native_runtime":
+                        native_runtime_stage_identity = result_receipt.get("stage_operation_identity")
+                receipt_hashes.append(_hash_path(result_path))
+            if terminal.get("ordered_result_receipt_sha256") != receipt_hashes:
+                raise RetentionError("v3 terminal receipt does not bind the exact ordered step receipts")
+            if (not sandbox_profile_hashes or len(sandbox_launcher_hashes) != 1
+                    or terminal.get("sandbox_profile_sha256") != last_sandbox_profile_hash
+                    or terminal.get("sandbox_launcher_sha256") not in sandbox_launcher_hashes
+                    or terminal.get("sandbox_launcher_path") != self.session_plan["tools"]["sandbox"]["path"]):
+                raise RetentionError("v3 terminal sandbox evidence is not consistent across commands")
+            root_fd = _open_dir(self.path)
+            try:
+                root_info = os.fstat(root_fd)
+                root_fsid = getattr(os.fstatvfs(root_fd), "f_fsid", None)
+                marker = _read_marker(root_fd)
+                observed_root_identity = {"device": root_info.st_dev, "inode": root_info.st_ino,
+                                          "filesystem_id": root_fsid}
+                if (marker.get("build_id") != self.build_id or marker.get("state") != "ACTIVE"
+                        or (root_info.st_dev, root_info.st_ino, root_fsid) != (
+                            lease.get("build_device"), lease.get("build_inode"),
+                            lease.get("build_filesystem_id"))
+                        or plan_receipt.get("build_root_identity") != observed_root_identity
+                        or terminal.get("build_root_identity") != observed_root_identity
+                        or session.get("build_root_identity") != observed_root_identity):
+                    raise RetentionError("v3 session build root or active marker changed")
+            finally:
+                os.close(root_fd)
+            workspace_mount = session.get("workspace_mount_identity")
+            if not isinstance(workspace_mount, dict) or workspace_mount.get("attached") is not True:
+                raise RetentionError("v3 original writable workspace mount identity is absent")
+            if (plan_receipt.get("workspace_mount_identity") != workspace_mount
+                    or terminal.get("workspace_mount_identity") != workspace_mount):
+                raise RetentionError("v3 terminal does not bind the original writable workspace identity")
+            detached_workspace = session.get("detached_workspace_identity")
+            readonly_mount = session.get("readonly_mount_identity")
+            if (not isinstance(detached_workspace, dict) or detached_workspace.get("attached") is not False
+                    or not isinstance(session.get("detached_image_identity"), dict)
+                    or detached_workspace.get("detached_image_identity") != session.get("detached_image_identity")
+                    or terminal.get("detached_workspace_identity") != detached_workspace
+                    or terminal.get("detached_image_identity") != session.get("detached_image_identity")
+                    or not isinstance(readonly_mount, dict) or readonly_mount.get("attached") is not True
+                    or readonly_mount.get("readonly") is not True
+                    or terminal.get("readonly_mount_identity") != readonly_mount):
+                raise RetentionError("v3 terminal does not bind normal detach and exact read-only reattachment")
+            _verify_session_workspace_readonly(self.path, readonly_mount)
+            final_inputs = self._validate_session_inputs()
+            if terminal.get("final_source_verification") != final_inputs:
+                raise RetentionError("source changed after the v3 session verification step")
+            stage_relative = _session_relative_path(self.session_plan["stage_root"], "stage_root")
+            output_relative = _session_relative_path(self.session_plan["output_root"],
+                                                      "output_root", allow_dot=True)
+            workspace = Path(self.session_plan["build_workspace"])
+            stage = _session_safe_path(workspace, stage_relative, must_exist=True, directory=True)
+            output = _session_safe_path(workspace, output_relative, must_exist=True, directory=True)
+            stage_fd = _open_dir(stage)
+            try:
+                stage_identity = _fs_identity(stage_fd)
+            finally:
+                os.close(stage_fd)
+            if (terminal.get("stage_root_identity") != stage_identity
+                    or terminal.get("readonly_stage_root_identity") != stage_identity
+                    or session.get("readonly_stage_root_identity") != stage_identity):
+                raise RetentionError("v3 session stage root identity changed")
+            output_fd = _open_dir(output)
+            try:
+                output_identity = _fs_identity(output_fd)
+            finally:
+                os.close(output_fd)
+            if (terminal.get("output_root_identity") != output_identity
+                    or terminal.get("readonly_output_root_identity") != output_identity
+                    or session.get("readonly_output_root_identity") != output_identity):
+                raise RetentionError("v3 session output root identity changed")
+            output_tree_hash, output_file_count = _session_tree_digest(output, exclude_controller_state=True)
+            if (terminal.get("output_tree_sha256") != output_tree_hash
+                    or terminal.get("output_file_count") != output_file_count):
+                raise RetentionError("v3 session output tree changed after finalization")
+            if (terminal.get("peak_allocated_bytes") != session.get("peak_allocated_bytes")
+                    or terminal.get("peak_allocated_bytes", self.expected_bytes + 1) > self.expected_bytes):
+                raise RetentionError("v3 session cumulative peak does not fit its signed reservation")
+            launcher_path = Path(terminal.get("sandbox_launcher_path", ""))
+            launcher = _session_hash_executable(
+                launcher_path, self.session_plan["tools"]["sandbox"]["sha256"])
+            profile_sha = terminal.get("sandbox_profile_sha256")
+            if not isinstance(profile_sha, str) or not re.fullmatch(r"[0-9a-f]{64}", profile_sha):
+                raise RetentionError("v3 session sandbox profile receipt is invalid")
+        except (OSError, RetentionError, ValueError, TypeError, json.JSONDecodeError) as error:
+            raise RetentionError(f"v3 session success evidence is missing or invalid: {error}") from error
+        return {**terminal, "sandbox_profile_sha256": profile_sha,
+                "sandbox_launcher": launcher, "ordered_result_receipt_sha256": receipt_hashes}
+
     def _record_successful_sandboxed_run(self, command: list[str], started_at: float,
                                          profile: str, launcher_sha256: str,
                                          declared_environment: Mapping[str, str] | None = None,
@@ -5783,10 +15911,243 @@ class BuildLease:
         if not self.started:
             raise RetentionError("cannot fail an unreserved build")
         command = _validate_failure_command(command)
+        submitted_failure_sha256 = (
+            hashlib.sha256(error.encode("utf-8", "replace")).hexdigest()
+            if error is not None else None)
         error, error_sha256 = _bounded_failure_error(error)
-        self._stop_heartbeat()
-        _require_no_live_process(self.path)
         lease = _load_lease(self.build_id)
+        session_record = lease.get("session_v3")
+        if isinstance(session_record, dict):
+            if (session_record.get("output_capture_uncertain") is True
+                    or session_record.get("process_containment_uncertain") is True):
+                raise RetentionError("cannot capture or retire a session with uncertain process or output containment")
+            if session_record.get("state") != "FAILED":
+                raise RetentionError("v3 session failure must be durably terminalized before BuildLease cleanup")
+            first_failure_sha256 = session_record.get("failure_reason_sha256")
+            failure_manifest_path = (
+                MANIFEST_ROOT / f"{self.build_id}.failure" / "failure-manifest.json")
+            if (not isinstance(first_failure_sha256, str)
+                    or not re.fullmatch(r"[0-9a-f]{64}", first_failure_sha256)
+                    or first_failure_sha256 != submitted_failure_sha256
+                    or lease.get("state") != "FAILED"
+                    or lease.get("failed_command") != command
+                    or lease.get("return_code") != return_code):
+                raise RetentionError("v3 session first failure provenance is immutable")
+            if (lease.get("failure_evidence_path") is not None
+                    or lease.get("retired_at_unix") is not None
+                    or failure_manifest_path.exists() or failure_manifest_path.is_symlink()):
+                raise RetentionError("v3 session failure is already durably recorded")
+            if (str(session_record.get("acceptance_state", "")).startswith("REJECTED_")
+                    and session_record.get("acceptance_state") != "REJECTED_EXECUTION_FAILED"):
+                self._stop_heartbeat()
+                lease.update({"session_v3": session_record,
+                              "failure_reason_sha256": first_failure_sha256,
+                              "workspace_detach_uncertain": True})
+                _store_lease(lease)
+                root_fd = _open_dir(self.path)
+                try:
+                    marker = _read_marker(root_fd)
+                    marker.update(lease)
+                    marker["state"] = "FAILED"
+                    _write_marker(root_fd, marker)
+                    os.fsync(root_fd)
+                finally:
+                    os.close(root_fd)
+                _discard_unaccepted_host_v3_completion(lease)
+                _record_unaccepted_session_failure(lease, error or "host BuildLease v3 session rejected")
+                self._release_lock()
+                return {"status": "FAILED_UNACCEPTED_BLOCKING", "build_id": self.build_id,
+                        "failure_evidence": "NOT_CAPTURED_FROM_WRITABLE_IMAGE"}
+            pregraph_start_failure = (
+                command in (["session-start"], ["r71-admission-revalidation"])
+                and session_record.get("next_step_index") == 0
+                and session_record.get("step_receipts") == []
+                and session_record.get("graph_outputs") in (None, {}))
+            if pregraph_start_failure:
+                original_reason = (session_record.get("failure_reason")
+                                   or error or "BuildLease session start failed before graph step zero")
+                failure_contract = {
+                    **_session_start_admission_evidence(lease),
+                    "buildlease_acquired": True,
+                    "build_id": self.build_id,
+                    "session_start_attempted": True,
+                    "graph_execution_started": False,
+                    "failed_step_index": session_record.get("failed_step_index"),
+                    "next_step_index": 0,
+                    "step_receipts": [],
+                    "graph_outputs": {},
+                    "finalizing": False,
+                    "success": False,
+                    "r6a_accepted": False,
+                    "outputs_accepted": False,
+                    "retirement_result": {
+                        "status": "PENDING_AFTER_FAILURE_EVIDENCE",
+                        "receipt_path": str(RECEIPT_ROOT / f"{self.build_id}.json"),
+                    },
+                }
+                r71_failure = session_record.get("r71_pregraph_validation_failure")
+                if (command == ["r71-admission-revalidation"]
+                        and isinstance(r71_failure, Mapping)):
+                    failure_contract.update({
+                        "triggering_exception_class": r71_failure.get("exception_class"),
+                        "triggering_exception_message": r71_failure.get("exception_message"),
+                    })
+                saved_identity = session_record.get("workspace_mount_identity")
+                cleanup_error: str | None = None
+                holder_evidence: dict[str, Any]
+                if isinstance(saved_identity, dict):
+                    try:
+                        if saved_identity.get("attached") is True:
+                            _verify_session_workspace_mount(self.path, saved_identity)
+                            detached_identity = _detach_session_workspace(self.path, saved_identity)
+                        else:
+                            if _session_image_row(self.path) is not None:
+                                raise RetentionError(
+                                    "BuildLease image is attached while its persisted identity says detached")
+                            detached_identity = _verify_session_workspace_detached(self.path, saved_identity)
+                    except BaseException as detach_error:
+                        cleanup_error = str(detach_error)[:MAX_FAILURE_ERROR_BYTES]
+                        holder_evidence = _capture_lsof_holder_evidence(
+                            self.path / BUILD_SESSION_WORKSPACE_NAME)
+                        workspace_cleanup = {
+                            "status": "BLOCKED", "identity": dict(saved_identity),
+                            "error": cleanup_error,
+                        }
+                        session_record["workspace_cleanup"] = workspace_cleanup
+                        lease.update({"session_v3": session_record,
+                                      "workspace_detach_uncertain": True,
+                                      "workspace_detach_failure": cleanup_error,
+                                      "workspace_cleanup": workspace_cleanup,
+                                      "workspace_holder_evidence": holder_evidence})
+                        _store_lease(lease)
+                        root_fd = _open_dir(self.path)
+                        try:
+                            marker = _read_marker(root_fd)
+                            marker.update(lease)
+                            marker["state"] = "FAILED"
+                            _write_marker(root_fd, marker)
+                            os.fsync(root_fd)
+                        finally:
+                            os.close(root_fd)
+                        self._stop_heartbeat()
+                        _record_unaccepted_session_failure(
+                            lease, original_reason,
+                            evidence_fields={**failure_contract,
+                                             "retirement_result": {"status": "BLOCKED",
+                                                                   "reason": "workspace_cleanup"},
+                                             "workspace_cleanup": workspace_cleanup,
+                                             "cleanup_error": cleanup_error,
+                                             "residual_holder_evidence": holder_evidence})
+                        raise RetentionError(
+                            "failed BuildLease workspace normal detach was blocked; lease remains active for recovery: "
+                            + cleanup_error) from detach_error
+                else:
+                    if _session_image_row(self.path) is not None:
+                        cleanup_error = "attached BuildLease image has no persisted exact mount identity"
+                        holder_evidence = _capture_lsof_holder_evidence(
+                            self.path / BUILD_SESSION_WORKSPACE_NAME)
+                        workspace_cleanup = {"status": "BLOCKED", "identity": None,
+                                             "error": cleanup_error}
+                    else:
+                        detached_identity = {"attached": False,
+                                             "image_path": str(self.path / BUILD_SESSION_WORKSPACE_IMAGE_NAME),
+                                             "mountpoint": str(self.path / BUILD_SESSION_WORKSPACE_NAME),
+                                             "detached_at_unix": time.time(),
+                                             "identity_unavailable": True}
+                        workspace_cleanup = {"status": "NO_ATTACHED_IMAGE", "identity": None,
+                                             "error": None}
+                        holder_evidence = {"path": str(self.path / BUILD_SESSION_WORKSPACE_NAME),
+                                           "status": "NOT_RUN", "return_code": None,
+                                           "process_ids": [], "process_ids_truncated": False,
+                                           "stderr": ""}
+                    session_record["workspace_cleanup"] = workspace_cleanup
+                    lease.update({"session_v3": session_record,
+                                  "workspace_cleanup": workspace_cleanup})
+                    if cleanup_error is not None:
+                        lease.update({"workspace_detach_uncertain": True,
+                                      "workspace_detach_failure": cleanup_error,
+                                      "workspace_holder_evidence": holder_evidence})
+                    _store_lease(lease)
+                    root_fd = _open_dir(self.path)
+                    try:
+                        marker = _read_marker(root_fd)
+                        marker.update(lease)
+                        marker["state"] = "FAILED"
+                        _write_marker(root_fd, marker)
+                        os.fsync(root_fd)
+                    finally:
+                        os.close(root_fd)
+                    if cleanup_error is not None:
+                        self._stop_heartbeat()
+                        _record_unaccepted_session_failure(
+                            lease, original_reason,
+                            evidence_fields={**failure_contract,
+                                             "retirement_result": {"status": "BLOCKED",
+                                                                   "reason": "workspace_identity"},
+                                             "workspace_cleanup": workspace_cleanup,
+                                             "cleanup_error": cleanup_error,
+                                             "residual_holder_evidence": holder_evidence})
+                        raise RetentionError(
+                            "failed BuildLease workspace identity is unavailable; lease remains blocking")
+
+                session_record["workspace_mount_identity"] = detached_identity
+                session_record["workspace_detached_at_unix"] = detached_identity.get("detached_at_unix")
+                session_record["workspace_cleanup"] = {
+                    "status": "DETACHED" if saved_identity is not None else "NO_ATTACHED_IMAGE",
+                    "identity": dict(saved_identity) if isinstance(saved_identity, dict) else None,
+                    "result_identity": dict(detached_identity), "error": None,
+                }
+                lease.update({"session_v3": session_record,
+                              "workspace_cleanup": session_record["workspace_cleanup"]})
+                _store_lease(lease)
+                root_fd = _open_dir(self.path)
+                try:
+                    marker = _read_marker(root_fd)
+                    marker.update(lease)
+                    marker["state"] = "FAILED"
+                    _write_marker(root_fd, marker)
+                    os.fsync(root_fd)
+                finally:
+                    os.close(root_fd)
+
+                holder_evidence = _capture_lsof_holder_evidence(self.path)
+                if holder_evidence["status"] != "NO_HOLDERS":
+                    lease["residual_holder_evidence"] = holder_evidence
+                    _store_lease(lease)
+                    self._stop_heartbeat()
+                    _record_unaccepted_session_failure(
+                        lease, original_reason,
+                        evidence_fields={**failure_contract,
+                                         "retirement_result": {"status": "BLOCKED",
+                                                               "reason": "residual_holders"},
+                                         "workspace_cleanup": lease["workspace_cleanup"],
+                                         "residual_holder_evidence": holder_evidence})
+                    raise RetentionError(
+                        "failed BuildLease has residual holders after exact workspace detach; lease remains blocking")
+
+                self._stop_heartbeat()
+                admission_allows_retirement = (
+                    not _is_r6a_r71_admission_id(str(lease.get("owner_experiment", "")))
+                    or failure_contract.get("admission_decision") == "ALLOW")
+                if not admission_allows_retirement:
+                    failure_contract["retirement_result"] = {
+                        "status": "BLOCKED",
+                        "reason": "signed_admission_allow_unverified",
+                    }
+                _record_unaccepted_session_failure(
+                    lease, original_reason,
+                    evidence_fields={**failure_contract,
+                                     "workspace_cleanup": lease["workspace_cleanup"],
+                                     "residual_holder_evidence": holder_evidence})
+                if not admission_allows_retirement:
+                    raise RetentionError(
+                        "failed R71 session-start admission is not an authenticated signed ALLOW; "
+                        "lease remains blocking")
+                receipt = _retire(lease, reason="failed-session-start-evidence-captured")
+                self._release_lock()
+                return receipt
+        _require_no_live_process(self.path)
+        self._stop_heartbeat()
         evidence = MANIFEST_ROOT / f"{self.build_id}.failure"
         evidence_fd = _open_dir(evidence / "configuration", create=True)
         os.close(evidence_fd)
@@ -5814,10 +16175,13 @@ class BuildLease:
             copied_bytes += row["size_bytes"]
             return row
 
+        session_prefix = (f"{BUILD_SESSION_WORKSPACE_NAME}/"
+                          if isinstance(session_record, dict) else "")
         for relative in ("meson-logs/meson-log.txt", "meson-private/cmd_line.txt",
                          "meson-info/intro-buildoptions.json", "meson-info/intro-compilers.json",
                          "meson-info/intro-buildsystem_files.json", "build.ninja"):
-            row = capture(relative, evidence / "configuration" / relative, required=False)
+            leased_relative = session_prefix + relative
+            row = capture(leased_relative, evidence / "configuration" / relative, required=False)
             if row is not None:
                 copied.append(row)
         if log_path is not None:
@@ -5830,7 +16194,8 @@ class BuildLease:
             if row is not None:
                 copied.append(row)
         for relative in self.failure_capture_paths:
-            row = capture(relative, evidence / "generated" / Path(relative), required=False)
+            leased_relative = session_prefix + relative
+            row = capture(leased_relative, evidence / "generated" / Path(relative), required=False)
             if row is None:
                 generated_diagnostics.append({"relative_path": relative, "status": "MISSING"})
                 continue
@@ -5839,6 +16204,8 @@ class BuildLease:
                                           "sha256": row["sha256"], "size_bytes": row["size_bytes"],
                                           "retained_path": row["retained_path"]})
         command_record = {"build_id": self.build_id, "command": command, "return_code": return_code,
+                          "outputs_accepted": False,
+                          "failure_reason_sha256": submitted_failure_sha256,
                           "error": error, "failed_at_unix": time.time(), "configuration_and_logs": copied,
                           "generated_diagnostics": generated_diagnostics,
                           "storage_watch_events": [dict(event) for event in self.storage_watch_events]}
@@ -5872,7 +16239,8 @@ class BuildLease:
                       "failure_evidence_sha256": _hash_path(failure_path),
                       "failure_evidence_files": evidence_files,
                       "failure_evidence_index_sha256": hashlib.sha256(_canonical_json(evidence_files)).hexdigest(),
-                      "failed_command": command, "return_code": return_code, "failed_at_unix": time.time()})
+                      "failed_command": command, "return_code": return_code, "failed_at_unix": time.time(),
+                      "failure_reason_sha256": submitted_failure_sha256})
         _store_lease(lease)
         root_fd = _open_dir(self.path)
         try:
@@ -5882,24 +16250,77 @@ class BuildLease:
             os.fsync(root_fd)
         finally:
             os.close(root_fd)
+        if isinstance(session_record, dict):
+            workspace_mount = session_record.get("workspace_mount_identity")
+            try:
+                detached_mount = _detach_session_workspace(self.path, workspace_mount)
+            except BaseException as error:
+                lease["workspace_detach_uncertain"] = True
+                lease["workspace_detach_failure"] = repr(error)[:MAX_FAILURE_ERROR_BYTES]
+                _store_lease(lease)
+                raise RetentionError(
+                    f"failed BuildLease workspace could not be detached; lease remains blocking: {error}") from error
+            session_record["workspace_mount_identity"] = detached_mount
+            session_record["workspace_detached_at_unix"] = detached_mount.get("detached_at_unix")
+            lease["session_v3"] = session_record
+            _store_lease(lease)
+            root_fd = _open_dir(self.path)
+            try:
+                marker = _read_marker(root_fd)
+                marker.update(lease)
+                _write_marker(root_fd, marker)
+                os.fsync(root_fd)
+            finally:
+                os.close(root_fd)
         receipt = _retire(lease, reason="failed-build-evidence-captured")
         self._release_lock()
         return receipt
 
     def _wait_for_build_process(self, process: subprocess.Popen[Any], *,
-                                poll_interval_seconds: float = 1.0) -> int:
+                                poll_interval_seconds: float = 1.0,
+                                session: "BuildLeaseSession | None" = None,
+                                session_output_error: threading.Event | None = None,
+                                session_output_overflow: threading.Event | None = None) -> int:
         """Wait for a build while enforcing the live emergency free-space stop."""
         from storage_policy import FREE_HARD_STOP, FREE_WARNING, disk_free_bytes
 
         if poll_interval_seconds <= 0:
             raise ValueError("build storage monitor poll interval must be positive")
         started = time.monotonic()
+        exact_subprocess = type(process).__module__ == "subprocess"
         while True:
-            try:
-                return_code = process.wait(timeout=poll_interval_seconds)
-            except subprocess.TimeoutExpired:
-                return_code = None
+            if session is not None and exact_subprocess:
+                try:
+                    observed_exit = os.waitid(
+                        os.P_PID, process.pid, os.WEXITED | os.WNOHANG | os.WNOWAIT)
+                except (AttributeError, OSError, ChildProcessError) as error:
+                    raise RetentionError(
+                        f"cannot hold BuildLease session leader unreaped for descendant containment: {error}") from error
+                if observed_exit is None or observed_exit.si_pid == 0:
+                    return_code = None
+                elif observed_exit.si_code == getattr(os, "CLD_EXITED", 1):
+                    return_code = observed_exit.si_status
+                else:
+                    return_code = -observed_exit.si_status
+                if return_code is not None:
+                    session._record_process_exit_observation(process, return_code)
+            else:
+                try:
+                    return_code = process.wait(timeout=poll_interval_seconds)
+                except subprocess.TimeoutExpired:
+                    return_code = None
+            if session_output_error is not None and session_output_error.is_set():
+                raise RetentionError("session command output could not be durably captured")
+            if session_output_overflow is not None and session_output_overflow.is_set():
+                raise RetentionError("session command exceeded its strict aggregate log-size limit")
             free = disk_free_bytes(REPO)
+            if session is not None:
+                # Only a real Popen child can produce the durable exit authority
+                # required by the post-exit capacity phase. Synthetic controller
+                # fixtures remain on the ordinary in-flight path.
+                session._check_limits(
+                    "during-step-exited"
+                    if return_code is not None and exact_subprocess else "during-step")
             event = {
                 "elapsed_seconds": round(time.monotonic() - started, 3),
                 "free_bytes": free,
@@ -5910,21 +16331,38 @@ class BuildLease:
                 event["action"] = (
                     "HARD_STOP_AFTER_PROCESS_COMPLETION" if completed else "HARD_STOP_TERMINATE"
                 )
-                self.storage_watch_events.append(event)
+                if session is None:
+                    self.storage_watch_events.append(event)
+                else:
+                    self._append_session_storage_event(event)
                 raise RetentionError(
                     f"free space crossed the 25 GiB emergency hard stop during the build: {free}"
                 )
             if free < FREE_WARNING and not self._free_warning_emitted:
                 event["action"] = "WARNING_NO_NEW_EXPERIMENTS"
                 self._free_warning_emitted = True
-                self.storage_watch_events.append(event)
+                if session is None:
+                    self.storage_watch_events.append(event)
+                else:
+                    self._append_session_storage_event(event)
             if return_code is not None:
                 event["action"] = "PROCESS_COMPLETED"
-                self.storage_watch_events.append(event)
+                if session is None:
+                    self.storage_watch_events.append(event)
+                else:
+                    self._append_session_storage_event(event)
                 return return_code
+
+    def _append_session_storage_event(self, event: Mapping[str, Any]) -> None:
+        """Keep v3 telemetry bounded while preserving the legacy v1 event stream."""
+        if len(self.storage_watch_events) >= BUILD_SESSION_MAX_STORAGE_WATCH_EVENTS:
+            raise RetentionError("session storage telemetry exceeded its fixed event limit")
+        self.storage_watch_events.append(dict(event))
 
     def run(self, command: Iterable[str], *, cwd: Path | None = None, env: Mapping[str, str] | None = None,
             preserve_debug: bool = False) -> dict[str, Any]:
+        if self.session_plan is not None:
+            raise RetentionError("a session-bound BuildLease must use start_session() and cannot use v1 run()")
         args = _validate_failure_command([str(x) for x in command])
         if not self.started:
             self.reserve()
@@ -6053,6 +16491,2225 @@ class BuildLease:
             self._stop_heartbeat()
             self._release_lock()
         return False
+
+
+class BuildLeaseSession:
+    """A finite v3 command plan held by one ACTIVE BuildLease until finalize()."""
+
+    def __init__(self, lease: BuildLease, *, _construction_token: object | None = None):
+        if (_construction_token is not lease._session_construction_token
+                or not lease._session_creation_lock.locked() or lease.session is not None):
+            raise RetentionError("BuildLeaseSession can only be created once by its owning BuildLease")
+        if (not lease.started or lease.reused_manifest is not None or lease.lock_fds is None
+                or lease.session_plan is None):
+            raise RetentionError("BuildLeaseSession requires its active reserved BuildLease and live serialization lock")
+        try:
+            for descriptor in lease.lock_fds:
+                os.fstat(descriptor)
+            reserved = _load_lease(lease.build_id)
+        except (OSError, RetentionError) as error:
+            raise RetentionError("BuildLeaseSession cannot verify its live reservation lock") from error
+        reserved_session = reserved.get("session_v3")
+        if (reserved.get("state") != "ACTIVE" or reserved.get("path") != str(lease.path)
+                or reserved.get("session_started") is not False
+                or not isinstance(reserved_session, dict) or reserved_session.get("state") != "RESERVED"
+                or reserved_session.get("plan_sha256") != lease.session_plan_sha256):
+            raise RetentionError("BuildLeaseSession is not the RESERVED session for its live BuildLease")
+        lease._assert_session_plan_binding()
+        self.lease = lease
+        self.plan = lease.session_plan
+        if self.plan is None:
+            raise RetentionError("BuildLeaseSession requires a signed v3 session plan")
+        self.plan_sha256 = lease.session_plan_sha256
+        self.root = lease.path
+        self.workspace = Path(self.plan["build_workspace"])
+        self.session_dir = self.root / BUILD_SESSION_DIRECTORY
+        self._active_process: subprocess.Popen[Any] | None = None
+        self._operation_lock = threading.Lock()
+
+    def _with_operation(self, name: str, operation: Callable[[], Any]) -> Any:
+        if not self._operation_lock.acquire(blocking=False):
+            raise RetentionError(f"v3 session {name} overlaps another active session operation")
+        try:
+            return operation()
+        finally:
+            self._operation_lock.release()
+
+    def _store(self, lease_record: Mapping[str, Any]) -> None:
+        with self.lease._lease_state_lock:
+            selected = dict(lease_record)
+            session_record = selected.get("session_v3")
+            if isinstance(session_record, dict):
+                session_record = dict(session_record)
+                session_record["storage_watch_events"] = [
+                    dict(event) for event in self.lease.storage_watch_events]
+                selected["session_v3"] = session_record
+            _store_lease(selected)
+            root_fd = _open_dir(self.root)
+            try:
+                marker = _read_marker(root_fd)
+                if marker.get("build_id") != self.lease.build_id or marker.get("state") != "ACTIVE":
+                    raise RetentionError("session lease marker is no longer ACTIVE")
+                marker.update(selected)
+                _write_marker(root_fd, marker)
+                os.fsync(root_fd)
+            finally:
+                os.close(root_fd)
+
+    def _record_process_exit_observation(self, process: subprocess.Popen[Any],
+                                        return_code: int) -> None:
+        """Durably bind the exact child exit to its sealed in-flight command."""
+        if (type(process).__module__ != "subprocess" or self._active_process is not process
+                or not isinstance(return_code, int) or isinstance(return_code, bool)):
+            raise RetentionError("BuildLease exit observation lacks its exact Popen owner")
+        lease_record, session = self._load(allow_running=True)
+        step_index = session.get("inflight_step_index")
+        process_session_id = session.get("process_session_id")
+        receipt_sha256 = session.get("inflight_command_receipt_sha256")
+        if (session.get("state") != "RUNNING"
+                or not isinstance(step_index, int) or isinstance(step_index, bool)
+                or not isinstance(process_session_id, int) or isinstance(process_session_id, bool)
+                or process_session_id != process.pid
+                or not isinstance(receipt_sha256, str)
+                or not re.fullmatch(r"[0-9a-f]{64}", receipt_sha256)
+                or step_index < 0 or step_index >= len(self.plan["steps"])):
+            raise RetentionError("BuildLease exit observation lacks exact RUNNING command authority")
+        try:
+            observed_exit = os.waitid(
+                os.P_PID, process_session_id, os.WEXITED | os.WNOHANG | os.WNOWAIT)
+        except (AttributeError, OSError, ChildProcessError) as error:
+            raise RetentionError("BuildLease exit observation is not held by its exact unreaped child") from error
+        if observed_exit is None or observed_exit.si_pid != process_session_id:
+            raise RetentionError("BuildLease exit observation has no exact unreaped child status")
+        observed_return_code = (observed_exit.si_status
+                                if observed_exit.si_code == getattr(os, "CLD_EXITED", 1)
+                                else -observed_exit.si_status)
+        if observed_return_code != return_code:
+            raise RetentionError("BuildLease exit observation differs from the exact child status")
+
+        command_path = (self.session_dir / "steps" / f"step-{step_index:03d}.command.json")
+        try:
+            command_receipt = _read_json(command_path, sealed=True)
+            command_digest = _hash_path(command_path)
+        except (OSError, RetentionError) as error:
+            raise RetentionError("BuildLease exit observation lacks its sealed command receipt") from error
+        step = self.plan["steps"][step_index]
+        expected_command, executable_identity = self._command_for_step(step, session)
+        if step.get("kind") == "test" and executable_identity is not None:
+            expected_command[0] = executable_identity.get(
+                "executable_path", executable_identity["path"])
+        if (command_digest != receipt_sha256
+                or command_receipt.get("schema_version") != BUILD_SESSION_SCHEMA_VERSION
+                or command_receipt.get("executor_mode") != BUILD_SESSION_EXECUTOR_MODE
+                or command_receipt.get("executor_version") != BUILD_SESSION_SCHEMA_VERSION
+                or command_receipt.get("build_id") != self.lease.build_id
+                or command_receipt.get("plan_sha256") != self.plan_sha256
+                or command_receipt.get("step_index") != step_index
+                or command_receipt.get("kind") != step.get("kind")
+                or command_receipt.get("acceptance_state") != "UNACCEPTED_UNTIL_WHOLE_LEASE_DETACH"
+                or command_receipt.get("cwd") != str(self.workspace)
+                or command_receipt.get("command") != expected_command
+                or command_receipt.get("registered_executable_identity") != executable_identity
+                or command_receipt.get("graph_provenance") != self._graph_provenance(step)):
+            raise RetentionError("BuildLease exit observation is not bound to its exact sealed command")
+        session["process_exit_observation"] = {
+            "schema_version": 1,
+            "build_id": self.lease.build_id,
+            "step_index": step_index,
+            "command_receipt_sha256": command_digest,
+            "process_session_id": process_session_id,
+            "return_code": return_code,
+            "observed_at_unix": time.time(),
+        }
+        lease_record["session_v3"] = session
+        self._store(lease_record)
+
+    def _check_controller_evidence_budget(self) -> tuple[int, int]:
+        """Bound evidence outside the image, especially logs that commands cannot write."""
+        total_bytes = 0
+        log_bytes = 0
+        file_count = 0
+        for directory, dirnames, filenames in os.walk(self.session_dir, followlinks=False):
+            base = Path(directory)
+            for name in list(dirnames):
+                path = base / name
+                info = path.lstat()
+                if stat.S_ISLNK(info.st_mode) or not stat.S_ISDIR(info.st_mode):
+                    raise RetentionError("controller evidence contains a linked or special directory")
+            for name in filenames:
+                path = base / name
+                info = path.lstat()
+                if not stat.S_ISREG(info.st_mode) or info.st_nlink != 1:
+                    raise RetentionError("controller evidence contains a non-regular or hardlinked file")
+                file_count += 1
+                total_bytes += info.st_size
+                if path.suffix == ".log":
+                    log_bytes += info.st_size
+                elif info.st_size > BUILD_SESSION_PLAN_LIMIT_BYTES:
+                    raise RetentionError("controller receipt exceeds its individual size cap")
+        if file_count > BUILD_SESSION_MAX_STEPS * 3 + 16:
+            raise RetentionError("controller evidence contains more files than the finite session plan allows")
+        if total_bytes > BUILD_SESSION_CONTROLLER_EVIDENCE_LIMIT_BYTES:
+            raise RetentionError("controller evidence exceeds its strict aggregate size cap")
+        if log_bytes > BUILD_SESSION_TOTAL_LOG_LIMIT_BYTES:
+            raise RetentionError("controller logs exceed their strict aggregate size cap")
+        return total_bytes, log_bytes
+
+    def _load(self, *, allow_running: bool = False) -> tuple[dict[str, Any], dict[str, Any]]:
+        _require_buildlease_vm_runtime(self.plan)
+        lease_record = _load_lease(self.lease.build_id)
+        session = lease_record.get("session_v3")
+        if (lease_record.get("state") == "ACTIVE" and isinstance(session, dict)
+                and (session.get("output_capture_uncertain") is True
+                     or session.get("process_containment_uncertain") is True)):
+            raise RetentionError("v3 session process or output containment is uncertain and remains durably RUNNING")
+        try:
+            self.lease._assert_session_plan_binding()
+        except RetentionError as error:
+            if (lease_record.get("state") == "ACTIVE" and isinstance(session, dict)
+                    and session.get("state") != "FAILED"):
+                try:
+                    self._fail(str(error), -1, command=["session-plan-integrity"])
+                except BaseException:
+                    pass
+            raise
+        if (lease_record.get("state") != "ACTIVE" or lease_record.get("path") != str(self.root)
+                or not isinstance(session, dict) or session.get("plan_sha256") != self.plan_sha256
+                or session.get("schema_version") != BUILD_SESSION_SCHEMA_VERSION):
+            raise RetentionError("v3 BuildLease session is no longer the same ACTIVE reservation")
+        if session.get("state") != "ACTIVE" and not allow_running:
+            raise RetentionError(f"v3 BuildLease session cannot continue from {session.get('state')}")
+        return lease_record, session
+
+    def _check_root_bindings(self, lease_record: Mapping[str, Any], session: Mapping[str, Any]) -> None:
+        root_fd = _open_dir(self.root)
+        try:
+            root_info = os.fstat(root_fd)
+            fsid = getattr(os.fstatvfs(root_fd), "f_fsid", None)
+            marker = _read_marker(root_fd)
+            observed_root_identity = {"device": root_info.st_dev, "inode": root_info.st_ino,
+                                     "filesystem_id": fsid}
+            if (marker.get("build_id") != self.lease.build_id or marker.get("state") != "ACTIVE"
+                    or marker.get("session_v3", {}).get("plan_sha256") != self.plan_sha256
+                    or (root_info.st_dev, root_info.st_ino, fsid) != (
+                        lease_record.get("build_device"), lease_record.get("build_inode"),
+                        lease_record.get("build_filesystem_id"))
+                    or session.get("build_root_identity") != observed_root_identity):
+                raise RetentionError("session root or marker identity changed")
+        finally:
+            os.close(root_fd)
+        stage_relative = _session_relative_path(self.plan["stage_root"], "stage_root")
+        output_relative = _session_relative_path(self.plan["output_root"], "output_root", allow_dot=True)
+        workspace_mount = session.get("workspace_mount_identity")
+        if not isinstance(workspace_mount, dict) or workspace_mount.get("attached") is not True:
+            raise RetentionError("session workspace mount is not in its exact attached state")
+        quiescence = session.get("write_quiescence_state")
+        readonly_mount = session.get("readonly_mount_identity")
+        if quiescence == "WRITABLE_IMAGE_NORMALLY_UNMOUNTED_AND_DETACHED":
+            if (not isinstance(readonly_mount, dict) or readonly_mount.get("readonly") is not True
+                    or readonly_mount.get("attached") is not True):
+                raise RetentionError("session lost its verified read-only evidence attachment")
+            _verify_session_workspace_readonly(self.root, readonly_mount)
+            workspace_mount = readonly_mount
+        else:
+            _verify_session_workspace_mount(self.root, workspace_mount)
+        stage = _session_safe_path(self.workspace, stage_relative, must_exist=True, directory=True)
+        output = _session_safe_path(self.workspace, output_relative, must_exist=True, directory=True)
+        stage_fd = _open_dir(stage)
+        output_fd = _open_dir(output)
+        try:
+            if (_fs_identity(stage_fd) != session.get("stage_root_identity")
+                    or _fs_identity(output_fd) != session.get("output_root_identity")):
+                raise RetentionError("session stage/output root identity changed")
+        finally:
+            os.close(stage_fd)
+            os.close(output_fd)
+
+    def _check_limits(self, phase: str, *, extra_bytes: int = 0) -> int:
+        from storage_policy import (conservative_project_usage_bytes, disk_free_bytes,
+                                    measure_project_usage, projected_storage_admission)
+        lease_record, session = self._load(allow_running=True)
+        self._check_root_bindings(lease_record, session)
+        process_exited = phase == "during-step-exited"
+        process_session_id = None
+        if process_exited and session.get("state") != "RUNNING":
+            raise RetentionError("post-exit capacity check requires the exact RUNNING step authority")
+        if phase in {"during-step", "during-step-exited"} and session.get("state") == "RUNNING":
+            process = self._active_process
+            process_session_id = session.get("process_session_id")
+            if (session.get("state") != "RUNNING" or process is None
+                    or not isinstance(process_session_id, int)
+                    or isinstance(process_session_id, bool)
+                    or getattr(process, "pid", None) != process_session_id):
+                raise RetentionError(
+                    "runtime BuildLease capacity check lacks its exact in-flight process owner")
+            if process_exited:
+                if type(process).__module__ != "subprocess":
+                    raise RetentionError("post-exit capacity check requires the exact subprocess owner")
+                try:
+                    observed_exit = os.waitid(
+                        os.P_PID, process_session_id, os.WEXITED | os.WNOHANG | os.WNOWAIT)
+                except (AttributeError, OSError, ChildProcessError) as error:
+                    raise RetentionError(
+                        "post-exit capacity check lacks exact unreaped process exit evidence") from error
+                if observed_exit is None or observed_exit.si_pid != process_session_id:
+                    raise RetentionError("post-exit capacity check lacks exact unreaped process exit evidence")
+                observation = session.get("process_exit_observation")
+                step_index = session.get("inflight_step_index")
+                command_receipt_sha256 = session.get("inflight_command_receipt_sha256")
+                if (not isinstance(observation, Mapping)
+                        or observation.get("schema_version") != 1
+                        or observation.get("build_id") != self.lease.build_id
+                        or observation.get("step_index") != step_index
+                        or observation.get("command_receipt_sha256") != command_receipt_sha256
+                        or observation.get("process_session_id") != process_session_id
+                        or not isinstance(observation.get("return_code"), int)
+                        or isinstance(observation.get("return_code"), bool)):
+                    raise RetentionError(
+                        "post-exit capacity check lacks its durable exact-child exit observation")
+                observed_return_code = (
+                    observed_exit.si_status
+                    if observed_exit.si_code == getattr(os, "CLD_EXITED", 1)
+                    else -observed_exit.si_status)
+                if observation["return_code"] != observed_return_code:
+                    raise RetentionError(
+                        "post-exit capacity check differs from the durable exact-child exit observation")
+        workspace_mount = session.get("readonly_mount_identity")
+        if (session.get("write_quiescence_state") != "WRITABLE_IMAGE_NORMALLY_UNMOUNTED_AND_DETACHED"
+                or not isinstance(workspace_mount, dict)
+                or workspace_mount.get("readonly") is not True):
+            workspace_mount = session.get("workspace_mount_identity")
+        measured_row = _session_measure_tree(
+            self.root, workspace_mount_identity=workspace_mount)
+        controller_evidence_bytes, controller_log_bytes = self._check_controller_evidence_budget()
+        measured = measured_row["allocated_bytes"]
+        peak = max(int(session.get("peak_allocated_bytes", 0)), measured + extra_bytes)
+        needed = peak
+        if needed > self.lease.expected_bytes:
+            raise RetentionError(
+                f"session cumulative allocation exceeds its signed reservation during {phase}: "
+                f"{needed} > {self.lease.expected_bytes}")
+        admitted_peak = lease_record.get("storage_admission_peak_bytes")
+        if (not isinstance(admitted_peak, int) or isinstance(admitted_peak, bool)
+                or admitted_peak < self.lease.expected_bytes):
+            raise RetentionError("session lease lacks its signed projected-admission peak")
+        projected_additional = max(0, admitted_peak - measured) + extra_bytes
+        current_free = disk_free_bytes(REPO)
+        is_r71 = (isinstance(lease_record.get("owner_experiment"), str)
+                  and _is_r6a_r71_admission_id(lease_record["owner_experiment"]))
+        project_usage = measure_project_usage(
+            strict=is_r71,
+            exclude_paths=([self.root] if is_r71 and phase == "session-start" else ()),
+            active_buildlease_id=(self.lease.build_id if is_r71 else None),
+            **({"r71_exited_process_id": process_session_id}
+               if process_exited and is_r71 else {}))
+        current_scoped = conservative_project_usage_bytes(project_usage)
+        admission = projected_storage_admission(
+            current_free_bytes=current_free, current_scoped_bytes=current_scoped,
+            peak_additional_bytes=projected_additional)
+        event = {"phase": phase, "allocated_bytes": measured, "peak_allocated_bytes": peak,
+                 "controller_evidence_bytes": controller_evidence_bytes,
+                 "controller_log_bytes": controller_log_bytes,
+                 "reservation_bytes": self.lease.expected_bytes,
+                 "admitted_projected_peak_bytes": admitted_peak,
+                 "projected_additional_bytes": projected_additional, "free_bytes": current_free,
+                 "project_scoped_bytes": current_scoped, "sampled_at_unix": time.time(),
+                 "warnings": list(admission["warnings"])}
+        if phase not in {"during-step", "before-terminal-receipt"} or not admission["admitted"]:
+            self.lease._append_session_storage_event(event)
+        if not admission["admitted"]:
+            raise RetentionError("session runtime storage limits block continuation: "
+                                 + "; ".join(admission["blockers"]))
+        if peak != session.get("peak_allocated_bytes"):
+            session["peak_allocated_bytes"] = peak
+            session["last_storage_check"] = event
+            lease_record["session_v3"] = session
+            self._store(lease_record)
+        return peak
+
+    def _create_install_temporary(self) -> tuple[Path, Path, dict[str, Any]]:
+        stage_relative = _session_relative_path(self.plan["stage_root"], "stage_root")
+        stage = _session_safe_path(self.workspace, stage_relative, must_exist=True, directory=True)
+        temporary = stage / ".buildlease-install-tmp"
+        if temporary.exists() or temporary.is_symlink():
+            raise RetentionError("install temporary path already exists beneath the declared stage root")
+        temporary.mkdir(mode=0o700)
+        for relative in (Path(".cache"), Path(".config"), Path(".local/share")):
+            (temporary / relative).mkdir(mode=0o700, parents=True)
+        temporary_fd = _open_dir(temporary)
+        try:
+            identity = _fs_identity(temporary_fd)
+        finally:
+            os.close(temporary_fd)
+        return stage, temporary, identity
+
+    def _remove_install_temporary(self, stage: Path, temporary: Path,
+                                  identity: Mapping[str, Any]) -> None:
+        stage_fd = _open_dir(stage)
+        try:
+            _remove_verified_tree_at(
+                stage_fd, temporary.name, expected_device=identity["device"],
+                expected_inode=identity["inode"], logical_path=temporary,
+                expected_filesystem_id=identity["filesystem_id"])
+        finally:
+            os.close(stage_fd)
+
+    def _validate_source(self) -> dict[str, Any]:
+        identity = self.lease._validate_session_inputs()
+        reserved_source = self.plan["source_identity"]
+        if (identity.get("source_revision") != reserved_source["revision"]
+                or identity.get("source_tree_sha256") != reserved_source["sha256"]):
+            raise RetentionError("session source revision or digest changed")
+        lease_record, session = self._load(allow_running=True)
+        pinned = session.get("source_root_identity")
+        if pinned != {"device": identity["source_device"], "inode": identity["source_inode"]}:
+            raise RetentionError("session source root identity changed")
+        if identity != session.get("source_start_identity"):
+            raise RetentionError("session source, tool, input, or PATH identity changed after session creation")
+        return identity
+
+    def _validate_test_executable(self, step: Mapping[str, Any], session: dict[str, Any],
+                                  *, after_execution: bool = False) -> dict[str, Any]:
+        if _session_dual_graph_enabled(self.plan):
+            graph = _session_dual_graph_by_id(self.plan, str(step.get("graph_id", "")))
+            if (step.get("graph_id") != "native-verification-r6a"
+                    or graph.get("graph_role") != "NATIVE_VERIFICATION"
+                    or graph.get("executable_test_eligibility") is not True):
+                raise RetentionError("only a native verification graph output is executable")
+            output_rows = [row for row in graph["expected_outputs"]
+                           if row["output_id"] == step.get("output_id")]
+            if len(output_rows) != 1:
+                raise RetentionError("test step references an undeclared native graph output")
+            output = output_rows[0]
+            test_binding = BUILD_SESSION_DUAL_GRAPH_NATIVE_TEST_BINDINGS.get(output["output_id"])
+            if (not isinstance(test_binding, Mapping)
+                    or step.get("test_class") != test_binding["test_class"]
+                    or output.get("producer_target") != test_binding["producer_target"]):
+                raise RetentionError("native test label and output target are not a fixed pair")
+            if output["format"] != "MACHO_NATIVE_ARCH":
+                raise RetentionError("Windows PE outputs can never be executed by a session test step")
+            observed = _session_graph_output_identity(self.workspace, graph, output)
+            registered = session.setdefault("graph_outputs", {}).get(output["output_id"])
+            key = f"{graph['graph_id']}:{output['output_id']}"
+            previous_test = session.setdefault("registered_tests", {}).get(key)
+            if registered != observed:
+                raise RetentionError("native test output differs from its declared graph producer identity")
+            if after_execution:
+                if previous_test != observed:
+                    raise RetentionError("native test output changed while it ran")
+            elif previous_test is None:
+                session["registered_tests"][key] = observed
+            elif previous_test != observed:
+                raise RetentionError("native test output identity changed before launch")
+            return {**observed, "executable_path": str(
+                self.workspace / graph["build_directory"] / output["path"])}
+        relative = _session_relative_path(step["executable"], "registered test executable")
+        output_rel = _session_relative_path(self.plan["output_root"], "output_root", allow_dot=True)
+        output = _session_safe_path(self.workspace, output_rel, must_exist=True, directory=True)
+        executable = _session_safe_path(output, relative, must_exist=True, directory=False)
+        info = executable.stat(follow_symlinks=False)
+        if not info.st_mode & 0o111:
+            raise RetentionError("registered test output is not executable")
+        with executable.open("rb") as stream:
+            if stream.read(2) == b"#!":
+                raise RetentionError("interpreter-based test wrappers are not permitted")
+        digest = _hash_path(executable)
+        registered = session.setdefault("registered_tests", {}).get(relative.as_posix())
+        observed = {"path": str(executable), "sha256": digest, "device": info.st_dev,
+                    "inode": info.st_ino, "mode": stat.S_IMODE(info.st_mode)}
+        if after_execution:
+            if registered != observed:
+                raise RetentionError("registered test executable changed while it ran")
+        elif registered is None:
+            session["registered_tests"][relative.as_posix()] = observed
+        elif registered != observed:
+            raise RetentionError("registered test executable identity changed before launch")
+        return observed
+
+    def _graph_provenance(self, step: Mapping[str, Any]) -> dict[str, Any] | None:
+        return _session_graph_provenance(self.plan, step)
+
+    def _graph_directory_identity(self, graph: Mapping[str, Any], *, must_exist: bool) -> dict[str, int] | None:
+        identity = _session_graph_directory_identity(self.workspace, graph, must_exist=must_exist)
+        expected = self._load(allow_running=True)[1].get("graph_directory_identities", {}).get(graph["graph_id"])
+        if expected is not None and identity != expected:
+            raise RetentionError("graph build directory identity changed between steps")
+        return identity
+
+    def _capture_graph_outputs(self, step: Mapping[str, Any], session: dict[str, Any]) -> list[dict[str, Any]]:
+        if not _session_dual_graph_enabled(self.plan) or step.get("kind") != "build":
+            return []
+        graph = _session_dual_graph_by_id(self.plan, str(step["graph_id"]))
+        target_id = step["target_id"]
+        graph_identity = self._graph_directory_identity(graph, must_exist=True)
+        identities: list[dict[str, Any]] = []
+        for output in graph["expected_outputs"]:
+            if output["producer_target"] != target_id:
+                continue
+            identity = _session_graph_output_identity(self.workspace, graph, output)
+            if identity["build_directory_identity"] != graph_identity:
+                raise RetentionError("graph output was produced under a changed build directory")
+            prior = session.setdefault("graph_outputs", {}).get(output["output_id"])
+            if prior is not None:
+                raise RetentionError("graph output identity was already recorded by another producer step")
+            session["graph_outputs"][output["output_id"]] = identity
+            identities.append(identity)
+        if target_id in {"R6A_PRODUCTION_PATH_PE", "R6A_PRODUCTION_PATH_MACHO"} and not identities:
+            raise RetentionError("declared fixture target completed without its exact output identity")
+        return identities
+
+    def _verify_graph_outputs(self, session: Mapping[str, Any]) -> list[dict[str, Any]]:
+        if not _session_dual_graph_enabled(self.plan):
+            return []
+        expected_rows = self._verify_recorded_graph_outputs(session)
+        all_output_ids = {row["output_id"] for graph in self.plan["build_graphs"]
+                          for row in graph["expected_outputs"]}
+        if set(session.get("graph_outputs", {})) != all_output_ids:
+            raise RetentionError("session graph-output receipt has missing or unexpected identities")
+        return expected_rows
+
+    def _verify_recorded_graph_outputs(self, session: Mapping[str, Any]) -> list[dict[str, Any]]:
+        """Revalidate every output already produced, without requiring future graph outputs."""
+        if not _session_dual_graph_enabled(self.plan):
+            return []
+        expected_rows: list[dict[str, Any]] = []
+        recorded = session.get("graph_outputs", {})
+        if not isinstance(recorded, Mapping):
+            raise RetentionError("session graph-output receipt is malformed")
+        for graph in self.plan["build_graphs"]:
+            recorded_graph_identity = session.get("graph_directory_identities", {}).get(graph["graph_id"])
+            if recorded_graph_identity is not None:
+                identity = self._graph_directory_identity(graph, must_exist=True)
+                if recorded_graph_identity != identity:
+                    raise RetentionError("graph build directory identity changed after configure")
+            for output in graph["expected_outputs"]:
+                saved = recorded.get(output["output_id"])
+                if saved is None:
+                    continue
+                if not isinstance(saved, dict) or recorded_graph_identity is None:
+                    raise RetentionError("declared graph output is missing its configured graph identity")
+                current = _session_graph_output_identity(self.workspace, graph, output)
+                if saved != current:
+                    raise RetentionError("graph output changed after its producer step")
+                expected_rows.append(current)
+        allowed_ids = {row["output_id"] for graph in self.plan["build_graphs"]
+                       for row in graph["expected_outputs"]}
+        if set(recorded) - allowed_ids:
+            raise RetentionError("session graph-output receipt contains an undeclared output")
+        return expected_rows
+
+    def _stage_root_snapshot(self) -> dict[str, Any]:
+        stage = _session_safe_path(
+            self.workspace, _session_relative_path(self.plan["stage_root"], "stage_root"),
+            must_exist=True, directory=True)
+        stage_fd = _open_dir(stage)
+        try:
+            identity = _fs_identity(stage_fd)
+        finally:
+            os.close(stage_fd)
+        tree_sha256, file_count = _session_tree_digest(stage)
+        return {"stage_root_identity": identity, "tree_sha256": tree_sha256,
+                "file_count": file_count}
+
+    def _stage_install_snapshot(self, *, initial: bool = False) -> dict[str, Any]:
+        stage = _session_safe_path(
+            self.workspace, _session_relative_path(self.plan["stage_root"], "stage_root"),
+            must_exist=True, directory=True)
+        if initial and set(os.listdir(stage)) != {"usr"}:
+            raise RetentionError("Windows Meson install must populate only the fixed /usr stage subtree")
+        usr = _session_safe_path(stage, Path("usr"), must_exist=True, directory=True)
+        usr_fd = _open_dir(usr)
+        try:
+            identity = _fs_identity(usr_fd)
+        finally:
+            os.close(usr_fd)
+        tree_sha256, file_count = _session_tree_digest(usr)
+        if file_count == 0:
+            raise RetentionError("Windows Meson install produced no receipted product files")
+        files: list[dict[str, Any]] = []
+        for directory, dirnames, filenames in os.walk(usr, followlinks=False):
+            base = Path(directory)
+            for name in sorted(dirnames):
+                info = (base / name).lstat()
+                if not stat.S_ISDIR(info.st_mode):
+                    raise RetentionError("Windows product install tree contains a linked or special directory")
+            for name in sorted(filenames):
+                path = base / name
+                before = path.lstat()
+                if not stat.S_ISREG(before.st_mode) or before.st_nlink != 1:
+                    raise RetentionError("Windows product install tree contains a linked or special file")
+                digest = _hash_path(path)
+                after = path.lstat()
+                if ((before.st_dev, before.st_ino, before.st_size, before.st_mtime_ns)
+                        != (after.st_dev, after.st_ino, after.st_size, after.st_mtime_ns)):
+                    raise RetentionError("Windows product file changed while its install receipt was captured")
+                with path.open("rb") as stream:
+                    magic = stream.read(4)
+                suffix = path.suffix.casefold()
+                if suffix in {".dll", ".exe"}:
+                    file_format, architecture = _session_graph_format_identity(
+                        path, "PE32PLUS_X86_64")
+                elif magic in _MACHO_MAGIC_PREFIXES:
+                    raise RetentionError("Windows product stage contains a native Mach-O artifact")
+                else:
+                    file_format, architecture = "DATA", None
+                files.append({"graph_id": "windows-product-r6a",
+                              "graph_role": "WINDOWS_PRODUCT",
+                              "producer_target_id": "DEFAULT_PRODUCTION_OUTPUTS",
+                              "path": path.relative_to(usr).as_posix(),
+                              "format": file_format, "architecture": architecture,
+                              "file_identity": {"device": before.st_dev, "inode": before.st_ino,
+                                                "mode": stat.S_IMODE(before.st_mode),
+                                                "size_bytes": before.st_size, "sha256": digest}})
+        if len(files) != file_count:
+            raise RetentionError("Windows product install tree file inventory differs from its tree digest")
+        if _session_tree_digest(usr) != (tree_sha256, file_count):
+            raise RetentionError("Windows product install tree changed while per-file identities were captured")
+        return {"graph_id": "windows-product-r6a", "graph_role": "WINDOWS_PRODUCT",
+                "producer_target_id": "DEFAULT_PRODUCTION_OUTPUTS",
+                "stage_role": "WINDOWS_PRODUCT_OUTPUTS", "path": "stage/usr",
+                "directory_identity": identity, "tree_sha256": tree_sha256,
+                "file_count": file_count, "files": files,
+                "identity_boundary": "FIXED_WINDOWS_INSTALL_GRAPH_AND_PER_FILE_HASH_FORMAT_RECEIPTS"}
+
+    def _verify_windows_pe_stage(self, session: Mapping[str, Any]) -> dict[str, Any]:
+        graph = _session_dual_graph_by_id(self.plan, "windows-product-r6a")
+        output = graph["expected_outputs"][0]
+        recorded_graph_output = session.get("graph_outputs", {}).get(output["output_id"])
+        if not isinstance(recorded_graph_output, dict):
+            raise RetentionError("Windows PE stage has no declared Windows graph producer output")
+        current_graph_output = _session_graph_output_identity(self.workspace, graph, output)
+        if current_graph_output != recorded_graph_output:
+            raise RetentionError("Windows PE producer output changed before staging or acceptance")
+        staged = _session_safe_path(
+            self.workspace, BUILD_SESSION_DUAL_GRAPH_WINDOWS_PE_STAGE_RELATIVE,
+            must_exist=True, directory=False)
+        info = staged.stat(follow_symlinks=False)
+        if not stat.S_ISREG(info.st_mode) or not info.st_mode & 0o111:
+            raise RetentionError("staged Windows PE product is not a regular executable file")
+        digest = _hash_path(staged)
+        actual_format, architecture = _session_graph_format_identity(
+            staged, "PE32PLUS_X86_64")
+        identity = {
+            "graph_id": graph["graph_id"], "graph_role": graph["graph_role"],
+            "source_identity": graph["source_identity"],
+            "stage_role": "WINDOWS_PE_NEVER_EXECUTE",
+            "output_id": output["output_id"], "source_output_identity": recorded_graph_output,
+            "path": BUILD_SESSION_DUAL_GRAPH_WINDOWS_PE_STAGE_RELATIVE.as_posix(),
+            "format": actual_format, "architecture": architecture,
+            "file_identity": {"device": info.st_dev, "inode": info.st_ino,
+                              "mode": stat.S_IMODE(info.st_mode), "size_bytes": info.st_size,
+                              "sha256": digest},
+        }
+        if identity["file_identity"]["sha256"] != recorded_graph_output["file_identity"]["sha256"]:
+            raise RetentionError("staged Windows PE differs from its exact graph-produced bytes")
+        return identity
+
+    def _verify_stage_outputs(self, session: Mapping[str, Any], *, require_complete: bool = False) -> dict[str, Any]:
+        stage_snapshot = self._stage_root_snapshot()
+        saved_tree = session.get("stage_tree_identity")
+        if saved_tree is not None and saved_tree != stage_snapshot:
+            raise RetentionError("declared stage tree changed after its controller-owned operation")
+        saved_install = session.get("stage_install_tree_identity")
+        if saved_install is not None and saved_install != self._stage_install_snapshot():
+            raise RetentionError("Windows product install outputs changed after the Meson install step")
+        windows_saved = session.get("windows_pe_stage_identity")
+        runtime_saved = session.get("native_runtime_stage_identity")
+        if windows_saved is not None and windows_saved != self._verify_windows_pe_stage(session):
+            raise RetentionError("staged Windows PE output changed after its typed operation")
+        if runtime_saved is not None and runtime_saved != self._native_runtime_stage_snapshot():
+            raise RetentionError("staged native runtime closure changed after its typed operation")
+        if require_complete and (windows_saved is None or runtime_saved is None or saved_tree is None):
+            raise RetentionError("dual-graph stage outputs are incomplete at read-only verification")
+        return stage_snapshot
+
+    def _stage_windows_product(self, session: dict[str, Any]) -> dict[str, Any]:
+        if session.get("windows_pe_stage_identity") is not None:
+            raise RetentionError("Windows product output was already staged")
+        graph = _session_dual_graph_by_id(self.plan, "windows-product-r6a")
+        output = graph["expected_outputs"][0]
+        source_identity = session.get("graph_outputs", {}).get(output["output_id"])
+        if not isinstance(source_identity, dict):
+            raise RetentionError("Windows PE staging requires its exact graph output receipt")
+        current_source = _session_graph_output_identity(self.workspace, graph, output)
+        if current_source != source_identity:
+            raise RetentionError("Windows PE producer output changed before typed staging")
+        source_path = self.workspace / graph["build_directory"] / output["path"]
+        destination = self.workspace / BUILD_SESSION_DUAL_GRAPH_WINDOWS_PE_STAGE_RELATIVE
+        destination_dir = destination.parent
+        if destination_dir.exists() or destination_dir.is_symlink():
+            raise RetentionError("typed Windows PE destination already exists")
+        destination_dir.mkdir(mode=0o700)
+        parent_fd = _open_dir(source_path.parent)
+        source_fd = None
+        destination_fd = None
+        try:
+            source_fd = os.open(source_path.name, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0),
+                                dir_fd=parent_fd)
+            before = os.fstat(source_fd)
+            if ((before.st_dev, before.st_ino, before.st_size, before.st_mtime_ns)
+                    != (source_identity["file_identity"]["device"],
+                        source_identity["file_identity"]["inode"],
+                        source_identity["file_identity"]["size_bytes"],
+                        source_path.stat(follow_symlinks=False).st_mtime_ns)):
+                raise RetentionError("Windows PE producer changed immediately before stage copy")
+            stage_parent_fd = _open_dir(destination_dir)
+            try:
+                destination_fd = os.open(
+                    destination.name, os.O_WRONLY | os.O_CREAT | os.O_EXCL
+                    | getattr(os, "O_NOFOLLOW", 0), 0o500, dir_fd=stage_parent_fd)
+                digest = hashlib.sha256()
+                while True:
+                    block = os.read(source_fd, 1024 * 1024)
+                    if not block:
+                        break
+                    digest.update(block)
+                    view = memoryview(block)
+                    while view:
+                        written = os.write(destination_fd, view)
+                        if written <= 0:
+                            raise RetentionError("typed Windows PE stage copy made no progress")
+                        view = view[written:]
+                os.fchmod(destination_fd, 0o500)
+                os.fsync(destination_fd)
+            finally:
+                if destination_fd is not None:
+                    os.close(destination_fd)
+                    destination_fd = None
+                os.close(stage_parent_fd)
+            after = os.fstat(source_fd)
+            if ((before.st_dev, before.st_ino, before.st_size, before.st_mtime_ns)
+                    != (after.st_dev, after.st_ino, after.st_size, after.st_mtime_ns)
+                    or digest.hexdigest() != source_identity["file_identity"]["sha256"]):
+                raise RetentionError("Windows PE producer changed while the controller staged it")
+        finally:
+            if destination_fd is not None:
+                os.close(destination_fd)
+            if source_fd is not None:
+                os.close(source_fd)
+            os.close(parent_fd)
+        staged_identity = self._verify_windows_pe_stage(session)
+        session["windows_pe_stage_identity"] = staged_identity
+        stage_snapshot = self._stage_root_snapshot()
+        session["stage_tree_identity"] = stage_snapshot
+        return staged_identity
+
+    def _native_runtime_stage_snapshot(self) -> dict[str, Any]:
+        runtime_dir = _session_safe_path(
+            self.workspace, BUILD_SESSION_DUAL_GRAPH_NATIVE_RUNTIME_RELATIVE,
+            must_exist=True, directory=True)
+        runtime_fd = _open_dir(runtime_dir)
+        try:
+            directory_identity = _fs_identity(runtime_fd)
+            expected_names = {BUILD_SESSION_DUAL_GRAPH_RUNTIME_NAMES[row["runtime_id"]]
+                              for row in self.plan["runtime_receipts"]}
+            if set(os.listdir(runtime_fd)) != expected_names:
+                raise RetentionError("native runtime staging directory has missing or unexpected files")
+        finally:
+            os.close(runtime_fd)
+        rows = []
+        for receipt in self.plan["runtime_receipts"]:
+            filename = BUILD_SESSION_DUAL_GRAPH_RUNTIME_NAMES[receipt["runtime_id"]]
+            path = runtime_dir / filename
+            identity = _session_regular_file_identity(path, receipt["sha256"],
+                                                     f"staged native {receipt['runtime_id']} runtime")
+            macho_identity = _session_macho_dependency_identity(path)
+            architecture = macho_identity["architecture"]
+            native = _session_native_architecture()
+            if architecture != native or macho_identity["filetype"] != 6:
+                raise RetentionError("staged SDL runtime is not a native thin Mach-O dylib")
+            dependency_bindings = _session_macho_dependency_bindings(
+                macho_identity, [row["runtime_id"] for row in self.plan["runtime_receipts"]])
+            if identity["mode"] & 0o222:
+                raise RetentionError("staged native runtime files must be read-only")
+            rows.append({"runtime_id": receipt["runtime_id"],
+                         "path": BUILD_SESSION_DUAL_GRAPH_NATIVE_RUNTIME_RELATIVE.joinpath(filename).as_posix(),
+                         "format": "MACHO_DYLIB_NATIVE_ARCH", "architecture": architecture,
+                         "file_identity": identity,
+                         "macho_dependency_identity": macho_identity,
+                         "macho_dependency_bindings": dependency_bindings,
+                         "resolution_claim": BUILD_SESSION_DUAL_GRAPH_NATIVE_LOADER_RESOLUTION_CLAIM})
+        tree_sha256, file_count = _session_tree_digest(runtime_dir)
+        if file_count != len(expected_names):
+            raise RetentionError("native runtime stage contains an unexpected filesystem object")
+        return {"graph_id": "native-verification-r6a",
+                "stage_role": "NATIVE_SDL2_RUNTIME_CLOSURE",
+                "runtime_directory_identity": directory_identity,
+                "tree_sha256": tree_sha256, "file_count": file_count,
+                "files": rows}
+
+    def _native_loader_provenance(self, session: Mapping[str, Any],
+                                  loader_path: str) -> dict[str, Any]:
+        stage_identity = self._verify_native_runtime_stage(session)
+        if loader_path != str(self.workspace / BUILD_SESSION_DUAL_GRAPH_NATIVE_RUNTIME_RELATIVE):
+            raise RetentionError("native SDL2 loader path is not the controller-derived runtime stage")
+        output = session.get("graph_outputs", {}).get("r6a-production-path-macho")
+        if not isinstance(output, Mapping) or output.get("graph_id") != "native-verification-r6a":
+            raise RetentionError("native loader provenance has no bound native test graph output")
+        return {
+            "graph_id": "native-verification-r6a",
+            "graph_role": "NATIVE_VERIFICATION",
+            "output_id": "r6a-production-path-macho",
+            "requested_basename": BUILD_SESSION_DUAL_GRAPH_NATIVE_LOADER_BASENAME,
+            "controller_derived_dyld_library_path": loader_path,
+            "runtime_stage_identity": stage_identity,
+            "output_macho_dependency_identity": output.get("macho_dependency_identity"),
+            "output_macho_dependency_bindings": output.get("macho_dependency_bindings"),
+            "resolution_claim": BUILD_SESSION_DUAL_GRAPH_NATIVE_LOADER_RESOLUTION_CLAIM,
+            "dyld_resolution_verified": False,
+        }
+
+    def _stage_native_runtime(self, session: dict[str, Any]) -> dict[str, Any]:
+        """Copy only the fixed SDL2/SDL3 closure into its controller-owned stage role."""
+        if not _session_dual_graph_enabled(self.plan):
+            raise RetentionError("native runtime staging requires the dual-graph capability")
+        if session.get("native_runtime_stage_identity") is not None:
+            raise RetentionError("native runtime closure was already staged")
+        self._verify_windows_pe_stage(session)
+        stage_root = _session_safe_path(
+            self.workspace, _session_relative_path(self.plan["stage_root"], "stage_root"),
+            must_exist=True, directory=True)
+        runtime_parent = stage_root / "native-verification"
+        if runtime_parent.exists() or runtime_parent.is_symlink():
+            raise RetentionError("native runtime staging role must be absent before its typed operation")
+        runtime_parent.mkdir(mode=0o700)
+        runtime_dir = runtime_parent / "runtime"
+        runtime_dir.mkdir(mode=0o700)
+        runtime_fd = _open_dir(runtime_dir)
+        try:
+            for receipt in self.plan["runtime_receipts"]:
+                runtime_id = receipt["runtime_id"]
+                filename = BUILD_SESSION_DUAL_GRAPH_RUNTIME_NAMES[runtime_id]
+                source_path = Path(receipt["path"])
+                if source_path.is_symlink() or source_path.resolve(strict=True) != source_path:
+                    raise RetentionError("native runtime source path is not a canonical real file")
+                source_fd = os.open(source_path, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0))
+                try:
+                    before = os.fstat(source_fd)
+                    if not stat.S_ISREG(before.st_mode):
+                        raise RetentionError("native runtime source is not a regular file")
+                    destination_fd = os.open(
+                        filename, os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0),
+                        0o500, dir_fd=runtime_fd)
+                    digest = hashlib.sha256()
+                    try:
+                        while True:
+                            block = os.read(source_fd, 1024 * 1024)
+                            if not block:
+                                break
+                            digest.update(block)
+                            view = memoryview(block)
+                            while view:
+                                written = os.write(destination_fd, view)
+                                if written <= 0:
+                                    raise RetentionError("native runtime staging copy made no progress")
+                                view = view[written:]
+                        os.fchmod(destination_fd, 0o500)
+                        os.fsync(destination_fd)
+                    finally:
+                        os.close(destination_fd)
+                    after = os.fstat(source_fd)
+                    if ((before.st_dev, before.st_ino, before.st_size, before.st_mtime_ns)
+                            != (after.st_dev, after.st_ino, after.st_size, after.st_mtime_ns)
+                            or digest.hexdigest() != receipt["sha256"]):
+                        raise RetentionError("native runtime source changed while being staged")
+                finally:
+                    os.close(source_fd)
+        finally:
+            os.close(runtime_fd)
+        snapshot = self._native_runtime_stage_snapshot()
+        session["native_runtime_stage_identity"] = snapshot
+        session["stage_tree_identity"] = self._stage_root_snapshot()
+        return snapshot
+
+    def _verify_native_runtime_stage(self, session: Mapping[str, Any]) -> dict[str, Any]:
+        saved = session.get("native_runtime_stage_identity")
+        if not isinstance(saved, dict):
+            raise RetentionError("native SDL2 runtime closure has not been staged")
+        current = self._native_runtime_stage_snapshot()
+        if saved != current:
+            raise RetentionError("staged native SDL2 runtime closure changed after its typed operation")
+        return current
+
+    def _environment_for_step(self, step: Mapping[str, Any],
+                              session: Mapping[str, Any] | None = None) -> dict[str, str]:
+        environment = dict(self.plan["environment"])
+        if not _session_dual_graph_enabled(self.plan):
+            return environment
+        environment["PATH"] = BUILD_SESSION_DUAL_GRAPH_PATH
+        environment.pop("DXVK_WSI_DRIVER", None)
+        environment.pop("MACOSX_DEPLOYMENT_TARGET", None)
+        if step.get("kind") == "test":
+            graph = _session_dual_graph_by_id(self.plan, str(step.get("graph_id", "")))
+            if graph["graph_role"] != "NATIVE_VERIFICATION":
+                raise RetentionError("only the native verification graph may execute a test")
+            profile = self.plan["native_host_profile"]
+            environment["DEVELOPER_DIR"] = profile["developer_directory"]
+            environment["SDKROOT"] = profile["sdk_resolved_path"]
+            if session is None:
+                session = self._load(allow_running=True)[1]
+            self._verify_stage_outputs(session, require_complete=True)
+            if step.get("test_class") == "PRODUCTION_PATH":
+                environment["DXVK_WSI_DRIVER"] = "SDL2"
+                self._verify_native_runtime_stage(session)
+                environment["DYLD_LIBRARY_PATH"] = str(
+                    self.workspace / BUILD_SESSION_DUAL_GRAPH_NATIVE_RUNTIME_RELATIVE)
+            elif step.get("test_class") not in {"UNIT", "MODEL"}:
+                raise RetentionError("dual-graph test class is outside the fixed native test set")
+            return environment
+        if step.get("kind") not in {"configure", "build", "install"}:
+            return environment
+        graph = _session_dual_graph_by_id(self.plan, str(step.get("graph_id", "")))
+        ids = graph["tool_receipt_ids"]
+        if graph["graph_role"] == "WINDOWS_PRODUCT":
+            # The cross file owns host compilers. Meson uses *_FOR_BUILD for
+            # the separately pinned build-machine compilers during cross setup.
+            environment.update({"CC": self.plan["tools"]["mingw_cc"]["path"],
+                                "CXX": self.plan["tools"]["mingw_cxx"]["path"],
+                                "AR": self.plan["tools"]["mingw_ar"]["path"],
+                                "CC_FOR_BUILD": self.plan["tools"]["native_cc"]["path"],
+                                "CXX_FOR_BUILD": self.plan["tools"]["native_cxx"]["path"],
+                                "AR_FOR_BUILD": self.plan["tools"]["native_ar"]["path"]})
+        else:
+            profile = self.plan["native_host_profile"]
+            environment["DEVELOPER_DIR"] = profile["developer_directory"]
+            environment["SDKROOT"] = profile["sdk_resolved_path"]
+            environment.update({"CC": self.plan["tools"]["native_cc"]["path"],
+                                "CXX": self.plan["tools"]["native_cxx"]["path"],
+                                "AR": self.plan["tools"]["native_ar"]["path"],
+                                "RANLIB": self.plan["tools"]["native_ranlib"]["path"],
+                                "PKG_CONFIG_PATH": str(Path(next(
+                                    row["path"] for row in self.plan["host_dependency_receipts"]
+                                    if row["input_id"] == "SDL2_PKGCONFIG")).parent)})
+        if not set(ids).issubset(self.plan["tools"]):
+            raise RetentionError("graph toolchain identities are incomplete")
+        return environment
+
+    def _command_for_dual_graph_step(self, step: Mapping[str, Any],
+                                     session: dict[str, Any]) -> tuple[list[str], dict[str, Any] | None]:
+        kind = step["kind"]
+        graph = _session_dual_graph_by_id(self.plan, str(step["graph_id"]))
+        graph_dir = self.workspace / graph["build_directory"]
+        if kind == "configure":
+            current_graph_identity = _session_graph_directory_identity(
+                self.workspace, graph, must_exist=False)
+            recorded_graph_identity = session.get("graph_directory_identities", {}).get(graph["graph_id"])
+            if (current_graph_identity is not None
+                    and current_graph_identity != recorded_graph_identity):
+                raise RetentionError("declared graph build directory must be absent before its configure step")
+            return _dual_graph_configure_command(self.plan, graph, graph_dir), None
+        current_identity = self._graph_directory_identity(graph, must_exist=True)
+        if session.get("graph_directory_identities", {}).get(graph["graph_id"]) != current_identity:
+            raise RetentionError("graph build directory is not bound to its completed configure step")
+        if kind == "build":
+            target_id = step.get("target_id")
+            if target_id not in graph["targets"] or target_id not in BUILD_SESSION_DUAL_GRAPH_TARGETS:
+                raise RetentionError("Ninja target ID is outside the closed graph target map")
+            target = BUILD_SESSION_DUAL_GRAPH_TARGETS[target_id]
+            command = [self.plan["tools"]["ninja"]["path"], "-C", str(graph_dir)]
+            if target is not None:
+                command.append(target)
+            return command, None
+        if kind == "install":
+            if graph["graph_role"] != "WINDOWS_PRODUCT":
+                raise RetentionError("only the Windows product graph may stage product outputs")
+            stage = str(self.workspace / _session_relative_path(self.plan["stage_root"], "stage_root"))
+            return [self.plan["tools"]["meson"]["path"], "install", "-C", str(graph_dir),
+                    "--destdir", stage, "--no-rebuild"], None
+        if kind == "test":
+            identity = self._validate_test_executable(step, session)
+            args = step.get("arguments", [])
+            if args:
+                raise RetentionError("dual-graph production-path tests do not accept caller-supplied arguments")
+            return [identity["executable_path"]], identity
+        raise RetentionError(f"unsupported dual-graph step kind: {kind}")
+
+    def start(self) -> None:
+        _require_buildlease_vm_runtime(self.plan)
+        lease_record, session = self._load(allow_running=True)
+        if session.get("state") != "RESERVED" or session.get("next_step_index") != 0:
+            raise RetentionError("v3 BuildLease session has already started or cannot be resumed")
+        if lease_record.get("session_started") is not False:
+            raise RetentionError("v3 BuildLease start lacks its exact never-started live reservation state")
+        if self.lease.session_plan_sha256 != self.plan_sha256:
+            raise RetentionError("session plan changed after reservation")
+        if any((self.root / name).exists() or (self.root / name).is_symlink()
+               for name in (BUILD_EXECUTION_RECEIPT, "build-command.json", "build.log")):
+            raise RetentionError("v1 execution evidence already exists in a v3 session workspace")
+        source_identity = self.lease._validate_session_inputs()
+        stage_relative = _session_relative_path(self.plan["stage_root"], "stage_root")
+        if len(stage_relative.parts) != 1:
+            raise RetentionError("stage root must be one direct child of the leased workspace")
+        lease_record["session_started"] = True
+        lease_record["session_started_at_unix"] = time.time()
+        self._store(lease_record)
+        self.session_dir.mkdir(mode=0o700)
+        (self.session_dir / "steps").mkdir(mode=0o700)
+        session["workspace_mount_pending"] = True
+        lease_record["session_v3"] = session
+        self._store(lease_record)
+        mount_capacity = self.lease.expected_bytes - BUILD_SESSION_CONTROLLER_HEADROOM_BYTES
+        workspace_mount_identity = _attach_session_workspace(self.root, mount_capacity)
+        session["workspace_mount_identity"] = workspace_mount_identity
+        session.pop("workspace_mount_pending", None)
+        lease_record["session_v3"] = session
+        self._store(lease_record)
+        if _session_dual_graph_enabled(self.plan):
+            for graph in self.plan["build_graphs"]:
+                if _session_graph_directory_identity(self.workspace, graph, must_exist=False) is not None:
+                    raise RetentionError("dual-graph build directories must be absent before configure")
+        stage = self.workspace / stage_relative
+        if stage.exists() or stage.is_symlink():
+            raise RetentionError("declared stage root must be absent at v3 session creation")
+        stage.mkdir(mode=0o700)
+        output_relative = _session_relative_path(self.plan["output_root"], "output_root", allow_dot=True)
+        if output_relative != Path("."):
+            if len(output_relative.parts) != 1:
+                raise RetentionError("output root must be the lease root or one direct child")
+            output = self.workspace / output_relative
+            if output.exists() or output.is_symlink():
+                raise RetentionError("declared output root must be absent at v3 session creation")
+            output.mkdir(mode=0o700)
+        (self.workspace / ".home").mkdir(mode=0o700)
+        (self.workspace / ".tmp").mkdir(mode=0o700)
+        for relative in (Path(".home/.cache"), Path(".home/.config"),
+                         Path(".home/.local/share")):
+            (self.workspace / relative).mkdir(mode=0o700, parents=True)
+        for step in self.plan["steps"]:
+            if step.get("kind") != "test":
+                continue
+            if _session_dual_graph_enabled(self.plan):
+                graph = _session_dual_graph_by_id(self.plan, step["graph_id"])
+                output = next(row for row in graph["expected_outputs"]
+                              if row["output_id"] == step["output_id"])
+                relative = Path(graph["build_directory"]) / _session_relative_path(
+                    output["path"], "native test output path")
+                candidate = self.workspace / relative
+                current = self.workspace
+            else:
+                relative = _session_relative_path(step["executable"], "registered test executable")
+                candidate = self.workspace / output_relative / relative
+                current = self.workspace / output_relative
+            missing = False
+            for part in relative.parts:
+                current = current / part
+                try:
+                    info = current.lstat()
+                except FileNotFoundError:
+                    missing = True
+                    break
+                if stat.S_ISLNK(info.st_mode):
+                    raise RetentionError("registered test path contains a symlink before the build")
+            if not missing:
+                raise RetentionError(f"registered test executable already exists before the session: {candidate}")
+        root_fd = _open_dir(self.root)
+        output_fd = _open_dir(self.workspace if output_relative == Path(".") else self.workspace / output_relative)
+        stage_fd = _open_dir(stage)
+        try:
+            root_info = os.fstat(root_fd)
+            fsid = getattr(os.fstatvfs(root_fd), "f_fsid", None)
+            root_identity = {"device": root_info.st_dev, "inode": root_info.st_ino,
+                             "filesystem_id": fsid}
+            stage_identity = _fs_identity(stage_fd)
+            output_identity = _fs_identity(output_fd)
+        finally:
+            os.close(root_fd)
+            os.close(output_fd)
+            os.close(stage_fd)
+        session.update({"state": "ACTIVE", "started_at_unix": time.time(),
+                        "executor_mode": BUILD_SESSION_EXECUTOR_MODE,
+                        "executor_version": BUILD_SESSION_SCHEMA_VERSION,
+                        "build_root_identity": root_identity,
+                        "stage_root_identity": stage_identity,
+                        "output_root_identity": output_identity,
+                        "workspace_mount_identity": workspace_mount_identity,
+                        "source_root_identity": {"device": source_identity["source_device"],
+                                                 "inode": source_identity["source_inode"]},
+                        "source_start_identity": source_identity,
+                        "input_tool_identities": source_identity["tools"],
+                        "next_step_index": 0, "step_receipts": [], "registered_tests": {},
+                        "peak_allocated_bytes": 0, "storage_watch_events": []})
+        if _session_dual_graph_enabled(self.plan):
+            session.update({
+                "graph_directory_identities": {}, "graph_outputs": {},
+                "graph_step_output_rows": {}, "stage_tree_identity": None,
+                "stage_install_tree_identity": None, "windows_pe_stage_identity": None,
+                "native_runtime_stage_identity": None, "typed_stage_step_identities": {},
+                "stage_step_tree_identities": {},
+                "initial_stage_tree_identity": self._stage_root_snapshot(),
+            })
+        lease_record["session_v3"] = session
+        plan_receipt = {"schema_version": BUILD_SESSION_SCHEMA_VERSION,
+                        "executor_mode": BUILD_SESSION_EXECUTOR_MODE,
+                        "executor_version": BUILD_SESSION_SCHEMA_VERSION,
+                        "build_id": self.lease.build_id, "plan_sha256": self.plan_sha256,
+                        "plan": self.plan, "admission_identity": self.plan["admission_identity"],
+                        "source_identity": self.plan["source_identity"],
+                        "build_root_identity": root_identity, "stage_root_identity": stage_identity,
+                        "output_root_identity": output_identity,
+                        "workspace_mount_identity": workspace_mount_identity,
+                        "created_at_unix": session["started_at_unix"]}
+        _write_json(self.session_dir / BUILD_SESSION_PLAN, plan_receipt, replace=False, sealed=True)
+        self._store(lease_record)
+        self._check_limits("session-start")
+
+    def _command_for_step(self, step: Mapping[str, Any], session: dict[str, Any]) -> tuple[list[str], dict[str, Any] | None]:
+        if _session_dual_graph_enabled(self.plan):
+            return self._command_for_dual_graph_step(step, session)
+        kind = step["kind"]
+        if kind == "test":
+            test_identity = self._validate_test_executable(step, session)
+            args = step.get("arguments", [])
+            if any(any(char in token for char in ("\x00", "`", "$(", "\n", "\r")) for token in args):
+                raise RetentionError("registered test arguments contain forbidden command syntax")
+            return [test_identity["path"], *args], test_identity
+        command = list(step["argv"])
+        if not command or any(any(char in token for char in ("\x00", "`", "$(", "\n", "\r"))
+                                  for token in command):
+            raise RetentionError("session command contains forbidden shell/interpreter syntax")
+        kind_tool = {"configure": "meson", "install": "meson", "build": "ninja"}.get(kind)
+        if kind_tool is None or command[0] != self.plan["tools"][kind_tool]["path"]:
+            raise RetentionError(f"unregistered executable for v3 {kind} step")
+        build = str(self.workspace)
+        source = self.plan["source_identity"]["root"]
+        if kind == "configure":
+            if len(command) < 4 or command[1] != "setup":
+                raise RetentionError("configure step must use the accepted Meson setup form")
+            positionals: list[str] = []
+            options: set[str] = set()
+            args = command[2:]
+            index = 0
+            cross_files = {row["path"] for row in self.plan.get("input_receipts", [])}
+            source_root = Path(source)
+            while index < len(args):
+                token = args[index]
+                if token == "--strip":
+                    key = "--strip"
+                    if key in options:
+                        raise RetentionError("Meson setup option is duplicated: --strip")
+                    options.add(key)
+                    index += 1
+                    continue
+                if token.startswith("-D"):
+                    if token != f"-Dbuildtype={self.lease.metadata['build_type']}":
+                        raise RetentionError(f"Meson define is not authorized for this session: {token}")
+                    key = "buildtype"
+                    value = self.lease.metadata["build_type"]
+                elif token.startswith("--"):
+                    key, separator, value = token.partition("=")
+                    if not separator:
+                        if index + 1 >= len(args):
+                            raise RetentionError(f"Meson setup option lacks a value: {key}")
+                        value = args[index + 1]
+                        index += 1
+                    if key == "--prefix":
+                        if value != "/usr":
+                            raise RetentionError("Meson install prefix must remain /usr under the declared DESTDIR")
+                        key = "prefix"
+                    elif key == "--backend":
+                        if value != "ninja":
+                            raise RetentionError("Meson backend must be Ninja")
+                    elif key == "--buildtype":
+                        if value != self.lease.metadata["build_type"]:
+                            raise RetentionError("Meson build type differs from the signed BuildLease")
+                        key = "buildtype"
+                    elif key == "--wrap-mode":
+                        if value != "nodownload":
+                            raise RetentionError("Meson wrap mode must prohibit network downloads")
+                        key = "wrap-mode"
+                    elif key == "--cross-file":
+                        selected = Path(value)
+                        relative = (selected.relative_to(source_root).as_posix()
+                                    if selected.is_absolute() and source_root in selected.parents
+                                    else value)
+                        if relative not in cross_files:
+                            raise RetentionError("Meson cross file must be an exactly hashed admitted source input")
+                        expected = str(source_root / relative)
+                        if str(selected) != expected:
+                            raise RetentionError("Meson cross file path must be canonical beneath the admitted source")
+                        value = expected
+                        key = "cross-file"
+                    else:
+                        raise RetentionError(f"Meson setup option is not authorized for this session: {key}")
+                else:
+                    positionals.append(token)
+                    index += 1
+                    continue
+                if key in options:
+                    raise RetentionError(f"Meson setup option is duplicated: {key}")
+                options.add(key)
+                index += 1
+            if positionals != [build, source]:
+                raise RetentionError("Meson setup must name this exact build workspace and source root")
+        elif kind == "build":
+            if command[1:] not in ([], ["-C", build]):
+                raise RetentionError("Ninja build must target only the admitted BuildLease workspace")
+        elif kind == "install":
+            stage = str(self.workspace / _session_relative_path(self.plan["stage_root"], "stage_root"))
+            if (len(command) not in {6, 7} or command[1] != "install"
+                    or command[2:4] != ["-C", build]
+                    or command[4:6] != ["--destdir", stage]
+                    or (len(command) == 7 and command[6] != "--no-rebuild")):
+                raise RetentionError("Meson install must stage only into the declared session stage root")
+        return command, None
+
+    def run_next(self) -> dict[str, Any]:
+        def run_with_admission_revalidation() -> dict[str, Any]:
+            try:
+                self.lease._revalidate_r71_admission()
+            except BaseException as error:
+                # Do not call _load() here: its plan-integrity failure path may
+                # terminalize the session before the triggering R71 exception
+                # is attached to the durable failure record.
+                lease_record = _load_lease(self.lease.build_id)
+                session = lease_record.get("session_v3")
+                if (lease_record.get("state") == "ACTIVE"
+                        and lease_record.get("path") == str(self.root)
+                        and isinstance(session, dict)
+                        and session.get("plan_sha256") == self.plan_sha256
+                        and session.get("state") == "ACTIVE"
+                        and session.get("next_step_index") == 0
+                        and session.get("step_receipts") == []
+                        and session.get("graph_outputs") in (None, {})):
+                    session["r71_pregraph_validation_failure"] = {
+                        "exception_class": type(error).__name__,
+                        "exception_message": str(error)[:MAX_FAILURE_ERROR_BYTES],
+                    }
+                    lease_record["session_v3"] = session
+                    self._store(lease_record)
+                    try:
+                        self._fail(repr(error), -1,
+                                   command=["r71-admission-revalidation"], step_index=None)
+                    except BaseException as capture_error:
+                        raise RetentionError(
+                            "R71 pre-step-0 failure capture did not complete: "
+                            f"{type(capture_error).__name__}: {capture_error}; original: "
+                            f"{type(error).__name__}: {error}") from error
+                raise
+            return self._run_next_locked()
+
+        return self._with_operation("run_next", run_with_admission_revalidation)
+
+    def _run_typed_stage_step(self, index: int, step: Mapping[str, Any],
+                              lease_record: dict[str, Any], session: dict[str, Any]) -> dict[str, Any]:
+        """Run one closed controller-owned copy operation without launching a command."""
+        kind = step["kind"]
+        action = (BUILD_SESSION_DUAL_GRAPH_WINDOWS_STAGE_ACTION
+                  if kind == "stage_windows_product" else BUILD_SESSION_DUAL_GRAPH_NATIVE_STAGE_ACTION)
+        command_path = self.session_dir / "steps" / f"step-{index:03d}.command.json"
+        result_path = self.session_dir / "steps" / f"step-{index:03d}.result.json"
+        try:
+            if command_path.exists() or result_path.exists():
+                raise RetentionError("duplicate or replayed typed stage evidence is not permitted")
+            self._check_root_bindings(lease_record, session)
+            source_before = self._validate_source()
+            inputs_before = self.lease._validate_session_inputs()
+            if source_before != inputs_before:
+                raise RetentionError("typed staging input observations are inconsistent")
+            graph = _session_dual_graph_by_id(self.plan, str(step["graph_id"]))
+            graph_directory_identity = self._graph_directory_identity(graph, must_exist=True)
+            graph_provenance = self._graph_provenance(step)
+            graph_outputs_before = self._verify_recorded_graph_outputs(session)
+            self._verify_stage_outputs(session)
+            peak_before = self._check_limits("before-typed-stage-step", extra_bytes=32 * 1024)
+            command_payload = {
+                "schema_version": BUILD_SESSION_SCHEMA_VERSION,
+                "build_id": self.lease.build_id,
+                "executor_mode": BUILD_SESSION_EXECUTOR_MODE,
+                "executor_version": BUILD_SESSION_SCHEMA_VERSION,
+                "acceptance_state": "UNACCEPTED_UNTIL_WHOLE_LEASE_DETACH",
+                "plan_sha256": self.plan_sha256, "step_index": index, "kind": kind,
+                "action": action, "command": None, "cwd": str(self.workspace),
+                "source_observation": source_before,
+                "input_tool_identities": inputs_before["tools"],
+                "input_receipts": inputs_before["input_receipts"],
+                "graph_tool_identities": inputs_before["graph_tools"],
+                "runtime_input_identities": inputs_before["runtime_inputs"],
+                "graph_provenance": graph_provenance,
+                "graph_directory_identity_before": graph_directory_identity,
+                "graph_output_identities_before": graph_outputs_before,
+                "stage_tree_identity_before": self._stage_root_snapshot(),
+                "windows_pe_stage_identity_before": session.get("windows_pe_stage_identity"),
+                "native_runtime_stage_identity_before": session.get("native_runtime_stage_identity"),
+                "sandbox_launcher_path": None, "sandbox_launcher_sha256": None,
+                "sandbox_profile_sha256": None, "environment_sha256": None,
+                "registered_executable_identity": None,
+                "started_at_unix": time.time(),
+            }
+            command_receipt_raw = _write_json(command_path, command_payload, replace=False, sealed=True)
+            session["state"] = "RUNNING"
+            session["inflight_step_index"] = index
+            session["inflight_command_receipt_sha256"] = hashlib.sha256(command_receipt_raw).hexdigest()
+            session.pop("process_exit_observation", None)
+            lease_record["session_v3"] = session
+            self._store(lease_record)
+            self._check_root_bindings(_load_lease(self.lease.build_id), session)
+            if self._validate_source() != source_before or self.lease._validate_session_inputs() != inputs_before:
+                raise RetentionError("source, tool, or runtime input changed before typed staging")
+            if kind == "stage_windows_product":
+                stage_operation_identity = self._stage_windows_product(session)
+            else:
+                stage_operation_identity = self._stage_native_runtime(session)
+            source_after = self._validate_source()
+            inputs_after = self.lease._validate_session_inputs()
+            if source_after != source_before or inputs_after != inputs_before:
+                raise RetentionError("source, tool, or runtime input changed during typed staging")
+            if self._graph_directory_identity(graph, must_exist=True) != graph_directory_identity:
+                raise RetentionError("build graph directory changed during typed staging")
+            graph_output_rows = self._verify_recorded_graph_outputs(session)
+            stage_snapshot = self._verify_stage_outputs(
+                session, require_complete=(kind == "stage_native_runtime"))
+            if stage_snapshot != session.get("stage_tree_identity"):
+                raise RetentionError("typed staging did not seal the complete stage tree identity")
+            peak = self._check_limits("typed-stage-step-boundary", extra_bytes=32 * 1024)
+            session.setdefault("graph_step_output_rows", {})[str(index)] = graph_output_rows
+            session.setdefault("typed_stage_step_identities", {})[str(index)] = {
+                "action": action, "stage_operation_identity": stage_operation_identity,
+                "stage_tree_identity": stage_snapshot,
+            }
+            lease_record["session_v3"] = session
+            self._store(lease_record)
+            self._write_result(
+                index, "SUCCESS", command_path, None, return_code=0,
+                source_observation=source_before, peak_allocated_bytes=peak,
+                input_observation=inputs_before, input_observation_after=inputs_after,
+                graph_provenance=graph_provenance,
+                graph_directory_identity=graph_directory_identity,
+                graph_output_identities=graph_output_rows,
+                stage_operation_identity=stage_operation_identity,
+                stage_tree_identity=stage_snapshot)
+            lease_record, session = self._load(allow_running=True)
+            result_hash = _hash_path(result_path)
+            command_hash = _hash_path(command_path)
+            session["state"] = "ACTIVE"
+            session.pop("inflight_step_index", None)
+            session.pop("inflight_command_receipt_sha256", None)
+            session["next_step_index"] = index + 1
+            session["step_receipts"] = list(session.get("step_receipts", [])) + [{
+                "step_index": index, "command_receipt_sha256": command_hash,
+                "result_receipt_sha256": result_hash}]
+            lease_record["session_v3"] = session
+            self._store(lease_record)
+            return {"status": "STEP_SUCCEEDED_SESSION_ACTIVE", "step_index": index,
+                    "kind": kind, "action": action, "peak_allocated_bytes": peak,
+                    "lease_state": "ACTIVE"}
+        except BaseException as error:
+            try:
+                current = _load_lease(self.lease.build_id)
+                if current.get("state") == "ACTIVE" and current.get("session_v3", {}).get("state") != "FAILED":
+                    self._fail(repr(error), -1, command=[action], step_index=index)
+            except BaseException:
+                pass
+            raise
+
+    def _run_next_locked(self) -> dict[str, Any]:
+        _require_buildlease_vm_runtime(self.plan)
+        lease_record, session = self._load(allow_running=True)
+        if session.get("state") == "RUNNING":
+            if (session.get("output_capture_uncertain") is True
+                    or session.get("process_containment_uncertain") is True
+                    or session.get("process_session_id") is not None):
+                raise RetentionError(
+                    "v3 session process or output containment is uncertain; the RUNNING lease remains blocking")
+            self._fail("a previous session step has an uncertain result and cannot be resumed", -1)
+            raise RetentionError("v3 session had an interrupted step and is non-resumable")
+        if session.get("state") != "ACTIVE":
+            raise RetentionError(f"v3 session cannot execute from state {session.get('state')}")
+        index = session.get("next_step_index")
+        if not isinstance(index, int) or index < 0 or index >= len(self.plan["steps"]):
+            raise RetentionError("v3 session has no remaining command step")
+        step = self.plan["steps"][index]
+        if step["kind"] == "source_verification":
+            raise RetentionError("the final source_verification step requires verify_source()")
+        if (_session_dual_graph_enabled(self.plan)
+                and step["kind"] in {"stage_windows_product", "stage_native_runtime"}):
+            return self._run_typed_stage_step(index, step, lease_record, session)
+        process = None
+        log_path = self.session_dir / "steps" / f"step-{index:03d}.log"
+        command_path = self.session_dir / "steps" / f"step-{index:03d}.command.json"
+        result_path = self.session_dir / "steps" / f"step-{index:03d}.result.json"
+        command: list[str] = []
+        install_stage: Path | None = None
+        install_temporary: Path | None = None
+        install_temporary_identity: dict[str, Any] | None = None
+        output_reader: threading.Thread | None = None
+        output_errors: list[BaseException] = []
+        output_error_event = threading.Event()
+        output_overflow_event = threading.Event()
+        output_eof_event = threading.Event()
+        output_stop_event = threading.Event()
+        process_containment: dict[str, Any] | None = None
+        unexpected_descendants = False
+        reader_live_uncertain = False
+        process_containment_uncertain = False
+        process_session_identity_mismatch = False
+        native_loader_provenance: dict[str, Any] | None = None
+        inputs_after_observation: dict[str, Any] | None = None
+        graph_provenance: dict[str, Any] | None = None
+        graph_directory_identity_before: dict[str, int] | None = None
+        graph_output_rows: list[dict[str, Any]] = []
+        graph_output_rows_before: list[dict[str, Any]] = []
+        stage_tree_identity: dict[str, Any] | None = None
+        stage_tree_identity_before: dict[str, Any] | None = None
+        _evidence_bytes_before, log_bytes_before = self._check_controller_evidence_budget()
+        remaining_log_bytes = max(0, BUILD_SESSION_TOTAL_LOG_LIMIT_BYTES - log_bytes_before)
+        step_log_bytes = 0
+        try:
+            if command_path.exists() or result_path.exists():
+                raise RetentionError("duplicate or replayed session step evidence is not permitted")
+            source_observation = self._validate_source()
+            inputs_observation = self.lease._validate_session_inputs()
+            command, executable_identity = self._command_for_step(step, session)
+            if step["kind"] == "test":
+                command[0] = executable_identity.get("executable_path", executable_identity["path"])
+            dual_graph = _session_dual_graph_enabled(self.plan)
+            if dual_graph:
+                graph_provenance = self._graph_provenance(step)
+                selected_graph = _session_dual_graph_by_id(self.plan, str(step["graph_id"]))
+                graph_output_rows_before = self._verify_recorded_graph_outputs(session)
+                stage_tree_identity_before = self._stage_root_snapshot()
+                if step["kind"] != "configure":
+                    graph_directory_identity_before = self._graph_directory_identity(
+                        selected_graph, must_exist=True)
+            for role, receipt in self.plan["tools"].items():
+                _session_hash_executable(Path(receipt["path"]), receipt["sha256"])
+            step_environment = self._environment_for_step(step, session)
+            self._check_limits("before-step", extra_bytes=32 * 1024)
+            write_root = None
+            temporary_directory = None
+            if step["kind"] == "install":
+                install_stage, install_temporary, install_temporary_identity = self._create_install_temporary()
+                # Meson records install-log.txt in its build directory. Keep that
+                # controller-owned record writable while all installation outputs
+                # remain argv-bound to the exact stage root above.
+                write_root = self.workspace
+                temporary_directory = install_temporary
+            # Install output destinations are stage-bound; every command remains
+            # confined to the exact writable BuildLease image.
+            sandboxed, effective_env, launcher = _sandbox_session_command(command, self.workspace,
+                                                                            step_environment,
+                                                                            write_root=write_root,
+                                                                            temporary_directory=temporary_directory)
+            expected_tmp = str(temporary_directory or (self.workspace / ".tmp"))
+            expected_home = str(temporary_directory or (self.workspace / ".home"))
+            expected_environment_keys = set(step_environment) | {
+                "TMPDIR", "TMP", "TEMP", "XDG_CACHE_HOME", "XDG_CONFIG_HOME", "XDG_DATA_HOME"}
+            dyld_keys = {key for key in effective_env if key.startswith("DYLD_")}
+            native_loader_path = str(
+                self.workspace / BUILD_SESSION_DUAL_GRAPH_NATIVE_RUNTIME_RELATIVE)
+            production_path_test = (
+                dual_graph and step["kind"] == "test"
+                and step.get("test_class") == "PRODUCTION_PATH")
+            typed_loader_environment = (
+                production_path_test
+                and dyld_keys == {"DYLD_LIBRARY_PATH"}
+                and effective_env.get("DYLD_LIBRARY_PATH") == native_loader_path)
+            if (set(effective_env) != expected_environment_keys
+                    or "DESTDIR" in effective_env
+                    or any(key.startswith("LD_") for key in effective_env)
+                    or (dyld_keys and not typed_loader_environment)
+                    or (production_path_test
+                        and effective_env.get("DXVK_WSI_DRIVER") != "SDL2")
+                    or (dual_graph and step["kind"] == "test" and not production_path_test
+                        and ("DXVK_WSI_DRIVER" in effective_env or dyld_keys))
+                    or (dual_graph and step["kind"] != "test"
+                        and "DXVK_WSI_DRIVER" in effective_env)
+                    or effective_env.get("HOME") != expected_home
+                    or effective_env.get("TMPDIR") != expected_tmp
+                    or effective_env.get("TMP") != expected_tmp
+                    or effective_env.get("TEMP") != expected_tmp
+                    or effective_env.get("XDG_CACHE_HOME") != str(Path(expected_home) / ".cache")
+                    or effective_env.get("XDG_CONFIG_HOME") != str(Path(expected_home) / ".config")
+                    or effective_env.get("XDG_DATA_HOME") != str(Path(expected_home) / ".local" / "share")):
+                raise RetentionError("effective session environment contains output redirection or hooks")
+            if production_path_test:
+                native_loader_provenance = self._native_loader_provenance(
+                    session, effective_env["DYLD_LIBRARY_PATH"])
+            if (len(sandboxed) < 4 or sandboxed[0] != self.plan["tools"]["sandbox"]["path"]
+                    or sandboxed[1] != "-p" or sandboxed[3:] != command
+                    or launcher != self.plan["tools"]["sandbox"]["path"]):
+                raise RetentionError("session launcher must dispatch the exact direct command under Seatbelt")
+            profile_sha256 = hashlib.sha256(sandboxed[2].encode("utf-8")).hexdigest()
+            launcher_identity = _session_hash_executable(
+                Path(launcher), self.plan["tools"]["sandbox"]["sha256"])
+            launcher_sha256 = launcher_identity["sha256"]
+            lease_record, session = self._load()
+            self._check_root_bindings(lease_record, session)
+            if executable_identity is not None:
+                test_relative = (f"{step['graph_id']}:{step['output_id']}" if dual_graph
+                                 else step["executable"])
+                stored_executable_identity = (
+                    {key: value for key, value in executable_identity.items()
+                     if key != "executable_path"}
+                    if dual_graph else executable_identity)
+                prior_identity = session.setdefault("registered_tests", {}).get(test_relative)
+                if prior_identity is not None and prior_identity != stored_executable_identity:
+                    raise RetentionError("registered test executable identity changed before it was sealed")
+                session["registered_tests"][test_relative] = stored_executable_identity
+            command_receipt = {
+                "schema_version": BUILD_SESSION_SCHEMA_VERSION, "build_id": self.lease.build_id,
+                "executor_mode": BUILD_SESSION_EXECUTOR_MODE,
+                "executor_version": BUILD_SESSION_SCHEMA_VERSION,
+                "acceptance_state": "UNACCEPTED_UNTIL_WHOLE_LEASE_DETACH",
+                "plan_sha256": self.plan_sha256, "step_index": index, "kind": step["kind"],
+                "command": command, "cwd": str(self.workspace),
+                "source_observation": source_observation,
+                "input_tool_identities": inputs_observation["tools"],
+                "input_receipts": inputs_observation["input_receipts"],
+                "environment_sha256": hashlib.sha256(_canonical_json(effective_env)).hexdigest(),
+                "sandbox_launcher_path": launcher, "sandbox_launcher_sha256": launcher_sha256,
+                "sandbox_profile_sha256": profile_sha256,
+                "registered_executable_identity": executable_identity,
+                "started_at_unix": time.time(),
+            }
+            if dual_graph:
+                command_receipt.update({
+                    "graph_tool_identities": inputs_observation["graph_tools"],
+                    "runtime_input_identities": inputs_observation["runtime_inputs"],
+                    "graph_provenance": graph_provenance,
+                    "graph_directory_identity_before": graph_directory_identity_before,
+                    "graph_output_identities_before": graph_output_rows_before,
+                    "stage_tree_identity_before": stage_tree_identity_before,
+                    "windows_pe_stage_identity_before": session.get("windows_pe_stage_identity"),
+                    "native_runtime_stage_identity_before": session.get("native_runtime_stage_identity"),
+                })
+                if native_loader_provenance is not None:
+                    command_receipt["native_loader_provenance"] = native_loader_provenance
+            # Bind the prepared command to the live R71 capability after all
+            # command/environment preparation and before durable command
+            # evidence makes this step appear consumable.
+            self.lease._revalidate_r71_admission()
+            command_receipt_raw = _write_json(command_path, command_receipt, replace=False, sealed=True)
+            session["state"] = "RUNNING"
+            session["inflight_step_index"] = index
+            session["inflight_command_receipt_sha256"] = hashlib.sha256(command_receipt_raw).hexdigest()
+            session.pop("process_exit_observation", None)
+            session["sandbox_launcher_path"] = launcher
+            session["sandbox_launcher_sha256"] = launcher_sha256
+            session["sandbox_profile_sha256"] = profile_sha256
+            lease_record["session_v3"] = session
+            self._store(lease_record)
+            with log_path.open("xb") as stream:
+                self._validate_source()
+                for receipt in self.plan["tools"].values():
+                    _session_hash_executable(Path(receipt["path"]), receipt["sha256"])
+                if executable_identity is not None:
+                    self._validate_test_executable(step, session, after_execution=False)
+                if dual_graph and step["kind"] != "configure":
+                    selected_graph = _session_dual_graph_by_id(self.plan, str(step["graph_id"]))
+                    if self._graph_directory_identity(selected_graph, must_exist=True) != graph_directory_identity_before:
+                        raise RetentionError("graph build directory changed immediately before command dispatch")
+                if dual_graph:
+                    self._verify_recorded_graph_outputs(session)
+                    self._verify_stage_outputs(session)
+                _session_hash_executable(Path(launcher), launcher_sha256)
+                self._check_root_bindings(_load_lease(self.lease.build_id), session)
+                test_runtime_links: list[Path] = []
+                if production_path_test:
+                    for receipt in self.plan["runtime_receipts"]:
+                        filename = BUILD_SESSION_DUAL_GRAPH_RUNTIME_NAMES[receipt["runtime_id"]]
+                        link = self.workspace / filename
+                        if not link.exists() and not link.is_symlink():
+                            link.symlink_to(BUILD_SESSION_DUAL_GRAPH_NATIVE_RUNTIME_RELATIVE / filename)
+                            test_runtime_links.append(link)
+                try:
+                    # This is the final capability check at the process-launch
+                    # boundary. A changed dependency blocks Popen even if it
+                    # changed after the command receipt was durably written.
+                    self.lease._revalidate_r71_admission(
+                        allow_pre_dispatch=True)
+                    process = subprocess.Popen(sandboxed, cwd=self.workspace, env=effective_env,
+                                               stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
+                                               stderr=subprocess.STDOUT, close_fds=True, pass_fds=(),
+                                               start_new_session=True)
+                    self._active_process = process
+                    session["process_session_id"] = process.pid
+                    lease_record["session_v3"] = session
+                    self._store(lease_record)
+                    if type(process).__module__ == "subprocess":
+                        try:
+                            observed_session_id = os.getsid(process.pid)
+                        except OSError as sid_error:
+                            raise RetentionError(
+                                f"cannot verify the new BuildLease process session: {sid_error}") from sid_error
+                        if observed_session_id != process.pid:
+                            process_session_identity_mismatch = True
+                            raise RetentionError(
+                                "BuildLease command did not enter its dedicated process session")
+                    if process.stdout is None:
+                        raise RetentionError("session command stdout pipe was not created")
+                    output_fd = process.stdout.fileno()
+                    os.set_blocking(output_fd, False)
+
+                    def copy_output() -> None:
+                        nonlocal step_log_bytes
+                        try:
+                            while not output_stop_event.is_set():
+                                readable, _writable, _exceptional = select.select([output_fd], [], [], 0.1)
+                                if not readable:
+                                    continue
+                                try:
+                                    chunk = os.read(output_fd, 64 * 1024)
+                                except BlockingIOError:
+                                    continue
+                                if not chunk:
+                                    output_eof_event.set()
+                                    break
+                                try:
+                                    writable = min(len(chunk), remaining_log_bytes - step_log_bytes)
+                                    if writable > 0:
+                                        stream.write(chunk[:writable])
+                                        stream.flush()
+                                        step_log_bytes += writable
+                                    if writable < len(chunk):
+                                        output_overflow_event.set()
+                                except BaseException as error:
+                                    if not output_error_event.is_set():
+                                        output_errors.append(error)
+                                        output_error_event.set()
+                                    # Keep draining so a full pipe cannot stall the failed child.
+                        except BaseException as error:
+                            if not output_error_event.is_set():
+                                output_errors.append(error)
+                                output_error_event.set()
+                        finally:
+                            try:
+                                process.stdout.close()
+                            except OSError:
+                                pass
+
+                    output_reader = threading.Thread(target=copy_output, daemon=True,
+                                                     name=f"build-session-output-{self.lease.build_id}")
+                    output_reader.start()
+                    return_code = self.lease._wait_for_build_process(
+                        process, session=self, session_output_error=output_error_event,
+                        session_output_overflow=output_overflow_event)
+                    process_containment = _contain_session_processes(process.pid)
+                    process.wait(timeout=5)
+                    unexpected_descendants = set(process_containment.get("members_seen", [])) - {process.pid}
+                    output_reader.join(timeout=BUILD_SESSION_OUTPUT_DRAIN_SECONDS)
+                    if output_reader.is_alive():
+                        raise RetentionError("session command descendants still held its stdout pipe after SID cleanup")
+                    if output_errors:
+                        raise RetentionError(f"session command output capture failed: {output_errors[0]}")
+                    if not output_eof_event.is_set():
+                        raise RetentionError("session command output pipe ended without a verified EOF")
+                    try:
+                        stream.flush()
+                        os.fsync(stream.fileno())
+                    except BaseException as capture_error:
+                        output_errors.append(capture_error)
+                        output_error_event.set()
+                        raise RetentionError(
+                            f"session output log could not be made durable: {capture_error}") from capture_error
+                finally:
+                    for link in test_runtime_links:
+                        try:
+                            link.unlink()
+                        except OSError:
+                            pass
+            if dual_graph:
+                inputs_after_observation = self.lease._validate_session_inputs()
+                if inputs_after_observation != inputs_observation:
+                    raise RetentionError("source, tool, runtime, or SDK input changed during session operation")
+            self._active_process = None
+            if unexpected_descendants:
+                raise RetentionError("session command spawned descendants; they were stopped and killed")
+            if output_overflow_event.is_set():
+                raise RetentionError("session command exceeded its strict aggregate log-size limit")
+            if step_log_bytes > remaining_log_bytes:
+                raise RetentionError("session controller log exceeded its strict aggregate size cap")
+            lease_record, session = self._load(allow_running=True)
+            session["log_bytes_written"] = log_bytes_before + step_log_bytes
+            session["last_process_containment"] = process_containment
+            session.pop("process_session_id", None)
+            lease_record["session_v3"] = session
+            self._store(lease_record)
+            if install_stage is not None and install_temporary is not None and install_temporary_identity is not None:
+                self._remove_install_temporary(install_stage, install_temporary, install_temporary_identity)
+                install_temporary_identity = None
+            if return_code != 0:
+                self._write_result(index, "FAILURE", command_path, log_path,
+                                   return_code=return_code, error="session command returned nonzero",
+                                   input_observation=inputs_observation,
+                                   input_observation_after=inputs_after_observation,
+                                   graph_provenance=graph_provenance,
+                                   graph_directory_identity=graph_directory_identity_before)
+                self._fail("session command returned nonzero", return_code,
+                           command=command, log_path=log_path, step_index=index)
+                raise RetentionError(f"v3 session step {index} failed with exit {return_code}")
+            if dual_graph:
+                selected_graph = _session_dual_graph_by_id(self.plan, str(step["graph_id"]))
+                if step["kind"] == "configure":
+                    graph_directory_identity_after = _session_graph_directory_identity(
+                        self.workspace, selected_graph, must_exist=True)
+                    if graph_directory_identity_after is None:
+                        raise RetentionError("successful graph configure did not create its declared directory")
+                    existing = session.setdefault("graph_directory_identities", {}).get(selected_graph["graph_id"])
+                    if existing is not None:
+                        raise RetentionError("graph directory was configured more than once")
+                    session["graph_directory_identities"][selected_graph["graph_id"]] = graph_directory_identity_after
+                    graph_directory_identity_before = graph_directory_identity_after
+                elif step["kind"] == "build":
+                    graph_output_rows = self._capture_graph_outputs(step, session)
+                elif step["kind"] == "install":
+                    session["stage_install_tree_identity"] = self._stage_install_snapshot(initial=True)
+                elif step["kind"] == "test":
+                    executable_identity = self._validate_test_executable(
+                        step, session, after_execution=True)
+                    graph_output_rows = [{key: value for key, value in executable_identity.items()
+                                          if key != "executable_path"}]
+                self._verify_recorded_graph_outputs(session)
+                stage_tree_identity = self._verify_stage_outputs(
+                    session, require_complete=(step["kind"] == "test"))
+                session.setdefault("graph_step_output_rows", {})[str(index)] = graph_output_rows
+                session.setdefault("stage_step_tree_identities", {})[str(index)] = stage_tree_identity
+                lease_record["session_v3"] = session
+                self._store(lease_record)
+            elif step["kind"] == "build":
+                lease_record, session = self._load(allow_running=True)
+                for planned_test in self.plan["steps"]:
+                    if planned_test["kind"] == "test":
+                        self._validate_test_executable(planned_test, session)
+                lease_record["session_v3"] = session
+                self._store(lease_record)
+            if step["kind"] == "test" and not dual_graph:
+                self._validate_test_executable(step, session, after_execution=True)
+            self._validate_source()
+            peak = self._check_limits("step-boundary", extra_bytes=32 * 1024)
+            if dual_graph:
+                self._write_result(index, "SUCCESS", command_path, log_path,
+                                   return_code=0, source_observation=source_observation,
+                                   peak_allocated_bytes=peak,
+                                   input_observation=inputs_observation,
+                                   input_observation_after=inputs_after_observation,
+                                   graph_provenance=graph_provenance,
+                                   graph_directory_identity=graph_directory_identity_before,
+                                   graph_output_identities=graph_output_rows,
+                                   stage_tree_identity=stage_tree_identity,
+                                   native_loader_provenance=native_loader_provenance)
+            else:
+                self._write_result(index, "SUCCESS", command_path, log_path,
+                                   return_code=0, source_observation=source_observation,
+                                   peak_allocated_bytes=peak)
+            lease_record, session = self._load(allow_running=True)
+            result_hash = _hash_path(result_path)
+            command_hash = _hash_path(command_path)
+            session["state"] = "ACTIVE"
+            session.pop("inflight_step_index", None)
+            session.pop("inflight_command_receipt_sha256", None)
+            session["next_step_index"] = index + 1
+            session["step_receipts"] = list(session.get("step_receipts", [])) + [
+                {"step_index": index, "command_receipt_sha256": command_hash,
+                 "result_receipt_sha256": result_hash}]
+            lease_record["session_v3"] = session
+            self._store(lease_record)
+            return {"status": "STEP_SUCCEEDED_SESSION_ACTIVE", "step_index": index,
+                    "kind": step["kind"], "peak_allocated_bytes": peak,
+                    "lease_state": "ACTIVE"}
+        except BaseException as error:
+            if process is not None:
+                try:
+                    if process_containment is None:
+                        if process_session_identity_mismatch:
+                            raise RetentionError(
+                                "cannot contain a BuildLease command outside its dedicated process session")
+                        if type(process).__module__ == "subprocess":
+                            try:
+                                observed_session_id = os.getsid(process.pid)
+                            except OSError as sid_error:
+                                # ESRCH can mean the short-lived leader exited
+                                # after its launch-bound SID was established.
+                                # Keep its PID as the session identity so the
+                                # containment routine can inspect the unreaped
+                                # leader and enumerate any remaining members.
+                                if sid_error.errno != errno.ESRCH:
+                                    raise RetentionError(
+                                        f"cannot reverify the BuildLease process session: {sid_error}") from sid_error
+                            else:
+                                if observed_session_id != process.pid:
+                                    raise RetentionError(
+                                        "cannot contain a BuildLease command outside its dedicated process session")
+                        process_containment = _contain_session_processes(process.pid)
+                    process.wait(timeout=5)
+                except BaseException as termination_error:
+                    process_containment_uncertain = True
+                    error = RetentionError(f"{error}; process SID containment failed: {termination_error}")
+                    try:
+                        self._mark_process_containment_uncertain(error, step_index=index,
+                                                                process_session_id=process.pid)
+                    except BaseException:
+                        pass
+                    self._active_process = process
+                    raise error
+            if output_reader is not None and output_reader.ident is not None:
+                output_stop_event.set()
+                output_reader.join(timeout=5.0)
+                if output_reader.is_alive():
+                    reader_live_uncertain = True
+                    error = RetentionError(f"{error}; session output reader did not stop after SID containment")
+                    try:
+                        self._mark_output_capture_uncertain(error, step_index=index)
+                    except BaseException:
+                        # The prelaunch RUNNING record remains a durable no-resume barrier.
+                        pass
+                    self._active_process = None
+                    raise error
+            capture_uncertain = (output_error_event.is_set() or bool(output_errors)
+                                 or (not output_eof_event.is_set()
+                                     and not output_overflow_event.is_set()))
+            if process is not None and capture_uncertain:
+                # A stopped reader is not proof that it drained the pipe. Keep
+                # the lease RUNNING whenever a launched command lacks verified
+                # EOF or its log could not be durably captured, even if the
+                # controller reader thread has exited. An aggregate overflow is
+                # a known bounded failure and remains eligible for terminal capture.
+                reader_live_uncertain = True
+                reason = ("session output log durability is uncertain"
+                          if output_error_event.is_set() or output_errors
+                          else "session output capture ended without verified EOF")
+                error = RetentionError(f"{error}; {reason}")
+                try:
+                    self._mark_output_capture_uncertain(error, step_index=index)
+                except BaseException:
+                    # The prelaunch RUNNING record remains a durable no-resume barrier.
+                    pass
+                self._active_process = None
+                raise error
+            self._active_process = None
+            if not process_containment_uncertain and not reader_live_uncertain and process_containment is not None:
+                try:
+                    current = _load_lease(self.lease.build_id)
+                    current_session = current.get("session_v3")
+                    if isinstance(current_session, dict) and current_session.get("state") == "RUNNING":
+                        current_session["last_process_containment"] = process_containment
+                        current_session["log_bytes_written"] = min(
+                            BUILD_SESSION_TOTAL_LOG_LIMIT_BYTES,
+                            int(current_session.get("log_bytes_written", 0)) + step_log_bytes)
+                        current_session.pop("process_session_id", None)
+                        current["session_v3"] = current_session
+                        self._store(current)
+                except BaseException:
+                    pass
+            if (install_stage is not None and install_temporary is not None
+                    and install_temporary_identity is not None):
+                try:
+                    self._remove_install_temporary(install_stage, install_temporary,
+                                                   install_temporary_identity)
+                except BaseException as cleanup_error:
+                    error = RetentionError(f"{error}; install temporary cleanup failed: {cleanup_error}")
+            try:
+                current = _load_lease(self.lease.build_id)
+                if current.get("state") == "ACTIVE" and current.get("session_v3", {}).get("state") != "FAILED":
+                    self._fail(repr(error), -1, command=command or ["session-step"],
+                               log_path=(log_path if log_path.is_file()
+                                         and (output_reader is None or not output_reader.is_alive()) else None),
+                               step_index=index)
+            except BaseException:
+                pass
+            raise
+
+    def _write_result(self, index: int, status: str, command_path: Path, log_path: Path | None,
+                      *, return_code: int, error: str | None = None,
+                      source_observation: Mapping[str, Any] | None = None,
+                      peak_allocated_bytes: int | None = None,
+                      input_observation: Mapping[str, Any] | None = None,
+                      input_observation_after: Mapping[str, Any] | None = None,
+                      graph_provenance: Mapping[str, Any] | None = None,
+                      graph_directory_identity: Mapping[str, Any] | None = None,
+                      graph_directory_identities: Mapping[str, Any] | None = None,
+                      graph_output_identities: list[Mapping[str, Any]] | None = None,
+                      stage_operation_identity: Mapping[str, Any] | None = None,
+                      stage_tree_identity: Mapping[str, Any] | None = None,
+                      native_loader_provenance: Mapping[str, Any] | None = None) -> Path:
+        result_path = self.session_dir / "steps" / f"step-{index:03d}.result.json"
+        if result_path.exists():
+            raise RetentionError("session step result receipt already exists")
+        log_hash = _hash_path(log_path) if log_path is not None and log_path.is_file() else None
+        payload = {"schema_version": BUILD_SESSION_SCHEMA_VERSION, "build_id": self.lease.build_id,
+                   "executor_mode": BUILD_SESSION_EXECUTOR_MODE,
+                   "executor_version": BUILD_SESSION_SCHEMA_VERSION,
+                   "plan_sha256": self.plan_sha256, "step_index": index,
+                   "kind": self.plan["steps"][index]["kind"], "status": status,
+                   "acceptance_state": "UNACCEPTED_UNTIL_WHOLE_LEASE_DETACH",
+                   "return_code": return_code, "command_receipt_sha256": _hash_path(command_path),
+                   "log_path": (log_path.relative_to(self.root).as_posix() if log_hash else None),
+                   "log_sha256": log_hash, "source_observation": source_observation,
+                   "peak_allocated_bytes": peak_allocated_bytes, "completed_at_unix": time.time()}
+        if input_observation is not None:
+            payload.update({
+                "input_tool_identities": input_observation.get("tools"),
+                "input_receipts": input_observation.get("input_receipts"),
+                "graph_tool_identities": input_observation.get("graph_tools"),
+                "runtime_input_identities": input_observation.get("runtime_inputs"),
+            })
+        if input_observation_after is not None:
+            payload["input_observation_after"] = dict(input_observation_after)
+        if graph_provenance is not None:
+            payload["graph_provenance"] = dict(graph_provenance)
+        if graph_directory_identity is not None:
+            payload["graph_directory_identity"] = dict(graph_directory_identity)
+        if graph_directory_identities is not None:
+            payload["graph_directory_identities"] = {
+                key: dict(value) for key, value in graph_directory_identities.items()}
+        if graph_output_identities is not None:
+            payload["graph_output_identities"] = [dict(row) for row in graph_output_identities]
+        if stage_operation_identity is not None:
+            payload["stage_operation_identity"] = dict(stage_operation_identity)
+        if stage_tree_identity is not None:
+            payload["stage_tree_identity"] = dict(stage_tree_identity)
+        if native_loader_provenance is not None:
+            payload["native_loader_provenance"] = dict(native_loader_provenance)
+        if error is not None:
+            bounded, digest = _bounded_failure_error(error)
+            payload["error"] = bounded
+            if digest:
+                payload["error_sha256"] = digest
+        predicted_peak = self._check_limits(
+            "before-step-result-write", extra_bytes=len(_canonical_json(payload)) + 8192)
+        if peak_allocated_bytes is not None:
+            payload["peak_allocated_bytes"] = max(peak_allocated_bytes, predicted_peak)
+        _write_json(result_path, payload, replace=False, sealed=True)
+        return result_path
+
+    def verify_source(self) -> dict[str, Any]:
+        self.lease._revalidate_r71_admission()
+        return self._with_operation("verify_source", self._verify_source_locked)
+
+    def _verify_source_locked(self) -> dict[str, Any]:
+        _require_buildlease_vm_runtime(self.plan)
+        lease_record, session = self._load(allow_running=True)
+        if session.get("state") == "RUNNING":
+            if session.get("output_capture_uncertain") is True:
+                raise RetentionError("v3 session output capture is uncertain; source verification is blocked")
+            self._fail("source verification cannot recover an uncertain step", -1)
+            raise RetentionError("v3 session has an uncertain command result")
+        if session.get("state") != "ACTIVE":
+            raise RetentionError(f"v3 source verification cannot run from state {session.get('state')}")
+        index = session.get("next_step_index")
+        if index != len(self.plan["steps"]) - 1 or self.plan["steps"][index]["kind"] != "source_verification":
+            raise RetentionError("source verification is allowed only at the final planned step")
+        command_path = self.session_dir / "steps" / f"step-{index:03d}.command.json"
+        result_path = self.session_dir / "steps" / f"step-{index:03d}.result.json"
+        try:
+            if command_path.exists() or result_path.exists():
+                raise RetentionError("source verification receipt already exists")
+            self._check_limits("before-source-verification")
+            source_observation = self._validate_source()
+            input_observation = self.lease._validate_session_inputs()
+            graph_directory_identities: dict[str, Any] = {}
+            graph_output_identities: list[dict[str, Any]] = []
+            stage_operation_identity: dict[str, Any] | None = None
+            stage_tree_identity: dict[str, Any] | None = None
+            if _session_dual_graph_enabled(self.plan):
+                if input_observation != source_observation:
+                    raise RetentionError("final source and input observations are inconsistent")
+                graph_directory_identities = dict(session.get("graph_directory_identities", {}))
+                graph_output_identities = self._verify_graph_outputs(session)
+                stage_tree_identity = self._verify_stage_outputs(session, require_complete=True)
+                stage_operation_identity = {
+                    "windows_pe_stage_identity": session.get("windows_pe_stage_identity"),
+                    "native_runtime_stage_identity": session.get("native_runtime_stage_identity"),
+                    "stage_install_tree_identity": session.get("stage_install_tree_identity"),
+                }
+            command_payload = {"schema_version": BUILD_SESSION_SCHEMA_VERSION,
+                              "executor_mode": BUILD_SESSION_EXECUTOR_MODE,
+                              "executor_version": BUILD_SESSION_SCHEMA_VERSION,
+                              "acceptance_state": "UNACCEPTED_UNTIL_WHOLE_LEASE_DETACH",
+                              "build_id": self.lease.build_id, "plan_sha256": self.plan_sha256,
+                              "step_index": index, "kind": "source_verification", "command": None,
+                              "cwd": str(self.workspace),
+                              "read_only": True, "source_observation": source_observation,
+                              "started_at_unix": time.time()}
+            if _session_dual_graph_enabled(self.plan):
+                command_payload.update({
+                    "input_tool_identities": input_observation["tools"],
+                    "input_receipts": input_observation["input_receipts"],
+                    "graph_tool_identities": input_observation["graph_tools"],
+                    "runtime_input_identities": input_observation["runtime_inputs"],
+                    "graph_directory_identities": graph_directory_identities,
+                    "graph_output_identities": graph_output_identities,
+                    "stage_operation_identity": stage_operation_identity,
+                    "stage_tree_identity": stage_tree_identity,
+                })
+            _write_json(command_path, command_payload, replace=False, sealed=True)
+            if _session_dual_graph_enabled(self.plan):
+                self._write_result(
+                    index, "SUCCESS", command_path, None, return_code=0,
+                    source_observation=source_observation,
+                    peak_allocated_bytes=self._check_limits("source-verification-boundary"),
+                    input_observation=input_observation,
+                    graph_directory_identities=graph_directory_identities,
+                    graph_output_identities=graph_output_identities,
+                    stage_operation_identity=stage_operation_identity,
+                    stage_tree_identity=stage_tree_identity)
+            else:
+                self._write_result(index, "SUCCESS", command_path, None, return_code=0,
+                                   source_observation=source_observation,
+                                   peak_allocated_bytes=self._check_limits("source-verification-boundary"))
+            lease_record, session = self._load()
+            session["state"] = "ACTIVE"
+            session["next_step_index"] = index + 1
+            session["final_source_verification"] = source_observation
+            session["step_receipts"] = list(session.get("step_receipts", [])) + [{
+                "step_index": index, "command_receipt_sha256": _hash_path(command_path),
+                "result_receipt_sha256": _hash_path(result_path)}]
+            lease_record["session_v3"] = session
+            self._store(lease_record)
+            return {"status": "SOURCE_VERIFIED_SESSION_ACTIVE", "source_identity": source_observation,
+                    "lease_state": "ACTIVE"}
+        except BaseException as error:
+            self._fail(repr(error), -1, command=["source-verification"], step_index=index)
+            raise
+
+    def _fail(self, reason: str, return_code: int, *, command: list[str] | None = None,
+              log_path: Path | None = None, step_index: int | None = None) -> None:
+        """Durably terminalize first, then preserve bounded failure evidence and retire."""
+        try:
+            lease_record = _load_lease(self.lease.build_id)
+        except (OSError, RetentionError):
+            raise RetentionError("cannot terminalize a missing v3 session lease")
+        session = lease_record.get("session_v3")
+        if lease_record.get("state") != "ACTIVE" or not isinstance(session, dict):
+            raise RetentionError("cannot fail a v3 session that is no longer ACTIVE")
+        if session.get("state") == "FAILED":
+            return
+        if session.get("state") in {"QUIESCING", "READY_TO_FINALIZE", "FINALIZING", "ACCEPTED"}:
+            session["acceptance_state"] = "REJECTED_INCOMPLETE_QUIESCENCE"
+            session["write_quiescence_state"] = "UNKNOWN_OR_FAILED"
+        elif not str(session.get("acceptance_state", "")).startswith("REJECTED_"):
+            session["acceptance_state"] = "REJECTED_EXECUTION_FAILED"
+        session["state"] = "FAILED"
+        session["failed_at_unix"] = time.time()
+        session["failed_step_index"] = step_index
+        session["failure_reason_sha256"] = hashlib.sha256(reason.encode("utf-8", "replace")).hexdigest()
+        session["failure_reason"] = reason[:MAX_FAILURE_ERROR_BYTES]
+        session["storage_watch_events"] = [dict(event) for event in self.lease.storage_watch_events]
+        lease_record["session_v3"] = session
+        lease_record["state"] = "FAILED"
+        lease_record["failed_at_unix"] = session["failed_at_unix"]
+        lease_record["failure_reason_sha256"] = session["failure_reason_sha256"]
+        lease_record["failed_command"] = command or ["build-session", "failed"]
+        lease_record["return_code"] = return_code
+        self._store(lease_record)
+        for path in (self.session_dir / BUILD_SESSION_TERMINAL,
+                     self.session_dir / "session-terminal.pending.json"):
+            try:
+                path.unlink()
+            except FileNotFoundError:
+                pass
+        selected_command = command or ["build-session", "failed"]
+        try:
+            self.lease.fail(command=selected_command, return_code=return_code,
+                            log_path=log_path, error=reason)
+        except BaseException:
+            # The signed FAILED session lease remains a durable no-resume barrier even if capture fails.
+            raise
+
+    def _mark_output_capture_uncertain(self, reason: BaseException, *, step_index: int) -> None:
+        """Keep the active reservation blocking when its controller log writer cannot be stopped."""
+        lease_record = _load_lease(self.lease.build_id)
+        session = lease_record.get("session_v3")
+        if (lease_record.get("state") != "ACTIVE" or not isinstance(session, dict)
+                or session.get("state") != "RUNNING"):
+            raise RetentionError("cannot block an output-uncertain session outside its RUNNING lease")
+        message = str(reason)
+        session.update({"state": "RUNNING", "output_capture_uncertain": True,
+                        "output_capture_failure_reason": message[:MAX_FAILURE_ERROR_BYTES],
+                        "output_capture_failure_reason_sha256": hashlib.sha256(
+                            message.encode("utf-8", "replace")).hexdigest(),
+                        "output_capture_failed_step_index": step_index,
+                        "output_capture_marked_at_unix": time.time()})
+        lease_record["session_v3"] = session
+        self._store(lease_record)
+
+    def _mark_process_containment_uncertain(self, reason: BaseException, *, step_index: int,
+                                            process_session_id: int) -> None:
+        """Keep the mount and reservation blocking if SID cleanup cannot be proven."""
+        lease_record = _load_lease(self.lease.build_id)
+        session = lease_record.get("session_v3")
+        if (lease_record.get("state") != "ACTIVE" or not isinstance(session, dict)
+                or session.get("state") != "RUNNING"):
+            raise RetentionError("cannot block process-uncertain containment outside a RUNNING lease")
+        message = str(reason)
+        session.update({"state": "RUNNING", "process_containment_uncertain": True,
+                        "process_session_id": process_session_id,
+                        "process_containment_failure_reason": message[:MAX_FAILURE_ERROR_BYTES],
+                        "process_containment_failure_reason_sha256": hashlib.sha256(
+                            message.encode("utf-8", "replace")).hexdigest(),
+                        "process_containment_failed_step_index": step_index,
+                        "process_containment_marked_at_unix": time.time()})
+        lease_record["session_v3"] = session
+        self._store(lease_record)
+
+    def finalize(self) -> dict[str, Any]:
+        return self._with_operation("finalize", self._finalize_locked)
+
+    def _finalize_locked(self) -> dict[str, Any]:
+        _require_buildlease_vm_runtime(self.plan)
+        lease_record, session = self._load(allow_running=True)
+        if session.get("state") != "ACTIVE":
+            raise RetentionError(f"v3 session cannot finalize from state {session.get('state')}")
+        if session.get("next_step_index") != len(self.plan["steps"]):
+            raise RetentionError("v3 session cannot finalize before every planned step succeeds")
+        if not session.get("final_source_verification"):
+            raise RetentionError("v3 session lacks its final read-only source verification")
+        terminal_path = self.session_dir / BUILD_SESSION_TERMINAL
+        pending_path = self.session_dir / "session-terminal.pending.json"
+        try:
+            if terminal_path.exists() or pending_path.exists():
+                raise RetentionError("v3 session terminal receipt already exists")
+            final_source = self._validate_source()
+            if final_source != session["final_source_verification"]:
+                raise RetentionError("source changed after the final verification step")
+            self._check_root_bindings(lease_record, session)
+            peak = self._check_limits("before-finalize")
+            self.lease._stop_heartbeat()
+            session["state"] = "QUIESCING"
+            session["acceptance_state"] = "UNACCEPTED_UNTIL_NORMAL_UNMOUNT_AND_DETACH"
+            session["write_quiescence_state"] = "WRITABLE_IMAGE_DETACH_IN_PROGRESS"
+            session["quiescence_started_at_unix"] = time.time()
+            lease_record["session_v3"] = session
+            self._store(lease_record)
+
+            # This is the only writable-phase acceptance boundary. No output hash,
+            # artifact copy, or SUCCESS receipt is produced before both operations.
+            detached_workspace = _detach_session_workspace(
+                self.root, session["workspace_mount_identity"])
+            session["detached_workspace_identity"] = detached_workspace
+            session["detached_image_identity"] = detached_workspace["detached_image_identity"]
+            session["write_quiescence_state"] = "WRITABLE_IMAGE_NORMALLY_UNMOUNTED_AND_DETACHED"
+            session["writable_detached_at_unix"] = detached_workspace.get("detached_at_unix")
+            lease_record["session_v3"] = session
+            self._store(lease_record)
+
+            readonly_mount = _attach_session_workspace_readonly(self.root, detached_workspace)
+            session["readonly_mount_identity"] = readonly_mount
+            lease_record["session_v3"] = session
+            self._store(lease_record)
+
+            final_source = self._validate_source()
+            if final_source != session["final_source_verification"]:
+                raise RetentionError("source changed between writable detach and read-only evidence verification")
+            output_relative = _session_relative_path(self.plan["output_root"], "output_root", allow_dot=True)
+            output_root = _session_safe_path(self.workspace, output_relative, must_exist=True, directory=True)
+            output_tree, output_count = _session_tree_digest(output_root, exclude_controller_state=True)
+            stage_relative = _session_relative_path(self.plan["stage_root"], "stage_root")
+            stage = _session_safe_path(self.workspace, stage_relative, must_exist=True, directory=True)
+            graph_directory_identities: dict[str, Any] = {}
+            graph_output_identities: list[dict[str, Any]] = []
+            stage_tree_identity: dict[str, Any] | None = None
+            stage_operation_identity: dict[str, Any] | None = None
+            if _session_dual_graph_enabled(self.plan):
+                graph_directory_identities = dict(session.get("graph_directory_identities", {}))
+                graph_output_identities = self._verify_graph_outputs(session)
+                stage_tree_identity = self._verify_stage_outputs(session, require_complete=True)
+                stage_operation_identity = {
+                    "windows_pe_stage_identity": session.get("windows_pe_stage_identity"),
+                    "native_runtime_stage_identity": session.get("native_runtime_stage_identity"),
+                    "stage_install_tree_identity": session.get("stage_install_tree_identity"),
+                }
+            stage_fd = _open_dir(stage)
+            output_fd = _open_dir(output_root)
+            try:
+                readonly_stage_identity = _fs_identity(stage_fd)
+                readonly_output_identity = _fs_identity(output_fd)
+            finally:
+                os.close(stage_fd)
+                os.close(output_fd)
+            _verify_session_workspace_readonly(self.root, readonly_mount)
+            ordered_results = [row["result_receipt_sha256"] for row in session["step_receipts"]]
+            sandbox_profile_sha = session.get("sandbox_profile_sha256")
+            launcher_path = session.get("sandbox_launcher_path")
+            launcher_hash = session.get("sandbox_launcher_sha256")
+            if (not isinstance(sandbox_profile_sha, str) or not launcher_path or not launcher_hash
+                    or len(ordered_results) != len(self.plan["steps"])):
+                raise RetentionError("v3 session lacks sandbox or ordered-step completion evidence")
+            session["storage_watch_events"] = [dict(event) for event in self.lease.storage_watch_events]
+            lease_record["session_v3"] = session
+            self._store(lease_record)
+            payload = {"schema_version": BUILD_SESSION_SCHEMA_VERSION, "state": "PENDING_SUCCESS",
+                       "executor_mode": BUILD_SESSION_EXECUTOR_MODE,
+                       "executor_version": BUILD_SESSION_SCHEMA_VERSION,
+                       "acceptance_state": "UNACCEPTED_PENDING_NORMAL_READONLY_DETACH_AND_MANIFEST",
+                       "write_quiescence_state": session["write_quiescence_state"],
+                       "build_id": self.lease.build_id, "plan_sha256": self.plan_sha256,
+                       "admission_identity": self.plan["admission_identity"],
+                       "source_identity": self.plan["source_identity"],
+                       "final_source_verification": final_source,
+                       "build_root_identity": session["build_root_identity"],
+                       "workspace_mount_identity": session["workspace_mount_identity"],
+                       "detached_workspace_identity": detached_workspace,
+                       "detached_image_identity": session["detached_image_identity"],
+                       "readonly_mount_identity": readonly_mount,
+                       "readonly_stage_root_identity": readonly_stage_identity,
+                       "readonly_output_root_identity": readonly_output_identity,
+                       "stage_root_identity": readonly_stage_identity,
+                       "output_root_identity": readonly_output_identity,
+                       "output_tree_sha256": output_tree, "output_file_count": output_count,
+                       "step_count": len(self.plan["steps"]),
+                       "step_receipts": session["step_receipts"],
+                       "graph_directory_identities": graph_directory_identities,
+                       "graph_output_identities": graph_output_identities,
+                       "stage_operation_identity": stage_operation_identity,
+                       "stage_tree_identity": stage_tree_identity,
+                       "ordered_result_receipt_sha256": ordered_results,
+                       "storage_watch_events": [dict(event) for event in self.lease.storage_watch_events],
+                       "peak_allocated_bytes": peak,
+                       "reservation_bytes": self.lease.expected_bytes,
+                       "sandbox_launcher_path": launcher_path,
+                       "sandbox_launcher_sha256": launcher_hash,
+                       "sandbox_profile_sha256": sandbox_profile_sha,
+                       "finalized_at_unix": time.time()}
+            root_info = os.statvfs(self.root)
+            terminal_size_estimate = len(json.dumps(_seal(payload), indent=2, sort_keys=True).encode())
+            extra = ((terminal_size_estimate + root_info.f_frsize - 1) // root_info.f_frsize + 2) * root_info.f_frsize
+            peak = self._check_limits("before-terminal-receipt", extra_bytes=extra)
+            _write_json(pending_path, payload, replace=False, sealed=True)
+            self._check_controller_evidence_budget()
+            measure_root = lambda: _session_measure_tree(
+                self.root, workspace_mount_identity=readonly_mount)["allocated_bytes"]
+            observed_peak = measure_root()
+            if observed_peak > self.lease.expected_bytes:
+                raise RetentionError("session terminal evidence would exceed the signed reservation")
+            payload["peak_allocated_bytes"] = max(peak, observed_peak)
+            _write_json(pending_path, payload, replace=True, sealed=True)
+            self._check_controller_evidence_budget()
+            if measure_root() > self.lease.expected_bytes:
+                raise RetentionError("session terminal receipt exceeds the signed reservation")
+            session["state"] = "READY_TO_FINALIZE"
+            session["peak_allocated_bytes"] = payload["peak_allocated_bytes"]
+            session["output_tree_sha256"] = output_tree
+            session["output_file_count"] = output_count
+            session["readonly_stage_root_identity"] = readonly_stage_identity
+            session["readonly_output_root_identity"] = readonly_output_identity
+            session["acceptance_state"] = "UNACCEPTED_PENDING_NORMAL_READONLY_DETACH_AND_MANIFEST"
+            lease_record["session_v3"] = session
+            self._store(lease_record)
+            session_fd = _open_dir(self.session_dir)
+            try:
+                _rename_exclusive(session_fd, pending_path.name, terminal_path.name)
+            finally:
+                os.close(session_fd)
+            self._check_controller_evidence_budget()
+            if measure_root() > self.lease.expected_bytes:
+                raise RetentionError("session finalization crossed its signed reservation")
+            lease_record = _load_lease(self.lease.build_id)
+            session = lease_record["session_v3"]
+            session["terminal_sha256"] = _hash_path(terminal_path)
+            lease_record["session_v3"] = session
+            self._store(lease_record)
+            result = self.lease.complete()
+            return result
+        except BaseException as error:
+            try:
+                current = _load_lease(self.lease.build_id)
+                if current.get("state") == "ACTIVE" and current.get("session_v3", {}).get("state") != "FAILED":
+                    self._fail(repr(error), -1, command=["session-finalize"], step_index=None)
+            except BaseException:
+                pass
+            raise
+
 
 def reconcile_pending() -> list[dict[str, Any]]:
     lease_fd, lock_fd = _lock()
