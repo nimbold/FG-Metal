@@ -1,4 +1,23 @@
-# CMake and Ninja output
+# ─────────────────────────────────────────────────────────────────────────────
+# FG-Metal — published scope
+#
+# This repository publishes the library, its documentation, the round reports
+# cited by that documentation, and the source of the experiment harness.
+#
+# The accumulated engineering record — historical round reports, gate
+# evidence, instrument traces, and raw captures — is archived on the machine
+# that produced it and is deliberately not tracked. It ran to 4.8 GB of
+# evidence against 71 MB of code, which made the repository unreadable and
+# slow to clone without making any claim more verifiable: the reports that
+# cite that evidence state what was measured, and the evidence is retained
+# locally with the run that produced it.
+#
+# Rules below apply to untracked files only. A file already tracked keeps
+# working normally. To publish an excluded artefact deliberately, use
+# `git add -f <path>`.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ── Build and tool output ────────────────────────────────────────────────────
 /build/
 /build-*/
 /cmake-build-*/
@@ -9,8 +28,6 @@ compile_commands.json
 build.ninja
 .ninja_deps
 .ninja_log
-
-# Apple build output and local IDE state
 DerivedData/
 *.xcuserstate
 *.xcuserdata/
@@ -18,80 +35,81 @@ DerivedData/
 __pycache__/
 *.py[cod]
 
-# Model assets are fetched and converted locally; keep copyrighted checkpoints
-# and generated runtime weights out of Git history.
+# Generated benchmark output.
+/test-results/
+
+# ── Model assets ─────────────────────────────────────────────────────────────
+# Weights are fetched and converted locally; copyrighted checkpoints and
+# generated runtime weights stay out of Git history.
 /models/local/
 /models/cache/
-# Step 11D.2 native DXVK outputs are retained in the local content-addressed
-# store. Evidence manifests pin their hashes; do not stage absolute CAS symlinks
-# or multi-gigabyte build products in the source repository.
-/experiments/dxvk_macos_step11dR/evidence/**/d3d11.dll
-/experiments/dxvk_macos_step11dR/evidence/**/dxgi.dll
-# GitHub rejects individual files above 100 MiB. Keep the original captures
-# locally and track their byte-exact gzip archives beside them.
-/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-300s-10-low-candidate/runtime.log
-/experiments/dxvk_macos_step11dR/evidence/step11d2-diagnostic/diag-300s-10-low-candidate/slow-visual_d3d11.log
 
-# Large raw captures and rebuildable control binaries stay local; reports,
-# compact run results, manifests, analyses, and cleanup receipts remain reviewable.
-/experiments/dxvk_macos_step11d3a/evidence/native-runs/**/trace.jsonl
-/experiments/dxvk_macos_step11d3b/runs/
-/experiments/dxvk_macos_step11d3b/control/*.exe
-/experiments/dxvk_macos_step11d3b/control/*.dylib
-/experiments/dxvk_macos_step11d3b/control/test_proxy_device_dispatch
-/experiments/dxvk_macos_step11d3b/test_proxy_device_dispatch
-/experiments/dxvk_macos_step11d3b/evidence/**/*.exe
-/experiments/dxvk_macos_step11d3b/evidence/**/*.dylib
-/experiments/dxvk_macos_step11d3b/evidence/**/public-window-observer
-/experiments/dxvk_macos_step11d3b/evidence/br4/collision-proof/collision_harness
-/experiments/dxvk_macos_step11d3b/evidence/br7/ownership-test
-/experiments/dxvk_macos_step11d3b/evidence/br7/ownership-test-final
-# Retain verified archives and receipts locally; this 335 MB archive exceeds
-# GitHub's per-file size limit.
-/experiments/dxvk_macos_step11d3b/evidence/br7/superseded-pre-br7.tar.gz
-
-# Local scratch and agent workspace state. These are shell-accident paths and
-# tool caches, not project material.
+# ── Local scratch and agent workspace state ──────────────────────────────────
 /--help/
 /--verbose=4
 /.workbuddy-ai/
 
-# R6 local provenance archive store. Holds git bundles, source tarballs, and
-# workspace snapshots used for host-local recovery; the reviews and reports that
-# cite them are tracked.
+# ── Root round reports ───────────────────────────────────────────────────────
+# Rounds R65–R113 and the R5/R6 gate bookkeeping are archived. The rounds the
+# published documentation cites are re-included below.
+/FG-METAL-R*.md
+!/FG-METAL-R105-*.md
+!/FG-METAL-R106-*.md
+!/FG-METAL-R114-*.md
+!/FG-METAL-R115-*.md
+!/FG-METAL-R116-*.md
+!/FG-METAL-R117-*.md
+!/FG-METAL-R118-*.md
+!/FG-METAL-R119-*.md
+!/FG-METAL-R120-*.md
+!/FG-METAL-R121-*.md
+
+# Storage-gate, Step 11E, and BR9R working records.
+/R5-*
+/R6-*
+/POST-R5-*
+/STEP11E-*
+/Z9R-*
+
+# ── R6 local provenance archive ──────────────────────────────────────────────
+# Git bundles, source tarballs, and workspace snapshots used for host-local
+# recovery. The reviews and reports that cite them are tracked.
 /r6/
 
-# MetalFX title-integration evidence (R92-R121). Raw GPU frame dumps, captured
-# frames, per-process observer logs, and built observers run to tens of
-# gigabytes per round. Reports, analysers, run summaries, and the observer
-# sources stay tracked so every published claim remains reviewable.
-/experiments/metalfx_frame_interpolator_R93/evidence/**/*.raw
-/experiments/metalfx_frame_interpolator_R93/evidence/**/*.rg16f
-/experiments/metalfx_frame_interpolator_R93/evidence/**/*.rgba16f
-/experiments/metalfx_frame_interpolator_R93/evidence/**/*.rgba32f
-/experiments/metalfx_frame_interpolator_R93/evidence/**/*.rg32f
-/experiments/metalfx_frame_interpolator_R93/evidence/**/*.jsonl
-/experiments/metalfx_frame_interpolator_R93/evidence/**/*.png
-/experiments/metalfx_frame_interpolator_R93/evidence/**/*.dylib
-/experiments/metalfx_frame_interpolator_R93/evidence/**/*.exe
-/experiments/metalfx_frame_interpolator_R93/evidence/**/observer*.log
+# ── Experiment evidence trees ────────────────────────────────────────────────
+# Every investigation keeps its report and its harness source in Git, and its
+# evidence directory on disk. Evidence is reproducible from the harness and
+# the run parameters recorded in the report.
+/experiments/*/evidence/
+/experiments/*/runs/
+
+# Archived investigation trees. These routes were closed or deferred; their
+# reports, audits, patches, and manifests are retained locally. Harness source
+# that the published documentation still cites stays tracked, and tracked files
+# are unaffected by these rules.
+/experiments/dxgi_public_attachment/
+/experiments/dxgi_public_probe/
+/experiments/dxmt_framegen/
+/experiments/dxvk_macos_step11a/
+/experiments/dxvk_macos_step11b/
+/experiments/dxvk_macos_step11b1/
+/experiments/dxvk_macos_step11c/
+/experiments/dxvk_macos_step11c1/
+/experiments/dxvk_macos_step11c1r/
+/experiments/dxvk_macos_step11c1r2/
+/experiments/dxvk_macos_step11d3a/
+/experiments/dxvk_macos_step11d3b/
+/experiments/dxvk_macos_step11dR/
+/experiments/metalfx_fi_capability_probe_R92/
+/experiments/storage/
+
+# Raw GPU frame dumps, captured frames, and built observers from the MetalFX
+# title-integration rounds: tens of gigabytes per round.
 /experiments/metalfx_frame_interpolator_R93/*.dylib
 /experiments/metalfx_frame_interpolator_R93/provider_smoke
 /experiments/metalfx_frame_interpolator_R93/frame_interpolator_smoke
 
-# R6 storage-gate iteration scratch: superseded candidate patches, dependency
-# manifests, and workspace snapshots, roughly 160 MB of them. The reviews and
-# reports that selected the retained candidate are tracked.
-/R6-A-R87-*
-/R6-A-*-CANDIDATE-*.diff
-
-# Storage-gate generated dumps. Single attestations and structured-output files
-# reach hundreds of megabytes; the gate code, tests, and reviews that produced
-# them are tracked.
-/experiments/storage/R6-A-R46-*.json
-/experiments/storage/R6-A-R46-*.md
-/experiments/storage/R6-A-R72-CLEANUP-RECEIPT-ARCHIVE-*.json
-/experiments/storage/R6-A-R74-PRE-R75-*.json
-/experiments/storage/r75-pre-attempt-archive/
-/experiments/storage/r18-evidence/
-/experiments/storage/smoke-runs/
+# Root-level gate scratch.
+/R64-GEMINI-ATTEMPT-DISPOSITION-R65.json
+/g0c-launcher-independent-review-*.json
+/present-accounting-production-path_dxgi.log
