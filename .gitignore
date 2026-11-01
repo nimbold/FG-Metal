@@ -49,3 +49,43 @@ __pycache__/
 # Retain verified archives and receipts locally; this 335 MB archive exceeds
 # GitHub's per-file size limit.
 /experiments/dxvk_macos_step11d3b/evidence/br7/superseded-pre-br7.tar.gz
+
+# Local scratch and agent workspace state. These are shell-accident paths and
+# tool caches, not project material.
+/--help/
+/--verbose=4
+/.workbuddy-ai/
+
+# R6 local provenance archive store. Holds git bundles, source tarballs, and
+# workspace snapshots used for host-local recovery; the reviews and reports that
+# cite them are tracked.
+/r6/
+
+# MetalFX title-integration evidence (R92-R121). Raw GPU frame dumps, captured
+# frames, per-process observer logs, and built observers run to tens of
+# gigabytes per round. Reports, analysers, run summaries, and the observer
+# sources stay tracked so every published claim remains reviewable.
+/experiments/metalfx_frame_interpolator_R93/evidence/**/*.raw
+/experiments/metalfx_frame_interpolator_R93/evidence/**/*.rg16f
+/experiments/metalfx_frame_interpolator_R93/evidence/**/*.rgba16f
+/experiments/metalfx_frame_interpolator_R93/evidence/**/*.rgba32f
+/experiments/metalfx_frame_interpolator_R93/evidence/**/*.rg32f
+/experiments/metalfx_frame_interpolator_R93/evidence/**/*.jsonl
+/experiments/metalfx_frame_interpolator_R93/evidence/**/*.png
+/experiments/metalfx_frame_interpolator_R93/evidence/**/*.dylib
+/experiments/metalfx_frame_interpolator_R93/evidence/**/*.exe
+/experiments/metalfx_frame_interpolator_R93/evidence/**/observer*.log
+/experiments/metalfx_frame_interpolator_R93/*.dylib
+/experiments/metalfx_frame_interpolator_R93/provider_smoke
+/experiments/metalfx_frame_interpolator_R93/frame_interpolator_smoke
+
+# Storage-gate generated dumps. Single attestations and structured-output files
+# reach hundreds of megabytes; the gate code, tests, and reviews that produced
+# them are tracked.
+/experiments/storage/R6-A-R46-*.json
+/experiments/storage/R6-A-R46-*.md
+/experiments/storage/R6-A-R72-CLEANUP-RECEIPT-ARCHIVE-*.json
+/experiments/storage/R6-A-R74-PRE-R75-*.json
+/experiments/storage/r75-pre-attempt-archive/
+/experiments/storage/r18-evidence/
+/experiments/storage/smoke-runs/
