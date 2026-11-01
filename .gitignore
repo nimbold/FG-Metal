@@ -6,16 +6,22 @@
 #
 # The accumulated engineering record — historical round reports, gate
 # evidence, instrument traces, and raw captures — is archived on the machine
-# that produced it and is deliberately not tracked. It ran to 4.8 GB of
-# evidence against 71 MB of code, which made the repository unreadable and
-# slow to clone without making any claim more verifiable: the reports that
-# cite that evidence state what was measured, and the evidence is retained
-# locally with the run that produced it.
+# that produced it and is deliberately not tracked. It runs to tens of
+# gigabytes against a few megabytes of source, which made the repository
+# unreadable and slow to clone without making any claim more verifiable: the
+# reports that cite that evidence state what was measured, and the evidence is
+# retained locally with the run that produced it.
 #
 # Rules below apply to untracked files only. A file already tracked keeps
 # working normally. To publish an excluded artefact deliberately, use
 # `git add -f <path>`.
 # ─────────────────────────────────────────────────────────────────────────────
+
+# ── Local archive ────────────────────────────────────────────────────────────
+# Everything this project retains but does not publish lives under `archive/`,
+# grouped by what it is rather than left loose at the root. See the header
+# above for why none of it is tracked.
+/archive/
 
 # ── Build and tool output ────────────────────────────────────────────────────
 /build/
@@ -45,36 +51,7 @@ __pycache__/
 /models/cache/
 
 # ── Local scratch and agent workspace state ──────────────────────────────────
-/--help/
-/--verbose=4
 /.workbuddy-ai/
-
-# ── Root round reports ───────────────────────────────────────────────────────
-# Rounds R65–R113 and the R5/R6 gate bookkeeping are archived. The rounds the
-# published documentation cites are re-included below.
-/FG-METAL-R*.md
-!/FG-METAL-R105-*.md
-!/FG-METAL-R106-*.md
-!/FG-METAL-R114-*.md
-!/FG-METAL-R115-*.md
-!/FG-METAL-R116-*.md
-!/FG-METAL-R117-*.md
-!/FG-METAL-R118-*.md
-!/FG-METAL-R119-*.md
-!/FG-METAL-R120-*.md
-!/FG-METAL-R121-*.md
-
-# Storage-gate, Step 11E, and BR9R working records.
-/R5-*
-/R6-*
-/POST-R5-*
-/STEP11E-*
-/Z9R-*
-
-# ── R6 local provenance archive ──────────────────────────────────────────────
-# Git bundles, source tarballs, and workspace snapshots used for host-local
-# recovery. The reviews and reports that cite them are tracked.
-/r6/
 
 # ── Experiment evidence trees ────────────────────────────────────────────────
 # Every investigation keeps its report and its harness source in Git, and its
@@ -84,9 +61,9 @@ __pycache__/
 /experiments/*/runs/
 
 # Archived investigation trees. These routes were closed or deferred; their
-# reports, audits, patches, and manifests are retained locally. Harness source
-# that the published documentation still cites stays tracked, and tracked files
-# are unaffected by these rules.
+# reports, audits, patches, and manifests are retained under `archive/`.
+# Harness source that the published documentation still cites stays tracked,
+# and tracked files are unaffected by these rules.
 /experiments/dxgi_public_attachment/
 /experiments/dxgi_public_probe/
 /experiments/dxmt_framegen/
@@ -108,8 +85,3 @@ __pycache__/
 /experiments/metalfx_frame_interpolator_R93/*.dylib
 /experiments/metalfx_frame_interpolator_R93/provider_smoke
 /experiments/metalfx_frame_interpolator_R93/frame_interpolator_smoke
-
-# Root-level gate scratch.
-/R64-GEMINI-ATTEMPT-DISPOSITION-R65.json
-/g0c-launcher-independent-review-*.json
-/present-accounting-production-path_dxgi.log
