@@ -14,16 +14,16 @@
 
 Artifacts:
 
-- [Cumulative local DXMT diagnostic patch](../../experiments/dxmt_framegen/patches/step10b2-dxmt-downstream.patch)
-- [First post-lifecycle-fix analysis](../../experiments/dxmt_framegen/evidence/step10b2/crash-fix-copy-completion/analysis.txt)
-- [First post-lifecycle-fix native log](../../experiments/dxmt_framegen/evidence/step10b2/crash-fix-copy-completion/native.csv)
-- [First post-lifecycle-fix app log](../../experiments/dxmt_framegen/evidence/step10b2/crash-fix-copy-completion/d3d11_clear_window_app.csv)
-- [First post-lifecycle-fix Wine log](../../experiments/dxmt_framegen/evidence/step10b2/crash-fix-copy-completion/wine-console.log)
-- [Latest bypass-guard retry analysis](../../experiments/dxmt_framegen/evidence/step10b2/retry-detach-bypass/analysis.txt)
-- [Latest bypass-guard retry native log](../../experiments/dxmt_framegen/evidence/step10b2/retry-detach-bypass/native.csv)
-- [Latest bypass-guard retry app log](../../experiments/dxmt_framegen/evidence/step10b2/retry-detach-bypass/d3d11_clear_window_app.csv)
-- [Latest bypass-guard retry Wine log](../../experiments/dxmt_framegen/evidence/step10b2/retry-detach-bypass/wine-console.log)
-- [Earlier failed-run analysis](../../experiments/dxmt_framegen/evidence/step10b2/failure-copy-completion/analysis.txt)
+- Cumulative local DXMT diagnostic patch (`experiments/dxmt_framegen/patches/step10b2-dxmt-downstream.patch`)
+- First post-lifecycle-fix analysis (`experiments/dxmt_framegen/evidence/step10b2/crash-fix-copy-completion/analysis.txt`)
+- First post-lifecycle-fix native log (`experiments/dxmt_framegen/evidence/step10b2/crash-fix-copy-completion/native.csv`)
+- First post-lifecycle-fix app log (`experiments/dxmt_framegen/evidence/step10b2/crash-fix-copy-completion/d3d11_clear_window_app.csv`)
+- First post-lifecycle-fix Wine log (`experiments/dxmt_framegen/evidence/step10b2/crash-fix-copy-completion/wine-console.log`)
+- Latest bypass-guard retry analysis (`experiments/dxmt_framegen/evidence/step10b2/retry-detach-bypass/analysis.txt`)
+- Latest bypass-guard retry native log (`experiments/dxmt_framegen/evidence/step10b2/retry-detach-bypass/native.csv`)
+- Latest bypass-guard retry app log (`experiments/dxmt_framegen/evidence/step10b2/retry-detach-bypass/d3d11_clear_window_app.csv`)
+- Latest bypass-guard retry Wine log (`experiments/dxmt_framegen/evidence/step10b2/retry-detach-bypass/wine-console.log`)
+- Earlier failed-run analysis (`experiments/dxmt_framegen/evidence/step10b2/failure-copy-completion/analysis.txt`)
 - [Analyzer source](../../tools/dxmt/analyze_framegen_run.py)
 
 The latest injected run used `DXMT_FRAMEGEN_FAIL=copy-completion`. Its app executable SHA-256 is `343178533e44c359ca0b67a2ae62cd91e97ba4282bbe5370c763385ae15d8f89`.

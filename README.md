@@ -9,7 +9,7 @@
 
 FG-Metal is a frame-generation research project built around one rule: **no claim survives without a measurement that could have falsified it.** It pairs a renderer-independent GPU-texture library with a live in-process integration that has generated and displayed real interpolated frames inside a running game on Apple silicon.
 
-Every headline number in this repository traces to a dated report and a content-hashed evidence directory. Results that failed are published with the same prominence as results that passed.
+Every headline number in this repository traces to a dated report and a run whose evidence is retained with it. Results that failed are published with the same prominence as results that passed.
 
 > **Naming.** The reusable library is `Framegen` in the source tree and in [ARCHITECTURE.md](ARCHITECTURE.md); `FG-Metal` is the repository and the research programme around it.
 
@@ -41,13 +41,13 @@ Every headline number in this repository traces to a dated report and a content-
 | Core library, GPU-texture contract, draft C ABI | **Implemented, tested** | `tests/`, [`include/framegen/api.h`](include/framegen/api.h) |
 | Metal backend (Practical-RIFE v4.26) | **Offline / synthetic only** | [Temporal quality](docs/TEMPORAL_QUALITY.md) |
 | Presentation scheduler | **Simulated only** | [`framegen-pacing-host`](tests/pacing_host.cpp) |
-| Real in-world A→M→B on the game's own layer | **Validated** (one pair) | [R114](FG-METAL-R114-INPROCESS-TARGET-LATCH-TITLE-DISPLAY-REPORT.md) |
-| Re-armable continuous A→M→B | **Validated** (60 tuples) | [R115](FG-METAL-R115-REARMABLE-CONTINUOUS-TITLE-REPORT.md) |
-| Async GPU fast gate, non-blocking M-then-B | **Validated** (51/51 ordered) | [R116](FG-METAL-R116-CRITICAL-PATH-PACING-REPORT.md) |
-| Generation throughput ≥ source rate | **Not validated** | [R118](FG-METAL-R118-LIVE-GENERATION-THROUGHPUT-REPORT.md), [R119](FG-METAL-R119-LIVE-CONTENTION-AND-EVIDENCE-ISOLATION-REPORT.md) |
-| Continuous 30→60 | **Not validated** | [R120](FG-METAL-R120-CONTINUOUS-30-TO-60-TITLE-REPORT.md), [R121](FG-METAL-R121-PRESENTATION-OCCUPANCY-REPORT.md) |
-| Continuous 60→120 | **Not attempted** | [R117](FG-METAL-R117-LOOKAHEAD-2X-FEASIBILITY-REPORT.md) |
-| Real title depth and motion vectors | **Not validated** (constant-depth prototype) | [R105](FG-METAL-R105-TITLE-INPUTS-CONSOLIDATED-REPORT.md), [R106](FG-METAL-R106-TITLE-DERIVED-MOTION-CONSOLIDATED-REPORT.md) |
+| Real in-world A→M→B on the game's own layer | **Validated** (one pair) | [R114](docs/reports/r114-inprocess-target-latch.md) |
+| Re-armable continuous A→M→B | **Validated** (60 tuples) | [R115](docs/reports/r115-rearmable-continuous-title.md) |
+| Async GPU fast gate, non-blocking M-then-B | **Validated** (51/51 ordered) | [R116](docs/reports/r116-critical-path-pacing.md) |
+| Generation throughput ≥ source rate | **Not validated** | [R118](docs/reports/r118-live-generation-throughput.md), [R119](docs/reports/r119-live-contention-and-evidence-isolation.md) |
+| Continuous 30→60 | **Not validated** | [R120](docs/reports/r120-continuous-30-to-60.md), [R121](docs/reports/r121-presentation-occupancy.md) |
+| Continuous 60→120 | **Not attempted** | [R117](docs/reports/r117-lookahead-2x-feasibility.md) |
+| Real title depth and motion vectors | **Not validated** (constant-depth prototype) | [R105](docs/reports/r105-title-inputs.md), [R106](docs/reports/r106-title-derived-motion.md) |
 | Supported adapter for an unmodified game | **None exists** | [TASKS.md](TASKS.md) |
 
 ---
@@ -62,10 +62,10 @@ The project has two tracks that are deliberately kept separate.
 
 What that integration has proven, in a real game process:
 
-- A real in-world frame pair was captured, interpolated, and displayed as **A → M → B** with `reachedDisplay=1`, and the game remained stable for 9,864 further frames ([R114](FG-METAL-R114-INPROCESS-TARGET-LATCH-TITLE-DISPLAY-REPORT.md)).
-- The lifecycle is **re-armable**: 60 accepted tuples across two processes with zero source leaks, zero stale callbacks, zero duplicate dispatches ([R115](FG-METAL-R115-REARMABLE-CONTINUOUS-TITLE-REPORT.md)).
-- The critical-path gate moved from **31.28 ms to 0.128 ms** of CPU time, and M-then-B scheduling held ordering and distinctness in 51 of 51 in-game tuples ([R116](FG-METAL-R116-CRITICAL-PATH-PACING-REPORT.md)).
-- A genuine **30 fps source cadence** was established by back-pressure, not frame thinning: 738 of 744 presents were actually blocked by the limiter ([R120](FG-METAL-R120-CONTINUOUS-30-TO-60-TITLE-REPORT.md)).
+- A real in-world frame pair was captured, interpolated, and displayed as **A → M → B** with `reachedDisplay=1`, and the game remained stable for 9,864 further frames ([R114](docs/reports/r114-inprocess-target-latch.md)).
+- The lifecycle is **re-armable**: 60 accepted tuples across two processes with zero source leaks, zero stale callbacks, zero duplicate dispatches ([R115](docs/reports/r115-rearmable-continuous-title.md)).
+- The critical-path gate moved from **31.28 ms to 0.128 ms** of CPU time, and M-then-B scheduling held ordering and distinctness in 51 of 51 in-game tuples ([R116](docs/reports/r116-critical-path-pacing.md)).
+- A genuine **30 fps source cadence** was established by back-pressure, not frame thinning: 738 of 744 presents were actually blocked by the limiter ([R120](docs/reports/r120-continuous-30-to-60.md)).
 
 What it has not proven: that the output is a continuous 60 fps stream. It is not. See below.
 
@@ -91,7 +91,7 @@ That leaves one open problem, and it is arithmetic rather than scheduling:
 
 > The SOURCE frame occupies the GPU for ~25 ms of every 33.3 ms period, leaving ~7.7 ms for interpolation passes that need ~15.8 ms. **The deficit is ~8.1 ms, and it lives entirely inside GPU work.** No presentation-side reordering can reach it.
 
-Three candidate fixes were evaluated and **all were declined with measurement**, not caution: committing the blit earlier moves the GPU start by the same amount in the opposite direction; capturing in the completion handler gains nothing; a separate queue inherits the same hazard. The honest classification is `GPU_CAPACITY_FOR_INTERPOLATION` — see [R121 §11](FG-METAL-R121-PRESENTATION-OCCUPANCY-REPORT.md).
+Three candidate fixes were evaluated and **all were declined with measurement**, not caution: committing the blit earlier moves the GPU start by the same amount in the opposite direction; capturing in the completion handler gains nothing; a separate queue inherits the same hazard. The honest classification is `GPU_CAPACITY_FOR_INTERPOLATION` — see [R121 §11](docs/reports/r121-presentation-occupancy.md).
 
 ---
 
@@ -201,11 +201,11 @@ adapters/            test-metal host; d3dmetal, dxmt, dxvk reserved
 tools/               Benchmark runner, corpus, analyzer, RIFE conversion
 tests/               CTest suite and Python metric checks
 docs/                Benchmark, HUD, temporal quality, feasibility, provenance
-experiments/         Dated investigation trees with evidence and reports
-*.md (root)          Append-only engineering log, R65–R121 and Step 8–11 closeouts
+docs/reports/        Round reports cited by this README, and the Step 11 closeout
+experiments/         Investigation harnesses; evidence is retained locally
 ```
 
-The root-level `FG-METAL-R*.md` files are the project's primary record. They are kept at the root deliberately so that report-to-report references and evidence paths stay stable; a future documentation consolidation is tracked in [TASKS.md](TASKS.md).
+**What is published, and what is not.** This repository tracks the library, its documentation, the round reports the documentation cites, and the harness source of the experiment line. It does not track the accumulated evidence: raw frame dumps, instrument traces, gate manifests, and per-round logs ran to 4.8 GB against 71 MB of source, which made the repository slow to clone without making any claim more verifiable. Those artefacts are retained on the machine that produced them, and the reports record the harness, run parameters, and build hashes needed to reproduce a measurement. `.gitignore` documents the boundary; `git add -f <path>` publishes an excluded artefact deliberately.
 
 ---
 
@@ -220,7 +220,7 @@ Four integration routes were investigated before the current title work. Three a
 | DXVK-MacOS Step 11 | **11E NOT READY** | AppFrame/backbuffer identity, cross-frame A/B ownership, and release-ledger closure unproven |
 | Native MoltenVK control | **Healthy baseline** | 59.99–60.01 FPS with 0 waits ≥ 50 ms — proving the starvation is upstream, in the Wine/DXVK stack |
 
-The native control is the most useful result in that set: it converted a suspected platform limitation into a bounded, upstream-specific defect. Details are in the [Step 11 closeout](STEP11-CLOSEOUT-RECONCILIATION.md) and [decisions](DECISIONS.md).
+The native control is the most useful result in that set: it converted a suspected platform limitation into a bounded, upstream-specific defect. Details are in the [Step 11 closeout](docs/reports/step11-closeout/reconciliation.md) and [decisions](DECISIONS.md).
 
 ---
 
@@ -232,14 +232,15 @@ The native control is the most useful result in that set: it converted a suspect
 | [Roadmap](ROADMAP.md) | Phase structure and prerequisites |
 | [Tasks](TASKS.md) | Completed, blocked, and open work with verification records |
 | [Decisions](DECISIONS.md) | Accepted constraints and open questions |
-| [Step 11 closeout](STEP11-CLOSEOUT-RECONCILIATION.md) | DXVK disposition and 11E readiness |
+| [Step 11 closeout](docs/reports/step11-closeout/reconciliation.md) | DXVK disposition and 11E readiness |
+| [Round reports](docs/reports/) | R105–R121 title-integration reports and the Step 11 closeout series |
 | [Benchmark guidance](docs/BENCHMARK.md) | Corpus format, metrics, and limits |
 | [Temporal quality](docs/TEMPORAL_QUALITY.md) | Synthetic evaluation and regressions |
 | [HUD preservation](docs/HUD_PRESERVATION.md) | UI-plane and automatic protection |
 | [Renderer feasibility](docs/feasibility/) | GPTK, D3DMetal, DXGI, DXMT reports |
 | [Model provenance](docs/provenance/rife-v4.26.md) | Source, conversion, license, evidence |
 
-Recent title-integration rounds, newest first: [R121](FG-METAL-R121-PRESENTATION-OCCUPANCY-REPORT.md) · [R120](FG-METAL-R120-CONTINUOUS-30-TO-60-TITLE-REPORT.md) · [R119](FG-METAL-R119-LIVE-CONTENTION-AND-EVIDENCE-ISOLATION-REPORT.md) · [R118](FG-METAL-R118-LIVE-GENERATION-THROUGHPUT-REPORT.md) · [R117](FG-METAL-R117-LOOKAHEAD-2X-FEASIBILITY-REPORT.md) · [R116](FG-METAL-R116-CRITICAL-PATH-PACING-REPORT.md) · [R115](FG-METAL-R115-REARMABLE-CONTINUOUS-TITLE-REPORT.md) · [R114](FG-METAL-R114-INPROCESS-TARGET-LATCH-TITLE-DISPLAY-REPORT.md)
+Recent title-integration rounds, newest first: [R121](docs/reports/r121-presentation-occupancy.md) · [R120](docs/reports/r120-continuous-30-to-60.md) · [R119](docs/reports/r119-live-contention-and-evidence-isolation.md) · [R118](docs/reports/r118-live-generation-throughput.md) · [R117](docs/reports/r117-lookahead-2x-feasibility.md) · [R116](docs/reports/r116-critical-path-pacing.md) · [R115](docs/reports/r115-rearmable-continuous-title.md) · [R114](docs/reports/r114-inprocess-target-latch.md)
 
 ---
 

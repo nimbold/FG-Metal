@@ -45,7 +45,7 @@ Lower flicker is better; higher edge recall is better. Temporal stabilization al
 
 The refreshed five-target contact sheet was inspected across reference, raw RIFE, HUD-protected RIFE, temporal endpoint fallback, and combined HUD/temporal output. Some generated variants show broken or speckled fence segments and distorted or doubled HUD text, much of which is already present with HUD protection alone. No broad additional blur or accumulated multi-frame trails were apparent, and the first temporal target visibly steps to a real endpoint after reset. A still contact sheet does not establish response delay. The separate GPT-6 Max review of the refreshed sheet reached the same visual limits and called out the combined-mode flicker and thin-edge regressions above. The direct scene-cut and reset probes verified real-frame output after a cut, explicit reset, and timestamp/timeline invalidation. These checks do not substitute for licensed real-game captures.
 
-![Temporal quality contact sheet: reference, raw RIFE, HUD, temporal endpoint fallback, and combined output](/Users/nima/Documents/Code/FG-Metal/test-results/benchmarks/rife-v4.26-temporal-quality-rotation-contact.png)
+!Temporal quality contact sheet: reference, raw RIFE, HUD, temporal endpoint fallback, and combined output (`/Users/nima/Documents/Code/FG-Metal/test-results/benchmarks/rife-v4.26-temporal-quality-rotation-contact.png`)
 
 ### Result artifacts
 

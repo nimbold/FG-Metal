@@ -22,7 +22,7 @@ The retained BR8 classifier reports `NO_SUSTAINED_PATHOLOGY_OBSERVED`, zero qual
 
 ## Evidence references and limits
 
-- Accepted run result: [run-result.json](../../runs/step11d3b-br8-state-02-20261010-205756-a9b95137/run-result.json)
+- Accepted run result: run-result.json (`experiments/dxvk_macos_step11d3b/runs/step11d3b-br8-state-02-20261010-205756-a9b95137/run-result.json`)
 - BR8 outcome and pathology analysis: [inactive-raise-repeat-analysis.json](inactive-raise-repeat-analysis.json)
 - Target-owned telemetry: [host-trace.3197.jsonl](../../runs/step11d3b-br8-state-02-20261010-205756-a9b95137/host-traces/host-trace.3197.jsonl)
 - External actions and snapshots: [inactive-raise-repeat-controller.json](inactive-raise-repeat-controller.json), [inactive-raise-repeat-coverage-65.json](inactive-raise-repeat-coverage-65.json), and [inactive-raise-repeat-sequence.log](inactive-raise-repeat-sequence.log)

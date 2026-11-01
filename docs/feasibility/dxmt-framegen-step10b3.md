@@ -8,14 +8,14 @@
 
 The downstream patch targets DXMT commit `fb4515681daefb789a4d0f403c4bdbca88f3b3de`. The test remains D3D11, SDR, single-sample, one controlled application, approximately 30 Presents/s, and a 60 Hz display link. The patch is local and downstream.
 
-- [Final downstream patch](../../experiments/dxmt_framegen/patches/step10b3-dxmt-downstream.patch) — SHA-256 `cf45abb86fa51e3f581c2e3a9a8def700a82b72b6fdbe052dfde18fb60d95729`; applies cleanly to the pristine pinned checkout.
-- [Source-only 30-second run](../../experiments/dxmt_framegen/evidence/step10b3/source-only-30s-repeat-clean/summary.txt)
-- [Optional generation circuit-breaker run](../../experiments/dxmt_framegen/evidence/step10b3/failure-circuit-breaker-source-only/summary.txt)
-- [Failure matrix evidence](../../experiments/dxmt_framegen/evidence/step10b3/failure-matrix/)
-- [Fresh 60-second acceptance run](../../experiments/dxmt_framegen/evidence/step10b3/acceptance-60s-final/summary.txt)
-- [Combined lifecycle run](../../experiments/dxmt_framegen/evidence/step10b3/lifecycle-65s-logfix/summary.txt)
-- [Final 15-minute soak summary](../../experiments/dxmt_framegen/evidence/step10b3/soak-15m/summary.txt)
-- [Final 15-minute native CSV (lossless gzip)](../../experiments/dxmt_framegen/evidence/step10b3/soak-15m/native.csv.gz)
+- Final downstream patch (`experiments/dxmt_framegen/patches/step10b3-dxmt-downstream.patch`) — SHA-256 `cf45abb86fa51e3f581c2e3a9a8def700a82b72b6fdbe052dfde18fb60d95729`; applies cleanly to the pristine pinned checkout.
+- Source-only 30-second run (`experiments/dxmt_framegen/evidence/step10b3/source-only-30s-repeat-clean/summary.txt`)
+- Optional generation circuit-breaker run (`experiments/dxmt_framegen/evidence/step10b3/failure-circuit-breaker-source-only/summary.txt`)
+- Failure matrix evidence (`experiments/dxmt_framegen/evidence/step10b3/failure-matrix`)
+- Fresh 60-second acceptance run (`experiments/dxmt_framegen/evidence/step10b3/acceptance-60s-final/summary.txt`)
+- Combined lifecycle run (`experiments/dxmt_framegen/evidence/step10b3/lifecycle-65s-logfix/summary.txt`)
+- Final 15-minute soak summary (`experiments/dxmt_framegen/evidence/step10b3/soak-15m/summary.txt`)
+- Final 15-minute native CSV (lossless gzip) (`experiments/dxmt_framegen/evidence/step10b3/soak-15m/native.csv.gz`)
 
 The native CSV expands to 165 MB; it is gzip-compressed losslessly so the
 evidence remains within GitHub's per-file limit. `analyze_framegen_run.py`

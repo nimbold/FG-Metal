@@ -54,7 +54,7 @@ Only the qualified runs below contribute to primary comparisons. Rejected or exp
 | Long capture attempts v18 and v22 | Xcode could not save/trim the trace because the disk was full. Native output was retained but not counted as independent display evidence. |
 | First source-motion trace attempt | Wrong process matcher; run was not trace-qualified and was repeated with the corrected matcher. |
 
-The saved primary run outputs, manifests, and staged hashes are under [runs](runs/). Full raw `.trace` packages remain in their `/private/tmp/dxmt-step10b5-run-v*` capture directories; the programmatically exported TOCs and selected XML tables are preserved in this evidence directory. Their SHA-256 values are in [trace-exports.sha256](trace-exports.sha256).
+The saved primary run outputs, manifests, and staged hashes are under runs (`experiments/dxmt_framegen/evidence/step10b5/runs`). Full raw `.trace` packages remain in their `/private/tmp/dxmt-step10b5-run-v*` capture directories; the programmatically exported TOCs and selected XML tables are preserved in this evidence directory. Their SHA-256 values are in [trace-exports.sha256](trace-exports.sha256).
 
 ## Xcode facilities, signposts, and correlation method
 
@@ -66,7 +66,7 @@ The relevant installed instruments included Display, Core Animation Activity/Com
 
 The downstream instrumentation emits public OS signposts in subsystem `org.fgmetal.dxmt`, category `PointsOfInterest`: `DISPLAY_CALLBACK`, `TICK_ENQUEUED`, `WORKER_WAKE`, `OUTPUT_SELECTED`, `PRESENTER_BEGIN`, `PRESENTER_END`, `COMMAND_COMMITTED`, `DRAWABLE_PRESENT_CALLED`, `PRESENT_GPU_COMPLETED`, and `DRAWABLE_FEEDBACK`. Events carry compact tick/drawable/attempt/source/pair/epoch/output identifiers. The callback path uses a fixed event macro without formatting or allocation.
 
-**VERIFIED smoke/cost check:** the short static export is [smoke-v6-selected-trace.xml](smoke-v6-selected-trace.xml), with its TOC and signpost-off control TOC beside it. It contains VSync, Metal, and signpost rows and correlates `ca-client-present-request` to `DRAWABLE_PRESENT_CALLED` and handler rows to `DRAWABLE_FEEDBACK`. The signposts-on/off control retained about 60.29 versus 60.30 callbacks/s. Callback-duration p95 was 44.17 µs with signposts and 23.63 µs without; the observed approximately 20.5 µs increase did not move callback cadence. Native smoke outputs are under [signpost-on-smoke](runs/signpost-on-smoke/) and [signpost-off-control](runs/signpost-off-control/).
+**VERIFIED smoke/cost check:** the short static export is `experiments/dxmt_framegen/evidence/step10b5/smoke-v6-selected-trace.xml`, with its TOC and signpost-off control TOC beside it. It contains VSync, Metal, and signpost rows and correlates `ca-client-present-request` to `DRAWABLE_PRESENT_CALLED` and handler rows to `DRAWABLE_FEEDBACK`. The signposts-on/off control retained about 60.29 versus 60.30 callbacks/s. Callback-duration p95 was 44.17 µs with signposts and 23.63 µs without; the observed approximately 20.5 µs increase did not move callback cadence. Native smoke outputs are under signpost-on-smoke (`experiments/dxmt_framegen/evidence/step10b5/runs/signpost-on-smoke`) and signpost-off-control (`experiments/dxmt_framegen/evidence/step10b5/runs/signpost-off-control`).
 
 Correlation uses monotonic nanosecond timestamps and the compact IDs in native CSV/signpost rows. The Display and Core Animation rows are independently inspected by process, surface, frame label, direct-to-display status, and interval. In static trace controls, the Core Animation present-request rows match the app’s present-call signposts within 1 ms, while presented-handler rows match the app feedback signpost within about 0.01 ms. Thus those Core Animation rows confirm the same request/feedback chain; they are not an independent count of physical scanout.
 
@@ -97,7 +97,7 @@ All internal event fields use one monotonic nanosecond epoch derived from `mach_
 
 Apple Display event rates below use adjacent-row gaps: for `N` event rows spanning `T` seconds, the rate is `(N - 1) / T`. Row counts and gap rates are both shown where the distinction matters.
 
-Both controls used the same app binary, one owner epoch, and a static texture whose color stayed unchanged for 60 app Presents. The full native summaries and Display exports are preserved as [latency 1](runs/static-latency1/) and [latency 2](runs/static-latency2/).
+Both controls used the same app binary, one owner epoch, and a static texture whose color stayed unchanged for 60 app Presents. The full native summaries and Display exports are preserved as latency 1 (`experiments/dxmt_framegen/evidence/step10b5/runs/static-latency1`) and latency 2 (`experiments/dxmt_framegen/evidence/step10b5/runs/static-latency2`).
 
 | Run | App Presents/s | Callbacks/s | Submissions/s | GPU completions/s | Positive `presentedTime`/s | VSync/s | Wine surface gap rate/s |
 |---|---:|---:|---:|---:|---:|---:|---:|
@@ -125,7 +125,7 @@ The source-only harness changed color only once per 60 app Presents, so these su
 
 ## Primary F-equivalent 60-second run
 
-**VERIFIED**, same frozen identity as the static/source runs, fresh engine/prefix, visible foreground window, 60 Hz display, one owner epoch. Full output is in [F-synthetic-60](runs/F-synthetic-60/); exported trace is [F-synthetic60-selected-trace.xml](F-synthetic60-selected-trace.xml).
+**VERIFIED**, same frozen identity as the static/source runs, fresh engine/prefix, visible foreground window, 60 Hz display, one owner epoch. Full output is in F-synthetic-60 (`experiments/dxmt_framegen/evidence/step10b5/runs/F-synthetic-60`); exported trace is `experiments/dxmt_framegen/evidence/step10b5/F-synthetic60-selected-trace.xml`.
 
 | Stage | Count/rate |
 |---|---:|
@@ -211,7 +211,7 @@ The regression in [core_tests.cpp](../../../../tests/core_tests.cpp) uses A=`294
 
 ## Lifecycle and failure regression
 
-Full logs and summaries are under [regressions](regressions/).
+Full logs and summaries are under regressions (`experiments/dxmt_framegen/evidence/step10b5/regressions`).
 
 **Lifecycle, 65 s — VERIFIED PASS for safety/drain:** resize, Framegen disable/re-enable, minimize/restore, fullscreen enter/exit, swapchain recreation, and shutdown all completed successfully. The app was visible for every Present; 30 presents during intentional minimization were marked iconic/occluded. Across the expected eight owner epochs, all 1,722 accepted sources ended safely; lost=0, unsafe=0, regressions=0, malformed G pairs=0. Callback and terminal counts matched at 3,437; presentation feedback, worker drawables/ticks, generation submissions, and synthetic GPU work drained. App exit was 0.
 

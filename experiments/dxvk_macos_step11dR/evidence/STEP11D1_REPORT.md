@@ -69,7 +69,7 @@ The largest tail was A2 AppFrameId 4106: source Present lasted **1.144259 s**, W
 
 The trace does not measure WSI acquire duration, queue/lock waits, source command recording/submission, bridge-call duration, contemporaneous slot/scheduler state, swapchain lifecycle timestamps, Wine/OS scheduling, or per-stage logging cost. Static R5 review found no direct CPU wait for Metal completion in the normal application Present path. Indirect contention is not ruled out, so the source-latency hard invariant is **partially supported but not fully proven**, and tail causality remains unresolved.
 
-Evidence: [latency comparison](source-latency-comparison-20261006.json), [tail join data](source-present-tail-correlation-20261006.json), [tail CSV](source-present-tail-correlation-20261006.csv), [static lifetime audit](source-latency-lifetime-audit.md).
+Evidence: latency comparison (`experiments/dxvk_macos_step11dR/evidence/source-latency-comparison-20261006.json`), tail join data (`experiments/dxvk_macos_step11dR/evidence/source-present-tail-correlation-20261006.json`), [tail CSV](source-present-tail-correlation-20261006.csv), [static lifetime audit](source-latency-lifetime-audit.md).
 
 ## 4. Failure matrix and async Metal failure distinction
 
@@ -91,7 +91,7 @@ Evidence: [latency comparison](source-latency-comparison-20261006.json), [tail j
 
 The post-commit injection is explicitly **simulated at the provider callback**. It is not evidence of a real Metal command-buffer error and is not labeled as an NSError. The tested failure case did not leave a Vulkan wait pending on a Metal signal that could never arrive. Optional-failure source preservation across the untested cases remains unverified; device loss is expected to stay fatal.
 
-Prior inventory: [failure matrix status](../../../../../../.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/ledger-audits/failure-matrix-status.md) and [strict async injection audit](../../../../../../.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/ledger-audits/current-r5-async-injection-strict.json).
+Prior inventory: failure matrix status (`../../../.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/ledger-audits/failure-matrix-status.md`) and strict async injection audit (`../../../.codex/worktrees/step11d-r/FG-Metal/experiments/dxvk_macos_step11dR/evidence/ledger-audits/current-r5-async-injection-strict.json`).
 
 ## 5. Shutdown, final-job drain, and process termination
 
@@ -153,8 +153,8 @@ The independent adversarial reviewer concluded that Step 11E is **not authorized
 ## Evidence index
 
 - [Repeated cadence and per-run ledgers](cadence-repeatability-r5-20261006/)
-- [Source latency comparison](source-latency-comparison-20261006.json)
-- [Source Present tail correlation](source-present-tail-correlation-20261006.json)
+- Source latency comparison (`experiments/dxvk_macos_step11dR/evidence/source-latency-comparison-20261006.json`)
+- Source Present tail correlation (`experiments/dxvk_macos_step11dR/evidence/source-present-tail-correlation-20261006.json`)
 - [30 Hz lifecycle and shutdown](lifecycle-30hz-r5-20261006/runtime/)
 - [Process termination offsets](process-termination-r5-20261006/sequence-results.json)
 - [Exact-R5 FLIP_SEQUENTIAL control](flipseq-r5-exact-20261006/runs-fixed/analysis.json)

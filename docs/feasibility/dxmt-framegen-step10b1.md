@@ -8,7 +8,7 @@
 
 - Pristine DXMT checkout: `/tmp/dxmt-fb451568-evidence.opkf8x/repo`, clean at `fb4515681daefb789a4d0f403c4bdbca88f3b3de` before patch export.
 - Downstream worktree: `/tmp/dxmt-fb451568-evidence.opkf8x/downstream`, same base commit. The changes remain local and uncommitted.
-- The exact-baseline controlled D3D11 run before edits passed; its record is [baseline.txt](../../experiments/dxmt_framegen/evidence/step10b1/baseline/baseline.txt). That verifies app execution and resize setup, not scanout or frame generation.
+- The exact-baseline controlled D3D11 run before edits passed; its record is baseline.txt (`experiments/dxmt_framegen/evidence/step10b1/baseline/baseline.txt`). That verifies app execution and resize setup, not scanout or frame generation.
 - The downstream patch contains 16 DXMT files. It applies cleanly to the pristine checkout with `git apply --check`; `git diff --check` passes. Patch SHA-256: `2e728eb22f3d15b41154ef3f1e70b555adda47cc2239334479caf03eb1eb0c0c`.
 - The DXMT cross-build succeeded with `ninja -C /tmp/dxmt-step10b1-wine-x64`. The native bridge links the local model-free Framegen backend; no RIFE code is included.
 - No upstream PR, commit, or push was made. The pristine checkout and its `AGENTS.md` were not changed.
@@ -18,10 +18,10 @@ The build enabled `enable_dxmt_framegen_experiment` with `framegen_root=/Users/<
 
 Deliverables:
 
-- [Downstream DXMT patch](../../experiments/dxmt_framegen/patches/step10b1-dxmt-downstream.patch)
-- [Final 60-second summary](../../experiments/dxmt_framegen/evidence/step10b1/acceptance-60s-20261003-final-reviewed/summary.txt)
-- [Final native event log](../../experiments/dxmt_framegen/evidence/step10b1/acceptance-60s-20261003-final-reviewed/native.csv)
-- [Final app progression log](../../experiments/dxmt_framegen/evidence/step10b1/acceptance-60s-20261003-final-reviewed/d3d11_clear_window_app.csv)
+- Downstream DXMT patch (`experiments/dxmt_framegen/patches/step10b1-dxmt-downstream.patch`)
+- Final 60-second summary (`experiments/dxmt_framegen/evidence/step10b1/acceptance-60s-20261003-final-reviewed/summary.txt`)
+- Final native event log (`experiments/dxmt_framegen/evidence/step10b1/acceptance-60s-20261003-final-reviewed/native.csv`)
+- Final app progression log (`experiments/dxmt_framegen/evidence/step10b1/acceptance-60s-20261003-final-reviewed/d3d11_clear_window_app.csv`)
 - [Run analyzer](../../tools/dxmt/analyze_framegen_run.py)
 
 The patch changes `meson.build`, `meson.options`, `src/d3d11/d3d11_swapchain.cpp`, the DXMT command-queue/context/Presenter files, and WineMetal's `Metal.hpp`, Unix bridge/build/thunk files, and public typed declarations. The native Objective-C/Metal implementation is `src/winemetal/unix/dxmt_framegen_bridge.mm`.

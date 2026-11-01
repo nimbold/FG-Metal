@@ -26,9 +26,9 @@ The 10 seconds before the first resignation contain 600 acquisitions and 600 dis
 
 ## Evidence references and limits
 
-- Run result: [run-result.json](../../runs/step11d3b-br8-state-02-20261011-005208-590fa5da/run-result.json)
+- Run result: run-result.json (`experiments/dxvk_macos_step11d3b/runs/step11d3b-br8-state-02-20261011-005208-590fa5da/run-result.json`)
 - BR8 analysis: [inactive-frontmost-analysis.json](inactive-frontmost-analysis.json)
-- Target-owned trace: [host-trace.9014.jsonl](../../runs/step11d3b-br8-state-02-20261011-005208-590fa5da/host-traces/host-trace.9014.jsonl)
+- Target-owned trace: host-trace.9014.jsonl (`experiments/dxvk_macos_step11d3b/runs/step11d3b-br8-state-02-20261011-005208-590fa5da/host-traces/host-trace.9014.jsonl`)
 - Controller and external snapshots: [inactive-frontmost-controller.json](inactive-frontmost-controller.json), [inactive-frontmost-coverage-10.json](inactive-frontmost-coverage-10.json), [inactive-frontmost-coverage-25.json](inactive-frontmost-coverage-25.json), and [inactive-frontmost-coverage-65.json](inactive-frontmost-coverage-65.json)
 
 This is one valid inactive-app negative, not a B1/B2 classification. It does not rule out a different state trigger, a repeated pathology elsewhere in the condition series, or a separate renderer/compositor mechanism. No live UI interaction, graphics run, or test was performed for this assessment; the ongoing serial series was left untouched.
