@@ -11,6 +11,8 @@ FG-Metal is a frame-generation research project built around one rule: **no clai
 
 Every headline number in this repository traces to a dated report and a content-hashed evidence directory. Results that failed are published with the same prominence as results that passed.
 
+> **Naming.** The reusable library is `Framegen` in the source tree and in [ARCHITECTURE.md](ARCHITECTURE.md); `FG-Metal` is the repository and the research programme around it.
+
 > **Not a product.** There is no supported adapter for an unmodified game, the C ABI is a draft, and continuous 2× frame generation is **not** achieved. See [Status at a glance](#status-at-a-glance) for exactly what is and is not established.
 
 ---
