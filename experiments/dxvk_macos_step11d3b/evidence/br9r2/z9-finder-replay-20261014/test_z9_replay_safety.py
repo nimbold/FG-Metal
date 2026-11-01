@@ -1,9 +1,11 @@
 """Deterministic budget and fail-closed evidence tests for Z9 replay."""
 from __future__ import annotations
 
+import ast
 import sys
 import unittest
 from pathlib import Path
+from typing import Any
 
 LOCAL_DIR = Path(__file__).resolve().parent
 EXPERIMENT = LOCAL_DIR.parents[2]
@@ -17,6 +19,85 @@ from z9_replay_safety import (
     renderer_healthy, replay_execution_path_eligible, same_query_cover_state,
     transition_bracket_summary, _renderer_stream_coverage,
 )
+
+
+class Z9ReplayControllerContractTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.controller_path = LOCAL_DIR / "z9_finder_replay.py"
+        cls.controller_source = cls.controller_path.read_text(encoding="utf-8")
+        cls.controller_ast = ast.parse(cls.controller_source)
+
+    def test_appkit_visible_mask_accepts_8194_and_rejects_8192(self) -> None:
+        assignment = next(
+            node for node in ast.walk(self.controller_ast)
+            if isinstance(node, ast.Assign)
+            and any(isinstance(target, ast.Name)
+                    and target.id == "NS_WINDOW_OCCLUSION_STATE_VISIBLE"
+                    for target in node.targets))
+        self.assertEqual(ast.unparse(assignment.value), "1 << 1")
+        visible_mask = eval(
+            compile(ast.Expression(assignment.value), str(self.controller_path), "eval"),
+            {"__builtins__": {}},
+        )
+        self.assertEqual(visible_mask, 2)
+
+        telemetry_function = next(
+            node for node in self.controller_ast.body
+            if isinstance(node, ast.FunctionDef) and node.name == "telemetry_state")
+        namespace: dict[str, Any] = {
+            "Any": Any,
+            "NS_WINDOW_OCCLUSION_STATE_VISIBLE": visible_mask,
+        }
+        isolated_module = ast.Module(body=[telemetry_function], type_ignores=[])
+        exec(compile(isolated_module, str(self.controller_path), "exec"), namespace)
+        telemetry_state = namespace["telemetry_state"]
+        self.assertTrue(telemetry_state({"window_occlusion_state": 8194})["visible_bit_set"])
+        self.assertFalse(telemetry_state({"window_occlusion_state": 8192})["visible_bit_set"])
+
+    def test_finder_treatment_actions_follow_successful_action_free_measured_pre(self) -> None:
+        main_function = next(
+            node for node in self.controller_ast.body
+            if isinstance(node, ast.FunctionDef) and node.name == "main")
+        loops = [node for node in ast.walk(main_function) if isinstance(node, ast.While)]
+        canonical_wait = next(
+            node for node in loops if "precondition_deadline" in ast.unparse(node.test))
+        measured_pre = next(
+            node for node in loops if "pre_end_deadline" in ast.unparse(node.test))
+
+        def treatment_action_calls(node: ast.AST) -> list[ast.Call]:
+            names = {
+                "finder_activate_request", "finder_window_creation",
+                "finder_exact_window_raise_request", "finder_disjoint_stage_request",
+                "finder_full_cover_position_request", "finder_restore_staged_bounds_request",
+                "finder_close_exact_window_request", "cleanup_close_only_exact_new_finder_window",
+            }
+            return [
+                call for call in ast.walk(node)
+                if isinstance(call, ast.Call) and call.args
+                and isinstance(call.args[0], ast.Constant)
+                and call.args[0].value in names
+            ]
+
+        for name, loop in (("canonical PRE acquisition", canonical_wait),
+                           ("measured PRE", measured_pre)):
+            self.assertEqual(treatment_action_calls(loop), [], name)
+            loop_source = ast.unparse(loop)
+            self.assertNotIn("make new Finder window", loop_source, name)
+
+        successful_pre_line = next(
+            node.lineno for node in ast.walk(main_function)
+            if isinstance(node, ast.Assign)
+            and any(isinstance(target, ast.Name)
+                    and target.id == "measured_pre_completed" for target in node.targets)
+            and isinstance(node.value, ast.Constant) and node.value.value is True)
+        action_calls = treatment_action_calls(main_function)
+        self.assertTrue(action_calls)
+        self.assertGreater(min(call.lineno for call in action_calls), successful_pre_line)
+
+        creation_line = self.controller_source.index("set z9Window to make new Finder window")
+        completion_line = self.controller_source.index("measured_pre_completed = True")
+        self.assertGreater(creation_line, completion_line)
 
 
 class Z9ReplayBudgetTests(unittest.TestCase):

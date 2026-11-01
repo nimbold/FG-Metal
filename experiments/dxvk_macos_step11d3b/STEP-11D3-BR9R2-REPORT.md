@@ -1128,3 +1128,178 @@ Before any new Wine authorization, separately review and reconcile the runner's 
 `git diff --check` passed after the README update and authorization evidence append.
 
 This report is append-only. After this section and the README update are committed and published, a final complete post-append Gate 0 chain is run. Its canonical attestation, inventory, cleanup receipt, smoke, blockers, and storage extrema are the final authority; no report edit follows that finalization.
+
+
+## STEP 11D.3-BR9R2-Z9R-H4 — Measurement fix and Gate 0 stop — 2026-10-15 UTC
+
+### Storage diagnosis and fix
+
+The two requested profiling workers completed. Each regular-file path previously scanned all 132 exclusions and repeatedly rebuilt/walked `Path.parents`; profiling counted about 98.98 million ancestor iterator steps. The local Torch `ATen/ops` directory alone spent 85.61 seconds in this predicate. This was CPU-bound path accounting, not a filesystem wait. The minimal fix precomputes normalized exclusions as a set and checks each candidate and ancestor once. Accounting semantics changed: **NO**; root selection, traversal, symlink/device checks, hardlink treatment, allocated-block totals, and exclusions remain unchanged. `.git` and historical output remain in scope.
+
+The same instrumented exact-shape call improved from **493.824669 seconds** to **5.007292 seconds** (**98.6×**). The separately reported operational call exceeded one hour and was interrupted; it was not a completed timing baseline. After the fix, the scan covered the same 11 roots and 132 exclusions: 6,411 directories yielded, 6,432 directory entries, 53,508 filename entries, 53,034 regular-file paths, 51,889 inode keys, 50,827 included inode keys, and 451 symlinks. It measured 95,000,807,286 logical bytes, 49,975,717,888 allocated bytes, and 46,748,053,504 bytes after signed-output exclusions. The fresh Gate 0 inventory recorded a conservative scope of 49,975,791,616 bytes with no unlinked-image upper bound.
+
+The prior profile measured 49,976,610,816 allocated bytes and 46,748,024,832 after exclusions. The 921,600-byte decrease in total allocation is accounted for by the closed historical run: its `runtime.log` retained the same path, inode, size, and timestamps, while `st_blocks` changed from 4,104 to 2,304 (down 1,800 blocks / 921,600 bytes). Non-lease allocation increased by 28,672 bytes. No roots or project files were pruned to produce the speedup.
+
+Focused storage-policy tests passed: **50/50**. The new regressions bound exclusion membership work by path depth and protect `.git` inclusion and inode deduplication across nested roots. The fresh independent H4 reviewer returned **PASS**: [profile](evidence/br9r2/z9-finder-replay-20261014/H4-A-MEASURE-PROFILE.md), [algorithm review](evidence/br9r2/z9-finder-replay-20261014/H4-B-ALGORITHM.md), [fresh review](evidence/br9r2/z9-finder-replay-20261014/H4-FRESH-REVIEW.md). `git diff --check` passed.
+
+### Fresh Gate 0 and replay disposition
+
+Fresh Gate 0 preflight: **FAIL / BLOCKED** before the storage-only PrefixLease smoke. The exact blocker was that historical terminal closure verification reported “the signed output identity changed after terminal closure,” followed by the historical run exceeding its original persistent reservation. The current closed-tree allocation is 724,766,720 bytes versus 725,688,320 in correction-1. The closure also pins the prior `storage_policy.py` hash, which changed with this reviewed fix; the closure remains untouched. No smoke manifest, claim, or run directory was created for the blocked nonce. Lifecycle authorization and replay PRE were **not reached**; Finder treatment: **NO**; replay 1 and timing classification: **not reached**; replay 2: **not run**. Native and STEP 11D.3-C remain **gated: YES**.
+
+**Exact next step:** establish a narrowly scoped, independently reviewed append-only reconciliation path for the historical closure’s `runtime.log` allocation drift and current `storage_policy.py` hash while preserving the original failure, manifest, and closed-tree accounting. Do not retry Gate 0 until that closure can verify the current signed output; then resume the canonical Gate 0 chain and, only on PASS, continue with the already-reviewed lifecycle authorization and H3 replay. No H3 source work was reopened. No commit or push was made.
+
+
+## STEP 11D.3-BR9R2-Z9R-H5 — Exact successor implemented and reviewed — 2026-10-15 UTC
+
+H5-A and H5-B independently proved all 16 historical file hashes and the exact 20-entry tree unchanged except runtime.log st_blocks 4104 → 2304. The GO reconciliation, implementation and fresh review are retained beside the H3 controller as H5-A-CLOSURE-FORENSICS.md, H5-B-ADVERSARIAL-CONTRACT.md, H5-RECONCILIATION.md, H5-C-IMPLEMENTATION.md and H5-D-FRESH-REVIEW.md. H4 measurement optimization remains CLOSED and intact; H3 fixes, frozen detector, covered predicate and neutral-coverer SHA remain unchanged.
+
+The sole append-only successor is `experiments/storage/historical-terminal-closures/step11d3b-baseline-01-20261014-130823-44892b9b.correction-2.json`, SHA-256 `f0317a73c158fadaad52742f13e8944a444fa39e3c6b3a25eb3c3c25389b1613`. It cryptographically pins correction-1 SHA `8201c356ce00f8b2577df90c4e3ed5e6bb229bacef4f1785eac0a6edb5628710`, the immutable manifest SHA `11732b65ef09689e0cac94f3e0579e9c45f5af24def1129f8e7bfa910efc9d59`, and the complete exact current inventory. Allocation changes only 725,688,320 → 724,766,720 bytes (delta -921,600); logical bytes remain 720,231,108. Every subsequent content/path/inode/metadata/allocation change blocks. There is no tolerance or automatic rebase. Creation used the existing certification/allocation locks, O_EXCL/O_NOFOLLOW, file/directory fsync and repeated pre/post evidence, source, tree and liveness checks.
+
+Predecessor correction-1 SHA unchanged: YES. Original reservation 314,572,800 unchanged: YES. Original Gate POST BLOCKED and ordered blockers unchanged: YES. R5/T8 and Finder NOT EXECUTED history unchanged: YES. Historical bytes still charged: YES. `authorizes_execution=false`; failure preserved; no execution authority comes from closure. STEP 11D.3-B remains CASE B1; BR9R remains N3 — INCONCLUSIVE. Native gated: YES. STEP 11D.3-C gated: YES.
+
+Frozen source SHA is `b7ed515d6061d3999a303685a4332ceadb7360605b554fa4ac340f22afac6a70`; storage-policy tests SHA is `bf7fece1d92c04c228debdb75cc8ff39b65f2d95d1d00116ae705316941cadb5`. Precreation validation SHA is `396ac82d1577af6b1696091b2b9734a88b698e632c7bc880ebd6471914852e10`. Focused tests: 29 PASS. Full storage/Gate suite: 484 PASS. Fresh independent H5-D: PASS WITH NON-BLOCKING CAVEATS, 57 fresh focused tests PASS. D report SHA `0f3d65d875aaa290e31c6b0c33ccd9407639bbd595fba7af96466b6334d567a5`; external binding SHA `a0c3ff84085d6d9a26361b6b93f4df18109a2470a315c590e81fd5a872141902`. Caveats: synthetic C2 race/inventory fixtures do not emulate APFS; direct real-tree and liveness checks passed. The canonical G0C review now binds all nine required current files, including the unchanged PrefixLease contract test. Its completion-evidence check passes.
+
+This is the required pre-Gate implementation/review append. Admission and execution have not occurred at this append. After final diff/binding checks, all non-run repository writes stop. The next actions are fresh read-only admission for future output reservation 4,974,444,544 bytes plus existing PrefixLease/uncertainty policy, exactly one preflight → storage-only PrefixLease smoke → signed cleanup → finalization → explicit blockers chain, then immediate lifecycle authorization and H3 replay 1 only on PASS. Canonical run artifacts and `/private/tmp/codex-br9r2-h5-20261015-orchestration/h5-execution.json` retain actual outcomes; a terminal results append follows only after execution stops/completes. No report write occurs between final Gate 0 and lifecycle authorization. No commit or push.
+
+
+## STEP 11D.3-BR9R2-Z9R-H5 — Terminal Gate 0 smoke stop — 2026-10-15 UTC
+
+**STOP: no lifecycle authorization or Finder replay.** The historical successor reconciliation succeeded and fresh read-only admission passed. The one fresh canonical Gate 0 attempt passed preflight, then failed the storage-only PrefixLease smoke before prefix creation. No second Gate 0 attempt was made.
+
+The exact exception was `ValueError: Wine child environment contains a forbidden process startup hook: PYTHONDONTWRITEBYTECODE`, raised by `_validate_wine_child_environment` through `lease.set_env(env)`. The orchestrator introduced that variable into the execution environment to suppress Python bytecode writes. This was an orchestration error; the existing environment guard correctly rejected it. The guard was not weakened. The H4 measurement fix and successful historical reconciliation are not contradicted by this failure.
+
+### Admission and the attempted Gate chain
+
+Fresh current-hash admission bound policy SHA `b7ed515d6061d3999a303685a4332ceadb7360605b554fa4ac340f22afac6a70` and used the unchanged future-only output reservation:
+
+| Admission measurement | Bytes |
+|---|---:|
+| Current free | 69,510,451,200 |
+| Current conservative project scope | 49,979,850,752 |
+| Future output reservation | 4,974,444,544 |
+| Prefix reservation | 3,221,225,472 |
+| Uncertainty (10% raw peak) | 819,567,002 |
+| Total projected additional peak | 9,015,237,018 |
+| Projected free | 60,495,214,182 |
+| Projected conservative scope | 58,995,087,770 |
+
+Admission: PASS; blockers `[]`. Projected free passed the unchanged 50 GiB minimum, scope passed the unchanged 55 GiB ceiling. The below-60-GiB preferred-free and above-52-GiB scope advisories apply. No cleanup was used to force admission.
+
+1. Preflight: PASS, free 69,507,727,360 bytes, conservative scope 49,980,006,400 bytes, smoke PENDING, no storage warnings.
+2. Storage-only PrefixLease smoke `step11d3-storage-policy-smoke-20261015-a92fe196a361461b`: FAIL (return code 1), exact environment rejection above. No Wine application or graphics target was launched. Prefix created: false.
+3. Signed cleanup receipt: PASS; HMAC verified with `cleanup_receipt_hmac_sha256`; active marker removed; prefix absent; no prefix allocation to reclaim. Receipt: `experiments/storage/smoke-runs/step11d3-storage-policy-smoke-20261015-a92fe196a361461b/prefix-cleanup.json` (SHA-256 `5138f158a5e2b17bc2f5622a29be722455b278cfac9c64f694804581b867a6d5`). The cleanup PASS does not make the failed smoke PASS.
+4. Finalization: NOT ATTEMPTED after the smoke failure. No prefix-smoke-report was produced. Canonical attestation remains PREFLIGHT_PASS, not final PASS.
+5. Read-only terminal blockers observation (not a second Gate attempt): `["Gate 0 requires a final PASS attestation; preflight attestations authorize only the fixed storage smoke", "unrelated non-lease storage changed since Gate 0 certification", "Gate 0 PrefixLease smoke status is inconsistent with its attestation mode"]`. Thus blockers are not `[]`, and normal execution remains gated.
+
+Exact raw attempt logs and the orchestration stage record are retained at `/private/tmp/codex-br9r2-h5-20261015-orchestration/gate0-preflight.log`, `gate0-prefixlease-smoke.log`, `h5-execution.json`, and `h5-terminal-state.json`. The failed smoke manifest, claim, run directory and signed cleanup remain retained; nothing was deleted or rebased. This terminal report append follows the explicit stop; there was no report write between a final Gate PASS and authorization because no final Gate PASS occurred.
+
+### Required final disposition
+
+| Field | Result |
+|---|---|
+| Successor historical closure | `experiments/storage/historical-terminal-closures/step11d3b-baseline-01-20261014-130823-44892b9b.correction-2.json` |
+| Successor SHA-256 | `f0317a73c158fadaad52742f13e8944a444fa39e3c6b3a25eb3c3c25389b1613` |
+| Predecessor correction-1 SHA unchanged | YES — `8201c356ce00f8b2577df90c4e3ed5e6bb229bacef4f1785eac0a6edb5628710` |
+| Original manifest/reservation unchanged | YES — manifest `11732b65ef09689e0cac94f3e0579e9c45f5af24def1129f8e7bfa910efc9d59`; 314,572,800 bytes |
+| Original Gate POST failure unchanged | YES — BLOCKED, original ordered blockers preserved |
+| R5/T8 history unchanged | YES — INVALID / INCOMPLETE; INSUFFICIENT TIMING EVIDENCE |
+| Historical Finder execution unchanged | NOT EXECUTED |
+| Historical bytes still charged | YES — 724,766,720 allocated / 720,231,108 logical |
+| Successor authorizes execution | false |
+| H4 measurement fix preserved | YES; remains CLOSED |
+| Focused/full tests | 29 PASS / 484 PASS |
+| Fresh independent implementation review | PASS WITH NON-BLOCKING CAVEATS; 57 fresh focused tests PASS |
+| Read-only admission | PASS, exact numbers above |
+| Gate 0 | STOP at smoke; final PASS absent |
+| Lifecycle authorization | NOT EXECUTED |
+| Replay 1 | NOT EXECUTED |
+| Canonical PRE | NOT REACHED |
+| I1 runtime correlation | NOT REACHED |
+| Healthy measured PRE | NOT REACHED |
+| Finder full cover | NOT EXECUTED |
+| Visible-bit behavior | NOT MEASURED; mask 2 implementation unchanged |
+| Frozen fast-zero detector | NOT RUN; unchanged |
+| Restoration | NOT EXECUTED |
+| New R classification | NONE; historical R5 unchanged |
+| New T classification | NONE; historical T8 unchanged |
+| Replay 2 eligibility/result | INELIGIBLE / NOT EXECUTED |
+| Post-run P1/P2/P3 | NOT LAUNCHED, no treatment run |
+| Final independent replay review | NOT LAUNCHED, no replay evidence |
+| Terminal free-space observation | 69,539,360,768 bytes, before this terminal append |
+| Terminal conservative-scope observation | 49,980,170,240 bytes, before this terminal append |
+| Active PrefixLease markers | 0; failed smoke prefix absent |
+| Native gated | YES |
+| STEP 11D.3-C gated | YES |
+
+Exact next experimental step: retain this stopped attempt, remove the orchestrator-added PYTHONDONTWRITEBYTECODE variable from the child environment (use interpreter-local `sys.dont_write_bytecode` if needed), then under a separately resumed attempt complete a fresh read-only admission and full canonical Gate 0 chain. Do not alter the environment guard, historical successor, H4 optimization, H3 protocol, detector, or coverage predicate. Only after final PASS with blockers `[]` proceed immediately through lifecycle authorization and H3 Finder replay 1. STEP 11D.3-B remains CASE B1 — BARE WINE VULKAN REPRODUCES DRAWABLE INSTABILITY; BR9R remains N3 — INCONCLUSIVE. No commit or push.
+
+
+## STEP 11D.3-BR9R2-H6 — Clean Gate retry and authorization; replay admission stop — 2026-10-15 UTC
+
+### Readiness and write cutoff
+
+- H6-A environment/readiness: **READY** — [H6-A-READINESS.md](evidence/br9r2/H6-A-READINESS.md). The read-only verifier confirmed correction-2 SHA `f0317a73c158fadaad52742f13e8944a444fa39e3c6b3a25eb3c3c25389b1613`, its pinned correction-1 predecessor, current G0C and H5-D bindings, current PrefixLease runner ownership calls, mask 2, action-free PRE ordering, frozen detector/predicate, and quiescent FG-Metal liveness. Correction-2 still has `authorizes_execution=false`; historical facts and charged bytes are unchanged.
+- H6-B protocol: **READY** — [H6-B-PROTOCOL-VERIFY.md](evidence/br9r2/z9-finder-replay-20261014/H6-B-PROTOCOL-VERIFY.md). The current controller SHA is `162a9ab3a4b0e2013f855f9a0fc0b098536790f4a757057da45f5ae46f1f3f82`; frozen detector SHA remains `af6c2b69893e6c59fb453f5e140901a711411ba0e75c68747f11eaef1fadd582`. H3 retains its previously reviewed 20.000-second PRE with up to 250 ms capture tolerance. No H3/H4/H5 source or storage changes were made.
+- No forbidden startup hook was present. Gate, smoke, authorization, and replay-controller Python processes used interpreter-local `-B`; `PYTHONDONTWRITEBYTECODE` was removed from each invocation environment and was not passed into PrefixLease/Wine. The environment guard was not changed. Two long-lived CrossOver `winedevice.exe` processes belonged to separate Steam/Battle.net bottles and had no FG-Metal prefix/output handles; no active FG-Metal PrefixLease or build lease invalidated the attempt.
+- Both reports, the transient orchestration state, and `git diff --check` were completed before Gate 0. No explanatory report was appended between Gate final PASS and lifecycle authorization/replay. This terminal section is appended only after the replay controller stopped.
+
+### Fresh admission and the single canonical Gate 0 chain
+
+Read-only admission passed under the unchanged future-output reservation of 4,974,444,544 bytes and 3,221,225,472-byte PrefixLease reservation. Uncertainty was 819,567,002 bytes (`max(256 MiB, 10% raw peak)`); projected additional peak was 9,015,237,018 bytes.
+
+| Measurement | Bytes |
+|---|---:|
+| Current free | 69,530,689,536 |
+| Current conservative scope | 49,983,987,712 |
+| Projected free | 60,515,452,518 |
+| Projected conservative scope | 58,999,224,730 |
+| Admission blockers | `[]` |
+
+Admission warnings were the expected below-60-GiB preferred-free warning and above-52-GiB scope warning. No cleanup was performed.
+
+Exactly one canonical Gate 0 chain ran, with no retry:
+
+| Stage | Result and evidence |
+|---|---|
+| Preflight | `PREFLIGHT_PASS`; free 69,529,251,840 bytes; scope 49,984,061,440 bytes; no warnings. Log: `/private/tmp/codex-br9r2-h6-20261015/gate0-preflight.log`. |
+| Storage-only PrefixLease smoke | **PASS**, ID `step11d3-storage-policy-smoke-20261015-fe6b3903709f4c65`; process exit 0. The 144-test smoke suite and 24 focused Gate checks passed. No Wine application or graphics workload ran. |
+| Signed cleanup | **PASS**, HMAC verified; 2,303,463,424 bytes reclaimed; temporary prefix absent; active PrefixLease markers `[]`. Receipt SHA-256 `d1bbc9f035d04ed8cfc02f3e1ab7c4d4ae16c769f045dfc148429d61893fc6c1`. |
+| Finalization | **PASS**, `mode=final`, `prefixlease_smoke_status=PASS`; free 69,524,770,816 bytes; scope 49,984,323,584 bytes; no warnings. Log: `/private/tmp/codex-br9r2-h6-20261015/gate0-finalize.log`. |
+| Explicit blockers | `[]`; log: `/private/tmp/codex-br9r2-h6-20261015/gate0-blockers.log`. |
+
+### Lifecycle-bound Wine authorization
+
+The already-reviewed authorization path returned **PASS** for run `step11d3b-smoke-20261015-084645-a9298721`; controller record SHA-256 `83e2be0540c683cd422b3f5949fc5144198014adc0e5abd951b6d1e2e4fde4a8`; run-result SHA-256 `e74e139fdd410a5adad121228e85ea87419514ed4537c444cecc8a6edb19815e`.
+
+The authenticated actual target was PID 44601 with the expected PE and Wine runtime identities. The unique public target joined to on-screen CGWindow 3314 owned by PID 44601. The accepted start-gate streak was 2.486 seconds; the observer's longest qualifying uncovered streak was 32.110 seconds across 99 samples, with advancing target-owned telemetry and no observer error. During the accepted state, the target was active, visible, key/main, not miniaturized, unoccluded, and `occlusionState=8194`; mask 2 was set. No unrelated full cover or neutral coverer was present.
+
+The 30.010-second authorization renderer run was `HEALTHY_REFRESH` at 59.847 displayed FPS, with `quantitative_ready=true`. Authorization Gate PRE and POST both passed; PrefixLease cleanup passed (receipt SHA-256 `6c102793f9f7e9fb4a235d384729fe427bc1e42554de4421cdac72e4ecd07751`). The controller and observer evidence are under `/private/tmp/codex-br9r2-h6-20261015/`. This was the separate authorization target, not a replay target.
+
+### Replay 1 admission stop and classification
+
+The orchestrator invoked H3 replay 1 bound to the successful authorization run. The controller exited 1 in `fresh_replay_admission()` at `z9_finder_replay.py:688`, called from `main()` at line 761, before `finder_pid()`, replay run-directory creation, observer startup, canonical PRE, or any Finder action. The exact error was:
+
+`derived replay reservation fails unchanged 55/50 GiB admission`
+
+At that read-only replay admission, current free was 69,441,368,064 bytes and current conservative scope was 50,060,107,776 bytes. The unchanged 4,974,444,544-byte output reservation, 3,221,225,472-byte prefix reservation, and 819,567,002-byte uncertainty produced projected free of 60,426,131,046 bytes and projected scope of 59,075,344,794 bytes. The 55-GiB ceiling is 59,055,800,320 bytes, so projected scope exceeded it by **19,544,474 bytes**. The free-space projection passed; the scope blocker did not. The failure log is `/private/tmp/codex-br9r2-h6-20261015/finder-replay-1.log` (SHA-256 `d8548d82ed018d2206fa1a394fa266ebc6c18424d9395d6ea97817baa01ed24e`).
+
+No replay target was launched and no replay directory or PRE trace was created. Finder performed zero treatment actions. No cleanup was used to force a pass, no second Gate chain was run, and no storage threshold, reservation, evidence, controller, detector, or predicate was weakened.
+
+| Replay question | H6 result |
+|---|---|
+| Technically valid PRE / healthy PRE | **No PRE reached.** The authorization smoke's healthy refresh is separate evidence. |
+| I1 for replay target | **Not established.** Authorization I1 passed for PID 44601 / CGWindow 3314 only; that process was not the replay target. |
+| Finder exact full cover / target Visible clearing / `occlusionState=8192` | **Not run.** |
+| Frozen fast-zero detector / onset ordering | **Not run;** no detector onset or timing bracket exists. |
+| Restored renderer behavior | **Not run.** |
+| BR8 reproduction / causal or association evidence | **No new result;** this attempt supplies neither reproduction nor causal evidence. |
+| R/T disposition | **R5 — INVALID / INCOMPLETE; T8 — INSUFFICIENT TIMING EVIDENCE**, because replay admission stopped before PRE. No event-aligned replay analysis was generated. |
+| Replay 2 | **Ineligible / not run**; the replay-1 interlock has no valid replay-1 result or analysis to bind. |
+
+Because replay 1 did not reach a technically valid treatment phase, P1/P2/P3 were not launched. The final independent replay reviewer was not reached. H3's controller and all frozen predicates remain unchanged.
+
+### Terminal disposition and next step
+
+At the failed replay admission, current free space was 69,441,368,064 bytes and conservative scope was 50,060,107,776 bytes. Native remains **gated: YES**; STEP 11D.3-C remains **gated: YES**. Historical R5/T8 and H5 correction-2 remain unchanged. No commit or push was made.
+
+**Exact shortest next step:** retain this H6 stop as R5/T8 and move to essential Step 11 completion, then Step 11E, then the explicit backend/provider strategy review. Do not delete or rebase historical/authentication evidence, weaken the 50/55-GiB policy, or start H7/H8 to force this replay. Any future replay attempt must first pass fresh admission with retained evidence and the current reservation intact.

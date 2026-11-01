@@ -34,6 +34,7 @@ RUNNER = EXPERIMENT / "runner_b.py"
 COLLECTOR_SOURCE = LOCAL_DIR / "public_cgwindow_inventory_z9.swift"
 COLLECTOR = LOCAL_DIR / "public_cgwindow_inventory_z9"
 DETECTOR = LOCAL_DIR / "z9_fast_zero_detector.py"
+ANALYSIS_SOURCE = LOCAL_DIR / "z9_event_aligned_analysis.py"
 OBSERVER_MODULE = EXPERIMENT / "evidence/br9r2/lifecycle_window_observer.py"
 PUBLIC_OBSERVER_SOURCE = EXPERIMENT / "evidence/br9r2/public_window_observer.swift"
 COVERER = pathlib.Path(
@@ -51,7 +52,8 @@ EXPECTED_TARGET_CG = {"x": 68.0, "y": 62.0, "width": 640.0, "height": 392.0}
 FULL_COVER_SECONDS = 40
 PRE_SECONDS = 20
 RESTORED_SECONDS = 20
-PRE_ACTION_OFFSET_TOLERANCE_NS = 250_000_000
+NS_WINDOW_OCCLUSION_STATE_VISIBLE = 1 << 1
+MEASURED_PRE_DURATION_TOLERANCE_NS = 250_000_000
 MAX_FINDER_ACTION_INVENTORY_AGE_NS = 500_000_000
 RUNNER_WATCHDOG_SECONDS = 1500
 OBSERVER_SAMPLE_MAX_AGE_NS = 1_500_000_000
@@ -482,7 +484,8 @@ def telemetry_state(row: dict[str, Any]) -> dict[str, Any]:
         "window_miniaturized": row.get("window_miniaturized"),
         "window_occlusion_state": row.get("window_occlusion_state"),
         "visible_bit_set": (type(row.get("window_occlusion_state")) is int
-                            and bool(row["window_occlusion_state"] & 1)),
+                            and bool(row["window_occlusion_state"]
+                                     & NS_WINDOW_OCCLUSION_STATE_VISIBLE)),
         "window_alpha": row.get("window_alpha"),
         "window_level": row.get("window_level"),
         "window_frame_appkit": {"x": row.get("window_frame_x"),
@@ -499,10 +502,70 @@ def root_hashes(paths: list[pathlib.Path]) -> dict[str, str]:
     return {str(path.resolve(strict=True)): sha256(path) for path in paths}
 
 
+def require_valid_replay1_analysis(analysis_path: pathlib.Path,
+                                  controller_path: pathlib.Path,
+                                  controller: dict[str, Any]) -> dict[str, Any]:
+    """Require the analyzer's R1-R4 result to bind this exact replay-1 run."""
+    if (not analysis_path.is_absolute()
+            or analysis_path.parent != controller_path.parent
+            or analysis_path.is_symlink() or not analysis_path.is_file()
+            or analysis_path.resolve(strict=True) != analysis_path):
+        raise RuntimeError(
+            "replay 2 requires one canonical replay-1 analysis JSON in the exact replay-1 evidence directory")
+    if analysis_path.stat().st_mtime_ns < controller_path.stat().st_mtime_ns:
+        raise RuntimeError("replay 2 is blocked because replay-1 analysis predates the final controller record")
+    analysis = read_json(analysis_path)
+    run_id = controller.get("run_id")
+    target_pid = controller.get("target_pid")
+    if (not isinstance(run_id, str) or type(target_pid) is not int or target_pid <= 1):
+        raise RuntimeError("replay 1 lacks an exact run ID or target PID for analysis binding")
+    expected_trace_path = (
+        EXPERIMENT / "runs" / run_id / "host-traces" / f"host-trace.{target_pid}.jsonl")
+    raw_trace_path = controller.get("target_trace_path")
+    trace_path = pathlib.Path(raw_trace_path) if isinstance(raw_trace_path, str) else None
+    if (trace_path != expected_trace_path or trace_path.is_symlink()
+            or not trace_path.is_file()):
+        raise RuntimeError("replay 1 target trace path is missing, stale, or mismatched")
+    finder_identity = controller.get("finder_identity")
+    expected_finder_id = (finder_identity.get("cg_window_id")
+                          if isinstance(finder_identity, dict) else None)
+    expected_target_id = controller.get("accepted_public_cg_window_id")
+    expected_poller_path = controller.get("poller_path")
+    if not isinstance(analysis, dict):
+        raise RuntimeError("replay 2 is blocked because replay-1 analysis is missing or malformed")
+    if (analysis.get("schema_version") != 1
+            or analysis.get("analysis_source") != str(ANALYSIS_SOURCE.resolve(strict=True))
+            or analysis.get("analysis_source_sha256") != sha256(ANALYSIS_SOURCE)
+            or analysis.get("controller_path") != str(controller_path.resolve(strict=True))
+            or analysis.get("trace_path") != str(trace_path.resolve(strict=True))
+            or analysis.get("trace_sha256") != sha256(trace_path)
+            or analysis.get("poller_path") != expected_poller_path
+            or analysis.get("target_pid") != target_pid
+            or analysis.get("target_cg_window_id") != expected_target_id
+            or type(expected_finder_id) is not int
+            or analysis.get("finder_cg_window_id") != expected_finder_id
+            or analysis.get("sequence_integrity_ok") is not True
+            or analysis.get("accepted_identity_continuity_ok") is not True
+            or analysis.get("finder_full_cover_hold_complete") is not True
+            or analysis.get("controller_technical_valid") is not True
+            or analysis.get("replay_classification") not in {"R1", "R2", "R3", "R4"}):
+        raise RuntimeError(
+            "replay 2 is blocked because replay-1 analysis is stale, mismatched, invalid, R5, or unsupported")
+    return {
+        "path": str(analysis_path),
+        "sha256": sha256(analysis_path),
+        "replay_classification": analysis["replay_classification"],
+        "trace_path": str(trace_path),
+        "trace_sha256": analysis["trace_sha256"],
+        "target_pid": target_pid,
+    }
+
+
 def require_valid_replay1(root: pathlib.Path, smoke_id: str,
                           binding: dict[str, Any],
                           candidate_hashes: dict[str, str],
-                          runner_b: Any) -> dict[str, Any]:
+                          runner_b: Any,
+                          analysis_path: pathlib.Path) -> dict[str, Any]:
     matches = []
     for controller_path in sorted(root.glob("z9-replay-1-*/controller.json")):
         if controller_path.is_symlink() or not controller_path.is_file():
@@ -593,12 +656,15 @@ def require_valid_replay1(root: pathlib.Path, smoke_id: str,
             or run_result.get("prefix_cleanup_pass") is not True
             or run_artifact.get("sha256") != sha256(run_path)):
         raise RuntimeError("replay 2 is blocked because replay 1 is not technically valid under current hashes")
+    analysis_binding = require_valid_replay1_analysis(
+        analysis_path, controller_path, record)
     return {"controller_path": str(controller_path),
             "controller_sha256": sha256(controller_path),
             "final_gate0_post_path": str(final_path),
             "final_gate0_post_sha256": sha256(final_path),
             "run_result_path": str(run_path),
-            "run_result_sha256": sha256(run_path)}
+            "run_result_sha256": sha256(run_path),
+            "analysis": analysis_binding}
 
 
 def fresh_replay_admission(runner_b: Any, budget: Any) -> dict[str, Any]:
@@ -637,9 +703,16 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("smoke_authorization_id")
     parser.add_argument("--run-index", type=int, choices=(1, 2), required=True)
+    parser.add_argument(
+        "--replay1-analysis", type=pathlib.Path,
+        help="exact replay-1 event-aligned analysis JSON, required for run index 2")
     args = parser.parse_args()
     if not re.fullmatch(r"step11d3b-smoke-\d{8}-\d{6}-[0-9a-f]{8}", args.smoke_authorization_id):
         parser.error("a current exact authenticated smoke ID is required")
+    if args.run_index == 2 and args.replay1_analysis is None:
+        parser.error("--replay1-analysis is required for run index 2")
+    if args.run_index == 1 and args.replay1_analysis is not None:
+        parser.error("--replay1-analysis is only valid for run index 2")
 
     sys.path.insert(0, str(REPO / "experiments/storage"))
     sys.path.insert(0, str(EXPERIMENT / "evidence/br9r2"))
@@ -668,7 +741,7 @@ def main() -> int:
     candidate_hashes = {key: value["sha256"] for key, value in candidate.items()}
     required_user_hashes = {
         "runner": "f30c13df04bb0408f572480483b612bae58695d652281fdae025ed51ebfe8324",
-        "process_runner": "5665d0ee50fdda022454d02c1292ed87e74b5e08a9bf58eb5c98ccdeb46b1a15",
+        "process_runner": "a6708ef4dd0c2d718419daaa4dda0800781d7da92ef61b8fad60a4b66d0b5f82",
         "trace_proxy_source": "08d721e9871c9715594a2ec5e6c140ce2bfd26e9beeb4febc6109247f1ea596a",
         "trace_proxy": "04bbfc075f6ab999d0538f4a5371f3abd65fb0f0e307be0dea56e47aaefd5157",
         "wine_runtime_tree": "2fea825b205073bf011ce948ec4cbe6560d9d90e26982233ad05822a17a92bfe",
@@ -681,10 +754,11 @@ def main() -> int:
         raise RuntimeError(f"current telemetry/runtime binding differs from accepted hashes: {binding_mismatch}")
     if authorization.get("bindings") != binding:
         raise RuntimeError("current lifecycle authorization does not bind the exact replay implementation")
-    admission_evidence = fresh_replay_admission(runner_b, z9_replay_budget)
     replay1_binding = (require_valid_replay1(root, args.smoke_authorization_id,
-                                             binding, candidate_hashes, runner_b)
+                                             binding, candidate_hashes, runner_b,
+                                             args.replay1_analysis)
                        if args.run_index == 2 else None)
+    admission_evidence = fresh_replay_admission(runner_b, z9_replay_budget)
     current_finder_pid = finder_pid()
 
     run_directory = root / run_tag
@@ -782,6 +856,7 @@ def main() -> int:
     runner_result: dict[str, Any] | None = None
     observer_started = False
     completed_measured_sequence = False
+    measured_pre_completed = False
     cleanup_errors: list[str] = []
     poller_rows: list[dict[str, Any]] = []
     new_poller_samples: list[dict[str, Any]] = []
@@ -816,6 +891,9 @@ def main() -> int:
                             expect_present_after: bool = True,
                             expect_front_after: bool = False
                             ) -> subprocess.CompletedProcess[str]:
+        if not measured_pre_completed:
+            raise RuntimeError(
+                f"{action}: refusing Finder treatment action before successful action-free measured PRE")
         actual_pid = finder_pid()
         if actual_pid != current_finder_pid:
             raise RuntimeError(
@@ -909,15 +987,6 @@ def main() -> int:
     def append_event(value: dict[str, Any]) -> None:
         event_stream.write(json.dumps(value, sort_keys=True) + "\n")
         event_stream.flush()
-
-    def enforce_pre_action_offset(action: str, scheduled_offset_ns: int,
-                                  actual_begin_mach_ns: int) -> int:
-        actual_offset = actual_begin_mach_ns - pre_begin_mach
-        if abs(actual_offset - scheduled_offset_ns) > PRE_ACTION_OFFSET_TOLERANCE_NS:
-            raise RuntimeError(
-                f"{action} request missed its predeclared PRE offset by "
-                f"{actual_offset - scheduled_offset_ns} ns")
-        return actual_offset
 
     def read_new_sources() -> None:
         nonlocal target_external_latest, display_inventory, runner_output_tail, last_identity_error
@@ -1220,6 +1289,9 @@ def main() -> int:
             'end tell')
 
     def run_guarded_ax_raise(action: str) -> dict[str, Any]:
+        if not measured_pre_completed:
+            raise RuntimeError(
+                f"{action}: refusing Finder treatment action before successful action-free measured PRE")
         actual_pid = finder_pid()
         if actual_pid != current_finder_pid:
             raise RuntimeError(f"{action}: Finder PID changed; refusing AX action")
@@ -1651,7 +1723,7 @@ def main() -> int:
 
         # The actual target may differ from the expected frame. Compute the exact
         # BR8 disjoint staging bounds after fresh I1 acceptance; create/raise the
-        # dedicated Finder window later at its fixed measured PRE offsets.
+        # dedicated Finder window only after the full action-free measured PRE.
         precondition_deadline = time.monotonic() + 180
         precondition: dict[str, Any] | None = None
         stage_proven = False
@@ -1691,23 +1763,21 @@ def main() -> int:
         finder_stage_bounds = precondition["disjoint_stage_target_bounds_cg"]
         target_rect = precondition["external_target_correlation"]["converted_target_frame_cg"]
 
-        # PRE starts canonical and reproduces the historical BR8 sequence at
-        # fixed offsets: activate +3, create +4, raise +5, disjoint stage +6.
+        # The measured PRE is a complete action-free baseline. No Finder
+        # treatment window is created or touched until this interval succeeds.
         pre_begin = clock_pair()
-        pre_begin_mach = pre_begin["mach_absolute_time_ns"]
         pre_begin_mono = pre_begin["python_monotonic_after_ns"]
-        phase_timeline["PRE"] = {"begin": pre_begin, "duration_seconds": PRE_SECONDS,
-                                  "scheduled_finder_actions": [
-                                      {"action": "finder_activate_request", "offset_seconds": 3},
-                                      {"action": "finder_window_creation", "offset_seconds": 4},
-                                      {"action": "finder_exact_window_raise_request", "offset_seconds": 5},
-                                      {"action": "finder_disjoint_stage_request", "offset_seconds": 6}]}
+        phase_timeline["PRE"] = {
+            "begin": pre_begin,
+            "duration_seconds": PRE_SECONDS,
+            "finder_actions": [],
+            "treatment_window_created": False,
+        }
         record["status"] = "MEASURED_PRE"
         record["measured_phases"] = phase_timeline
         atomic_json(controller_path, record)
         append_event({"event": "phase_begin", "phase": "PRE", "stamp": pre_begin})
         pre_end_deadline = pre_begin_mono + PRE_SECONDS * 1_000_000_000
-        pre_actions: dict[str, Any] = {}
         while time.monotonic_ns() < pre_end_deadline:
             read_new_sources()
             current = current_link()
@@ -1719,7 +1789,7 @@ def main() -> int:
                 recent_trace_events, mach_ns(), expected_pid=target_pid,
                 expected_token=target_handoff.get("experiment_token", ""))
             if renderer.get("healthy") is not True:
-                raise RuntimeError(f"actual replay renderer left healthy PRE before Finder action: {renderer}")
+                raise RuntimeError(f"actual replay renderer left healthy PRE: {renderer}")
             telemetry = latest_telemetry()
             state = telemetry_state(telemetry) if telemetry else {}
             if (state.get("window_visible") is not True
@@ -1727,220 +1797,224 @@ def main() -> int:
                 raise RuntimeError("target ceased to be visible or became miniaturized during uncovered PRE")
             if full_cover_rows(target_external_latest):
                 raise RuntimeError("a Finder full cover appeared during uncovered PRE")
-            elapsed_ns = time.monotonic_ns() - pre_begin_mono
-            if "finder_activate_request" not in pre_actions and elapsed_ns >= 3_000_000_000:
-                activation_script = ('tell application "Finder"\n'
-                                     'activate\nreturn "activated"\nend tell')
-                result = exact_finder_action("finder_activate_request", activation_script)
-                activation_event = next((row for row in reversed(read_all_jsonl(events_path))
-                                         if row.get("event") == "finder_action"
-                                         and row.get("action") == "finder_activate_request"), None)
-                activation_begin = (activation_event.get("begin", {}).get("mach_absolute_time_ns")
-                                    if isinstance(activation_event, dict) else None)
-                if type(activation_begin) is not int:
-                    raise RuntimeError("Finder activation request lacks its exact Mach timestamp")
-                pre_actions["finder_activate_request"] = {
-                    "scheduled_offset_ns": 3_000_000_000,
-                    "actual_begin_offset_ns": enforce_pre_action_offset(
-                        "finder_activate_request", 3_000_000_000, activation_begin),
-                    "action": activation_event,
-                    "result": result.stdout.strip(),
-                }
-            if "finder_window_creation" not in pre_actions and elapsed_ns >= 4_000_000_000:
-                read_new_sources()
-                before_creation = latest_control_sample()
-                if (not isinstance(before_creation, dict)
-                        or before_creation.get("all_window_query_succeeded") is not True
-                        or before_creation.get("onscreen_window_query_succeeded") is not True):
-                    raise RuntimeError("fresh complete Finder inventory unavailable before dedicated-window creation")
-                before_rows = before_creation.get("finder_windows")
-                if not isinstance(before_rows, list):
-                    raise RuntimeError("Finder same-PID inventory missing before dedicated-window creation")
-                before_creation_ids = {row.get("cg_window_id") for row in before_rows
-                                       if isinstance(row, dict)
-                                       and row.get("owner_pid") == current_finder_pid}
-                before_start, before_end = control_query_bounds(before_creation)
-                if (type(before_end) is not int or type(before_start) is not int
-                        or before_end < before_start or before_end > mach_ns()):
-                    raise RuntimeError("dedicated Finder creation pre-action inventory has invalid Mach bounds")
-                record["finder_creation_pre_action_inventory"] = {
-                    "sample_index": before_creation.get("sample_index"),
-                    "query_started_mach_ns": before_start,
-                    "query_completed_mach_ns": before_end,
-                    "freshness_limit_ns": MAX_FINDER_ACTION_INVENTORY_AGE_NS,
-                    "same_pid_window_ids": sorted(value for value in before_creation_ids
-                                                   if type(value) is int),
-                    "rows": before_rows,
-                }
-                create_script = (
-                    'tell application "Finder"\n'
-                    'set z9Window to make new Finder window\n'
-                    f'set target of z9Window to (POSIX file {applescript_literal(str(finder_folder))}) as alias\n'
-                    'return (id of z9Window as text) & "|" & ((bounds of z9Window) as text)\n'
-                    'end tell')
-                create_result = exact_finder_action("finder_window_creation", create_script)
-                creation_event = next((row for row in reversed(read_all_jsonl(events_path))
-                                       if row.get("event") == "finder_action"
-                                       and row.get("action") == "finder_window_creation"), None)
-                creation_begin = (creation_event.get("begin", {}).get("mach_absolute_time_ns")
-                                  if isinstance(creation_event, dict) else None)
-                if type(creation_begin) is not int:
-                    raise RuntimeError("Finder window creation lacks its exact Mach timestamp")
-                creation_boundary_inventory = creation_event.get("pre_action_inventory", {})
-                if (not isinstance(creation_boundary_inventory, dict)
-                        or type(creation_boundary_inventory.get("query_started_mach_ns")) is not int
-                        or type(creation_boundary_inventory.get("query_completed_mach_ns")) is not int
-                        or not isinstance(creation_boundary_inventory.get("same_pid_all_rows"), list)
-                        or not isinstance(creation_boundary_inventory.get("same_pid_onscreen_rows"), list)
-                        or type(creation_boundary_inventory.get("age_at_action_begin_ns")) is not int
-                        or creation_boundary_inventory["age_at_action_begin_ns"]
-                        > MAX_FINDER_ACTION_INVENTORY_AGE_NS):
-                    raise RuntimeError("Finder creation lacks its fresh action-boundary inventory proof")
-                if (creation_begin < before_end
-                        or creation_begin - before_end > MAX_FINDER_ACTION_INVENTORY_AGE_NS):
-                    raise RuntimeError("dedicated Finder creation inventory was stale at the action boundary")
-                record["finder_creation_pre_action_inventory"].update({
-                    "action_begin_mach_ns": creation_begin,
-                    "age_at_action_begin_ns": creation_begin - before_end,
-                    "action_boundary_preguard": creation_boundary_inventory,
-                })
-                create_fields = create_result.stdout.strip().split("|", maxsplit=1)
-                create_values = parse_ints(" ".join(create_fields))
-                if create_values:
-                    finder_window_id = create_values[0]
-                    record["finder_window_created_by_this_run"] = True
-                    record["finder_apple_script_window_id"] = finder_window_id
-                if len(create_fields) != 2 or len(create_values) < 5:
-                    raise RuntimeError("dedicated Finder creation returned an unparseable AppleScript identity")
-                finder_initial_script_bounds = create_values[1:5]
-                record["finder_initial_script_bounds"] = finder_initial_script_bounds
-                record["finder_pid_after_creation"] = finder_pid()
-                if record["finder_pid_after_creation"] != current_finder_pid:
-                    raise RuntimeError("Finder PID changed during exact-window creation")
-                creation_returned = clock_pair()
-                creation_end_mach_ns = (creation_event.get("end", {}).get("mach_absolute_time_ns")
-                                         if isinstance(creation_event, dict) else None)
-                if type(creation_end_mach_ns) is not int:
-                    raise RuntimeError("Finder creation completion lacks its exact Mach timestamp")
-                creation_sample, creation_all_row, creation_screen_row = wait_for_new_finder_sample(
-                    creation_end_mach_ns, before_creation_ids, finder_title)
-                finder_cg_id = creation_all_row.get("cg_window_id")
-                if type(finder_cg_id) is not int:
-                    raise RuntimeError("new Finder public identity lacks an exact CGWindow ID")
-                screen_layer = creation_screen_row.get("layer")
-                screen_alpha = creation_screen_row.get("alpha")
-                if (type(screen_layer) is not int or not isinstance(screen_alpha, (int, float))
-                        or float(screen_alpha) < 0.999):
-                    raise RuntimeError("new Finder window has incomplete layer/alpha identity")
-                query_start, query_end = control_query_bounds(creation_sample)
-                record["finder_creation_external_first_proof"] = {
-                    "sample_index": creation_sample.get("sample_index"),
-                    "query_started_mach_absolute_ns": query_start,
-                    "query_completed_mach_absolute_ns": query_end,
-                    "row": creation_screen_row,
-                }
-                record["finder_created_windowserver_identity"] = {
-                    "pid": current_finder_pid,
-                    "cg_window_id": finder_cg_id,
-                    "title": finder_title,
-                    "creation_bounds_script": finder_initial_script_bounds,
-                    "creation_bounds_cg": rect_from_row(creation_screen_row),
-                    "layer": screen_layer,
-                    "alpha": screen_alpha,
-                    "rank_all_windows": creation_screen_row.get("rank_all_windows"),
-                    "rank_onscreen_windows": creation_screen_row.get("rank_onscreen_windows"),
-                    "new_to_pre_action_inventory": True,
-                }
-                record["finder_identity"] = {
-                    "pid": current_finder_pid,
-                    "cg_window_id": finder_cg_id,
-                    "title": finder_title,
-                    "creation_bounds_script": finder_initial_script_bounds,
-                    "creation_bounds_cg": rect_from_row(creation_screen_row),
-                    "initial_bounds_cg": rect_from_row(creation_screen_row),
-                    "layer": screen_layer,
-                    "alpha": screen_alpha,
-                    "rank_all_windows": creation_screen_row.get("rank_all_windows"),
-                    "rank_onscreen_windows": creation_screen_row.get("rank_onscreen_windows"),
-                }
-                pre_actions["finder_window_creation"] = {
-                    "scheduled_offset_ns": 4_000_000_000,
-                    "actual_begin_offset_ns": enforce_pre_action_offset(
-                        "finder_window_creation", 4_000_000_000, creation_begin),
-                    "apple_script_window_id": finder_window_id,
-                    "cg_window_id": finder_cg_id,
-                    "creation_returned": creation_returned,
-                    "first_external_proof": record["finder_creation_external_first_proof"],
-                    "created_row": creation_all_row,
-                }
-                atomic_json(controller_path, record)
-            if "finder_exact_window_raise_request" not in pre_actions and elapsed_ns >= 5_000_000_000:
-                raise_result = run_guarded_ax_raise("finder_exact_window_raise_request")
-                raise_result["scheduled_offset_ns"] = 5_000_000_000
-                raise_result["actual_begin_offset_ns"] = enforce_pre_action_offset(
-                    "finder_exact_window_raise_request", 5_000_000_000,
-                    raise_result["begin"]["mach_absolute_time_ns"])
-                pre_actions["finder_exact_window_raise_request"] = raise_result
-            if "finder_disjoint_stage_request" not in pre_actions and elapsed_ns >= 6_000_000_000:
-                desired_stage = precondition["disjoint_stage_target_bounds_cg"]
-                stage_script = guarded_finder_script(
-                    f'set bounds of z9Window to {{{int(desired_stage["x"])}, '
-                    f'{int(desired_stage["y"])}, '
-                    f'{int(desired_stage["x"] + desired_stage["width"])}, '
-                    f'{int(desired_stage["y"] + desired_stage["height"])}}}\n'
-                    'return (id of z9Window as text) & "|" & ((bounds of z9Window) as text)')
-                result = exact_finder_action("finder_disjoint_stage_request", stage_script,
-                                             expect_front_after=True)
-                stage_event = next((row for row in reversed(read_all_jsonl(events_path))
-                                    if row.get("event") == "finder_action"
-                                    and row.get("action") == "finder_disjoint_stage_request"), None)
-                stage_begin = (stage_event.get("begin", {}).get("mach_absolute_time_ns")
-                               if isinstance(stage_event, dict) else None)
-                if type(stage_begin) is not int:
-                    raise RuntimeError("Finder disjoint stage request lacks its exact Mach timestamp")
-                values = parse_ints(" ".join(result.stdout.strip().split("|", maxsplit=1)))
-                if len(values) < 5 or values[0] != finder_window_id:
-                    raise RuntimeError("BR8-matched disjoint stage action lost exact Finder window identity")
-                finder_stage_bounds = {"x": float(values[1]), "y": float(values[2]),
-                                       "width": float(values[3] - values[1]),
-                                       "height": float(values[4] - values[2])}
-                if rects_overlap(finder_stage_bounds, target_rect):
-                    raise RuntimeError("BR8-matched Finder stage overlaps fresh target geometry")
-                pre_actions["finder_disjoint_stage_request"] = {
-                    "scheduled_offset_ns": 6_000_000_000,
-                    "actual_begin_offset_ns": enforce_pre_action_offset(
-                        "finder_disjoint_stage_request", 6_000_000_000, stage_begin),
-                    "result": result.stdout.strip(),
-                    "requested_bounds_cg": desired_stage,
-                    "returned_bounds_cg": finder_stage_bounds,
-                }
-                stage_sample = latest_control_sample()
-                stage_identity = require_controlled_finder_row(
-                    stage_sample, "finder_disjoint_stage_request", "after",
-                    expect_front=True)
-                record["finder_stage_requested_bounds"] = desired_stage
-                record["finder_stage_script_returned_bounds"] = finder_stage_bounds
-                record["finder_identity"].update({
-                    "initial_bounds_cg": finder_stage_bounds,
-                    "layer": stage_identity.get("layer"),
-                    "alpha": stage_identity.get("alpha"),
-                    "rank_all_windows": stage_identity.get("rank_all_windows"),
-                    "rank_onscreen_windows": stage_identity.get("rank_onscreen_windows"),
-                })
-                pre_actions["finder_disjoint_stage_request"]["identity_after"] = stage_identity
-                atomic_json(controller_path, record)
             time.sleep(0.02)
-        phase_timeline["PRE"]["finder_actions"] = pre_actions
+
+        pre_end = clock_pair()
+        measured_pre_ns = pre_end["python_monotonic_after_ns"] - pre_begin_mono
+        phase_timeline["PRE"]["end"] = pre_end
+        phase_timeline["PRE"]["measured_seconds"] = measured_pre_ns / 1_000_000_000
+        phase_timeline["PRE"]["measured_duration_ns"] = measured_pre_ns
+        append_event({"event": "phase_end", "phase": "PRE", "stamp": pre_end})
+        required_pre_ns = PRE_SECONDS * 1_000_000_000
+        if (measured_pre_ns < required_pre_ns
+                or measured_pre_ns - required_pre_ns > MEASURED_PRE_DURATION_TOLERANCE_NS):
+            raise RuntimeError("uncovered PRE duration was outside 20.000 s plus the 250 ms capture tolerance")
+
+        # Persist the successful, action-free PRE boundary before any Finder
+        # activation or window creation can occur.
+        phase_timeline["PRE"]["completed_successfully"] = True
+        phase_timeline["PRE"]["treatment_window_created"] = False
+        record["status"] = "MEASURED_PRE_COMPLETE"
         record["measured_phases"] = phase_timeline
         atomic_json(controller_path, record)
-        pre_end = clock_pair()
-        phase_timeline["PRE"]["end"] = pre_end
-        phase_timeline["PRE"]["measured_seconds"] = (
-            pre_end["python_monotonic_after_ns"] - pre_begin_mono) / 1_000_000_000
-        append_event({"event": "phase_end", "phase": "PRE", "stamp": pre_end})
-        if (abs(pre_end["python_monotonic_after_ns"] - pre_begin_mono
-                - PRE_SECONDS * 1_000_000_000) > PRE_ACTION_OFFSET_TOLERANCE_NS):
-            raise RuntimeError("uncovered PRE duration exceeded the predeclared 250 ms tolerance")
+        measured_pre_completed = True
+
+        post_pre_actions: dict[str, Any] = {}
+        if "finder_activate_request" not in post_pre_actions:
+            activation_script = ('tell application "Finder"\n'
+                                 'activate\nreturn "activated"\nend tell')
+            result = exact_finder_action("finder_activate_request", activation_script)
+            activation_event = next((row for row in reversed(read_all_jsonl(events_path))
+                                     if row.get("event") == "finder_action"
+                                     and row.get("action") == "finder_activate_request"), None)
+            activation_begin = (activation_event.get("begin", {}).get("mach_absolute_time_ns")
+                                if isinstance(activation_event, dict) else None)
+            if type(activation_begin) is not int:
+                raise RuntimeError("Finder activation request lacks its exact Mach timestamp")
+            post_pre_actions["finder_activate_request"] = {
+                "pre_completed_mach_ns": pre_end["mach_absolute_time_ns"],
+                "action": activation_event,
+                "result": result.stdout.strip(),
+            }
+        if "finder_window_creation" not in post_pre_actions:
+            read_new_sources()
+            before_creation = latest_control_sample()
+            if (not isinstance(before_creation, dict)
+                    or before_creation.get("all_window_query_succeeded") is not True
+                    or before_creation.get("onscreen_window_query_succeeded") is not True):
+                raise RuntimeError("fresh complete Finder inventory unavailable before dedicated-window creation")
+            before_rows = before_creation.get("finder_windows")
+            if not isinstance(before_rows, list):
+                raise RuntimeError("Finder same-PID inventory missing before dedicated-window creation")
+            before_creation_ids = {row.get("cg_window_id") for row in before_rows
+                                   if isinstance(row, dict)
+                                   and row.get("owner_pid") == current_finder_pid}
+            before_start, before_end = control_query_bounds(before_creation)
+            if (type(before_end) is not int or type(before_start) is not int
+                    or before_end < before_start or before_end > mach_ns()):
+                raise RuntimeError("dedicated Finder creation pre-action inventory has invalid Mach bounds")
+            record["finder_creation_pre_action_inventory"] = {
+                "sample_index": before_creation.get("sample_index"),
+                "query_started_mach_ns": before_start,
+                "query_completed_mach_ns": before_end,
+                "freshness_limit_ns": MAX_FINDER_ACTION_INVENTORY_AGE_NS,
+                "same_pid_window_ids": sorted(value for value in before_creation_ids
+                                               if type(value) is int),
+                "rows": before_rows,
+            }
+            create_script = (
+                'tell application "Finder"\n'
+                'set z9Window to make new Finder window\n'
+                f'set target of z9Window to (POSIX file {applescript_literal(str(finder_folder))}) as alias\n'
+                'return (id of z9Window as text) & "|" & ((bounds of z9Window) as text)\n'
+                'end tell')
+            create_result = exact_finder_action("finder_window_creation", create_script)
+            creation_event = next((row for row in reversed(read_all_jsonl(events_path))
+                                   if row.get("event") == "finder_action"
+                                   and row.get("action") == "finder_window_creation"), None)
+            creation_begin = (creation_event.get("begin", {}).get("mach_absolute_time_ns")
+                              if isinstance(creation_event, dict) else None)
+            if type(creation_begin) is not int:
+                raise RuntimeError("Finder window creation lacks its exact Mach timestamp")
+            creation_boundary_inventory = creation_event.get("pre_action_inventory", {})
+            if (not isinstance(creation_boundary_inventory, dict)
+                    or type(creation_boundary_inventory.get("query_started_mach_ns")) is not int
+                    or type(creation_boundary_inventory.get("query_completed_mach_ns")) is not int
+                    or not isinstance(creation_boundary_inventory.get("same_pid_all_rows"), list)
+                    or not isinstance(creation_boundary_inventory.get("same_pid_onscreen_rows"), list)
+                    or type(creation_boundary_inventory.get("age_at_action_begin_ns")) is not int
+                    or creation_boundary_inventory["age_at_action_begin_ns"]
+                    > MAX_FINDER_ACTION_INVENTORY_AGE_NS):
+                raise RuntimeError("Finder creation lacks its fresh action-boundary inventory proof")
+            if (creation_begin < before_end
+                    or creation_begin - before_end > MAX_FINDER_ACTION_INVENTORY_AGE_NS):
+                raise RuntimeError("dedicated Finder creation inventory was stale at the action boundary")
+            record["finder_creation_pre_action_inventory"].update({
+                "action_begin_mach_ns": creation_begin,
+                "age_at_action_begin_ns": creation_begin - before_end,
+                "action_boundary_preguard": creation_boundary_inventory,
+            })
+            create_fields = create_result.stdout.strip().split("|", maxsplit=1)
+            create_values = parse_ints(" ".join(create_fields))
+            if create_values:
+                finder_window_id = create_values[0]
+                record["finder_window_created_by_this_run"] = True
+                record["finder_apple_script_window_id"] = finder_window_id
+            if len(create_fields) != 2 or len(create_values) < 5:
+                raise RuntimeError("dedicated Finder creation returned an unparseable AppleScript identity")
+            finder_initial_script_bounds = create_values[1:5]
+            record["finder_initial_script_bounds"] = finder_initial_script_bounds
+            record["finder_pid_after_creation"] = finder_pid()
+            if record["finder_pid_after_creation"] != current_finder_pid:
+                raise RuntimeError("Finder PID changed during exact-window creation")
+            creation_returned = clock_pair()
+            creation_end_mach_ns = (creation_event.get("end", {}).get("mach_absolute_time_ns")
+                                     if isinstance(creation_event, dict) else None)
+            if type(creation_end_mach_ns) is not int:
+                raise RuntimeError("Finder creation completion lacks its exact Mach timestamp")
+            creation_sample, creation_all_row, creation_screen_row = wait_for_new_finder_sample(
+                creation_end_mach_ns, before_creation_ids, finder_title)
+            finder_cg_id = creation_all_row.get("cg_window_id")
+            if type(finder_cg_id) is not int:
+                raise RuntimeError("new Finder public identity lacks an exact CGWindow ID")
+            screen_layer = creation_screen_row.get("layer")
+            screen_alpha = creation_screen_row.get("alpha")
+            if (type(screen_layer) is not int or not isinstance(screen_alpha, (int, float))
+                    or float(screen_alpha) < 0.999):
+                raise RuntimeError("new Finder window has incomplete layer/alpha identity")
+            query_start, query_end = control_query_bounds(creation_sample)
+            record["finder_creation_external_first_proof"] = {
+                "sample_index": creation_sample.get("sample_index"),
+                "query_started_mach_absolute_ns": query_start,
+                "query_completed_mach_absolute_ns": query_end,
+                "row": creation_screen_row,
+            }
+            record["finder_created_windowserver_identity"] = {
+                "pid": current_finder_pid,
+                "cg_window_id": finder_cg_id,
+                "title": finder_title,
+                "creation_bounds_script": finder_initial_script_bounds,
+                "creation_bounds_cg": rect_from_row(creation_screen_row),
+                "layer": screen_layer,
+                "alpha": screen_alpha,
+                "rank_all_windows": creation_screen_row.get("rank_all_windows"),
+                "rank_onscreen_windows": creation_screen_row.get("rank_onscreen_windows"),
+                "new_to_pre_action_inventory": True,
+            }
+            record["finder_identity"] = {
+                "pid": current_finder_pid,
+                "cg_window_id": finder_cg_id,
+                "title": finder_title,
+                "creation_bounds_script": finder_initial_script_bounds,
+                "creation_bounds_cg": rect_from_row(creation_screen_row),
+                "initial_bounds_cg": rect_from_row(creation_screen_row),
+                "layer": screen_layer,
+                "alpha": screen_alpha,
+                "rank_all_windows": creation_screen_row.get("rank_all_windows"),
+                "rank_onscreen_windows": creation_screen_row.get("rank_onscreen_windows"),
+            }
+            post_pre_actions["finder_window_creation"] = {
+                "pre_completed_mach_ns": pre_end["mach_absolute_time_ns"],
+                "apple_script_window_id": finder_window_id,
+                "cg_window_id": finder_cg_id,
+                "creation_returned": creation_returned,
+                "first_external_proof": record["finder_creation_external_first_proof"],
+                "created_row": creation_all_row,
+            }
+            atomic_json(controller_path, record)
+        if "finder_exact_window_raise_request" not in post_pre_actions:
+            raise_result = run_guarded_ax_raise("finder_exact_window_raise_request")
+            raise_result["pre_completed_mach_ns"] = pre_end["mach_absolute_time_ns"]
+            post_pre_actions["finder_exact_window_raise_request"] = raise_result
+        if "finder_disjoint_stage_request" not in post_pre_actions:
+            desired_stage = precondition["disjoint_stage_target_bounds_cg"]
+            stage_script = guarded_finder_script(
+                f'set bounds of z9Window to {{{int(desired_stage["x"])}, '
+                f'{int(desired_stage["y"])}, '
+                f'{int(desired_stage["x"] + desired_stage["width"])}, '
+                f'{int(desired_stage["y"] + desired_stage["height"])}}}\n'
+                'return (id of z9Window as text) & "|" & ((bounds of z9Window) as text)')
+            result = exact_finder_action("finder_disjoint_stage_request", stage_script,
+                                         expect_front_after=True)
+            stage_event = next((row for row in reversed(read_all_jsonl(events_path))
+                                if row.get("event") == "finder_action"
+                                and row.get("action") == "finder_disjoint_stage_request"), None)
+            stage_begin = (stage_event.get("begin", {}).get("mach_absolute_time_ns")
+                           if isinstance(stage_event, dict) else None)
+            if type(stage_begin) is not int:
+                raise RuntimeError("Finder disjoint stage request lacks its exact Mach timestamp")
+            values = parse_ints(" ".join(result.stdout.strip().split("|", maxsplit=1)))
+            if len(values) < 5 or values[0] != finder_window_id:
+                raise RuntimeError("BR8-matched disjoint stage action lost exact Finder window identity")
+            finder_stage_bounds = {"x": float(values[1]), "y": float(values[2]),
+                                   "width": float(values[3] - values[1]),
+                                   "height": float(values[4] - values[2])}
+            if rects_overlap(finder_stage_bounds, target_rect):
+                raise RuntimeError("BR8-matched Finder stage overlaps fresh target geometry")
+            post_pre_actions["finder_disjoint_stage_request"] = {
+                "pre_completed_mach_ns": pre_end["mach_absolute_time_ns"],
+                "result": result.stdout.strip(),
+                "requested_bounds_cg": desired_stage,
+                "returned_bounds_cg": finder_stage_bounds,
+            }
+            stage_sample = latest_control_sample()
+            stage_identity = require_controlled_finder_row(
+                stage_sample, "finder_disjoint_stage_request", "after",
+                expect_front=True)
+            record["finder_stage_requested_bounds"] = desired_stage
+            record["finder_stage_script_returned_bounds"] = finder_stage_bounds
+            record["finder_identity"].update({
+                "initial_bounds_cg": finder_stage_bounds,
+                "layer": stage_identity.get("layer"),
+                "alpha": stage_identity.get("alpha"),
+                "rank_all_windows": stage_identity.get("rank_all_windows"),
+                "rank_onscreen_windows": stage_identity.get("rank_onscreen_windows"),
+            })
+            post_pre_actions["finder_disjoint_stage_request"]["identity_after"] = stage_identity
+            atomic_json(controller_path, record)
+        record["finder_setup_actions"] = post_pre_actions
+        record["measured_phases"] = phase_timeline
+        atomic_json(controller_path, record)
 
         current_target = current_link()
         if current_target.get("status") != "PASS":

@@ -115,7 +115,7 @@ def run_managed_process(context: dict, lease: PrefixLease) -> int:
                 )
                 target_process_exit_monotonic_ns = time.monotonic_ns()
             except RuntimeError as error:
-                process_error = f"{type(error).__name__}: {error}"
+                process_error = f"RuntimeError: {error}"
                 process_returncode = process.poll()
                 if process_returncode is not None:
                     target_process_exit_monotonic_ns = time.monotonic_ns()
