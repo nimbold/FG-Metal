@@ -1,8 +1,0 @@
-Timestamp               Ty Process[PID:TID]
-2026-10-11 16:04:10.917 Df gamepolicyd[289:d1a6d0] [com.apple.runningboard:monitor] Received state update for 89364 (anon<neutral-coverer>(501), running-NotVisible
-2026-10-11 16:04:11.024 Df gamepolicyd[289:d1a798] [com.apple.runningboard:monitor] Received state update for 89364 (anon<neutral-coverer>(501), running-NotVisible
-2026-10-11 16:04:11.028 Df gamepolicyd[289:d1a6d0] [com.apple.runningboard:monitor] Received state update for 89364 (anon<neutral-coverer>(501), running-NotVisible
-2026-10-11 16:09:36.732 Df runningboardd[188:d1b304] [com.apple.runningboard:process] [anon<neutral-coverer>(501):89364] termination reported by proc_exit
-2026-10-11 16:09:36.840 Df runningboardd[188:d1b53c] [com.apple.runningboard:process] Removing process: [anon<neutral-coverer>(501):89364]
-2026-10-11 16:09:36.843 Df gamepolicyd[289:d1b546] [com.apple.runningboard:monitor] Received state update for 89364 (anon<neutral-coverer>(501), none-NotVisible
-2026-10-11 16:09:36.843 Df gamepolicyd[289:d1b5f2] [com.apple.runningboard:monitor] Received state update for 89364 (anon<neutral-coverer>(501), none-NotVisible

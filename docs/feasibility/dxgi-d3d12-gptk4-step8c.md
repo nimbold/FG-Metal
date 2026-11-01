@@ -19,7 +19,7 @@ The test used the engine installed for `/Applications/Highball.app`, not the ear
 
 Highball’s engine manifest labels its component GPTK 4.0 beta 2 / D3DMetal 4.0b2; this is the package actually tested. It is not identified here as a separate Apple package named “GPTK 4.0-2.” The Step 8B report’s `com.gamemac.www` package attribution was incorrect: that was a different GameHub/Proton tree, and its run did not validate this Highball runtime. The Step 8B results remain useful only as evidence about that earlier Wine-builtin run.
 
-The host was macOS 27.0.1 (build 26A434), arm64, Apple M3. CoreGraphics reported the built-in Liquid Retina display at 60 Hz and its five available display modes all at 60 Hz. The disposable prefix was `$HOME/Library/Caches/FG-Metal-Step8C/validated-prefix-2`, initialized as `win64` with the Highball runner. The exact path/version evidence and filtered loader excerpt are in [the runtime evidence file](../../experiments/dxgi_public_probe/evidence/step8c-runtime-load.txt).
+The host was macOS 27.0.1 (build 26A434), arm64, Apple M3. CoreGraphics reported the built-in Liquid Retina display at 60 Hz and its five available display modes all at 60 Hz. The disposable prefix was `$HOME/Library/Caches/FG-Metal-Step8C/validated-prefix-2`, initialized as `win64` with the Highball runner. The exact path/version evidence and filtered loader excerpt are in the runtime evidence file (`../../experiments/dxgi_public_probe/evidence/step8c-runtime-load.txt`).
 
 ### Highball environment reproduced
 
@@ -82,7 +82,7 @@ The main run requested 30 source frames/s and 60 output frames/s for 60 seconds.
 
 After each Present/Present1, the harness queried `GetFrameStatistics` and `GetLastPresentCount`. All 3,599 statistics queries returned `S_OK`. The first observation established a baseline; each of the following 3,598 observations advanced both `DXGI_FRAME_STATISTICS.PresentCount` and `PresentRefreshCount` by exactly one. The final values were 3,599. Microsoft defines `PresentCount` as images presented to the monitor and `PresentRefreshCount` as the refresh at which the last image was presented; these counters need not equal the number of Present calls. That makes them materially stronger than call counts alone. See [`DXGI_FRAME_STATISTICS`](https://learn.microsoft.com/en-us/windows/win32/api/dxgi/ns-dxgi-dxgi_frame_statistics).
 
-The Apple Metal Performance HUD independently logged 59 once-per-second batches containing 3,594 frame present intervals. Of those intervals, 3,589 were 16.67 ms, one was 27.76 ms, three were 33.33 ms, and one was 50.00 ms. Median, p95, and p99 were 16.67 ms; maximum was 50.00 ms. This corroborates output near 60 Hz with occasional long gaps. Apple documents that HUD logging reports frame numbers and per-frame present intervals; the recorded HUD lines are preserved in [the display evidence file](../../experiments/dxgi_public_probe/evidence/step8c-30to60-metal-hud.log). See [Apple’s Metal Performance HUD logging documentation](https://developer.apple.com/documentation/xcode/monitoring-your-metal-apps-graphics-performance).
+The Apple Metal Performance HUD independently logged 59 once-per-second batches containing 3,594 frame present intervals. Of those intervals, 3,589 were 16.67 ms, one was 27.76 ms, three were 33.33 ms, and one was 50.00 ms. Median, p95, and p99 were 16.67 ms; maximum was 50.00 ms. This corroborates output near 60 Hz with occasional long gaps. Apple documents that HUD logging reports frame numbers and per-frame present intervals; the recorded HUD lines are preserved in the display evidence file (`../../experiments/dxgi_public_probe/evidence/step8c-30to60-metal-hud.log`). See [Apple’s Metal Performance HUD logging documentation](https://developer.apple.com/documentation/xcode/monitoring-your-metal-apps-graphics-performance).
 
 Together, the controlled A/G/B sequence and one-image/one-refresh DXGI increments after each G provide credible evidence that the synthetic G presentations reached the display between source presentations. The HUD-reported present cadence corroborates that output ran near 60 Hz. This does not reveal the actual pixel values of each displayed image. The evidence supports the requested feasibility gate without claiming a screenshot-level identity check.
 
@@ -102,7 +102,7 @@ The harness also logged absolute QPC deadline lateness separately from the actua
 
 Metal HUD memory values rose from 20.78 to 23.91 MB graphics memory and from 169.40 to 182.66 MB process memory over the 60-second run. That short observation cannot distinguish warm-up/allocation from a leak. The harness has no drawable-starvation counter; the measured evidence is successful Present/fence results and HUD-reported present intervals, not a 30-minute stability claim.
 
-The full per-presentation timeline correlates frame kind, source and G production QPCs, fence signal/completion observation, Present QPCs, schedule deadlines, and monitor/refresh counter deltas in [the 30→60 CSV](../../experiments/dxgi_public_probe/evidence/step8c-30to60-timeline.csv).
+The full per-presentation timeline correlates frame kind, source and G production QPCs, fence signal/completion observation, Present QPCs, schedule deadlines, and monitor/refresh counter deltas in the 30→60 CSV (`../../experiments/dxgi_public_probe/evidence/step8c-30to60-timeline.csv`).
 
 ## 60→120 result
 
@@ -117,7 +117,7 @@ A separate 10-second 30→60 run completed with 300 source frames, 299 G frames,
 - restored 960×540 and reacquired all buffers again;
 - transferred focus from the main harness window to a second helper window, observed main-window focus loss, then restored focus and verified recovery.
 
-Every `ResizeBuffers`, `SetFullscreenState`, `GetFullscreenState`, focus check, and final run result succeeded. The focus exercise uses two Win32 windows in the test process; it does not claim an OS-level alt-tab test. The checks were short and cooperative, not a repeated resize/recreation stress test. The filtered calls and results are in [the lifecycle evidence file](../../experiments/dxgi_public_probe/evidence/step8c-lifecycle.txt).
+Every `ResizeBuffers`, `SetFullscreenState`, `GetFullscreenState`, focus check, and final run result succeeded. The focus exercise uses two Win32 windows in the test process; it does not claim an OS-level alt-tab test. The checks were short and cooperative, not a repeated resize/recreation stress test. The filtered calls and results are in the lifecycle evidence file (`../../experiments/dxgi_public_probe/evidence/step8c-lifecycle.txt`).
 
 ## Boundary, decision, and next step
 

@@ -9,7 +9,7 @@
 
 FG-Metal is a frame-generation research project built around one rule: **no claim survives without a measurement that could have falsified it.** It pairs a renderer-independent GPU-texture library with a live in-process integration that has generated and displayed real interpolated frames inside a running game on Apple silicon.
 
-Every headline number in this repository traces to a dated report and a run whose evidence is retained with it. Results that failed are published with the same prominence as results that passed.
+Every headline number in this repository traces to a dated report naming the harness, the run parameters, and the build hashes that produced it. The raw evidence stays on the machine that generated it; the report states what was measured. Results that failed are published with the same prominence as results that passed.
 
 > **Naming.** The reusable library is `Framegen` in the source tree and in [ARCHITECTURE.md](ARCHITECTURE.md); `FG-Metal` is the repository and the research programme around it.
 

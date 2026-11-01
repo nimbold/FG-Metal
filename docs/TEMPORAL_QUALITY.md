@@ -51,14 +51,14 @@ The refreshed five-target contact sheet was inspected across reference, raw RIFE
 
 Each policy has a full run report and a strict comparison report:
 
-- [Raw RIFE](../test-results/benchmarks/rife-v4.26-raw-rotation-final.md)
-- [RIFE + automatic HUD](../test-results/benchmarks/rife-v4.26-automatic-rotation-final.md)
-- [RIFE + endpoint blend](../test-results/benchmarks/rife-v4.26-endpoint-rotation-final.md) and [comparison with raw](../test-results/benchmarks/rife-v4.26-endpoint-vs-raw-rotation-final.md)
-- [RIFE + source blend](../test-results/benchmarks/rife-v4.26-source-rotation-final.md) and [comparison with raw](../test-results/benchmarks/rife-v4.26-source-vs-raw-rotation-final.md)
-- [RIFE + nearest fallback](../test-results/benchmarks/rife-v4.26-nearest-rotation-final.md) and [comparison with raw](../test-results/benchmarks/rife-v4.26-nearest-vs-raw-rotation-final.md)
-- [HUD + endpoint blend](../test-results/benchmarks/rife-v4.26-automatic-endpoint-rotation-final.md) and [comparison with HUD](../test-results/benchmarks/rife-v4.26-automatic-endpoint-vs-automatic-rotation-final.md)
-- [HUD + source blend](../test-results/benchmarks/rife-v4.26-automatic-source-rotation-final.md) and [comparison with HUD](../test-results/benchmarks/rife-v4.26-automatic-source-vs-automatic-rotation-final.md)
-- [HUD + nearest fallback](../test-results/benchmarks/rife-v4.26-automatic-nearest-rotation-final.md) and [comparison with HUD](../test-results/benchmarks/rife-v4.26-automatic-nearest-vs-automatic-rotation-final.md)
+- Raw RIFE (`../test-results/benchmarks/rife-v4.26-raw-rotation-final.md`)
+- RIFE + automatic HUD (`../test-results/benchmarks/rife-v4.26-automatic-rotation-final.md`)
+- RIFE + endpoint blend (`../test-results/benchmarks/rife-v4.26-endpoint-rotation-final.md`) and comparison with raw (`../test-results/benchmarks/rife-v4.26-endpoint-vs-raw-rotation-final.md`)
+- RIFE + source blend (`../test-results/benchmarks/rife-v4.26-source-rotation-final.md`) and comparison with raw (`../test-results/benchmarks/rife-v4.26-source-vs-raw-rotation-final.md`)
+- RIFE + nearest fallback (`../test-results/benchmarks/rife-v4.26-nearest-rotation-final.md`) and comparison with raw (`../test-results/benchmarks/rife-v4.26-nearest-vs-raw-rotation-final.md`)
+- HUD + endpoint blend (`../test-results/benchmarks/rife-v4.26-automatic-endpoint-rotation-final.md`) and comparison with HUD (`../test-results/benchmarks/rife-v4.26-automatic-endpoint-vs-automatic-rotation-final.md`)
+- HUD + source blend (`../test-results/benchmarks/rife-v4.26-automatic-source-rotation-final.md`) and comparison with HUD (`../test-results/benchmarks/rife-v4.26-automatic-source-vs-automatic-rotation-final.md`)
+- HUD + nearest fallback (`../test-results/benchmarks/rife-v4.26-automatic-nearest-rotation-final.md`) and comparison with HUD (`../test-results/benchmarks/rife-v4.26-automatic-nearest-vs-automatic-rotation-final.md`)
 
 Re-run a matrix cell with the standard analyzer, changing `--hud-mode` and `--temporal-policy` for the selected cell:
 
