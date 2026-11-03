@@ -85,3 +85,10 @@ __pycache__/
 /experiments/metalfx_frame_interpolator_R93/*.dylib
 /experiments/metalfx_frame_interpolator_R93/provider_smoke
 /experiments/metalfx_frame_interpolator_R93/frame_interpolator_smoke
+
+# Per-round evidence corpora for the live title-integration rounds (observer
+# logs, frame captures, PNG captures, built dylibs, launch preparations, build
+# directories). Each round's report is published under docs/reports/; the
+# corpus stays on the machine that produced it.
+/experiments/metalfx_frame_interpolator_R93/r1[0-9][0-9]-evidence/
+/experiments/metalfx_frame_interpolator_R93/r127-alpha-runtime/evidence/
