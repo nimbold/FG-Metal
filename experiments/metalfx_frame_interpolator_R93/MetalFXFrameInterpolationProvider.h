@@ -26,8 +26,11 @@ typedef void (^FGMetalFXAdditionalEncodingBlock)(id<MTLCommandBuffer> commandBuf
 
 /// Experimental MetalFX provider for a single fixed-size SDR texture configuration.
 /// Callers supply two source frames and their corresponding depth/motion inputs.
-/// The first completed non-reset transition establishes temporal history and returns
-/// nil without an error; only later completed transitions produce INTERNAL frames.
+/// A call on a provider without established temporal history first seeds history
+/// from the pair's A frame (warmup pass) and then yields that same pair's real
+/// A->B INTERNAL frame. R138: the pre-R138 discard of that first frame left the
+/// seed pair structurally unproducible and amplified the measured heavy-area
+/// starvation cascade.
 @interface MetalFXFrameInterpolationProvider : NSObject
 + (BOOL)supportsDevice:(id<MTLDevice>)device;
 - (nullable instancetype)initWithDevice:(id<MTLDevice>)device
@@ -42,6 +45,18 @@ typedef void (^FGMetalFXAdditionalEncodingBlock)(id<MTLCommandBuffer> commandBuf
                                                 motionTexture:(id<MTLTexture>)motionTexture
                                                     deltaTime:(float)deltaTime
                                                         error:(NSError * _Nullable * _Nullable)error;
+
+/// Drops MetalFX's temporal history at a runtime epoch boundary. The next
+/// interpolation call seeds history from its SOURCE pair (a warmup pass inside
+/// the same call) and still yields that pair's real A->B INTERNAL frame.
+/// R138: the pre-R138 discard of the first post-reset output left the seed
+/// pair structurally unproducible and chained the measured heavy-area
+/// starvation cascade.
+- (void)invalidateHistory;
+
+/// R136 diagnostics: YES when temporal history is established, i.e. the next
+/// interpolation is a real pair rather than a seeding transition. Read-only.
+- (BOOL)historyValid;
 
 /// R116 variant. `additionalEncoding` may be nil, in which case behaviour is
 /// identical to the method above. When non-nil it is invoked once, on the calling

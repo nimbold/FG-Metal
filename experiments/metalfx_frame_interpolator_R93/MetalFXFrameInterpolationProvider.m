@@ -114,6 +114,19 @@ static void FGSetError(NSError **error, FGMetalFXProviderError code, NSString *d
                                     error:error];
 }
 
+- (void)invalidateHistory {
+    [self.lock lock];
+    self.hasValidHistory = NO;
+    [self.lock unlock];
+}
+
+- (BOOL)historyValid {
+    [self.lock lock];
+    const BOOL valid = self.hasValidHistory;
+    [self.lock unlock];
+    return valid;
+}
+
 - (nullable FGMetalInternalFrame *)interpolatePreviousColor:(id<MTLTexture>)previousColor
                                                 currentColor:(id<MTLTexture>)currentColor
                                                  depthTexture:(id<MTLTexture>)depthTexture
@@ -196,6 +209,14 @@ static void FGSetError(NSError **error, FGMetalFXProviderError code, NSString *d
                 FGSetError(error, FGMetalFXProviderErrorEncoding, detail);
                 return nil;
             }
+            // R138: the warmup pass seeded MetalFX history with A. The real
+            // A->B pass encoded below is a genuine interpolation, so the same
+            // call must yield it. Discarding it (the pre-R138 behavior) made
+            // the first pair after every history reset structurally
+            // unproducible, and the measured heavy-area cascade (skip ->
+            // gap reset -> seed -> NO-OUTPUT) chained that loss into
+            // multi-slot FG-only starvation bursts.
+            self.hasValidHistory = YES;
         }
 
         self.interpolator.colorTexture = currentColor;
@@ -231,13 +252,6 @@ static void FGSetError(NSError **error, FGMetalFXProviderError code, NSString *d
             self.hasValidHistory = NO;
             NSString *detail = commandBuffer.error.localizedDescription ?: @"MetalFX interpolation command did not complete.";
             FGSetError(error, FGMetalFXProviderErrorEncoding, detail);
-            return nil;
-        }
-
-        if (!self.hasValidHistory) {
-            // The first completed non-reset transition establishes usable history,
-            // but its output may still be the endpoint and is not an INTERNAL M frame.
-            self.hasValidHistory = YES;
             return nil;
         }
 

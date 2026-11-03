@@ -39,12 +39,15 @@ int main(void) {
         [depth replaceRegion:MTLRegionMake2D(0, 0, width, height) mipmapLevel:0 withBytes:z bytesPerRow:width * 4];
         [motion replaceRegion:MTLRegionMake2D(0, 0, width, height) mipmapLevel:0 withBytes:v bytesPerRow:width * 4];
         FGMetalInternalFrame *establishment = [provider interpolatePreviousColor:previous currentColor:current depthTexture:depth motionTexture:motion deltaTime:1.0f / 60.0f error:&error];
-        if (establishment || error) {
+        // R138: the first call after provider creation seeds history AND yields
+        // its own A->B INTERNAL frame (the pre-R138 by-design discard of this
+        // frame amplified the measured starvation cascade).
+        if (!establishment || error) {
             printf("provider_history_establishment=failed frame=%s error=%s\n",
-                   establishment ? "unexpected" : "none", error.localizedDescription.UTF8String ?: "none");
+                   establishment ? "present" : "none", error.localizedDescription.UTF8String ?: "none");
             return 4;
         }
-        puts("provider_history_establishment=completed eligible_frame=none error=none");
+        puts("provider_history_establishment=completed eligible_frame=yielded error=none");
         error = nil;
         FGMetalInternalFrame *frame = [provider interpolatePreviousColor:current currentColor:next depthTexture:depth motionTexture:motion deltaTime:1.0f / 60.0f error:&error];
         if (!frame) { printf("provider_interpolation=failed error=%s\n", error.localizedDescription.UTF8String); return 4; }
@@ -68,7 +71,9 @@ int main(void) {
                (unsigned long long)frame.internalPresentId, (unsigned)frame.texture.pixelFormat,
                pixels[center], pixels[center + 1], pixels[center + 2], pixels[center + 3]);
         free(a); free(b); free(c); free(z); free(v); free(pixels);
-        return frame.internalPresentId == 1 && frame.texture.storageMode == MTLStorageModePrivate &&
+        return frame.internalPresentId == establishment.internalPresentId + 1 &&
+               establishment.internalPresentId == 1 &&
+               frame.texture.storageMode == MTLStorageModePrivate &&
                readbackBuffer.status == MTLCommandBufferStatusCompleted ? 0 : 5;
     }
 }
