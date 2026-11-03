@@ -5,15 +5,15 @@
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Apple%20silicon-lightgrey.svg)](#requirements)
 [![C++](https://img.shields.io/badge/C%2B%2B-23-00599C.svg)](CMakeLists.txt)
-[![Status](https://img.shields.io/badge/status-experimental-orange.svg)](#status-at-a-glance)
+[![Status](https://img.shields.io/badge/status-alpha%20rc-orange.svg)](#status-at-a-glance)
 
-FG-Metal is a frame-generation research project built around one rule: **no claim survives without a measurement that could have falsified it.** It pairs a renderer-independent GPU-texture library with a live in-process integration that has generated and displayed real interpolated frames inside a running game on Apple silicon.
+FG-Metal is a frame-generation research project built around one rule: **no claim survives without a measurement that could have falsified it.** It pairs a renderer-independent GPU-texture library with a live in-process integration that generates and displays real interpolated frames inside a running game on Apple silicon — continuously, at 30→60, through the game's own presentation layer.
 
 Every headline number in this repository traces to a dated report naming the harness, the run parameters, and the build hashes that produced it. The raw evidence stays on the machine that generated it; the report states what was measured. Results that failed are published with the same prominence as results that passed.
 
 > **Naming.** The reusable library is `Framegen` in the source tree and in [ARCHITECTURE.md](ARCHITECTURE.md); `FG-Metal` is the repository and the research programme around it.
 
-> **Not a product.** There is no supported adapter for an unmodified game, the C ABI is a draft, and continuous 2× frame generation is **not** achieved. See [Status at a glance](#status-at-a-glance) for exactly what is and is not established.
+> **Not a product.** The first alpha release candidate is narrowly scoped — one title, one translation stack, one host class — and requires manual setup. There is no supported adapter for an unmodified game, and 60→120 Hz is not attempted. See [Status at a glance](#status-at-a-glance) for exactly what is and is not established.
 
 ---
 
@@ -21,7 +21,8 @@ Every headline number in this repository traces to a dated report naming the har
 
 - [Status at a glance](#status-at-a-glance)
 - [What has actually been demonstrated](#what-has-actually-been-demonstrated)
-- [The current blocker](#the-current-blocker)
+- [From blocker to alpha](#from-blocker-to-alpha)
+- [Open items](#open-items)
 - [Architecture](#architecture)
 - [Requirements](#requirements)
 - [Build and test](#build-and-test)
@@ -40,14 +41,13 @@ Every headline number in this repository traces to a dated report naming the har
 | --- | --- | --- |
 | Core library, GPU-texture contract, draft C ABI | **Implemented, tested** | `tests/`, [`include/framegen/api.h`](include/framegen/api.h) |
 | Metal backend (Practical-RIFE v4.26) | **Offline / synthetic only** | [Temporal quality](docs/TEMPORAL_QUALITY.md) |
-| Presentation scheduler | **Simulated only** | [`framegen-pacing-host`](tests/pacing_host.cpp) |
-| Real in-world A→M→B on the game's own layer | **Validated** (one pair) | [R114](docs/reports/r114-inprocess-target-latch.md) |
-| Re-armable continuous A→M→B | **Validated** (60 tuples) | [R115](docs/reports/r115-rearmable-continuous-title.md) |
-| Async GPU fast gate, non-blocking M-then-B | **Validated** (51/51 ordered) | [R116](docs/reports/r116-critical-path-pacing.md) |
-| Generation throughput ≥ source rate | **Not validated** | [R118](docs/reports/r118-live-generation-throughput.md), [R119](docs/reports/r119-live-contention-and-evidence-isolation.md) |
-| Continuous 30→60 | **Not validated** | [R120](docs/reports/r120-continuous-30-to-60.md), [R121](docs/reports/r121-presentation-occupancy.md) |
+| Generation overlapping the game's own rendering at 30 fps | **Validated** | [R122](docs/reports/r122-overlapped-gpu-capacity.md) |
+| Continuous 30→60 through the title's layer | **Validated** | [R126](docs/reports/r126-self-present-gate.md), [R134](docs/reports/r134-restore-r126-class-cadence.md) |
+| Exactly-once SOURCE ownership and ordering | **Validated** | [R129](docs/reports/r129-transactional-source-ownership.md)–[R132](docs/reports/r132-presentation-ordered-estimator-ingestion.md) |
+| Fixed-latency capture-anchored 30→60 pipeline | **Validated** (~29–30 fps source → ~56 fps displayed) | [R135](docs/reports/r135-fixed-latency-30-to-60-pipeline.md) |
+| D3DMetal alpha runtime | **Validated** (12-min soak, zero source drops) | [R138](docs/reports/r138-fg-starvation-classified-and-fixed.md) |
+| First alpha release candidate | **Ready for controlled testing** | [R139](docs/reports/r139-first-alpha-release-candidate.md), [independent review](docs/reports/r139-independent-review.md) |
 | Continuous 60→120 | **Not attempted** | [R117](docs/reports/r117-lookahead-2x-feasibility.md) |
-| Real title depth and motion vectors | **Not validated** (constant-depth prototype) | [R105](docs/reports/r105-title-inputs.md), [R106](docs/reports/r106-title-derived-motion.md) |
 | Supported adapter for an unmodified game | **None exists** | [TASKS.md](TASKS.md) |
 
 ---
@@ -62,36 +62,46 @@ The project has two tracks that are deliberately kept separate.
 
 What that integration has proven, in a real game process:
 
-- A real in-world frame pair was captured, interpolated, and displayed as **A → M → B** with `reachedDisplay=1`, and the game remained stable for 9,864 further frames ([R114](docs/reports/r114-inprocess-target-latch.md)).
-- The lifecycle is **re-armable**: 60 accepted tuples across two processes with zero source leaks, zero stale callbacks, zero duplicate dispatches ([R115](docs/reports/r115-rearmable-continuous-title.md)).
-- The critical-path gate moved from **31.28 ms to 0.128 ms** of CPU time, and M-then-B scheduling held ordering and distinctness in 51 of 51 in-game tuples ([R116](docs/reports/r116-critical-path-pacing.md)).
-- A genuine **30 fps source cadence** was established by back-pressure, not frame thinning: 738 of 744 presents were actually blocked by the limiter ([R120](docs/reports/r120-continuous-30-to-60.md)).
-
-What it has not proven: that the output is a continuous 60 fps stream. It is not. See below.
+- **Continuous 30→60 frame generation** through the title's own layer, with the game rendering normally underneath ([R126](docs/reports/r126-self-present-gate.md), re-established on the fixed-latency pipeline in [R135](docs/reports/r135-fixed-latency-30-to-60-pipeline.md)).
+- A **fixed-latency display schedule**: every source and every interpolated midpoint is presented at a capture-anchored slot, at ~29–30 fps source → ~56 fps displayed in qualifying windows ([R135](docs/reports/r135-fixed-latency-30-to-60-pipeline.md)).
+- **Exactly-once source ownership**: zero dropped sources and zero ordering violations across validation windows and a 12-minute soak ([R129](docs/reports/r129-transactional-source-ownership.md)–[R132](docs/reports/r132-presentation-ordered-estimator-ingestion.md), [R138](docs/reports/r138-fg-starvation-classified-and-fixed.md)).
+- A measured 1.27 s frame-generation starvation burst, **root-caused and fixed** with a one-assignment provider change; post-fix, the longest generation-only gap in the soak was 183 ms ([R138](docs/reports/r138-fg-starvation-classified-and-fixed.md)).
+- A **release candidate**: reproducible bundle, reversible bottle install/restore, ON/OFF control, five clean live enable/disable cycles, and an independent 15-point review ([R139](docs/reports/r139-first-alpha-release-candidate.md)).
 
 ---
 
-## The current blocker
+## From blocker to alpha
 
-R121 decomposed the interpolation presentation path end to end. The result is not where it was expected to be.
+R121 measured the era-defining deficit: the source frame occupied the GPU ~25 ms of every 33.3 ms period, leaving ~8 ms short for interpolation. The conclusion then was `GPU_CAPACITY_FOR_INTERPOLATION` — no presentation-side reordering could reach it.
 
-| Quantity | Measured | Budget |
-| --- | --- | --- |
-| Present hook → M dispatched to WSI (median) | **41.392 ms** | 33.333 ms |
-| of which: wait for the SOURCE frame to retire on the GPU | **23.073 ms** (59.7 %) | — |
-| of which: frozen estimator + MetalFX | 15.799 ms (38.2 %) | — |
-| of which: all fifteen remaining links combined | 0.867 ms (2.1 %) | — |
-| Internal `nextDrawable` acquisition (median) | 0.017 ms | — |
-| Observed output rate | **27.11 fps** | 60 fps |
-| Source rate in the same window | 29.14 fps | 30 fps |
+R122 reframed the question. Instead of squeezing interpolation into the same period, let the game render the next source frame **while** generation works on the previous pair. Measured answer: generation fits, and the source cadence does not move (+0.01 %). The deficit was a scheduling assumption, not a hardware limit.
 
-The 25 ms that earlier rounds attributed to "presentation overhead" is not presentation overhead. The capture blit is committed on the producer's command queue, so by in-order queue semantics it cannot begin until the frame it is copying has retired. Every CPU-side and drawable-side component measures below one millisecond combined.
+The rounds that turned that result into an alpha:
 
-That leaves one open problem, and it is arithmetic rather than scheduling:
+| Round | What it established |
+| --- | --- |
+| [R123](docs/reports/r123-buffered-source-presentation.md) | Buffered source presentation — the display chain decoupled from title drawables |
+| [R125](docs/reports/r125-retention-control.md) | Instrumentation retention contamination found and removed |
+| [R126](docs/reports/r126-self-present-gate.md) | Self-present gate; continuous 30→60 title FG validated |
+| [R129](docs/reports/r129-transactional-source-ownership.md)–[R133](docs/reports/r133-restore-live-capture-availability.md) | Transactional source ownership, presentation ordering, producer-side capture |
+| [R135](docs/reports/r135-fixed-latency-30-to-60-pipeline.md) | Capture-anchored fixed-latency schedule; 30→60 proven at target rate |
+| [R136](docs/reports/r136-miss-boundary-glitches.md) | Capture-aware drop guard for miss boundaries |
+| [R138](docs/reports/r138-fg-starvation-classified-and-fixed.md) | The starvation burst classified and fixed; alpha validated |
+| [R139](docs/reports/r139-first-alpha-release-candidate.md) | First alpha release candidate; independent review PASS |
 
-> The SOURCE frame occupies the GPU for ~25 ms of every 33.3 ms period, leaving ~7.7 ms for interpolation passes that need ~15.8 ms. **The deficit is ~8.1 ms, and it lives entirely inside GPU work.** No presentation-side reordering can reach it.
+The alpha runtime is deliberately narrow: Apple silicon (M3 host), Highball, D3DMetal translation, one title (Elden Ring, offline), 60 Hz display, 30→60 target. It defaults to OFF and installs reversibly. See the [R139 report](docs/reports/r139-first-alpha-release-candidate.md) for scope, limits, and verdicts.
 
-Three candidate fixes were evaluated and **all were declined with measurement**, not caution: committing the blit earlier moves the GPU start by the same amount in the opposite direction; capturing in the completion handler gains nothing; a separate queue inherits the same hazard. The honest classification is `GPU_CAPACITY_FOR_INTERPOLATION` — see [R121 §11](docs/reports/r121-presentation-occupancy.md).
+---
+
+## Open items
+
+Tracked, measured, and unsolved — detailed in the [R139 report](docs/reports/r139-first-alpha-release-candidate.md):
+
+- **Edge haze.** A reported softening near screen edges in heavy gameplay. Bounded capture analysis found no edge-concentrated spatial defect; classified INCONCLUSIVE, with a measured photometric difference on captured internal frames queued for disambiguation.
+- **Target-rate retest.** No R139 window reached the ~29–30 fps source class; historical R135 numbers stand until one does.
+- **Display latency.** ~101.6 ms source-hook-to-display median at target rate (R135). Latency at slower cadences measured higher, as the fixed schedule predicts.
+- **Pump QoS default.** An opt-in thread-priority gate compresses the wake-lateness tail (p99 16.9 → 5.1 ms); it ships default-off until a soak validates it as the default.
+- **60→120 Hz, more titles, other stacks.** Not attempted.
 
 ---
 
@@ -189,6 +199,10 @@ Metric definitions, HUD-protected runs, and known limitations are in [benchmark 
 build/tests/framegen-pacing-host
 ```
 
+### Live alpha runtime harness (R127 line)
+
+The in-process runtime that rounds R122–R139 validated lives in [`experiments/metalfx_frame_interpolator_R93/r127-alpha-runtime/`](experiments/metalfx_frame_interpolator_R93/r127-alpha-runtime/). Its build scripts compile the injected observer, the display pump, and the deterministic suites (diagnostics, pump, integration, trace selection). Operating the alpha against a real title requires the local Highball setup described in the [R139 report](docs/reports/r139-first-alpha-release-candidate.md); the evidence corpus it produces stays local.
+
 ---
 
 ## Repository layout
@@ -201,11 +215,11 @@ adapters/            test-metal host; d3dmetal, dxmt, dxvk reserved
 tools/               Benchmark runner, corpus, analyzer, RIFE conversion
 tests/               CTest suite and Python metric checks
 docs/                Benchmark, HUD, temporal quality, feasibility, provenance
-docs/reports/        Round reports cited by this README, and the Step 11 closeout
-experiments/         Investigation harnesses; evidence is retained locally
+docs/reports/        Round reports cited by this README (R105–R139), Step 11 closeout
+experiments/         Investigation harnesses; evidence corpora are retained locally
 ```
 
-**What is published, and what is not.** This repository tracks the library, its documentation, the round reports the documentation cites, and the harness source of the experiment line. It does not track the accumulated evidence: raw frame dumps, instrument traces, gate manifests, and per-round logs ran to 4.8 GB against 71 MB of source, which made the repository slow to clone without making any claim more verifiable. Those artefacts are retained on the machine that produced them, and the reports record the harness, run parameters, and build hashes needed to reproduce a measurement. `.gitignore` documents the boundary; `git add -f <path>` publishes an excluded artefact deliberately.
+**What is published, and what is not.** This repository tracks the library, its documentation, the round reports the documentation cites, and the harness source of the experiment line — including the alpha runtime observer and its test suites. It does not track the accumulated evidence: raw frame dumps, instrument traces, capture PNGs, per-round logs, and built binaries ran to gigabytes against a few megabytes of source, which made the repository slow to clone without making any claim more verifiable. Those artefacts are retained on the machine that produced them, and the reports record the harness, run parameters, and build hashes needed to reproduce a measurement. `.gitignore` documents the boundary; `git add -f <path>` publishes an excluded artefact deliberately.
 
 ---
 
@@ -233,14 +247,14 @@ The native control is the most useful result in that set: it converted a suspect
 | [Tasks](TASKS.md) | Completed, blocked, and open work with verification records |
 | [Decisions](DECISIONS.md) | Accepted constraints and open questions |
 | [Step 11 closeout](docs/reports/step11-closeout/reconciliation.md) | DXVK disposition and 11E readiness |
-| [Round reports](docs/reports/) | R105–R121 title-integration reports and the Step 11 closeout series |
+| [Round reports](docs/reports/) | R105–R139 title-integration reports and the Step 11 closeout series |
 | [Benchmark guidance](docs/BENCHMARK.md) | Corpus format, metrics, and limits |
 | [Temporal quality](docs/TEMPORAL_QUALITY.md) | Synthetic evaluation and regressions |
 | [HUD preservation](docs/HUD_PRESERVATION.md) | UI-plane and automatic protection |
 | [Renderer feasibility](docs/feasibility/) | GPTK, D3DMetal, DXGI, DXMT reports |
 | [Model provenance](docs/provenance/rife-v4.26.md) | Source, conversion, license, evidence |
 
-Recent title-integration rounds, newest first: [R121](docs/reports/r121-presentation-occupancy.md) · [R120](docs/reports/r120-continuous-30-to-60.md) · [R119](docs/reports/r119-live-contention-and-evidence-isolation.md) · [R118](docs/reports/r118-live-generation-throughput.md) · [R117](docs/reports/r117-lookahead-2x-feasibility.md) · [R116](docs/reports/r116-critical-path-pacing.md) · [R115](docs/reports/r115-rearmable-continuous-title.md) · [R114](docs/reports/r114-inprocess-target-latch.md)
+Recent title-integration rounds, newest first: [R139](docs/reports/r139-first-alpha-release-candidate.md) · [R138](docs/reports/r138-fg-starvation-classified-and-fixed.md) · [R137](docs/reports/r137-pump-starvation-alpha-status.md) · [R136](docs/reports/r136-miss-boundary-glitches.md) · [R135](docs/reports/r135-fixed-latency-30-to-60-pipeline.md) · [R134](docs/reports/r134-restore-r126-class-cadence.md) · [R133](docs/reports/r133-restore-live-capture-availability.md) · [R132](docs/reports/r132-presentation-ordered-estimator-ingestion.md) · [R131](docs/reports/r131-transactional-ownership-report.md) · [R130](docs/reports/r130-transactional-ownership-gate.md) · [R129](docs/reports/r129-transactional-source-ownership.md) · [R128](docs/reports/r128-source-ownership-planner-handoff.md) · [R126](docs/reports/r126-self-present-gate.md) · [R125](docs/reports/r125-retention-control.md) · [R124](docs/reports/r124-drawable-retirement.md) · [R123](docs/reports/r123-buffered-source-presentation.md) · [R122](docs/reports/r122-overlapped-gpu-capacity.md) · [R121](docs/reports/r121-presentation-occupancy.md)
 
 ---
 
