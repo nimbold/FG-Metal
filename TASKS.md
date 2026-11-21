@@ -2,6 +2,13 @@
 
 Task states: **Done** means the repository contains the work and it has passed the stated check; **In progress** means implementation is underway; **Open** means it remains future work. Verification claims belong with their evidence, not merely with a task marked done.
 
+## Supervised internal alpha & base-M3 R&D status (R189–R208)
+
+- [ ] **Blocked (`ALPHA_EXTERNAL_TEST_GATE = HOLD_FOR_FREEZE_ROOT_CAUSE`)** — External-alpha promotion remains gated on capturing opportunistic live natural-stall witness stacks via `r195_freeze_witness_candidate.py` during supervised play (see `DECISIONS.md` D-019, D-022).
+- [x] **Done (`R189` promoted)** — Promoted `R189` (`r110CoarseMatch` sample-outer loop inversion, `1470×956` Apple M3) as the preferred supervised internal-alpha candidate (`estimatorGpuExec` median `8.75–9.07 ms` cold / `12.17 ms` 20.4-min thermally soaked; separate `metalFXStartToEnd` `6.22–6.30 ms` cold / `8.54 ms` soaked; `0` SOURCE drops, `0` order violations, `0` GPU/protection errors, `0.19%–0.27%` natural misses; audited `OFF`/FG-ON hooks; protected `R165` bars, `R170` letterbox, and opt-in `R185` Souls ROI). `R185` remains the previous validated candidate and `R172` the immutable rollback candidate.
+- [x] **Done (`R201–R203` operational groundwork)** — Standardized journaled `r190_bottle_env.py` (`prepare → play → finish`) workflow, completed reversible R201 resting-bottle cleanup (21 obsolete R100–R136 overrides removed), verified a 20.4-minute live `R189` round-trip (R202), and forensically verified `nextDrawableNil = 0` and exact benign `droppedInternal = 201` partitioning (R203).
+- [x] **Done (`R193–R208` interpolation R&D closed — base-M3 R&D frozen on `R189`)** — Completed empirical closure across single-scale block-matching tuning (`R193–R194`), Rosetta/native `VTFrameProcessor` & `Vision` (`R196–R197`), post-MetalFX 6-hypothesis MV repair (`R199`), full-res Metal FP16 RIFE (`R200`), `0.25×` flow-only RIFE (`R204–R205`), Path 1 relative-contrast HUD mask (`R206`), Path 2 3-level analytical pyramid flow (`R207`), and Path 3 native `arm64 <= 720p` ANE `VTFrameProcessor` (`R208`). Base Apple M3 interpolation R&D is **frozen on `R189`** pending an explicit reopen trigger (D-022).
+
 ## Bootstrap step
 
 - [x] **Done** — Create the initial project layout and CMake/Ninja targets using C++23 and the newest available macOS SDK/toolchain.

@@ -49,9 +49,31 @@ __pycache__/
 # generated runtime weights stay out of Git history.
 /models/local/
 /models/cache/
+*.fgweights
+*.fgweights.json
 
 # ── Local scratch and agent workspace state ──────────────────────────────────
 /.workbuddy-ai/
+/.codex/
+
+# ── Highball bottle state, receipts, witnesses, logs & captures ──────────────
+# Never stage local Highball bottle configs, staging/restore receipts, freeze
+# witnesses, observer/probe logs, or Elden Ring game-frame captures.
+bottle*.json
+stage-receipt.json
+restore-receipt.json
+witness-*.json
+clock-map-*.csv
+observer.*.log
+*.log
+*.jsonl
+*.png
+*.ppm
+*.raw
+*.bin
+*.o
+*.dSYM/
+*.metallib
 
 # ── Experiment evidence trees ────────────────────────────────────────────────
 # Every investigation keeps its report and its harness source in Git, and its
@@ -88,7 +110,16 @@ __pycache__/
 
 # Per-round evidence corpora for the live title-integration rounds (observer
 # logs, frame captures, PNG captures, built dylibs, launch preparations, build
-# directories). Each round's report is published under docs/reports/; the
-# corpus stays on the machine that produced it.
+# directories, and local probe runs). Canonical public summaries live in
+# README.md, DECISIONS.md, TASKS.md, ROADMAP.md, and docs/reports/.
+/r1[0-9][0-9]-evidence/
+/INTERNAL-ALPHA-RUNBOOK.md
+/R1[7-9][0-9]-*.md
+/R2[0-9][0-9]-*.md
 /experiments/metalfx_frame_interpolator_R93/r1[0-9][0-9]-evidence/
+/experiments/metalfx_frame_interpolator_R93/r2[0-9][0-9]-evidence/
+/experiments/metalfx_frame_interpolator_R93/r201-evidence/backups/
+/experiments/metalfx_frame_interpolator_R93/r201-evidence/fixture-test/
+/experiments/metalfx_frame_interpolator_R93/r19[6-9]-*/
+/experiments/metalfx_frame_interpolator_R93/r20[0-9]-*/
 /experiments/metalfx_frame_interpolator_R93/r127-alpha-runtime/evidence/

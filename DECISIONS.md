@@ -130,6 +130,46 @@ This log records decisions that constrain implementation. Pending items are not 
 **Rationale:** BuildLease 12 produced thin x86_64 artifacts under least-privilege Seatbelt confinement, which were promoted to CAS (`libMoltenVK.dylib` SHA-256 `1e6d12acea36...`, `FGMetalNativeControl` SHA-256 `fa39c374ae...`). Native loader probe 06 confirmed `sysctl.proc_translated == 1`. Smoke 06 and three independent 5-minute baselines ran with 100% valid offline traces and 0 errors. In steady state (Baselines 02 & 03), native control achieved 59.99–60.01 FPS, 99.98% presentation rate, mean `nextDrawable` 16.04–16.05 ms (std 0.40–0.48 ms), >99.79% in the 14–18 ms bucket, and exactly 0 waits $\ge 50\text{ ms}$. This conclusively diverges from STEP 11D.2's starvation under identical swapchain parameters (640x360 BGRA8 FIFO, 3 images). See the Step 11D.3-A3 report (`experiments/dxvk_macos_step11d3a/STEP-11D3-A3-REPORT.md`).<br>
 **Consequence:** Native MoltenVK v1.4.2 and CAMetalLayer are confirmed healthy. STEP 11D.3-A is complete. Bare Wine Vulkan reproduced drawable instability (CASE B1), but BR9R remains N3 inconclusive because the frozen-coverer calibration did not verify full coverage or restoration. Diagnose the coverer window's on-screen/stacking failure before a fresh Gate 0 → authorization → calibration sequence. Keep Native follow-up and STEP 11D.3-C gated.
 
+### D-019 — Promoted supervised internal-alpha baseline (`R189`)
+
+**Status:** Accepted (`2026-11-19`; live 20.4-min soak verified `2026-11-20`)<br>
+**Decision:** Promote `R189` (`r110CoarseMatch` sample-outer loop inversion, `1470×956` Apple M3) as the preferred supervised internal-alpha candidate (`FGMETAL_PREFERRED_SUPERVISED_INTERNAL_CANDIDATE = R189`), retaining `R185` as the previous validated candidate and `R172` as the immutable rollback candidate. Keep `ALPHA_EXTERNAL_TEST_GATE = HOLD_FOR_FREEZE_ROOT_CAUSE`.<br>
+**Rationale:** At `1470×956` on base Apple M3, `R189` achieves `8.75–9.07 ms` cold (`9.066 ms` in R192, `-37.06%` vs `R185` `14.405 ms`) and `12.173 ms` (`12.17 ms`) 20.4-minute thermally soaked live `estimatorGpuExec` median. On its separate `CLOCK_MONOTONIC` interval domain, `metalFXStartToEnd` median is `6.22–6.30 ms` cold (`6.295 ms` in R192) and `8.536 ms` (`8.54 ms`) thermally soaked. Across live validation and the 20.4-minute soak, `R189` recorded `0` `SOURCE` drops, `0` order violations, `0` GPU/protection errors, `0.19%–0.27%` natural deadline misses (`89 / 32,718 = 0.272%` in R202), audited `R172 OFF` and active FG-ON hooks, and active protection for `R165` bars, `R170` letterbox borders, and opt-in `R185` Souls/Runes ROI.<br>
+**Consequence:** Never sum `estimatorGpuExec` and `metalFXStartToEnd` — they are measured on separate clock/interval domains. External alpha remains gated on natural-stall root-cause attribution.
+
+### D-020 — Operational safety groundwork (`R201–R203`)
+
+**Status:** Accepted (`2026-11-20`)<br>
+**Decision:** Standardize supervised Highball staging/restore on the journaled `r190_bottle_env.py` (`prepare → play → finish`) workflow against the R201-cleaned resting bottle.<br>
+**Rationale:** R201 removed 21 obsolete R100–R136 injection/diagnostic keys from the resting Highball `bottle.json` reversibly while preserving `inode`, `com.apple.provenance`, ACLs, and `engineSyncValid=true`. R202 verified a full 20.4-minute live `R189` round-trip (`RESTORED_TO_BASELINE=YES`). R203 forensically verified `nextDrawableNil = 0` across all 21 periodic intervals and partitioned all `201` `droppedInternal` events cleanly (`89` deadline misses + `1` `ON->OFF` flush discard + `111` `maxDepth=8` queue-capacity evictions = `201`, zero silent abnormal drops).<br>
+**Consequence:** All future supervised live runs use `r190_bottle_env.py` with `r195_freeze_witness_candidate.py` on standby.
+
+### D-021 — Base Apple M3 interpolation R&D empirical closure (`R193–R208`)
+
+**Status:** Accepted — Base Apple M3 interpolation R&D frozen on `R189` (`2026-11-21`)<br>
+**Decision:** Close base-M3 interpolation-backend and shader-tuning R&D (`R193–R208`) and freeze the supervised internal-alpha line on unchanged `R189`.<br>
+**Rationale:** Every evaluated alternative on base Apple M3 (`1470×956`) either regressed foreground/background quality, failed slow-pan fidelity, blew the thermally soaked `<= 12 ms` GPU budget, or lacked sufficient live evidence:
+
+| Round(s) | Approach Tested (Apple M3, `1470×956` unless noted) | Key Measured Result | Verdict |
+|---|---|---|---|
+| `R193–R194` | Single-scale block-matching tuning (`96×96` patch, soft color weighting, `B1_NEIGHBOR_SEED_REFINE`) | `6.109–6.191 ms` GPU, but regressed dark torso (`7.39 -> 11.06–11.44 px`), multi-step `fgMAE`, and FG Mean EPE (`11.213 -> 12.104 px` in R194) | **Route B** (Closed) |
+| `R196–R197` | Rosetta `VTFrameProcessor` / `VTOpticalFlow` / `Vision`; native `arm64` `VT LLFI` | `VT` & `Vision` Rev 2 unsupported under `x86_64` Rosetta (`Rev 1` `16.448 ms` sync); native `arm64` `13.143 ms` idle / `23.225 ms` contended (`> 12 ms`), `R178` `bgMAE` regression, `4:2:0` HUD bleed (`74/255`) | **Route B / C** (Keep `R189`) |
+| `R199` | Post-MetalFX 6-hypothesis spatial-neighborhood MV repair | `sword_blade_pixels` `100%` collapsed to BG vector (`0.0000` true-match); `0.00%` helmet true-match at `16 px` | **Route B** (Early Exit) |
+| `R200` | Full-res Metal FP16 `Practical-RIFE v4.26` (`BALANCED`) | Decisive quality win, but `91.945 ms` GPU median and `+771.28 MiB` allocation (`~10.5×` slower than `R189`) | **Route B** (Too Slow) |
+| `R204–R205` | `0.25×` flow-only RIFE (`F2_FLOW_025X_4BLK`) → `MTLFXFrameInterpolator` | `5.297 ms` idle / `+57.11 MiB`, but `12.61×` GPU contention (`66.794 ms`) and `29.7%–94.8%` slow-pan `2–4 px` damping (`10.9×–18.3×` worse MAE) | **Route B** (Closed) |
+| `R206` | Path 1 stateless relative-contrast HUD mask (`H1_REL_CONTRAST`) | `0.00%` false-lock, but `+0.7679 ms` `FULL_MFX` idle, zero `1470×956` buff-icon captures, no-op on single-frame MetalFX | **Route E** (Insufficient Evidence) |
+| `R207` | Path 2 clean-room 3-level analytical pyramid flow (`P2_PYRAMID_FLOW`) | Preserved slow pan (`<= 0.17%`), but `12.271 ms` idle GPU (`> 6.5 ms` stop) and worse `R176` foreground EPE on all 4 ROIs | **Route B** (Early Exit) |
+| `R208` | Path 3 native `arm64 <= 720p` ANE `VTFrameProcessor` (`1104×720`) | Confirmed `2.54×` ANE speed cliff (`3.335 ms` VT-only, `5.476 ms` contended wall E2E), but rejected for `0.75×` blur (`fgEdgeRatio=0.7169`), `25×–63×` worse slow-pan MAE, and `4:2:0` HUD bleed (`maxChErr=151/255`, `hud_MAE=0.056086`) | **Route C** (Rejected) |
+
+**Consequence:** Do not pursue further interpolation-backend or shader micro-tuning on base Apple M3 without an explicit reopen trigger (D-022).
+
+### D-022 — Reopen triggers for interpolation R&D and external-alpha gating
+
+**Status:** Accepted (`2026-11-21`)<br>
+**Decision:** Reopen base-M3 interpolation R&D or the external-alpha gate only when one of three explicit triggers occurs: (1) live natural-stall witness stacks from `r195_freeze_witness_candidate.py` clear `ALPHA_EXTERNAL_TEST_GATE = HOLD_FOR_FREEZE_ROOT_CAUSE`, (2) macOS, Highball, or Wine/D3DMetal updates cause a regression in `R189`/`R185`/`R172`, or (3) work moves to higher-tier Apple silicon hardware (such as M3 Max, M4 Pro, or M5) with a materially larger GPU/ANE budget.<br>
+**Rationale:** Base-M3 empirical exploration (`R193–R208`) exhausted the practical algorithmic space under the `<= 12 ms` thermally soaked budget and Rosetta/D3DMetal constraints.<br>
+**Consequence:** Preserve `R189`, `R185`, `R172`, and the R201-cleaned bottle workflow unchanged until a reopen trigger fires.
+
 ## Open decisions
 
 ### O-002 — Public API ABI and language boundary

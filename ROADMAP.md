@@ -2,10 +2,12 @@
 
 This roadmap is ordered by prerequisites. Dates and performance targets are intentionally omitted until there is a measured baseline. Completion of a phase does not authorize starting a later phase automatically.
 
-## Current status — 2026-10-15
+## Current status — 2026-11-21
 
-Framegen remains an experimental library with a draft C ABI and no supported adapter for an unmodified game. The Metal preview and synthetic evaluation tools work, but they do not establish in-game quality or physical display cadence.
+Framegen remains an experimental C++23/Metal library with a draft C ABI and **no supported adapter for an unmodified general game**. The Metal preview host and synthetic RIFE evaluation tools work, and are strictly separate from the supervised internal-alpha MetalFX runtime (`R189`).
 
+- **Supervised internal-alpha runtime (`R189`, Apple M3, `1470×956`):** `R189` is the promoted supervised internal-alpha candidate (with `R185` previous validated and `R172` immutable rollback), verified across a 20.4-minute live soak (`R202–R203`) with zero `SOURCE` drops, zero order violations, and reversible `r190_bottle_env.py` staging (`R201`). **External alpha remains gated** (`ALPHA_EXTERNAL_TEST_GATE = HOLD_FOR_FREEZE_ROOT_CAUSE`, awaiting opportunistic live natural-stall witness stacks via `r195_freeze_witness_candidate.py`).
+- **Base Apple M3 interpolation R&D (`R193–R208`):** Closed and **frozen on `R189`** after empirical evaluation of block-matching tuning (`R193–R194`), `VTFrameProcessor`/`Vision` (`R196–R197`, `R208`), post-MetalFX MV repair (`R199`), full-res and `0.25×` flow-only RIFE (`R200`, `R204–R205`), relative-contrast HUD masking (`R206`), and 3-level analytical pyramid flow (`R207`). See `DECISIONS.md` D-019–D-022.
 - DXMT Step 10B.6.1: **STOP** the current CAMetalDisplayLink architecture; matched windowed and fullscreen runs failed presentation health. RIFE is not cleared. See the report (`experiments/dxmt_framegen/evidence/step10b6_1/report.md`).
 - DXVK-MacOS Step 11C.1R2: **FULL PASS** for its WSI cadence/lifecycle gates. Step 11D.1 accepted the GPU-only single-source Vulkan→Metal→Vulkan transport. Step 11E is **NOT READY**: integrated AppFrame/backbuffer identity, cross-frame A/B ownership, two-source reset rejection, and release-ledger closure remain unproven; the rebuildable R5 integration source is absent from this checkout. See the [Step 11 closeout](docs/reports/step11-closeout/reconciliation.md).
 - Native MoltenVK Step 11D.3-A: **CASE A2 — DIVERGENT / HEALTHY NATIVE BASELINE**. Thin x86_64 MoltenVK under Rosetta achieves 59.99–60.01 FPS with >99.79% of nextDrawable calls locked in 14–18 ms and 0 waits >= 50 ms. The presentation starvation of STEP 11D.2 does not reproduce in native control. See the Step 11D.3-A3 report (`experiments/dxvk_macos_step11d3a/STEP-11D3-A3-REPORT.md`).
@@ -17,6 +19,7 @@ Framegen remains an experimental library with a draft C ABI and no supported ada
 - [x] Add synthetic image/temporal metrics and a bounded presentation scheduler with simulation coverage.
 - [x] Run cooperative GPTK/D3DMetal and public DXGI feasibility experiments; document the partial and blocked routes.
 - [x] Run the current DXMT and DXVK-MacOS feasibility investigations to their evidence-backed stop points; BR9R engineering work is closed while its scientific classification remains inconclusive.
+- [x] Promote supervised internal-alpha `R189`, standardize reversible `r190_bottle_env.py` staging (`R201–R203`), and close base-M3 interpolation R&D (`R193–R208`); external alpha remains held on `HOLD_FOR_FREEZE_ROOT_CAUSE` (`DECISIONS.md` D-019–D-022).
 - [ ] Complete essential Step 11 A/B source identity, cross-frame ownership, reset, and bounded-release proof; run Step 11E before selecting an integration strategy.
 - [ ] Validate the public API, resource lifetime, and synchronization contract with an independent adapter consumer.
 - [ ] Expand quality evaluation with documented, redistribution-cleared material and supported-hardware measurements.
