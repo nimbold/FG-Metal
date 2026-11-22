@@ -7,11 +7,11 @@
 [![C++23](https://img.shields.io/badge/C%2B%2B-23-00599C.svg)](CMakeLists.txt)
 [![Alpha Status](https://img.shields.io/badge/Alpha-R189%20Internal%20Baseline-orange.svg)](#status-at-a-glance)
 
-FG-Metal pairs a renderer-independent C++23/Metal frame-generation library (`Framegen`) with an in-process MetalFX live integration (`R189`) that interpolates 30→60 fps inside a running game on Apple silicon. Every claim in this repo traces to a falsifiable measurement; failed experiments are published alongside passes.
+FG-Metal pairs a renderer-independent C++23/Metal frame-generation library (`Framegen`) with a supervised internal-alpha MetalFX integration (`R189`) that targets 2× 30→60 fps interpolation inside a running game on Apple silicon. `R189` is a supervised internal engineering prototype—not yet a general-purpose everyday action-game enhancement due to moving-foreground ghosting. Every claim in this repo traces to a falsifiable measurement; failed experiments are published alongside passes.
 
 > [!IMPORTANT]
 > **Experimental research project — not a drop-in mod.**
-> The supervised internal alpha (`R189`) is narrowly scoped to one title (Elden Ring, offline), one translation stack (Highball / D3DMetal), and one host class (Apple M3, 60 Hz display, 30→60 fps). There is **no** general adapter for arbitrary games, 60→120 Hz is not attempted, and external alpha testing is currently held (`HOLD_FOR_FREEZE_ROOT_CAUSE`).
+> The supervised internal alpha (`R189`) is narrowly scoped to one title (Elden Ring, offline), one translation stack (Highball / D3DMetal), and one host class (Apple M3, 60 Hz display, 2× 30→60 fps target). There is **no** general adapter for arbitrary games, 60→120 Hz is not attempted, and external alpha testing is currently held (`HOLD_FOR_FREEZE_ROOT_CAUSE`).
 
 ---
 
@@ -20,7 +20,7 @@ FG-Metal pairs a renderer-independent C++23/Metal frame-generation library (`Fra
 - [Status at a Glance](#status-at-a-glance)
 - [Quick Start](#quick-start)
 - [Architecture](#architecture)
-- [Supervised Internal Alpha (`R189`) & Base-M3 Closures (`R193–R208`)](#supervised-internal-alpha-r189--base-m3-closures-r193r208)
+- [Supervised Internal Alpha (`R189`) & Base-M3 Alpha-1 Deferral (`R193–R208`)](#supervised-internal-alpha-r189--base-m3-alpha-1-deferral-r193r208)
 - [Repository Layout](#repository-layout)
 - [Documentation](#documentation)
 - [Project Boundaries & License](#project-boundaries--license)
@@ -33,9 +33,10 @@ FG-Metal pairs a renderer-independent C++23/Metal frame-generation library (`Fra
 | --- | --- | --- |
 | **Core Library & C ABI** (`src/`, `include/framegen/`) | **Implemented & Tested** | `ctest` (6/6), [ARCHITECTURE.md](ARCHITECTURE.md) |
 | **Metal RIFE v4.26 Backend** (`src/metal/`) | **Offline / Synthetic Only** | [TEMPORAL_QUALITY.md](docs/TEMPORAL_QUALITY.md) |
-| **Live 30→60 Alpha (`R189`)** (`experiments/.../r127-alpha-runtime/`) | **Promoted Internal Alpha** (20.4-min soak, `0` source drops) | [DECISIONS.md](DECISIONS.md) (D-019–D-020) |
-| **External Alpha Test Gate** | **HELD (`HOLD_FOR_FREEZE_ROOT_CAUSE`)** | [TASKS.md](TASKS.md) |
-| **Base-M3 Alternative Backends (`R193–R208`)** | **Closed / Frozen on `R189`** (8 paths falsified) | [DECISIONS.md](DECISIONS.md) (D-021–D-022) |
+| **Live 30→60 Alpha (`R189`)** (`experiments/.../r127-alpha-runtime/`) | **Supervised Internal Engineering Prototype** (`32,871/32,871` source presents, `~26.9` avg `SOURCE`/s, `89/32,718` [`0.272%`] misses, `201/32,718` [`0.61%`] `droppedInternal`; moving-foreground ghosting remains) | [DECISIONS.md](DECISIONS.md) (D-019–D-020) |
+| **External Alpha Test Gate** | **HELD (`HOLD_FOR_FREEZE_ROOT_CAUSE`)** (requires root-cause fix + validation OR bounded mitigation + reviewed risk acceptance) | [DECISIONS.md](DECISIONS.md) (D-022), [TASKS.md](TASKS.md) |
+| **Base-M3 Alternative Backends (`R193–R212`)** | **Deferred for Alpha-1 on `R189`** (`R208` `<= 1280×720` `REJECTED`; `R212` `1472×960` `ROUTE_B_FULLRES_VT_QUALITY_REJECTED`) | [DECISIONS.md](DECISIONS.md) (D-021–D-022) |
+| **DXMT / DXVK-MacOS Feasibility** | **Stopped / Not Ready** (DXMT `Step 10B.6.1 STOP`; DXVK `Step 11E NOT READY`) | [ROADMAP.md](ROADMAP.md), [Step 11 Closeout](docs/reports/step11-closeout/reconciliation.md) |
 | **60→120 Hz & Arbitrary-Game Adapter** | **Not Attempted** | [R117](docs/reports/r117-lookahead-2x-feasibility.md), [TASKS.md](TASKS.md) |
 
 ---
@@ -114,20 +115,20 @@ include/framegen/          Public, versioned C ABI & C++ backend SPI
 
 ---
 
-## Supervised Internal Alpha (`R189`) & Base-M3 Closures (`R193–R208`)
+## Supervised Internal Alpha (`R189`) & Base-M3 Alpha-1 Deferral (`R193–R208`)
 
-The live integration in [`experiments/metalfx_frame_interpolator_R93/`](experiments/metalfx_frame_interpolator_R93/) runs in-process under Highball/D3DMetal, captures source frames on the GPU, computes coarse-to-fine motion vectors, and interpolates via `MTLFXFrameInterpolator` directly into `CAMetalLayer`.
+The live integration in [`experiments/metalfx_frame_interpolator_R93/`](experiments/metalfx_frame_interpolator_R93/) runs in-process under Highball/D3DMetal, captures source frames on the GPU, computes coarse-to-fine motion vectors, and interpolates via `MTLFXFrameInterpolator` directly into `CAMetalLayer`. It is a **supervised internal engineering prototype**—not yet a general-purpose everyday action-game enhancement due to moving-foreground ghosting.
 
 ### Promoted Baseline (`R189`)
 
-- **Live Performance (`1470×956`, Apple M3):** `8.75–9.07 ms` cold / `12.17 ms` 20.4-min thermally soaked `estimatorGpuExec` median; separate `metalFXStartToEnd` `6.22–6.30 ms` cold / `8.54 ms` soaked *(disjoint clock domains — never summed)*.
-- **Stability:** `0` SOURCE drops, `0` ordering violations, `0` protection/GPU errors, `0` `nextDrawableNil` events, and `0.19%–0.27%` natural misses (`R189` promoted; `R185` previous validated; `R172` immutable rollback).
+- **Live Performance (`1470×956`, Apple M3):** `8.75–9.07 ms` cold / `12.173 ms` (`12.17 ms`, trailing 384-pair sample) late-session GPU-time degradation across a 20.4-min session (`estimatorGpuExec` median; consistent with thermal or workload/scene effects, not directly proven thermal without GPU clock/temperature telemetry); separate `metalFXStartToEnd` `6.22–6.30 ms` cold / `8.536 ms` (`8.54 ms`, trailing 384-pair sample) late-session *(disjoint clock domains — never summed)*.
+- **Stability:** `32,871` `SOURCE` presents across `~20.4 min` (`~26.9` avg `SOURCE` presentations/sec — not locked 60 Hz output), `droppedSource = 0` (`32,871/32,871`), `0` ordering violations, `0` protection/GPU errors, `0` `nextDrawableNil` events, `89/32,718` (`0.272%`) deadline misses, and `201/32,718` (`0.61%`) total `droppedInternal` (`89` misses + `111` `maxDepth=8` queue-capacity evictions + `1` `ON->OFF` flush discard). (`R189` promoted; `R185` previous validated; `R172` immutable rollback).
 - **Protected Regions:** `R165` status bars, `R170` letterbox borders, and opt-in `R185` Souls counter ROI.
-- **Open Blocker (`HOLD_FOR_FREEZE_ROOT_CAUSE`):** External alpha testing remains held until opportunistic live natural-stall witness stacks are captured via `r195_freeze_witness_candidate.py`.
+- **Open Blocker (`HOLD_FOR_FREEZE_ROOT_CAUSE`):** External alpha testing remains held. Capturing opportunistic live natural-stall witness stacks via `r195_freeze_witness_candidate.py` provides *diagnostic evidence only*; clearing the gate requires either (a) an identified root-cause fix plus sufficient validation, or (b) a demonstrated bounded mitigation/recovery strategy with explicit, independently reviewed reliability-risk acceptance ([DECISIONS.md](DECISIONS.md) D-022).
 
-### Base-M3 Interpolation Closures (`R193–R208`)
+### Base-M3 Interpolation Alpha-1 Deferral (`R193–R208`)
 
-Eight alternative interpolation and HUD-masking paths were tested on base Apple M3 and formally closed in [DECISIONS.md](DECISIONS.md) (D-021–D-022):
+Evaluated configurations across `R193–R208` failed combined quality, slow-pan, HUD, performance, or integration gates under tested conditions; further base-M3 interpolation R&D is **deferred for Alpha-1** on `R189` (not declared universally impossible; `<= 12 ms` is a provisional pipelined GPU screening threshold, not a rigid universal cutoff). See [DECISIONS.md](DECISIONS.md) (D-021–D-022):
 
 | Rounds | Investigated Path | Outcome | Primary Falsification / Rejection Reason |
 | --- | --- | --- | --- |
@@ -138,7 +139,8 @@ Eight alternative interpolation and HUD-masking paths were tested on base Apple 
 | **R204–R205** | `0.25×` flow-only RIFE + `MTLFX` / warp | **Closed** | `29.7%–94.8%` slow-pan collapse at `2–4 px` + `12.6×` contended GPU scaling (`31.83 ms`) |
 | **R206** | Path 1: Stateless relative-contrast HUD mask | **Parked** | `0.00%` dark-torso false-lock, but `ov=0` on single-frame `MTLFX` (`ROUTE_E` insufficient evidence) |
 | **R207** | Path 2: 3-level analytical pyramid flow + custom warp | **Closed** | Gate 1 early-exit: `12.271 ms` idle GPU (`> 6.5 ms` stop) and worse `R176` EPE than `R189` |
-| **R208** | Path 3: Native `arm64 <= 720p` ANE `VTFrameProcessor` | **Closed** | `3.34 ms` ANE fast cliff, but failed `R176` anti-blur, `R205` slow-pan (30–63×), and `4:2:0` HUD bleed (`151/255`) |
+| **R208** (`<= 1280×720`) | Path 3: Downscaled native `arm64 <= 1280×720` ANE `VTFrameProcessor` (`1104×720` / `1280×720`) | **`REJECTED`** | `3.335 ms` VT-only ANE cliff, but blur (`fgEdgeRatio=0.7169`, torso `0.674 < 0.751`), `MTLFXSpatialScaler` BG oversharpening (`1.572`) & HUD bleed (`173/255`), `30×–63×` slow-pan MAE, `151/255` HUD bleed, `126/255` letterbox bleed |
+| **R208 / R212** (`1472×960`) | Full-res `1472×960` native `arm64` single-conversion `VTFrameProcessor` | **`ROUTE_B_FULLRES_VT_QUALITY_REJECTED`** | `ONLY_420V_SUPPORTED`; zero conversion bug; `~98%` pure VT slow-pan luma error, `99.7%` pure VT `bg_only=0.0620` breakdown, `torso_Y=0.680 < 0.750 linear_blend`, `R114 compass 6.88%` overshoot despite `9.45–9.69 ms` contended ANE offload |
 
 <details>
 <summary>Historical Context: Live Alpha Milestones (R121–R139) & Prior Renderer Investigations</summary>
@@ -175,9 +177,9 @@ experiments/         Live R127/R189 alpha runtime & local R&D harnesses (evidenc
 | Document | Purpose |
 | --- | --- |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Module boundaries, resource ownership, synchronization, clock domains |
-| [DECISIONS.md](DECISIONS.md) | Accepted engineering constraints, `R189` promotion, and `R193–R208` closures |
-| [TASKS.md](TASKS.md) | Open external-alpha freeze gate (`HOLD_FOR_FREEZE_ROOT_CAUSE`) & completed work |
-| [ROADMAP.md](ROADMAP.md) | Phase status, active freeze on `R189`, and reopen criteria |
+| [DECISIONS.md](DECISIONS.md) | Accepted engineering constraints, `R189` promotion, and `R193–R208` Alpha-1 deferral |
+| [TASKS.md](TASKS.md) | Open external-alpha freeze gate (`HOLD_FOR_FREEZE_ROOT_CAUSE`), Alpha-1 checks, & completed work |
+| [ROADMAP.md](ROADMAP.md) | Phase status, Alpha-1 deferral on `R189`, and reopen criteria |
 | [docs/BENCHMARK.md](docs/BENCHMARK.md) | Synthetic corpus format, metrics, and evaluation limits |
 | [docs/HUD_PRESERVATION.md](docs/HUD_PRESERVATION.md) | Explicit UI-plane and automatic HUD confidence masking |
 | [docs/TEMPORAL_QUALITY.md](docs/TEMPORAL_QUALITY.md) | Synthetic temporal quality benchmarks |
